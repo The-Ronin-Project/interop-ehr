@@ -1,0 +1,43 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-ehr-create
+      author: Josh Smith
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            tableExists:
+              tableName: io_ehr
+      changes:
+        - createTable:
+            tableName: io_ehr
+            columns:
+              - column:
+                  name: io_ehr_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_io_ehr
+              - column:
+                  name: name
+                  type: java.sql.Types.VARCHAR(30)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_io_ehr_name
+              - column:
+                  name: client_id
+                  type: java.sql.Types.VARCHAR(128)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: public_key
+                  type: java.sql.Types.VARCHAR(2000)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: private_key
+                  type: java.sql.Types.VARCHAR(2000)
+                  constraints:
+                    nullable: false

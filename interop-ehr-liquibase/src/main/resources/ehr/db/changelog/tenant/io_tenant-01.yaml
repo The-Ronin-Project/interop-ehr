@@ -1,0 +1,45 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-create
+      author: Josh Smith
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            tableExists:
+              tableName: io_tenant
+      changes:
+        - createTable:
+            tableName: io_tenant
+            columns:
+              - column:
+                  name: io_tenant_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_io_tenant
+              - column:
+                  name: mnemonic
+                  type: java.sql.Types.VARCHAR(10)
+                  constraints:
+                    nullable: false
+                    unique: true
+                    uniqueConstraintName: uk_io_tenant_mnemonic
+              - column:
+                  name: io_ehr_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    references: io_ehr(io_ehr_id)
+                    foreignKeyName: fk_io_tenant_io_ehr
+              - column:
+                  name: available_batch_start
+                  type: TIME
+                  constraints:
+                    nullable: true
+              - column:
+                  name: available_batch_end
+                  type: TIME
+                  constraints:
+                    nullable: true

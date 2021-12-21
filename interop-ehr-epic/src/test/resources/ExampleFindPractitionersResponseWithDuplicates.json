@@ -1,0 +1,278 @@
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 2,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole?_include=PractitionerRole:practitioner&location=e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
+    }
+  ],
+  "entry": [
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/e.TaXco-8ZEq63hw9riexz13ynhjloQIZHYC70uq-52zzam5A3iL3sq4D036f3.9u3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/e.TaXco-8ZEq63hw9riexz13ynhjloQIZHYC70uq-52zzam5A3iL3sq4D036f3.9u3",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "e.TaXco-8ZEq63hw9riexz13ynhjloQIZHYC70uq-52zzam5A3iL3sq4D036f3.9u3",
+        "active": true,
+        "practitioner": {
+          "reference": "Practitioner/eUqvfRVFNUVeJmt1pCf8YS24CEOUR6bhBnL-xrSXlTdc3",
+          "display": "John Adams, MD"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.10.836982.1040",
+                "code": "1",
+                "display": "Physician"
+              }
+            ],
+            "text": "Physician"
+          }
+        ],
+        "location": [
+          {
+            "reference": "Location/etKZzJux8VWCn.v-YDz2ZLhdhUwhVwqE082St.Jnq1eDXmuSzU9D4HAOFAP3RHkzY3"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e2qocqJm-DdjHLS0Not4qjA3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e2qocqJm-DdjHLS0Not4qjA3",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "e2qocqJm-DdjHLS0Not4qjA3",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "text": "NPI"
+            },
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "1101299992"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EPIC"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.7",
+            "value": "208D00000X"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "NPI"
+            },
+            "system": "urn:oid:2.16.840.1.113883.4.6",
+            "value": "1101299992"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "Epic"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.63",
+            "value": "830"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "   E1012"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "E1012"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "use": "usual",
+            "text": "Historical Provider, MD",
+            "family": "Provider",
+            "given": [
+              "Historical"
+            ]
+          }
+        ],
+        "qualification": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "urn:oid:1.2.840.114350.1.13.0.1.7.4.836982.6000",
+                  "code": "11",
+                  "display": "MD"
+                }
+              ],
+              "text": "MD"
+            }
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/eK1.bLYJV0sOOib70m9Lk0Zm6fxzNPdYmYcYNuNBb5LMjzvRjbbH3TGOcAJBELAaQ3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/eK1.bLYJV0sOOib70m9Lk0Zm6fxzNPdYmYcYNuNBb5LMjzvRjbbH3TGOcAJBELAaQ3",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "eK1.bLYJV0sOOib70m9Lk0Zm6fxzNPdYmYcYNuNBb5LMjzvRjbbH3TGOcAJBELAaQ3",
+        "active": true,
+        "practitioner": {
+          "reference": "Practitioner/e52-W3K1K-BhK5D-G546gSMHn1YKyfWKEPq6jMtBPPmA3",
+          "display": "Al-Shazari, Akbar, MD"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.10.836982.1040",
+                "code": "1",
+                "display": "Physician"
+              }
+            ],
+            "text": "Physician"
+          }
+        ],
+        "location": [
+          {
+            "reference": "Location/epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543"
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "565-543-2342",
+            "use": "work"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e2qocqJm-DdjHLS0Not4qjA3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e2qocqJm-DdjHLS0Not4qjA3",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "e2qocqJm-DdjHLS0Not4qjA3",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "text": "NPI"
+            },
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "1101299992"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EPIC"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.7",
+            "value": "208D00000X"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "NPI"
+            },
+            "system": "urn:oid:2.16.840.1.113883.4.6",
+            "value": "1101299992"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "Epic"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.63",
+            "value": "830"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "   E1012"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "E1012"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "use": "usual",
+            "text": "Historical Provider, MD",
+            "family": "Provider",
+            "given": [
+              "Historical"
+            ]
+          }
+        ],
+        "qualification": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "urn:oid:1.2.840.114350.1.13.0.1.7.4.836982.6000",
+                  "code": "11",
+                  "display": "MD"
+                }
+              ],
+              "text": "MD"
+            }
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    }
+  ]
+}

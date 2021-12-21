@@ -1,0 +1,279 @@
+{
+  "Error": null,
+  "Appointments": [
+    {
+      "PatientName": "LMRTESTING,HERMIONE",
+      "Date": "4/30/2015",
+      "VisitTypeName": "TRANSPLANT EVALUATION",
+      "AppointmentNotes": [],
+      "AppointmentStartTime": " 3:30 PM",
+      "AppointmentDuration": "30",
+      "AppointmentStatus": "No Show",
+      "PatientIDs": [
+        {
+          "ID": "     Z5660",
+          "Type": "Internal"
+        },
+        {
+          "ID": "E5597",
+          "Type": "ExternalKey"
+        }
+      ],
+      "ContactIDs": [
+        {
+          "ID": "22792",
+          "Type": "CSN"
+        },
+        {
+          "ID": "22792",
+          "Type": "ASN"
+        }
+      ],
+      "VisitTypeIDs": [
+        {
+          "ID": "   25000",
+          "Type": "Internal"
+        },
+        {
+          "ID": "1401369",
+          "Type": "CID"
+        }
+      ],
+      "Providers": [
+        {
+          "ProviderName": "Coordinator Phoenix, RN",
+          "DepartmentName": "EMH PHX CTH DEPT",
+          "Time": " 3:30 PM",
+          "Duration": "30",
+          "ProviderIDs": [
+            {
+              "ID": " E400019",
+              "Type": "Internal"
+            },
+            {
+              "ID": "1404179",
+              "Type": "CID"
+            }
+          ],
+          "DepartmentIDs": [
+            {
+              "ID": "10501205",
+              "Type": "Internal"
+            },
+            {
+              "ID": "140922",
+              "Type": "CID"
+            }
+          ]
+        }
+      ],
+      "ExtraItems": null,
+      "ExtraExtensions": []
+    },
+    {
+      "PatientName": "LMRTESTING,HERMIONE",
+      "Date": "4/29/2015",
+      "VisitTypeName": "INFUSION 120",
+      "AppointmentNotes": [
+        "test"
+      ],
+      "AppointmentStartTime": "11:45 AM",
+      "AppointmentDuration": "120",
+      "AppointmentStatus": "Completed",
+      "PatientIDs": [
+        {
+          "ID": "     Z5660",
+          "Type": "Internal"
+        },
+        {
+          "ID": "E5597",
+          "Type": "ExternalKey"
+        }
+      ],
+      "ContactIDs": [
+        {
+          "ID": "22787",
+          "Type": "CSN"
+        },
+        {
+          "ID": "22787",
+          "Type": "ASN"
+        }
+      ],
+      "VisitTypeIDs": [
+        {
+          "ID": "   33004",
+          "Type": "Internal"
+        },
+        {
+          "ID": "1401378",
+          "Type": "CID"
+        }
+      ],
+      "Providers": [
+        {
+          "ProviderName": "INFUSION STATION 1",
+          "DepartmentName": "EMH INFUSION THERAPY",
+          "Time": "11:45 AM",
+          "Duration": "120",
+          "ProviderIDs": [
+            {
+              "ID": " E600500",
+              "Type": "Internal"
+            },
+            {
+              "ID": "1404469",
+              "Type": "CID"
+            }
+          ],
+          "DepartmentIDs": [
+            {
+              "ID": "10101172",
+              "Type": "Internal"
+            },
+            {
+              "ID": "140667",
+              "Type": "CID"
+            }
+          ]
+        }
+      ],
+      "ExtraItems": null,
+      "ExtraExtensions": []
+    },
+    {
+      "PatientName": "LMRTESTING,HERMIONE",
+      "Date": "4/29/2015",
+      "VisitTypeName": "",
+      "AppointmentNotes": [],
+      "AppointmentStartTime": " 9:45 AM",
+      "AppointmentDuration": "120",
+      "AppointmentStatus": "Completed",
+      "PatientIDs": [
+        {
+          "ID": "     Z5660",
+          "Type": "Internal"
+        },
+        {
+          "ID": "E5597",
+          "Type": "ExternalKey"
+        }
+      ],
+      "ContactIDs": [
+        {
+          "ID": "22784",
+          "Type": "CSN"
+        },
+        {
+          "ID": "22784",
+          "Type": "ASN"
+        }
+      ],
+      "VisitTypeIDs": [
+        {
+          "ID": "   33035",
+          "Type": "Internal"
+        }
+      ],
+      "Providers": [
+        {
+          "ProviderName": "PED CHEMO INFUSION, CHAIR A",
+          "DepartmentName": "EMH PED CHEMO INFUSION",
+          "Time": " 9:45 AM",
+          "Duration": "120",
+          "ProviderIDs": [
+            {
+              "ID": " E601641",
+              "Type": "Internal"
+            },
+            {
+              "ID": "1404524",
+              "Type": "CID"
+            }
+          ],
+          "DepartmentIDs": [
+            {
+              "ID": "10103300",
+              "Type": "Internal"
+            },
+            {
+              "ID": "140742",
+              "Type": "CID"
+            }
+          ]
+        }
+      ],
+      "ExtraItems": null,
+      "ExtraExtensions": []
+    },
+    {
+      "PatientName": "LMRTESTING,HERMIONE",
+      "Date": "4/29/2015",
+      "VisitTypeName": "OFFICE VISIT",
+      "AppointmentNotes": [],
+      "AppointmentStartTime": " 2:15 PM",
+      "AppointmentDuration": "15",
+      "AppointmentStatus": "Completed",
+      "PatientIDs": [
+        {
+          "ID": "     Z5660",
+          "Type": "Internal"
+        },
+        {
+          "ID": "E5597",
+          "Type": "ExternalKey"
+        }
+      ],
+      "ContactIDs": [
+        {
+          "ID": "22783",
+          "Type": "CSN"
+        },
+        {
+          "ID": "22783",
+          "Type": "ASN"
+        }
+      ],
+      "VisitTypeIDs": [
+        {
+          "ID": "    1004",
+          "Type": "Internal"
+        },
+        {
+          "ID": "140939",
+          "Type": "CID"
+        }
+      ],
+      "Providers": [
+        {
+          "ProviderName": "Physician Family Medicine, MD",
+          "DepartmentName": "EMC FAMILY MEDICINE",
+          "Time": " 2:15 PM",
+          "Duration": "15",
+          "ProviderIDs": [
+            {
+              "ID": "   E1000",
+              "Type": "Internal"
+            },
+            {
+              "ID": "1402684",
+              "Type": "CID"
+            }
+          ],
+          "DepartmentIDs": [
+            {
+              "ID": "10501101",
+              "Type": "Internal"
+            },
+            {
+              "ID": "140821",
+              "Type": "CID"
+            }
+          ]
+        }
+      ],
+      "ExtraItems": null,
+      "ExtraExtensions": []
+    }
+  ]
+}

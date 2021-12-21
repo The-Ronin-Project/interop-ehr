@@ -1,0 +1,126 @@
+codecov:
+  require_ci_to_pass: true
+
+coverage:
+  status:
+    default_rules:
+      flag_coverage_not_uploaded_behavior: pass
+    project:
+      tenant:
+        target: auto
+        threshold: 1%
+        flags:
+          - tenant
+      fhir:
+        target: auto
+        threshold: 1%
+        flags:
+          - fhir
+      ehr:
+        target: auto
+        threshold: 1%
+        flags:
+          - ehr
+      transform:
+        target: auto
+        threshold: 1%
+        flags:
+          - transform
+      ehr-factory:
+        target: auto
+        threshold: 1%
+        flags:
+          - ehr-factory
+      ehr-auth:
+        target: auto
+        threshold: 1%
+        flags:
+          - ehr-auth
+      ehr-epic:
+        target: auto
+        threshold: 1%
+        flags:
+          - ehr-epic
+
+    patch:
+      tenant:
+        target: 80
+        threshold: 1%
+        base: auto
+        flags:
+          - tenant
+      fhir:
+        target: 80
+        threshold: 1%
+        base: auto
+        flags:
+          - fhir
+      ehr:
+        target: 80
+        threshold: 1%
+        base: auto
+        flags:
+          - ehr
+      transform:
+        target: 80
+        threshold: 1%
+        base: auto
+        flags:
+          - transform
+      ehr-factory:
+        target: 80
+        threshold: 1%
+        base: auto
+        flags:
+          - ehr-factory
+      ehr-auth:
+        target: 80
+        threshold: 1%
+        base: auto
+        flags:
+          - ehr-auth
+      ehr-epic:
+        target: 80
+        threshold: 1%
+        base: auto
+        flags:
+          - ehr-epic
+
+comment:
+  layout: "reach, diff, flags, files"
+  behavior: default
+  require_changes: false
+  require_base: no
+  require_head: yes
+  branches: null
+  show_carryforward_flags: false
+
+flags:
+  tenant:
+    paths:
+      - interop-tenant/
+    carryforward: true
+  fhir:
+    paths:
+      - interop-fhir/
+    carryforward: true
+  ehr:
+    paths:
+      - interop-ehr/
+    carryforward: true
+  transform:
+    paths:
+      - interop-transform/
+    carryforward: true
+  ehr-factory:
+    paths:
+      - interop-ehr-factory/
+    carryforward: true
+  ehr-auth:
+    paths:
+      - interop-ehr-auth/
+    carryforward: true
+  ehr-epic:
+    paths:
+      - interop-ehr-epic/
+    carryforward: true

@@ -1,0 +1,7 @@
+databaseChangeLog:
+  - include:
+      file: ehr/db/changelog/ehr/io_ehr-01.yaml
+  - include:
+      file: ehr/db/changelog/tenant/io_tenant-01.yaml
+  - include:
+      file: ehr/db/changelog/tenant-epic/io_tenant_epic-01.yaml
