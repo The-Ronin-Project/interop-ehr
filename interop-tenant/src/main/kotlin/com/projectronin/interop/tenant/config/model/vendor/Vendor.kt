@@ -1,11 +1,21 @@
 package com.projectronin.interop.tenant.config.model.vendor
 
+import com.fasterxml.jackson.annotation.JsonSubTypes
+import com.fasterxml.jackson.annotation.JsonTypeInfo
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.tenant.config.model.AuthenticationConfig
 
 /**
  * Sealed interface for a Vendor. This interface is sealed to prevent external implementations and to allow for easier consumption.
  */
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "type"
+)
+@JsonSubTypes(
+    JsonSubTypes.Type(value = Epic::class, name = "EPIC")
+)
 sealed interface Vendor {
     /**
      * The type of vendor.

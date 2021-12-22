@@ -1,0 +1,30 @@
+---
+# List of Tenants and their configuration
+- mnemonic: "SAND_AO"
+  batchConfig:
+    availableStart: "22:00:00"
+    availableEnd: "06:00:00"
+  vendor:
+    type: "EPIC"
+    clientId: "101"
+    serviceEndpoint: "https://example.com"
+    authenticationConfig:
+      publicKey: "pubkey"
+      privateKey: "${AO_SANDBOX_KEY}"
+    release: "1.0"
+    ehrUserId: "1"
+    messageType: "Message Report"
+- mnemonic: "PSJ"
+  batchConfig:
+    availableStart: "22:00:00"
+    availableEnd: "06:00:00"
+  vendor:
+    type: "EPIC"
+    clientId: "1"
+    serviceEndpoint: "https://example.com"
+    authenticationConfig:
+      publicKey: "pubkey"
+      privateKey: "privkey"
+    release: "1.0"
+    ehrUserId: "1"
+    messageType: "Message Report"

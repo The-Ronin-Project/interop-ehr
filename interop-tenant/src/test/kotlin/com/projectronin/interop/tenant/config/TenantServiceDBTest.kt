@@ -19,15 +19,15 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalTime
 
-class TenantServiceTest {
+class TenantServiceDBTest {
     private lateinit var tenantDAO: TenantDAO
-    private lateinit var service: TenantService
+    private lateinit var service: TenantServiceDB
 
     @BeforeEach
     fun setup() {
         tenantDAO = mockk()
 
-        service = TenantService(tenantDAO)
+        service = TenantServiceDB(tenantDAO)
     }
 
     @Test
