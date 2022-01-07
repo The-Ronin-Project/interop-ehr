@@ -1,7 +1,7 @@
 package com.projectronin.interop.fhir.r4.datatype.primitive
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.projectronin.interop.fhir.jackson.JacksonManager.Companion.objectMapper
+import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test

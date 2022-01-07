@@ -1,10 +1,10 @@
 package com.projectronin.interop.transform.fhir.r4
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.enums.DataSource
-import com.projectronin.interop.fhir.jackson.JacksonManager
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.ExtensionMeanings
@@ -148,7 +148,8 @@ class EpicAppointmentTransformer : AppointmentTransformer {
                 start = R4Instant(startInstant.toString()),
                 end = R4Instant(endInstant.toString()),
                 minutesDuration = appOrchardAppointment.appointmentDuration.toInt(),
-                comment = appOrchardAppointment.appointmentNotes.joinToString(separator = "\n").let { if (it == "") null else it },
+                comment = appOrchardAppointment.appointmentNotes.joinToString(separator = "\n")
+                    .let { if (it == "") null else it },
                 participant = participants.map { it.localize(tenant) }
             )
         } catch (e: Exception) {

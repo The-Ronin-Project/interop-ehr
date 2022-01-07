@@ -1,7 +1,7 @@
 package com.projectronin.interop.fhir.r4.datatype
 
 import com.fasterxml.jackson.core.JsonParser
-import com.projectronin.interop.fhir.jackson.JacksonManager.Companion.objectMapper
+import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
 import com.projectronin.interop.fhir.r4.datatype.primitive.Base64Binary
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code

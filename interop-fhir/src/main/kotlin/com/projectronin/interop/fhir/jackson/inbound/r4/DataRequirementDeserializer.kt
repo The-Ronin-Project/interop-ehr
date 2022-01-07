@@ -5,10 +5,10 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
-import com.projectronin.interop.fhir.jackson.getAs
-import com.projectronin.interop.fhir.jackson.getAsList
-import com.projectronin.interop.fhir.jackson.getAsOrNull
-import com.projectronin.interop.fhir.jackson.getAsTextOrNull
+import com.projectronin.interop.common.jackson.getAs
+import com.projectronin.interop.common.jackson.getAsList
+import com.projectronin.interop.common.jackson.getAsOrNull
+import com.projectronin.interop.common.jackson.getAsTextOrNull
 import com.projectronin.interop.fhir.jackson.getDynamicValueOrNull
 import com.projectronin.interop.fhir.r4.datatype.DataRequirement
 

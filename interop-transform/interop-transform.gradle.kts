@@ -8,6 +8,7 @@ plugins {
 
 dependencies {
     implementation("com.projectronin.interop:interop-common")
+    implementation("com.projectronin.interop:interop-common-jackson")
     implementation(project(":interop-tenant"))
     implementation(project(":interop-ehr"))
     implementation(project(":interop-fhir"))

@@ -1,10 +1,10 @@
 package com.projectronin.interop.transform.fhir.r4
 
 import com.fasterxml.jackson.module.kotlin.readValue
+import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.enums.DataSource
-import com.projectronin.interop.fhir.jackson.JacksonManager
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyAppointment
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.AppointmentTransformer

@@ -1,7 +1,7 @@
 package com.projectronin.interop.fhir.r4.resource
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.projectronin.interop.fhir.jackson.JacksonManager
+import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.fhir.r4.datatype.Address
 import com.projectronin.interop.fhir.r4.datatype.Attachment
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
@@ -30,7 +30,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.IllegalArgumentException
 
 class PatientTest {
     @Test
@@ -216,7 +215,10 @@ class PatientTest {
                 multipleBirth = DynamicValue(type = DynamicValueType.BASE_64_BINARY, value = 2)
             )
         }
-        assertEquals("Bad dynamic value indicating whether the patient was part of a multiple birth", multipleBirthException.message)
+        assertEquals(
+            "Bad dynamic value indicating whether the patient was part of a multiple birth",
+            multipleBirthException.message
+        )
     }
 
     @Test

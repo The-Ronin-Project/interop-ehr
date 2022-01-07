@@ -1,7 +1,7 @@
 package com.projectronin.interop.fhir.r4.ronin.resource
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.projectronin.interop.fhir.jackson.JacksonManager.Companion.objectMapper
+import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.AvailableTime

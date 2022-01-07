@@ -1,7 +1,7 @@
 package com.projectronin.interop.fhir.r4.ronin.resource
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.projectronin.interop.fhir.jackson.JacksonManager
+import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Address
@@ -557,7 +557,10 @@ class OncologyPatientTest {
                 maritalStatus = CodeableConcept(text = "M")
             )
         }
-        assertEquals("Bad dynamic value indicating whether the patient was part of a multiple birth", multipleBirthException.message)
+        assertEquals(
+            "Bad dynamic value indicating whether the patient was part of a multiple birth",
+            multipleBirthException.message
+        )
     }
 
     @Test

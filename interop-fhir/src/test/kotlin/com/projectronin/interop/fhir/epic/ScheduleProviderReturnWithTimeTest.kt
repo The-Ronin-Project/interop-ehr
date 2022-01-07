@@ -1,7 +1,7 @@
 package com.projectronin.interop.fhir.epic
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.projectronin.interop.fhir.jackson.JacksonManager
+import com.projectronin.interop.common.jackson.JacksonManager
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -20,7 +20,8 @@ class ScheduleProviderReturnWithTimeTest {
             providerName = "Provider Name",
             time = "3:30 PM"
         )
-        val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(scheduleProviderReturnWithTime)
+        val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter()
+            .writeValueAsString(scheduleProviderReturnWithTime)
 
         val expectedJson = """
             {
@@ -40,7 +41,8 @@ class ScheduleProviderReturnWithTimeTest {
         """.trimIndent()
         assertEquals(expectedJson, json)
 
-        val deserializedScheduleProviderReturnWithTime = JacksonManager.objectMapper.readValue<ScheduleProviderReturnWithTime>(json)
+        val deserializedScheduleProviderReturnWithTime =
+            JacksonManager.objectMapper.readValue<ScheduleProviderReturnWithTime>(json)
         assertEquals(scheduleProviderReturnWithTime, deserializedScheduleProviderReturnWithTime)
     }
 
@@ -73,7 +75,8 @@ class ScheduleProviderReturnWithTimeTest {
             providerName = "Provider Name",
             time = "3:30 PM"
         )
-        val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(scheduleProviderReturnWithTime)
+        val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter()
+            .writeValueAsString(scheduleProviderReturnWithTime)
 
         val expectedJson = """
             {

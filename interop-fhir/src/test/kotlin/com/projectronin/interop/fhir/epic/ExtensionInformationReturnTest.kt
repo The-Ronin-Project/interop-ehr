@@ -1,7 +1,7 @@
 package com.projectronin.interop.fhir.epic
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.projectronin.interop.fhir.jackson.JacksonManager
+import com.projectronin.interop.common.jackson.JacksonManager
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
@@ -22,7 +22,8 @@ class ExtensionInformationReturnTest {
             ),
             value = "value"
         )
-        val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(extensionInformationReturn)
+        val json =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(extensionInformationReturn)
 
         val expectedJson = """
             {
@@ -40,7 +41,8 @@ class ExtensionInformationReturnTest {
         """.trimIndent()
         assertEquals(expectedJson, json)
 
-        val deserializedExtensionInformationReturn = JacksonManager.objectMapper.readValue<ExtensionInformationReturn>(json)
+        val deserializedExtensionInformationReturn =
+            JacksonManager.objectMapper.readValue<ExtensionInformationReturn>(json)
         assertEquals(extensionInformationReturn, deserializedExtensionInformationReturn)
     }
 
@@ -52,7 +54,8 @@ class ExtensionInformationReturnTest {
             lines = listOf(),
             value = "value"
         )
-        val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(extensionInformationReturn)
+        val json =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(extensionInformationReturn)
 
         val expectedJson = """
             {

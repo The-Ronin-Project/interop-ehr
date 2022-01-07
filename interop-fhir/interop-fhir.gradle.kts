@@ -5,6 +5,7 @@ plugins {
 
 dependencies {
     implementation("com.projectronin.interop:interop-common")
+    implementation("com.projectronin.interop:interop-common-jackson")
     implementation("ca.uhn.hapi.fhir:org.hl7.fhir.validation:5.4.11")
 }
 

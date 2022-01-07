@@ -1,7 +1,7 @@
 package com.projectronin.interop.fhir.r4.resource
 
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.projectronin.interop.fhir.jackson.JacksonManager
+import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
@@ -25,7 +25,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.lang.IllegalArgumentException
 
 class AppointmentTest {
     @Test
@@ -292,7 +291,10 @@ class AppointmentTest {
                 participant = listOf(Participant(status = ParticipationStatus.ACCEPTED))
             )
         }
-        assertEquals("[app-1](https://www.hl7.org/fhir/R4/appointment.html#invs): Either the type or actor on the participant SHALL be specified", exception.message)
+        assertEquals(
+            "[app-1](https://www.hl7.org/fhir/R4/appointment.html#invs): Either the type or actor on the participant SHALL be specified",
+            exception.message
+        )
     }
 
     @Test
@@ -309,7 +311,10 @@ class AppointmentTest {
                 start = Instant(value = "2017-01-01T00:00:00Z")
             )
         }
-        assertEquals("[app-2](https://www.hl7.org/fhir/R4/appointment.html#invs): Either start and end are specified, or neither", exception.message)
+        assertEquals(
+            "[app-2](https://www.hl7.org/fhir/R4/appointment.html#invs): Either start and end are specified, or neither",
+            exception.message
+        )
     }
 
     @Test
@@ -325,7 +330,10 @@ class AppointmentTest {
                 )
             )
         }
-        assertEquals("[app-3](https://www.hl7.org/fhir/R4/appointment.html#invs): Only proposed or cancelled appointments can be missing start/end dates", exception.message)
+        assertEquals(
+            "[app-3](https://www.hl7.org/fhir/R4/appointment.html#invs): Only proposed or cancelled appointments can be missing start/end dates",
+            exception.message
+        )
     }
 
     @Test
@@ -342,6 +350,9 @@ class AppointmentTest {
                 cancellationReason = CodeableConcept(text = "cancel reason")
             )
         }
-        assertEquals("[app-4](https://www.hl7.org/fhir/R4/appointment.html#invs): Cancellation reason is only used for appointments that have been cancelled, or no-show", exception.message)
+        assertEquals(
+            "[app-4](https://www.hl7.org/fhir/R4/appointment.html#invs): Cancellation reason is only used for appointments that have been cancelled, or no-show",
+            exception.message
+        )
     }
 }
