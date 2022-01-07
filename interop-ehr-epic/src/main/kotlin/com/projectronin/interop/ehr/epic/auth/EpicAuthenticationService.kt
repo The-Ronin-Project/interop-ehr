@@ -48,6 +48,7 @@ class EpicAuthenticationService(@Qualifier("epic") private val client: HttpClien
                 // Remove any Key formatting before decoding
                 tenant.vendor.authenticationConfig.privateKey.replace("-----BEGIN PRIVATE KEY-----", "")
                     .replace("-----END PRIVATE KEY-----", "")
+                    .replace(" ", "")
                     .replace(System.lineSeparator(), "")
             )
         )
