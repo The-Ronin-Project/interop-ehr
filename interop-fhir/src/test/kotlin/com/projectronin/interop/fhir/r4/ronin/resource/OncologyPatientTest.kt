@@ -171,20 +171,14 @@ class OncologyPatientTest {
               } ],
               "gender" : "female",
               "birthDate" : "1975-07-05",
-              "deceased" : {
-                "type" : "BOOLEAN",
-                "value" : false
-              },
+              "deceasedBoolean" : false,
               "address" : [ {
                 "country" : "USA"
               } ],
               "maritalStatus" : {
                 "text" : "M"
               },
-              "multipleBirth" : {
-                "type" : "INTEGER",
-                "value" : 2
-              },
+              "multipleBirthInteger" : 2,
               "photo" : [ {
                 "contentType" : "text",
                 "data" : "abcd"
@@ -497,6 +491,73 @@ class OncologyPatientTest {
                 )
             }
         assertEquals("tenant value is required", exception.message)
+    }
+
+    @Test
+    fun `cannot create dynamic values with bad types`() {
+        // deceased must be Boolean or Date Time
+        val deceasedException = assertThrows<java.lang.IllegalArgumentException> {
+            OncologyPatient(
+                deceased = DynamicValue(type = DynamicValueType.BASE_64_BINARY, value = false),
+                identifier = listOf(
+                    Identifier(
+                        system = CodeSystem.RONIN_TENANT.uri,
+                        type = CodeableConcepts.RONIN_TENANT,
+                        value = "tenantId"
+                    ),
+                    Identifier(
+                        system = CodeSystem.FHIR_STU3_ID.uri,
+                        type = CodeableConcepts.FHIR_STU3_ID,
+                        value = "fhirId"
+                    )
+                ),
+                name = listOf(HumanName(family = "Doe")),
+                telecom = listOf(
+                    ContactPoint(
+                        system = ContactPointSystem.PHONE,
+                        value = "8675309",
+                        use = ContactPointUse.MOBILE
+                    )
+                ),
+                gender = AdministrativeGender.FEMALE,
+                birthDate = Date("1975-07-05"),
+                address = listOf(Address(country = "USA")),
+                maritalStatus = CodeableConcept(text = "M")
+            )
+        }
+        assertEquals("Bad dynamic value indicating if the patient is deceased", deceasedException.message)
+
+        // multipleBirth must be Boolean or Integer
+        val multipleBirthException = assertThrows<java.lang.IllegalArgumentException> {
+            OncologyPatient(
+                multipleBirth = DynamicValue(type = DynamicValueType.BASE_64_BINARY, value = 2),
+                identifier = listOf(
+                    Identifier(
+                        system = CodeSystem.RONIN_TENANT.uri,
+                        type = CodeableConcepts.RONIN_TENANT,
+                        value = "tenantId"
+                    ),
+                    Identifier(
+                        system = CodeSystem.FHIR_STU3_ID.uri,
+                        type = CodeableConcepts.FHIR_STU3_ID,
+                        value = "fhirId"
+                    )
+                ),
+                name = listOf(HumanName(family = "Doe")),
+                telecom = listOf(
+                    ContactPoint(
+                        system = ContactPointSystem.PHONE,
+                        value = "8675309",
+                        use = ContactPointUse.MOBILE
+                    )
+                ),
+                gender = AdministrativeGender.FEMALE,
+                birthDate = Date("1975-07-05"),
+                address = listOf(Address(country = "USA")),
+                maritalStatus = CodeableConcept(text = "M")
+            )
+        }
+        assertEquals("Bad dynamic value indicating whether the patient was part of a multiple birth", multipleBirthException.message)
     }
 
     @Test
@@ -828,7 +889,7 @@ class OncologyPatientTest {
                     maritalStatus = CodeableConcept(text = "M")
                 )
             }
-        assertEquals("telecoms must have a system, value and use", exception.message)
+        assertEquals("Telecoms must have a system, value and use", exception.message)
     }
 
     @Test
@@ -866,7 +927,7 @@ class OncologyPatientTest {
                     maritalStatus = CodeableConcept(text = "M")
                 )
             }
-        assertEquals("telecoms must have a system, value and use", exception.message)
+        assertEquals("Telecoms must have a system, value and use", exception.message)
     }
 
     @Test
@@ -904,7 +965,7 @@ class OncologyPatientTest {
                     maritalStatus = CodeableConcept(text = "M")
                 )
             }
-        assertEquals("telecoms must have a system, value and use", exception.message)
+        assertEquals("Telecoms must have a system, value and use", exception.message)
     }
 
     @Test
@@ -983,6 +1044,9 @@ class OncologyPatientTest {
                     contact = listOf(Contact()),
                 )
             }
-        assertEquals("contact SHALL at least contain a contact's details or a reference to an organization", exception.message)
+        assertEquals(
+            "[pat-1](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-patient.html#constraints): contact SHALL at least contain a contact's details or a reference to an organization",
+            exception.message
+        )
     }
 }

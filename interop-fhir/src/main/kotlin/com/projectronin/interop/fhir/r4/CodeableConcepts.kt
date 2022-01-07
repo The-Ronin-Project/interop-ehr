@@ -52,5 +52,16 @@ class CodeableConcepts {
             ),
             text = "FHIR STU3"
         )
+
+        val RONIN_ID = CodeableConcept(
+            coding = listOf(
+                Coding(
+                    system = CodeSystem.RONIN_ID.uri,
+                    code = Code("RONIN_ID"),
+                    display = "Ronin ID"
+                )
+            ),
+            text = "Ronin ID"
+        )
     }
 }

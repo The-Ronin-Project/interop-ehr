@@ -1,0 +1,69 @@
+{
+  "PatientName": "LMRTESTING,HERMIONE",
+  "Date": "4/30/2015",
+  "VisitTypeName": "TRANSPLANT EVALUATION",
+  "AppointmentNotes": [],
+  "AppointmentStartTime": " 3:30 PM",
+  "AppointmentDuration": "30",
+  "AppointmentStatus": "No Show",
+  "PatientIDs": [
+    {
+      "ID": "     Z5660",
+      "Type": "Internal"
+    },
+    {
+      "ID": "E5597",
+      "Type": "ExternalKey"
+    }
+  ],
+  "ContactIDs": [
+    {
+      "ID": "22792",
+      "Type": "CSN"
+    },
+    {
+      "ID": "22792",
+      "Type": "ASN"
+    }
+  ],
+  "VisitTypeIDs": [
+    {
+      "ID": "   25000",
+      "Type": "Internal"
+    },
+    {
+      "ID": "1401369",
+      "Type": "CID"
+    }
+  ],
+  "Providers": [
+    {
+      "ProviderName": "Coordinator Phoenix, RN",
+      "DepartmentName": "EMH PHX CTH DEPT",
+      "Time": " 3:30 PM",
+      "Duration": "15",
+      "ProviderIDs": [
+        {
+          "ID": " E400019",
+          "Type": "Internal"
+        },
+        {
+          "ID": "1404179",
+          "Type": "CID"
+        }
+      ],
+      "DepartmentIDs": [
+        {
+          "ID": "10501205",
+          "Type": "Internal"
+        },
+        {
+          "ID": "140922",
+          "Type": "CID"
+        }
+      ]
+    }
+  ],
+  "ExtraItems": null,
+  "ExtraExtensions": []
+}

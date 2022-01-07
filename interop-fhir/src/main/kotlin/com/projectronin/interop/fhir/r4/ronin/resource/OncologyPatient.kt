@@ -1,5 +1,9 @@
 package com.projectronin.interop.fhir.r4.ronin.resource
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
+import com.projectronin.interop.fhir.jackson.inbound.r4.OncologyPatientDeserializer
+import com.projectronin.interop.fhir.jackson.outbound.r4.OncologyPatientSerializer
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Address
@@ -9,6 +13,7 @@ import com.projectronin.interop.fhir.r4.datatype.Communication
 import com.projectronin.interop.fhir.r4.datatype.Contact
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
@@ -21,6 +26,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 
 /**
@@ -28,6 +34,8 @@ import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
  *
  * See [Project Ronin Profile Spec](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-patient.html)
  */
+@JsonDeserialize(using = OncologyPatientDeserializer::class)
+@JsonSerialize(using = OncologyPatientSerializer::class)
 data class OncologyPatient(
     override val id: Id? = null,
     override val meta: Meta? = null,
@@ -55,7 +63,25 @@ data class OncologyPatient(
     val link: List<Link> = listOf()
 ) :
     RoninDomainResource(id, meta, implicitRules, language, text, contained, extension, modifierExtension, identifier) {
+    companion object {
+        val acceptedDeceasedTypes = listOf(DynamicValueType.BOOLEAN, DynamicValueType.DATE_TIME)
+        val acceptedMultipleBirthTypes = listOf(DynamicValueType.BOOLEAN, DynamicValueType.INTEGER)
+    }
+
     init {
+        // Dynamic values
+        deceased?.let {
+            require(Patient.acceptedDeceasedTypes.contains(deceased.type)) {
+                "Bad dynamic value indicating if the patient is deceased"
+            }
+        }
+
+        multipleBirth?.let {
+            require(Patient.acceptedMultipleBirthTypes.contains(multipleBirth.type)) {
+                "Bad dynamic value indicating whether the patient was part of a multiple birth"
+            }
+        }
+
         // MRN
         val mrnIdentifier = identifier.find { it.system == CodeSystem.MRN.uri }
         requireNotNull(mrnIdentifier) { "mrn identifier is required" }
@@ -83,7 +109,7 @@ data class OncologyPatient(
         require(telecom.isNotEmpty()) { "At least one telecom must be provided" }
         require(
             telecom.all { (it.system != null) and (it.value != null) and (it.use != null) }
-        ) { "telecoms must have a system, value and use" }
+        ) { "Telecoms must have a system, value and use" }
 
         // Address
         require(address.isNotEmpty()) { "At least one address must be provided" }
@@ -91,6 +117,6 @@ data class OncologyPatient(
         // Contact
         require(
             contact.all { (it.name != null) or (it.telecom.isNotEmpty()) or (it.address != null) or (it.organization != null) }
-        ) { "contact SHALL at least contain a contact's details or a reference to an organization" }
+        ) { "[pat-1](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-patient.html#constraints): contact SHALL at least contain a contact's details or a reference to an organization" }
     }
 }

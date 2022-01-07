@@ -19,6 +19,7 @@ import com.projectronin.interop.fhir.r4.datatype.Link
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
 import com.projectronin.interop.fhir.r4.datatype.NotAvailable
+import com.projectronin.interop.fhir.r4.datatype.Participant
 import com.projectronin.interop.fhir.r4.datatype.Period
 import com.projectronin.interop.fhir.r4.datatype.Qualification
 import com.projectronin.interop.fhir.r4.datatype.Reference
@@ -435,6 +436,43 @@ fun NotAvailable.localize(tenant: Tenant): NotAvailable {
             updatedModifierExtensions.ifEmpty { modifierExtension },
             description,
             duringPair.first
+        )
+    }
+
+    return this
+}
+
+/**
+ * Localizes this [Participant] relative to the [tenant].  If this [Participant] does not contain any localizable
+ * information, the current [Participant] will be returned.
+ */
+fun Participant.localize(tenant: Tenant): Participant {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
+
+    val typeLocalizations = type.map { it.localizePair(tenant) }
+    val updatedType = typeLocalizations.hasUpdates()
+
+    val actorLocalizations = actor.map { it.localizePair(tenant) }
+    val updatedActor = actorLocalizations.hasUpdates()
+
+    val updatedPeriod = period?.localize(tenant)
+
+    if (updatedExtensions.isNotEmpty() ||
+        updatedModifierExtensions.isNotEmpty() ||
+        updatedType ||
+        updatedActor ||
+        updatedPeriod !== period
+    ) {
+        return Participant(
+            id = id,
+            extension = updatedExtensions.ifEmpty { extension },
+            modifierExtension = updatedModifierExtensions.ifEmpty { modifierExtension },
+            type = typeLocalizations.values(),
+            actor = actorLocalizations.values(),
+            required = required,
+            status = status,
+            period = updatedPeriod
         )
     }
 

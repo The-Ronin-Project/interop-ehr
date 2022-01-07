@@ -18,6 +18,7 @@ import com.projectronin.interop.fhir.r4.datatype.Link
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
 import com.projectronin.interop.fhir.r4.datatype.NotAvailable
+import com.projectronin.interop.fhir.r4.datatype.Participant
 import com.projectronin.interop.fhir.r4.datatype.Period
 import com.projectronin.interop.fhir.r4.datatype.Qualification
 import com.projectronin.interop.fhir.r4.datatype.Reference
@@ -40,6 +41,8 @@ import com.projectronin.interop.fhir.r4.valueset.IdentifierUse
 import com.projectronin.interop.fhir.r4.valueset.LinkType
 import com.projectronin.interop.fhir.r4.valueset.NameUse
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
+import com.projectronin.interop.fhir.r4.valueset.ParticipantRequired
+import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -1859,6 +1862,162 @@ class LocalizersTest {
             during = Period(extension = localizedExtensions, start = DateTime("2021"))
         )
         assertEquals(expectedNotAvailable, localizedNotAvailable)
+    }
+
+    @Test
+    fun `returns current participant if participant has no localizable information`() {
+        val participant = Participant(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
+            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = nonLocalizableExtensions)
+        )
+        val localizedParticipant = participant.localize(tenant)
+        assertTrue(localizedParticipant === participant)
+    }
+
+    @Test
+    fun `localizes pariticipant with localizable extension`() {
+        val participant = Participant(
+            id = "12345",
+            extension = localizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
+            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = nonLocalizableExtensions)
+        )
+        val localizedParticipant = participant.localize(tenant)
+        assertTrue(localizedParticipant !== participant)
+
+        val expectedParticipant = Participant(
+            id = "12345",
+            extension = localizedExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
+            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = nonLocalizableExtensions)
+        )
+        assertEquals(expectedParticipant, localizedParticipant)
+    }
+
+    @Test
+    fun `localizes pariticipant with localizable modifierExtension`() {
+        val participant = Participant(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = localizableExtensions,
+            type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
+            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = nonLocalizableExtensions)
+        )
+        val localizedParticipant = participant.localize(tenant)
+        assertTrue(localizedParticipant !== participant)
+
+        val expectedParticipant = Participant(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = localizedExtensions,
+            type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
+            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = nonLocalizableExtensions)
+        )
+        assertEquals(expectedParticipant, localizedParticipant)
+    }
+
+    @Test
+    fun `localizes pariticipant with localizable type`() {
+        val participant = Participant(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            type = listOf(CodeableConcept(extension = localizableExtensions)),
+            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = nonLocalizableExtensions)
+        )
+        val localizedParticipant = participant.localize(tenant)
+        assertTrue(localizedParticipant !== participant)
+
+        val expectedParticipant = Participant(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            type = listOf(CodeableConcept(extension = localizedExtensions)),
+            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = nonLocalizableExtensions)
+        )
+        assertEquals(expectedParticipant, localizedParticipant)
+    }
+
+    @Test
+    fun `localizes pariticipant with localizable actor`() {
+        val participant = Participant(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
+            actor = listOf(Reference(extension = localizableExtensions)),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = nonLocalizableExtensions)
+        )
+        val localizedParticipant = participant.localize(tenant)
+        assertTrue(localizedParticipant !== participant)
+
+        val expectedParticipant = Participant(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
+            actor = listOf(Reference(extension = localizedExtensions)),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = nonLocalizableExtensions)
+        )
+        assertEquals(expectedParticipant, localizedParticipant)
+    }
+
+    @Test
+    fun `localizes pariticipant with localizable period`() {
+        val participant = Participant(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
+            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = localizableExtensions)
+        )
+        val localizedParticipant = participant.localize(tenant)
+        assertTrue(localizedParticipant !== participant)
+
+        val expectedParticipant = Participant(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
+            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = localizedExtensions)
+        )
+        assertEquals(expectedParticipant, localizedParticipant)
     }
 
     @Test

@@ -11,7 +11,8 @@ enum class CodeSystem(private val uriString: String) {
     NPI("http://hl7.org/fhir/sid/us-npi"),
     MRN("http://projectronin.com/id/mrn"),
     FHIR_STU3_ID("http://projectronin.com/id/fhir"),
-    SER("http://projectronin.com/id/ser");
+    SER("http://projectronin.com/id/ser"),
+    RONIN_ID("http://projectronin.com/fhir/us/ronin");
 
     val uri = Uri(uriString)
 }

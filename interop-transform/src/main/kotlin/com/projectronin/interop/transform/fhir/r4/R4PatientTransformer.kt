@@ -8,7 +8,6 @@ import com.projectronin.interop.fhir.jackson.JacksonManager
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyPatient
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.PatientTransformer
-import com.projectronin.interop.transform.PractitionerTransformer
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.transform.util.toFhirIdentifier
 import mu.KotlinLogging
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Component
 import com.projectronin.interop.fhir.r4.resource.Patient as R4Patient
 
 /**
- * Implementation of [PractitionerTransformer] suitable for all R4 FHIR Practitioners
+ * Implementation of [PatientTransformer] suitable for all R4 FHIR Patients
  */
 @Component
 class R4PatientTransformer : PatientTransformer {
@@ -37,31 +36,31 @@ class R4PatientTransformer : PatientTransformer {
         val r4Patient = try {
             JacksonManager.objectMapper.readValue<R4Patient>(patient.raw)
         } catch (e: Exception) {
-            logger.warn { "Unable to read R4 Patient: ${e.message}" }
+            logger.warn { "Unable to read R4 patient: ${e.message}" }
             return null
         }
 
         val id = r4Patient.id
         if (id == null) {
-            logger.warn { "Unable to transform Patient due to missing ID" }
+            logger.warn { "Unable to transform patient due to missing ID" }
             return null
         }
 
         val gender = r4Patient.gender
         if (gender == null) {
-            logger.warn { "Unable to transform Patient due to missing gender" }
+            logger.warn { "Unable to transform patient due to missing gender" }
             return null
         }
 
         val birthDate = r4Patient.birthDate
         if (birthDate == null) {
-            logger.warn { "Unable to transform Patient due to missing birthDate" }
+            logger.warn { "Unable to transform patient due to missing birth date" }
             return null
         }
 
         val maritalStatus = r4Patient.maritalStatus
         if (maritalStatus == null) {
-            logger.warn { "Unable to transform Patient due to missing maritalStatus" }
+            logger.warn { "Unable to transform patient due to missing marital status" }
             return null
         }
 
@@ -93,7 +92,7 @@ class R4PatientTransformer : PatientTransformer {
                 link = r4Patient.link.map { it.localize(tenant) }
             )
         } catch (e: Exception) {
-            logger.warn { "Unable to transform Patient: ${e.message}" }
+            logger.warn { "Unable to transform patient: ${e.message}" }
             return null
         }
     }

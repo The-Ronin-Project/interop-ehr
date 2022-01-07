@@ -264,6 +264,13 @@ class R4PatientTransformerTest {
         oncologyPatient!! // Force it to be treated as non-null
         assertEquals("OncologyPatient", oncologyPatient.resourceType)
         assertEquals(Id("test-12345"), oncologyPatient.id)
+        assertNull(oncologyPatient.meta)
+        assertNull(oncologyPatient.implicitRules)
+        assertNull(oncologyPatient.language)
+        assertNull(oncologyPatient.text)
+        assertEquals(listOf<ContainedResource>(), oncologyPatient.contained)
+        assertEquals(listOf<Extension>(), oncologyPatient.extension)
+        assertEquals(listOf<Extension>(), oncologyPatient.modifierExtension)
         assertEquals(
             listOf(
                 Identifier(type = CodeableConcepts.MRN, system = CodeSystem.MRN.uri, value = "MRN"),
@@ -272,6 +279,7 @@ class R4PatientTransformerTest {
             ),
             oncologyPatient.identifier
         )
+        assertNull(oncologyPatient.active)
         assertEquals(listOf(HumanName(family = "Doe")), oncologyPatient.name)
         assertEquals(
             listOf(ContactPoint(value = "8675309", system = ContactPointSystem.PHONE, use = ContactPointUse.MOBILE)),
@@ -279,8 +287,15 @@ class R4PatientTransformerTest {
         )
         assertEquals(AdministrativeGender.FEMALE, oncologyPatient.gender)
         assertEquals(Date("1975-07-05"), oncologyPatient.birthDate)
+        assertNull(oncologyPatient.deceased)
         assertEquals(listOf(Address(country = "USA")), oncologyPatient.address)
         assertEquals(CodeableConcept(text = "M"), oncologyPatient.maritalStatus)
+        assertNull(oncologyPatient.multipleBirth)
+        assertEquals(listOf<Attachment>(), oncologyPatient.photo)
+        assertEquals(listOf<Communication>(), oncologyPatient.communication)
+        assertEquals(listOf<Reference>(), oncologyPatient.generalPractitioner)
+        assertNull(oncologyPatient.managingOrganization)
+        assertEquals(listOf<Link>(), oncologyPatient.link)
     }
 
     @Test

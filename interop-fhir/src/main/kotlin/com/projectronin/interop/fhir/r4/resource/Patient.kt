@@ -29,7 +29,7 @@ import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
  * Demographics and other administrative information about an individual or animal receiving care or other
  * health-related services.
  *
- * See [FHIR Spec](https://www.hl7.org/fhir/patient.html)
+ * See [FHIR Spec](https://www.hl7.org/fhir/R4/patient.html)
  */
 @JsonDeserialize(using = PatientDeserializer::class)
 @JsonSerialize(using = PatientSerializer::class)
@@ -61,22 +61,22 @@ data class Patient(
 ) : DomainResource {
     companion object {
         val acceptedDeceasedTypes = listOf(DynamicValueType.BOOLEAN, DynamicValueType.DATE_TIME)
-        val acceptedMultipleBirtTypes = listOf(DynamicValueType.BOOLEAN, DynamicValueType.INTEGER)
+        val acceptedMultipleBirthTypes = listOf(DynamicValueType.BOOLEAN, DynamicValueType.INTEGER)
     }
 
     init {
         deceased?.let {
-            require(acceptedDeceasedTypes.contains(deceased.type)) { "deceased can only be one of the following: ${acceptedDeceasedTypes.joinToString { it.code }}" }
+            require(acceptedDeceasedTypes.contains(deceased.type)) { "Bad dynamic value indicating if the patient is deceased" }
         }
 
         multipleBirth?.let {
-            require(acceptedMultipleBirtTypes.contains(multipleBirth.type)) { "multipleBirth can only be one of the following: ${acceptedMultipleBirtTypes.joinToString { it.code }}" }
+            require(acceptedMultipleBirthTypes.contains(multipleBirth.type)) { "Bad dynamic value indicating whether the patient was part of a multiple birth" }
         }
 
         require(
             contact.all {
                 (it.name != null) or (it.telecom.isNotEmpty()) or (it.address != null) or (it.organization != null)
             }
-        ) { "contact SHALL at least contain a contact's details or a reference to an organization." }
+        ) { "[pat-1](https://www.hl7.org/fhir/R4/patient.html#invs): contact SHALL at least contain a contact's details or a reference to an organization." }
     }
 }

@@ -91,13 +91,7 @@ class ContactTest {
 
     @Test
     fun `can deserialize from JSON with nullable and empty fields`() {
-        val json = """
-            {
-                "organization" : {
-                    "reference" : "Patient/123"
-                }
-            }
-        """.trimIndent()
+        val json = "{ }"
         val contact = JacksonManager.objectMapper.readValue<Contact>(json)
 
         assertNull(contact.id)
@@ -108,6 +102,7 @@ class ContactTest {
         assertEquals(listOf<ContactPoint>(), contact.telecom)
         assertNull(contact.address)
         assertNull(contact.gender)
+        assertNull(contact.organization)
         assertNull(contact.period)
     }
 }

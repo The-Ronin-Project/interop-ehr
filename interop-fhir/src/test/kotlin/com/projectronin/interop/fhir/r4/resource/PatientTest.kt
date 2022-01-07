@@ -203,12 +203,12 @@ class PatientTest {
     @Test
     fun `cannot create dynamic values with bad types`() {
         // deceased must be Boolean or Date Time
-        val decisionException = assertThrows<IllegalArgumentException> {
+        val deceasedException = assertThrows<IllegalArgumentException> {
             Patient(
                 deceased = DynamicValue(type = DynamicValueType.BASE_64_BINARY, value = false)
             )
         }
-        assertEquals("deceased can only be one of the following: Boolean, DateTime", decisionException.message)
+        assertEquals("Bad dynamic value indicating if the patient is deceased", deceasedException.message)
 
         // multipleBirth must be Boolean or Integer
         val multipleBirthException = assertThrows<IllegalArgumentException> {
@@ -216,7 +216,7 @@ class PatientTest {
                 multipleBirth = DynamicValue(type = DynamicValueType.BASE_64_BINARY, value = 2)
             )
         }
-        assertEquals("multipleBirth can only be one of the following: Boolean, Integer", multipleBirthException.message)
+        assertEquals("Bad dynamic value indicating whether the patient was part of a multiple birth", multipleBirthException.message)
     }
 
     @Test
@@ -227,6 +227,9 @@ class PatientTest {
                 contact = listOf(Contact())
             )
         }
-        assertEquals("contact SHALL at least contain a contact's details or a reference to an organization.", exception.message)
+        assertEquals(
+            "[pat-1](https://www.hl7.org/fhir/R4/patient.html#invs): contact SHALL at least contain a contact's details or a reference to an organization.",
+            exception.message
+        )
     }
 }
