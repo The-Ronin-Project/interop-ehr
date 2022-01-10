@@ -21,15 +21,6 @@ class TenantServiceEmbeddedTest {
     }
 
     @Test
-    fun `no tenant found2`() {
-        val tenantService = TenantServiceEmbedded(
-            DefaultResourceLoader(),
-            "file:///Users/travisbean/IdeaProjects/interop-proxy-server/src/it/resources/tenants.yaml"
-        )
-        assertNull(tenantService.getTenantForMnemonic("UNKNOWN"))
-    }
-
-    @Test
     fun `tenants load classpath`() {
         val tenantService = TenantServiceEmbedded(DefaultResourceLoader(), "valid_tenants.yaml")
         assertNotNull(tenantService.getTenantForMnemonic("PSJ"))
