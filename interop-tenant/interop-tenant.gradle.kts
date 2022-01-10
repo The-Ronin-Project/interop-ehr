@@ -6,7 +6,7 @@ plugins {
 }
 
 dependencies {
-    implementation("com.projectronin.interop:interop-common")
+    implementation("com.projectronin.interop:interop-common:${project.property("interopCommonVersion")}")
 
     // Spring
     implementation("org.springframework:spring-context")
@@ -15,5 +15,5 @@ dependencies {
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
 
     testImplementation(project(":interop-ehr-liquibase"))
-    testImplementation("com.projectronin.interop:interop-common-test-db")
+    testImplementation("com.projectronin.interop:interop-common-test-db:${project.property("interopCommonVersion")}")
 }

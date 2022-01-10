@@ -8,14 +8,4 @@ plugins {
 
 subprojects {
     apply(plugin = "com.projectronin.interop.gradle.publish")
-
-    dependencyManagement {
-        dependencies {
-            dependencySet("com.projectronin.interop:${ext["interopCommonVersion"]}") {
-                entry("interop-common")
-                entry("interop-common-jackson")
-                entry("interop-common-test-db")
-            }
-        }
-    }
 }
