@@ -8,7 +8,7 @@ plugins {
 dependencies {
     implementation("com.projectronin.interop:interop-common:${project.property("interopCommonVersion")}")
 
-    // Spring
+    implementation("org.springframework:spring-core")
     implementation("org.springframework:spring-context")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.apache.commons:commons-text:1.9")

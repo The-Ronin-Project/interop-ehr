@@ -13,7 +13,7 @@ import org.springframework.stereotype.Service
 @Service
 class TenantServiceEmbedded(
     resourceLoader: ResourceLoader,
-    @Value("\${interop.tenant.config:tenants.yaml}") private val tenantYamlFile: String
+    @Value("\${interop.tenant.config:classpath:tenants.yaml}") private val tenantYamlFile: String
 ) : TenantService {
     private var tenants: Map<String, Tenant> = emptyMap()
 
