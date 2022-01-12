@@ -16,7 +16,6 @@ for (project in rootProject.children) {
 
 pluginManagement {
     repositories {
-        gradlePluginPortal()
         maven {
             url = uri("https://maven.pkg.github.com/projectronin/package-repo")
             credentials {
@@ -24,6 +23,7 @@ pluginManagement {
                 password = System.getenv("PACKAGE_TOKEN")
             }
         }
-        mavenLocal()
+        mavenCentral()
+        gradlePluginPortal()
     }
 }
