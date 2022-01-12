@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.auth
 
+import com.projectronin.interop.common.auth.Authentication
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
 import java.time.Instant

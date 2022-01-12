@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.auth
 
+import com.projectronin.interop.common.auth.Authentication
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.tenant.config.model.Tenant
 

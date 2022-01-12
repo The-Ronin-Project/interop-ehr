@@ -2,7 +2,7 @@ package com.projectronin.interop.ehr.epic.auth
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
-import com.projectronin.interop.ehr.auth.Authentication
+import com.projectronin.interop.common.auth.Authentication
 import java.time.Instant
 
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
