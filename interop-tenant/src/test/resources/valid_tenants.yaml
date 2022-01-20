@@ -1,6 +1,6 @@
 ---
 # List of Tenants and their configuration
-- mnemonic: "SAND_AO"
+- mnemonic: "SAND-AO"
   batchConfig:
     availableStart: "22:00:00"
     availableEnd: "06:00:00"

@@ -5,29 +5,27 @@ import com.projectronin.interop.tenant.config.model.vendor.Epic
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
-import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
-import org.springframework.core.io.DefaultResourceLoader
-import java.io.IOException
+import org.junit.jupiter.api.assertThrows
+import java.io.FileNotFoundException
 import java.nio.file.Paths
 import java.time.LocalTime
 
 class TenantServiceEmbeddedTest {
-
     @Test
     fun `no tenant found`() {
-        val tenantService = TenantServiceEmbedded(DefaultResourceLoader(), "valid_tenants.yaml")
+        val tenantService = TenantServiceEmbedded("classpath:valid_tenants.yaml")
         assertNull(tenantService.getTenantForMnemonic("UNKNOWN"))
     }
 
     @Test
     fun `tenants load classpath`() {
-        val tenantService = TenantServiceEmbedded(DefaultResourceLoader(), "valid_tenants.yaml")
+        val tenantService = TenantServiceEmbedded("classpath:valid_tenants.yaml")
         assertNotNull(tenantService.getTenantForMnemonic("PSJ"))
 
-        val tenant = tenantService.getTenantForMnemonic("SAND_AO")
+        val tenant = tenantService.getTenantForMnemonic("SAND-AO")
         assertNotNull(tenant)
-        assertEquals("SAND_AO", tenant!!.mnemonic)
+        assertEquals("SAND-AO", tenant!!.mnemonic)
 
         val batchConfig = tenant.batchConfig
         assertNotNull(batchConfig)
@@ -55,12 +53,12 @@ class TenantServiceEmbeddedTest {
     fun `tenants load from filesystem`() {
         val modulePath = Paths.get("").toAbsolutePath().toString()
         val tenantService =
-            TenantServiceEmbedded(DefaultResourceLoader(), "file:$modulePath/src/test/resources/valid_tenants.yaml")
+            TenantServiceEmbedded("$modulePath/src/test/resources/valid_tenants.yaml")
         assertNotNull(tenantService.getTenantForMnemonic("PSJ"))
 
-        val tenant = tenantService.getTenantForMnemonic("SAND_AO")
+        val tenant = tenantService.getTenantForMnemonic("SAND-AO")
         assertNotNull(tenant)
-        assertEquals("SAND_AO", tenant!!.mnemonic)
+        assertEquals("SAND-AO", tenant!!.mnemonic)
 
         val batchConfig = tenant.batchConfig
         assertNotNull(batchConfig)
@@ -86,9 +84,9 @@ class TenantServiceEmbeddedTest {
 
     @Test
     fun `missing file`() {
-        val exception = assertThrows(IOException::class.java) {
-            TenantServiceEmbedded(DefaultResourceLoader(), "unknown.yaml")
+        val exception = assertThrows<FileNotFoundException> {
+            TenantServiceEmbedded("classpath:unknown.yaml")
         }
-        assertEquals("class path resource [unknown.yaml] cannot be opened because it does not exist", exception.message)
+        assertEquals("unknown.yaml not found on classpath", exception.message)
     }
 }
