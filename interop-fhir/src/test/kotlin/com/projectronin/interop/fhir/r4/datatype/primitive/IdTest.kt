@@ -15,15 +15,21 @@ class IdTest {
     }
 
     @Test
+    fun `fails on underscore`() {
+        val exception = assertThrows<IllegalArgumentException> { Id("app_o_snd-ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-.") }
+        assertEquals("Supplied value is not valid for an Id", exception.message)
+    }
+
+    @Test
     fun `fails on empty value`() {
         val exception = assertThrows<IllegalArgumentException> { Id("") }
         assertEquals("Supplied value is not valid for an Id", exception.message)
     }
 
     @Test
-    fun `fails on value over 64 characters`() {
-        val exception = assertThrows<IllegalArgumentException> { Id("A".repeat(65)) }
-        assertEquals("Supplied value is not valid for an Id", exception.message)
+    fun `accepts value over 64 characters`() {
+        val id = { Id("A".repeat(65)) }
+        assertNotNull(id)
     }
 
     @Test
