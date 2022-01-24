@@ -233,4 +233,81 @@ class FHIRValidatorTest {
         assertEquals(false, result.hasWarn())
         assertEquals(false, result.hasInfo())
     }
+
+    @Test
+    fun `ensure long resource ids are supported`() {
+        val rawString = """
+            |     {
+            |        "resourceType": "Patient",
+            |        "id": "eJzlzKe3KPzAV5TtkxmNivQ3eJzlzKe3KPzAV5TtkxmNivQ3eJzlzKe3KPzAV5TtkxmNivQ3",
+            |        "identifier": [
+            |          {
+            |            "use": "usual",
+            |            "system": "urn:oid:2.16.840.1.113883.4.1",
+            |            "value": "391-50-5316"
+            |          }
+            |        ],
+            |        "active": true,
+            |        "name": [
+            |          {
+            |            "use": "usual",
+            |            "text": "Ali Mychart",
+            |            "family": "Mychart",
+            |            "given": [
+            |              "Ali"
+            |            ]
+            |          }
+            |        ],
+            |        "gender": "female",
+            |        "birthDate": "1987-01-15",
+            |        "deceasedBoolean": false,
+            |        "address": [
+            |          {
+            |            "use": "home",
+            |            "line": [
+            |              "123 Main St."
+            |            ],
+            |            "city": "Madison",
+            |            "district": "DANE",
+            |            "state": "WI",
+            |            "postalCode": "53703",
+            |            "country": "US"
+            |          }
+            |        ],
+            |        "maritalStatus": {
+            |           "coding": [
+            |               {
+            |                   "code": "M",
+            |                   "system": "http://terminology.hl7.org/CodeSystem/v3-MaritalStatus",
+            |                   "display": "Married"
+            |               }
+            |           },
+            |          "text": "Married"
+            |        },
+            |        "generalPractitioner": [
+            |          {
+            |            "reference": "Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+            |            "display": "Physician Family Medicine, MD"
+            |          },
+            |          {
+            |            "reference": "Practitioner/ef9TegF2nfECi-0Skirbvpg3",
+            |            "display": "Physician One Cardiology, MD"
+            |          }
+            |        ],
+            |        "managingOrganization": {
+            |          "reference": "Organization/enRyWnSP963FYDpoks4NHOA3",
+            |          "display": "Epic Hospital System"
+            |        }
+            |      }
+        """.trimMargin()
+
+        val result = validator.validate(rawString)
+
+        assertEquals(false, result.hasFatal())
+        assertEquals(false, result.hasError())
+        assertEquals(false, result.hasWarn())
+        // An info of all clear is expected
+        assertEquals(true, result.hasInfo())
+        assertEquals("All OK", result.getInfo()[0].details)
+    }
 }
