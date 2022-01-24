@@ -1,0 +1,531 @@
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 7,
+  "link": [
+    {
+      "relation": "next",
+      "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition?patient=eovSKnwDlsv-8MsEzCJO3BA3&clinical-status=active,inactive,resolved&category=problem-list-item"
+    }
+  ],
+  "entry": [
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/eGVC1DSR9YDJxMi7Th3xbsA3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/eGVC1DSR9YDJxMi7Th3xbsA3",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "eGVC1DSR9YDJxMi7Th3xbsA3",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "version": "4.0.0",
+              "code": "resolved",
+              "display": "Resolved"
+            }
+          ],
+          "text": "Resolved"
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "version": "4.0.0",
+              "code": "confirmed",
+              "display": "Confirmed"
+            }
+          ],
+          "text": "Confirmed"
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ],
+            "text": "Problem List Item"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.90",
+              "code": "R10.9"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.96",
+              "code": "21522001"
+            }
+          ],
+          "text": "Abdominal pain"
+        },
+        "subject": {
+          "reference": "Patient/eovSKnwDlsv-8MsEzCJO3BA3",
+          "display": "Icu, Raj"
+        },
+        "onsetPeriod": {
+          "start": "2015-02-09",
+          "end": "2015-02-09"
+        },
+        "abatementPeriod": {
+          "end": "2015-02-19"
+        },
+        "recordedDate": "2015-02-09"
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/eLn-6z3hP2NJG0T20kjWyGw3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/eLn-6z3hP2NJG0T20kjWyGw3",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "eLn-6z3hP2NJG0T20kjWyGw3",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "version": "4.0.0",
+              "code": "resolved",
+              "display": "Resolved"
+            }
+          ],
+          "text": "Resolved"
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "version": "4.0.0",
+              "code": "confirmed",
+              "display": "Confirmed"
+            }
+          ],
+          "text": "Confirmed"
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ],
+            "text": "Problem List Item"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.90",
+              "code": "R09.02"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.96",
+              "code": "389086002"
+            }
+          ],
+          "text": "Hypoxia"
+        },
+        "subject": {
+          "reference": "Patient/eovSKnwDlsv-8MsEzCJO3BA3",
+          "display": "Icu, Raj"
+        },
+        "onsetPeriod": {
+          "start": "2015-02-19",
+          "end": "2015-02-19"
+        },
+        "abatementPeriod": {
+          "end": "2015-02-20"
+        },
+        "recordedDate": "2015-02-19"
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/ehbL8Q9rn3jAsl6s8yGxC1w3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/ehbL8Q9rn3jAsl6s8yGxC1w3",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "ehbL8Q9rn3jAsl6s8yGxC1w3",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "version": "4.0.0",
+              "code": "active",
+              "display": "Active"
+            }
+          ],
+          "text": "Active"
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "version": "4.0.0",
+              "code": "confirmed",
+              "display": "Confirmed"
+            }
+          ],
+          "text": "Confirmed"
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ],
+            "text": "Problem List Item"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.90",
+              "code": "I10"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.96",
+              "code": "38341003"
+            }
+          ],
+          "text": "Hypertension"
+        },
+        "subject": {
+          "reference": "Patient/eovSKnwDlsv-8MsEzCJO3BA3",
+          "display": "Icu, Raj"
+        },
+        "onsetPeriod": {
+          "start": "2015-02-19",
+          "end": "2015-02-19"
+        },
+        "recordedDate": "2015-02-19"
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/e.3Yf2fdBeJFpNyIZg0GVFg3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/e.3Yf2fdBeJFpNyIZg0GVFg3",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "e.3Yf2fdBeJFpNyIZg0GVFg3",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "version": "4.0.0",
+              "code": "active",
+              "display": "Active"
+            }
+          ],
+          "text": "Active"
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "version": "4.0.0",
+              "code": "confirmed",
+              "display": "Confirmed"
+            }
+          ],
+          "text": "Confirmed"
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ],
+            "text": "Problem List Item"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.90",
+              "code": "E11.9"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.96",
+              "code": "73211009"
+            }
+          ],
+          "text": "Diabetes mellitus (CMS/HCC)"
+        },
+        "subject": {
+          "reference": "Patient/eovSKnwDlsv-8MsEzCJO3BA3",
+          "display": "Icu, Raj"
+        },
+        "onsetPeriod": {
+          "start": "2015-02-19",
+          "end": "2015-02-19"
+        },
+        "recordedDate": "2015-02-19"
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/eqrR1BMfXhGmimr8OUK7PbA3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/eqrR1BMfXhGmimr8OUK7PbA3",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "eqrR1BMfXhGmimr8OUK7PbA3",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "version": "4.0.0",
+              "code": "active",
+              "display": "Active"
+            }
+          ],
+          "text": "Active"
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "version": "4.0.0",
+              "code": "confirmed",
+              "display": "Confirmed"
+            }
+          ],
+          "text": "Confirmed"
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ],
+            "text": "Problem List Item"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.90",
+              "code": "J69.0"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.96",
+              "code": "422588002"
+            }
+          ],
+          "text": "Aspiration pneumonia (CMS/HCC)"
+        },
+        "subject": {
+          "reference": "Patient/eovSKnwDlsv-8MsEzCJO3BA3",
+          "display": "Icu, Raj"
+        },
+        "onsetPeriod": {
+          "start": "2015-02-19",
+          "end": "2015-02-19"
+        },
+        "recordedDate": "2015-02-19"
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/eZ1muPaohtiRvQlo0D-yxEg3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/eZ1muPaohtiRvQlo0D-yxEg3",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "eZ1muPaohtiRvQlo0D-yxEg3",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "version": "4.0.0",
+              "code": "resolved",
+              "display": "Resolved"
+            }
+          ],
+          "text": "Resolved"
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "version": "4.0.0",
+              "code": "confirmed",
+              "display": "Confirmed"
+            }
+          ],
+          "text": "Confirmed"
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ],
+            "text": "Problem List Item"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.90",
+              "code": "Z22.322"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.96",
+              "code": "440608005"
+            }
+          ],
+          "text": "MRSA (methicillin resistant staph aureus) culture positive"
+        },
+        "subject": {
+          "reference": "Patient/eovSKnwDlsv-8MsEzCJO3BA3",
+          "display": "Icu, Raj"
+        },
+        "onsetPeriod": {
+          "start": "2014-12-19",
+          "end": "2014-12-19"
+        },
+        "abatementPeriod": {
+          "end": "2014-12-19"
+        },
+        "recordedDate": "2014-12-19"
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/e67ikTL29RrR6zDPXYcbWBA3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition/e67ikTL29RrR6zDPXYcbWBA3",
+      "resource": {
+        "resourceType": "Condition",
+        "id": "e67ikTL29RrR6zDPXYcbWBA3",
+        "clinicalStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+              "version": "4.0.0",
+              "code": "active",
+              "display": "Active"
+            }
+          ],
+          "text": "Active"
+        },
+        "verificationStatus": {
+          "coding": [
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+              "version": "4.0.0",
+              "code": "confirmed",
+              "display": "Confirmed"
+            }
+          ],
+          "text": "Confirmed"
+        },
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/condition-category",
+                "code": "problem-list-item",
+                "display": "Problem List Item"
+              }
+            ],
+            "text": "Problem List Item"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.90",
+              "code": "E43"
+            },
+            {
+              "system": "urn:oid:2.16.840.1.113883.6.96",
+              "code": "360549009"
+            }
+          ],
+          "text": "Protein-calorie malnutrition, severe (CMS/HCC)"
+        },
+        "subject": {
+          "reference": "Patient/eovSKnwDlsv-8MsEzCJO3BA3",
+          "display": "Icu, Raj"
+        },
+        "onsetPeriod": {
+          "start": "2020-07-30",
+          "end": "2020-07-30"
+        },
+        "recordedDate": "2020-07-30",
+        "note": [
+          {
+            "text": "Junum problem list item\r\n"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    }
+  ]
+}

@@ -193,6 +193,19 @@ class JsonFhirHelpersTest {
         assertEquals(2, comboBundle.resources.size)
     }
 
+    @Test
+    fun `merge list of bundles`() {
+        val bundleJson1 = """{"entry":[{"resource":{"resourceType":"Patient","id":1}}]}"""
+        val bundleJson2 = """{"entry":[{"resource":{"resourceType":"Patient","id":1}}]}"""
+
+        val bundles = listOf(Bundle(bundleJson1), Bundle(bundleJson2))
+
+        val comboBundle = mergeBundles(bundles, ::Bundle)
+
+        assertEquals(DataSource.FHIR_R4, comboBundle.dataSource)
+        assertEquals(2, comboBundle.resources.size)
+    }
+
     private fun jsonObject(json: String) = Parser.default().parse(StringBuilder(json)) as JsonObject
 }
 

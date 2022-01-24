@@ -87,3 +87,10 @@ fun <R : FHIRResource, B : FHIRBundle<R>> mergeBundles(
 
     return creator(combinedJSON)
 }
+
+/**
+ * Merges a list of [FHIRBundle]s of the same resource into a single [FHIRBundle]
+ */
+fun <R : FHIRResource, B : FHIRBundle<R>> mergeBundles(bundles: List<B>, creator: (String) -> B): B {
+    return bundles.reduce { acc, bundle -> mergeBundles(acc, bundle, creator) }
+}

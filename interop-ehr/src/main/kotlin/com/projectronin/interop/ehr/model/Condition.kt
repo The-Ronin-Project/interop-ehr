@@ -20,6 +20,11 @@ interface Condition : EHRResource {
     val clinicalStatus: CodeableConcept?
 
     /**
+     * Verification status of this [Condition]
+     */
+    val verificationStatus: CodeableConcept?
+
+    /**
      * Category of this [Condition] (e.g. problem-list-item, encounter-diagnosis, etc)
      */
     val category: List<CodeableConcept>
