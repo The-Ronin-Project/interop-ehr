@@ -106,7 +106,7 @@ class OncologyPatientTest {
 
         val expectedJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "meta" : {
                 "profile" : [ "http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitioner" ]
@@ -248,7 +248,7 @@ class OncologyPatientTest {
 
         val expectedJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "identifier" : [ {
                 "type" : {
                   "coding" : [ {
@@ -308,7 +308,7 @@ class OncologyPatientTest {
     fun `can deserialize from JSON with nullable and empty fields`() {
         val json = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "identifier" : [ {
                 "type" : {
                   "coding" : [ {

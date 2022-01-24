@@ -119,4 +119,6 @@ data class OncologyPatient(
             contact.all { (it.name != null) or (it.telecom.isNotEmpty()) or (it.address != null) or (it.organization != null) }
         ) { "[pat-1](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-patient.html#constraints): contact SHALL at least contain a contact's details or a reference to an organization" }
     }
+
+    override val resourceType: String = "Patient"
 }

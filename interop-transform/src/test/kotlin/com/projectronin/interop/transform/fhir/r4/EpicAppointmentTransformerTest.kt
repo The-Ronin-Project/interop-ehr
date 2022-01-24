@@ -211,7 +211,7 @@ class EpicAppointmentTransformerTest {
         val oncologyAppointment = transformer.transformAppointment(appointment, tenant)
         oncologyAppointment!!
 
-        assertEquals("OncologyAppointment", oncologyAppointment.resourceType)
+        assertEquals("Appointment", oncologyAppointment.resourceType)
         assertEquals(Id(value = "test-12345"), oncologyAppointment.id)
         assertEquals(
             listOf(
@@ -289,7 +289,10 @@ class EpicAppointmentTransformerTest {
             listOf(
                 Extension(
                     url = ExtensionMeanings.PARTNER_DEPARTMENT.uri,
-                    value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Organization/test-10501205"))
+                    value = DynamicValue(
+                        DynamicValueType.REFERENCE,
+                        Reference(reference = "Organization/test-10501205")
+                    )
                 )
             ),
             oncologyAppointment.extension

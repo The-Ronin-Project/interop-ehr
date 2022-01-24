@@ -157,7 +157,7 @@ class OncologyPractitionerTest {
 
         val expectedJson = """
             |{
-            |  "resourceType" : "OncologyPractitioner",
+            |  "resourceType" : "Practitioner",
             |  "id" : "12345",
             |  "meta" : {
             |    "profile" : [ "http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitioner" ]
@@ -236,7 +236,7 @@ class OncologyPractitionerTest {
 
         val expectedJson = """
             |{
-            |  "resourceType" : "OncologyPractitioner",
+            |  "resourceType" : "Practitioner",
             |  "identifier" : [ {
             |    "type" : {
             |      "coding" : [ {

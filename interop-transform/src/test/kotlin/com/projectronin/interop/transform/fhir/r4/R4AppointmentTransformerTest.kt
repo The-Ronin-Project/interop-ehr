@@ -128,7 +128,7 @@ class R4AppointmentTransformerTest {
         val oncologyAppointment = transformer.transformAppointment(appointment, tenant)
 
         oncologyAppointment!! // Force it to be treated as non-null
-        assertEquals("OncologyAppointment", oncologyAppointment.resourceType)
+        assertEquals("Appointment", oncologyAppointment.resourceType)
         assertEquals(Id(value = "test-12345"), oncologyAppointment.id)
         assertEquals(
             Meta(profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitioner"))),
@@ -226,7 +226,7 @@ class R4AppointmentTransformerTest {
         val oncologyAppointment = transformer.transformAppointment(appointment, tenant)
 
         oncologyAppointment!! // Force it to be treated as non-null
-        assertEquals("OncologyAppointment", oncologyAppointment.resourceType)
+        assertEquals("Appointment", oncologyAppointment.resourceType)
         assertEquals(Id(value = "test-12345"), oncologyAppointment.id)
         assertNull(oncologyAppointment.meta)
         assertNull(oncologyAppointment.implicitRules)

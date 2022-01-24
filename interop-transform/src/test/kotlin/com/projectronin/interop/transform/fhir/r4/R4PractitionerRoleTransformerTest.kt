@@ -169,7 +169,7 @@ class R4PractitionerRoleTransformerTest {
         val oncologyPractitionerRole = transformer.transformPractitionerRole(practitionerRole, tenant)
 
         oncologyPractitionerRole!! // Force it to be treated as non-null
-        assertEquals("OncologyPractitionerRole", oncologyPractitionerRole.resourceType)
+        assertEquals("PractitionerRole", oncologyPractitionerRole.resourceType)
         assertEquals(Id("test-12345"), oncologyPractitionerRole.id)
         assertEquals(
             Meta(profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitionerrole"))),
@@ -248,7 +248,7 @@ class R4PractitionerRoleTransformerTest {
         val oncologyPractitionerRole = transformer.transformPractitionerRole(practitionerRole, tenant)
 
         oncologyPractitionerRole!! // Force it to be treated as non-null
-        assertEquals("OncologyPractitionerRole", oncologyPractitionerRole.resourceType)
+        assertEquals("PractitionerRole", oncologyPractitionerRole.resourceType)
         assertEquals(Id("test-12345"), oncologyPractitionerRole.id)
         assertNull(oncologyPractitionerRole.meta)
         assertNull(oncologyPractitionerRole.implicitRules)
@@ -303,7 +303,7 @@ class R4PractitionerRoleTransformerTest {
         val oncologyPractitionerRole = transformer.transformPractitionerRole(practitionerRole, tenant)
 
         oncologyPractitionerRole!! // Force it to be treated as non-null
-        assertEquals("OncologyPractitionerRole", oncologyPractitionerRole.resourceType)
+        assertEquals("PractitionerRole", oncologyPractitionerRole.resourceType)
         assertEquals(Id("test-12345"), oncologyPractitionerRole.id)
         assertNull(oncologyPractitionerRole.meta)
         assertNull(oncologyPractitionerRole.implicitRules)
@@ -359,7 +359,7 @@ class R4PractitionerRoleTransformerTest {
         val oncologyPractitionerRole = transformer.transformPractitionerRole(practitionerRole, tenant)
 
         oncologyPractitionerRole!! // Force it to be treated as non-null
-        assertEquals("OncologyPractitionerRole", oncologyPractitionerRole.resourceType)
+        assertEquals("PractitionerRole", oncologyPractitionerRole.resourceType)
         assertEquals(Id("test-12345"), oncologyPractitionerRole.id)
         assertNull(oncologyPractitionerRole.meta)
         assertNull(oncologyPractitionerRole.implicitRules)

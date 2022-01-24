@@ -96,4 +96,6 @@ data class OncologyAppointment(
             "[app-1](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-appointment.html#constraints): Either the type or actor on the participant SHALL be specified"
         }
     }
+
+    override val resourceType: String = "Appointment"
 }

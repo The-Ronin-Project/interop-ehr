@@ -53,4 +53,6 @@ data class OncologyPractitioner(
         require(name.isNotEmpty()) { "At least one name must be provided" }
         require(name.all { it.family != null }) { "All names must have a family name provided" }
     }
+
+    override val resourceType: String = "Practitioner"
 }

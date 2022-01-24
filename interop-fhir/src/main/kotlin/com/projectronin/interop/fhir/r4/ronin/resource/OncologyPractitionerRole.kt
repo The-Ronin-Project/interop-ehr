@@ -48,4 +48,6 @@ data class OncologyPractitionerRole(
     init {
         require(telecom.all { it.system != null && it.value != null }) { "All telecoms must have a system and value" }
     }
+
+    override val resourceType: String = "PractitionerRole"
 }

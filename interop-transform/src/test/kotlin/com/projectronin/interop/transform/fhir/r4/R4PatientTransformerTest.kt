@@ -50,7 +50,7 @@ class R4PatientTransformerTest {
     fun `transforms patient with all attributes`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "meta" : {
                 "profile" : [ "http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-patient" ]
@@ -146,7 +146,7 @@ class R4PatientTransformerTest {
         val oncologyPatient = transformer.transformPatient(patient, tenant)
 
         oncologyPatient!! // Force it to be treated as non-null
-        assertEquals("OncologyPatient", oncologyPatient.resourceType)
+        assertEquals("Patient", oncologyPatient.resourceType)
         assertEquals(Id("test-12345"), oncologyPatient.id)
         assertEquals(
             Meta(profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-patient"))),
@@ -180,7 +180,11 @@ class R4PatientTransformerTest {
         assertEquals(
             listOf(
                 Identifier(type = CodeableConcepts.MRN, system = CodeSystem.MRN.uri, value = "MRN"),
-                Identifier(type = CodeableConcepts.FHIR_STU3_ID, system = CodeSystem.FHIR_STU3_ID.uri, value = "fhirId"),
+                Identifier(
+                    type = CodeableConcepts.FHIR_STU3_ID,
+                    system = CodeSystem.FHIR_STU3_ID.uri,
+                    value = "fhirId"
+                ),
                 Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test")
             ),
             oncologyPatient.identifier
@@ -211,7 +215,7 @@ class R4PatientTransformerTest {
     fun `transforms patient with only required attributes`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -262,7 +266,7 @@ class R4PatientTransformerTest {
         val oncologyPatient = transformer.transformPatient(patient, tenant)
 
         oncologyPatient!! // Force it to be treated as non-null
-        assertEquals("OncologyPatient", oncologyPatient.resourceType)
+        assertEquals("Patient", oncologyPatient.resourceType)
         assertEquals(Id("test-12345"), oncologyPatient.id)
         assertNull(oncologyPatient.meta)
         assertNull(oncologyPatient.implicitRules)
@@ -274,7 +278,11 @@ class R4PatientTransformerTest {
         assertEquals(
             listOf(
                 Identifier(type = CodeableConcepts.MRN, system = CodeSystem.MRN.uri, value = "MRN"),
-                Identifier(type = CodeableConcepts.FHIR_STU3_ID, system = CodeSystem.FHIR_STU3_ID.uri, value = "fhirId"),
+                Identifier(
+                    type = CodeableConcepts.FHIR_STU3_ID,
+                    system = CodeSystem.FHIR_STU3_ID.uri,
+                    value = "fhirId"
+                ),
                 Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test")
             ),
             oncologyPatient.identifier
@@ -315,7 +323,7 @@ class R4PatientTransformerTest {
     fun `fails for patient with missing id`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "identifier" : [ {
                 "type" : {
                   "coding" : [ {
@@ -370,7 +378,7 @@ class R4PatientTransformerTest {
     fun `fails for missing mrn`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -415,7 +423,7 @@ class R4PatientTransformerTest {
     fun `fails for bad mrn CodeableConcept`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -471,7 +479,7 @@ class R4PatientTransformerTest {
     fun `fails for missing mrn value`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -526,7 +534,7 @@ class R4PatientTransformerTest {
     fun `fails for missing fhir stu3 id`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -571,7 +579,7 @@ class R4PatientTransformerTest {
     fun `fails for missing CodeableConcept in fhir stu3 id`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -627,7 +635,7 @@ class R4PatientTransformerTest {
     fun `fails for missing value for fhir stu3 id`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -682,7 +690,7 @@ class R4PatientTransformerTest {
     fun `fails for no name`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -736,7 +744,7 @@ class R4PatientTransformerTest {
     fun `fails for no telecom`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -787,7 +795,7 @@ class R4PatientTransformerTest {
     fun `fails for telecom with missing details`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -842,7 +850,7 @@ class R4PatientTransformerTest {
     fun `fails for missing address`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -896,7 +904,7 @@ class R4PatientTransformerTest {
     fun `fails for contact with missing details`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -953,7 +961,7 @@ class R4PatientTransformerTest {
     fun `fails for missing gender`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -1008,7 +1016,7 @@ class R4PatientTransformerTest {
     fun `fails for missing birthDate`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -1063,7 +1071,7 @@ class R4PatientTransformerTest {
     fun `fails for missing maritalStatus`() {
         val patientJson = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -1153,7 +1161,7 @@ class R4PatientTransformerTest {
         }
         val patient2Json = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -1215,7 +1223,7 @@ class R4PatientTransformerTest {
     fun `bundle transformation returns all when all valid`() {
         val patient1Json = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "12345",
               "identifier" : [ {
                 "type" : {
@@ -1265,7 +1273,7 @@ class R4PatientTransformerTest {
 
         val patient2Json = """
             {
-              "resourceType" : "OncologyPatient",
+              "resourceType" : "Patient",
               "id" : "67890",
               "identifier" : [ {
                 "type" : {

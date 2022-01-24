@@ -156,7 +156,7 @@ class R4PractitionerTransformerTest {
         val oncologyPractitioner = transformer.transformPractitioner(practitioner, tenant)
 
         oncologyPractitioner!! // Force it to be treated as non-null
-        assertEquals("OncologyPractitioner", oncologyPractitioner.resourceType)
+        assertEquals("Practitioner", oncologyPractitioner.resourceType)
         assertEquals(Id("test-12345"), oncologyPractitioner.id)
         assertEquals(
             Meta(profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitioner"))),
@@ -226,7 +226,7 @@ class R4PractitionerTransformerTest {
         val oncologyPractitioner = transformer.transformPractitioner(practitioner, tenant)
 
         oncologyPractitioner!! // Force it to be treated as non-null
-        assertEquals("OncologyPractitioner", oncologyPractitioner.resourceType)
+        assertEquals("Practitioner", oncologyPractitioner.resourceType)
         assertEquals(Id("test-12345"), oncologyPractitioner.id)
         assertNull(oncologyPractitioner.meta)
         assertNull(oncologyPractitioner.implicitRules)
