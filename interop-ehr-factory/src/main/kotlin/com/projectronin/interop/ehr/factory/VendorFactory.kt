@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.factory
 
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.AppointmentService
+import com.projectronin.interop.ehr.ConditionService
 import com.projectronin.interop.ehr.MessageService
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.PractitionerService
@@ -22,6 +23,7 @@ interface VendorFactory {
     val messageService: MessageService
     val patientService: PatientService
     val practitionerService: PractitionerService
+    val conditionService: ConditionService
 
     // Transformers
     val practitionerTransformer: PractitionerTransformer
