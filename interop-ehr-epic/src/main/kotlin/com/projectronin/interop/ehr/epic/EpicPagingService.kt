@@ -1,9 +1,10 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.model.base.FHIRBundle
-import com.projectronin.interop.ehr.model.base.FHIRResource
-import com.projectronin.interop.ehr.model.helper.mergeBundles
+import com.projectronin.interop.ehr.model.base.JSONBundle
+import com.projectronin.interop.ehr.model.base.JSONResource
+import com.projectronin.interop.fhir.r4.mergeBundles
+import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.receive
 import io.ktor.http.HttpStatusCode
@@ -23,11 +24,11 @@ abstract class EpicPagingService(private val epicClient: EpicClient) {
      * [urlPart] and includes the query [parameters].  If there are more resources, it performs multiple GETs
      * until they've all been retrieved, and then combines them into a single bundle using [creator].
      */
-    fun <R : FHIRResource, B : FHIRBundle<R>> getBundleWithPaging(
+    fun <R : JSONResource, B : JSONBundle<R, Bundle>> getBundleWithPaging(
         tenant: Tenant,
         urlPart: String,
         parameters: Map<String, Any?>,
-        creator: (String) -> B
+        creator: (Bundle) -> B
     ): B {
         logger.debug { "Get started for ${tenant.mnemonic}" }
 
@@ -35,7 +36,7 @@ abstract class EpicPagingService(private val epicClient: EpicClient) {
         var nextURL: String? = null
 
         do {
-            val json = runBlocking {
+            val bundle = runBlocking {
                 val httpResponse =
                     if (nextURL == null) {
                         epicClient.get(tenant, urlPart, parameters)
@@ -47,16 +48,25 @@ abstract class EpicPagingService(private val epicClient: EpicClient) {
                     logger.error { "Get failed for ${tenant.mnemonic} with a ${httpResponse.status}" }
                     throw IOException("Get failed for ${tenant.mnemonic} with a ${httpResponse.status}")
                 }
-                httpResponse.receive<String>()
+                httpResponse.receive<Bundle>()
             }
 
-            val response = creator(json)
+            val response = creator(bundle)
 
             responses.add(response)
             nextURL = response.getURL("next")
         } while (nextURL != null)
 
         logger.debug { "Get completed for ${tenant.mnemonic}" }
-        return mergeBundles(responses, creator)
+        return mergeResponses(responses, creator)
+    }
+
+    protected fun <R : JSONResource, B : JSONBundle<R, Bundle>> mergeResponses(
+        responses: List<B>,
+        creator: (Bundle) -> B
+    ): B {
+        var bundle = responses.first().resource
+        responses.subList(1, responses.size).forEach { bundle = mergeBundles(bundle, it.resource) }
+        return creator(bundle)
     }
 }

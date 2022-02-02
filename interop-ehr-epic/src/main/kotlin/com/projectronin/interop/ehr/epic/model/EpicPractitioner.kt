@@ -6,48 +6,35 @@ import com.projectronin.interop.ehr.model.ContactPoint
 import com.projectronin.interop.ehr.model.HumanName
 import com.projectronin.interop.ehr.model.Identifier
 import com.projectronin.interop.ehr.model.Practitioner
-import com.projectronin.interop.ehr.model.base.FHIRResource
+import com.projectronin.interop.ehr.model.base.JSONResource
 import com.projectronin.interop.ehr.model.enums.DataSource
-import com.projectronin.interop.ehr.model.helper.enum
-import com.projectronin.interop.ehr.model.helper.fhirElementList
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
+import com.projectronin.interop.fhir.r4.resource.Practitioner as R4Practitioner
 
-class EpicPractitioner(override val raw: String) : FHIRResource(raw), Practitioner {
+class EpicPractitioner(override val resource: R4Practitioner) : JSONResource(resource), Practitioner {
     override val dataSource: DataSource
         get() = DataSource.FHIR_R4
 
     override val resourceType: ResourceType
         get() = ResourceType.PRACTITIONER
 
-    override val id: String by lazy {
-        jsonObject.string("id")!!
-    }
+    override val id: String = resource.id!!.value
+    override val active: Boolean? = resource.active
+    override val gender: AdministrativeGender? = resource.gender
 
     override val identifier: List<Identifier> by lazy {
-        jsonObject.fhirElementList("identifier", ::EpicIdentifier)
-    }
-
-    override val active: Boolean? by lazy {
-        jsonObject.boolean("active")
+        resource.identifier.map(::EpicIdentifier)
     }
 
     override val communication: List<CodeableConcept> by lazy {
-        jsonObject.fhirElementList("communication", ::EpicCodeableConcept)
-    }
-
-    override val gender: AdministrativeGender? by lazy {
-        jsonObject.enum<AdministrativeGender>("gender")
+        resource.communication.map(::EpicCodeableConcept)
     }
 
     override val name: List<HumanName> by lazy {
-        jsonObject.fhirElementList("name", ::EpicHumanName)
-    }
-
-    override val qualification: List<CodeableConcept> by lazy {
-        jsonObject.fhirElementList("qualification", ::EpicCodeableConcept)
+        resource.name.map(::EpicHumanName)
     }
 
     override val telecom: List<ContactPoint> by lazy {
-        jsonObject.fhirElementList("telecom", ::EpicContactPoint)
+        resource.telecom.map(::EpicContactPoint)
     }
 }

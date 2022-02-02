@@ -1,25 +1,21 @@
 package com.projectronin.interop.ehr.epic.model
 
-import com.beust.klaxon.JsonObject
+import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsResponse
 import com.projectronin.interop.ehr.model.Link
-import com.projectronin.interop.ehr.model.base.FHIRBundle
+import com.projectronin.interop.ehr.model.base.JSONBundle
 import com.projectronin.interop.ehr.model.enums.DataSource
-import com.projectronin.interop.ehr.model.helper.fhirElementList
 
 /**
  * A bundle of Epic appointments as returned from [GetPatientAppointments](https://apporchard.epic.com/Sandbox?api=195) API
  */
-class EpicAppointmentBundle(override val raw: String) :
-    FHIRBundle<EpicAppointment>(raw) {
+class EpicAppointmentBundle(override val resource: GetPatientAppointmentsResponse) :
+    JSONBundle<EpicAppointment, GetPatientAppointmentsResponse>(resource) {
     override val dataSource: DataSource
         get() = DataSource.EPIC_APPORCHARD
 
-    override val links: List<Link> by lazy {
-        jsonObject.fhirElementList("link", ::EpicLink)
-    }
+    override val links: List<Link> = listOf()
 
     override val resources: List<EpicAppointment> by lazy {
-        jsonObject.array<JsonObject>("Appointments")?.map { EpicAppointment(it.toJsonString()) }
-            ?: listOf()
+        resource.appointments.map(::EpicAppointment)
     }
 }

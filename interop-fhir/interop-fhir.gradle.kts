@@ -7,6 +7,9 @@ dependencies {
     implementation("com.projectronin.interop:interop-common:${project.property("interopCommonVersion")}")
     implementation("com.projectronin.interop:interop-common-jackson:${project.property("interopCommonVersion")}")
     implementation("ca.uhn.hapi.fhir:org.hl7.fhir.validation:5.4.11")
+
+    // Used for some tests utilizing classpath inspection to verify configuration
+    testImplementation("io.github.classgraph:classgraph:4.8.138")
 }
 
 tasks.withType<Test> {

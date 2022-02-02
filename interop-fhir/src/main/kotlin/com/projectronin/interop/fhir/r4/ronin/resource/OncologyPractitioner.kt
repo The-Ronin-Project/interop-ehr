@@ -1,5 +1,6 @@
 package com.projectronin.interop.fhir.r4.ronin.resource
 
+import com.fasterxml.jackson.annotation.JsonTypeName
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Address
@@ -17,6 +18,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.resource.base.BasePractitioner
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 
 /**
@@ -24,6 +26,7 @@ import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
  *
  * See [Project Ronin Profile Spec](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-practitioner.html)
  */
+@JsonTypeName("Practitioner")
 data class OncologyPractitioner(
     override val id: Id? = null,
     override val meta: Meta? = null,
@@ -33,19 +36,22 @@ data class OncologyPractitioner(
     override val contained: List<ContainedResource> = listOf(),
     override val extension: List<Extension> = listOf(),
     override val modifierExtension: List<Extension> = listOf(),
-    val identifier: List<Identifier>,
-    val active: Boolean? = null,
-    val name: List<HumanName>,
-    val telecom: List<ContactPoint> = listOf(),
-    val address: List<Address> = listOf(),
-    val gender: AdministrativeGender? = null,
-    val birthDate: Date? = null,
-    val photo: List<Attachment> = listOf(),
-    val qualification: List<Qualification> = listOf(),
-    val communication: List<CodeableConcept> = listOf()
-) :
-    RoninDomainResource(id, meta, implicitRules, language, text, contained, extension, modifierExtension, identifier) {
+    override val identifier: List<Identifier>,
+    override val active: Boolean? = null,
+    override val name: List<HumanName>,
+    override val telecom: List<ContactPoint> = listOf(),
+    override val address: List<Address> = listOf(),
+    override val gender: AdministrativeGender? = null,
+    override val birthDate: Date? = null,
+    override val photo: List<Attachment> = listOf(),
+    override val qualification: List<Qualification> = listOf(),
+    override val communication: List<CodeableConcept> = listOf()
+) : RoninDomainResource, BasePractitioner() {
     init {
+        validate()
+
+        requireTenantIdentifier(identifier)
+
         identifier.find { it.system == CodeSystem.SER.uri }?.let {
             require(it.type == CodeableConcepts.SER) { "SER provided without proper CodeableConcept defined" }
         }
@@ -53,6 +59,4 @@ data class OncologyPractitioner(
         require(name.isNotEmpty()) { "At least one name must be provided" }
         require(name.all { it.family != null }) { "All names must have a family name provided" }
     }
-
-    override val resourceType: String = "Practitioner"
 }

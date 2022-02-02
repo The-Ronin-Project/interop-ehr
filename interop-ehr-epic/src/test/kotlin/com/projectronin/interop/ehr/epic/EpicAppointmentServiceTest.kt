@@ -1,7 +1,8 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
+import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsResponse
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.epic.model.GetPatientAppointmentsRequest
 import io.ktor.client.call.receive
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
@@ -17,7 +18,8 @@ import org.junit.jupiter.api.assertThrows
 class EpicAppointmentServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var httpResponse: HttpResponse
-    private val validAppointmentSearchJson = this::class.java.getResource("/ExampleAppointmentBundle.json")!!.readText()
+    private val validAppointmentSearchResponse =
+        readResource<GetPatientAppointmentsResponse>("/ExampleAppointmentBundle.json")
     private val testPrivateKey = this::class.java.getResource("/TestPrivateKey.txt")!!.readText()
 
     @BeforeEach
@@ -37,7 +39,7 @@ class EpicAppointmentServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<String>() } returns validAppointmentSearchJson
+        coEvery { httpResponse.receive<GetPatientAppointmentsResponse>() } returns validAppointmentSearchResponse
         coEvery {
             epicClient.post(
                 tenant,
@@ -53,7 +55,7 @@ class EpicAppointmentServiceTest {
                 "1/1/2015",
                 "11/1/2015",
             )
-        assertEquals(validAppointmentSearchJson, bundle.raw)
+        assertEquals(validAppointmentSearchResponse, bundle.resource)
     }
 
     @Test
@@ -67,7 +69,7 @@ class EpicAppointmentServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.receive<String>() } returns validAppointmentSearchJson
+        coEvery { httpResponse.receive<GetPatientAppointmentsResponse>() } returns validAppointmentSearchResponse
         coEvery {
             epicClient.post(
                 tenant,

@@ -40,7 +40,7 @@ class PractitionerTest {
                 status = NarrativeStatus.GENERATED,
                 div = "div"
             ),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(ContainedResource("""{"resourceType":"Banana","field":"24680"}""")),
             extension = listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
@@ -79,7 +79,7 @@ class PractitionerTest {
             |    "status" : "generated",
             |    "div" : "div"
             |  },
-            |  "contained" : [ {"resourceType":"Banana","id":"24680"} ],
+            |  "contained" : [ {"resourceType":"Banana","field":"24680"} ],
             |  "extension" : [ {
             |    "url" : "http://localhost/extension",
             |    "valueString" : "Value"
@@ -151,7 +151,7 @@ class PractitionerTest {
         assertNull(practitioner.implicitRules)
         assertNull(practitioner.language)
         assertNull(practitioner.text)
-        assertEquals(listOf<ContainedResource>(), practitioner.contained)
+        assertEquals(listOf<Resource>(), practitioner.contained)
         assertEquals(listOf<Extension>(), practitioner.extension)
         assertEquals(listOf<Extension>(), practitioner.modifierExtension)
         assertEquals(listOf<Identifier>(), practitioner.identifier)

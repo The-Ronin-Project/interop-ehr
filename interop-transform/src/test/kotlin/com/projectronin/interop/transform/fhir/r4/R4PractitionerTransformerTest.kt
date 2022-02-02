@@ -33,6 +33,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import com.projectronin.interop.fhir.r4.resource.Practitioner as R4Practitioner
 
 class R4PractitionerTransformerTest {
     private val transformer = R4PractitionerTransformer()
@@ -55,10 +56,10 @@ class R4PractitionerTransformerTest {
 
     @Test
     fun `fails for practitioner with no ID`() {
-        val practitionerJson = "{}"
+        val r4Practitioner = R4Practitioner()
         val practitioner = mockk<Practitioner> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns practitionerJson
+            every { resource } returns r4Practitioner
         }
 
         val oncologyPractitioner = transformer.transformPractitioner(practitioner, tenant)
@@ -67,12 +68,12 @@ class R4PractitionerTransformerTest {
 
     @Test
     fun `fails for practitioner with no name`() {
-        val practitionerJson = """{
-                |  "id" : "12345"
-                |}""".trimMargin()
+        val r4Practitioner = R4Practitioner(
+            id = Id("12345")
+        )
         val practitioner = mockk<Practitioner> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns practitionerJson
+            every { resource } returns r4Practitioner
         }
 
         val oncologyPractitioner = transformer.transformPractitioner(practitioner, tenant)
@@ -81,15 +82,13 @@ class R4PractitionerTransformerTest {
 
     @Test
     fun `fails for practitioner name with no family name`() {
-        val practitionerJson = """{
-                |  "id" : "12345",
-                |  "name" : [ {
-                |    "given" : [ "Jane" ]
-                |  } ]
-                |}""".trimMargin()
+        val r4Practitioner = R4Practitioner(
+            id = Id("12345"),
+            name = listOf(HumanName(given = listOf("Jane")))
+        )
         val practitioner = mockk<Practitioner> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns practitionerJson
+            every { resource } returns r4Practitioner
         }
 
         val oncologyPractitioner = transformer.transformPractitioner(practitioner, tenant)
@@ -98,59 +97,41 @@ class R4PractitionerTransformerTest {
 
     @Test
     fun `transforms practitioner with all attributes`() {
-        val practitionerJson = """
-            |{
-            |  "resourceType" : "Practitioner",
-            |  "id" : "12345",
-            |  "meta" : {
-            |    "profile" : [ "http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitioner" ]
-            |  },
-            |  "implicitRules" : "implicit-rules",
-            |  "language" : "en-US",
-            |  "text" : {
-            |    "status" : "generated",
-            |    "div" : "div"
-            |  },
-            |  "contained" : [ {"resourceType":"Banana","id":"24680"} ],
-            |  "extension" : [ {
-            |    "url" : "http://localhost/extension",
-            |    "valueString" : "Value"
-            |  } ],
-            |  "modifierExtension" : [ {
-            |    "url" : "http://localhost/modifier-extension",
-            |    "valueString" : "Value"
-            |  } ],
-            |  "identifier" : [ {
-            |    "value" : "id"
-            |  } ],
-            |  "active" : true,
-            |  "name" : [ {
-            |    "family" : "Doe"
-            |  } ],
-            |  "telecom" : [ {
-            |    "value" : "8675309"
-            |  } ],
-            |  "address" : [ {
-            |    "country" : "USA"
-            |  } ],
-            |  "gender" : "female",
-            |  "birthDate" : "1975-07-05",
-            |  "photo" : [ {
-            |    "contentType" : "text",
-            |    "data" : "abcd"
-            |  } ],
-            |  "qualification" : [ {
-            |    "code" : {
-            |      "text" : "code"
-            |    }
-            |  } ],
-            |  "communication" : [ {
-            |    "text" : "communication"
-            |  } ]
-            |}""".trimMargin()
+        val r4Practitioner = R4Practitioner(
+            id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitioner"))
+            ),
+            implicitRules = Uri("implicit-rules"),
+            language = Code("en-US"),
+            text = Narrative(status = NarrativeStatus.GENERATED, div = "div"),
+            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://localhost/extension"),
+                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                )
+            ),
+            modifierExtension = listOf(
+                Extension(
+                    url = Uri("http://localhost/modifier-extension"),
+                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                )
+            ),
+            identifier = listOf(Identifier(value = "id")),
+            active = true,
+            name = listOf(HumanName(family = "Doe")),
+            telecom = listOf(ContactPoint(value = "8675309")),
+            address = listOf(Address(country = "USA")),
+            gender = AdministrativeGender.FEMALE,
+            birthDate = Date("1975-07-05"),
+            photo = listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
+            qualification = listOf(Qualification(code = CodeableConcept(text = "code"))),
+            communication = listOf(CodeableConcept(text = "communication"))
+        )
         val practitioner = mockk<Practitioner> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns practitionerJson
+            every { resource } returns r4Practitioner
         }
 
         val oncologyPractitioner = transformer.transformPractitioner(practitioner, tenant)
@@ -210,17 +191,13 @@ class R4PractitionerTransformerTest {
 
     @Test
     fun `transforms practitioner with only required attributes`() {
-        val practitionerJson = """
-            |{
-            |  "resourceType" : "Practitioner",
-            |  "id" : "12345",
-            |  "name" : [ {
-            |    "family" : "Doe"
-            |  } ]
-            |}""".trimMargin()
+        val r4Practitioner = R4Practitioner(
+            id = Id("12345"),
+            name = listOf(HumanName(family = "Doe"))
+        )
         val practitioner = mockk<Practitioner> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns practitionerJson
+            every { resource } returns r4Practitioner
         }
 
         val oncologyPractitioner = transformer.transformPractitioner(practitioner, tenant)
@@ -267,13 +244,17 @@ class R4PractitionerTransformerTest {
 
     @Test
     fun `bundle transformation returns empty when no valid transformations`() {
+        val invalidPractitioner = R4Practitioner(
+            name = listOf(HumanName(family = "Doe"))
+        )
+
         val practitioner1 = mockk<Practitioner> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns "{}"
+            every { resource } returns invalidPractitioner
         }
         val practitioner2 = mockk<Practitioner> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns "{}"
+            every { resource } returns invalidPractitioner
         }
 
         val bundle = mockk<Bundle<Practitioner>> {
@@ -287,21 +268,21 @@ class R4PractitionerTransformerTest {
 
     @Test
     fun `bundle transformation returns only valid transformations`() {
+        val invalidPractitioner = R4Practitioner(
+            name = listOf(HumanName(family = "Doe"))
+        )
         val practitioner1 = mockk<Practitioner> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns "{}"
+            every { resource } returns invalidPractitioner
         }
-        val practitioner2Json = """
-            |{
-            |  "resourceType" : "Practitioner",
-            |  "id" : "12345",
-            |  "name" : [ {
-            |    "family" : "Doe"
-            |  } ]
-            |}""".trimMargin()
+
+        val r4Practitioner = R4Practitioner(
+            id = Id("12345"),
+            name = listOf(HumanName(family = "Doe"))
+        )
         val practitioner2 = mockk<Practitioner> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns practitioner2Json
+            every { resource } returns r4Practitioner
         }
 
         val bundle = mockk<Bundle<Practitioner>> {
@@ -315,30 +296,18 @@ class R4PractitionerTransformerTest {
 
     @Test
     fun `bundle transformation returns all when all valid`() {
-        val practitioner1Json = """
-            |{
-            |  "resourceType" : "Practitioner",
-            |  "id" : "67890",
-            |  "name" : [ {
-            |    "family" : "Buck"
-            |  } ]
-            |}""".trimMargin()
+        val r4Practitioner = R4Practitioner(
+            id = Id("12345"),
+            name = listOf(HumanName(family = "Doe"))
+        )
         val practitioner1 = mockk<Practitioner> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns practitioner1Json
+            every { resource } returns r4Practitioner
         }
 
-        val practitioner2Json = """
-            |{
-            |  "resourceType" : "Practitioner",
-            |  "id" : "12345",
-            |  "name" : [ {
-            |    "family" : "Doe"
-            |  } ]
-            |}""".trimMargin()
         val practitioner2 = mockk<Practitioner> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns practitioner2Json
+            every { resource } returns r4Practitioner
         }
 
         val bundle = mockk<Bundle<Practitioner>> {

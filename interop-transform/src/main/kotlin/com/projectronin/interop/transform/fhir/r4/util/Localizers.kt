@@ -15,11 +15,11 @@ import com.projectronin.interop.fhir.r4.datatype.Element
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
-import com.projectronin.interop.fhir.r4.datatype.Link
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
 import com.projectronin.interop.fhir.r4.datatype.NotAvailable
 import com.projectronin.interop.fhir.r4.datatype.Participant
+import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Period
 import com.projectronin.interop.fhir.r4.datatype.Qualification
 import com.projectronin.interop.fhir.r4.datatype.Reference
@@ -267,7 +267,18 @@ fun ContactPoint.localizePair(tenant: Tenant): Pair<ContactPoint, Boolean> {
     val updatedExtensions = getUpdatedExtensions(this, tenant)
     val periodPair = period?.localizePair(tenant) ?: Pair(null, false)
     if (updatedExtensions.isNotEmpty() || periodPair.second) {
-        return Pair(ContactPoint(id, updatedExtensions.ifEmpty { extension }, system, value, use, rank, periodPair.first), true)
+        return Pair(
+            ContactPoint(
+                id,
+                updatedExtensions.ifEmpty { extension },
+                system,
+                value,
+                use,
+                rank,
+                periodPair.first
+            ),
+            true
+        )
     }
 
     return Pair(this, false)
@@ -287,11 +298,11 @@ fun Extension.localize(tenant: Tenant): Extension = localizePair(tenant).first
 fun Extension.localizePair(tenant: Tenant): Pair<Extension, Boolean> {
     val updatedExtensions = getUpdatedExtensions(this, tenant)
 
-    val updateValue = value.type == DynamicValueType.REFERENCE
+    val updateValue = value?.type == DynamicValueType.REFERENCE
     if (updatedExtensions.isNotEmpty() || updateValue) {
         val extensions = updatedExtensions.ifEmpty { extension }
-        val newValue: DynamicValue<Any> = if (updateValue)
-            DynamicValue(value.type, (value.value as Reference).localize(tenant)) else value
+        val newValue: DynamicValue<Any>? = if (updateValue)
+            DynamicValue(value!!.type, (value!!.value as Reference).localize(tenant)) else value
 
         return Pair(Extension(id, extensions, url, newValue), true)
     }
@@ -358,16 +369,16 @@ fun Identifier.localizePair(tenant: Tenant): Pair<Identifier, Boolean> {
 }
 
 /**
- * Localizes this [Link] relative to the [tenant].  If this [Link] does not contain any localizable
- * information, the current [Link] will be returned.
+ * Localizes this [PatientLink] relative to the [tenant].  If this [PatientLink] does not contain any localizable
+ * information, the current [PatientLink] will be returned.
  */
-fun Link.localize(tenant: Tenant): Link {
+fun PatientLink.localize(tenant: Tenant): PatientLink {
     val updatedExtensions = getUpdatedExtensions(this, tenant)
     val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
     val updatedOther = other.localize(tenant)
 
     if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || updatedOther !== other) {
-        return Link(
+        return PatientLink(
             id = id,
             extension = updatedExtensions.ifEmpty { extension },
             modifierExtension = updatedModifierExtensions.ifEmpty { modifierExtension },

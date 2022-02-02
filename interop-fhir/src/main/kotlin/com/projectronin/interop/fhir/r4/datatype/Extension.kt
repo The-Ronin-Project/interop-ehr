@@ -17,5 +17,5 @@ data class Extension(
     override val id: String? = null,
     override val extension: List<Extension> = listOf(),
     val url: Uri,
-    val value: DynamicValue<Any>
+    val value: DynamicValue<Any>? = null
 ) : Element

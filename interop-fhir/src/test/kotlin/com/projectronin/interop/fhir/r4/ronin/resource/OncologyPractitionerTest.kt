@@ -23,6 +23,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -123,7 +124,7 @@ class OncologyPractitionerTest {
                 status = NarrativeStatus.GENERATED,
                 div = "div"
             ),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(ContainedResource("""{"resourceType":"Banana","field":"24680"}""")),
             extension = listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
@@ -168,7 +169,7 @@ class OncologyPractitionerTest {
             |    "status" : "generated",
             |    "div" : "div"
             |  },
-            |  "contained" : [ {"resourceType":"Banana","id":"24680"} ],
+            |  "contained" : [ {"resourceType":"Banana","field":"24680"} ],
             |  "extension" : [ {
             |    "url" : "http://localhost/extension",
             |    "valueString" : "Value"
@@ -260,7 +261,7 @@ class OncologyPractitionerTest {
     fun `can deserialize from JSON with nullable and empty fields`() {
         val json = """
             |{
-            |  "resourceType" : "OncologyPractitioner",
+            |  "resourceType" : "Practitioner",
             |  "identifier" : [ {
             |    "type" : {
             |      "coding" : [ {
@@ -284,7 +285,7 @@ class OncologyPractitionerTest {
         assertNull(practitioner.implicitRules)
         assertNull(practitioner.language)
         assertNull(practitioner.text)
-        assertEquals(listOf<ContainedResource>(), practitioner.contained)
+        assertEquals(listOf<Resource>(), practitioner.contained)
         assertEquals(listOf<Extension>(), practitioner.extension)
         assertEquals(listOf<Extension>(), practitioner.modifierExtension)
 

@@ -38,7 +38,7 @@ class PractitionerRoleTest {
                 status = NarrativeStatus.GENERATED,
                 div = "div"
             ),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(ContainedResource("""{"resourceType":"Banana","field":"24680"}""")),
             extension = listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
@@ -81,7 +81,7 @@ class PractitionerRoleTest {
             |    "status" : "generated",
             |    "div" : "div"
             |  },
-            |  "contained" : [ {"resourceType":"Banana","id":"24680"} ],
+            |  "contained" : [ {"resourceType":"Banana","field":"24680"} ],
             |  "extension" : [ {
             |    "url" : "http://localhost/extension",
             |    "valueString" : "Value"
@@ -166,7 +166,7 @@ class PractitionerRoleTest {
         assertNull(practitionerRole.implicitRules)
         assertNull(practitionerRole.language)
         assertNull(practitionerRole.text)
-        assertEquals(listOf<ContainedResource>(), practitionerRole.contained)
+        assertEquals(listOf<Resource>(), practitionerRole.contained)
         assertEquals(listOf<Extension>(), practitionerRole.extension)
         assertEquals(listOf<Extension>(), practitionerRole.modifierExtension)
         assertEquals(listOf<Identifier>(), practitionerRole.identifier)

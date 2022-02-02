@@ -1,10 +1,10 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.MessageService
+import com.projectronin.interop.ehr.epic.apporchard.model.SendMessageRecipient
+import com.projectronin.interop.ehr.epic.apporchard.model.SendMessageRequest
+import com.projectronin.interop.ehr.epic.apporchard.model.SendMessageResponse
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.epic.model.SendMessageRecipient
-import com.projectronin.interop.ehr.epic.model.SendMessageRequest
-import com.projectronin.interop.ehr.epic.model.SendMessageResponse
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -43,7 +43,7 @@ class EpicMessageService(private val epicClient: EpicClient) :
         }
 
         // Return the id of the message
-        return response.iDTypes[0].iD
+        return response.idTypes[0].id
     }
 
     private fun translateMessageInput(

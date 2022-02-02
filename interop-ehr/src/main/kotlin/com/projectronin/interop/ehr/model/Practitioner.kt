@@ -37,11 +37,6 @@ interface Practitioner : EHRResource {
     val name: List<HumanName>
 
     /**
-     * [Practitioner]'s qualifications
-     */
-    val qualification: List<CodeableConcept>
-
-    /**
      * [Practitioner]'s contact info
      */
     val telecom: List<ContactPoint>

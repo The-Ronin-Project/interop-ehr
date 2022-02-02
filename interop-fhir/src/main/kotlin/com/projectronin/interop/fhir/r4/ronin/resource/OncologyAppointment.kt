@@ -1,5 +1,6 @@
 package com.projectronin.interop.fhir.r4.ronin.resource
 
+import com.fasterxml.jackson.annotation.JsonTypeName
 import com.projectronin.interop.fhir.r4.ExtensionMeanings
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
@@ -16,6 +17,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.resource.base.BaseAppointment
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 
 /**
@@ -23,6 +25,7 @@ import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
  *
  * See [Project Ronin Profile Spec](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-appointment.html)
  */
+@JsonTypeName("Appointment")
 data class OncologyAppointment(
     override val id: Id? = null,
     override val meta: Meta? = null,
@@ -32,70 +35,40 @@ data class OncologyAppointment(
     override val contained: List<ContainedResource> = listOf(),
     override val extension: List<Extension> = listOf(),
     override val modifierExtension: List<Extension> = listOf(),
-    val identifier: List<Identifier>,
-    val status: AppointmentStatus,
-    val cancellationReason: CodeableConcept? = null,
-    val serviceCategory: List<CodeableConcept> = listOf(),
-    val serviceType: List<CodeableConcept> = listOf(),
-    val specialty: List<CodeableConcept> = listOf(),
-    val appointmentType: CodeableConcept? = null,
-    val reasonCode: List<CodeableConcept> = listOf(),
-    val reasonReference: List<Reference> = listOf(),
-    val priority: Int? = null,
-    val description: String? = null,
-    val supportingInformation: List<Reference> = listOf(),
-    val start: Instant? = null,
-    val end: Instant? = null,
-    val minutesDuration: Int? = null,
-    val slot: List<Reference> = listOf(),
-    val created: DateTime? = null,
-    val comment: String? = null,
-    val patientInstruction: String? = null,
-    val basedOn: List<Reference> = listOf(),
-    val participant: List<Participant>,
-    val requestedPeriod: List<Period> = listOf()
-) :
-    RoninDomainResource(id, meta, implicitRules, language, text, contained, extension, modifierExtension, identifier) {
+    override val identifier: List<Identifier>,
+    override val status: AppointmentStatus,
+    override val cancellationReason: CodeableConcept? = null,
+    override val serviceCategory: List<CodeableConcept> = listOf(),
+    override val serviceType: List<CodeableConcept> = listOf(),
+    override val specialty: List<CodeableConcept> = listOf(),
+    override val appointmentType: CodeableConcept? = null,
+    override val reasonCode: List<CodeableConcept> = listOf(),
+    override val reasonReference: List<Reference> = listOf(),
+    override val priority: Int? = null,
+    override val description: String? = null,
+    override val supportingInformation: List<Reference> = listOf(),
+    override val start: Instant? = null,
+    override val end: Instant? = null,
+    override val minutesDuration: Int? = null,
+    override val slot: List<Reference> = listOf(),
+    override val created: DateTime? = null,
+    override val comment: String? = null,
+    override val patientInstruction: String? = null,
+    override val basedOn: List<Reference> = listOf(),
+    override val participant: List<Participant>,
+    override val requestedPeriod: List<Period> = listOf()
+) : RoninDomainResource, BaseAppointment() {
     init {
-        require(((start != null) == (end != null))) { "[app-2](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-appointment.html#constraints): Either start and end are specified, or neither" }
+        validate()
 
-        if ((start == null) || (end == null)) {
-            require(
-                listOf(
-                    AppointmentStatus.PROPOSED,
-                    AppointmentStatus.CANCELLED,
-                    AppointmentStatus.WAITLIST
-                ).contains(status)
-            ) { "[app-3](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-appointment.html#constraints): Only proposed or cancelled appointments can be missing start/end dates" }
-        }
-
-        cancellationReason?.let {
-            require(listOf(AppointmentStatus.CANCELLED, AppointmentStatus.NOSHOW).contains(status)) {
-                "[app-4](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-appointment.html#constraints): Cancellation reason is only used for appointments that have been cancelled, or no-show"
-            }
-        }
+        requireTenantIdentifier(identifier)
 
         val partnerReference = extension.find { it.url == ExtensionMeanings.PARTNER_DEPARTMENT.uri }
         requireNotNull(partnerReference) {
             "Appointment must have a reference to a partner department"
         }
-        require(partnerReference.value.type == DynamicValueType.REFERENCE) {
+        require(partnerReference.value?.type == DynamicValueType.REFERENCE) {
             "Partner department reference must be of type Reference"
         }
-
-        minutesDuration?.let {
-            require(minutesDuration > 0) { "Appointment duration must be positive" }
-        }
-
-        priority?.let {
-            require(priority >= 0) { "Priority cannot be negative" }
-        }
-
-        require(participant.isNotEmpty()) { "At least one participant must be provided" }
-        require(participant.all { it.type.isNotEmpty() || it.actor.isNotEmpty() }) {
-            "[app-1](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-appointment.html#constraints): Either the type or actor on the participant SHALL be specified"
-        }
     }
-
-    override val resourceType: String = "Appointment"
 }

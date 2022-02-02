@@ -1,10 +1,10 @@
 package com.projectronin.interop.ehr.epic.client
 
 import com.projectronin.interop.ehr.auth.AuthenticationBroker
+import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
 import com.projectronin.interop.ehr.epic.auth.EpicAuthentication
 import com.projectronin.interop.ehr.epic.createTestTenant
 import com.projectronin.interop.ehr.epic.getClient
-import com.projectronin.interop.ehr.epic.model.GetPatientAppointmentsRequest
 import io.ktor.client.call.receive
 import io.mockk.every
 import io.mockk.mockk

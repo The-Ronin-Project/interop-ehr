@@ -40,7 +40,7 @@ class AppointmentTest {
                 status = NarrativeStatus.GENERATED,
                 div = "div"
             ),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(ContainedResource("""{"resourceType":"Banana","field":"24680"}""")),
             extension = listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
@@ -96,7 +96,7 @@ class AppointmentTest {
                 "status" : "generated",
                 "div" : "div"
               },
-              "contained" : [ {"resourceType":"Banana","id":"24680"} ],
+              "contained" : [ {"resourceType":"Banana","field":"24680"} ],
               "extension" : [ {
                 "url" : "http://localhost/extension",
                 "valueString" : "Value"
@@ -213,7 +213,7 @@ class AppointmentTest {
         assertNull(appointment.implicitRules)
         assertNull(appointment.language)
         assertNull(appointment.text)
-        assertEquals(listOf<ContainedResource>(), appointment.contained)
+        assertEquals(listOf<Resource>(), appointment.contained)
         assertEquals(listOf<Extension>(), appointment.extension)
         assertEquals(listOf<Extension>(), appointment.modifierExtension)
         assertEquals(listOf<Identifier>(), appointment.identifier)

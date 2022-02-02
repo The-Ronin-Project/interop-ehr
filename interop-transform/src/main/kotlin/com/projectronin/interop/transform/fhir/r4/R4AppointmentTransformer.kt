@@ -1,7 +1,5 @@
 package com.projectronin.interop.transform.fhir.r4
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.enums.DataSource
@@ -33,12 +31,7 @@ class R4AppointmentTransformer : AppointmentTransformer {
     override fun transformAppointment(appointment: Appointment, tenant: Tenant): OncologyAppointment? {
         require(appointment.dataSource == DataSource.FHIR_R4) { "Appointment is not an R4 FHIR resource" }
 
-        val r4Appointment = try {
-            JacksonManager.objectMapper.readValue<R4Appointment>(appointment.raw)
-        } catch (e: Exception) {
-            logger.warn { "Unable to read R4 Appointment: ${e.message}" }
-            return null
-        }
+        val r4Appointment = appointment.resource as R4Appointment
 
         val id = r4Appointment.id
         if (id == null) {

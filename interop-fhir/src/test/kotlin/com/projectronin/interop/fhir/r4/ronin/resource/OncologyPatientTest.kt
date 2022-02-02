@@ -15,9 +15,9 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
-import com.projectronin.interop.fhir.r4.datatype.Link
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
+import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Base64Binary
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
@@ -50,7 +50,7 @@ class OncologyPatientTest {
                 status = NarrativeStatus.GENERATED,
                 div = "div"
             ),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(ContainedResource("""{"resourceType":"Banana","field":"24680"}""")),
             extension = listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
@@ -100,7 +100,7 @@ class OncologyPatientTest {
             communication = listOf(Communication(language = CodeableConcept(text = "English"))),
             generalPractitioner = listOf(Reference(display = "GP")),
             managingOrganization = Reference(display = "organization"),
-            link = listOf(Link(other = Reference(), type = LinkType.REPLACES))
+            link = listOf(PatientLink(other = Reference(), type = LinkType.REPLACES))
         )
         val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(oncologyPatient)
 
@@ -117,7 +117,7 @@ class OncologyPatientTest {
                 "status" : "generated",
                 "div" : "div"
               },
-              "contained" : [ {"resourceType":"Banana","id":"24680"} ],
+              "contained" : [ {"resourceType":"Banana","field":"24680"} ],
               "extension" : [ {
                 "url" : "http://localhost/extension",
                 "valueString" : "Value"
@@ -368,7 +368,7 @@ class OncologyPatientTest {
         assertNull(oncologyPatient.implicitRules)
         assertNull(oncologyPatient.language)
         assertNull(oncologyPatient.text)
-        assertEquals(listOf<ContainedResource>(), oncologyPatient.contained)
+        assertEquals(listOf<RoninResource>(), oncologyPatient.contained)
         assertEquals(listOf<Extension>(), oncologyPatient.extension)
         assertEquals(listOf<Extension>(), oncologyPatient.modifierExtension)
         assertNull(oncologyPatient.active)
@@ -379,7 +379,7 @@ class OncologyPatientTest {
         assertEquals(listOf<Communication>(), oncologyPatient.communication)
         assertEquals(listOf<Reference>(), oncologyPatient.generalPractitioner)
         assertNull(oncologyPatient.managingOrganization)
-        assertEquals(listOf<Link>(), oncologyPatient.link)
+        assertEquals(listOf<PatientLink>(), oncologyPatient.link)
     }
 
     @Test
@@ -1048,7 +1048,7 @@ class OncologyPatientTest {
                 )
             }
         assertEquals(
-            "[pat-1](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-patient.html#constraints): contact SHALL at least contain a contact's details or a reference to an organization",
+            "[pat-1](https://www.hl7.org/fhir/R4/patient.html#invs): contact SHALL at least contain a contact's details or a reference to an organization",
             exception.message
         )
     }

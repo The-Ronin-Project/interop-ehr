@@ -1,9 +1,10 @@
 package com.projectronin.interop.fhir.r4.ronin.resource
 
+import com.fasterxml.jackson.annotation.JsonTypeName
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
 import com.fasterxml.jackson.databind.annotation.JsonSerialize
-import com.projectronin.interop.fhir.jackson.inbound.r4.OncologyPatientDeserializer
-import com.projectronin.interop.fhir.jackson.outbound.r4.OncologyPatientSerializer
+import com.projectronin.interop.fhir.jackson.inbound.r4.ronin.OncologyPatientDeserializer
+import com.projectronin.interop.fhir.jackson.outbound.r4.ronin.OncologyPatientSerializer
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Address
@@ -13,20 +14,19 @@ import com.projectronin.interop.fhir.r4.datatype.Communication
 import com.projectronin.interop.fhir.r4.datatype.Contact
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
-import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
-import com.projectronin.interop.fhir.r4.datatype.Link
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
+import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
-import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.r4.resource.base.BasePatient
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 
 /**
@@ -36,6 +36,7 @@ import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
  */
 @JsonDeserialize(using = OncologyPatientDeserializer::class)
 @JsonSerialize(using = OncologyPatientSerializer::class)
+@JsonTypeName("Patient")
 data class OncologyPatient(
     override val id: Id? = null,
     override val meta: Meta? = null,
@@ -45,42 +46,27 @@ data class OncologyPatient(
     override val contained: List<ContainedResource> = listOf(),
     override val extension: List<Extension> = listOf(),
     override val modifierExtension: List<Extension> = listOf(),
-    val identifier: List<Identifier> = listOf(),
-    val active: Boolean? = null,
-    val name: List<HumanName>,
-    val telecom: List<ContactPoint>,
-    val gender: AdministrativeGender,
-    val birthDate: Date,
-    val deceased: DynamicValue<Any>? = null,
-    val address: List<Address>,
-    val maritalStatus: CodeableConcept,
-    val multipleBirth: DynamicValue<Any>? = null,
-    val photo: List<Attachment> = listOf(),
-    val contact: List<Contact> = listOf(),
-    val communication: List<Communication> = listOf(),
-    val generalPractitioner: List<Reference> = listOf(),
-    val managingOrganization: Reference? = null,
-    val link: List<Link> = listOf()
-) :
-    RoninDomainResource(id, meta, implicitRules, language, text, contained, extension, modifierExtension, identifier) {
-    companion object {
-        val acceptedDeceasedTypes = listOf(DynamicValueType.BOOLEAN, DynamicValueType.DATE_TIME)
-        val acceptedMultipleBirthTypes = listOf(DynamicValueType.BOOLEAN, DynamicValueType.INTEGER)
-    }
-
+    override val identifier: List<Identifier> = listOf(),
+    override val active: Boolean? = null,
+    override val name: List<HumanName>,
+    override val telecom: List<ContactPoint>,
+    override val gender: AdministrativeGender,
+    override val birthDate: Date,
+    override val deceased: DynamicValue<Any>? = null,
+    override val address: List<Address>,
+    override val maritalStatus: CodeableConcept,
+    override val multipleBirth: DynamicValue<Any>? = null,
+    override val photo: List<Attachment> = listOf(),
+    override val contact: List<Contact> = listOf(),
+    override val communication: List<Communication> = listOf(),
+    override val generalPractitioner: List<Reference> = listOf(),
+    override val managingOrganization: Reference? = null,
+    override val link: List<PatientLink> = listOf()
+) : RoninDomainResource, BasePatient() {
     init {
-        // Dynamic values
-        deceased?.let {
-            require(Patient.acceptedDeceasedTypes.contains(deceased.type)) {
-                "Bad dynamic value indicating if the patient is deceased"
-            }
-        }
+        validate()
 
-        multipleBirth?.let {
-            require(Patient.acceptedMultipleBirthTypes.contains(multipleBirth.type)) {
-                "Bad dynamic value indicating whether the patient was part of a multiple birth"
-            }
-        }
+        requireTenantIdentifier(identifier)
 
         // MRN
         val mrnIdentifier = identifier.find { it.system == CodeSystem.MRN.uri }
@@ -113,12 +99,5 @@ data class OncologyPatient(
 
         // Address
         require(address.isNotEmpty()) { "At least one address must be provided" }
-
-        // Contact
-        require(
-            contact.all { (it.name != null) or (it.telecom.isNotEmpty()) or (it.address != null) or (it.organization != null) }
-        ) { "[pat-1](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-patient.html#constraints): contact SHALL at least contain a contact's details or a reference to an organization" }
     }
-
-    override val resourceType: String = "Patient"
 }

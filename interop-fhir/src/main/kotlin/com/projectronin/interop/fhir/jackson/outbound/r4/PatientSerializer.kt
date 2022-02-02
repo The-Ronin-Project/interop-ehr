@@ -11,7 +11,7 @@ import com.projectronin.interop.fhir.r4.resource.Patient
  * Jackson serializer for [Patient]s
  */
 class PatientSerializer : BaseDomainResourceSerializer<Patient>(Patient::class.java) {
-    override fun serializeSpecificElement(value: Patient, gen: JsonGenerator, provider: SerializerProvider) {
+    override fun serializeSpecificDomainElement(value: Patient, gen: JsonGenerator, provider: SerializerProvider) {
         gen.writeListField("identifier", value.identifier)
         gen.writeNullableField("active", value.active)
         gen.writeListField("name", value.name)

@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.epic.model.EpicConditionBundle
+import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.receive
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
@@ -19,8 +20,8 @@ class EpicConditionServiceTest {
     private lateinit var conditionService: EpicConditionService
     private lateinit var httpResponse: HttpResponse
     private lateinit var pagingHttpResponse: HttpResponse
-    private val validConditionSearchJSON = this::class.java.getResource("/ExampleConditionBundle.json")!!.readText()
-    private val pagingConditionSearchJSON = this::class.java.getResource("/ExampleConditionBundleWithPaging.json")!!.readText()
+    private val validConditionSearch = readResource<Bundle>("/ExampleConditionBundle.json")
+    private val pagingConditionSearch = readResource<Bundle>("/ExampleConditionBundleWithPaging.json")
 
     @BeforeEach
     fun setup() {
@@ -45,7 +46,7 @@ class EpicConditionServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<String>() } returns validConditionSearchJSON
+        coEvery { httpResponse.receive<Bundle>() } returns validConditionSearch
         coEvery {
             epicClient.get(
                 tenant,
@@ -66,7 +67,7 @@ class EpicConditionServiceTest {
                 clinicalStatus
             )
 
-        assertEquals(EpicConditionBundle(validConditionSearchJSON), bundle)
+        assertEquals(EpicConditionBundle(validConditionSearch), bundle)
     }
 
     @Test
@@ -84,7 +85,7 @@ class EpicConditionServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.receive<String>() } returns validConditionSearchJSON
+        coEvery { httpResponse.receive<Bundle>() } returns validConditionSearch
         coEvery {
             epicClient.get(
                 tenant,
@@ -123,7 +124,7 @@ class EpicConditionServiceTest {
 
         // Mock response with paging
         every { pagingHttpResponse.status } returns HttpStatusCode.OK
-        coEvery { pagingHttpResponse.receive<String>() } returns pagingConditionSearchJSON
+        coEvery { pagingHttpResponse.receive<Bundle>() } returns pagingConditionSearch
         coEvery {
             epicClient.get(
                 tenant,
@@ -138,7 +139,7 @@ class EpicConditionServiceTest {
 
         // Mock response without paging
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<String>() } returns validConditionSearchJSON
+        coEvery { httpResponse.receive<Bundle>() } returns validConditionSearch
         coEvery {
             epicClient.get(
                 tenant,

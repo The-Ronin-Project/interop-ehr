@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.epic.model.EpicFindPractitionersResponse
+import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.receive
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
@@ -19,10 +20,9 @@ class EpicPractitionerServiceTest {
     private lateinit var practitionerService: EpicPractitionerService
     private lateinit var httpResponse: HttpResponse
     private lateinit var pagingHttpResponse: HttpResponse
-    private val validPractitionerSearchJSON =
-        this::class.java.getResource("/ExampleFindPractitionersResponse.json")!!.readText()
-    private val pagingPractitionerSearchJSON =
-        this::class.java.getResource("/ExampleFindPractitionersResponseWithPaging.json")!!.readText()
+    private val validPractitionerSearchBundle = readResource<Bundle>("/ExampleFindPractitionersResponse.json")
+    private val pagingPractitionerSearchBundle =
+        readResource<Bundle>("/ExampleFindPractitionersResponseWithPaging.json")
 
     @BeforeEach
     fun setup() {
@@ -43,7 +43,7 @@ class EpicPractitionerServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<String>() } returns validPractitionerSearchJSON
+        coEvery { httpResponse.receive<Bundle>() } returns validPractitionerSearchBundle
         coEvery {
             epicClient.get(
                 tenant,
@@ -61,7 +61,7 @@ class EpicPractitionerServiceTest {
                 listOf("e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03")
             )
 
-        assertEquals(EpicFindPractitionersResponse(validPractitionerSearchJSON), bundle)
+        assertEquals(EpicFindPractitionersResponse(validPractitionerSearchBundle), bundle)
     }
 
     @Test
@@ -75,7 +75,7 @@ class EpicPractitionerServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.receive<String>() } returns validPractitionerSearchJSON
+        coEvery { httpResponse.receive<Bundle>() } returns validPractitionerSearchBundle
         coEvery {
             epicClient.get(
                 tenant,
@@ -106,7 +106,7 @@ class EpicPractitionerServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<String>() } returns validPractitionerSearchJSON
+        coEvery { httpResponse.receive<Bundle>() } returns validPractitionerSearchBundle
         coEvery {
             epicClient.get(
                 tenant,
@@ -147,7 +147,7 @@ class EpicPractitionerServiceTest {
 
         // Mock response with paging
         every { pagingHttpResponse.status } returns HttpStatusCode.OK
-        coEvery { pagingHttpResponse.receive<String>() } returns pagingPractitionerSearchJSON
+        coEvery { pagingHttpResponse.receive<Bundle>() } returns pagingPractitionerSearchBundle
         coEvery {
             epicClient.get(
                 tenant,
@@ -161,7 +161,7 @@ class EpicPractitionerServiceTest {
 
         // Mock response without paging
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<String>() } returns validPractitionerSearchJSON
+        coEvery { httpResponse.receive<Bundle>() } returns validPractitionerSearchBundle
         coEvery {
             epicClient.get(
                 tenant,

@@ -32,6 +32,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import com.projectronin.interop.fhir.r4.resource.Appointment as R4Appointment
 
 class R4AppointmentTransformerTest {
     private val transformer = R4AppointmentTransformer()
@@ -42,87 +43,59 @@ class R4AppointmentTransformerTest {
 
     @Test
     fun `transforms appointment with all attributes`() {
-        val appointmentJson = """
-            {
-              "resourceType" : "Appointment",
-              "id" : "12345",
-              "meta" : {
-                "profile" : [ "http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitioner" ]
-              },
-              "implicitRules" : "implicit-rules",
-              "language" : "en-US",
-              "text" : {
-                "status" : "generated",
-                "div" : "div"
-              },
-              "contained" : [ {"resourceType":"Banana","id":"24680"} ],
-              "extension" : [ {
-                "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
-                "valueReference" : {
-                  "reference" : "reference"
-                }
-              } ],
-              "modifierExtension" : [ {
-                "url" : "http://localhost/modifier-extension",
-                "valueString" : "Value"
-              } ],
-              "identifier" : [ {
-                "value" : "id"
-              } ],
-              "status" : "cancelled",
-              "cancellationReason" : {
-                "text" : "cancel reason"
-              },
-              "serviceCategory" : [ {
-                "text" : "service category"
-              } ],
-              "serviceType" : [ {
-                "text" : "service type"
-              } ],
-              "specialty" : [ {
-                "text" : "specialty"
-              } ],
-              "appointmentType" : {
-                "text" : "appointment type"
-              },
-              "reasonCode" : [ {
-                "text" : "reason code"
-              } ],
-              "reasonReference" : [ {
-                "display" : "reason reference"
-              } ],
-              "priority" : 1,
-              "description" : "appointment test",
-              "supportingInformation" : [ {
-                "display" : "supporting info"
-              } ],
-              "start" : "2017-01-01T00:00:00Z",
-              "end" : "2017-01-01T01:00:00Z",
-              "minutesDuration" : 15,
-              "slot" : [ {
-                "display" : "slot"
-              } ],
-              "created" : "2021-11-16",
-              "comment" : "comment",
-              "patientInstruction" : "patient instruction",
-              "basedOn" : [ {
-                "display" : "based on"
-              } ],
-              "participant" : [ {
-                "actor" : [ {
-                  "display" : "actor"
-                } ],
-                "status" : "accepted"
-              } ],
-              "requestedPeriod" : [ {
-                "start" : "2021-11-16"
-              } ]
-            }
-        """.trimIndent()
+        val r4Appointment = R4Appointment(
+            id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitioner"))
+            ),
+            implicitRules = Uri("implicit-rules"),
+            language = Code("en-US"),
+            text = Narrative(status = NarrativeStatus.GENERATED, div = "div"),
+            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference"),
+                    value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "reference"))
+                )
+            ),
+            modifierExtension = listOf(
+                Extension(
+                    url = Uri("http://localhost/modifier-extension"),
+                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                )
+            ),
+            identifier = listOf(Identifier(value = "id")),
+            status = AppointmentStatus.CANCELLED,
+            cancellationReason = CodeableConcept(text = "cancel reason"),
+            serviceCategory = listOf(CodeableConcept(text = "service category")),
+            serviceType = listOf(CodeableConcept(text = "service type")),
+            specialty = listOf(CodeableConcept(text = "specialty")),
+            appointmentType = CodeableConcept(text = "appointment type"),
+            reasonCode = listOf(CodeableConcept(text = "reason code")),
+            reasonReference = listOf(Reference(display = "reason reference")),
+            priority = 1,
+            description = "appointment test",
+            supportingInformation = listOf(Reference(display = "supporting info")),
+            start = Instant("2017-01-01T00:00:00Z"),
+            end = Instant("2017-01-01T01:00:00Z"),
+            minutesDuration = 15,
+            slot = listOf(Reference(display = "slot")),
+            created = DateTime("2021-11-16"),
+            comment = "comment",
+            patientInstruction = "patient instruction",
+            basedOn = listOf(Reference(display = "based on")),
+            participant = listOf(
+                Participant(
+                    actor = listOf(Reference(display = "actor")),
+                    status = ParticipationStatus.ACCEPTED
+                )
+            ),
+            requestedPeriod = listOf(Period(start = DateTime("2021-11-16")))
+        )
 
         val appointment = mockk<Appointment> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
+            every { resource } returns r4Appointment
         }
 
         val oncologyAppointment = transformer.transformAppointment(appointment, tenant)
@@ -198,29 +171,26 @@ class R4AppointmentTransformerTest {
 
     @Test
     fun `transform appointment with only required attributes`() {
-        val appointmentJson = """
-            {
-              "resourceType" : "Appointment",
-              "id" : "12345",
-              "extension" : [ {
-                "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
-                "valueReference" : {
-                  "reference" : "reference"
-                }
-              } ],
-              "status" : "cancelled",
-              "participant" : [ {
-                "actor" : [ {
-                  "display" : "actor"
-                } ],
-                "status" : "accepted"
-              } ]
-            }
-        """.trimIndent()
+        val r4Appointment = R4Appointment(
+            id = Id("12345"),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference"),
+                    value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "reference"))
+                )
+            ),
+            status = AppointmentStatus.CANCELLED,
+            participant = listOf(
+                Participant(
+                    actor = listOf(Reference(display = "actor")),
+                    status = ParticipationStatus.ACCEPTED
+                )
+            )
+        )
 
         val appointment = mockk<Appointment> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
+            every { resource } returns r4Appointment
         }
 
         val oncologyAppointment = transformer.transformAppointment(appointment, tenant)
@@ -294,122 +264,25 @@ class R4AppointmentTransformerTest {
 
     @Test
     fun `fails for appointment with missing id`() {
-        val appointmentJson = """
-            {
-              "resourceType" : "Appointment",
-              "extension" : [ {
-                "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
-                "valueReference" : {
-                  "reference" : "reference"
-                }
-              } ],
-              "status" : "cancelled",
-              "participant" : [ {
-                "actor" : [ {
-                  "display" : "actor"
-                } ],
-                "status" : "accepted"
-              } ]
-            }
-        """.trimIndent()
+        val r4Appointment = R4Appointment(
+            extension = listOf(
+                Extension(
+                    url = Uri("http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference"),
+                    value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "reference"))
+                )
+            ),
+            status = AppointmentStatus.CANCELLED,
+            participant = listOf(
+                Participant(
+                    actor = listOf(Reference(display = "actor")),
+                    status = ParticipationStatus.ACCEPTED
+                )
+            )
+        )
 
         val appointment = mockk<Appointment> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
-        }
-
-        assertNull(transformer.transformAppointment(appointment, tenant))
-    }
-
-    @Test
-    fun `fails on having end without start`() {
-        val appointmentJson = """
-            {
-              "end" : "2017-01-01T01:00:00Z",
-              "resourceType" : "Appointment",
-              "id" : "12345",
-              "extension" : [ {
-                "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
-                "valueReference" : {
-                  "reference" : "reference"
-                }
-              } ],
-              "status" : "cancelled",
-              "participant" : [ {
-                "actor" : [ {
-                  "display" : "actor"
-                } ],
-                "status" : "accepted"
-              } ]
-            }
-        """.trimIndent()
-
-        val appointment = mockk<Appointment> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
-        }
-
-        assertNull(transformer.transformAppointment(appointment, tenant))
-    }
-
-    @Test
-    fun `fails on missing start and end dates without proposed or cancelled status`() {
-        val appointmentJson = """
-            {
-              "resourceType" : "Appointment",
-              "id" : "12345",
-              "extension" : [ {
-                "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
-                "valueReference" : {
-                  "reference" : "reference"
-                }
-              } ],
-              "status" : "booked",
-              "participant" : [ {
-                "actor" : [ {
-                  "display" : "actor"
-                } ],
-                "status" : "accepted"
-              } ]
-            }
-        """.trimIndent()
-
-        val appointment = mockk<Appointment> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
-        }
-
-        assertNull(transformer.transformAppointment(appointment, tenant))
-    }
-
-    @Test
-    fun `fails on cancellationReason without cancelled or noshow status`() {
-        val appointmentJson = """
-            {
-              "cancellationReason" : {
-                "text" : "cancel reason"
-              },
-              "resourceType" : "Appointment",
-              "id" : "12345",
-              "extension" : [ {
-                "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
-                "valueReference" : {
-                  "reference" : "reference"
-                }
-              } ],
-              "status" : "booked",
-              "participant" : [ {
-                "actor" : [ {
-                  "display" : "actor"
-                } ],
-                "status" : "accepted"
-              } ]
-            }
-        """.trimIndent()
-
-        val appointment = mockk<Appointment> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
+            every { resource } returns r4Appointment
         }
 
         assertNull(transformer.transformAppointment(appointment, tenant))
@@ -417,24 +290,20 @@ class R4AppointmentTransformerTest {
 
     @Test
     fun `fails on missing partnerReference extension`() {
-        val appointmentJson = """
-            {
-              "resourceType" : "Appointment",
-              "id" : "12345",
-              "extension" : [ ],
-              "status" : "cancelled",
-              "participant" : [ {
-                "actor" : [ {
-                  "display" : "actor"
-                } ],
-                "status" : "accepted"
-              } ]
-            }
-        """.trimIndent()
+        val r4Appointment = R4Appointment(
+            id = Id("12345"),
+            status = AppointmentStatus.CANCELLED,
+            participant = listOf(
+                Participant(
+                    actor = listOf(Reference(display = "actor")),
+                    status = ParticipationStatus.ACCEPTED
+                )
+            )
+        )
 
         val appointment = mockk<Appointment> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
+            every { resource } returns r4Appointment
         }
 
         assertNull(transformer.transformAppointment(appointment, tenant))
@@ -442,141 +311,26 @@ class R4AppointmentTransformerTest {
 
     @Test
     fun `fails partnerReference extension not being a Reference`() {
-        val appointmentJson = """
-            {
-              "resourceType" : "Appointment",
-              "id" : "12345",
-              "extension" : [ {
-                "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
-                "valueBoolean" : false
-              } ],
-              "status" : "cancelled",
-              "participant" : [ {
-                "actor" : [ {
-                  "display" : "actor"
-                } ],
-                "status" : "accepted"
-              } ]
-            }
-        """.trimIndent()
+        val r4Appointment = R4Appointment(
+            id = Id("12345"),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference"),
+                    value = DynamicValue(DynamicValueType.BOOLEAN, false)
+                )
+            ),
+            status = AppointmentStatus.CANCELLED,
+            participant = listOf(
+                Participant(
+                    actor = listOf(Reference(display = "actor")),
+                    status = ParticipationStatus.ACCEPTED
+                )
+            )
+        )
 
         val appointment = mockk<Appointment> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
-        }
-
-        assertNull(transformer.transformAppointment(appointment, tenant))
-    }
-
-    @Test
-    fun `fails on minutesDuration not positive`() {
-        val appointmentJson = """
-            {
-              "minutesDuration" : 0,
-              "resourceType" : "Appointment",
-              "id" : "12345",
-              "extension" : [ {
-                "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
-                "valueReference" : {
-                  "reference" : "reference"
-                }
-              } ],
-              "status" : "cancelled",
-              "participant" : [ {
-                "actor" : [ {
-                  "display" : "actor"
-                } ],
-                "status" : "accepted"
-              } ]
-            }
-        """.trimIndent()
-
-        val appointment = mockk<Appointment> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
-        }
-
-        assertNull(transformer.transformAppointment(appointment, tenant))
-    }
-
-    @Test
-    fun `fails on negative priority`() {
-        val appointmentJson = """
-            {
-              "priority" : -1,
-              "resourceType" : "Appointment",
-              "id" : "12345",
-              "extension" : [ {
-                "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
-                "valueReference" : {
-                  "reference" : "reference"
-                }
-              } ],
-              "status" : "cancelled",
-              "participant" : [ {
-                "actor" : [ {
-                  "display" : "actor"
-                } ],
-                "status" : "accepted"
-              } ]
-            }
-        """.trimIndent()
-
-        val appointment = mockk<Appointment> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
-        }
-
-        assertNull(transformer.transformAppointment(appointment, tenant))
-    }
-
-    @Test
-    fun `fails on no participants`() {
-        val appointmentJson = """
-            {
-              "resourceType" : "Appointment",
-              "id" : "12345",
-              "extension" : [ {
-                "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
-                "valueReference" : {
-                  "reference" : "reference"
-                }
-              } ],
-              "status" : "cancelled",
-              "participant" : [ ]
-            }
-        """.trimIndent()
-
-        val appointment = mockk<Appointment> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
-        }
-
-        assertNull(transformer.transformAppointment(appointment, tenant))
-    }
-
-    @Test
-    fun `fails participant without type or actor`() {
-        val appointmentJson = """
-            {
-              "resourceType" : "Appointment",
-              "id" : "12345",
-              "extension" : [ {
-                "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
-                "valueReference" : {
-                  "reference" : "reference"
-                }
-              } ],
-              "status" : "cancelled",
-              "participant" : [ {
-                "status" : "accepted"
-              } ]
-            }
-        """.trimIndent()
-
-        val appointment = mockk<Appointment> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
+            every { resource } returns r4Appointment
         }
 
         assertNull(transformer.transformAppointment(appointment, tenant))
@@ -597,14 +351,24 @@ class R4AppointmentTransformerTest {
 
     @Test
     fun `bundle transformation returns empty when no valid transformations`() {
+        val invalidAppointment = R4Appointment(
+            id = Id("12345"),
+            status = AppointmentStatus.CANCELLED,
+            participant = listOf(
+                Participant(
+                    actor = listOf(Reference(display = "actor")),
+                    status = ParticipationStatus.ACCEPTED
+                )
+            )
+        )
         val appointment1 = mockk<Appointment> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns "{}"
+            every { resource } returns invalidAppointment
         }
 
         val appointment2 = mockk<Appointment> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns "{}"
+            every { resource } returns invalidAppointment
         }
 
         val bundle = mockk<Bundle<Appointment>> {
@@ -618,33 +382,40 @@ class R4AppointmentTransformerTest {
 
     @Test
     fun `bundle transformation returns only valid transformations`() {
+        val invalidAppointment = R4Appointment(
+            id = Id("12345"),
+            status = AppointmentStatus.CANCELLED,
+            participant = listOf(
+                Participant(
+                    actor = listOf(Reference(display = "actor")),
+                    status = ParticipationStatus.ACCEPTED
+                )
+            )
+        )
         val appointment1 = mockk<Appointment> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns "{}"
+            every { resource } returns invalidAppointment
         }
 
-        val appointment2Json = """
-            {
-              "resourceType" : "Appointment",
-              "id" : "12345",
-              "extension" : [ {
-                "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
-                "valueReference" : {
-                  "reference" : "reference"
-                }
-              } ],
-              "status" : "cancelled",
-              "participant" : [ {
-                "actor" : [ {
-                  "display" : "actor"
-                } ],
-                "status" : "accepted"
-              } ]
-            }
-        """.trimIndent()
+        val r4Appointment2 = R4Appointment(
+            id = Id("12345"),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference"),
+                    value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "reference"))
+                )
+            ),
+            status = AppointmentStatus.CANCELLED,
+            participant = listOf(
+                Participant(
+                    actor = listOf(Reference(display = "actor")),
+                    status = ParticipationStatus.ACCEPTED
+                )
+            )
+        )
         val appointment2 = mockk<Appointment> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointment2Json
+            every { resource } returns r4Appointment2
         }
 
         val bundle = mockk<Bundle<Appointment>> {
@@ -658,34 +429,31 @@ class R4AppointmentTransformerTest {
 
     @Test
     fun `bundle transformation returns all when all valid`() {
-        val appointmentJson = """
-            {
-              "resourceType" : "Appointment",
-              "id" : "12345",
-              "extension" : [ {
-                "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
-                "valueReference" : {
-                  "reference" : "reference"
-                }
-              } ],
-              "status" : "cancelled",
-              "participant" : [ {
-                "actor" : [ {
-                  "display" : "actor"
-                } ],
-                "status" : "accepted"
-              } ]
-            }
-        """.trimIndent()
+        val r4Appointment1 = R4Appointment(
+            id = Id("12345"),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference"),
+                    value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "reference"))
+                )
+            ),
+            status = AppointmentStatus.CANCELLED,
+            participant = listOf(
+                Participant(
+                    actor = listOf(Reference(display = "actor")),
+                    status = ParticipationStatus.ACCEPTED
+                )
+            )
+        )
 
         val appointment1 = mockk<Appointment> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
+            every { resource } returns r4Appointment1
         }
 
         val appointment2 = mockk<Appointment> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { raw } returns appointmentJson
+            every { resource } returns r4Appointment1
         }
 
         val bundle = mockk<Bundle<Appointment>> {

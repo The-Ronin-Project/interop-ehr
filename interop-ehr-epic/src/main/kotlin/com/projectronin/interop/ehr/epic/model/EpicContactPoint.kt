@@ -1,19 +1,13 @@
 package com.projectronin.interop.ehr.epic.model
 
 import com.projectronin.interop.ehr.model.ContactPoint
-import com.projectronin.interop.ehr.model.base.FHIRElement
-import com.projectronin.interop.ehr.model.helper.enum
+import com.projectronin.interop.ehr.model.base.JSONElement
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
+import com.projectronin.interop.fhir.r4.datatype.ContactPoint as R4ContactPoint
 
-class EpicContactPoint(override val raw: String) : FHIRElement(raw), ContactPoint {
-    override val system: ContactPointSystem? by lazy {
-        jsonObject.enum<ContactPointSystem>("system")
-    }
-    override val use: ContactPointUse? by lazy {
-        jsonObject.enum<ContactPointUse>("use")
-    }
-    override val value: String? by lazy {
-        jsonObject.string("value")
-    }
+class EpicContactPoint(override val element: R4ContactPoint) : JSONElement(element), ContactPoint {
+    override val system: ContactPointSystem? = element.system
+    override val use: ContactPointUse? = element.use
+    override val value: String? = element.value
 }

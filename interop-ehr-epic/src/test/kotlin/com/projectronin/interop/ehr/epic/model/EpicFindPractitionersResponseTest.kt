@@ -1,16 +1,20 @@
 package com.projectronin.interop.ehr.epic.model
 
 import com.projectronin.interop.common.resource.ResourceType
+import com.projectronin.interop.ehr.epic.readResource
 import com.projectronin.interop.ehr.model.enums.DataSource
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.r4.resource.Bundle
+import com.projectronin.interop.fhir.r4.valueset.BundleType
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class EpicFindPractitionersResponseTest {
     @Test
-    fun `can build from JSON`() {
-        val json = this::class.java.getResource("/ExampleFindPractitionersResponse.json")!!.readText()
+    fun `can build from object`() {
+        val response = readResource<Bundle>("/ExampleFindPractitionersResponse.json")
 
-        val findPractitionersResponse = EpicFindPractitionersResponse(json)
+        val findPractitionersResponse = EpicFindPractitionersResponse(response)
 
         assertEquals(DataSource.FHIR_R4, findPractitionersResponse.dataSource)
         assertEquals(ResourceType.BUNDLE, findPractitionersResponse.resourceType)
@@ -35,9 +39,9 @@ class EpicFindPractitionersResponseTest {
     fun `can build old style with duplicates from JSON`() {
         // Old style of this API puts the provider after each resource instead of at the bottom,
         // and can have duplicate providers.
-        val json = this::class.java.getResource("/ExampleFindPractitionersResponseWithDuplicates.json")!!.readText()
+        val response = readResource<Bundle>("/ExampleFindPractitionersResponseWithDuplicates.json")
 
-        val findPractitionersResponse = EpicFindPractitionersResponse(json)
+        val findPractitionersResponse = EpicFindPractitionersResponse(response)
 
         assertEquals(DataSource.FHIR_R4, findPractitionersResponse.dataSource)
         assertEquals(ResourceType.BUNDLE, findPractitionersResponse.resourceType)
@@ -60,12 +64,9 @@ class EpicFindPractitionersResponseTest {
 
     @Test
     fun `check that no resources are handled`() {
-        val json = """
-            |{
-            |  "Entry": null
-            |}""".trimMargin()
+        val response = Bundle(id = Id("123"), type = BundleType.SEARCHSET)
 
-        val findPractitionersResponse = EpicFindPractitionersResponse(json)
+        val findPractitionersResponse = EpicFindPractitionersResponse(response)
         assertEquals(0, findPractitionersResponse.links.size)
 
         // PractitionerRoles

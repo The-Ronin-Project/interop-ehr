@@ -4,7 +4,6 @@ import com.projectronin.interop.ehr.PractitionerService
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.epic.model.EpicFindPractitionersResponse
 import com.projectronin.interop.ehr.model.FindPractitionersResponse
-import com.projectronin.interop.ehr.model.helper.mergeBundles
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
 
@@ -28,6 +27,6 @@ class EpicPractitionerService(epicClient: EpicClient) : PractitionerService, Epi
             getBundleWithPaging(tenant, practitionerSearchUrlPart, parameters, ::EpicFindPractitionersResponse)
         }
 
-        return mergeBundles(practitionerResponses, ::EpicFindPractitionersResponse)
+        return mergeResponses(practitionerResponses, ::EpicFindPractitionersResponse)
     }
 }

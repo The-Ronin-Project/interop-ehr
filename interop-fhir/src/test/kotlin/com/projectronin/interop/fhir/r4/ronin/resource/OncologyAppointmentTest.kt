@@ -22,6 +22,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
@@ -44,7 +45,7 @@ class OncologyAppointmentTest {
                 status = NarrativeStatus.GENERATED,
                 div = "div"
             ),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(ContainedResource("""{"resourceType":"Banana","field":"24680"}""")),
             extension = listOf(
                 Extension(
                     url = ExtensionMeanings.PARTNER_DEPARTMENT.uri,
@@ -106,7 +107,7 @@ class OncologyAppointmentTest {
                 "status" : "generated",
                 "div" : "div"
               },
-              "contained" : [ {"resourceType":"Banana","id":"24680"} ],
+              "contained" : [ {"resourceType":"Banana","field":"24680"} ],
               "extension" : [ {
                 "url" : "http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference",
                 "valueReference" : {
@@ -283,7 +284,7 @@ class OncologyAppointmentTest {
         assertNull(appointment.implicitRules)
         assertNull(appointment.language)
         assertNull(appointment.text)
-        assertEquals(listOf<ContainedResource>(), appointment.contained)
+        assertEquals(listOf<Resource>(), appointment.contained)
         assertEquals(listOf<Extension>(), appointment.modifierExtension)
         assertNull(appointment.cancellationReason)
         assertEquals(listOf<CodeableConcept>(), appointment.serviceCategory)
@@ -412,7 +413,7 @@ class OncologyAppointmentTest {
             )
         }
         assertEquals(
-            "[app-1](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-appointment.html#constraints): Either the type or actor on the participant SHALL be specified",
+            "[app-1](https://www.hl7.org/fhir/R4/appointment.html#invs): Either the type or actor on the participant SHALL be specified",
             exception.message
         )
     }
@@ -445,7 +446,7 @@ class OncologyAppointmentTest {
             )
         }
         assertEquals(
-            "[app-2](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-appointment.html#constraints): Either start and end are specified, or neither",
+            "[app-2](https://www.hl7.org/fhir/R4/appointment.html#invs): Either start and end are specified, or neither",
             exception.message
         )
     }
@@ -477,7 +478,7 @@ class OncologyAppointmentTest {
             )
         }
         assertEquals(
-            "[app-3](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-appointment.html#constraints): Only proposed or cancelled appointments can be missing start/end dates",
+            "[app-3](https://www.hl7.org/fhir/R4/appointment.html#invs): Only proposed or cancelled appointments can be missing start/end dates",
             exception.message
         )
     }
@@ -510,7 +511,7 @@ class OncologyAppointmentTest {
             )
         }
         assertEquals(
-            "[app-4](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-appointment.html#constraints): Cancellation reason is only used for appointments that have been cancelled, or no-show",
+            "[app-4](https://www.hl7.org/fhir/R4/appointment.html#invs): Cancellation reason is only used for appointments that have been cancelled, or no-show",
             exception.message
         )
     }

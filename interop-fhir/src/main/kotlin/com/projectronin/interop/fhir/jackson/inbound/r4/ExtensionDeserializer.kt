@@ -8,7 +8,7 @@ import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.projectronin.interop.common.jackson.getAs
 import com.projectronin.interop.common.jackson.getAsList
 import com.projectronin.interop.common.jackson.getAsTextOrNull
-import com.projectronin.interop.fhir.jackson.getDynamicValue
+import com.projectronin.interop.fhir.jackson.getDynamicValueOrNull
 import com.projectronin.interop.fhir.r4.datatype.Extension
 
 /**
@@ -22,7 +22,7 @@ class ExtensionDeserializer : StdDeserializer<Extension>(Extension::class.java) 
             id = node.getAsTextOrNull("id"),
             extension = node.getAsList("extension", p),
             url = node.getAs("url", p),
-            value = node.getDynamicValue("value", p)
+            value = node.getDynamicValueOrNull("value", p)
         )
     }
 }

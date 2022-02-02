@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.epic.model.EpicPatientBundle
+import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.receive
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
@@ -17,7 +18,7 @@ import org.junit.jupiter.api.assertThrows
 class EpicPatientServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var httpResponse: HttpResponse
-    private val validPatientSearchJson = this::class.java.getResource("/ExamplePatientBundle.json")!!.readText()
+    private val validPatientBundle = readResource<Bundle>("/ExamplePatientBundle.json")
     private val testPrivateKey = this::class.java.getResource("/TestPrivateKey.txt")!!.readText()
 
     @BeforeEach
@@ -37,7 +38,7 @@ class EpicPatientServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<String>() } returns validPatientSearchJson
+        coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
         coEvery {
             epicClient.get(
                 tenant,
@@ -53,7 +54,7 @@ class EpicPatientServiceTest {
                 "givenName",
                 "familyName"
             )
-        assertEquals(EpicPatientBundle(validPatientSearchJson), bundle)
+        assertEquals(EpicPatientBundle(validPatientBundle), bundle)
     }
 
     @Test
@@ -67,7 +68,7 @@ class EpicPatientServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.receive<String>() } returns validPatientSearchJson
+        coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
         coEvery {
             epicClient.get(
                 tenant,

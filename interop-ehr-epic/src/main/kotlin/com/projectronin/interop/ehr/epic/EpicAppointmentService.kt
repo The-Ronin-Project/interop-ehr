@@ -1,9 +1,10 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.AppointmentService
+import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
+import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsResponse
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.epic.model.EpicAppointmentBundle
-import com.projectronin.interop.ehr.epic.model.GetPatientAppointmentsRequest
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -44,16 +45,16 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
                 patientId = patientMRN,
             )
 
-        val json = runBlocking {
+        val getPatientAppointments = runBlocking {
             val httpResponse = epicClient.post(tenant, appointmentSearchUrlPart, request)
             if (httpResponse.status != HttpStatusCode.OK) {
                 logger.error { "Appointment search failed for ${tenant.mnemonic}, with a ${httpResponse.status}" }
                 throw IOException("Call to tenant ${tenant.mnemonic} failed with a ${httpResponse.status}")
             }
-            httpResponse.receive<String>()
+            httpResponse.receive<GetPatientAppointmentsResponse>()
         }
 
         logger.debug { "Appointment search completed for ${tenant.mnemonic}" }
-        return EpicAppointmentBundle(json)
+        return EpicAppointmentBundle(getPatientAppointments)
     }
 }

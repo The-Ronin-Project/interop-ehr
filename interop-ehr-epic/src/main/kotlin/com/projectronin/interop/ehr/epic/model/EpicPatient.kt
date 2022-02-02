@@ -6,44 +6,35 @@ import com.projectronin.interop.ehr.model.ContactPoint
 import com.projectronin.interop.ehr.model.HumanName
 import com.projectronin.interop.ehr.model.Identifier
 import com.projectronin.interop.ehr.model.Patient
-import com.projectronin.interop.ehr.model.base.FHIRResource
+import com.projectronin.interop.ehr.model.base.JSONResource
 import com.projectronin.interop.ehr.model.enums.DataSource
-import com.projectronin.interop.ehr.model.helper.enum
-import com.projectronin.interop.ehr.model.helper.fhirElementList
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
+import com.projectronin.interop.fhir.r4.resource.Patient as R4Patient
 
-class EpicPatient(override val raw: String) : FHIRResource(raw), Patient {
+class EpicPatient(override val resource: R4Patient) : JSONResource(resource), Patient {
     override val dataSource: DataSource
         get() = DataSource.FHIR_R4
 
     override val resourceType: ResourceType
         get() = ResourceType.PATIENT
 
-    override val id: String by lazy {
-        jsonObject.string("id")!!
-    }
+    override val id: String = resource.id!!.value
+    override val gender: AdministrativeGender? = resource.gender
+    override val birthDate: String? = resource.birthDate?.value
 
     override val identifier: List<Identifier> by lazy {
-        jsonObject.fhirElementList("identifier", ::EpicIdentifier)
+        resource.identifier.map(::EpicIdentifier)
     }
 
     override val name: List<HumanName> by lazy {
-        jsonObject.fhirElementList("name", ::EpicHumanName)
-    }
-
-    override val gender: AdministrativeGender? by lazy {
-        jsonObject.enum<AdministrativeGender>("gender")
-    }
-
-    override val birthDate: String? by lazy {
-        jsonObject.string("birthDate")
+        resource.name.map(::EpicHumanName)
     }
 
     override val telecom: List<ContactPoint> by lazy {
-        jsonObject.fhirElementList("telecom", ::EpicContactPoint)
+        resource.telecom.map(::EpicContactPoint)
     }
 
     override val address: List<Address> by lazy {
-        jsonObject.fhirElementList("address", ::EpicAddress)
+        resource.address.map(::EpicAddress)
     }
 }

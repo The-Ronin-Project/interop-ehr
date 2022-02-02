@@ -1,7 +1,5 @@
 package com.projectronin.interop.transform.fhir.r4
 
-import com.fasterxml.jackson.module.kotlin.readValue
-import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.PractitionerRole
 import com.projectronin.interop.ehr.model.enums.DataSource
@@ -36,7 +34,7 @@ class R4PractitionerRoleTransformer : PractitionerRoleTransformer {
     ): OncologyPractitionerRole? {
         require(practitionerRole.dataSource == DataSource.FHIR_R4) { "PractitionerRole is not an R4 FHIR resource" }
 
-        val r4PractitionerRole = JacksonManager.objectMapper.readValue<R4PractitionerRole>(practitionerRole.raw)
+        val r4PractitionerRole = practitionerRole.resource as R4PractitionerRole
 
         val id = r4PractitionerRole.id
         if (id == null) {

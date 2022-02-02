@@ -13,9 +13,9 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
-import com.projectronin.interop.fhir.r4.datatype.Link
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
+import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Base64Binary
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
@@ -45,7 +45,7 @@ class PatientTest {
                 status = NarrativeStatus.GENERATED,
                 div = "div"
             ),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(ContainedResource("""{"resourceType":"Banana","field":"24680"}""")),
             extension = listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
@@ -73,7 +73,7 @@ class PatientTest {
             communication = listOf(Communication(language = CodeableConcept(text = "English"))),
             generalPractitioner = listOf(Reference(display = "GP")),
             managingOrganization = Reference(display = "organization"),
-            link = listOf(Link(other = Reference(), type = LinkType.REPLACES))
+            link = listOf(PatientLink(other = Reference(), type = LinkType.REPLACES))
         )
         val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(patient)
 
@@ -90,7 +90,7 @@ class PatientTest {
                 "status" : "generated",
                 "div" : "div"
               },
-              "contained" : [ {"resourceType":"Banana","id":"24680"} ],
+              "contained" : [ {"resourceType":"Banana","field":"24680"} ],
               "extension" : [ {
                 "url" : "http://localhost/extension",
                 "valueString" : "Value"
@@ -178,7 +178,7 @@ class PatientTest {
         assertNull(patient.implicitRules)
         assertNull(patient.language)
         assertNull(patient.text)
-        assertEquals(listOf<ContainedResource>(), patient.contained)
+        assertEquals(listOf<Resource>(), patient.contained)
         assertEquals(listOf<Extension>(), patient.extension)
         assertEquals(listOf<Extension>(), patient.modifierExtension)
         assertEquals(listOf<Identifier>(), patient.identifier)
@@ -196,7 +196,7 @@ class PatientTest {
         assertEquals(listOf<Communication>(), patient.communication)
         assertEquals(listOf<Reference>(), patient.generalPractitioner)
         assertNull(patient.managingOrganization)
-        assertEquals(listOf<Link>(), patient.link)
+        assertEquals(listOf<PatientLink>(), patient.link)
     }
 
     @Test
@@ -230,7 +230,7 @@ class PatientTest {
             )
         }
         assertEquals(
-            "[pat-1](https://www.hl7.org/fhir/R4/patient.html#invs): contact SHALL at least contain a contact's details or a reference to an organization.",
+            "[pat-1](https://www.hl7.org/fhir/R4/patient.html#invs): contact SHALL at least contain a contact's details or a reference to an organization",
             exception.message
         )
     }

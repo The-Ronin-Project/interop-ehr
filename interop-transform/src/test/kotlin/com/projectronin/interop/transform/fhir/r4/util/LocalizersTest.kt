@@ -14,11 +14,11 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
-import com.projectronin.interop.fhir.r4.datatype.Link
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
 import com.projectronin.interop.fhir.r4.datatype.NotAvailable
 import com.projectronin.interop.fhir.r4.datatype.Participant
+import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Period
 import com.projectronin.interop.fhir.r4.datatype.Qualification
 import com.projectronin.interop.fhir.r4.datatype.Reference
@@ -1504,7 +1504,7 @@ class LocalizersTest {
 
     @Test
     fun `returns current link if link has no localizable information`() {
-        val link = Link(
+        val link = PatientLink(
             id = "12345",
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -1517,7 +1517,7 @@ class LocalizersTest {
 
     @Test
     fun `localizes link with localizable extension`() {
-        val link = Link(
+        val link = PatientLink(
             id = "12345",
             extension = localizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -1527,7 +1527,7 @@ class LocalizersTest {
         val localizedLink = link.localize(tenant)
         assertTrue(localizedLink !== link)
 
-        val expectedLink = Link(
+        val expectedLink = PatientLink(
             id = "12345",
             extension = localizedExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -1539,7 +1539,7 @@ class LocalizersTest {
 
     @Test
     fun `localizes link with localizable modifierExtension`() {
-        val link = Link(
+        val link = PatientLink(
             id = "12345",
             extension = nonLocalizableExtensions,
             modifierExtension = localizableExtensions,
@@ -1549,7 +1549,7 @@ class LocalizersTest {
         val localizedLink = link.localize(tenant)
         assertTrue(localizedLink !== link)
 
-        val expectedLink = Link(
+        val expectedLink = PatientLink(
             id = "12345",
             extension = nonLocalizableExtensions,
             modifierExtension = localizedExtensions,
@@ -1561,7 +1561,7 @@ class LocalizersTest {
 
     @Test
     fun `localizes link with localizable other`() {
-        val link = Link(
+        val link = PatientLink(
             id = "12345",
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -1571,7 +1571,7 @@ class LocalizersTest {
         val localizedLink = link.localize(tenant)
         assertTrue(localizedLink !== link)
 
-        val expectedLink = Link(
+        val expectedLink = PatientLink(
             id = "12345",
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -1583,7 +1583,7 @@ class LocalizersTest {
 
     @Test
     fun `localizes link with all localizable values`() {
-        val link = Link(
+        val link = PatientLink(
             id = "12345",
             extension = localizableExtensions,
             modifierExtension = localizableExtensions,
@@ -1593,7 +1593,7 @@ class LocalizersTest {
         val localizedLink = link.localize(tenant)
         assertTrue(localizedLink !== link)
 
-        val expectedLink = Link(
+        val expectedLink = PatientLink(
             id = "12345",
             extension = localizedExtensions,
             modifierExtension = localizedExtensions,

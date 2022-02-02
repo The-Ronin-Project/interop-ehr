@@ -1,5 +1,7 @@
 package com.projectronin.interop.ehr.epic.model
 
+import com.projectronin.interop.ehr.epic.deformat
+import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -8,59 +10,77 @@ import org.junit.jupiter.api.Test
 
 class EpicContactPointTest {
     @Test
-    fun `can build from JSON`() {
-        val json = """{
-          |  "system": "phone",
-          |  "value": "0648352638",
-          |  "use": "mobile"
-          |}""".trimMargin()
+    fun `can build from object`() {
+        val contactPoint = ContactPoint(
+            system = ContactPointSystem.PHONE,
+            value = "0648352638",
+            use = ContactPointUse.MOBILE
+        )
 
-        val contactPoint = EpicContactPoint(json)
-        assertEquals(json, contactPoint.raw)
-        assertEquals(ContactPointSystem.PHONE, contactPoint.system)
-        assertEquals(ContactPointUse.MOBILE, contactPoint.use)
-        assertEquals("0648352638", contactPoint.value)
+        val epicContactPoint = EpicContactPoint(contactPoint)
+        assertEquals(contactPoint, epicContactPoint.element)
+        assertEquals(ContactPointSystem.PHONE, epicContactPoint.system)
+        assertEquals(ContactPointUse.MOBILE, epicContactPoint.use)
+        assertEquals("0648352638", epicContactPoint.value)
     }
 
     @Test
     fun `supports no system`() {
-        val json = """{
-          |  "value": "0648352638",
-          |  "use": "mobile"
-          |}""".trimMargin()
+        val contactPoint = ContactPoint(
+            value = "0648352638",
+            use = ContactPointUse.MOBILE
+        )
 
-        val contactPoint = EpicContactPoint(json)
-        assertEquals(json, contactPoint.raw)
-        assertNull(contactPoint.system)
-        assertEquals(ContactPointUse.MOBILE, contactPoint.use)
-        assertEquals("0648352638", contactPoint.value)
+        val epicContactPoint = EpicContactPoint(contactPoint)
+        assertEquals(contactPoint, epicContactPoint.element)
+        assertNull(epicContactPoint.system)
+        assertEquals(ContactPointUse.MOBILE, epicContactPoint.use)
+        assertEquals("0648352638", epicContactPoint.value)
     }
 
     @Test
     fun `supports no use`() {
-        val json = """{
-          |  "system": "phone",
-          |  "value": "0648352638"
-          |}""".trimMargin()
+        val contactPoint = ContactPoint(
+            system = ContactPointSystem.PHONE,
+            value = "0648352638"
+        )
 
-        val contactPoint = EpicContactPoint(json)
-        assertEquals(json, contactPoint.raw)
-        assertEquals(ContactPointSystem.PHONE, contactPoint.system)
-        assertNull(contactPoint.use)
-        assertEquals("0648352638", contactPoint.value)
+        val epicContactPoint = EpicContactPoint(contactPoint)
+        assertEquals(contactPoint, epicContactPoint.element)
+        assertEquals(ContactPointSystem.PHONE, epicContactPoint.system)
+        assertNull(epicContactPoint.use)
+        assertEquals("0648352638", epicContactPoint.value)
     }
 
     @Test
     fun `supports no value`() {
+        val contactPoint = ContactPoint(
+            system = ContactPointSystem.PHONE,
+            use = ContactPointUse.MOBILE
+        )
+
+        val epicContactPoint = EpicContactPoint(contactPoint)
+        assertEquals(contactPoint, epicContactPoint.element)
+        assertEquals(ContactPointSystem.PHONE, epicContactPoint.system)
+        assertEquals(ContactPointUse.MOBILE, epicContactPoint.use)
+        assertNull(epicContactPoint.value)
+    }
+
+    @Test
+    fun `returns JSON as raw`() {
+        val contactPoint = ContactPoint(
+            system = ContactPointSystem.PHONE,
+            value = "0648352638",
+            use = ContactPointUse.MOBILE
+        )
         val json = """{
           |  "system": "phone",
+          |  "value": "0648352638",
           |  "use": "mobile"
           |}""".trimMargin()
 
-        val contactPoint = EpicContactPoint(json)
-        assertEquals(json, contactPoint.raw)
-        assertEquals(ContactPointSystem.PHONE, contactPoint.system)
-        assertEquals(ContactPointUse.MOBILE, contactPoint.use)
-        assertNull(contactPoint.value)
+        val epicContactPoint = EpicContactPoint(contactPoint)
+        assertEquals(contactPoint, epicContactPoint.element)
+        assertEquals(deformat(json), epicContactPoint.raw)
     }
 }
