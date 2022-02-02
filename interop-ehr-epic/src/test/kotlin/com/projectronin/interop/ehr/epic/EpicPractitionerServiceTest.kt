@@ -19,8 +19,10 @@ class EpicPractitionerServiceTest {
     private lateinit var practitionerService: EpicPractitionerService
     private lateinit var httpResponse: HttpResponse
     private lateinit var pagingHttpResponse: HttpResponse
-    private val validPractitionerSearchJSON = this::class.java.getResource("/ExampleFindPractitionersResponse.json")!!.readText()
-    private val pagingPractitionerSearchJSON = this::class.java.getResource("/ExampleFindPractitionersResponseWithPaging.json")!!.readText()
+    private val validPractitionerSearchJSON =
+        this::class.java.getResource("/ExampleFindPractitionersResponse.json")!!.readText()
+    private val pagingPractitionerSearchJSON =
+        this::class.java.getResource("/ExampleFindPractitionersResponseWithPaging.json")!!.readText()
 
     @BeforeEach
     fun setup() {
@@ -46,7 +48,10 @@ class EpicPractitionerServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
-                mapOf("_include" to "PractitionerRole:practitioner", "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03")
+                mapOf(
+                    "_include" to "PractitionerRole:practitioner",
+                    "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
+                )
             )
         } returns httpResponse
 
@@ -75,7 +80,10 @@ class EpicPractitionerServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
-                mapOf("_include" to "PractitionerRole:practitioner", "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03")
+                mapOf(
+                    "_include" to "PractitionerRole:practitioner",
+                    "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
+                )
             )
         } returns httpResponse
 
@@ -103,7 +111,14 @@ class EpicPractitionerServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
-                mapOf("_include" to "PractitionerRole:practitioner", "location" to "abc,123")
+                mapOf("_include" to "PractitionerRole:practitioner", "location" to "abc")
+            )
+        } returns httpResponse
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/PractitionerRole",
+                mapOf("_include" to "PractitionerRole:practitioner", "location" to "123")
             )
         } returns httpResponse
 
@@ -113,7 +128,11 @@ class EpicPractitionerServiceTest {
                 listOf("abc", "123")
             )
 
-        assertEquals(EpicFindPractitionersResponse(validPractitionerSearchJSON), bundle)
+        // 64 for each location
+        assertEquals(128, bundle.practitionerRoles!!.resources.size)
+
+        // 64 total because duplicate practitioners are removed
+        assertEquals(64, bundle.practitioners.resources.size)
     }
 
     @Test
@@ -133,7 +152,10 @@ class EpicPractitionerServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
-                mapOf("_include" to "PractitionerRole:practitioner", "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03")
+                mapOf(
+                    "_include" to "PractitionerRole:practitioner",
+                    "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
+                )
             )
         } returns pagingHttpResponse
 
