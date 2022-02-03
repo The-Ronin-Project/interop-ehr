@@ -5,8 +5,8 @@ databaseChangeLog:
       preConditions:
         - onFail: MARK_RAN
           not:
-            tableExists:
-              tableName: io_tenant_epic
+            - tableExists:
+                tableName: io_tenant_epic
       changes:
         - createTable:
             tableName: io_tenant_epic

@@ -10,4 +10,9 @@ interface TenantService {
      * Retrieves the [Tenant] for the supplied [mnemonic]. If none exists, null will be returned.
      */
     fun getTenantForMnemonic(mnemonic: String): Tenant?
+
+    /**
+     * Retrieves the pools associated to the supplied [providerIds] in the [tenantId]. Any providers that do not have an associated pool will not be included in the response.
+     */
+    fun getPoolsForProviders(tenantId: Int, providerIds: List<String>): Map<String, String>
 }

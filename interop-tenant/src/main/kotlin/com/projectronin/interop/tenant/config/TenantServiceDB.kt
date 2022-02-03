@@ -14,9 +14,6 @@ import com.projectronin.interop.tenant.config.model.vendor.Vendor
  * Service responsible for [Tenant]s loaded from a database.
  */
 class TenantServiceDB(private val tenantDAO: TenantDAO) : TenantService {
-    /**
-     * Retrieves the [Tenant] for the supplied [mnemonic]. If none exists, null will be returned.
-     */
     override fun getTenantForMnemonic(mnemonic: String): Tenant? {
         val tenantDO = tenantDAO.getTenantForMnemonic(mnemonic) ?: return null
         val ehrDO = tenantDO.ehr
@@ -27,6 +24,10 @@ class TenantServiceDB(private val tenantDAO: TenantDAO) : TenantService {
 
         val vendor = createEpicVendor(ehrDO, ehrTenantDO)
         return createTenant(tenantDO, vendor)
+    }
+
+    override fun getPoolsForProviders(tenantId: Int, providerIds: List<String>): Map<String, String> {
+        TODO("Not yet implemented")
     }
 
     private fun createTenant(tenantDO: TenantDO, vendor: Vendor): Tenant {

@@ -17,6 +17,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalTime
 
 class TenantServiceDBTest {
@@ -279,6 +280,14 @@ class TenantServiceDBTest {
         verify(exactly = 1) {
             tenantDAO.getTenantForMnemonic("Tenant1")
             tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC)
+        }
+    }
+
+    // TODO: Replace once implemented
+    @Test
+    fun `unimplemented method throws exception`() {
+        assertThrows<NotImplementedError> {
+            service.getPoolsForProviders(1, listOf("1"))
         }
     }
 }

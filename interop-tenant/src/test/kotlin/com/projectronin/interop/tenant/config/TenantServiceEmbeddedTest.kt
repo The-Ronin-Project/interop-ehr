@@ -89,4 +89,14 @@ class TenantServiceEmbeddedTest {
         }
         assertEquals("unknown.yaml not found on classpath", exception.message)
     }
+
+    // TODO: Replace once implemented
+    @Test
+    fun `unimplemented method throws exception`() {
+        val tenantService = TenantServiceEmbedded("classpath:valid_tenants.yaml")
+
+        assertThrows<NotImplementedError> {
+            tenantService.getPoolsForProviders(1, listOf("1"))
+        }
+    }
 }
