@@ -11,11 +11,6 @@ coverage:
         threshold: 1%
         flags:
           - tenant
-      fhir:
-        target: auto
-        threshold: 1%
-        flags:
-          - fhir
       ehr:
         target: auto
         threshold: 1%
@@ -49,12 +44,6 @@ coverage:
         base: auto
         flags:
           - tenant
-      fhir:
-        target: 80
-        threshold: 1%
-        base: auto
-        flags:
-          - fhir
       ehr:
         target: 80
         threshold: 1%
@@ -99,10 +88,6 @@ flags:
   tenant:
     paths:
       - interop-tenant/
-    carryforward: true
-  fhir:
-    paths:
-      - interop-fhir/
     carryforward: true
   ehr:
     paths:

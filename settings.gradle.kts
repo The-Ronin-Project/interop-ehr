@@ -2,7 +2,6 @@ rootProject.name = "interop-ehr-build"
 
 include("interop-ehr-liquibase")
 include("interop-tenant")
-include("interop-fhir")
 include("interop-ehr")
 include("interop-transform")
 include("interop-ehr-factory")

@@ -9,11 +9,11 @@ plugins {
 dependencies {
     implementation("com.projectronin.interop:interop-common:${project.property("interopCommonVersion")}")
     implementation("com.projectronin.interop:interop-common-jackson:${project.property("interopCommonVersion")}")
+    implementation("com.projectronin.interop.fhir:interop-fhir:${project.property("interopFhirVersion")}")
     implementation(project(":interop-tenant"))
     implementation(project(":interop-ehr"))
     implementation(project(":interop-ehr-factory"))
     implementation(project(":interop-ehr-auth"))
-    implementation(project(":interop-fhir"))
     implementation(project(":interop-transform"))
     implementation("org.springframework:spring-context")
     implementation("com.beust:klaxon:5.5")
