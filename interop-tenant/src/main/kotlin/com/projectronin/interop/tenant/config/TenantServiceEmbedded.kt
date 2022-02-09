@@ -31,7 +31,7 @@ class TenantServiceEmbedded(
         return tenants[mnemonic]
     }
 
-    override fun getPoolsForProviders(tenantMnemonic: String, providerIds: List<String>): Map<String, String> {
-        TODO("Not yet implemented")
+    override fun getPoolsForProviders(tenant: Tenant, providerIds: List<String>): Map<String, String> {
+        TODO("Not implemented since this class will soon be removed")
     }
 }

@@ -1,6 +1,7 @@
 package com.projectronin.interop.tenant.config
 
 import com.projectronin.interop.common.vendor.VendorType
+import com.projectronin.interop.tenant.config.data.ProviderPoolDAO
 import com.projectronin.interop.tenant.config.data.TenantDAO
 import com.projectronin.interop.tenant.config.data.model.EhrDO
 import com.projectronin.interop.tenant.config.data.model.EpicTenantDO
@@ -15,20 +16,22 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalTime
 
 class TenantServiceDBTest {
     private lateinit var tenantDAO: TenantDAO
+    private lateinit var providerPoolDAO: ProviderPoolDAO
     private lateinit var service: TenantServiceDB
 
     @BeforeEach
     fun setup() {
         tenantDAO = mockk()
+        providerPoolDAO = mockk()
 
-        service = TenantServiceDB(tenantDAO)
+        service = TenantServiceDB(tenantDAO, providerPoolDAO)
     }
 
     @Test
@@ -283,11 +286,69 @@ class TenantServiceDBTest {
         }
     }
 
-    // TODO: Replace once implemented
     @Test
-    fun `unimplemented method throws exception`() {
-        assertThrows<NotImplementedError> {
-            service.getPoolsForProviders("TEST_TENANT", listOf("1"))
+    fun `provider-pool request for unknown tenant returns an empty map`() {
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "unknown"
         }
+        every { tenantDAO.getTenantForMnemonic("unknown") } returns null
+
+        val poolsByProvider = service.getPoolsForProviders(tenant, listOf("known1", "known2"))
+        assertTrue(poolsByProvider.isEmpty())
+    }
+
+    @Test
+    fun `provider-pool request supports unknown providers`() {
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "known"
+        }
+        every { tenantDAO.getTenantForMnemonic("known") } returns mockk {
+            every { id } returns 100
+        }
+        every { providerPoolDAO.getPoolsForProviders(100, listOf("unknown1", "unknown2")) } returns emptyMap()
+
+        val poolsByProvider = service.getPoolsForProviders(tenant, listOf("unknown1", "unknown2"))
+        assertTrue(poolsByProvider.isEmpty())
+    }
+
+    @Test
+    fun `provider-pool request supports known providers`() {
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "known"
+        }
+        every { tenantDAO.getTenantForMnemonic("known") } returns mockk {
+            every { id } returns 100
+        }
+        every {
+            providerPoolDAO.getPoolsForProviders(
+                100,
+                listOf("known1", "known2")
+            )
+        } returns mapOf("known1" to "pool1", "known2" to "pool2")
+
+        val poolsByProvider = service.getPoolsForProviders(tenant, listOf("known1", "known2"))
+        assertEquals(2, poolsByProvider.size)
+        assertEquals("pool1", poolsByProvider["known1"])
+        assertEquals("pool2", poolsByProvider["known2"])
+    }
+
+    @Test
+    fun `provider-pool request supports known and unknown providers`() {
+        val tenant = mockk<Tenant> {
+            every { mnemonic } returns "known"
+        }
+        every { tenantDAO.getTenantForMnemonic("known") } returns mockk {
+            every { id } returns 100
+        }
+        every {
+            providerPoolDAO.getPoolsForProviders(
+                100,
+                listOf("known1", "unknown2")
+            )
+        } returns mapOf("known1" to "pool1")
+
+        val poolsByProvider = service.getPoolsForProviders(tenant, listOf("known1", "unknown2"))
+        assertEquals(1, poolsByProvider.size)
+        assertEquals("pool1", poolsByProvider["known1"])
     }
 }

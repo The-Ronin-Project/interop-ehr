@@ -2,6 +2,7 @@ package com.projectronin.interop.tenant.config
 
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.tenant.config.model.vendor.Epic
+import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
@@ -90,13 +91,12 @@ class TenantServiceEmbeddedTest {
         assertEquals("unknown.yaml not found on classpath", exception.message)
     }
 
-    // TODO: Replace once implemented
     @Test
     fun `unimplemented method throws exception`() {
         val tenantService = TenantServiceEmbedded("classpath:valid_tenants.yaml")
 
         assertThrows<NotImplementedError> {
-            tenantService.getPoolsForProviders("TEST_TENANT", listOf("1"))
+            tenantService.getPoolsForProviders(mockk(), listOf("1"))
         }
     }
 }

@@ -35,7 +35,7 @@ class EpicMessageService(private val epicClient: EpicClient, private val tenantS
         logger.info { "SendMessage started for ${tenant.mnemonic}" }
 
         val sendMessageRequest =
-            translateMessageInput(messageInput, vendor.ehrUserId, vendor.messageType, tenant.mnemonic)
+            translateMessageInput(messageInput, vendor.ehrUserId, vendor.messageType, tenant)
 
         val response = runBlocking {
             val httpResponse = epicClient.post(tenant, sendMessageUrlPart, sendMessageRequest)
@@ -55,11 +55,11 @@ class EpicMessageService(private val epicClient: EpicClient, private val tenantS
         messageInput: EHRMessageInput,
         userId: String,
         messageType: String,
-        tenantMnemonic: String,
+        tenant: Tenant
     ): SendMessageRequest {
         return SendMessageRequest(
             patientID = messageInput.patientMRN,
-            recipients = translateRecipients(messageInput.recipients, tenantMnemonic),
+            recipients = translateRecipients(messageInput.recipients, tenant),
             messageText = messageInput.text,
             senderID = userId,
             messageType = messageType
@@ -68,7 +68,7 @@ class EpicMessageService(private val epicClient: EpicClient, private val tenantS
 
     private fun translateRecipients(
         recipients: List<EHRRecipient>,
-        tenantMnemonic: String
+        tenant: Tenant
     ): List<SendMessageRecipient> {
 
         val externalIDList =
@@ -76,7 +76,7 @@ class EpicMessageService(private val epicClient: EpicClient, private val tenantS
                 it.identifiers.find { identifier -> identifier.type?.text == "EXTERNAL" }?.value
                     ?: throw NotFoundException("No EXTERNAL Identifier found for practitioner ${it.id}")
             }
-        val poolList = tenantService.getPoolsForProviders(tenantMnemonic, externalIDList)
+        val poolList = tenantService.getPoolsForProviders(tenant, externalIDList)
 
         return externalIDList.map { externalID ->
             val poolID = poolList[externalID]

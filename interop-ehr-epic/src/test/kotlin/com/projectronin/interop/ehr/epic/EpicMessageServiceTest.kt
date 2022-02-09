@@ -79,7 +79,7 @@ class EpicMessageServiceTest {
             )
         )
 
-        every { tenantService.getPoolsForProviders("TEST_TENANT", listOf("CorrectID")) } returns emptyMap()
+        every { tenantService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
         val messageId = EpicMessageService(epicClient, tenantService).sendMessage(
             tenant,
@@ -134,7 +134,7 @@ class EpicMessageServiceTest {
         )
 
         every {
-            tenantService.getPoolsForProviders("TEST_TENANT", listOf("CorrectID"))
+            tenantService.getPoolsForProviders(tenant, listOf("CorrectID"))
         } returns mapOf("CorrectID" to "PoolID")
 
         val messageId = EpicMessageService(epicClient, tenantService).sendMessage(
@@ -233,7 +233,7 @@ class EpicMessageServiceTest {
             )
         )
 
-        every { tenantService.getPoolsForProviders("TEST_TENANT", listOf("CorrectID")) } returns emptyMap()
+        every { tenantService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
         assertThrows<IOException> {
             EpicMessageService(epicClient, tenantService).sendMessage(

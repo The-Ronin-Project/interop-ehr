@@ -1,5 +1,6 @@
 package com.projectronin.interop.tenant.config
 
+import com.projectronin.interop.tenant.config.data.ProviderPoolDAO
 import com.projectronin.interop.tenant.config.data.TenantDAO
 import com.projectronin.interop.tenant.config.data.model.EhrDO
 import com.projectronin.interop.tenant.config.data.model.EpicTenantDO
@@ -14,7 +15,7 @@ import mu.KotlinLogging
 /**
  * Service responsible for [Tenant]s loaded from a database.
  */
-class TenantServiceDB(private val tenantDAO: TenantDAO) : TenantService {
+class TenantServiceDB(private val tenantDAO: TenantDAO, private val providerPoolDAO: ProviderPoolDAO) : TenantService {
     private val logger = KotlinLogging.logger { }
 
     override fun getTenantForMnemonic(mnemonic: String): Tenant? {
@@ -30,8 +31,12 @@ class TenantServiceDB(private val tenantDAO: TenantDAO) : TenantService {
         return createTenant(tenantDO, vendor)
     }
 
-    override fun getPoolsForProviders(tenantMnemonic: String, providerIds: List<String>): Map<String, String> {
-        TODO("Not yet implemented")
+    override fun getPoolsForProviders(tenant: Tenant, providerIds: List<String>): Map<String, String> {
+        // TODO: This could be simplified by putting the ID on the Tenant object; however, the current embedded implementation
+        //  will break unless this is nullable. So for now, I am leaving this as is, but we should consider improving this in the future.
+        val tenantDO = tenantDAO.getTenantForMnemonic(tenant.mnemonic) ?: return emptyMap()
+
+        return providerPoolDAO.getPoolsForProviders(tenantDO.id, providerIds)
     }
 
     private fun createTenant(tenantDO: TenantDO, vendor: Vendor): Tenant {
