@@ -287,7 +287,7 @@ class TenantServiceDBTest {
     @Test
     fun `unimplemented method throws exception`() {
         assertThrows<NotImplementedError> {
-            service.getPoolsForProviders(1, listOf("1"))
+            service.getPoolsForProviders("TEST_TENANT", listOf("1"))
         }
     }
 }

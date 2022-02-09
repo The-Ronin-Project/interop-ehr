@@ -96,7 +96,7 @@ class TenantServiceEmbeddedTest {
         val tenantService = TenantServiceEmbedded("classpath:valid_tenants.yaml")
 
         assertThrows<NotImplementedError> {
-            tenantService.getPoolsForProviders(1, listOf("1"))
+            tenantService.getPoolsForProviders("TEST_TENANT", listOf("1"))
         }
     }
 }

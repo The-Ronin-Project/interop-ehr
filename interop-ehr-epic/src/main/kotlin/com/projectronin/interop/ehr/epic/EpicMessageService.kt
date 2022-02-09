@@ -7,9 +7,11 @@ import com.projectronin.interop.ehr.epic.apporchard.model.SendMessageResponse
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
+import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.call.receive
+import io.ktor.features.NotFoundException
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
@@ -22,7 +24,7 @@ import org.springframework.stereotype.Component
  * See: [SendMessage Documentation](https://apporchard.epic.com/Sandbox?api=384)
  */
 @Component
-class EpicMessageService(private val epicClient: EpicClient) :
+class EpicMessageService(private val epicClient: EpicClient, private val tenantService: TenantService) :
     MessageService {
     private val logger = KotlinLogging.logger { }
     private val sendMessageUrlPart = "/api/epic/2014/Common/Utility/SENDMESSAGE/Message"
@@ -32,7 +34,8 @@ class EpicMessageService(private val epicClient: EpicClient) :
         if (vendor !is Epic) throw IllegalStateException("Tenant is not Epic vendor: ${tenant.mnemonic}")
         logger.info { "SendMessage started for ${tenant.mnemonic}" }
 
-        val sendMessageRequest = translateMessageInput(messageInput, vendor.ehrUserId, vendor.messageType)
+        val sendMessageRequest =
+            translateMessageInput(messageInput, vendor.ehrUserId, vendor.messageType, tenant.mnemonic)
 
         val response = runBlocking {
             val httpResponse = epicClient.post(tenant, sendMessageUrlPart, sendMessageRequest)
@@ -51,18 +54,36 @@ class EpicMessageService(private val epicClient: EpicClient) :
     private fun translateMessageInput(
         messageInput: EHRMessageInput,
         userId: String,
-        messageType: String
+        messageType: String,
+        tenantMnemonic: String,
     ): SendMessageRequest {
         return SendMessageRequest(
             patientID = messageInput.patientMRN,
-            recipients = translateRecipients(messageInput.recipients),
+            recipients = translateRecipients(messageInput.recipients, tenantMnemonic),
             messageText = messageInput.text,
             senderID = userId,
             messageType = messageType
         )
     }
 
-    private fun translateRecipients(recipients: List<EHRRecipient>): List<SendMessageRecipient> {
-        return recipients.map { SendMessageRecipient(iD = it.id, isPool = it.isPool) }.toList()
+    private fun translateRecipients(
+        recipients: List<EHRRecipient>,
+        tenantMnemonic: String
+    ): List<SendMessageRecipient> {
+
+        val externalIDList =
+            recipients.map {
+                it.identifiers.find { identifier -> identifier.type?.text == "EXTERNAL" }?.value
+                    ?: throw NotFoundException("No EXTERNAL Identifier found for practitioner ${it.id}")
+            }
+        val poolList = tenantService.getPoolsForProviders(tenantMnemonic, externalIDList)
+
+        return externalIDList.map { externalID ->
+            val poolID = poolList[externalID]
+            SendMessageRecipient(
+                iD = poolID ?: externalID,
+                isPool = (poolID != null)
+            )
+        }.toList().distinct() // deduplicate
     }
 }

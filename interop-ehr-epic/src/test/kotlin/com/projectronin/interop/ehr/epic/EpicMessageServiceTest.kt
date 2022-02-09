@@ -7,8 +7,13 @@ import com.projectronin.interop.ehr.epic.apporchard.model.SendMessageResponse
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
+import com.projectronin.interop.fhir.r4.CodeableConcepts
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
+import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.tenant.config.TenantService
 import io.ktor.client.call.receive
 import io.ktor.client.statement.HttpResponse
+import io.ktor.features.NotFoundException
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.errors.IOException
 import io.mockk.coEvery
@@ -22,40 +27,41 @@ import org.junit.jupiter.api.assertThrows
 class EpicMessageServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var httpResponse: HttpResponse
+    private lateinit var tenantService: TenantService
     private val testPrivateKey = this::class.java.getResource("/TestPrivateKey.txt")!!.readText()
 
     @BeforeEach
     fun initTest() {
-        epicClient = mockk<EpicClient>()
-        httpResponse = mockk<HttpResponse>()
+        epicClient = mockk()
+        httpResponse = mockk()
+        tenantService = mockk()
     }
 
     @Test
     fun `ensure message can be sent`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT", "USER#1", "Symptom Alert"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            "USER#1",
+            "Symptom Alert"
+        )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.receive<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375",
-                    "Type"
+                    "130375", "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant,
-                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
-                    recipients = listOf(SendMessageRecipient("PROV#1", false)),
+                    recipients = listOf(SendMessageRecipient("CorrectID", false)),
                     messageText = "Message Text",
                     senderID = "USER#1",
                     messageType = "Symptom Alert"
@@ -63,36 +69,53 @@ class EpicMessageServiceTest {
             )
         } returns httpResponse
 
-        val messageId =
-            EpicMessageService(epicClient).sendMessage(
-                tenant,
-                EHRMessageInput(
-                    "Message Text", "MRN#1",
-                    listOf(EHRRecipient("PROV#1", false))
+        val recipientsList = listOf(
+            EHRRecipient(
+                "PROV#1",
+                listOf(
+                    Identifier(value = "CorrectID", type = CodeableConcept(text = "EXTERNAL")),
+                    Identifier(value = "BadID", type = CodeableConcepts.MRN)
                 )
             )
+        )
+
+        every { tenantService.getPoolsForProviders("TEST_TENANT", listOf("CorrectID")) } returns emptyMap()
+
+        val messageId = EpicMessageService(epicClient, tenantService).sendMessage(
+            tenant,
+            EHRMessageInput(
+                "Message Text", "MRN#1", recipientsList
+            )
+        )
 
         assertEquals("130375", messageId)
     }
 
     @Test
-    fun `ensure http error handled`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT", "USER#1", "Symptom Alert"
-            )
+    fun `ensure pool ID works can be sent`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            "USER#1",
+            "Symptom Alert"
+        )
 
-        every { httpResponse.status } returns HttpStatusCode.NotFound
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.receive<SendMessageResponse>() } returns SendMessageResponse(
+            listOf(
+                IDType(
+                    "130375", "Type"
+                )
+            )
+        )
         coEvery {
             epicClient.post(
-                tenant,
-                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
-                    recipients = listOf(SendMessageRecipient("PROV#1", false)),
+                    recipients = listOf(SendMessageRecipient("PoolID", true)), // this is an implied assertion
                     messageText = "Message Text",
                     senderID = "USER#1",
                     messageType = "Symptom Alert"
@@ -100,12 +123,123 @@ class EpicMessageServiceTest {
             )
         } returns httpResponse
 
-        assertThrows<IOException> {
-            EpicMessageService(epicClient).sendMessage(
+        val recipientsList = listOf(
+            EHRRecipient(
+                "PROV#1",
+                listOf(
+                    Identifier(value = "CorrectID", type = CodeableConcept(text = "EXTERNAL")),
+                    Identifier(value = "BadID", type = CodeableConcepts.MRN)
+                )
+            )
+        )
+
+        every {
+            tenantService.getPoolsForProviders("TEST_TENANT", listOf("CorrectID"))
+        } returns mapOf("CorrectID" to "PoolID")
+
+        val messageId = EpicMessageService(epicClient, tenantService).sendMessage(
+            tenant,
+            EHRMessageInput(
+                "Message Text", "MRN#1", recipientsList
+            )
+        )
+
+        assertEquals("130375", messageId)
+    }
+
+    @Test
+    fun `ensure null IDs work ok`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            "USER#1",
+            "Symptom Alert"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.receive<SendMessageResponse>() } returns SendMessageResponse(
+            listOf(
+                IDType(
+                    "130375", "Type"
+                )
+            )
+        )
+        coEvery {
+            epicClient.post(
+                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                SendMessageRequest(
+                    patientID = "MRN#1",
+                    recipients = listOf(), // this is an implied assertion
+                    messageText = "Message Text",
+                    senderID = "USER#1",
+                    messageType = "Symptom Alert"
+                )
+            )
+        } returns httpResponse
+
+        val recipientsList = listOf(
+            EHRRecipient(
+                "PROV#1",
+                listOf(
+                    Identifier(value = "BadID", type = CodeableConcepts.MRN)
+                )
+            )
+        )
+
+        assertThrows<NotFoundException> {
+            EpicMessageService(epicClient, tenantService).sendMessage(
                 tenant,
                 EHRMessageInput(
-                    "Message Text", "MRN#1",
-                    listOf(EHRRecipient("PROV#1", false))
+                    "Message Text", "MRN#1", recipientsList
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `ensure http error handled`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            "USER#1",
+            "Symptom Alert"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.NotFound
+        coEvery {
+            epicClient.post(
+                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                SendMessageRequest(
+                    patientID = "MRN#1",
+                    recipients = listOf(SendMessageRecipient("CorrectID", false)),
+                    messageText = "Message Text",
+                    senderID = "USER#1",
+                    messageType = "Symptom Alert"
+                )
+            )
+        } returns httpResponse
+
+        val recipientsList = listOf(
+            EHRRecipient(
+                "PROV#1",
+                listOf(
+                    Identifier(value = "CorrectID", type = CodeableConcept(text = "EXTERNAL")),
+                    Identifier(value = "BadID", type = CodeableConcepts.MRN)
+                )
+            )
+        )
+
+        every { tenantService.getPoolsForProviders("TEST_TENANT", listOf("CorrectID")) } returns emptyMap()
+
+        assertThrows<IOException> {
+            EpicMessageService(epicClient, tenantService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text", "MRN#1", recipientsList
                 )
             )
         }
