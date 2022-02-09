@@ -73,7 +73,7 @@ class R4AppointmentTransformer : AppointmentTransformer {
                 requestedPeriod = r4Appointment.requestedPeriod.map { it.localize(tenant) }
             )
         } catch (e: Exception) {
-            logger.warn { "Unable to transform Appointment: ${e.message}" }
+            logger.warn(e) { "Unable to transform Appointment: ${e.message}" }
             return null
         }
     }

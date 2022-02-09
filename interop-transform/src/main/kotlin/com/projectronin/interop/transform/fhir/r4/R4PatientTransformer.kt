@@ -85,7 +85,7 @@ class R4PatientTransformer : PatientTransformer {
                 link = r4Patient.link.map { it.localize(tenant) }
             )
         } catch (e: Exception) {
-            logger.warn { "Unable to transform patient: ${e.message}" }
+            logger.warn(e) { "Unable to transform patient: ${e.message}" }
             return null
         }
     }

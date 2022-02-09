@@ -9,12 +9,16 @@ import com.projectronin.interop.tenant.config.model.BatchConfig
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import com.projectronin.interop.tenant.config.model.vendor.Vendor
+import mu.KotlinLogging
 
 /**
  * Service responsible for [Tenant]s loaded from a database.
  */
 class TenantServiceDB(private val tenantDAO: TenantDAO) : TenantService {
+    private val logger = KotlinLogging.logger { }
+
     override fun getTenantForMnemonic(mnemonic: String): Tenant? {
+        logger.info { "Retrieving tenant for mnemonic : $mnemonic" }
         val tenantDO = tenantDAO.getTenantForMnemonic(mnemonic) ?: return null
         val ehrDO = tenantDO.ehr
 

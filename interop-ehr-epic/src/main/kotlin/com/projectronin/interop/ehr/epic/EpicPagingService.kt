@@ -30,11 +30,10 @@ abstract class EpicPagingService(private val epicClient: EpicClient) {
         parameters: Map<String, Any?>,
         creator: (Bundle) -> B
     ): B {
-        logger.debug { "Get started for ${tenant.mnemonic}" }
+        logger.info { "Get started for ${tenant.mnemonic}" }
 
         val responses: MutableList<B> = mutableListOf()
         var nextURL: String? = null
-
         do {
             val bundle = runBlocking {
                 val httpResponse =
@@ -56,8 +55,7 @@ abstract class EpicPagingService(private val epicClient: EpicClient) {
             responses.add(response)
             nextURL = response.getURL("next")
         } while (nextURL != null)
-
-        logger.debug { "Get completed for ${tenant.mnemonic}" }
+        logger.info { "Get completed for ${tenant.mnemonic}" }
         return mergeResponses(responses, creator)
     }
 

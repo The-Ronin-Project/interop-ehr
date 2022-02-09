@@ -29,7 +29,7 @@ class EpicPatientService(private val epicClient: EpicClient) :
         givenName: String,
         familyName: String
     ): Bundle<Patient> {
-        logger.debug { "Patient search started for ${tenant.mnemonic}" }
+        logger.info { "Patient search started for ${tenant.mnemonic}" }
 
         val parameters = mapOf("given" to givenName, "family" to familyName, "birthdate" to birthDate)
         val bundle = runBlocking {
@@ -41,7 +41,7 @@ class EpicPatientService(private val epicClient: EpicClient) :
             httpResponse.receive<R4Bundle>()
         }
 
-        logger.debug { "Patient search completed for ${tenant.mnemonic}" }
+        logger.info { "Patient search completed for ${tenant.mnemonic}" }
         return EpicPatientBundle(bundle)
     }
 }

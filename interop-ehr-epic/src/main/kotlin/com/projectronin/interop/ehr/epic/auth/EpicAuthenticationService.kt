@@ -72,10 +72,11 @@ class EpicAuthenticationService(@Qualifier("epic") private val client: HttpClien
                 )
                 httpResponse.receive<EpicAuthentication>()
             } catch (e: Exception) {
-                logger.error { "Authentication for $authURL, JTI $jti, failed with exception $e" }
+                logger.error(e) { "Authentication for $authURL, JTI $jti, failed with exception $e" }
                 throw e
             }
         }
+        logger.info { "Call for ${tenant.mnemonic} successful authenticated" }
         logger.debug { "Completed authentication for $authURL, JTI $jti" }
         return response
     }

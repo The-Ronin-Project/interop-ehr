@@ -30,6 +30,7 @@ class EpicMessageService(private val epicClient: EpicClient) :
     override fun sendMessage(tenant: Tenant, messageInput: EHRMessageInput): String {
         val vendor = tenant.vendor
         if (vendor !is Epic) throw IllegalStateException("Tenant is not Epic vendor: ${tenant.mnemonic}")
+        logger.info { "SendMessage started for ${tenant.mnemonic}" }
 
         val sendMessageRequest = translateMessageInput(messageInput, vendor.ehrUserId, vendor.messageType)
 
@@ -41,6 +42,7 @@ class EpicMessageService(private val epicClient: EpicClient) :
             }
             httpResponse.receive<SendMessageResponse>()
         }
+        logger.info { "SendMessage completed for ${tenant.mnemonic}" }
 
         // Return the id of the message
         return response.idTypes[0].id

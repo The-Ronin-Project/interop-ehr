@@ -32,7 +32,7 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
         startDate: String,
         endDate: String
     ): Bundle<Appointment> {
-        logger.debug { "Appointment search started for ${tenant.mnemonic}" }
+        logger.info { "Appointment search started for ${tenant.mnemonic}" }
 
         val vendor = tenant.vendor
         if (vendor !is Epic) throw IllegalStateException("Tenant is not Epic vendor: ${tenant.mnemonic}")
@@ -54,7 +54,7 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
             httpResponse.receive<GetPatientAppointmentsResponse>()
         }
 
-        logger.debug { "Appointment search completed for ${tenant.mnemonic}" }
+        logger.info { "Appointment search completed for ${tenant.mnemonic}" }
         return EpicAppointmentBundle(getPatientAppointments)
     }
 }

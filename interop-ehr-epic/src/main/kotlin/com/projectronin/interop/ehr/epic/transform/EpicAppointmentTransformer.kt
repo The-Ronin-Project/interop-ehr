@@ -139,7 +139,7 @@ class EpicAppointmentTransformer : AppointmentTransformer {
                 participant = participants.map { it.localize(tenant) }
             )
         } catch (e: Exception) {
-            logger.warn { "Unable to transform Appointment: ${e.message}" }
+            logger.warn(e) { "Unable to transform Appointment: ${e.message}" }
             return null
         }
     }
