@@ -1,0 +1,419 @@
+{
+  "Error": null,
+  "Appointments": [
+    {
+      "PatientName": "TEST,INTOUCH",
+      "Date": "2/1/2022",
+      "VisitTypeName": "INTOUCH DJL VISIT",
+      "AppointmentNotes": [],
+      "AppointmentStartTime": " 2:00 PM",
+      "AppointmentDuration": "30",
+      "AppointmentStatus": "Scheduled",
+      "PatientIDs": [
+        {
+          "ID": "     Z6156",
+          "Type": "Internal"
+        },
+        {
+          "ID": "E4034",
+          "Type": "ExternalKey"
+        }
+      ],
+      "ContactIDs": [
+        {
+          "ID": "38033",
+          "Type": "CSN"
+        },
+        {
+          "ID": "38033",
+          "Type": "ASN"
+        }
+      ],
+      "VisitTypeIDs": [
+        {
+          "ID": "     236",
+          "Type": "Internal"
+        },
+        {
+          "ID": "1402215",
+          "Type": "CID"
+        }
+      ],
+      "Providers": [
+        {
+          "ProviderName": "Physician Family Medicine, MD",
+          "DepartmentName": "EMC FAMILY MEDICINE",
+          "Time": " 2:00 PM",
+          "Duration": "30",
+          "ProviderIDs": [
+            {
+              "ID": "   E1000",
+              "Type": "Internal"
+            },
+            {
+              "ID": "1402684",
+              "Type": "CID"
+            }
+          ],
+          "DepartmentIDs": [
+            {
+              "ID": "10501101",
+              "Type": "Internal"
+            },
+            {
+              "ID": "140821",
+              "Type": "CID"
+            }
+          ]
+        }
+      ],
+      "ExtraItems": null,
+      "ExtraExtensions": []
+    },
+    {
+      "PatientName": "TEST,INTOUCH DJL",
+      "Date": "2/1/2022",
+      "VisitTypeName": "INTOUCH DJL VISIT",
+      "AppointmentNotes": [],
+      "AppointmentStartTime": " 2:00 PM",
+      "AppointmentDuration": "30",
+      "AppointmentStatus": "Scheduled",
+      "PatientIDs": [
+        {
+          "ID": "     Z6740",
+          "Type": "Internal"
+        },
+        {
+          "ID": "E4650",
+          "Type": "ExternalKey"
+        }
+      ],
+      "ContactIDs": [
+        {
+          "ID": "38034",
+          "Type": "CSN"
+        },
+        {
+          "ID": "38034",
+          "Type": "ASN"
+        }
+      ],
+      "VisitTypeIDs": [
+        {
+          "ID": "     236",
+          "Type": "Internal"
+        },
+        {
+          "ID": "1402215",
+          "Type": "CID"
+        }
+      ],
+      "Providers": [
+        {
+          "ProviderName": "Physician Family Medicine, MD",
+          "DepartmentName": "EMC FAMILY MEDICINE",
+          "Time": " 2:00 PM",
+          "Duration": "30",
+          "ProviderIDs": [
+            {
+              "ID": "   E1000",
+              "Type": "Internal"
+            },
+            {
+              "ID": "1402684",
+              "Type": "CID"
+            }
+          ],
+          "DepartmentIDs": [
+            {
+              "ID": "10501101",
+              "Type": "Internal"
+            },
+            {
+              "ID": "140821",
+              "Type": "CID"
+            }
+          ]
+        }
+      ],
+      "ExtraItems": null,
+      "ExtraExtensions": []
+    },
+    {
+      "PatientName": "TEST,INTOUCH",
+      "Date": "2/2/2022",
+      "VisitTypeName": "OFFICE VISIT",
+      "AppointmentNotes": [],
+      "AppointmentStartTime": "10:15 AM",
+      "AppointmentDuration": "15",
+      "AppointmentStatus": "Scheduled",
+      "PatientIDs": [
+        {
+          "ID": "     Z6156",
+          "Type": "Internal"
+        },
+        {
+          "ID": "E4034",
+          "Type": "ExternalKey"
+        }
+      ],
+      "ContactIDs": [
+        {
+          "ID": "38035",
+          "Type": "CSN"
+        },
+        {
+          "ID": "38035",
+          "Type": "ASN"
+        }
+      ],
+      "VisitTypeIDs": [
+        {
+          "ID": "    1004",
+          "Type": "Internal"
+        },
+        {
+          "ID": "140939",
+          "Type": "CID"
+        }
+      ],
+      "Providers": [
+        {
+          "ProviderName": "Physician Family Medicine, MD",
+          "DepartmentName": "EMC FAMILY MEDICINE",
+          "Time": "10:15 AM",
+          "Duration": "15",
+          "ProviderIDs": [
+            {
+              "ID": "   E1000",
+              "Type": "Internal"
+            },
+            {
+              "ID": "1402684",
+              "Type": "CID"
+            }
+          ],
+          "DepartmentIDs": [
+            {
+              "ID": "10501101",
+              "Type": "Internal"
+            },
+            {
+              "ID": "140821",
+              "Type": "CID"
+            }
+          ]
+        }
+      ],
+      "ExtraItems": null,
+      "ExtraExtensions": []
+    },
+    {
+      "PatientName": "TEST,INTOUCH DJL",
+      "Date": "2/2/2022",
+      "VisitTypeName": "OFFICE VISIT",
+      "AppointmentNotes": [],
+      "AppointmentStartTime": "10:15 AM",
+      "AppointmentDuration": "15",
+      "AppointmentStatus": "Scheduled",
+      "PatientIDs": [
+        {
+          "ID": "     Z6740",
+          "Type": "Internal"
+        },
+        {
+          "ID": "E4650",
+          "Type": "ExternalKey"
+        }
+      ],
+      "ContactIDs": [
+        {
+          "ID": "38036",
+          "Type": "CSN"
+        },
+        {
+          "ID": "38036",
+          "Type": "ASN"
+        }
+      ],
+      "VisitTypeIDs": [
+        {
+          "ID": "    1004",
+          "Type": "Internal"
+        },
+        {
+          "ID": "140939",
+          "Type": "CID"
+        }
+      ],
+      "Providers": [
+        {
+          "ProviderName": "Physician Family Medicine, MD",
+          "DepartmentName": "EMC FAMILY MEDICINE",
+          "Time": "10:15 AM",
+          "Duration": "15",
+          "ProviderIDs": [
+            {
+              "ID": "   E1000",
+              "Type": "Internal"
+            },
+            {
+              "ID": "1402684",
+              "Type": "CID"
+            }
+          ],
+          "DepartmentIDs": [
+            {
+              "ID": "10501101",
+              "Type": "Internal"
+            },
+            {
+              "ID": "140821",
+              "Type": "CID"
+            }
+          ]
+        }
+      ],
+      "ExtraItems": null,
+      "ExtraExtensions": []
+    },
+    {
+      "PatientName": "TEST,INTOUCH DJL2",
+      "Date": "2/2/2022",
+      "VisitTypeName": "OFFICE VISIT",
+      "AppointmentNotes": [],
+      "AppointmentStartTime": "10:15 AM",
+      "AppointmentDuration": "15",
+      "AppointmentStatus": "Scheduled",
+      "PatientIDs": [
+        {
+          "ID": "     Z6783",
+          "Type": "Internal"
+        },
+        {
+          "ID": "E4693",
+          "Type": "ExternalKey"
+        }
+      ],
+      "ContactIDs": [
+        {
+          "ID": "38037",
+          "Type": "CSN"
+        },
+        {
+          "ID": "38037",
+          "Type": "ASN"
+        }
+      ],
+      "VisitTypeIDs": [
+        {
+          "ID": "    1004",
+          "Type": "Internal"
+        },
+        {
+          "ID": "140939",
+          "Type": "CID"
+        }
+      ],
+      "Providers": [
+        {
+          "ProviderName": "Physician Family Medicine, MD",
+          "DepartmentName": "EMC FAMILY MEDICINE",
+          "Time": "10:15 AM",
+          "Duration": "15",
+          "ProviderIDs": [
+            {
+              "ID": "   E1000",
+              "Type": "Internal"
+            },
+            {
+              "ID": "1402684",
+              "Type": "CID"
+            }
+          ],
+          "DepartmentIDs": [
+            {
+              "ID": "10501101",
+              "Type": "Internal"
+            },
+            {
+              "ID": "140821",
+              "Type": "CID"
+            }
+          ]
+        }
+      ],
+      "ExtraItems": null,
+      "ExtraExtensions": []
+    },
+    {
+      "PatientName": "MYCHART,THEODORE",
+      "Date": "2/8/2022",
+      "VisitTypeName": "NEW PATIENT",
+      "AppointmentNotes": [],
+      "AppointmentStartTime": " 6:55 PM",
+      "AppointmentDuration": "15",
+      "AppointmentStatus": "Arrived",
+      "PatientIDs": [
+        {
+          "ID": "     Z4575",
+          "Type": "Internal"
+        },
+        {
+          "ID": "E2734",
+          "Type": "ExternalKey"
+        }
+      ],
+      "ContactIDs": [
+        {
+          "ID": "38184",
+          "Type": "CSN"
+        },
+        {
+          "ID": "38184",
+          "Type": "ASN"
+        }
+      ],
+      "VisitTypeIDs": [
+        {
+          "ID": "    1003",
+          "Type": "Internal"
+        },
+        {
+          "ID": "140938",
+          "Type": "CID"
+        }
+      ],
+      "Providers": [
+        {
+          "ProviderName": "Physician Family Medicine, MD",
+          "DepartmentName": "EMC FAMILY MEDICINE",
+          "Time": " 6:55 PM",
+          "Duration": "15",
+          "ProviderIDs": [
+            {
+              "ID": "   E1000",
+              "Type": "Internal"
+            },
+            {
+              "ID": "1402684",
+              "Type": "CID"
+            }
+          ],
+          "DepartmentIDs": [
+            {
+              "ID": "10501101",
+              "Type": "Internal"
+            },
+            {
+              "ID": "140821",
+              "Type": "CID"
+            }
+          ]
+        }
+      ],
+      "ExtraItems": null,
+      "ExtraExtensions": []
+    }
+  ]
+}

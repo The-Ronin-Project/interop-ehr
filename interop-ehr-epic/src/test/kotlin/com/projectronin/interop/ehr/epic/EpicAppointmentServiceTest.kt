@@ -1,7 +1,9 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
 import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
-import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsResponse
+import com.projectronin.interop.ehr.epic.apporchard.model.GetProviderAppointmentRequest
+import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProvider
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import io.ktor.client.call.receive
 import io.ktor.client.statement.HttpResponse
@@ -18,18 +20,20 @@ import org.junit.jupiter.api.assertThrows
 class EpicAppointmentServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var httpResponse: HttpResponse
-    private val validAppointmentSearchResponse =
-        readResource<GetPatientAppointmentsResponse>("/ExampleAppointmentBundle.json")
+    private val validPatientAppointmentSearchResponse =
+        readResource<GetAppointmentsResponse>("/ExampleAppointmentBundle.json")
+    private val validProviderAppointmentSearchResponse =
+        readResource<GetAppointmentsResponse>("/ExampleProviderAppointmentBundle.json")
     private val testPrivateKey = this::class.java.getResource("/TestPrivateKey.txt")!!.readText()
 
     @BeforeEach
     fun initTest() {
-        epicClient = mockk<EpicClient>()
-        httpResponse = mockk<HttpResponse>()
+        epicClient = mockk()
+        httpResponse = mockk()
     }
 
     @Test
-    fun `ensure appointments are returned`() {
+    fun `ensure patient appointments are returned`() {
         val tenant =
             createTestTenant(
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
@@ -39,7 +43,7 @@ class EpicAppointmentServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<GetPatientAppointmentsResponse>() } returns validAppointmentSearchResponse
+        coEvery { httpResponse.receive<GetAppointmentsResponse>() } returns validPatientAppointmentSearchResponse
         coEvery {
             epicClient.post(
                 tenant,
@@ -49,17 +53,17 @@ class EpicAppointmentServiceTest {
         } returns httpResponse
 
         val bundle =
-            EpicAppointmentService(epicClient).findAppointments(
+            EpicAppointmentService(epicClient).findPatientAppointments(
                 tenant,
                 "E5597",
                 "1/1/2015",
                 "11/1/2015",
             )
-        assertEquals(validAppointmentSearchResponse, bundle.resource)
+        assertEquals(validPatientAppointmentSearchResponse, bundle.resource)
     }
 
     @Test
-    fun `ensure http error handled`() {
+    fun `ensure patient http error handled`() {
         val tenant =
             createTestTenant(
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
@@ -69,7 +73,7 @@ class EpicAppointmentServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.receive<GetPatientAppointmentsResponse>() } returns validAppointmentSearchResponse
+        coEvery { httpResponse.receive<GetAppointmentsResponse>() } returns validPatientAppointmentSearchResponse
         coEvery {
             epicClient.post(
                 tenant,
@@ -79,9 +83,79 @@ class EpicAppointmentServiceTest {
         } returns httpResponse
 
         assertThrows<IOException> {
-            EpicAppointmentService(epicClient).findAppointments(
+            EpicAppointmentService(epicClient).findPatientAppointments(
                 tenant,
                 "E5597",
+                "1/1/2015",
+                "11/1/2015",
+            )
+        }
+    }
+
+    @Test
+    fun `ensure provider appointments are returned`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT"
+            )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.receive<GetAppointmentsResponse>() } returns validProviderAppointmentSearchResponse
+        coEvery {
+            epicClient.post(
+                tenant,
+                "api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments",
+                GetProviderAppointmentRequest(
+                    userID = "ehrUserId",
+                    providers = listOf(ScheduleProvider(id = "E1000")),
+                    startDate = "1/1/2015",
+                    endDate = "11/1/2015"
+                )
+            )
+        } returns httpResponse
+
+        val bundle =
+            EpicAppointmentService(epicClient).findProviderAppointments(
+                tenant,
+                listOf("E1000"),
+                "1/1/2015",
+                "11/1/2015",
+            )
+        assertEquals(validProviderAppointmentSearchResponse, bundle.resource)
+    }
+
+    @Test
+    fun `ensure provider http error handled`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT"
+            )
+
+        every { httpResponse.status } returns HttpStatusCode.NotFound
+        coEvery { httpResponse.receive<GetAppointmentsResponse>() } returns validProviderAppointmentSearchResponse
+        coEvery {
+            epicClient.post(
+                tenant,
+                "api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments",
+                GetProviderAppointmentRequest(
+                    userID = "ehrUserId",
+                    providers = listOf(ScheduleProvider(id = "E1000")),
+                    startDate = "1/1/2015",
+                    endDate = "11/1/2015"
+                )
+            )
+        } returns httpResponse
+
+        assertThrows<IOException> {
+            EpicAppointmentService(epicClient).findProviderAppointments(
+                tenant,
+                listOf("E1000"),
                 "1/1/2015",
                 "11/1/2015",
             )

@@ -4,12 +4,13 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
 
 /**
- * Represents appointments for a patient returned from Epic AppOrchard.
+ * Represents appointments for a patient or provider returned from Epic AppOrchard.
  *
  * See [GetPatientAppointments](https://apporchard.epic.com/Sandbox?api=195)
+ * and [GetProviderAppointments](https://apporchard.epic.com/Sandbox?api=202)
  */
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
-data class GetPatientAppointmentsResponse(
+data class GetAppointmentsResponse(
     val appointments: List<Appointment>,
-    val error: String?
+    val error: String?,
 )

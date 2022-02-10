@@ -12,10 +12,20 @@ interface AppointmentService {
      * Finds the appointments at a given [tenant] for a patient identified by the [patientMRN] between
      * the [startDate] and [endDate] from an EHR tenant.
      */
-    fun findAppointments(
+    fun findPatientAppointments(
         tenant: Tenant,
         patientMRN: String,
         startDate: String,
-        endDate: String
+        endDate: String,
+    ): Bundle<Appointment>
+
+    /**
+     * Finds the appointments at a given [tenant] for the [providerIDs] between the [startDate] and [endDate].
+     */
+    fun findProviderAppointments(
+        tenant: Tenant,
+        providerIDs: List<String>,
+        startDate: String,
+        endDate: String,
     ): Bundle<Appointment>
 }

@@ -1,7 +1,7 @@
 package com.projectronin.interop.ehr.epic.model
 
 import com.projectronin.interop.ehr.epic.apporchard.model.Appointment
-import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsResponse
+import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
 import com.projectronin.interop.ehr.epic.apporchard.model.IDType
 import com.projectronin.interop.ehr.epic.deformat
 import com.projectronin.interop.ehr.model.enums.DataSource
@@ -15,7 +15,7 @@ class EpicAppointmentBundleTest {
     fun `can build from object`() {
         val visitIdentifier1 = IDType(id = "25000", type = "Internal")
         val visitIdentifier2 = IDType(id = "25001", type = "Internal")
-        val getPatientAppointments = GetPatientAppointmentsResponse(
+        val getPatientAppointments = GetAppointmentsResponse(
             error = null,
             appointments = listOf(
                 Appointment(
@@ -77,7 +77,7 @@ class EpicAppointmentBundleTest {
 
     @Test
     fun `ensure no appointments handled`() {
-        val getPatientAppointments = GetPatientAppointmentsResponse(
+        val getPatientAppointments = GetAppointmentsResponse(
             error = null,
             appointments = listOf()
         )
@@ -92,7 +92,7 @@ class EpicAppointmentBundleTest {
     fun `returns JSON as raw`() {
         val visitIdentifier1 = IDType(id = "25000", type = "Internal")
         val visitIdentifier2 = IDType(id = "25001", type = "Internal")
-        val getPatientAppointments = GetPatientAppointmentsResponse(
+        val getPatientAppointments = GetAppointmentsResponse(
             error = null,
             appointments = listOf(
                 Appointment(
