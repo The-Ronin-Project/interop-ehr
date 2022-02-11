@@ -32,16 +32,13 @@ class TenantServiceDB(private val tenantDAO: TenantDAO, private val providerPool
     }
 
     override fun getPoolsForProviders(tenant: Tenant, providerIds: List<String>): Map<String, String> {
-        // TODO: This could be simplified by putting the ID on the Tenant object; however, the current embedded implementation
-        //  will break unless this is nullable. So for now, I am leaving this as is, but we should consider improving this in the future.
-        val tenantDO = tenantDAO.getTenantForMnemonic(tenant.mnemonic) ?: return emptyMap()
-
-        return providerPoolDAO.getPoolsForProviders(tenantDO.id, providerIds)
+        return providerPoolDAO.getPoolsForProviders(tenant.internalId, providerIds)
     }
 
     private fun createTenant(tenantDO: TenantDO, vendor: Vendor): Tenant {
         val batchConfig = createBatchConfig(tenantDO)
         return Tenant(
+            internalId = tenantDO.id,
             mnemonic = tenantDO.mnemonic,
             batchConfig = batchConfig,
             vendor = vendor
@@ -69,7 +66,9 @@ class TenantServiceDB(private val tenantDAO: TenantDAO, private val providerPool
             serviceEndpoint = epicTenant.serviceEndpoint,
             release = epicTenant.release,
             ehrUserId = epicTenant.ehrUserId,
-            messageType = epicTenant.messageType
+            messageType = epicTenant.messageType,
+            practitionerProviderSystem = epicTenant.practitionerProviderSystem,
+            practitionerUserSystem = epicTenant.practitionerUserSystem
         )
     }
 }

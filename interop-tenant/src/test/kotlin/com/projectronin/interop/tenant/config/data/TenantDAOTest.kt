@@ -67,6 +67,8 @@ class TenantDAOTest {
             assertEquals("https://localhost:8080/", ehrTenant.serviceEndpoint)
             assertEquals("RONIN", ehrTenant.ehrUserId)
             assertEquals("Ronin Alerts", ehrTenant.messageType)
+            assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.836982", ehrTenant.practitionerProviderSystem)
+            assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.697780", ehrTenant.practitionerUserSystem)
         }
     }
 }

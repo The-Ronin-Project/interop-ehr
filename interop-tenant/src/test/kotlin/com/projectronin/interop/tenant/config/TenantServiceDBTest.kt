@@ -99,10 +99,13 @@ class TenantServiceDBTest {
             every { serviceEndpoint } returns "http://localhost/"
             every { ehrUserId } returns "ehr user"
             every { messageType } returns "message type"
+            every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+            every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
         }
         every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
 
         val expectedTenant = Tenant(
+            internalId = 1,
             mnemonic = "Tenant1",
             batchConfig = null,
             vendor = Epic(
@@ -114,7 +117,9 @@ class TenantServiceDBTest {
                 serviceEndpoint = "http://localhost/",
                 release = "release",
                 ehrUserId = "ehr user",
-                messageType = "message type"
+                messageType = "message type",
+                practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
             )
         )
 
@@ -151,10 +156,13 @@ class TenantServiceDBTest {
             every { serviceEndpoint } returns "http://localhost/"
             every { ehrUserId } returns "ehr user"
             every { messageType } returns "message type"
+            every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+            every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
         }
         every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
 
         val expectedTenant = Tenant(
+            internalId = 1,
             mnemonic = "Tenant1",
             batchConfig = null,
             vendor = Epic(
@@ -166,7 +174,9 @@ class TenantServiceDBTest {
                 serviceEndpoint = "http://localhost/",
                 release = "release",
                 ehrUserId = "ehr user",
-                messageType = "message type"
+                messageType = "message type",
+                practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
             )
         )
 
@@ -203,10 +213,13 @@ class TenantServiceDBTest {
             every { serviceEndpoint } returns "http://localhost/"
             every { ehrUserId } returns "ehr user"
             every { messageType } returns "message type"
+            every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+            every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
         }
         every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
 
         val expectedTenant = Tenant(
+            internalId = 1,
             mnemonic = "Tenant1",
             batchConfig = null,
             vendor = Epic(
@@ -218,7 +231,9 @@ class TenantServiceDBTest {
                 serviceEndpoint = "http://localhost/",
                 release = "release",
                 ehrUserId = "ehr user",
-                messageType = "message type"
+                messageType = "message type",
+                practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
             )
         )
 
@@ -255,10 +270,13 @@ class TenantServiceDBTest {
             every { serviceEndpoint } returns "http://localhost/"
             every { ehrUserId } returns "ehr user"
             every { messageType } returns "message type"
+            every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+            every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
         }
         every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
 
         val expectedTenant = Tenant(
+            internalId = 1,
             mnemonic = "Tenant1",
             batchConfig = BatchConfig(
                 availableStart = LocalTime.of(20, 0),
@@ -273,7 +291,9 @@ class TenantServiceDBTest {
                 serviceEndpoint = "http://localhost/",
                 release = "release",
                 ehrUserId = "ehr user",
-                messageType = "message type"
+                messageType = "message type",
+                practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
             )
         )
 
@@ -287,23 +307,9 @@ class TenantServiceDBTest {
     }
 
     @Test
-    fun `provider-pool request for unknown tenant returns an empty map`() {
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "unknown"
-        }
-        every { tenantDAO.getTenantForMnemonic("unknown") } returns null
-
-        val poolsByProvider = service.getPoolsForProviders(tenant, listOf("known1", "known2"))
-        assertTrue(poolsByProvider.isEmpty())
-    }
-
-    @Test
     fun `provider-pool request supports unknown providers`() {
         val tenant = mockk<Tenant> {
-            every { mnemonic } returns "known"
-        }
-        every { tenantDAO.getTenantForMnemonic("known") } returns mockk {
-            every { id } returns 100
+            every { internalId } returns 100
         }
         every { providerPoolDAO.getPoolsForProviders(100, listOf("unknown1", "unknown2")) } returns emptyMap()
 
@@ -314,10 +320,7 @@ class TenantServiceDBTest {
     @Test
     fun `provider-pool request supports known providers`() {
         val tenant = mockk<Tenant> {
-            every { mnemonic } returns "known"
-        }
-        every { tenantDAO.getTenantForMnemonic("known") } returns mockk {
-            every { id } returns 100
+            every { internalId } returns 100
         }
         every {
             providerPoolDAO.getPoolsForProviders(
@@ -335,10 +338,7 @@ class TenantServiceDBTest {
     @Test
     fun `provider-pool request supports known and unknown providers`() {
         val tenant = mockk<Tenant> {
-            every { mnemonic } returns "known"
-        }
-        every { tenantDAO.getTenantForMnemonic("known") } returns mockk {
-            every { id } returns 100
+            every { internalId } returns 100
         }
         every {
             providerPoolDAO.getPoolsForProviders(

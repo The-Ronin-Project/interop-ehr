@@ -40,3 +40,13 @@ databaseChangeLog:
                   type: java.sql.Types.VARCHAR(32)
                   constraints:
                     nullable: false
+              - column:
+                  name: practitioner_provider_system
+                  type: java.sql.Types.VARCHAR(64)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: practitioner_user_system
+                  type: java.sql.Types.VARCHAR(64)
+                  constraints:
+                    nullable: false

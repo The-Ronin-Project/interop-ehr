@@ -9,6 +9,8 @@ import com.projectronin.interop.tenant.config.model.AuthenticationConfig
  * @property release The release of Epic being used by the tenant.
  * @property ehrUserId The ID of the User under which Epic communication should occur.
  * @property messageType The type of InBasket message that should be sent to Epic.
+ * @property practitionerProviderSystem The system utilized by this Epic instance to represent a practitioner's provider ID.
+ * @property practitionerUserSystem The system utilized by this Epic instance to represent a practitioner's user ID.
  */
 @JsonTypeName("EPIC")
 data class Epic(
@@ -17,7 +19,9 @@ data class Epic(
     override val serviceEndpoint: String,
     val release: String,
     val ehrUserId: String,
-    val messageType: String
+    val messageType: String,
+    val practitionerProviderSystem: String,
+    val practitionerUserSystem: String
 ) : Vendor {
     override val type: VendorType
         get() = VendorType.EPIC

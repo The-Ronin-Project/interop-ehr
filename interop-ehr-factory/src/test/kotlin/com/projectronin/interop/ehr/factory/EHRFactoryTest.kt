@@ -18,8 +18,17 @@ class EHRFactoryTest {
         }
         val ehrFactory = EHRFactory(listOf(epicVendorFactory))
         val vendor =
-            Epic("clientId", AuthenticationConfig("public", "private"), "endpoint", "release", "userId", "message")
-        val tenant = Tenant("TENANT", null, vendor)
+            Epic(
+                "clientId",
+                AuthenticationConfig("public", "private"),
+                "endpoint",
+                "release",
+                "userId",
+                "message",
+                "providerSystem",
+                "userSystem"
+            )
+        val tenant = Tenant(1, "TENANT", null, vendor)
 
         val vendorFactory = ehrFactory.getVendorFactory(tenant)
         assertEquals(epicVendorFactory, vendorFactory)
@@ -30,8 +39,17 @@ class EHRFactoryTest {
         // Today we have to set this up with no factories since we only currently support 1 VendorType.
         val ehrFactory = EHRFactory(listOf())
         val vendor =
-            Epic("clientId", AuthenticationConfig("public", "private"), "endpoint", "release", "userId", "message")
-        val tenant = Tenant("TENANT", null, vendor)
+            Epic(
+                "clientId",
+                AuthenticationConfig("public", "private"),
+                "endpoint",
+                "release",
+                "userId",
+                "message",
+                "providerSystem",
+                "userSystem"
+            )
+        val tenant = Tenant(1, "TENANT", null, vendor)
 
         val exception = assertThrows(IllegalStateException::class.java) {
             ehrFactory.getVendorFactory(tenant)

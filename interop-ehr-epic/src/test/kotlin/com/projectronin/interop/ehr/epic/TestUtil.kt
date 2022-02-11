@@ -28,9 +28,13 @@ fun createTestTenant(
     privateKey: String,
     tenantMnemonic: String = "mnemonic",
     ehrUserId: String = "ehrUserId",
-    messageType: String = "messageType"
+    messageType: String = "messageType",
+    internalId: Int = 1,
+    practitionerProviderSystem: String = "providerSystem",
+    practitionerUserSystem: String = "userSystem"
 ): Tenant {
     return Tenant(
+        internalId,
         tenantMnemonic,
         BatchConfig(LocalTime.MIN, LocalTime.MAX),
         Epic(
@@ -39,7 +43,9 @@ fun createTestTenant(
             serviceEndpoint,
             "release",
             ehrUserId,
-            messageType
+            messageType,
+            practitionerProviderSystem,
+            practitionerUserSystem
         )
     )
 }

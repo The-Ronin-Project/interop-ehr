@@ -10,4 +10,6 @@ interface EpicTenantDO : EHRTenantDO, Entity<EpicTenantDO> {
     val serviceEndpoint: String
     val ehrUserId: String
     val messageType: String
+    val practitionerProviderSystem: String
+    val practitionerUserSystem: String
 }

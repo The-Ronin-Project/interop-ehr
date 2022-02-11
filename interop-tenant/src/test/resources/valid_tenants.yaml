@@ -1,6 +1,7 @@
 ---
 # List of Tenants and their configuration
-- mnemonic: "SAND-AO"
+- internalId: 1
+  mnemonic: "SAND-AO"
   batchConfig:
     availableStart: "22:00:00"
     availableEnd: "06:00:00"
@@ -14,7 +15,10 @@
     release: "1.0"
     ehrUserId: "1"
     messageType: "Message Report"
-- mnemonic: "PSJ"
+    practitionerProviderSystem: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+    practitionerUserSystem: "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+- internalId: 2
+  mnemonic: "PSJ"
   batchConfig:
     availableStart: "22:00:00"
     availableEnd: "06:00:00"
@@ -28,3 +32,5 @@
     release: "1.0"
     ehrUserId: "1"
     messageType: "Message Report"
+    practitionerProviderSystem: "urn:oid:1.2.840.114350.1.13.1.1.7.2.836982"
+    practitionerUserSystem: "urn:oid:1.2.840.114350.1.13.1.1.7.2.697780"

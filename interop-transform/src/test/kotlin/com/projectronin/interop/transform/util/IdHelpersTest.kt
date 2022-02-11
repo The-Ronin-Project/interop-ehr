@@ -13,6 +13,7 @@ class IdHelpersTest {
     @Test
     fun `creates Identifier from Tenant`() {
         val tenant = Tenant(
+            internalId = 1,
             mnemonic = "test",
             batchConfig = null,
             vendor = Epic(
@@ -21,7 +22,9 @@ class IdHelpersTest {
                 serviceEndpoint = "endpoint",
                 release = "release",
                 ehrUserId = "userId",
-                messageType = "messageType"
+                messageType = "messageType",
+                practitionerProviderSystem = "providerSystem",
+                practitionerUserSystem = "userSystem"
             )
         )
 
