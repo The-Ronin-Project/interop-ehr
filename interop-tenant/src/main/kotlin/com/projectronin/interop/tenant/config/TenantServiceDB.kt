@@ -11,10 +11,12 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import com.projectronin.interop.tenant.config.model.vendor.Vendor
 import mu.KotlinLogging
+import org.springframework.stereotype.Service
 
 /**
  * Service responsible for [Tenant]s loaded from a database.
  */
+@Service
 class TenantServiceDB(private val tenantDAO: TenantDAO, private val providerPoolDAO: ProviderPoolDAO) : TenantService {
     private val logger = KotlinLogging.logger { }
 

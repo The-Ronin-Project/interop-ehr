@@ -5,12 +5,10 @@ import com.projectronin.interop.tenant.config.jackson.JacksonManager
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.apache.commons.text.StringSubstitutor
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Service
 
 /**
  * Service responsible for [Tenant]s loaded from a configuration located at [tenantYamlFile], defaulting to tenants.yaml on the classpath.
  */
-@Service
 class TenantServiceEmbedded(
     @Value("\${interop.tenant.config:classpath:tenants.yaml}") private val tenantYamlFile: String
 ) : TenantService {
