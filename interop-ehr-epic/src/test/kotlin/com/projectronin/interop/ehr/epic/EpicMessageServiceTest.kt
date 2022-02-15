@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.epic.apporchard.model.IDType
 import com.projectronin.interop.ehr.epic.apporchard.model.SendMessageRecipient
 import com.projectronin.interop.ehr.epic.apporchard.model.SendMessageRequest
@@ -13,7 +14,6 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.tenant.config.TenantService
 import io.ktor.client.call.receive
 import io.ktor.client.statement.HttpResponse
-import io.ktor.features.NotFoundException
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.errors.IOException
 import io.mockk.coEvery
@@ -188,7 +188,7 @@ class EpicMessageServiceTest {
             )
         )
 
-        assertThrows<NotFoundException> {
+        assertThrows<VendorIdentifierNotFoundException> {
             EpicMessageService(epicClient, tenantService).sendMessage(
                 tenant,
                 EHRMessageInput(

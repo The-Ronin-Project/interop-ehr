@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.MessageService
 import com.projectronin.interop.ehr.epic.apporchard.model.SendMessageRecipient
 import com.projectronin.interop.ehr.epic.apporchard.model.SendMessageRequest
@@ -11,7 +12,6 @@ import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.call.receive
-import io.ktor.features.NotFoundException
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
@@ -74,7 +74,7 @@ class EpicMessageService(private val epicClient: EpicClient, private val tenantS
         val externalIDList =
             recipients.map {
                 it.identifiers.find { identifier -> identifier.type?.text == "EXTERNAL" }?.value
-                    ?: throw NotFoundException("No EXTERNAL Identifier found for practitioner ${it.id}")
+                    ?: throw VendorIdentifierNotFoundException("No EXTERNAL Identifier found for practitioner ${it.id}")
             }
         val poolList = tenantService.getPoolsForProviders(tenant, externalIDList)
 
