@@ -27,7 +27,7 @@ class TenantServiceEmbeddedTest {
         val tenant = tenantService.getTenantForMnemonic("SAND-AO")
         assertNotNull(tenant)
         assertEquals(1, tenant!!.internalId)
-        assertEquals("SAND-AO", tenant!!.mnemonic)
+        assertEquals("SAND-AO", tenant.mnemonic)
 
         val batchConfig = tenant.batchConfig
         assertNotNull(batchConfig)
@@ -63,7 +63,7 @@ class TenantServiceEmbeddedTest {
         val tenant = tenantService.getTenantForMnemonic("SAND-AO")
         assertNotNull(tenant)
         assertEquals(1, tenant!!.internalId)
-        assertEquals("SAND-AO", tenant!!.mnemonic)
+        assertEquals("SAND-AO", tenant.mnemonic)
 
         val batchConfig = tenant.batchConfig
         assertNotNull(batchConfig)
@@ -80,11 +80,12 @@ class TenantServiceEmbeddedTest {
         // We will not assert the proper key is here, just that it was loaded
         assertNotNull(authenticationConfig.privateKey)
 
-        // Cast to epic to ensure epic specific field are populated
+        // Cast to epic to ensure epic specific fields are populated
         val epicVendor = vendor as Epic
         assertEquals("1.0", epicVendor.release)
         assertEquals("1", epicVendor.ehrUserId)
         assertEquals("Message Report", epicVendor.messageType)
+        assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.836982", epicVendor.practitionerProviderSystem)
         assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.697780", epicVendor.practitionerUserSystem)
     }
 

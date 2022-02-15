@@ -21,7 +21,7 @@ import org.junit.jupiter.api.Test
 class EpicPractitionerTest {
     @Test
     fun `can build from object`() {
-        val identifier = Identifier(system = Uri("abc123"), value = "E14345")
+        val identifier = Identifier(system = Uri("abc123"), type = CodeableConcept(text = "Internal"), value = "E14345")
         val name = HumanName(use = NameUse.USUAL, family = "Staywell", given = listOf("Physician"))
         val communication = CodeableConcept(
             coding = listOf(Coding(system = Uri("abc"), code = Code("11"), display = "English")),
@@ -49,6 +49,7 @@ class EpicPractitionerTest {
         // Identifier
         assertEquals(1, epicPractitioner.identifier.size)
         assertEquals(identifier, epicPractitioner.identifier[0].element)
+        assertEquals("Internal", epicPractitioner.identifier[0].type?.text)
         assertEquals("abc123", epicPractitioner.identifier[0].system)
         assertEquals("E14345", epicPractitioner.identifier[0].value)
 

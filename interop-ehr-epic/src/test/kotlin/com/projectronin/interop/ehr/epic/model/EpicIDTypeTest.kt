@@ -12,8 +12,9 @@ class EpicIDTypeTest {
 
         val epicIDType = EpicIDType(idType)
         assertEquals(idType, epicIDType.element)
-        assertEquals("ExternalKey", epicIDType.system)
+        assertEquals("ExternalKey", epicIDType.type?.text)
         assertEquals("E5597", epicIDType.value)
+        assertEquals(null, epicIDType.system)
     }
 
     @Test
