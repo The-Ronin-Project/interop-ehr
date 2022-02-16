@@ -1,6 +1,6 @@
 package com.projectronin.interop.ehr.epic.client
 
-import com.projectronin.interop.ehr.auth.AuthenticationBroker
+import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
 import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
 import com.projectronin.interop.ehr.epic.auth.EpicAuthentication
 import com.projectronin.interop.ehr.epic.createTestTenant
@@ -18,7 +18,7 @@ import org.junit.jupiter.api.assertThrows
 class EpicClientTest {
     private val validPatientSearchJson = this::class.java.getResource("/ExamplePatientBundle.json")!!.readText()
     private val validAppointmentSearchJson = this::class.java.getResource("/ExampleAppointmentBundle.json")!!.readText()
-    private val authenticationBroker = mockk<AuthenticationBroker>()
+    private val authenticationBroker = mockk<EHRAuthenticationBroker>()
     private val epicClient = EpicClient(getClient(), authenticationBroker)
 
     @Test

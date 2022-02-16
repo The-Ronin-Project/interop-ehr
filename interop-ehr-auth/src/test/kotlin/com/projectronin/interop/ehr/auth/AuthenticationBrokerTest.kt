@@ -21,7 +21,7 @@ class AuthenticationBrokerTest {
         }
 
         // Since we only have 1 vendor today, we have to send this with no authentication service.
-        val broker = AuthenticationBroker(listOf())
+        val broker = EHRAuthenticationBroker(listOf())
         val exception = assertThrows<IllegalStateException> {
             broker.getAuthentication(tenant)
         }
@@ -43,7 +43,7 @@ class AuthenticationBrokerTest {
         every { authenticationService.vendorType } returns VendorType.EPIC
         every { authenticationService.getAuthentication(tenant) } returns null
 
-        val broker = AuthenticationBroker(listOf(authenticationService))
+        val broker = EHRAuthenticationBroker(listOf(authenticationService))
         val authentication = broker.getAuthentication(tenant)
         assertNull(authentication)
 
@@ -67,7 +67,7 @@ class AuthenticationBrokerTest {
         val mockedAuthentication = mockk<Authentication>()
         every { authenticationService.getAuthentication(tenant) } returns mockedAuthentication
 
-        val broker = AuthenticationBroker(listOf(authenticationService))
+        val broker = EHRAuthenticationBroker(listOf(authenticationService))
         val authentication = broker.getAuthentication(tenant)
         assertEquals(mockedAuthentication, authentication)
 
@@ -97,7 +97,7 @@ class AuthenticationBrokerTest {
         val mockedAuthentication2 = mockk<Authentication>()
         every { authenticationService.getAuthentication(tenant) } returns mockedAuthentication1 andThen mockedAuthentication2
 
-        val broker = AuthenticationBroker(listOf(authenticationService))
+        val broker = EHRAuthenticationBroker(listOf(authenticationService))
 
         // This test needs to call in once to ensure the value is set in the Map.
         val authentication = broker.getAuthentication(tenant)
@@ -136,7 +136,7 @@ class AuthenticationBrokerTest {
         val mockedAuthentication2 = mockk<Authentication>()
         every { authenticationService.getAuthentication(tenant) } returns mockedAuthentication1 andThen mockedAuthentication2
 
-        val broker = AuthenticationBroker(listOf(authenticationService))
+        val broker = EHRAuthenticationBroker(listOf(authenticationService))
 
         // This test needs to call in once to ensure the value is set in the Map.
         val authentication = broker.getAuthentication(tenant)
@@ -176,7 +176,7 @@ class AuthenticationBrokerTest {
         val mockedAuthentication2 = mockk<Authentication>()
         every { authenticationService.getAuthentication(tenant) } returns mockedAuthentication1 andThen mockedAuthentication2
 
-        val broker = AuthenticationBroker(listOf(authenticationService))
+        val broker = EHRAuthenticationBroker(listOf(authenticationService))
 
         // This test needs to call in once to ensure the value is set in the Map.
         val authentication = broker.getAuthentication(tenant)
@@ -214,7 +214,7 @@ class AuthenticationBrokerTest {
         }
         every { authenticationService.getAuthentication(tenant) } returns mockedAuthentication
 
-        val broker = AuthenticationBroker(listOf(authenticationService))
+        val broker = EHRAuthenticationBroker(listOf(authenticationService))
 
         // This test needs to call in once to ensure the value is set in the Map.
         val authentication = broker.getAuthentication(tenant)

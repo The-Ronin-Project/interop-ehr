@@ -13,7 +13,6 @@ The following represent the core components for integrating with EHRs.
 * [interop-ehr-liquibase](interop-ehr-liquibase) - Provides Liquibase changelogs defining the EHR configuration database
   used by InterOps.
 * [interop-tenant](interop-tenant) - Provides access to Tenant configuration data.
-* [interop-fhir](interop-fhir) - Contains FHIR resource models and FHIR validation.
 * [interop-transform](interop-transform) - Provides APIs for transforming data between states
 * [interop-ehr](interop-ehr) - Abstraction layer around the various supported EHR vendors
 * [interop-ehr-auth](interop-ehr-auth) - Provides support for Authentication with an EHR.

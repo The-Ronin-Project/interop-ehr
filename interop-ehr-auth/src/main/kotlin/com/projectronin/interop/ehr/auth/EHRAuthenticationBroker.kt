@@ -9,7 +9,7 @@ import java.time.Instant
  * Brokers [Authentication] allowing re-use of existing credentials as long as they have not expired.
  */
 @Component
-class AuthenticationBroker(authenticationServices: List<AuthenticationService>) {
+class EHRAuthenticationBroker(authenticationServices: List<AuthenticationService>) {
     // Ideally, we could reuse the VendorFactory here, but this creates circular dependencies:
     // Factory requires Service, which requires Client, which requires Broker, which requires Factory
     // So we're following the same model used by the VendorFactory and EHRFactory within the AuthenticationService and here.

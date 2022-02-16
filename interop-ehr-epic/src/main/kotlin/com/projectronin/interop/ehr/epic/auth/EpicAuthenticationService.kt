@@ -13,7 +13,6 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.Parameters
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import java.security.KeyFactory
 import java.security.interfaces.RSAPrivateKey
@@ -26,7 +25,7 @@ import java.util.UUID
  * Epic implementation of [AuthenticationService]
  */
 @Component
-class EpicAuthenticationService(@Qualifier("epic") private val client: HttpClient) : AuthenticationService {
+class EpicAuthenticationService(private val client: HttpClient) : AuthenticationService {
     private val logger = KotlinLogging.logger { }
     private val authURLPart = "/oauth2/token"
 

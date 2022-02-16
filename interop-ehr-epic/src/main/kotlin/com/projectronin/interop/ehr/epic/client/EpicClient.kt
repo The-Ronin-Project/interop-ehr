@@ -1,6 +1,6 @@
 package com.projectronin.interop.ehr.epic.client
 
-import com.projectronin.interop.ehr.auth.AuthenticationBroker
+import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
@@ -13,7 +13,6 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 
 /**
@@ -21,8 +20,8 @@ import org.springframework.stereotype.Component
  */
 @Component
 class EpicClient(
-    @Qualifier("epic") private val client: HttpClient,
-    private val authenticationBroker: AuthenticationBroker
+    private val client: HttpClient,
+    private val authenticationBroker: EHRAuthenticationBroker
 ) {
     private val logger = KotlinLogging.logger { }
 
