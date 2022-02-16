@@ -23,9 +23,9 @@ fun deformat(json: String): String =
     objectMapper.writeValueAsString(objectMapper.readValue<Any>(json))
 
 fun createTestTenant(
-    clientId: String,
-    serviceEndpoint: String,
-    privateKey: String,
+    clientId: String = "clientId",
+    serviceEndpoint: String = "http://no.endpo.int",
+    privateKey: String = "privateKey",
     tenantMnemonic: String = "mnemonic",
     ehrUserId: String = "ehrUserId",
     messageType: String = "messageType",

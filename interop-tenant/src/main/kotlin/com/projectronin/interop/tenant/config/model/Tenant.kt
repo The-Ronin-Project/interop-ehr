@@ -14,4 +14,9 @@ data class Tenant(
     val mnemonic: String,
     val batchConfig: BatchConfig?,
     val vendor: Vendor
-)
+) {
+    inline fun <reified T : Vendor> vendorAs(): T {
+        if (vendor !is T) throw RuntimeException("Vendor is not a ${T::class.java.simpleName}")
+        return vendor
+    }
+}
