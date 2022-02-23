@@ -13,6 +13,7 @@ class EpicVendorFactoryTest {
     private val patientService = mockk<EpicPatientService>()
     private val practitionerService = mockk<EpicPractitionerService>()
     private val conditionService = mockk<EpicConditionService>()
+    private val identifierService = mockk<EpicIdentifierService>()
     private val practitionerTransformer = mockk<R4PractitionerTransformer>()
     private val practitionerRoleTransformer = mockk<R4PractitionerRoleTransformer>()
     private val vendorFactory =
@@ -22,6 +23,7 @@ class EpicVendorFactoryTest {
             messageService,
             practitionerService,
             conditionService,
+            identifierService,
             practitionerTransformer,
             practitionerRoleTransformer
         )
@@ -54,6 +56,11 @@ class EpicVendorFactoryTest {
     @Test
     fun `returns ConditionService`() {
         assertEquals(conditionService, vendorFactory.conditionService)
+    }
+
+    @Test
+    fun `returns IdentifierService`() {
+        assertEquals(identifierService, vendorFactory.identifierService)
     }
 
     @Test

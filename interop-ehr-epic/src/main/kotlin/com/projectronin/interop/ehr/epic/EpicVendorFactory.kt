@@ -16,8 +16,9 @@ class EpicVendorFactory(
     override val messageService: EpicMessageService,
     override val practitionerService: EpicPractitionerService,
     override val conditionService: EpicConditionService,
+    override val identifierService: EpicIdentifierService,
     override val practitionerTransformer: R4PractitionerTransformer,
-    override val practitionerRoleTransformer: R4PractitionerRoleTransformer
+    override val practitionerRoleTransformer: R4PractitionerRoleTransformer,
 ) : VendorFactory {
     override val vendorType: VendorType
         get() = VendorType.EPIC
