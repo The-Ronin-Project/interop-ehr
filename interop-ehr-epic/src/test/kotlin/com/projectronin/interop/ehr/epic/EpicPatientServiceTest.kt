@@ -1,7 +1,11 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.epic.model.EpicIdentifier
 import com.projectronin.interop.ehr.epic.model.EpicPatientBundle
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
+import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.receive
 import io.ktor.client.statement.HttpResponse
@@ -23,19 +27,15 @@ class EpicPatientServiceTest {
 
     @BeforeEach
     fun initTest() {
-        epicClient = mockk<EpicClient>()
-        httpResponse = mockk<HttpResponse>()
+        epicClient = mockk()
+        httpResponse = mockk()
     }
 
     @Test
-    fun `ensure patient is returned`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+    fun `ensure, find patient, patient is returned`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225", "https://example.org", testPrivateKey, "TEST_TENANT"
+        )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
@@ -47,25 +47,17 @@ class EpicPatientServiceTest {
             )
         } returns httpResponse
 
-        val bundle =
-            EpicPatientService(epicClient).findPatient(
-                tenant,
-                "birthDate",
-                "givenName",
-                "familyName"
-            )
+        val bundle = EpicPatientService(epicClient).findPatient(
+            tenant, "birthDate", "givenName", "familyName"
+        )
         assertEquals(EpicPatientBundle(validPatientBundle), bundle)
     }
 
     @Test
-    fun `ensure http error handled`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+    fun `ensure, find patient, http error handled`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225", "https://example.org", testPrivateKey, "TEST_TENANT"
+        )
 
         every { httpResponse.status } returns HttpStatusCode.NotFound
         coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
@@ -79,10 +71,160 @@ class EpicPatientServiceTest {
 
         assertThrows<IOException> {
             EpicPatientService(epicClient).findPatient(
+                tenant, "birthDate", "givenName", "familyName"
+            )
+        }
+    }
+
+    @Test
+    fun `ensure, find patient by identifier, returns single patient`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225", "https://example.org", testPrivateKey, "TEST_TENANT"
+        )
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
+        coEvery {
+            epicClient.get(
+                tenant, "/api/FHIR/R4/Patient", mapOf("identifier" to "MRN|202497")
+            )
+        } returns httpResponse
+
+        val resultPatientsByKey = EpicPatientService(epicClient).findPatientsById(
+            tenant,
+            mapOf("patient#1" to EpicIdentifier(Identifier(value = "202497", type = CodeableConcept(text = "MRN"))))
+        )
+
+        assertEquals(mapOf("patient#1" to EpicPatientBundle(validPatientBundle).resources.first()), resultPatientsByKey)
+    }
+
+    @Test
+    fun `ensure, find patient by identifier, single patient matches multiple requests, each returned the patient`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225", "https://example.org", testPrivateKey, "TEST_TENANT"
+        )
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
+        coEvery {
+            epicClient.get(
+                tenant, "/api/FHIR/R4/Patient", mapOf("identifier" to "MRN|202497,MRN|202497")
+            )
+        } returns httpResponse
+
+        val resultPatientsByKey = EpicPatientService(epicClient).findPatientsById(
+            tenant,
+            mapOf(
+                "patient#1" to EpicIdentifier(Identifier(value = "202497", type = CodeableConcept(text = "MRN"))),
+                "patient#2" to EpicIdentifier(
+                    Identifier(
+                        system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"),
+                        value = "202497",
+                        type = CodeableConcept(text = "MRN")
+                    )
+                )
+            )
+        )
+
+        assertEquals(EpicPatientBundle(validPatientBundle).resources.first(), resultPatientsByKey["patient#1"])
+        assertEquals(EpicPatientBundle(validPatientBundle).resources.first(), resultPatientsByKey["patient#2"])
+    }
+
+    @Test
+    fun `ensure, find patient by identifier, request missing type is not returned`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225", "https://example.org", testPrivateKey, "TEST_TENANT"
+        )
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
+        coEvery {
+            epicClient.get(
+                tenant, "/api/FHIR/R4/Patient", mapOf("identifier" to "MRN|202497")
+            )
+        } returns httpResponse
+
+        val resultPatientsByKey = EpicPatientService(epicClient).findPatientsById(
+            tenant,
+            mapOf(
+                "goodIdentifier" to EpicIdentifier(Identifier(value = "202497", type = CodeableConcept(text = "MRN"))),
+                "badIdentifier" to EpicIdentifier(Identifier(value = "202497", type = null))
+            )
+        )
+
+        assertEquals(
+            mapOf("goodIdentifier" to EpicPatientBundle(validPatientBundle).resources.first()), resultPatientsByKey
+        )
+    }
+
+    @Test
+    fun `ensure, find patient by identifier, multiple identifiers matching returns multiple patients`() {
+        val validMultiplePatientBundle = readResource<Bundle>("/ExampleMultiPatientBundle.json")
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225", "https://example.org", testPrivateKey, "TEST_TENANT"
+        )
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.receive<Bundle>() } returns validMultiplePatientBundle
+        coEvery {
+            epicClient.get(
+                tenant, "/api/FHIR/R4/Patient", mapOf("identifier" to "EXTERNAL|Z4572,EXTERNAL|Z5660")
+            )
+        } returns httpResponse
+
+        val resultPatientsByKey = EpicPatientService(epicClient).findPatientsById(
+            tenant,
+            mapOf(
+                "patient#1" to EpicIdentifier(
+                    Identifier(
+                        system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"),
+                        value = "Z4572",
+                        type = CodeableConcept(text = "EXTERNAL")
+                    )
+                ),
+                "patient#2" to EpicIdentifier(
+                    Identifier(
+                        system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"),
+                        value = "Z5660",
+                        type = CodeableConcept(text = "EXTERNAL")
+                    )
+                )
+            )
+        )
+
+        assertEquals(EpicPatientBundle(validMultiplePatientBundle).resources[0], resultPatientsByKey["patient#1"])
+        assertEquals(EpicPatientBundle(validMultiplePatientBundle).resources[1], resultPatientsByKey["patient#2"])
+    }
+
+    @Test
+    fun `ensure, find patient by id, http error handled`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225", "https://example.org", testPrivateKey, "TEST_TENANT"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.NotFound
+        coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
+        coEvery {
+            epicClient.get(
+                tenant, "/api/FHIR/R4/Patient", mapOf("identifier" to "EXTERNAL|Z4572,EXTERNAL|Z5660")
+            )
+        } returns httpResponse
+
+        assertThrows<IOException> {
+            EpicPatientService(epicClient).findPatientsById(
                 tenant,
-                "birthDate",
-                "givenName",
-                "familyName"
+                mapOf(
+                    "patient#1" to EpicIdentifier(
+                        Identifier(
+                            system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"),
+                            value = "Z4572",
+                            type = CodeableConcept(text = "EXTERNAL")
+                        )
+                    ),
+                    "patient#2" to EpicIdentifier(
+                        Identifier(
+                            system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"),
+                            value = "Z5660",
+                            type = CodeableConcept(text = "EXTERNAL")
+                        )
+                    )
+                )
             )
         }
     }
