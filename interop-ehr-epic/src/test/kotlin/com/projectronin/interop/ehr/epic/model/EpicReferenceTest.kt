@@ -18,6 +18,9 @@ class EpicReferenceTest {
         assertEquals(reference, epicReference.element)
         assertEquals("Practitioner/eUqvfRVFNUVeJmt1pCf8YS24CEOUR6bhBnL-xrSXlTdc3", epicReference.reference)
         assertEquals("John Adams, MD", epicReference.display)
+        assertEquals(null, epicReference.id)
+        assertEquals(null, epicReference.identifier)
+        assertEquals(null, epicReference.type)
     }
 
     @Test

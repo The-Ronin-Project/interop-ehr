@@ -7,6 +7,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.GetProviderAppointment
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProvider
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.epic.model.EpicAppointmentBundle
+import com.projectronin.interop.ehr.epic.model.EpicIDType
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -29,6 +30,7 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
         "/api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments"
     private val providerAppointmentSearchUrlPart =
         "api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments"
+    private val identifierService: EpicIdentifierService = EpicIdentifierService()
 
     override fun findPatientAppointments(
         tenant: Tenant,
@@ -92,8 +94,15 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
             }
             httpResponse.receive<GetAppointmentsResponse>()
         }
+        val providerIdMap = getAppointments.appointments.associate { appointment ->
+            val identifiers = appointment.providers.associateWith { provider ->
+                val providerIdentifiers = provider.providerIDs.map { EpicIDType(it) }
+                identifierService.getPractitionerIdentifier(tenant, providerIdentifiers)
+            }
+            appointment.id to identifiers
+        }
 
         logger.info { "Appointment search completed for ${tenant.mnemonic}" }
-        return EpicAppointmentBundle(getAppointments)
+        return EpicAppointmentBundle(getAppointments, providerIdMap)
     }
 }

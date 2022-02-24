@@ -1,9 +1,11 @@
 package com.projectronin.interop.ehr.epic.model
 
 import com.projectronin.interop.common.resource.ResourceType
+import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.CodeableConcept
 import com.projectronin.interop.ehr.model.Identifier
+import com.projectronin.interop.ehr.model.Participant
 import com.projectronin.interop.ehr.model.base.JSONResource
 import com.projectronin.interop.ehr.model.enums.DataSource
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
@@ -14,7 +16,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.Appointment as AppOrch
 /**
  * Epic's representation of an appointment from [GetPatientAppointments](https://apporchard.epic.com/Sandbox?api=195) API
  */
-class EpicAppointment(override val resource: AppOrchardAppointment) : JSONResource(resource), Appointment {
+class EpicAppointment(override val resource: AppOrchardAppointment, private val providerIdMap: Map<String, Map <ScheduleProviderReturnWithTime, Identifier>>) : JSONResource(resource), Appointment {
     override val dataSource: DataSource
         get() = DataSource.EPIC_APPORCHARD
 
@@ -43,5 +45,10 @@ class EpicAppointment(override val resource: AppOrchardAppointment) : JSONResour
         val dateTime = LocalDateTime.parse(dateTimeString, DateTimeFormatter.ofPattern("M/d/yyyy h:mm a"))
 
         dateTime.format(DateTimeFormatter.ISO_DATE_TIME)
+    }
+
+    override val participants: List<Participant> by lazy {
+        val providerIdMap = providerIdMap[resource.id] ?: emptyMap()
+        resource.providers.map { EpicProviderParticipant(it, providerIdMap) }
     }
 }

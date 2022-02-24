@@ -49,7 +49,7 @@ class EpicAppointmentBundleTest {
             )
         )
 
-        val bundle = EpicAppointmentBundle(getPatientAppointments)
+        val bundle = EpicAppointmentBundle(getPatientAppointments, emptyMap())
         assertEquals(getPatientAppointments, bundle.resource)
         assertEquals(DataSource.EPIC_APPORCHARD, bundle.dataSource)
         assertEquals(0, bundle.links.size)
@@ -84,7 +84,7 @@ class EpicAppointmentBundleTest {
             appointments = listOf()
         )
 
-        val bundle = EpicAppointmentBundle(getPatientAppointments)
+        val bundle = EpicAppointmentBundle(getPatientAppointments, emptyMap())
         assertEquals(getPatientAppointments, bundle.resource)
         assertEquals(DataSource.EPIC_APPORCHARD, bundle.dataSource)
         assertEquals(listOf<EpicAppointment>(), bundle.resources)
@@ -179,7 +179,7 @@ class EpicAppointmentBundleTest {
         |}
         """.trimMargin()
 
-        val bundle = EpicAppointmentBundle(getPatientAppointments)
+        val bundle = EpicAppointmentBundle(getPatientAppointments, emptyMap())
         assertEquals(getPatientAppointments, bundle.resource)
         assertEquals(deformat(json), bundle.raw)
 

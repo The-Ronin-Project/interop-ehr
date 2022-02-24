@@ -35,4 +35,9 @@ interface Appointment : EHRResource {
      * When the appointment is to take place.
      */
     val start: String?
+
+    /**
+     * List of other resources participating in this appointment
+     */
+    val participants: List<Participant>
 }
