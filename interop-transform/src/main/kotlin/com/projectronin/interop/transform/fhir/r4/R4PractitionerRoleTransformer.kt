@@ -49,10 +49,6 @@ class R4PractitionerRoleTransformer : PractitionerRoleTransformer {
         }
 
         val organizationReference = r4PractitionerRole.organization
-        if (organizationReference == null) {
-            logger.warn { "Unable to transform PractitionerRole $id due to missing organization reference" }
-            return null
-        }
 
         val telecoms = r4PractitionerRole.telecom.filter { it.system != null && it.value != null }
         val telecomDifference = r4PractitionerRole.telecom.size - telecoms.size
@@ -73,7 +69,7 @@ class R4PractitionerRoleTransformer : PractitionerRoleTransformer {
             active = r4PractitionerRole.active,
             period = r4PractitionerRole.period?.localize(tenant),
             practitioner = practitionerReference.localize(tenant),
-            organization = organizationReference.localize(tenant),
+            organization = organizationReference?.localize(tenant),
             code = r4PractitionerRole.code.map { it.localize(tenant) },
             specialty = r4PractitionerRole.specialty.map { it.localize(tenant) },
             location = r4PractitionerRole.location.map { it.localize(tenant) },

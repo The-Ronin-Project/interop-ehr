@@ -81,10 +81,27 @@ class R4PractitionerRoleTransformerTest {
     }
 
     @Test
-    fun `fails for practitioner role with no organization`() {
+    fun `succeeds for a sparse practitioner role with all required properties but no organization, location, or other optional properties`() {
         val r4PractitionerRole = R4PractitionerRole(
-            id = Id("1234"),
-            practitioner = Reference(reference = "Practitioner/1234")
+            id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitionerrole"))
+            ),
+            implicitRules = Uri("implicit-rules"),
+            language = Code("en-US"),
+            text = Narrative(status = NarrativeStatus.GENERATED, div = "div"),
+            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            identifier = listOf(Identifier(value = "id")),
+            active = true,
+            period = Period(end = DateTime("2022")),
+            practitioner = Reference(reference = "Practitioner/1234"),
+            code = listOf(CodeableConcept(text = "code")),
+            specialty = listOf(CodeableConcept(text = "specialty")),
+            telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE, value = "8675309")),
+            availableTime = listOf(AvailableTime(allDay = false)),
+            notAvailable = listOf(NotAvailable(description = "Not available now")),
+            availabilityExceptions = "exceptions",
+            endpoint = listOf(Reference(reference = "Endpoint/1357"))
         )
         val practitionerRole = mockk<PractitionerRole> {
             every { dataSource } returns DataSource.FHIR_R4
@@ -92,7 +109,46 @@ class R4PractitionerRoleTransformerTest {
         }
 
         val oncologyPractitionerRole = transformer.transformPractitionerRole(practitionerRole, tenant)
-        assertNull(oncologyPractitionerRole)
+
+        oncologyPractitionerRole!! // Force it to be treated as non-null
+        assertEquals("PractitionerRole", oncologyPractitionerRole.resourceType)
+        assertEquals(Id("test-12345"), oncologyPractitionerRole.id)
+        assertEquals(
+            Meta(profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitionerrole"))),
+            oncologyPractitionerRole.meta
+        )
+        assertEquals(Uri("implicit-rules"), oncologyPractitionerRole.implicitRules)
+        assertEquals(Code("en-US"), oncologyPractitionerRole.language)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED, div = "div"), oncologyPractitionerRole.text)
+        assertEquals(
+            listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            oncologyPractitionerRole.contained
+        )
+        assertEquals(0, oncologyPractitionerRole.extension.size)
+        assertEquals(0, oncologyPractitionerRole.modifierExtension.size)
+        assertEquals(
+            listOf(
+                Identifier(value = "id"),
+                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test")
+            ),
+            oncologyPractitionerRole.identifier
+        )
+        assertEquals(true, oncologyPractitionerRole.active)
+        assertEquals(Period(end = DateTime("2022")), oncologyPractitionerRole.period)
+        assertEquals(Reference(reference = "Practitioner/test-1234"), oncologyPractitionerRole.practitioner)
+        assertNull(oncologyPractitionerRole.organization)
+        assertEquals(listOf(CodeableConcept(text = "code")), oncologyPractitionerRole.code)
+        assertEquals(listOf(CodeableConcept(text = "specialty")), oncologyPractitionerRole.specialty)
+        assertEquals(0, oncologyPractitionerRole.location.size)
+        assertEquals(0, oncologyPractitionerRole.healthcareService.size)
+        assertEquals(
+            listOf(ContactPoint(system = ContactPointSystem.PHONE, value = "8675309")),
+            oncologyPractitionerRole.telecom
+        )
+        assertEquals(listOf(AvailableTime(allDay = false)), oncologyPractitionerRole.availableTime)
+        assertEquals(listOf(NotAvailable(description = "Not available now")), oncologyPractitionerRole.notAvailable)
+        assertEquals("exceptions", oncologyPractitionerRole.availabilityExceptions)
+        assertEquals(listOf(Reference(reference = "Endpoint/test-1357")), oncologyPractitionerRole.endpoint)
     }
 
     @Test
