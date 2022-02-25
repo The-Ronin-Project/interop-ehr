@@ -144,20 +144,18 @@ class EpicAppointmentTransformerTest {
         assertEquals(
             listOf(
                 Participant(
-                    actor = listOf(
-                        Reference(
-                            reference = "Patient/test-54321",
-                            display = "Test Name"
-                        ),
+                    actor =
+                    Reference(
+                        reference = "Patient/test-54321",
+                        display = "Test Name"
                     ),
                     status = ParticipationStatus.ACCEPTED
                 ),
                 Participant(
-                    actor = listOf(
-                        Reference(
-                            reference = "Practitioner/test-9876",
-                            display = "Test Doc"
-                        ),
+                    actor =
+                    Reference(
+                        reference = "Practitioner/test-9876",
+                        display = "Test Doc"
                     ),
                     status = ParticipationStatus.ACCEPTED,
                     period = Period(
@@ -236,11 +234,10 @@ class EpicAppointmentTransformerTest {
         assertEquals(
             listOf(
                 Participant(
-                    actor = listOf(
-                        Reference(
-                            reference = "Patient/test-54321",
-                            display = "Test Name"
-                        ),
+                    actor =
+                    Reference(
+                        reference = "Patient/test-54321",
+                        display = "Test Name"
                     ),
                     status = ParticipationStatus.ACCEPTED
                 )
@@ -311,20 +308,18 @@ class EpicAppointmentTransformerTest {
         assertEquals(
             listOf(
                 Participant(
-                    actor = listOf(
-                        Reference(
-                            reference = "Patient/test-Z5660",
-                            display = "LMRTESTING,HERMIONE"
-                        ),
+                    actor =
+                    Reference(
+                        reference = "Patient/test-Z5660",
+                        display = "LMRTESTING,HERMIONE"
                     ),
                     status = ParticipationStatus.ACCEPTED
                 ),
                 Participant(
-                    actor = listOf(
-                        Reference(
-                            reference = "Practitioner/test-E400019",
-                            display = "Coordinator Phoenix, RN"
-                        ),
+                    actor =
+                    Reference(
+                        reference = "Practitioner/test-E400019",
+                        display = "Coordinator Phoenix, RN"
                     ),
                     status = ParticipationStatus.ACCEPTED,
                     period = Period(

@@ -66,11 +66,10 @@ class EpicAppointmentTransformer : AppointmentTransformer {
         appOrchardAppointment.patientId?.let {
             participants.add(
                 Participant(
-                    actor = listOf(
-                        Reference(
-                            reference = "Patient/" + appOrchardAppointment.patientId?.trim(),
-                            display = appOrchardAppointment.patientName
-                        ),
+                    actor =
+                    Reference(
+                        reference = "Patient/" + appOrchardAppointment.patientId?.trim(),
+                        display = appOrchardAppointment.patientName
                     ),
                     status = ParticipationStatus.ACCEPTED
                 )
@@ -83,11 +82,10 @@ class EpicAppointmentTransformer : AppointmentTransformer {
                     getStartAndEndInstants(appOrchardAppointment.date, it.time, it.duration)
 
                 Participant(
-                    actor = listOf(
-                        Reference(
-                            reference = "Practitioner/" + it.providerId?.trim(),
-                            display = it.providerName
-                        ),
+                    actor =
+                    Reference(
+                        reference = "Practitioner/" + it.providerId?.trim(),
+                        display = it.providerName
                     ),
                     status = ParticipationStatus.ACCEPTED,
                     period = Period(

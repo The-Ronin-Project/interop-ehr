@@ -1871,7 +1871,22 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
-            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            actor = Reference(extension = nonLocalizableExtensions),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = nonLocalizableExtensions)
+        )
+        val localizedParticipant = participant.localize(tenant)
+        assertTrue(localizedParticipant === participant)
+    }
+
+    @Test
+    fun `returns current participant if participant has no localizable information and no actor`() {
+        val participant = Participant(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
             required = ParticipantRequired.REQUIRED,
             status = ParticipationStatus.ACCEPTED,
             period = Period(extension = nonLocalizableExtensions)
@@ -1887,7 +1902,7 @@ class LocalizersTest {
             extension = localizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
-            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            actor = Reference(extension = nonLocalizableExtensions),
             required = ParticipantRequired.REQUIRED,
             status = ParticipationStatus.ACCEPTED,
             period = Period(extension = nonLocalizableExtensions)
@@ -1900,7 +1915,33 @@ class LocalizersTest {
             extension = localizedExtensions,
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
-            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            actor = Reference(extension = nonLocalizableExtensions),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = nonLocalizableExtensions)
+        )
+        assertEquals(expectedParticipant, localizedParticipant)
+    }
+
+    @Test
+    fun `localizes pariticipant with localizable extension and no actor`() {
+        val participant = Participant(
+            id = "12345",
+            extension = localizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
+            required = ParticipantRequired.REQUIRED,
+            status = ParticipationStatus.ACCEPTED,
+            period = Period(extension = nonLocalizableExtensions)
+        )
+        val localizedParticipant = participant.localize(tenant)
+        assertTrue(localizedParticipant !== participant)
+
+        val expectedParticipant = Participant(
+            id = "12345",
+            extension = localizedExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
             required = ParticipantRequired.REQUIRED,
             status = ParticipationStatus.ACCEPTED,
             period = Period(extension = nonLocalizableExtensions)
@@ -1915,7 +1956,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = localizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
-            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            actor = Reference(extension = nonLocalizableExtensions),
             required = ParticipantRequired.REQUIRED,
             status = ParticipationStatus.ACCEPTED,
             period = Period(extension = nonLocalizableExtensions)
@@ -1928,7 +1969,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = localizedExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
-            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            actor = Reference(extension = nonLocalizableExtensions),
             required = ParticipantRequired.REQUIRED,
             status = ParticipationStatus.ACCEPTED,
             period = Period(extension = nonLocalizableExtensions)
@@ -1943,7 +1984,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = localizableExtensions)),
-            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            actor = Reference(extension = nonLocalizableExtensions),
             required = ParticipantRequired.REQUIRED,
             status = ParticipationStatus.ACCEPTED,
             period = Period(extension = nonLocalizableExtensions)
@@ -1956,7 +1997,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = localizedExtensions)),
-            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            actor = Reference(extension = nonLocalizableExtensions),
             required = ParticipantRequired.REQUIRED,
             status = ParticipationStatus.ACCEPTED,
             period = Period(extension = nonLocalizableExtensions)
@@ -1971,7 +2012,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
-            actor = listOf(Reference(extension = localizableExtensions)),
+            actor = Reference(extension = localizableExtensions),
             required = ParticipantRequired.REQUIRED,
             status = ParticipationStatus.ACCEPTED,
             period = Period(extension = nonLocalizableExtensions)
@@ -1984,7 +2025,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
-            actor = listOf(Reference(extension = localizedExtensions)),
+            actor = Reference(extension = localizedExtensions),
             required = ParticipantRequired.REQUIRED,
             status = ParticipationStatus.ACCEPTED,
             period = Period(extension = nonLocalizableExtensions)
@@ -1999,7 +2040,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
-            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            actor = Reference(extension = nonLocalizableExtensions),
             required = ParticipantRequired.REQUIRED,
             status = ParticipationStatus.ACCEPTED,
             period = Period(extension = localizableExtensions)
@@ -2012,7 +2053,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
-            actor = listOf(Reference(extension = nonLocalizableExtensions)),
+            actor = Reference(extension = nonLocalizableExtensions),
             required = ParticipantRequired.REQUIRED,
             status = ParticipationStatus.ACCEPTED,
             period = Period(extension = localizedExtensions)

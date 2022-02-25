@@ -2,7 +2,7 @@ package com.projectronin.interop.ehr.epic.model
 
 import com.projectronin.interop.ehr.epic.apporchard.model.IDType
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 class EpicProviderPractitionerTest {
@@ -18,6 +18,6 @@ class EpicProviderPractitionerTest {
             time = "900"
         )
         val epicPractitioner = EpicProviderParticipant(provider, emptyMap())
-        assertEquals(1, epicPractitioner.actor.size)
+        assertNotNull(epicPractitioner.actor)
     }
 }

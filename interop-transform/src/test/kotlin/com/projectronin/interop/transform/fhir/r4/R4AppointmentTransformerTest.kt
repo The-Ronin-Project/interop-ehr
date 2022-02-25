@@ -86,7 +86,7 @@ class R4AppointmentTransformerTest {
             basedOn = listOf(Reference(display = "based on")),
             participant = listOf(
                 Participant(
-                    actor = listOf(Reference(display = "actor")),
+                    actor = Reference(display = "actor"),
                     status = ParticipationStatus.ACCEPTED
                 )
             ),
@@ -160,7 +160,7 @@ class R4AppointmentTransformerTest {
         assertEquals(
             listOf(
                 Participant(
-                    actor = listOf(Reference(display = "actor")),
+                    actor = Reference(display = "actor"),
                     status = ParticipationStatus.ACCEPTED
                 )
             ),
@@ -182,7 +182,7 @@ class R4AppointmentTransformerTest {
             status = AppointmentStatus.CANCELLED,
             participant = listOf(
                 Participant(
-                    actor = listOf(Reference(display = "actor")),
+                    actor = Reference(display = "actor"),
                     status = ParticipationStatus.ACCEPTED
                 )
             )
@@ -240,7 +240,7 @@ class R4AppointmentTransformerTest {
         assertEquals(
             listOf(
                 Participant(
-                    actor = listOf(Reference(display = "actor")),
+                    actor = Reference(display = "actor"),
                     status = ParticipationStatus.ACCEPTED
                 )
             ),
@@ -274,7 +274,7 @@ class R4AppointmentTransformerTest {
             status = AppointmentStatus.CANCELLED,
             participant = listOf(
                 Participant(
-                    actor = listOf(Reference(display = "actor")),
+                    actor = Reference(display = "actor"),
                     status = ParticipationStatus.ACCEPTED
                 )
             )
@@ -295,7 +295,7 @@ class R4AppointmentTransformerTest {
             status = AppointmentStatus.CANCELLED,
             participant = listOf(
                 Participant(
-                    actor = listOf(Reference(display = "actor")),
+                    actor = Reference(display = "actor"),
                     status = ParticipationStatus.ACCEPTED
                 )
             )
@@ -322,7 +322,7 @@ class R4AppointmentTransformerTest {
             status = AppointmentStatus.CANCELLED,
             participant = listOf(
                 Participant(
-                    actor = listOf(Reference(display = "actor")),
+                    actor = Reference(display = "actor"),
                     status = ParticipationStatus.ACCEPTED
                 )
             )
@@ -356,7 +356,7 @@ class R4AppointmentTransformerTest {
             status = AppointmentStatus.CANCELLED,
             participant = listOf(
                 Participant(
-                    actor = listOf(Reference(display = "actor")),
+                    actor = Reference(display = "actor"),
                     status = ParticipationStatus.ACCEPTED
                 )
             )
@@ -387,7 +387,7 @@ class R4AppointmentTransformerTest {
             status = AppointmentStatus.CANCELLED,
             participant = listOf(
                 Participant(
-                    actor = listOf(Reference(display = "actor")),
+                    actor = Reference(display = "actor"),
                     status = ParticipationStatus.ACCEPTED
                 )
             )
@@ -408,7 +408,7 @@ class R4AppointmentTransformerTest {
             status = AppointmentStatus.CANCELLED,
             participant = listOf(
                 Participant(
-                    actor = listOf(Reference(display = "actor")),
+                    actor = Reference(display = "actor"),
                     status = ParticipationStatus.ACCEPTED
                 )
             )
@@ -440,7 +440,7 @@ class R4AppointmentTransformerTest {
             status = AppointmentStatus.CANCELLED,
             participant = listOf(
                 Participant(
-                    actor = listOf(Reference(display = "actor")),
+                    actor = Reference(display = "actor"),
                     status = ParticipationStatus.ACCEPTED
                 )
             )

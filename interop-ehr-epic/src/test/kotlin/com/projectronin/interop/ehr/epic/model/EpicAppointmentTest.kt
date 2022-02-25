@@ -238,7 +238,7 @@ class EpicAppointmentTest {
         assertEquals("2015-12-03T15:30:00", epicAppointment.start)
         assertEquals("TRANSPLANT EVALUATION", epicAppointment.serviceType[0].text)
         assertEquals(1, epicAppointment.participants.size)
-        assertEquals(provider.providerName, epicAppointment.participants.first().actor.first().display)
+        assertEquals(provider.providerName, epicAppointment.participants.first().actor.display)
         assertEquals(AppointmentStatus.NOSHOW, epicAppointment.status)
     }
 
@@ -310,7 +310,7 @@ class EpicAppointmentTest {
         assertEquals("2015-12-03T15:30:00", epicAppointment.start)
         assertEquals("TRANSPLANT EVALUATION", epicAppointment.serviceType[0].text)
         assertEquals(1, epicAppointment.participants.size)
-        assertEquals(provider.providerName, epicAppointment.participants.first().actor.first().display)
+        assertEquals(provider.providerName, epicAppointment.participants.first().actor.display)
         assertEquals(AppointmentStatus.NOSHOW, epicAppointment.status)
     }
 }

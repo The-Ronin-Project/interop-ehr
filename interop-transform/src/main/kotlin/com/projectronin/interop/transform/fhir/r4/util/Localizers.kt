@@ -464,15 +464,14 @@ fun Participant.localize(tenant: Tenant): Participant {
     val typeLocalizations = type.map { it.localizePair(tenant) }
     val updatedType = typeLocalizations.hasUpdates()
 
-    val actorLocalizations = actor.map { it.localizePair(tenant) }
-    val updatedActor = actorLocalizations.hasUpdates()
+    val updatedActor = actor?.localizePair(tenant)
 
     val updatedPeriod = period?.localize(tenant)
 
     if (updatedExtensions.isNotEmpty() ||
         updatedModifierExtensions.isNotEmpty() ||
         updatedType ||
-        updatedActor ||
+        updatedActor?.first !== actor ||
         updatedPeriod !== period
     ) {
         return Participant(
@@ -480,7 +479,7 @@ fun Participant.localize(tenant: Tenant): Participant {
             extension = updatedExtensions.ifEmpty { extension },
             modifierExtension = updatedModifierExtensions.ifEmpty { modifierExtension },
             type = typeLocalizations.values(),
-            actor = actorLocalizations.values(),
+            actor = updatedActor?.first,
             required = required,
             status = status,
             period = updatedPeriod
