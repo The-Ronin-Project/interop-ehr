@@ -8,9 +8,11 @@ import com.projectronin.interop.ehr.epic.apporchard.model.SendMessageResponse
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
-import com.projectronin.interop.fhir.r4.CodeableConcepts
-import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
+import com.projectronin.interop.ehr.inputs.IdVendorIdentifier
+import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.tenant.config.TenantService
 import io.ktor.client.call.receive
 import io.ktor.client.statement.HttpResponse
@@ -72,10 +74,7 @@ class EpicMessageServiceTest {
         val recipientsList = listOf(
             EHRRecipient(
                 "PROV#1",
-                listOf(
-                    Identifier(value = "CorrectID", type = CodeableConcept(text = "EXTERNAL")),
-                    Identifier(value = "BadID", type = CodeableConcepts.MRN)
-                )
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
             )
         )
 
@@ -126,10 +125,7 @@ class EpicMessageServiceTest {
         val recipientsList = listOf(
             EHRRecipient(
                 "PROV#1",
-                listOf(
-                    Identifier(value = "CorrectID", type = CodeableConcept(text = "EXTERNAL")),
-                    Identifier(value = "BadID", type = CodeableConcepts.MRN)
-                )
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
             )
         )
 
@@ -148,7 +144,7 @@ class EpicMessageServiceTest {
     }
 
     @Test
-    fun `ensure null IDs work ok`() {
+    fun `ensure wrong identifier types fail`() {
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
             "https://example.org",
@@ -182,9 +178,56 @@ class EpicMessageServiceTest {
         val recipientsList = listOf(
             EHRRecipient(
                 "PROV#1",
-                listOf(
-                    Identifier(value = "BadID", type = CodeableConcepts.MRN)
+                IdVendorIdentifier(Id("1234"))
+            )
+        )
+
+        assertThrows<ClassCastException> {
+            EpicMessageService(epicClient, tenantService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text", "MRN#1", recipientsList
                 )
+            )
+        }
+    }
+
+    @Test
+    fun `ensure identifier without value fails`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            "USER#1",
+            "Symptom Alert"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.receive<SendMessageResponse>() } returns SendMessageResponse(
+            listOf(
+                IDType(
+                    "130375", "Type"
+                )
+            )
+        )
+        coEvery {
+            epicClient.post(
+                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                SendMessageRequest(
+                    patientID = "MRN#1",
+                    recipients = listOf(), // this is an implied assertion
+                    messageText = "Message Text",
+                    senderID = "USER#1",
+                    messageType = "Symptom Alert"
+                )
+            )
+        } returns httpResponse
+
+        val recipientsList = listOf(
+            EHRRecipient(
+                "PROV#1",
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = null))
             )
         )
 
@@ -226,10 +269,7 @@ class EpicMessageServiceTest {
         val recipientsList = listOf(
             EHRRecipient(
                 "PROV#1",
-                listOf(
-                    Identifier(value = "CorrectID", type = CodeableConcept(text = "EXTERNAL")),
-                    Identifier(value = "BadID", type = CodeableConcepts.MRN)
-                )
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
             )
         )
 

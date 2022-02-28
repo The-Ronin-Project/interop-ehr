@@ -8,6 +8,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.SendMessageResponse
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
+import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
@@ -55,7 +56,7 @@ class EpicMessageService(private val epicClient: EpicClient, private val tenantS
         messageInput: EHRMessageInput,
         userId: String,
         messageType: String,
-        tenant: Tenant
+        tenant: Tenant,
     ): SendMessageRequest {
         return SendMessageRequest(
             patientID = messageInput.patientMRN,
@@ -68,20 +69,22 @@ class EpicMessageService(private val epicClient: EpicClient, private val tenantS
 
     private fun translateRecipients(
         recipients: List<EHRRecipient>,
-        tenant: Tenant
+        tenant: Tenant,
     ): List<SendMessageRecipient> {
 
-        val externalIDList =
+        val idList =
+            // The Epic implementation of sendMessage expects the VendorIdentifier to be an IdentifierVendorIdentifier.
+            // with a value. If it isn't, this will rightfully throw an exception.
             recipients.map {
-                it.identifiers.find { identifier -> identifier.type?.text == "EXTERNAL" }?.value
-                    ?: throw VendorIdentifierNotFoundException("No EXTERNAL Identifier found for practitioner ${it.id}")
+                val identifierVendorIdentifier = it.identifier as IdentifierVendorIdentifier
+                identifierVendorIdentifier.identifier.value ?: throw VendorIdentifierNotFoundException()
             }
-        val poolList = tenantService.getPoolsForProviders(tenant, externalIDList)
+        val poolList = tenantService.getPoolsForProviders(tenant, idList)
 
-        return externalIDList.map { externalID ->
-            val poolID = poolList[externalID]
+        return idList.map { userID ->
+            val poolID = poolList[userID]
             SendMessageRecipient(
-                iD = poolID ?: externalID,
+                iD = poolID ?: userID,
                 isPool = (poolID != null)
             )
         }.toList().distinct() // deduplicate
