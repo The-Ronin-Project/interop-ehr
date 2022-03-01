@@ -12,13 +12,14 @@ import org.ktorm.dsl.joinReferencesAndSelect
 import org.ktorm.dsl.map
 import org.ktorm.dsl.select
 import org.ktorm.dsl.where
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Repository
 
 /**
  * Provides data access operations for tenant data models.
  */
 @Repository
-class TenantDAO(private val database: Database) {
+class TenantDAO(@Qualifier("ehr") private val database: Database) {
     /**
      * Retrieves a [TenantDO] for the supplied [mnemonic]. If the mnemonic is unknown, null will be returned.
      */

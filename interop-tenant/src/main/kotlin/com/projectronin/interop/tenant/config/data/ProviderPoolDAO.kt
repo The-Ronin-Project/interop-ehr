@@ -9,13 +9,14 @@ import org.ktorm.dsl.inList
 import org.ktorm.dsl.map
 import org.ktorm.dsl.select
 import org.ktorm.dsl.where
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Repository
 
 /**
  * Provides data access operations for tenant data models.
  */
 @Repository
-class ProviderPoolDAO(private val database: Database) {
+class ProviderPoolDAO(@Qualifier("ehr") private val database: Database) {
     /**
      * Retrieves a Map of pool IDs keyed by provider IDs for the supplied [tenantId] and [providerIds]. If no pool was
      * found for the supplied provider ID, it will not be included in the returned Map.
