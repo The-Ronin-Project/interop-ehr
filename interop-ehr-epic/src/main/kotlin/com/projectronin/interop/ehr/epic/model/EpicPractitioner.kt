@@ -12,11 +12,8 @@ import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.resource.Practitioner as R4Practitioner
 
 class EpicPractitioner(override val resource: R4Practitioner) : JSONResource(resource), Practitioner {
-    override val dataSource: DataSource
-        get() = DataSource.FHIR_R4
-
-    override val resourceType: ResourceType
-        get() = ResourceType.PRACTITIONER
+    override val dataSource: DataSource = DataSource.FHIR_R4
+    override val resourceType: ResourceType = ResourceType.PRACTITIONER
 
     override val id: String = resource.id!!.value
     override val active: Boolean? = resource.active

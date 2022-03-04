@@ -10,10 +10,12 @@ import com.projectronin.interop.ehr.model.enums.DataSource
 /**
  * A bundle of Epic appointments as returned from [GetPatientAppointments](https://apporchard.epic.com/Sandbox?api=195) API
  */
-class EpicAppointmentBundle(override val resource: GetAppointmentsResponse, private val providerIdMap: Map<String, Map <ScheduleProviderReturnWithTime, Identifier>>) :
+class EpicAppointmentBundle(
+    override val resource: GetAppointmentsResponse,
+    private val providerIdMap: Map<String, Map<ScheduleProviderReturnWithTime, Identifier>>
+) :
     JSONBundle<EpicAppointment, GetAppointmentsResponse>(resource) {
-    override val dataSource: DataSource
-        get() = DataSource.EPIC_APPORCHARD
+    override val dataSource: DataSource = DataSource.EPIC_APPORCHARD
 
     override val links: List<Link> = listOf()
 

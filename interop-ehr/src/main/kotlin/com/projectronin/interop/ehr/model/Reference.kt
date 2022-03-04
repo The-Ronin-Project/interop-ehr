@@ -1,11 +1,15 @@
 package com.projectronin.interop.ehr.model
+
 /**
  * Representation of a [Reference].
  */
-interface Reference : EHRElement, EHRElementID {
-    enum class ReferenceType {
-        Provider
-    }
+interface Reference : EHRElement {
+
+    /**
+     * The direct reference to the object
+     */
+    val id: String?
+
     /**
      * Literal reference
      */
@@ -24,5 +28,9 @@ interface Reference : EHRElement, EHRElementID {
     /**
      * Type of participant
      */
-    val type: ReferenceType?
+    val type: String?
+}
+
+object ReferenceTypes {
+    const val PRACTITIONER = "Practitioner"
 }

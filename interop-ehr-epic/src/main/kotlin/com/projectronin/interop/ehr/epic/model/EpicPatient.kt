@@ -12,11 +12,8 @@ import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.resource.Patient as R4Patient
 
 class EpicPatient(override val resource: R4Patient) : JSONResource(resource), Patient {
-    override val dataSource: DataSource
-        get() = DataSource.FHIR_R4
-
-    override val resourceType: ResourceType
-        get() = ResourceType.PATIENT
+    override val dataSource: DataSource = DataSource.FHIR_R4
+    override val resourceType: ResourceType = ResourceType.PATIENT
 
     override val id: String = resource.id!!.value
     override val gender: AdministrativeGender? = resource.gender

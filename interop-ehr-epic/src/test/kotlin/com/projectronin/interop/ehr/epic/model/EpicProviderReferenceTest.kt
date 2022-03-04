@@ -2,7 +2,6 @@ package com.projectronin.interop.ehr.epic.model
 
 import com.projectronin.interop.ehr.epic.apporchard.model.IDType
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
-import com.projectronin.interop.ehr.model.Reference
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -36,6 +35,7 @@ class EpicProviderReferenceTest {
             time = "900"
         )
     )
+
     // cheating here by just assuming the first one is what Identifier service would return
     private val providerIdMap = okProviders.associateWith {
         EpicIDType(it.providerIDs[0])
@@ -49,9 +49,10 @@ class EpicProviderReferenceTest {
         assertTrue { epicReference.identifier != null }
         assertEquals(null, epicReference.reference)
         assertEquals(null, epicReference.id)
-        assertEquals(Reference.ReferenceType.Provider, epicReference.type)
+        assertEquals("Practitioner", epicReference.type)
         assertTrue { epicReference.identifier in okIdentifiers }
     }
+
     @Test
     fun `can build object with multiple Ids`() {
         val providerIdentifier1 = IDType(id = "123", type = "External")

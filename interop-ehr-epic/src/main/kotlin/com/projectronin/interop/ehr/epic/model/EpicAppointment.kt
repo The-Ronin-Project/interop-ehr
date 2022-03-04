@@ -16,12 +16,12 @@ import com.projectronin.interop.ehr.epic.apporchard.model.Appointment as AppOrch
 /**
  * Epic's representation of an appointment from [GetPatientAppointments](https://apporchard.epic.com/Sandbox?api=195) API
  */
-class EpicAppointment(override val resource: AppOrchardAppointment, private val providerIdMap: Map<String, Map <ScheduleProviderReturnWithTime, Identifier>>) : JSONResource(resource), Appointment {
-    override val dataSource: DataSource
-        get() = DataSource.EPIC_APPORCHARD
-
-    override val resourceType: ResourceType
-        get() = ResourceType.APPOINTMENT
+class EpicAppointment(
+    override val resource: AppOrchardAppointment,
+    private val providerIdMap: Map<String, Map<ScheduleProviderReturnWithTime, Identifier>>
+) : JSONResource(resource), Appointment {
+    override val dataSource: DataSource = DataSource.EPIC_APPORCHARD
+    override val resourceType: ResourceType = ResourceType.APPOINTMENT
 
     override val id: String = resource.id
     override val appointmentType: CodeableConcept? = null

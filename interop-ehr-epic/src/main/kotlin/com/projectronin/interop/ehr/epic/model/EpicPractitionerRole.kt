@@ -10,11 +10,8 @@ import com.projectronin.interop.ehr.model.enums.DataSource
 import com.projectronin.interop.fhir.r4.resource.PractitionerRole as R4PractitionerRole
 
 class EpicPractitionerRole(override val resource: R4PractitionerRole) : JSONResource(resource), PractitionerRole {
-    override val dataSource: DataSource
-        get() = DataSource.FHIR_R4
-
-    override val resourceType: ResourceType
-        get() = ResourceType.PRACTITIONER_ROLE
+    override val dataSource: DataSource = DataSource.FHIR_R4
+    override val resourceType: ResourceType = ResourceType.PRACTITIONER_ROLE
 
     override val id: String = resource.id!!.value
     override val active: Boolean? = resource.active

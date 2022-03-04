@@ -9,8 +9,7 @@ import com.projectronin.interop.fhir.r4.resource.Bundle
 class EpicFindPractitionersResponse(override val resource: Bundle) :
     EpicFHIRBundle<JSONResource>(resource),
     FindPractitionersResponse {
-    override val dataSource: DataSource
-        get() = DataSource.FHIR_R4
+    override val dataSource: DataSource = DataSource.FHIR_R4
 
     /**
      *  Resources is a list of PractitionerRole, Practitioner, and Location resources.
