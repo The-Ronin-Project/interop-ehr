@@ -29,7 +29,7 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
     private val patientAppointmentSearchUrlPart =
         "/api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments"
     private val providerAppointmentSearchUrlPart =
-        "api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments"
+        "/api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments"
     private val identifierService: EpicIdentifierService = EpicIdentifierService()
 
     override fun findPatientAppointments(

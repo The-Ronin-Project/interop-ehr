@@ -107,7 +107,7 @@ class EpicAppointmentServiceTest {
         coEvery {
             epicClient.post(
                 tenant,
-                "api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments",
+                "/api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments",
                 GetProviderAppointmentRequest(
                     userID = "ehrUserId",
                     providers = listOf(ScheduleProvider(id = "E1000")),
@@ -142,7 +142,7 @@ class EpicAppointmentServiceTest {
         coEvery {
             epicClient.post(
                 tenant,
-                "api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments",
+                "/api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments",
                 GetProviderAppointmentRequest(
                     userID = "ehrUserId",
                     providers = listOf(ScheduleProvider(id = "E1000")),
