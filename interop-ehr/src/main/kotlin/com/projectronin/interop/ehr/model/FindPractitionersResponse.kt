@@ -10,7 +10,12 @@ interface FindPractitionersResponse {
     val practitionerRoles: Bundle<PractitionerRole>?
 
     /**
-     * The [Bundle] of [Practitioner]s found based off the request.
+     * The [Bundle] of [Practitioner]s found based off the _include query parameter.
      */
-    val practitioners: Bundle<Practitioner>
+    val practitioners: Bundle<Practitioner>?
+
+    /**
+     * The [Bundle] of [Locations]s found based off the _include query parameter.
+     */
+    val locations: Bundle<Location>?
 }

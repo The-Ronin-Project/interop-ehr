@@ -4,11 +4,11 @@ import com.projectronin.interop.ehr.epic.util.convertResources
 import com.projectronin.interop.ehr.model.enums.DataSource
 import com.projectronin.interop.fhir.r4.resource.Bundle
 
-class EpicPractitionerBundle(override val resource: Bundle) : EpicFHIRBundle<EpicPractitioner>(resource) {
+class EpicLocationBundle(override val resource: Bundle) : EpicFHIRBundle<EpicLocation>(resource) {
     override val dataSource: DataSource
         get() = DataSource.FHIR_R4
 
-    override val resources: List<EpicPractitioner> by lazy {
-        resource.convertResources(::EpicPractitioner).toSet().toList() // de-duplicates
+    override val resources: List<EpicLocation> by lazy {
+        resource.convertResources(::EpicLocation).toSet().toList() // de-duplicates
     }
 }

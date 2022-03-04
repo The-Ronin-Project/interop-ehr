@@ -12,10 +12,12 @@ class EpicFindPractitionersResponse(override val resource: Bundle) :
     override val dataSource: DataSource
         get() = DataSource.FHIR_R4
 
-    // Resources is a list of both PractitionerRole and Practitioner resources.  This simplifies merging bundles later
-    // when we have to deal with paging in FHIR results.
+    /**
+     *  Resources is a list of PractitionerRole, Practitioner, and Location resources.
+     *  This simplifies merging bundles later when we have to deal with paging in FHIR results.
+     */
     override val resources: List<JSONResource> by lazy {
-        practitioners.resources + practitionerRoles.resources
+        practitioners.resources + practitionerRoles.resources + locations.resources
     }
 
     override val practitionerRoles: FHIRBundle<EpicPractitionerRole> by lazy {
@@ -24,5 +26,9 @@ class EpicFindPractitionersResponse(override val resource: Bundle) :
 
     override val practitioners: FHIRBundle<EpicPractitioner> by lazy {
         EpicPractitionerBundle(resource)
+    }
+
+    override val locations: FHIRBundle<EpicLocation> by lazy {
+        EpicLocationBundle(resource)
     }
 }

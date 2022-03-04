@@ -1,11 +1,11 @@
 {
   "resourceType": "Bundle",
   "type": "searchset",
-  "total": 64,
+  "total": 71,
   "link": [
     {
       "relation": "self",
-      "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole?_include=PractitionerRole:practitioner&location=e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
+      "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole?_include=PractitionerRole:practitioner,PractitionerRole:location&location=e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
     }
   ],
   "entry": [
@@ -35,6 +35,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -73,6 +89,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -120,6 +152,18 @@
             "text": "Nursing Student"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "116",
+                "display": "General Practice"
+              }
+            ],
+            "text": "General Practice"
+          }
+        ],
         "location": [
           {
             "reference": "Location/en3vmXpNOEYzO2ZFTnH-zcZWjVUInE7.WHpB4gifjyYI3"
@@ -163,6 +207,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -209,6 +269,22 @@
             ],
             "text": "Physician"
           }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
         ]
       },
       "search": {
@@ -241,6 +317,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -288,6 +380,18 @@
             "text": "Registered Nurse"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/ec3IiOd1rwbCVWN4qWJohskGmJD2IICcu3eb7V-jlHCI3"
@@ -331,6 +435,22 @@
               }
             ],
             "text": "Registered Nurse"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "116",
+                "display": "General Practice"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "163WG0000X"
+              }
+            ],
+            "text": "General Practice"
           }
         ],
         "location": [
@@ -378,6 +498,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/eT.Tw3aIJS.mZ6j2kDGrmhKewe0yMcmy-o71N-ztEkUg3"
@@ -421,6 +557,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -468,6 +620,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/eR.xW57Si1WSc9MKJVGHpRtsX7E0Q.c7ZuiPG6EyBe1w3"
@@ -512,6 +680,22 @@
             ],
             "text": "Physician"
           }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
         ]
       },
       "search": {
@@ -544,6 +728,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ]
       },
@@ -578,6 +778,22 @@
             ],
             "text": "Physician"
           }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
         ]
       },
       "search": {
@@ -610,6 +826,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -657,6 +889,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/eC5CBoepbvvYbnqD1Hp9zy4PLWCNHxLhHMhSdlqdLiQ83"
@@ -702,6 +950,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/ehAZPa6DzkD8pV0WMRQBenKPHLCegERTN3qMgLUhRdAk3"
@@ -738,6 +1002,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -785,6 +1065,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/ewCGzZp1z5z2yLBZhxq5K5iY105c53JgnhDV0qKrJSkg3"
@@ -828,6 +1124,18 @@
               }
             ],
             "text": "Medical Assistant"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -875,6 +1183,22 @@
             "text": "Nurse Practitioner"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "363LF0000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/e87tW7wRohBmf.eqyVIl0zVZMWSdgLNbuJSM.qUEGB4c3"
@@ -918,6 +1242,18 @@
               }
             ],
             "text": "Registered Nurse"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -965,6 +1301,18 @@
             "text": "Registered Nurse"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/ea9ApF.8zjmR0cuLXzrl-tnv8jUp6vJP3ylWsLIi8yR03"
@@ -1008,6 +1356,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -1060,6 +1424,18 @@
             "text": "Physician Assistant"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/ef7OTaEMPCgzrfd3jTV5SzRhN-4xRQtr6MEDN9xqm7yU3"
@@ -1103,6 +1479,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -1155,6 +1547,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/eMPDsXbeoNX-hhygWyr1QZJjgYqMZ5Q-ppNk8aLg8xCA3"
@@ -1198,6 +1606,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -1245,6 +1669,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/exrQk9p7spL3xj8f885y9J6LTjiVzMSJzY7OJaZvo.WE3"
@@ -1290,6 +1730,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/eDBhov2d5Y0QsI6qCGL.b..6Mfaa7twTHMIcwqNhenf43"
@@ -1333,6 +1789,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -1413,6 +1885,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/em6Bzt327w4edBiHX4xXGzQ3"
@@ -1456,6 +1944,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -1546,6 +2050,36 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "32",
+                "display": "Internal Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207R00000X"
+              }
+            ],
+            "text": "Internal Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/enVQLHdAtKx3Jj1YB4F6hbR06hCFsSY1LltLA9YniQ7o3"
@@ -1589,6 +2123,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -1637,6 +2187,18 @@
             "text": "Physician Assistant"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "3",
+                "display": "Allergy"
+              }
+            ],
+            "text": "Allergy"
+          }
+        ],
         "location": [
           {
             "reference": "Location/eboowOxbgONKrgo617OaMhpwnPfdM15K7yAZUgk3U8fQs2RnCVvhgUN8e38teUPI13",
@@ -1681,6 +2243,28 @@
               }
             ],
             "text": "Anesthesiologist"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "5",
+                "display": "Anesthesiology"
+              }
+            ],
+            "text": "Anesthesiology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "88",
+                "display": "Plastic Surgery"
+              }
+            ],
+            "text": "Plastic Surgery"
           }
         ],
         "location": [
@@ -1762,6 +2346,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/eCE8YNKXz5Gge8BNF8ULq8RKNBCmlLjGEgMt4n.vMmJY3"
@@ -1805,6 +2405,18 @@
               }
             ],
             "text": "Social Worker"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "125",
+                "display": "Social Services"
+              }
+            ],
+            "text": "Social Services"
           }
         ],
         "location": [
@@ -1851,6 +2463,22 @@
             ],
             "text": "Physician"
           }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
         ]
       },
       "search": {
@@ -1883,6 +2511,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -1930,6 +2574,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/ep.BHrMe-4XBICKGYdHM-Mg3"
@@ -1973,6 +2633,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "116",
+                "display": "General Practice"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "208D00000X"
+              }
+            ],
+            "text": "General Practice"
           }
         ],
         "location": [
@@ -2020,6 +2696,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/e81hAN2DlW.1oROex5lIG0OEwVapMdYRs9xa4vuFvEW83"
@@ -2063,6 +2755,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -2110,6 +2818,1438 @@
             "text": "Resident"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "32",
+                "display": "Internal Medicine"
+              }
+            ],
+            "text": "Internal Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "42",
+                "display": "Obstetrics and Gynecology"
+              }
+            ],
+            "text": "Obstetrics and Gynecology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "41",
+                "display": "Obstetrics"
+              }
+            ],
+            "text": "Obstetrics"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "3",
+                "display": "Allergy"
+              }
+            ],
+            "text": "Allergy"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "5",
+                "display": "Anesthesiology"
+              }
+            ],
+            "text": "Anesthesiology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "6",
+                "display": "Audiology"
+              }
+            ],
+            "text": "Audiology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "10",
+                "display": "Cardiology"
+              }
+            ],
+            "text": "Cardiology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "14",
+                "display": "Colon and Rectal Surgery"
+              }
+            ],
+            "text": "Colon and Rectal Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "15",
+                "display": "Dermatology"
+              }
+            ],
+            "text": "Dermatology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "18",
+                "display": "Endocrinology"
+              }
+            ],
+            "text": "Endocrinology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "52",
+                "display": "Otolaryngology"
+              }
+            ],
+            "text": "Otolaryngology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              }
+            ],
+            "text": "Family Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "20",
+                "display": "Gastroenterology"
+              }
+            ],
+            "text": "Gastroenterology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "21",
+                "display": "General Surgery"
+              }
+            ],
+            "text": "General Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "24",
+                "display": "Gerontology"
+              }
+            ],
+            "text": "Gerontology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "25",
+                "display": "Gynecology"
+              }
+            ],
+            "text": "Gynecology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "27",
+                "display": "Hematology"
+              }
+            ],
+            "text": "Hematology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "29",
+                "display": "Immunology"
+              }
+            ],
+            "text": "Immunology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "30",
+                "display": "Infectious Diseases"
+              }
+            ],
+            "text": "Infectious Diseases"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "32",
+                "display": "Internal Medicine"
+              }
+            ],
+            "text": "Internal Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "36",
+                "display": "Nephrology"
+              }
+            ],
+            "text": "Nephrology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "37",
+                "display": "Neurology"
+              }
+            ],
+            "text": "Neurology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "38",
+                "display": "Neurosurgery"
+              }
+            ],
+            "text": "Neurosurgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "40",
+                "display": "Nutrition"
+              }
+            ],
+            "text": "Nutrition"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "45",
+                "display": "Oncology"
+              }
+            ],
+            "text": "Oncology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "46",
+                "display": "Ophthalmology"
+              }
+            ],
+            "text": "Ophthalmology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "47",
+                "display": "Optometry"
+              }
+            ],
+            "text": "Optometry"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "49",
+                "display": "Orthopaedic Surgery"
+              }
+            ],
+            "text": "Orthopaedic Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "56",
+                "display": "Pediatric Allergy"
+              }
+            ],
+            "text": "Pediatric Allergy"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "58",
+                "display": "Pediatric Cardiology"
+              }
+            ],
+            "text": "Pediatric Cardiology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "66",
+                "display": "Pediatric Hematology and Oncology"
+              }
+            ],
+            "text": "Pediatric Hematology and Oncology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "70",
+                "display": "Pediatric Neurology"
+              }
+            ],
+            "text": "Pediatric Neurology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "82",
+                "display": "Pediatrics"
+              }
+            ],
+            "text": "Pediatrics"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "86",
+                "display": "Physical Medicine and Rehabilitation"
+              }
+            ],
+            "text": "Physical Medicine and Rehabilitation"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "87",
+                "display": "Physical Therapy"
+              }
+            ],
+            "text": "Physical Therapy"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "88",
+                "display": "Plastic Surgery"
+              }
+            ],
+            "text": "Plastic Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "89",
+                "display": "Podiatry"
+              }
+            ],
+            "text": "Podiatry"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "92",
+                "display": "Psychiatry"
+              }
+            ],
+            "text": "Psychiatry"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "93",
+                "display": "Psychology"
+              }
+            ],
+            "text": "Psychology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "94",
+                "display": "Radiation Oncology"
+              }
+            ],
+            "text": "Radiation Oncology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "96",
+                "display": "Radiology"
+              }
+            ],
+            "text": "Radiology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "99",
+                "display": "Rheumatology"
+              }
+            ],
+            "text": "Rheumatology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "102",
+                "display": "Thoracic Diseases"
+              }
+            ],
+            "text": "Thoracic Diseases"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "106",
+                "display": "Urology"
+              }
+            ],
+            "text": "Urology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "107",
+                "display": "Vascular Surgery"
+              }
+            ],
+            "text": "Vascular Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "1",
+                "display": "Addiction Medicine"
+              }
+            ],
+            "text": "Addiction Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "11",
+                "display": "Cardiothoracic Surgery"
+              }
+            ],
+            "text": "Cardiothoracic Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "13",
+                "display": "Chiropractic Medicine"
+              }
+            ],
+            "text": "Chiropractic Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "126",
+                "display": "Diagnostic Radiology"
+              }
+            ],
+            "text": "Diagnostic Radiology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "17",
+                "display": "Emergency Medicine"
+              }
+            ],
+            "text": "Emergency Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "116",
+                "display": "General Practice"
+              }
+            ],
+            "text": "General Practice"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "127",
+                "display": "Medical Oncology"
+              }
+            ],
+            "text": "Medical Oncology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "39",
+                "display": "Nuclear Medicine"
+              }
+            ],
+            "text": "Nuclear Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "33",
+                "display": "Oral Surgery"
+              }
+            ],
+            "text": "Oral Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "55",
+                "display": "Pathology"
+              }
+            ],
+            "text": "Pathology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "31",
+                "display": "Preventative Medicine"
+              }
+            ],
+            "text": "Preventative Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "95",
+                "display": "Radiation Therapy"
+              }
+            ],
+            "text": "Radiation Therapy"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "101",
+                "display": "Surgical Oncology"
+              }
+            ],
+            "text": "Surgical Oncology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "115",
+                "display": "Midwifery"
+              }
+            ],
+            "text": "Midwifery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "44",
+                "display": "Occupational Therapy"
+              }
+            ],
+            "text": "Occupational Therapy"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "108",
+                "display": "Dental General Practice"
+              }
+            ],
+            "text": "Dental General Practice"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "48",
+                "display": "Orthodontics"
+              }
+            ],
+            "text": "Orthodontics"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "83",
+                "display": "Pedodontics"
+              }
+            ],
+            "text": "Pedodontics"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "85",
+                "display": "Periodontics"
+              }
+            ],
+            "text": "Periodontics"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "151",
+                "display": "Joint Surgery"
+              }
+            ],
+            "text": "Joint Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "2",
+                "display": "Adolescent Medicine"
+              }
+            ],
+            "text": "Adolescent Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "4",
+                "display": "Alternative Medicine"
+              }
+            ],
+            "text": "Alternative Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "7",
+                "display": "Bariatrics"
+              }
+            ],
+            "text": "Bariatrics"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "8",
+                "display": "Behavioral Health"
+              }
+            ],
+            "text": "Behavioral Health"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "112",
+                "display": "Burn Surgery"
+              }
+            ],
+            "text": "Burn Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "9",
+                "display": "Cardiac Rehabilitation"
+              }
+            ],
+            "text": "Cardiac Rehabilitation"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "12",
+                "display": "Child and Adolescent Psychiatry"
+              }
+            ],
+            "text": "Child and Adolescent Psychiatry"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "150",
+                "display": "Interventional Radiology"
+              }
+            ],
+            "text": "Interventional Radiology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "40",
+                "display": "Dietitian"
+              }
+            ],
+            "text": "Dietitian"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "22",
+                "display": "Genetics"
+              }
+            ],
+            "text": "Genetics"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "23",
+                "display": "Geriatric Medicine"
+              }
+            ],
+            "text": "Geriatric Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "26",
+                "display": "Hand Surgery"
+              }
+            ],
+            "text": "Hand Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "28",
+                "display": "Hematology and Oncology"
+              }
+            ],
+            "text": "Hematology and Oncology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "118",
+                "display": "Intensive Care"
+              }
+            ],
+            "text": "Intensive Care"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "34",
+                "display": "Medical Genetics"
+              }
+            ],
+            "text": "Medical Genetics"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "35",
+                "display": "Neonatology"
+              }
+            ],
+            "text": "Neonatology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "43",
+                "display": "Occupational Medicine"
+              }
+            ],
+            "text": "Occupational Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "50",
+                "display": "Orthotics"
+              }
+            ],
+            "text": "Orthotics"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "51",
+                "display": "Osteopathic Medicine"
+              }
+            ],
+            "text": "Osteopathic Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "53",
+                "display": "Pain Medicine"
+              }
+            ],
+            "text": "Pain Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "54",
+                "display": "Pastoral Care"
+              }
+            ],
+            "text": "Pastoral Care"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "57",
+                "display": "Pediatric Anesthesia"
+              }
+            ],
+            "text": "Pediatric Anesthesia"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "59",
+                "display": "Pediatric Cardiothoracic Surgery"
+              }
+            ],
+            "text": "Pediatric Cardiothoracic Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "61",
+                "display": "Pediatric Dermatology"
+              }
+            ],
+            "text": "Pediatric Dermatology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "62",
+                "display": "Pediatric Emergency Medicine"
+              }
+            ],
+            "text": "Pediatric Emergency Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "63",
+                "display": "Pediatric Endocrinology"
+              }
+            ],
+            "text": "Pediatric Endocrinology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "64",
+                "display": "Pediatric Gastroenterology"
+              }
+            ],
+            "text": "Pediatric Gastroenterology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "65",
+                "display": "Pediatric Genetics"
+              }
+            ],
+            "text": "Pediatric Genetics"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "67",
+                "display": "Pediatric Infectious Disease"
+              }
+            ],
+            "text": "Pediatric Infectious Disease"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "68",
+                "display": "Pediatric Intensive Care"
+              }
+            ],
+            "text": "Pediatric Intensive Care"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "69",
+                "display": "Pediatric Nephrology"
+              }
+            ],
+            "text": "Pediatric Nephrology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "71",
+                "display": "Pediatric Neurosurgery"
+              }
+            ],
+            "text": "Pediatric Neurosurgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "72",
+                "display": "Pediatric Oncology"
+              }
+            ],
+            "text": "Pediatric Oncology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "73",
+                "display": "Pediatric Ophthalmology"
+              }
+            ],
+            "text": "Pediatric Ophthalmology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "74",
+                "display": "Pediatric Orthopaedic Surgery"
+              }
+            ],
+            "text": "Pediatric Orthopaedic Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "75",
+                "display": "Pediatric Otolaryngology"
+              }
+            ],
+            "text": "Pediatric Otolaryngology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "76",
+                "display": "Pediatric Pulmonology"
+              }
+            ],
+            "text": "Pediatric Pulmonology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "77",
+                "display": "Pediatric Radiology"
+              }
+            ],
+            "text": "Pediatric Radiology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "78",
+                "display": "Pediatric Rehabilitation"
+              }
+            ],
+            "text": "Pediatric Rehabilitation"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "79",
+                "display": "Pediatric Rheumatology"
+              }
+            ],
+            "text": "Pediatric Rheumatology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "80",
+                "display": "Pediatric Surgery"
+              }
+            ],
+            "text": "Pediatric Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "81",
+                "display": "Pediatric Urology"
+              }
+            ],
+            "text": "Pediatric Urology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "84",
+                "display": "Perinatology"
+              }
+            ],
+            "text": "Perinatology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "90",
+                "display": "Proctology"
+              }
+            ],
+            "text": "Proctology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "91",
+                "display": "Prosthodontics"
+              }
+            ],
+            "text": "Prosthodontics"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "110",
+                "display": "Pulmonary Disease"
+              }
+            ],
+            "text": "Pulmonary Disease"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "97",
+                "display": "Rehabilitation"
+              }
+            ],
+            "text": "Rehabilitation"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "98",
+                "display": "Respiratory Therapy"
+              }
+            ],
+            "text": "Respiratory Therapy"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "109",
+                "display": "Speech Pathology"
+              }
+            ],
+            "text": "Speech Pathology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "100",
+                "display": "Sports Medicine"
+              }
+            ],
+            "text": "Sports Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "103",
+                "display": "Transplant"
+              }
+            ],
+            "text": "Transplant"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "104",
+                "display": "Trauma Surgery"
+              }
+            ],
+            "text": "Trauma Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "105",
+                "display": "Urgent Care"
+              }
+            ],
+            "text": "Urgent Care"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "152",
+                "display": "Lactation Services"
+              }
+            ],
+            "text": "Lactation Services"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "137",
+                "display": "Dermatopathology"
+              }
+            ],
+            "text": "Dermatopathology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "132",
+                "display": "Allergy and Immunology"
+              }
+            ],
+            "text": "Allergy and Immunology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "131",
+                "display": "Aerospace Medicine"
+              }
+            ],
+            "text": "Aerospace Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "142",
+                "display": "Gynecologic Oncology"
+              }
+            ],
+            "text": "Gynecologic Oncology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "154",
+                "display": "Maternal and Fetal Medicine"
+              }
+            ],
+            "text": "Maternal and Fetal Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "179",
+                "display": "Pediatric Transplant Hepatology"
+              }
+            ],
+            "text": "Pediatric Transplant Hepatology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "182",
+                "display": "Reproductive Endocrinology and Infertility"
+              }
+            ],
+            "text": "Reproductive Endocrinology and Infertility"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "188",
+                "display": "Transplant Hepatology"
+              }
+            ],
+            "text": "Transplant Hepatology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "117",
+                "display": "Breast Surgery"
+              }
+            ],
+            "text": "Breast Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "192",
+                "display": "Wound Care"
+              }
+            ],
+            "text": "Wound Care"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "66",
+                "display": "Pediatric Hematology"
+              }
+            ],
+            "text": "Pediatric Hematology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "174",
+                "display": "Pediatric Plastic Surgery"
+              }
+            ],
+            "text": "Pediatric Plastic Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "172",
+                "display": "Pediatric Physical Medicine and Rehabilitation"
+              }
+            ],
+            "text": "Pediatric Physical Medicine and Rehabilitation"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "46",
+                "display": "Retina Ophthalmology"
+              }
+            ],
+            "text": "Retina Ophthalmology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "46",
+                "display": "Oculoplastics Ophthalmology"
+              }
+            ],
+            "text": "Oculoplastics Ophthalmology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "157",
+                "display": "Neuro-Ophthalmology"
+              }
+            ],
+            "text": "Neuro-Ophthalmology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "46",
+                "display": "Cornea Ophthalmology"
+              }
+            ],
+            "text": "Cornea Ophthalmology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "46",
+                "display": "Glaucoma Ophthalmology"
+              }
+            ],
+            "text": "Glaucoma Ophthalmology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "168",
+                "display": "Pediatric Immunology"
+              }
+            ],
+            "text": "Pediatric Immunology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "185",
+                "display": "Spine Surgery"
+              }
+            ],
+            "text": "Spine Surgery"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "139",
+                "display": "Endodontics"
+              }
+            ],
+            "text": "Endodontics"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "190",
+                "display": "Urogynecology"
+              }
+            ],
+            "text": "Urogynecology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "129",
+                "display": "Long Term Acute Care"
+              }
+            ],
+            "text": "Long Term Acute Care"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "103",
+                "display": "Transplant Surgery"
+              }
+            ],
+            "text": "Transplant Surgery"
+          }
+        ],
         "location": [
           {
             "reference": "Location/e1ggxPxExsvJ5sGx8IVE9nLDMiHcBQAwqqksBOw77-M03"
@@ -2153,6 +4293,38 @@
               }
             ],
             "text": "Resident"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "32",
+                "display": "Internal Medicine"
+              }
+            ],
+            "text": "Internal Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "42",
+                "display": "Obstetrics and Gynecology"
+              }
+            ],
+            "text": "Obstetrics and Gynecology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "41",
+                "display": "Obstetrics"
+              }
+            ],
+            "text": "Obstetrics"
           }
         ],
         "location": [
@@ -2200,6 +4372,38 @@
             "text": "Resident"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "32",
+                "display": "Internal Medicine"
+              }
+            ],
+            "text": "Internal Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "42",
+                "display": "Obstetrics and Gynecology"
+              }
+            ],
+            "text": "Obstetrics and Gynecology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "41",
+                "display": "Obstetrics"
+              }
+            ],
+            "text": "Obstetrics"
+          }
+        ],
         "location": [
           {
             "reference": "Location/eqq.mhlWNL3lD4vCZQoIxGZnXn4QOSM4f5hLef3Stm0Y3"
@@ -2243,6 +4447,48 @@
               }
             ],
             "text": "Resident"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "32",
+                "display": "Internal Medicine"
+              }
+            ],
+            "text": "Internal Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "42",
+                "display": "Obstetrics and Gynecology"
+              }
+            ],
+            "text": "Obstetrics and Gynecology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "41",
+                "display": "Obstetrics"
+              }
+            ],
+            "text": "Obstetrics"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "17",
+                "display": "Emergency Medicine"
+              }
+            ],
+            "text": "Emergency Medicine"
           }
         ],
         "location": [
@@ -2290,6 +4536,38 @@
             "text": "Resident"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "32",
+                "display": "Internal Medicine"
+              }
+            ],
+            "text": "Internal Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "42",
+                "display": "Obstetrics and Gynecology"
+              }
+            ],
+            "text": "Obstetrics and Gynecology"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "41",
+                "display": "Obstetrics"
+              }
+            ],
+            "text": "Obstetrics"
+          }
+        ],
         "location": [
           {
             "reference": "Location/eOzJ64g5ZZobBPgA8HTu2C.sRlukAT73-cvifHeI49TQ3"
@@ -2333,6 +4611,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -2379,6 +4673,22 @@
             ],
             "text": "Physician"
           }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
         ]
       },
       "search": {
@@ -2411,6 +4721,67 @@
               }
             ],
             "text": "Physician"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/e6YZZAtOPD95uOHPshIB2o-oG217DQw0mTPzHtnVsRLc3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/e6YZZAtOPD95uOHPshIB2o-oG217DQw0mTPzHtnVsRLc3",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "e6YZZAtOPD95uOHPshIB2o-oG217DQw0mTPzHtnVsRLc3",
+        "active": true,
+        "practitioner": {
+          "reference": "Practitioner/e6ShSa7TZojt5U-MlDw737w3",
+          "display": "Family Medicine Physician, MD"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.10.836982.1040",
+                "code": "1",
+                "display": "Physician"
+              }
+            ],
+            "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
+        "location": [
+          {
+            "reference": "Location/eiKJnJKvrNJVfXMX5fEKsANZEyKzIU-Ii1uaewBtztVg3"
+          }
+        ],
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555",
+            "use": "work"
           }
         ]
       },
@@ -2512,6 +4883,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/eNo3PgyjLFUL8cttXKy0Ju54X--reCtz6FLoSE8OaXEo3"
@@ -2522,6 +4909,384 @@
             "system": "phone",
             "value": "555-555-5555",
             "use": "work"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/e4IJhREx3VDRMBM.wfm-xqg3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/e4IJhREx3VDRMBM.wfm-xqg3",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "e4IJhREx3VDRMBM.wfm-xqg3",
+        "active": true,
+        "practitioner": {
+          "reference": "Practitioner/eNDVBCLqFJRxJxVz3hUdh6g3",
+          "display": "Provider Suki Ai Inc"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.10.836982.1040",
+                "code": "1",
+                "display": "Physician"
+              }
+            ],
+            "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "32",
+                "display": "Internal Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207R00000X"
+              }
+            ],
+            "text": "Internal Medicine"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/eKCovQX6AtkDLcW0Kv7TCLQ3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/eKCovQX6AtkDLcW0Kv7TCLQ3",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "eKCovQX6AtkDLcW0Kv7TCLQ3",
+        "active": true,
+        "practitioner": {
+          "reference": "Practitioner/eQGXdV.dSFtj24ZmWyDk2SA3",
+          "display": "Provider Suki Integrations"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.10.836982.1040",
+                "code": "1",
+                "display": "Physician"
+              }
+            ],
+            "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "32",
+                "display": "Internal Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207R00000X"
+              }
+            ],
+            "text": "Internal Medicine"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/eEzS.pNAPiiBKHQEHMAjvTA3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/eEzS.pNAPiiBKHQEHMAjvTA3",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "eEzS.pNAPiiBKHQEHMAjvTA3",
+        "active": true,
+        "practitioner": {
+          "reference": "Practitioner/eVnTFPSqfoD103zZTb68NJA3",
+          "display": "Provider Suki Outpatient"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.10.836982.1040",
+                "code": "1",
+                "display": "Physician"
+              }
+            ],
+            "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "32",
+                "display": "Internal Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207R00000X"
+              }
+            ],
+            "text": "Internal Medicine"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/eboImz2H53FxOlnpm13zDcw3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/eboImz2H53FxOlnpm13zDcw3",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "eboImz2H53FxOlnpm13zDcw3",
+        "active": true,
+        "practitioner": {
+          "reference": "Practitioner/ePkH00EAbbZSRsraH8mMQGw3",
+          "display": "Provider Suki Product"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.10.836982.1040",
+                "code": "1",
+                "display": "Physician"
+              }
+            ],
+            "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "32",
+                "display": "Internal Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207R00000X"
+              }
+            ],
+            "text": "Internal Medicine"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/eWgDnD2H0zC1LkKpIBSXzxw3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/eWgDnD2H0zC1LkKpIBSXzxw3",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "eWgDnD2H0zC1LkKpIBSXzxw3",
+        "active": true,
+        "practitioner": {
+          "reference": "Practitioner/eUrfzyZwio5rbAhX71TXsug3",
+          "display": "Sukiprovider Suki Qa"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.10.836982.1040",
+                "code": "1",
+                "display": "Physician"
+              }
+            ],
+            "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "32",
+                "display": "Internal Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207R00000X"
+              }
+            ],
+            "text": "Internal Medicine"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/eBX-56zQiCsYFeE04pT6rPg3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/eBX-56zQiCsYFeE04pT6rPg3",
+      "resource": {
+        "resourceType": "PractitionerRole",
+        "id": "eBX-56zQiCsYFeE04pT6rPg3",
+        "active": true,
+        "practitioner": {
+          "reference": "Practitioner/eFw5MepONEQaQ1QppgcCG3w3",
+          "display": "Provider Suki Test"
+        },
+        "code": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.10.836982.1040",
+                "code": "1",
+                "display": "Physician"
+              }
+            ],
+            "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          },
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "32",
+                "display": "Internal Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207R00000X"
+              }
+            ],
+            "text": "Internal Medicine"
           }
         ]
       },
@@ -2555,6 +5320,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -2607,6 +5388,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/eBW5dTb-97I-axPctFtpbHw3"
@@ -2655,6 +5452,22 @@
               }
             ],
             "text": "Physician"
+          }
+        ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
           }
         ],
         "location": [
@@ -2707,6 +5520,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/em7RjEYUpVuOIcN3gzuztSjtyO0AlaVnmgOkmtM5KBvI3"
@@ -2752,6 +5581,18 @@
             "text": "Social Worker"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "125",
+                "display": "Social Services"
+              }
+            ],
+            "text": "Social Services"
+          }
+        ],
         "location": [
           {
             "reference": "Location/eDvrnD7CHkqnk9wjW9AYkLh.HKZgaYYVp7DcuQYsDFOc3"
@@ -2767,6 +5608,29 @@
       },
       "search": {
         "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e.YvP8Oo3cbckBRArbwm29tApdL9c61ZZ5CNPhoAoMrk3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e.YvP8Oo3cbckBRArbwm29tApdL9c61ZZ5CNPhoAoMrk3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "e.YvP8Oo3cbckBRArbwm29tApdL9c61ZZ5CNPhoAoMrk3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "818-673-4770"
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
       }
     },
     {
@@ -2849,6 +5713,38 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e1ggxPxExsvJ5sGx8IVE9nLDMiHcBQAwqqksBOw77-M03"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e1ggxPxExsvJ5sGx8IVE9nLDMiHcBQAwqqksBOw77-M03",
+      "resource": {
+        "resourceType": "Location",
+        "id": "e1ggxPxExsvJ5sGx8IVE9nLDMiHcBQAwqqksBOw77-M03",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53711"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e2gxs4Fn7l-TbzLO17uxuHw3"
         }
       ],
@@ -2893,6 +5789,38 @@
             ]
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e2lYFlylQ362l0HRrQXNxUOQb3nR9j3VPfRHNPs.TNb03"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e2lYFlylQ362l0HRrQXNxUOQb3nR9j3VPfRHNPs.TNb03",
+      "resource": {
+        "resourceType": "Location",
+        "id": "e2lYFlylQ362l0HRrQXNxUOQb3nR9j3VPfRHNPs.TNb03",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "VERONA",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53593"
+        }
       },
       "search": {
         "mode": "include"
@@ -3046,6 +5974,37 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e33cX1PvZ7bDOewxK9oGG0mn97SWkzv2-Tt3g1K-.R4E3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e33cX1PvZ7bDOewxK9oGG0mn97SWkzv2-Tt3g1K-.R4E3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "e33cX1PvZ7bDOewxK9oGG0mn97SWkzv2-Tt3g1K-.R4E3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e3Dt5qIBhMpHNwBK2q370pg3"
         }
       ],
@@ -3190,6 +6149,37 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e4aPTZoZLqOja.QwzaEzp0A3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e4aPTZoZLqOja.QwzaEzp0A3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "e4aPTZoZLqOja.QwzaEzp0A3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e52-W3K1K-BhK5D-G546gSMHn1YKyfWKEPq6jMtBPPmA3"
         }
       ],
@@ -3274,6 +6264,68 @@
             }
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e55mVMs.OXNffNX2d54q9M.RUkBfXg-lDgv47cNTeXgw3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e55mVMs.OXNffNX2d54q9M.RUkBfXg-lDgv47cNTeXgw3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "e55mVMs.OXNffNX2d54q9M.RUkBfXg-lDgv47cNTeXgw3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "480-706-2222"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e5HzxEXv.mR.dx6K.-j85Cg3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e5HzxEXv.mR.dx6K.-j85Cg3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "e5HzxEXv.mR.dx6K.-j85Cg3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
       },
       "search": {
         "mode": "include"
@@ -3556,6 +6608,74 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e6ShSa7TZojt5U-MlDw737w3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e6ShSa7TZojt5U-MlDw737w3",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "e6ShSa7TZojt5U-MlDw737w3",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "text": "EPIC"
+            },
+            "system": "POTFID",
+            "value": "30561"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "   30561"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "30561"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "use": "usual",
+            "text": "Family Medicine Physician, MD",
+            "family": "Scott",
+            "given": [
+              "Jenn"
+            ]
+          }
+        ],
+        "gender": "male",
+        "qualification": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "urn:oid:1.2.840.114350.1.13.0.1.7.4.836982.6000",
+                  "code": "11",
+                  "display": "MD"
+                }
+              ],
+              "text": "MD"
+            }
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e7D.u41Zv3VPrLmUp-mWnrQ3"
         }
       ],
@@ -3732,6 +6852,71 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e81hAN2DlW.1oROex5lIG0OEwVapMdYRs9xa4vuFvEW83"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e81hAN2DlW.1oROex5lIG0OEwVapMdYRs9xa4vuFvEW83",
+      "resource": {
+        "resourceType": "Location",
+        "id": "e81hAN2DlW.1oROex5lIG0OEwVapMdYRs9xa4vuFvEW83",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "608-999-2342"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Maple Street"
+          ],
+          "city": "VERONA",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53593",
+          "country": "United States of America"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e87tW7wRohBmf.eqyVIl0zVZMWSdgLNbuJSM.qUEGB4c3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e87tW7wRohBmf.eqyVIl0zVZMWSdgLNbuJSM.qUEGB4c3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "e87tW7wRohBmf.eqyVIl0zVZMWSdgLNbuJSM.qUEGB4c3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "Verona",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53593"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e91ZqN58jkVe5kU07NSAMbw3"
         }
       ],
@@ -3816,6 +7001,38 @@
             }
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e9RZ-gh5EYC3e5vnPhgx5BCzeiX8byTgLvZlpWADVPac3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/e9RZ-gh5EYC3e5vnPhgx5BCzeiX8byTgLvZlpWADVPac3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "e9RZ-gh5EYC3e5vnPhgx5BCzeiX8byTgLvZlpWADVPac3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
       },
       "search": {
         "mode": "include"
@@ -4056,6 +7273,38 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eAPMQD8oBcZrBViYpebWwe6DDrBltQeqTlAUgGh3csY03"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eAPMQD8oBcZrBViYpebWwe6DDrBltQeqTlAUgGh3csY03",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eAPMQD8oBcZrBViYpebWwe6DDrBltQeqTlAUgGh3csY03",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53711"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eB6a6MUzqdCWN0-OY9RMX3A3"
         }
       ],
@@ -4133,6 +7382,69 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eBW5dTb-97I-axPctFtpbHw3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eBW5dTb-97I-axPctFtpbHw3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eBW5dTb-97I-axPctFtpbHw3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eBePJfIjZxFCKU1yN4xbYTvVXBdLvslIA5tbkFKt06iQ3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eBePJfIjZxFCKU1yN4xbYTvVXBdLvslIA5tbkFKt06iQ3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eBePJfIjZxFCKU1yN4xbYTvVXBdLvslIA5tbkFKt06iQ3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53711"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eBltqhirgL8m8dCpB-Yj4PQ3"
         }
       ],
@@ -4193,6 +7505,68 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eC5CBoepbvvYbnqD1Hp9zy4PLWCNHxLhHMhSdlqdLiQ83"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eC5CBoepbvvYbnqD1Hp9zy4PLWCNHxLhHMhSdlqdLiQ83",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eC5CBoepbvvYbnqD1Hp9zy4PLWCNHxLhHMhSdlqdLiQ83",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eCE8YNKXz5Gge8BNF8ULq8RKNBCmlLjGEgMt4n.vMmJY3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eCE8YNKXz5Gge8BNF8ULq8RKNBCmlLjGEgMt4n.vMmJY3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eCE8YNKXz5Gge8BNF8ULq8RKNBCmlLjGEgMt4n.vMmJY3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eCKUDq.tnyAnrTSmDAhV8.Q3"
         }
       ],
@@ -4237,6 +7611,101 @@
             ]
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eCsjdiEVwyi..1yZPWaRwf2w5D6rJuwLLgLY9DjxTFAo3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eCsjdiEVwyi..1yZPWaRwf2w5D6rJuwLLgLY9DjxTFAo3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eCsjdiEVwyi..1yZPWaRwf2w5D6rJuwLLgLY9DjxTFAo3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "VERONA",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53593"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eDBhov2d5Y0QsI6qCGL.b..6Mfaa7twTHMIcwqNhenf43"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eDBhov2d5Y0QsI6qCGL.b..6Mfaa7twTHMIcwqNhenf43",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eDBhov2d5Y0QsI6qCGL.b..6Mfaa7twTHMIcwqNhenf43",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eDvrnD7CHkqnk9wjW9AYkLh.HKZgaYYVp7DcuQYsDFOc3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eDvrnD7CHkqnk9wjW9AYkLh.HKZgaYYVp7DcuQYsDFOc3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eDvrnD7CHkqnk9wjW9AYkLh.HKZgaYYVp7DcuQYsDFOc3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "VERONA",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53593"
+        }
       },
       "search": {
         "mode": "include"
@@ -4520,6 +7989,140 @@
             }
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eFw5MepONEQaQ1QppgcCG3w3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eFw5MepONEQaQ1QppgcCG3w3",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "eFw5MepONEQaQ1QppgcCG3w3",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            "value": " SUKITESTPROV"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            "value": "SUKITESTPROV"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EPIC"
+            },
+            "system": "POTFID",
+            "value": "E44821"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "  E44821"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "E44821"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "use": "usual",
+            "text": "Provider Suki Test",
+            "family": "Suki Test",
+            "given": [
+              "Provider"
+            ]
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eG85mQL23VLL0a13.TIMYVyJEqQvkV2C7BIENmkbq2QQouov1S0QZbIuX4BYdRgOG3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eG85mQL23VLL0a13.TIMYVyJEqQvkV2C7BIENmkbq2QQouov1S0QZbIuX4BYdRgOG3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eG85mQL23VLL0a13.TIMYVyJEqQvkV2C7BIENmkbq2QQouov1S0QZbIuX4BYdRgOG3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "666-666-6666"
+          }
+        ],
+        "address": {
+          "line": [
+            "1234 Anywhere Streeet"
+          ],
+          "city": "Madison",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53715",
+          "country": "United States of America"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eI7weDhRIo932BSlv2-H0zAVHXVtsYAVF33n6KeHetj83"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eI7weDhRIo932BSlv2-H0zAVHXVtsYAVF33n6KeHetj83",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eI7weDhRIo932BSlv2-H0zAVHXVtsYAVF33n6KeHetj83",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "VERONA",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53593"
+        }
       },
       "search": {
         "mode": "include"
@@ -4857,6 +8460,37 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eJoWPNHZJG0jGSceogBCWb-hb2VKYzZ3B4QhRSKs-vb83"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eJoWPNHZJG0jGSceogBCWb-hb2VKYzZ3B4QhRSKs-vb83",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eJoWPNHZJG0jGSceogBCWb-hb2VKYzZ3B4QhRSKs-vb83",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eLTeNNYBPkgTp7S2U88fcnVE2AzH0LfR0JEYTKSygTS43"
         }
       ],
@@ -5002,6 +8636,38 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eM.654PFCSDbeU9NBjGaWIAH-wrJ9PFXLuOuk-Ejp.jw3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eM.654PFCSDbeU9NBjGaWIAH-wrJ9PFXLuOuk-Ejp.jw3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eM.654PFCSDbeU9NBjGaWIAH-wrJ9PFXLuOuk-Ejp.jw3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere St"
+          ],
+          "city": "Madison",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53711"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eM5CWtq15N0WJeuCet5bJlQ3"
         }
       ],
@@ -5129,6 +8795,98 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eMPDsXbeoNX-hhygWyr1QZJjgYqMZ5Q-ppNk8aLg8xCA3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eMPDsXbeoNX-hhygWyr1QZJjgYqMZ5Q-ppNk8aLg8xCA3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eMPDsXbeoNX-hhygWyr1QZJjgYqMZ5Q-ppNk8aLg8xCA3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eNDVBCLqFJRxJxVz3hUdh6g3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eNDVBCLqFJRxJxVz3hUdh6g3",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "eNDVBCLqFJRxJxVz3hUdh6g3",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            "value": " SUKIAIRR"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            "value": "SUKIAIRR"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "   E4482"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "E4482"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "use": "usual",
+            "text": "Provider Suki Ai Inc",
+            "family": "Suki Ai Inc",
+            "given": [
+              "Provider"
+            ]
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eNIBFvrqbGfASDASFbL0-bA3"
         }
       ],
@@ -5195,6 +8953,37 @@
             "value": "Jisoon@epic.com"
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eNo3PgyjLFUL8cttXKy0Ju54X--reCtz6FLoSE8OaXEo3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eNo3PgyjLFUL8cttXKy0Ju54X--reCtz6FLoSE8OaXEo3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eNo3PgyjLFUL8cttXKy0Ju54X--reCtz6FLoSE8OaXEo3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
       },
       "search": {
         "mode": "include"
@@ -5471,6 +9260,262 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eOzJ64g5ZZobBPgA8HTu2C.sRlukAT73-cvifHeI49TQ3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eOzJ64g5ZZobBPgA8HTu2C.sRlukAT73-cvifHeI49TQ3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eOzJ64g5ZZobBPgA8HTu2C.sRlukAT73-cvifHeI49TQ3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere St"
+          ],
+          "city": "Madison",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53711"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ePLWA944osclrkuXvLr-9d9vhud-1JTVcWA7D6r1K4iM3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ePLWA944osclrkuXvLr-9d9vhud-1JTVcWA7D6r1K4iM3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "ePLWA944osclrkuXvLr-9d9vhud-1JTVcWA7D6r1K4iM3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/ePkH00EAbbZSRsraH8mMQGw3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/ePkH00EAbbZSRsraH8mMQGw3",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "ePkH00EAbbZSRsraH8mMQGw3",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            "value": " SUKIPRODPROV"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            "value": "SUKIPRODPROV"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EPIC"
+            },
+            "system": "POTFID",
+            "value": "E44824"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "  E44824"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "E44824"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "use": "usual",
+            "text": "Provider Suki Product",
+            "family": "Suki Product",
+            "given": [
+              "Provider"
+            ]
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eQGXdV.dSFtj24ZmWyDk2SA3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eQGXdV.dSFtj24ZmWyDk2SA3",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "eQGXdV.dSFtj24ZmWyDk2SA3",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            "value": " SUKIINTPROV"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            "value": "SUKIINTPROV"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EPIC"
+            },
+            "system": "POTFID",
+            "value": "E44823"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "  E44823"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "E44823"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "use": "usual",
+            "text": "Provider Suki Integrations",
+            "family": "Suki Integrations",
+            "given": [
+              "Provider"
+            ]
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eR.xW57Si1WSc9MKJVGHpRtsX7E0Q.c7ZuiPG6EyBe1w3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eR.xW57Si1WSc9MKJVGHpRtsX7E0Q.c7ZuiPG6EyBe1w3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eR.xW57Si1WSc9MKJVGHpRtsX7E0Q.c7ZuiPG6EyBe1w3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "724-867-5309"
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eT.Tw3aIJS.mZ6j2kDGrmhKewe0yMcmy-o71N-ztEkUg3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eT.Tw3aIJS.mZ6j2kDGrmhKewe0yMcmy-o71N-ztEkUg3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eT.Tw3aIJS.mZ6j2kDGrmhKewe0yMcmy-o71N-ztEkUg3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "Verona",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53593"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eTNtEfb3IcGm9PUZ.pHfbCJNFv98bw1Zn9sAkJsrwsCM3"
         }
       ],
@@ -5578,6 +9623,14 @@
               "text": "EXTERNAL"
             },
             "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            "value": "61"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "PROVID"
+            },
+            "system": "PROVID",
             "value": "61"
           },
           {
@@ -5751,6 +9804,39 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eUogGK4IQ9oXYCelZpGEAnS6mOXr.6DsnNEdZvy8XTFo3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eUogGK4IQ9oXYCelZpGEAnS6mOXr.6DsnNEdZvy8XTFo3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eUogGK4IQ9oXYCelZpGEAnS6mOXr.6DsnNEdZvy8XTFo3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "608-999-2342"
+          }
+        ],
+        "address": {
+          "line": [
+            "1234 Maple Street"
+          ],
+          "city": "VERONA",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53593",
+          "country": "United States of America"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eUqvfRVFNUVeJmt1pCf8YS24CEOUR6bhBnL-xrSXlTdc3"
         }
       ],
@@ -5809,6 +9895,175 @@
             }
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eUrfzyZwio5rbAhX71TXsug3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eUrfzyZwio5rbAhX71TXsug3",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "eUrfzyZwio5rbAhX71TXsug3",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            "value": " SUKIQAPROV"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            "value": "SUKIQAPROV"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EPIC"
+            },
+            "system": "POTFID",
+            "value": "E44822"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "  E44822"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "E44822"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "use": "usual",
+            "text": "Sukiprovider Suki Qa",
+            "family": "Suki Qa",
+            "given": [
+              "Sukiprovider"
+            ]
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eVnTFPSqfoD103zZTb68NJA3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eVnTFPSqfoD103zZTb68NJA3",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "eVnTFPSqfoD103zZTb68NJA3",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            "value": " SUKIOPTPROV"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+            "value": "SUKIOPTPROV"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EPIC"
+            },
+            "system": "POTFID",
+            "value": "E44825"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "INTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "  E44825"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EXTERNAL"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+            "value": "E44825"
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "use": "usual",
+            "text": "Provider Suki Outpatient",
+            "family": "Suki Outpatient",
+            "given": [
+              "Provider"
+            ]
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eVx7M6ufxDS8KLLSAY3Z5U7b8dIGgYp9oOshvsLqkc-Y3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eVx7M6ufxDS8KLLSAY3Z5U7b8dIGgYp9oOshvsLqkc-Y3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eVx7M6ufxDS8KLLSAY3Z5U7b8dIGgYp9oOshvsLqkc-Y3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
       },
       "search": {
         "mode": "include"
@@ -6122,6 +10377,37 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eZVlwVydaOFu9zUEENSDi8A3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eZVlwVydaOFu9zUEENSDi8A3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eZVlwVydaOFu9zUEENSDi8A3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eZaGvZYLfCRMPKYf3C3dUSQ3"
         }
       ],
@@ -6290,6 +10576,38 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ea9ApF.8zjmR0cuLXzrl-tnv8jUp6vJP3ylWsLIi8yR03"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ea9ApF.8zjmR0cuLXzrl-tnv8jUp6vJP3ylWsLIi8yR03",
+      "resource": {
+        "resourceType": "Location",
+        "id": "ea9ApF.8zjmR0cuLXzrl-tnv8jUp6vJP3ylWsLIi8yR03",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53711"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eaYtx0ljledD7kS1aY5g1IQ3"
         }
       ],
@@ -6349,6 +10667,71 @@
             }
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eboowOxbgONKrgo617OaMhpwnPfdM15K7yAZUgk3U8fQs2RnCVvhgUN8e38teUPI13"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eboowOxbgONKrgo617OaMhpwnPfdM15K7yAZUgk3U8fQs2RnCVvhgUN8e38teUPI13",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eboowOxbgONKrgo617OaMhpwnPfdM15K7yAZUgk3U8fQs2RnCVvhgUN8e38teUPI13",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "777-777-7777"
+          }
+        ],
+        "address": {
+          "line": [
+            "12345 Anywhere Street"
+          ],
+          "city": "Madison",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53703",
+          "country": "United States of America"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ec3IiOd1rwbCVWN4qWJohskGmJD2IICcu3eb7V-jlHCI3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ec3IiOd1rwbCVWN4qWJohskGmJD2IICcu3eb7V-jlHCI3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "ec3IiOd1rwbCVWN4qWJohskGmJD2IICcu3eb7V-jlHCI3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "VERONA",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53593"
+        }
       },
       "search": {
         "mode": "include"
@@ -6464,6 +10847,106 @@
             }
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ecwGRbJxtGA5BfjrVJBkoKg3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ecwGRbJxtGA5BfjrVJBkoKg3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "ecwGRbJxtGA5BfjrVJBkoKg3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          },
+          {
+            "system": "fax",
+            "value": "6081234564"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eex8ECkA-udKBsKjHQNVOfOOPoRiHKvpKkf-D5xU-IyI3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eex8ECkA-udKBsKjHQNVOfOOPoRiHKvpKkf-D5xU-IyI3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eex8ECkA-udKBsKjHQNVOfOOPoRiHKvpKkf-D5xU-IyI3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "Madison",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53719",
+          "country": "United States of America"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ef7OTaEMPCgzrfd3jTV5SzRhN-4xRQtr6MEDN9xqm7yU3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ef7OTaEMPCgzrfd3jTV5SzRhN-4xRQtr6MEDN9xqm7yU3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "ef7OTaEMPCgzrfd3jTV5SzRhN-4xRQtr6MEDN9xqm7yU3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "Verona",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53593"
+        }
       },
       "search": {
         "mode": "include"
@@ -6772,6 +11255,61 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ehAZPa6DzkD8pV0WMRQBenKPHLCegERTN3qMgLUhRdAk3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ehAZPa6DzkD8pV0WMRQBenKPHLCegERTN3qMgLUhRdAk3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "ehAZPa6DzkD8pV0WMRQBenKPHLCegERTN3qMgLUhRdAk3",
+        "mode": "instance",
+        "address": {
+          "line": [
+            "123 Anywhere St"
+          ],
+          "city": "Madison",
+          "state": "Wisconsin"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eiKJnJKvrNJVfXMX5fEKsANZEyKzIU-Ii1uaewBtztVg3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eiKJnJKvrNJVfXMX5fEKsANZEyKzIU-Ii1uaewBtztVg3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eiKJnJKvrNJVfXMX5fEKsANZEyKzIU-Ii1uaewBtztVg3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eiQAstk2b61cRSU7jH5xJfw3"
         }
       ],
@@ -7032,6 +11570,69 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ekrQu6ofPMO0YHiWNkG3zZdsF.olGV8eILl3ZOyOsCpU3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ekrQu6ofPMO0YHiWNkG3zZdsF.olGV8eILl3ZOyOsCpU3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "ekrQu6ofPMO0YHiWNkG3zZdsF.olGV8eILl3ZOyOsCpU3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "VERONA",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53593"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/el6bpx-2OLUqCUa4hyNW9pQ3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/el6bpx-2OLUqCUa4hyNW9pQ3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "el6bpx-2OLUqCUa4hyNW9pQ3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/elpRiy0AYgjhdjAhTBJ3Aiw3"
         }
       ],
@@ -7131,6 +11732,60 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/em6Bzt327w4edBiHX4xXGzQ3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/em6Bzt327w4edBiHX4xXGzQ3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "em6Bzt327w4edBiHX4xXGzQ3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/em7RjEYUpVuOIcN3gzuztSjtyO0AlaVnmgOkmtM5KBvI3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/em7RjEYUpVuOIcN3gzuztSjtyO0AlaVnmgOkmtM5KBvI3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "em7RjEYUpVuOIcN3gzuztSjtyO0AlaVnmgOkmtM5KBvI3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "333-333-3333"
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/emZzxNGSvfrjuJx1BK7FZ-g3"
         }
       ],
@@ -7195,6 +11850,38 @@
             }
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/en3vmXpNOEYzO2ZFTnH-zcZWjVUInE7.WHpB4gifjyYI3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/en3vmXpNOEYzO2ZFTnH-zcZWjVUInE7.WHpB4gifjyYI3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "en3vmXpNOEYzO2ZFTnH-zcZWjVUInE7.WHpB4gifjyYI3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53711"
+        }
       },
       "search": {
         "mode": "include"
@@ -7280,6 +11967,38 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/enVQLHdAtKx3Jj1YB4F6hbR06hCFsSY1LltLA9YniQ7o3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/enVQLHdAtKx3Jj1YB4F6hbR06hCFsSY1LltLA9YniQ7o3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "enVQLHdAtKx3Jj1YB4F6hbR06hCFsSY1LltLA9YniQ7o3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53711"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eokGvHep79x1sbhy-q9j2cw3"
         }
       ],
@@ -7353,6 +12072,60 @@
               ],
               "text": "MD"
             }
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ep.BHrMe-4XBICKGYdHM-Mg3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ep.BHrMe-4XBICKGYdHM-Mg3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "ep.BHrMe-4XBICKGYdHM-Mg3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543",
+      "resource": {
+        "resourceType": "Location",
+        "id": "epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "565-543-2342"
           }
         ]
       },
@@ -7500,6 +12273,38 @@
             }
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eqq.mhlWNL3lD4vCZQoIxGZnXn4QOSM4f5hLef3Stm0Y3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/eqq.mhlWNL3lD4vCZQoIxGZnXn4QOSM4f5hLef3Stm0Y3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "eqq.mhlWNL3lD4vCZQoIxGZnXn4QOSM4f5hLef3Stm0Y3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere St"
+          ],
+          "city": "Madison",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53711"
+        }
       },
       "search": {
         "mode": "include"
@@ -7707,6 +12512,34 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/etKZzJux8VWCn.v-YDz2ZLhdhUwhVwqE082St.Jnq1eDXmuSzU9D4HAOFAP3RHkzY3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/etKZzJux8VWCn.v-YDz2ZLhdhUwhVwqE082St.Jnq1eDXmuSzU9D4HAOFAP3RHkzY3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "etKZzJux8VWCn.v-YDz2ZLhdhUwhVwqE082St.Jnq1eDXmuSzU9D4HAOFAP3RHkzY3",
+        "mode": "instance",
+        "address": {
+          "line": [
+            "1801 Royal Lane",
+            "Suite 805"
+          ],
+          "city": "DALLAS",
+          "district": "DALLAS",
+          "state": "Texas",
+          "postalCode": "75229",
+          "country": "United States of America"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eudXVBmjp3aRNxDV70NNx3w3"
         }
       ],
@@ -7751,6 +12584,70 @@
             ]
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/evo3uTo.w6hMTsXZw0yANdVB81fiBrqAnmqk-X57ei5w3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/evo3uTo.w6hMTsXZw0yANdVB81fiBrqAnmqk-X57ei5w3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "evo3uTo.w6hMTsXZw0yANdVB81fiBrqAnmqk-X57ei5w3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53711"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ewCGzZp1z5z2yLBZhxq5K5iY105c53JgnhDV0qKrJSkg3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ewCGzZp1z5z2yLBZhxq5K5iY105c53JgnhDV0qKrJSkg3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "ewCGzZp1z5z2yLBZhxq5K5iY105c53JgnhDV0qKrJSkg3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "Verona",
+          "district": "DANE",
+          "state": "Wisconsin",
+          "postalCode": "53593"
+        }
       },
       "search": {
         "mode": "include"
@@ -7918,6 +12815,68 @@
             }
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/exrQk9p7spL3xj8f885y9J6LTjiVzMSJzY7OJaZvo.WE3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/exrQk9p7spL3xj8f885y9J6LTjiVzMSJzY7OJaZvo.WE3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "exrQk9p7spL3xj8f885y9J6LTjiVzMSJzY7OJaZvo.WE3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ezR6EupEjDwKN44ECK4hsng3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/ezR6EupEjDwKN44ECK4hsng3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "ezR6EupEjDwKN44ECK4hsng3",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555-555-5555"
+          }
+        ],
+        "address": {
+          "line": [
+            "123 Anywhere Street"
+          ],
+          "city": "MADISON",
+          "state": "Wisconsin",
+          "postalCode": "53719"
+        }
       },
       "search": {
         "mode": "include"

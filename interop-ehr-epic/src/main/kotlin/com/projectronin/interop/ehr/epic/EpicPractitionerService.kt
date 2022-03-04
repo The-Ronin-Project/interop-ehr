@@ -18,12 +18,12 @@ class EpicPractitionerService(epicClient: EpicClient) : PractitionerService, Epi
         See https://sherlock.epic.com/default.aspx?view=slg/home#id=6412518&rv=0
 
         val locationsParameter = locationIds.joinToString(separator = ",")
-        val parameters = mapOf("_include" to "PractitionerRole:practitioner", "location" to locationsParameter)
+        val parameters = mapOf("_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to locationsParameter)
 
         return getBundleWithPaging(tenant, practitionerSearchUrlPart, parameters, ::EpicFindPractitionersResponse)
         */
         val practitionerResponses = locationIds.map {
-            val parameters = mapOf("_include" to "PractitionerRole:practitioner", "location" to it)
+            val parameters = mapOf("_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to it)
             getBundleWithPaging(tenant, practitionerSearchUrlPart, parameters, ::EpicFindPractitionersResponse)
         }
 

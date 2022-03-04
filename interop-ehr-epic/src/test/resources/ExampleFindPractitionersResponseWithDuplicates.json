@@ -142,6 +142,29 @@
       "link": [
         {
           "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543",
+      "resource": {
+        "resourceType": "Location",
+        "id": "epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "565-543-2342"
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
           "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole/eK1.bLYJV0sOOib70m9Lk0Zm6fxzNPdYmYcYNuNBb5LMjzvRjbbH3TGOcAJBELAaQ3"
         }
       ],
@@ -267,6 +290,29 @@
               ],
               "text": "MD"
             }
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543",
+      "resource": {
+        "resourceType": "Location",
+        "id": "epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "565-543-2342"
           }
         ]
       },

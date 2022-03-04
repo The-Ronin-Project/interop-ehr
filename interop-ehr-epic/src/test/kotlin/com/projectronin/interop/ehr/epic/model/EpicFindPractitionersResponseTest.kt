@@ -22,23 +22,30 @@ class EpicFindPractitionersResponseTest {
 
         // PractitionerRoles
         val practitionerRoles = findPractitionersResponse.practitionerRoles
-        assertEquals(64, practitionerRoles.resources.size)
+        assertEquals(71, practitionerRoles.resources.size)
         assertEquals(DataSource.FHIR_R4, practitionerRoles.dataSource)
         assertEquals(ResourceType.BUNDLE, practitionerRoles.resourceType)
         assertEquals(1, practitionerRoles.links.size)
 
         // Practitioners
         val practitioners = findPractitionersResponse.practitioners
-        assertEquals(64, practitioners.resources.size)
+        assertEquals(71, practitioners.resources.size)
         assertEquals(DataSource.FHIR_R4, practitioners.dataSource)
         assertEquals(ResourceType.BUNDLE, practitioners.resourceType)
         assertEquals(1, practitioners.links.size)
+
+        // Locations
+        val locations = findPractitionersResponse.locations
+        assertEquals(53, locations.resources.size)
+        assertEquals(DataSource.FHIR_R4, practitioners.dataSource)
+        assertEquals(ResourceType.BUNDLE, practitioners.resourceType)
+        assertEquals(1, locations.links.size)
     }
 
     @Test
     fun `can build old style with duplicates from JSON`() {
-        // Old style of this API puts the provider after each resource instead of at the bottom,
-        // and can have duplicate providers.
+        // Old style of this API puts the provider after each resource instead of all providers at the bottom, and can
+        // have duplicate providers. In either style, providers and locations are mixed and locations may be duplicates.
         val response = readResource<Bundle>("/ExampleFindPractitionersResponseWithDuplicates.json")
 
         val findPractitionersResponse = EpicFindPractitionersResponse(response)
@@ -60,6 +67,13 @@ class EpicFindPractitionersResponseTest {
         assertEquals(DataSource.FHIR_R4, practitioners.dataSource)
         assertEquals(ResourceType.BUNDLE, practitioners.resourceType)
         assertEquals(1, practitioners.links.size)
+
+        // Locations
+        val locations = findPractitionersResponse.locations
+        assertEquals(1, practitioners.resources.size)
+        assertEquals(DataSource.FHIR_R4, practitioners.dataSource)
+        assertEquals(ResourceType.BUNDLE, practitioners.resourceType)
+        assertEquals(1, locations.links.size)
     }
 
     @Test
@@ -78,5 +92,10 @@ class EpicFindPractitionersResponseTest {
         val practitioners = findPractitionersResponse.practitioners
         assertEquals(0, practitioners.resources.size)
         assertEquals(0, practitionerRoles.links.size)
+
+        // Locations
+        val locations = findPractitionersResponse.locations
+        assertEquals(0, practitioners.resources.size)
+        assertEquals(0, locations.links.size)
     }
 }

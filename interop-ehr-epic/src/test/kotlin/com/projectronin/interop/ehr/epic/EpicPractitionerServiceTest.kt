@@ -49,7 +49,7 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to "PractitionerRole:practitioner",
+                    "_include" to "PractitionerRole:practitioner,PractitionerRole:location",
                     "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
                 )
             )
@@ -62,6 +62,9 @@ class EpicPractitionerServiceTest {
             )
 
         assertEquals(EpicFindPractitionersResponse(validPractitionerSearchBundle), bundle)
+        assertEquals(71, bundle.practitionerRoles!!.resources.size)
+        assertEquals(71, bundle.practitioners?.resources?.size)
+        assertEquals(53, bundle.locations?.resources?.size)
     }
 
     @Test
@@ -81,7 +84,7 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to "PractitionerRole:practitioner",
+                    "_include" to "PractitionerRole:practitioner,PractitionerRole:location",
                     "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
                 )
             )
@@ -111,14 +114,14 @@ class EpicPractitionerServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
-                mapOf("_include" to "PractitionerRole:practitioner", "location" to "abc")
+                mapOf("_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to "abc")
             )
         } returns httpResponse
         coEvery {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
-                mapOf("_include" to "PractitionerRole:practitioner", "location" to "123")
+                mapOf("_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to "123")
             )
         } returns httpResponse
 
@@ -128,11 +131,12 @@ class EpicPractitionerServiceTest {
                 listOf("abc", "123")
             )
 
-        // 64 for each location
-        assertEquals(128, bundle.practitionerRoles!!.resources.size)
-
-        // 64 total because duplicate practitioners are removed
-        assertEquals(64, bundle.practitioners.resources.size)
+        // 142 = 71 practitioner roles from each of 2 locations
+        assertEquals(142, bundle.practitionerRoles!!.resources.size)
+        // 142 becomes 71 total because duplicate practitioners are removed by EpicPractitionerBundle
+        assertEquals(71, bundle.practitioners?.resources?.size)
+        // 106 becomes 53 total because duplicate practitioner locations are removed by EpicLocationBundle
+        assertEquals(53, bundle.locations?.resources?.size)
     }
 
     @Test
@@ -153,7 +157,7 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to "PractitionerRole:practitioner",
+                    "_include" to "PractitionerRole:practitioner,PractitionerRole:location",
                     "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
                 )
             )
@@ -165,7 +169,7 @@ class EpicPractitionerServiceTest {
         coEvery {
             epicClient.get(
                 tenant,
-                "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole?_include=PractitionerRole:practitioner&location=e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
+                "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole?_include=PractitionerRole:practitioner,PractitionerRole:location&location=e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
             )
         } returns httpResponse
 
@@ -175,10 +179,13 @@ class EpicPractitionerServiceTest {
                 listOf("e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03")
             )
 
-        // 2 Resources from the first query, 64 from the second
-        assertEquals(66, bundle.practitionerRoles?.resources?.size)
+        // 2 Resources from the first query, 71 from the second
+        assertEquals(73, bundle.practitionerRoles?.resources?.size)
 
         // 2 of the practitioners are duplicates and get filtered out
-        assertEquals(64, bundle.practitioners.resources.size)
+        assertEquals(71, bundle.practitioners?.resources?.size)
+
+        // 2 of the practitioner locations are duplicates and get filtered out
+        assertEquals(53, bundle.locations?.resources?.size)
     }
 }

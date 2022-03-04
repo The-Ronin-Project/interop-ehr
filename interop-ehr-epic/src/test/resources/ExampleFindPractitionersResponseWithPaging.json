@@ -5,7 +5,7 @@
   "link": [
     {
       "relation": "next",
-      "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole?_include=PractitionerRole:practitioner&location=e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
+      "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole?_include=PractitionerRole:practitioner,PractitionerRole:location&location=e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
     }
   ],
   "entry": [
@@ -37,6 +37,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/etKZzJux8VWCn.v-YDz2ZLhdhUwhVwqE082St.Jnq1eDXmuSzU9D4HAOFAP3RHkzY3"
@@ -51,45 +67,21 @@
       "link": [
         {
           "relation": "self",
-          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e2qocqJm-DdjHLS0Not4qjA3"
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eUqvfRVFNUVeJmt1pCf8YS24CEOUR6bhBnL-xrSXlTdc3"
         }
       ],
-      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e2qocqJm-DdjHLS0Not4qjA3",
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/eUqvfRVFNUVeJmt1pCf8YS24CEOUR6bhBnL-xrSXlTdc3",
       "resource": {
         "resourceType": "Practitioner",
-        "id": "e2qocqJm-DdjHLS0Not4qjA3",
+        "id": "eUqvfRVFNUVeJmt1pCf8YS24CEOUR6bhBnL-xrSXlTdc3",
         "identifier": [
-          {
-            "use": "usual",
-            "type": {
-              "text": "NPI"
-            },
-            "system": "http://hl7.org/fhir/sid/us-npi",
-            "value": "1101299992"
-          },
           {
             "use": "usual",
             "type": {
               "text": "EPIC"
             },
-            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.7",
-            "value": "208D00000X"
-          },
-          {
-            "use": "usual",
-            "type": {
-              "text": "NPI"
-            },
-            "system": "urn:oid:2.16.840.1.113883.4.6",
-            "value": "1101299992"
-          },
-          {
-            "use": "usual",
-            "type": {
-              "text": "Epic"
-            },
-            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.63",
-            "value": "830"
+            "system": "POTFID",
+            "value": "21340965"
           },
           {
             "use": "usual",
@@ -97,7 +89,7 @@
               "text": "INTERNAL"
             },
             "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-            "value": "   E1012"
+            "value": " 21340965"
           },
           {
             "use": "usual",
@@ -105,17 +97,17 @@
               "text": "EXTERNAL"
             },
             "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-            "value": "E1012"
+            "value": "21340965"
           }
         ],
         "active": true,
         "name": [
           {
             "use": "usual",
-            "text": "Historical Provider, MD",
-            "family": "Provider",
+            "text": "John Adams, MD",
+            "family": "Adams",
             "given": [
-              "Historical"
+              "John"
             ]
           }
         ],
@@ -133,6 +125,34 @@
             }
           }
         ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/etKZzJux8VWCn.v-YDz2ZLhdhUwhVwqE082St.Jnq1eDXmuSzU9D4HAOFAP3RHkzY3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/etKZzJux8VWCn.v-YDz2ZLhdhUwhVwqE082St.Jnq1eDXmuSzU9D4HAOFAP3RHkzY3",
+      "resource": {
+        "resourceType": "Location",
+        "id": "etKZzJux8VWCn.v-YDz2ZLhdhUwhVwqE082St.Jnq1eDXmuSzU9D4HAOFAP3RHkzY3",
+        "mode": "instance",
+        "address": {
+          "line": [
+            "1801 Royal Lane",
+            "Suite 805"
+          ],
+          "city": "DALLAS",
+          "district": "DALLAS",
+          "state": "Texas",
+          "postalCode": "75229",
+          "country": "United States of America"
+        }
       },
       "search": {
         "mode": "include"
@@ -166,6 +186,22 @@
             "text": "Physician"
           }
         ],
+        "specialty": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.72.1.7.7.10.688867.4160",
+                "code": "19",
+                "display": "Family Medicine"
+              },
+              {
+                "system": "http://nucc.org",
+                "code": "207Q00000X"
+              }
+            ],
+            "text": "Family Medicine"
+          }
+        ],
         "location": [
           {
             "reference": "Location/epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543"
@@ -187,21 +223,29 @@
       "link": [
         {
           "relation": "self",
-          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/ewyZVtBwkC0w85m69VbpXwQ3"
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e52-W3K1K-BhK5D-G546gSMHn1YKyfWKEPq6jMtBPPmA3"
         }
       ],
-      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/ewyZVtBwkC0w85m69VbpXwQ3",
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Practitioner/e52-W3K1K-BhK5D-G546gSMHn1YKyfWKEPq6jMtBPPmA3",
       "resource": {
         "resourceType": "Practitioner",
-        "id": "ewyZVtBwkC0w85m69VbpXwQ3",
+        "id": "e52-W3K1K-BhK5D-G546gSMHn1YKyfWKEPq6jMtBPPmA3",
         "identifier": [
           {
             "use": "usual",
             "type": {
+              "text": "NPI"
+            },
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "1282038298"
+          },
+          {
+            "use": "usual",
+            "type": {
               "text": "INTERNAL"
             },
             "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
-            "value": " CAREMANRN"
+            "value": " ASHAZARI"
           },
           {
             "use": "usual",
@@ -209,15 +253,15 @@
               "text": "EXTERNAL"
             },
             "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
-            "value": "CAREMANRN"
+            "value": "ASHAZARI"
           },
           {
             "use": "usual",
             "type": {
-              "text": "PROVID"
+              "text": "NPI"
             },
-            "system": "PROVID",
-            "value": "400404"
+            "system": "urn:oid:2.16.840.1.113883.4.6",
+            "value": "1282038298"
           },
           {
             "use": "usual",
@@ -225,7 +269,7 @@
               "text": "INTERNAL"
             },
             "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-            "value": " E400404"
+            "value": " ASHAZARI"
           },
           {
             "use": "usual",
@@ -233,32 +277,57 @@
               "text": "EXTERNAL"
             },
             "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-            "value": "E400404"
+            "value": "ASHAZARI"
           }
         ],
         "active": true,
         "name": [
           {
             "use": "usual",
-            "text": "Nurse Care Manager, RN",
-            "family": "Care Manager",
+            "text": "Al-Shazari, Akbar, MD",
+            "family": "Al-Shazari",
             "given": [
-              "Nurse"
+              "Akbar",
+              "Ibn"
             ]
           }
         ],
+        "gender": "male",
         "qualification": [
           {
             "code": {
               "coding": [
                 {
                   "system": "urn:oid:1.2.840.114350.1.13.0.1.7.4.836982.6000",
-                  "code": "1",
-                  "display": "RN"
+                  "code": "11",
+                  "display": "MD"
                 }
               ],
-              "text": "RN"
+              "text": "MD"
             }
+          }
+        ]
+      },
+      "search": {
+        "mode": "include"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Location/epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543",
+      "resource": {
+        "resourceType": "Location",
+        "id": "epUOL0SoXe1Ei0mqmgKqT6EHRZvENYfgW.HGCa.yYiFTzZlDM98W1Q2jiiUZr8h543",
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "565-543-2342"
           }
         ]
       },
