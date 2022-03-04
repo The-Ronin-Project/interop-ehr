@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.common.vendor.VendorType
+import com.projectronin.interop.transform.fhir.r4.R4LocationTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PractitionerRoleTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PractitionerTransformer
 import io.mockk.mockk
@@ -16,6 +17,7 @@ class EpicVendorFactoryTest {
     private val identifierService = mockk<EpicIdentifierService>()
     private val practitionerTransformer = mockk<R4PractitionerTransformer>()
     private val practitionerRoleTransformer = mockk<R4PractitionerRoleTransformer>()
+    private val locationTransformer = mockk<R4LocationTransformer>()
     private val vendorFactory =
         EpicVendorFactory(
             patientService,
@@ -25,7 +27,8 @@ class EpicVendorFactoryTest {
             conditionService,
             identifierService,
             practitionerTransformer,
-            practitionerRoleTransformer
+            practitionerRoleTransformer,
+            locationTransformer
         )
 
     @Test
@@ -71,5 +74,9 @@ class EpicVendorFactoryTest {
     @Test
     fun `returns PractitionerRoleTransformer`() {
         assertEquals(practitionerRoleTransformer, vendorFactory.practitionerRoleTransformer)
+    }
+    @Test
+    fun `returns LocationTransformer`() {
+        assertEquals(locationTransformer, vendorFactory.locationTransformer)
     }
 }
