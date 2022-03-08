@@ -31,7 +31,8 @@ fun createTestTenant(
     messageType: String = "messageType",
     internalId: Int = 1,
     practitionerProviderSystem: String = "providerSystem",
-    practitionerUserSystem: String = "userSystem"
+    practitionerUserSystem: String = "userSystem",
+    hsi: String? = null
 ): Tenant {
     return Tenant(
         internalId,
@@ -45,7 +46,8 @@ fun createTestTenant(
             ehrUserId,
             messageType,
             practitionerProviderSystem,
-            practitionerUserSystem
+            practitionerUserSystem,
+            hsi
         )
     )
 }

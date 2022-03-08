@@ -12,4 +12,5 @@ interface EpicTenantDO : EHRTenantDO, Entity<EpicTenantDO> {
     val messageType: String
     val practitionerProviderSystem: String
     val practitionerUserSystem: String
+    val hsi: String?
 }

@@ -50,3 +50,8 @@ databaseChangeLog:
                   type: java.sql.Types.VARCHAR(64)
                   constraints:
                     nullable: false
+              - column:
+                  name: hsi
+                  type: java.sql.Types.VARCHAR(64)
+                  constraints:
+                    nullable: true

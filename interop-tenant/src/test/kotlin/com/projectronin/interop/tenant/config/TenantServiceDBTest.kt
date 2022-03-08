@@ -101,6 +101,7 @@ class TenantServiceDBTest {
             every { messageType } returns "message type"
             every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
             every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+            every { hsi } returns null
         }
         every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
 
@@ -158,6 +159,7 @@ class TenantServiceDBTest {
             every { messageType } returns "message type"
             every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
             every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+            every { hsi } returns null
         }
         every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
 
@@ -215,6 +217,7 @@ class TenantServiceDBTest {
             every { messageType } returns "message type"
             every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
             every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+            every { hsi } returns null
         }
         every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
 
@@ -272,6 +275,7 @@ class TenantServiceDBTest {
             every { messageType } returns "message type"
             every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
             every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+            every { hsi } returns null
         }
         every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
 
@@ -350,5 +354,64 @@ class TenantServiceDBTest {
         val poolsByProvider = service.getPoolsForProviders(tenant, listOf("known1", "unknown2"))
         assertEquals(1, poolsByProvider.size)
         assertEquals("pool1", poolsByProvider["known1"])
+    }
+
+    @Test
+    fun `epic tenant with hsi found`() {
+        val ehrDO = mockk<EhrDO> {
+            every { id } returns 1
+            every { vendorType } returns VendorType.EPIC
+            every { clientId } returns "clientId"
+            every { publicKey } returns "publicKey"
+            every { privateKey } returns "privateKey"
+        }
+        val tenantDO = mockk<TenantDO> {
+            every { id } returns 1
+            every { mnemonic } returns "Tenant1"
+            every { ehr } returns ehrDO
+            every { availableBatchStart } returns null
+            every { availableBatchEnd } returns null
+        }
+        every { tenantDAO.getTenantForMnemonic("Tenant1") } returns tenantDO
+
+        val epicTenantDO = mockk<EpicTenantDO> {
+            every { tenantId } returns 1
+            every { release } returns "release"
+            every { serviceEndpoint } returns "http://localhost/"
+            every { ehrUserId } returns "ehr user"
+            every { messageType } returns "message type"
+            every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+            every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+            every { hsi } returns "urn:epic:apporchard.curprod"
+        }
+        every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
+
+        val expectedTenant = Tenant(
+            internalId = 1,
+            mnemonic = "Tenant1",
+            batchConfig = null,
+            vendor = Epic(
+                clientId = "clientId",
+                authenticationConfig = AuthenticationConfig(
+                    publicKey = "publicKey",
+                    privateKey = "privateKey"
+                ),
+                serviceEndpoint = "http://localhost/",
+                release = "release",
+                ehrUserId = "ehr user",
+                messageType = "message type",
+                practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+                hsi = "urn:epic:apporchard.curprod"
+            )
+        )
+
+        val tenant = service.getTenantForMnemonic("Tenant1")
+        assertEquals(expectedTenant, tenant)
+
+        verify(exactly = 1) {
+            tenantDAO.getTenantForMnemonic("Tenant1")
+            tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC)
+        }
     }
 }

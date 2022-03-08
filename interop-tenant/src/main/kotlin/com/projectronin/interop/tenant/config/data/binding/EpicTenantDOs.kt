@@ -1,5 +1,6 @@
 package com.projectronin.interop.tenant.config.data.binding
 
+import com.projectronin.interop.tenant.config.data.binding.EhrDOs.bindTo
 import com.projectronin.interop.tenant.config.data.model.EpicTenantDO
 import org.ktorm.schema.Table
 import org.ktorm.schema.int
@@ -17,4 +18,5 @@ object EpicTenantDOs : Table<EpicTenantDO>("io_tenant_epic") {
     private val practitionerProviderSystem =
         varchar("practitioner_provider_system").bindTo { it.practitionerProviderSystem }
     private val practitionerUserSystem = varchar("practitioner_user_system").bindTo { it.practitionerUserSystem }
+    private val hsi = varchar("hsi").bindTo { it.hsi }
 }

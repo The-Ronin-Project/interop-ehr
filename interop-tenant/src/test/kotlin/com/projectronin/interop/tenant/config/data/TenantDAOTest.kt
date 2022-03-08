@@ -69,6 +69,25 @@ class TenantDAOTest {
             assertEquals("Ronin Alerts", ehrTenant.messageType)
             assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.836982", ehrTenant.practitionerProviderSystem)
             assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.697780", ehrTenant.practitionerUserSystem)
+            assertNull(ehrTenant.hsi)
+        }
+    }
+
+    @Test
+    @DataSet(value = ["/dbunit/tenant/EpicHSITenants.yaml"], cleanAfter = true)
+    fun `epic tenant with hsi found`() {
+        val dao = TenantDAO(KtormHelper.database())
+        val ehrTenant = dao.getEHRTenant<EpicTenantDO>(1001, VendorType.EPIC)
+        assertNotNull(ehrTenant)
+        ehrTenant?.let {
+            assertEquals(1001, ehrTenant.tenantId)
+            assertEquals("2021.10", ehrTenant.release)
+            assertEquals("https://localhost:8080/", ehrTenant.serviceEndpoint)
+            assertEquals("RONIN", ehrTenant.ehrUserId)
+            assertEquals("Ronin Alerts", ehrTenant.messageType)
+            assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.836982", ehrTenant.practitionerProviderSystem)
+            assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.697780", ehrTenant.practitionerUserSystem)
+            assertEquals("urn:epic:apporchard.curprod", ehrTenant.hsi)
         }
     }
 }

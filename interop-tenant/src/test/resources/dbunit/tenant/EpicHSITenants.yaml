@@ -1,0 +1,28 @@
+io_ehr:
+  - io_ehr_id: 101
+    name: "EPIC"
+    client_id: "12345"
+    public_key: "public"
+    private_key: "private"
+
+io_tenant:
+  - io_tenant_id: 1001
+    mnemonic: "mdaoc"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+  - io_tenant_id: 1002
+    mnemonic: "psj"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+
+io_tenant_epic:
+  - io_tenant_id: 1001
+    release_version: "2021.10"
+    service_endpoint: "https://localhost:8080/"
+    ehr_user_id: "RONIN"
+    message_type: "Ronin Alerts"
+    practitioner_provider_system: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
+    practitioner_user_system: "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+    hsi: "urn:epic:apporchard.curprod"

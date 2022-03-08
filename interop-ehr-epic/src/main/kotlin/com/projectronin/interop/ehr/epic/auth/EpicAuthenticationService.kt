@@ -6,6 +6,7 @@ import com.projectronin.interop.common.auth.Authentication
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.auth.AuthenticationService
 import com.projectronin.interop.tenant.config.model.Tenant
+import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.HttpClient
 import io.ktor.client.call.receive
 import io.ktor.client.request.forms.submitForm
@@ -52,8 +53,11 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
             )
         )
         val privateKeyInstance = KeyFactory.getInstance("RSA").generatePrivate(privateKeySpec)
+
+        // Determine the audience value (hsi for Tesseract endpoints or authURL for direct endpoints)
+        val audience = tenant.vendorAs<Epic>().hsi ?: authURL
         val token =
-            JWT.create().withAudience(authURL).withIssuer(clientId).withSubject(clientId).withExpiresAt(expireAt)
+            JWT.create().withAudience(audience).withIssuer(clientId).withSubject(clientId).withExpiresAt(expireAt)
                 .withNotBefore(issueDate).withIssuedAt(issueDate).withJWTId(jti)
                 .sign(Algorithm.RSA384(null, privateKeyInstance as RSAPrivateKey))
 

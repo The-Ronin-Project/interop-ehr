@@ -70,7 +70,8 @@ class TenantServiceDB(private val tenantDAO: TenantDAO, private val providerPool
             ehrUserId = epicTenant.ehrUserId,
             messageType = epicTenant.messageType,
             practitionerProviderSystem = epicTenant.practitionerProviderSystem,
-            practitionerUserSystem = epicTenant.practitionerUserSystem
+            practitionerUserSystem = epicTenant.practitionerUserSystem,
+            hsi = epicTenant.hsi
         )
     }
 }
