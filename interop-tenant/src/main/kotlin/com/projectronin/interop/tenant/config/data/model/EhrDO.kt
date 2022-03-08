@@ -7,9 +7,10 @@ import org.ktorm.entity.Entity
  * Entity definition for the EHR data object.
  */
 interface EhrDO : Entity<EhrDO> {
+    companion object : Entity.Factory<EhrDO>()
     val id: Int
-    val vendorType: VendorType
-    val clientId: String
-    val publicKey: String
-    val privateKey: String
+    var vendorType: VendorType
+    var clientId: String
+    var publicKey: String
+    var privateKey: String
 }

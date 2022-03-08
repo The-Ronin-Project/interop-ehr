@@ -11,9 +11,9 @@ import org.ktorm.schema.varchar
  * Table binding definition for [EhrDO] data objects.
  */
 object EhrDOs : Table<EhrDO>("io_ehr") {
-    private val id = int("io_ehr_id").primaryKey().bindTo { it.id }
-    private val name = enum<VendorType>("name").bindTo { it.vendorType }
-    private val clientId = varchar("client_id").bindTo { it.clientId }
-    private val publicKey = varchar("public_key").bindTo { it.publicKey }
-    private val privateKey = varchar("private_key").bindTo { it.privateKey }
+    val id = int("io_ehr_id").primaryKey().bindTo { it.id }
+    val name = enum<VendorType>("name").bindTo { it.vendorType }
+    val clientId = varchar("client_id").bindTo { it.clientId }
+    val publicKey = varchar("public_key").bindTo { it.publicKey }
+    val privateKey = varchar("private_key").bindTo { it.privateKey }
 }
