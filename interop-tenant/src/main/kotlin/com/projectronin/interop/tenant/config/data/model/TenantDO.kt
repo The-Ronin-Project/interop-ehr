@@ -7,9 +7,11 @@ import java.time.LocalTime
  * Entity definition for the Tenant data object.
  */
 interface TenantDO : Entity<TenantDO> {
-    val id: Int
-    val mnemonic: String
-    val ehr: EhrDO
-    val availableBatchStart: LocalTime?
-    val availableBatchEnd: LocalTime?
+    companion object : Entity.Factory<TenantDO>()
+
+    var id: Int
+    var mnemonic: String
+    var ehr: EhrDO
+    var availableBatchStart: LocalTime?
+    var availableBatchEnd: LocalTime?
 }
