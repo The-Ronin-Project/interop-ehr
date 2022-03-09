@@ -6,7 +6,7 @@ import com.projectronin.interop.ehr.model.Participant
 import com.projectronin.interop.ehr.model.Reference
 import com.projectronin.interop.ehr.model.base.JSONElement
 
-class EpicProviderParticipant(override val element: ScheduleProviderReturnWithTime, private val providerIdMap: Map <ScheduleProviderReturnWithTime, Identifier>) : JSONElement(element), Participant {
+class EpicProviderParticipant(override val element: ScheduleProviderReturnWithTime, private val providerIdMap: Map<ScheduleProviderReturnWithTime, Identifier>) : JSONElement(element), Participant {
     override val actor: Reference by lazy {
         EpicProviderReference(element, providerIdMap)
     }

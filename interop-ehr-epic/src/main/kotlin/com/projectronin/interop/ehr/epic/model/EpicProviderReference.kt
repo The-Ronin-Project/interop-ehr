@@ -11,7 +11,7 @@ class EpicProviderReference(
     private val providerIdMap: Map<ScheduleProviderReturnWithTime, Identifier>
 ) : JSONElement(element), Reference {
     override val reference: String? = null
-    override val type: String? = ReferenceTypes.PRACTITIONER
+    override val type: String = ReferenceTypes.PRACTITIONER
     override val display: String = element.providerName
     override val id: String? = null
     override val identifier: Identifier? by lazy {

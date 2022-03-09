@@ -95,14 +95,19 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
             httpResponse.receive<GetAppointmentsResponse>()
         }
         val providerIdMap = getAppointments.appointments.associate { appointment ->
-            val identifiers = appointment.providers.associateWith { provider ->
+            val providerMap = appointment.providers.associateWith { provider ->
                 val providerIdentifiers = provider.providerIDs.map { EpicIDType(it) }
                 identifierService.getPractitionerIdentifier(tenant, providerIdentifiers)
             }
-            appointment.id to identifiers
+            appointment.id to providerMap
+        }
+        val patientIdsMap = getAppointments.appointments.associate { appointment ->
+            val allPatientIdentifiers = appointment.patientIDs.map { EpicIDType(it) }
+            val patientIdentifier = identifierService.getPatientIdentifier(tenant, allPatientIdentifiers)
+            appointment.id to patientIdentifier
         }
 
         logger.info { "Appointment search completed for ${tenant.mnemonic}" }
-        return EpicAppointmentBundle(getAppointments, providerIdMap)
+        return EpicAppointmentBundle(getAppointments, providerIdMap, patientIdsMap)
     }
 }

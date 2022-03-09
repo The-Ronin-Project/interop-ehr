@@ -12,7 +12,8 @@ import com.projectronin.interop.ehr.model.enums.DataSource
  */
 class EpicAppointmentBundle(
     override val resource: GetAppointmentsResponse,
-    private val providerIdMap: Map<String, Map<ScheduleProviderReturnWithTime, Identifier>>
+    private val providerIdMap: Map<String, Map<ScheduleProviderReturnWithTime, Identifier>>,
+    private val patientIdMap: Map<String, Identifier>
 ) :
     JSONBundle<EpicAppointment, GetAppointmentsResponse>(resource) {
     override val dataSource: DataSource = DataSource.EPIC_APPORCHARD
@@ -21,7 +22,8 @@ class EpicAppointmentBundle(
 
     override val resources: List<EpicAppointment> by lazy {
         resource.appointments.map {
-            EpicAppointment(it, providerIdMap)
+
+            EpicAppointment(it, providerIdMap[it.id], patientIdMap[it.id])
         }
     }
 }

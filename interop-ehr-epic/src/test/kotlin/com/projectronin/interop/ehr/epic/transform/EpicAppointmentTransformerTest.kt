@@ -6,6 +6,10 @@ import com.projectronin.interop.ehr.epic.apporchard.model.ItemValue
 import com.projectronin.interop.ehr.epic.apporchard.model.LineValue
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
 import com.projectronin.interop.ehr.epic.apporchard.model.SubLine
+import com.projectronin.interop.ehr.epic.model.EpicIDType
+import com.projectronin.interop.ehr.epic.model.EpicPatientParticipant
+import com.projectronin.interop.ehr.epic.model.EpicProviderParticipant
+import com.projectronin.interop.ehr.epic.model.EpicProviderReference
 import com.projectronin.interop.ehr.epic.readResource
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
@@ -21,9 +25,9 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Participant
 import com.projectronin.interop.fhir.r4.datatype.Period
 import com.projectronin.interop.fhir.r4.datatype.Reference
-import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
@@ -31,10 +35,14 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import com.projectronin.interop.ehr.epic.apporchard.model.Appointment as AOAppointment
+import com.projectronin.interop.ehr.model.Identifier as EHRIdentifier
+import com.projectronin.interop.ehr.model.Participant as EHRParticipant
+import com.projectronin.interop.ehr.model.Reference as EHRReference
 
 class EpicAppointmentTransformerTest {
     private val transformer = EpicAppointmentTransformer()
@@ -44,6 +52,22 @@ class EpicAppointmentTransformerTest {
     }
 
     private val epicAppointment = readResource<AOAppointment>("/ExampleEpicAppointment.json")
+    private val patientParticipant = EpicPatientParticipant(
+        element = "Patient Name", identifier = EpicIDType(IDType("patientEpicId", "External"))
+    )
+    private val mockProviderIdentifier = mockk<EHRIdentifier> {
+        every { value } returns "providerId"
+        every { type?.text } returns "External"
+    }
+    private val mockProviderReference = mockk<EpicProviderReference> {
+        every { display } returns "Coordinator Phoenix, RN"
+        every { identifier } returns mockProviderIdentifier
+        every { type } returns "Practitioner"
+    }
+    private val providerParticipant = mockk<EpicProviderParticipant> {
+        every { actor } returns mockProviderReference
+    }
+    private val mockParticipants = listOf<EHRParticipant>(patientParticipant, providerParticipant)
 
     @Test
     fun `transforms appointment with all attributes`() {
@@ -110,6 +134,7 @@ class EpicAppointmentTransformerTest {
         val appointment = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns aoAppointment
+            every { participants } returns mockParticipants
         }
 
         val oncologyAppointment = transformer.transformAppointment(appointment, tenant)
@@ -146,22 +171,20 @@ class EpicAppointmentTransformerTest {
                 Participant(
                     actor =
                     Reference(
-                        reference = "Patient/test-54321",
-                        display = "Test Name"
+                        identifier = Identifier(value = "patientEpicId", type = CodeableConcept(text = "External")),
+                        display = "Patient Name",
+                        type = Uri("Patient")
                     ),
                     status = ParticipationStatus.ACCEPTED
                 ),
                 Participant(
                     actor =
                     Reference(
-                        reference = "Practitioner/test-9876",
-                        display = "Test Doc"
+                        identifier = Identifier(value = "providerId", type = CodeableConcept(text = "External")),
+                        display = "Coordinator Phoenix, RN",
+                        type = Uri("Practitioner")
                     ),
-                    status = ParticipationStatus.ACCEPTED,
-                    period = Period(
-                        start = DateTime(value = "2015-04-30T20:30:00Z"),
-                        end = DateTime(value = "2015-04-30T20:45:00Z")
-                    )
+                    status = ParticipationStatus.ACCEPTED
                 )
             ),
             oncologyAppointment.participant
@@ -199,6 +222,7 @@ class EpicAppointmentTransformerTest {
         val appointment = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns aoAppointment
+            every { participants } returns mockParticipants
         }
 
         val oncologyAppointment = transformer.transformAppointment(appointment, tenant)
@@ -236,8 +260,18 @@ class EpicAppointmentTransformerTest {
                 Participant(
                     actor =
                     Reference(
-                        reference = "Patient/test-54321",
-                        display = "Test Name"
+                        identifier = Identifier(value = "patientEpicId", type = CodeableConcept(text = "External")),
+                        display = "Patient Name",
+                        type = Uri("Patient")
+                    ),
+                    status = ParticipationStatus.ACCEPTED
+                ),
+                Participant(
+                    actor =
+                    Reference(
+                        identifier = Identifier(value = "providerId", type = CodeableConcept(text = "External")),
+                        display = "Coordinator Phoenix, RN",
+                        type = Uri("Practitioner")
                     ),
                     status = ParticipationStatus.ACCEPTED
                 )
@@ -271,6 +305,7 @@ class EpicAppointmentTransformerTest {
         val appointment = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns epicAppointment
+            every { participants } returns mockParticipants
         }
 
         val oncologyAppointment = transformer.transformAppointment(appointment, tenant)
@@ -310,22 +345,20 @@ class EpicAppointmentTransformerTest {
                 Participant(
                     actor =
                     Reference(
-                        reference = "Patient/test-Z5660",
-                        display = "LMRTESTING,HERMIONE"
+                        identifier = Identifier(value = "patientEpicId", type = CodeableConcept(text = "External")),
+                        display = "Patient Name",
+                        type = Uri("Patient")
                     ),
                     status = ParticipationStatus.ACCEPTED
                 ),
                 Participant(
                     actor =
                     Reference(
-                        reference = "Practitioner/test-E400019",
-                        display = "Coordinator Phoenix, RN"
+                        identifier = Identifier(value = "providerId", type = CodeableConcept(text = "External")),
+                        display = "Coordinator Phoenix, RN",
+                        type = Uri("Practitioner")
                     ),
-                    status = ParticipationStatus.ACCEPTED,
-                    period = Period(
-                        start = DateTime(value = "2015-04-30T20:30:00Z"),
-                        end = DateTime(value = "2015-04-30T20:45:00Z")
-                    )
+                    status = ParticipationStatus.ACCEPTED
                 )
             ),
             oncologyAppointment.participant
@@ -363,6 +396,7 @@ class EpicAppointmentTransformerTest {
         val completedAppointment = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns completedAOAppointment
+            every { participants } returns mockParticipants
         }
 
         val completedOncologyAppointment = transformer.transformAppointment(completedAppointment, tenant)!!
@@ -397,6 +431,7 @@ class EpicAppointmentTransformerTest {
         val scheduledAppointment = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns scheduledAOAppointment
+            every { participants } returns mockParticipants
         }
 
         val scheduledOncologyAppointment = transformer.transformAppointment(scheduledAppointment, tenant)!!
@@ -431,6 +466,7 @@ class EpicAppointmentTransformerTest {
         val noShowAppointment = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns noShowAOAppointment
+            every { participants } returns mockParticipants
         }
 
         val noShowOncologyAppointment = transformer.transformAppointment(noShowAppointment, tenant)!!
@@ -465,6 +501,7 @@ class EpicAppointmentTransformerTest {
         val arrivedAppointment = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns arrivedAOAppointment
+            every { participants } returns mockParticipants
         }
 
         val arrivedOncologyAppointment = transformer.transformAppointment(arrivedAppointment, tenant)!!
@@ -499,6 +536,7 @@ class EpicAppointmentTransformerTest {
         val unknownAppointment = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns unknownAOAppointment
+            every { participants } returns mockParticipants
         }
 
         val unknownOncologyAppointment = transformer.transformAppointment(unknownAppointment, tenant)!!
@@ -549,6 +587,7 @@ class EpicAppointmentTransformerTest {
         val appointment = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns aoAppointment
+            every { participants } returns mockParticipants
         }
 
         assertNull(transformer.transformAppointment(appointment, tenant))
@@ -585,8 +624,8 @@ class EpicAppointmentTransformerTest {
         val appointment = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns aoAppointment
+            every { participants } returns emptyList()
         }
-
         assertNull(transformer.transformAppointment(appointment, tenant))
     }
 
@@ -621,6 +660,7 @@ class EpicAppointmentTransformerTest {
         val appointment = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns aoAppointment
+            every { participants } returns emptyList()
         }
 
         assertNull(transformer.transformAppointment(appointment, tenant))
@@ -669,11 +709,13 @@ class EpicAppointmentTransformerTest {
         val appointment1 = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns invalidAOAppointment
+            every { participants } returns mockParticipants
         }
 
         val appointment2 = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns invalidAOAppointment
+            every { participants } returns mockParticipants
         }
 
         val bundle = mockk<Bundle<Appointment>> {
@@ -715,6 +757,7 @@ class EpicAppointmentTransformerTest {
         val appointment1 = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns invalidAOAppointment
+            every { participants } returns mockParticipants
         }
 
         val aoAppointment = AOAppointment(
@@ -745,6 +788,7 @@ class EpicAppointmentTransformerTest {
         val appointment2 = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns aoAppointment
+            every { participants } returns mockParticipants
         }
 
         val bundle = mockk<Bundle<Appointment>> {
@@ -787,11 +831,13 @@ class EpicAppointmentTransformerTest {
         val appointment1 = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns aoAppointment
+            every { participants } returns mockParticipants
         }
 
         val appointment2 = mockk<Appointment> {
             every { dataSource } returns DataSource.EPIC_APPORCHARD
             every { resource } returns aoAppointment
+            every { participants } returns mockParticipants
         }
 
         val bundle = mockk<Bundle<Appointment>> {
@@ -801,5 +847,67 @@ class EpicAppointmentTransformerTest {
 
         val oncologyAppointments = transformer.transformAppointments(bundle, tenant)
         assertEquals(2, oncologyAppointments.size)
+    }
+
+    @Test
+    fun `null participant checks`() {
+        val mockIdentifier = mockk<EHRIdentifier> {
+            every { value } returns "providerId"
+            every { type } returns null
+        }
+        val mockProviderReference1 = mockk<EHRReference> {
+            every { display } returns "Unknown"
+            every { identifier } returns mockIdentifier
+            every { type } returns null
+        }
+        val mockUnknownParticipant = mockk<EHRParticipant> {
+            every { actor } returns mockProviderReference1
+        }
+
+        val mockProviderReference2 = mockk<EpicProviderReference> {
+            every { display } returns "Coordinator Phoenix, RN"
+            every { identifier } returns null
+            every { type } returns "Practitioner"
+        }
+
+        val providerParticipant = mockk<EpicProviderParticipant> {
+            every { actor } returns mockProviderReference2
+        }
+        val mockParticipants = listOf(patientParticipant, mockUnknownParticipant, providerParticipant)
+
+        val aoAppointment = AOAppointment(
+            appointmentDuration = "30",
+            appointmentStartTime = "3:30 PM",
+            appointmentStatus = "completed",
+            contactIDs = listOf(IDType(id = "12345", type = "ASN")),
+            date = "4/30/2015",
+            patientIDs = listOf(IDType(id = "54321", type = "Internal")),
+            patientName = "Test Name",
+            providers = listOf(
+                ScheduleProviderReturnWithTime(
+                    departmentIDs = listOf(
+                        IDType(
+                            id = "6789",
+                            type = "Internal"
+                        )
+                    ),
+                    departmentName = "Test department",
+                    duration = "15",
+                    providerName = "Test Doc",
+                    time = "3:30 PM"
+                )
+            ),
+            visitTypeIDs = listOf(IDType(id = "abcd", type = "Internal")),
+            visitTypeName = "Test visit type"
+        )
+
+        val appointment = mockk<Appointment> {
+            every { dataSource } returns DataSource.EPIC_APPORCHARD
+            every { resource } returns aoAppointment
+            every { participants } returns mockParticipants
+        }
+
+        val appt = transformer.transformAppointment(appointment, tenant)
+        assertNotNull(appt)
     }
 }

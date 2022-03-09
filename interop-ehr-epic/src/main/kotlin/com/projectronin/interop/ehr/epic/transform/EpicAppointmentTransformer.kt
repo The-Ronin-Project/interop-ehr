@@ -12,10 +12,9 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Participant
-import com.projectronin.interop.fhir.r4.datatype.Period
 import com.projectronin.interop.fhir.r4.datatype.Reference
-import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyAppointment
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -61,41 +60,21 @@ class EpicAppointmentTransformer : AppointmentTransformer {
 
         // participants include the patient, and all the providers
         // See [DataPlatform](https://github.com/projectronin/dp-databricks-jobs/blob/01b6ba76dc43046d29359783304b7d1ec7259213/jobs/gold/mdaoc/fhir/appointment.py#L151)
-        val participants: MutableList<Participant> = mutableListOf()
-
-        appOrchardAppointment.patientId?.let {
-            participants.add(
-                Participant(
-                    actor =
-                    Reference(
-                        reference = "Patient/" + appOrchardAppointment.patientId?.trim(),
-                        display = appOrchardAppointment.patientName
+        val participants = appointment.participants.map { ehrParticipant ->
+            Participant(
+                actor =
+                Reference(
+                    display = ehrParticipant.actor.display,
+                    identifier = Identifier(
+                        value = ehrParticipant.actor.identifier?.value,
+                        type = ehrParticipant.actor.identifier?.type?.text.let { CodeableConcept(text = it) }
                     ),
-                    status = ParticipationStatus.ACCEPTED
-                )
+                    type = ehrParticipant.actor.type?.let { Uri(it) }
+                ),
+                status = ParticipationStatus.ACCEPTED,
+
             )
         }
-
-        participants.addAll(
-            appOrchardAppointment.providers.filter { it.providerId != null }.map {
-                val (participantStartInstant, participantEndInstant) =
-                    getStartAndEndInstants(appOrchardAppointment.date, it.time, it.duration)
-
-                Participant(
-                    actor =
-                    Reference(
-                        reference = "Practitioner/" + it.providerId?.trim(),
-                        display = it.providerName
-                    ),
-                    status = ParticipationStatus.ACCEPTED,
-                    period = Period(
-                        start = DateTime(participantStartInstant.toString()),
-                        end = DateTime(participantEndInstant.toString())
-                    )
-                )
-            }
-        )
-
         try {
             return OncologyAppointment(
                 id = Id(appOrchardAppointment.id).localize(tenant),

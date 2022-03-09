@@ -18,7 +18,8 @@ import com.projectronin.interop.ehr.epic.apporchard.model.Appointment as AppOrch
  */
 class EpicAppointment(
     override val resource: AppOrchardAppointment,
-    private val providerIdMap: Map<String, Map<ScheduleProviderReturnWithTime, Identifier>>
+    private val providerIdMap: Map<ScheduleProviderReturnWithTime, Identifier>?,
+    private val patientIdentifier: Identifier?
 ) : JSONResource(resource), Appointment {
     override val dataSource: DataSource = DataSource.EPIC_APPORCHARD
     override val resourceType: ResourceType = ResourceType.APPOINTMENT
@@ -48,7 +49,9 @@ class EpicAppointment(
     }
 
     override val participants: List<Participant> by lazy {
-        val providerIdMap = providerIdMap[resource.id] ?: emptyMap()
-        resource.providers.map { EpicProviderParticipant(it, providerIdMap) }
+        val result: MutableList<Participant> = mutableListOf()
+        result.addAll(resource.providers.map { EpicProviderParticipant(it, providerIdMap ?: emptyMap()) })
+        result.add(EpicPatientParticipant(resource.patientName, patientIdentifier))
+        result
     }
 }

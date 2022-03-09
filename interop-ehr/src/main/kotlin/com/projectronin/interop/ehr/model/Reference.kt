@@ -33,4 +33,5 @@ interface Reference : EHRElement {
 
 object ReferenceTypes {
     const val PRACTITIONER = "Practitioner"
+    const val PATIENT = "Patient"
 }
