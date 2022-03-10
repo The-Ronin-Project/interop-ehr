@@ -2453,4 +2453,12 @@ class LocalizersTest {
         )
         assertEquals(expectedReference, localizedReference)
     }
+
+    @Test
+    fun `localizes reference String with relative URL over 64 characters`() {
+        assertEquals(
+            "Location/test-etKZzJux8VWCn.v-YDz2ZLhdhUwhVwqE082St.Jnq1eDXmuSzU9D4HAOFAP3RHkzY3",
+            "Location/etKZzJux8VWCn.v-YDz2ZLhdhUwhVwqE082St.Jnq1eDXmuSzU9D4HAOFAP3RHkzY3".localizeReference(tenant)
+        )
+    }
 }
