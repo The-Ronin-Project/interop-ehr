@@ -12,5 +12,4 @@ dependencies {
     implementation("com.projectronin.interop.fhir:interop-fhir:${project.property("interopFhirVersion")}")
     implementation(project(":interop-tenant"))
     implementation(project(":interop-ehr"))
-    implementation("com.beust:klaxon:5.5")
 }

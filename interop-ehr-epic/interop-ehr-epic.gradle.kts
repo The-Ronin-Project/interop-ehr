@@ -16,7 +16,6 @@ dependencies {
     implementation(project(":interop-ehr-auth"))
     implementation(project(":interop-transform"))
     implementation("org.springframework:spring-context")
-    implementation("com.beust:klaxon:5.5")
 
     // Using MockWebservice to ensure we can verify the headers set by the ktor engine
     testImplementation("com.squareup.okhttp3:mockwebserver:4.9.2")
