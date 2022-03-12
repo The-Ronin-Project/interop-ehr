@@ -68,11 +68,10 @@ class EpicPatientService(private val epicClient: EpicClient) : PatientService {
 
         // Translate to the Epic Patients
         val epicPatientBundle = EpicPatientBundle(patientsFound)
-
         // Index patients found based on identifiers
         val foundPatientsByIdentifier = epicPatientBundle.resources.flatMap { patient ->
             patient.identifier.map { identifier ->
-                TypeValueIdentifier(typeText = identifier.type?.text, value = identifier.value) to patient
+                TypeValueIdentifier(typeText = identifier.type?.text?.uppercase(), value = identifier.value) to patient
             }
         }.toMap()
 
@@ -80,7 +79,7 @@ class EpicPatientService(private val epicClient: EpicClient) : PatientService {
         val patientsFoundByKey = patientIdsByKey.mapNotNull { requestEntry ->
             val foundPatient = foundPatientsByIdentifier[
                 TypeValueIdentifier(
-                    typeText = requestEntry.value.type?.text, value = requestEntry.value.value
+                    typeText = requestEntry.value.type?.text?.uppercase(), value = requestEntry.value.value
                 )
             ]
             if (foundPatient != null) requestEntry.key to foundPatient else null
