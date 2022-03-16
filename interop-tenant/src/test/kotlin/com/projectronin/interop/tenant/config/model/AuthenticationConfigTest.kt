@@ -10,4 +10,10 @@ class AuthenticationConfigTest {
         assertEquals("publicKey", config.publicKey)
         assertEquals("privateKey", config.privateKey)
     }
+
+    @Test
+    fun `ensure toString is overwritten`() {
+        val config = AuthenticationConfig("publicKey", "privateKey")
+        assertEquals("AuthenticationConfig", config.toString())
+    }
 }

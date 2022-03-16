@@ -10,10 +10,13 @@ data class EpicAuthentication(
     override val accessToken: String,
     override val tokenType: String,
     private val expiresIn: Long,
-    override val scope: String
+    override val scope: String,
 ) : Authentication {
     override val expiresAt: Instant? = Instant.now().plusSeconds(expiresIn)
 
     // Refresh token is not supported by Epic's authentication.
     override val refreshToken: String? = null
+
+    // Override toString() to prevent accidentally leaking the accessToken
+    override fun toString(): String = this::class.simpleName!!
 }

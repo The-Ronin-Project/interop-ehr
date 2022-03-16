@@ -7,5 +7,8 @@ package com.projectronin.interop.tenant.config.model
  */
 data class AuthenticationConfig(
     val publicKey: String,
-    val privateKey: String
-)
+    val privateKey: String,
+) {
+    // Override toString() to prevent accidentally leaking the privateKey
+    override fun toString(): String = this::class.simpleName!!
+}

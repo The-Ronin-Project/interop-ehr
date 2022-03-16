@@ -15,7 +15,8 @@ class EpicAuthenticationTest {
           |  "token_type": "bearer",
           |  "expires_in": 3600,
           |  "scope": "Patient.read Patient.search"
-          |}""".trimMargin()
+          |}
+        """.trimMargin()
 
         val actualAuthentication = jacksonObjectMapper().readValue(json, EpicAuthentication::class.java)
 
@@ -32,5 +33,16 @@ class EpicAuthenticationTest {
 
         // Want some gap here, so using 5 seconds which should be way more than enough for this simple example
         assertTrue(Instant.now().isBefore(actualAuthentication.expiresAt?.minusSeconds(3595)))
+    }
+
+    @Test
+    fun `ensure toString is overwritten`() {
+        val epicAuthentication = EpicAuthentication(
+            accessToken = "123",
+            tokenType = "test token",
+            expiresIn = 456,
+            scope = "test scope"
+        )
+        assertEquals("EpicAuthentication", epicAuthentication.toString())
     }
 }
