@@ -66,7 +66,7 @@ class R4AppointmentTransformerTest {
             ),
             identifier = listOf(Identifier(value = "id")),
             status = AppointmentStatus.CANCELLED,
-            cancellationReason = CodeableConcept(text = "cancel reason"),
+            cancelationReason = CodeableConcept(text = "cancel reason"),
             serviceCategory = listOf(CodeableConcept(text = "service category")),
             serviceType = listOf(CodeableConcept(text = "service type")),
             specialty = listOf(CodeableConcept(text = "specialty")),
@@ -140,7 +140,7 @@ class R4AppointmentTransformerTest {
             oncologyAppointment.identifier
         )
         assertEquals(AppointmentStatus.CANCELLED, oncologyAppointment.status)
-        assertEquals(CodeableConcept(text = "cancel reason"), oncologyAppointment.cancellationReason)
+        assertEquals(CodeableConcept(text = "cancel reason"), oncologyAppointment.cancelationReason)
         assertEquals((listOf(CodeableConcept(text = "service category"))), oncologyAppointment.serviceCategory)
         assertEquals((listOf(CodeableConcept(text = "service type"))), oncologyAppointment.serviceType)
         assertEquals((listOf(CodeableConcept(text = "specialty"))), oncologyAppointment.specialty)
@@ -220,7 +220,7 @@ class R4AppointmentTransformerTest {
             oncologyAppointment.identifier
         )
         assertEquals(AppointmentStatus.CANCELLED, oncologyAppointment.status)
-        assertNull(oncologyAppointment.cancellationReason)
+        assertNull(oncologyAppointment.cancelationReason)
         assertEquals(listOf<CodeableConcept>(), oncologyAppointment.serviceCategory)
         assertEquals(listOf<CodeableConcept>(), oncologyAppointment.serviceType)
         assertEquals(listOf<CodeableConcept>(), oncologyAppointment.specialty)

@@ -51,7 +51,7 @@ class R4AppointmentTransformer : AppointmentTransformer {
                 modifierExtension = r4Appointment.modifierExtension.map { it.localize(tenant) },
                 identifier = r4Appointment.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier(),
                 status = r4Appointment.status,
-                cancellationReason = r4Appointment.cancellationReason?.localize(tenant),
+                cancelationReason = r4Appointment.cancelationReason?.localize(tenant),
                 serviceCategory = r4Appointment.serviceCategory.map { it.localize(tenant) },
                 serviceType = r4Appointment.serviceType.map { it.localize(tenant) },
                 specialty = r4Appointment.specialty.map { it.localize(tenant) },

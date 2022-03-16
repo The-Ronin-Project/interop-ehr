@@ -284,7 +284,7 @@ class EpicAppointmentTransformerTest {
         assertNull(oncologyAppointment.text)
         assertEquals(listOf<ContainedResource>(), oncologyAppointment.contained)
         assertEquals(listOf<Extension>(), oncologyAppointment.modifierExtension)
-        assertNull(oncologyAppointment.cancellationReason)
+        assertNull(oncologyAppointment.cancelationReason)
         assertEquals(listOf<CodeableConcept>(), oncologyAppointment.serviceCategory)
         assertEquals(listOf<CodeableConcept>(), oncologyAppointment.serviceType)
         assertEquals(listOf<CodeableConcept>(), oncologyAppointment.specialty)
@@ -909,5 +909,69 @@ class EpicAppointmentTransformerTest {
 
         val appt = transformer.transformAppointment(appointment, tenant)
         assertNotNull(appt)
+    }
+
+    @Test
+    fun `transform appointment provided fhir references`() {
+        val aoAppointment = AOAppointment(
+            appointmentDuration = "30",
+            appointmentStartTime = "3:30 PM",
+            appointmentStatus = "completed",
+            contactIDs = listOf(IDType(id = "12345", type = "ASN")),
+            date = "4/30/2015",
+            patientIDs = listOf(IDType(id = "54321", type = "Internal")),
+            patientName = "Test Name",
+            providers = listOf(
+                ScheduleProviderReturnWithTime(
+                    departmentIDs = listOf(
+                        IDType(
+                            id = "6789",
+                            type = "Internal"
+                        )
+                    ),
+                    departmentName = "Test department",
+                    duration = "15",
+                    providerName = "Test Doc",
+                    time = "3:30 PM"
+                )
+            ),
+            visitTypeIDs = listOf(IDType(id = "abcd", type = "Internal")),
+            visitTypeName = "Test visit type"
+        )
+
+        val appointment = mockk<Appointment> {
+            every { dataSource } returns DataSource.EPIC_APPORCHARD
+            every { resource } returns aoAppointment
+            every { participants } returns mockParticipants
+        }
+        val providerIdentiferMap = mapOf(mockProviderIdentifier to "practitionerFhirId")
+
+        val oncologyAppointment = transformer.transformAppointment(appointment, tenant, "patientFhirId", providerIdentiferMap)
+        oncologyAppointment!!
+
+        assertEquals(
+            listOf(
+                Participant(
+                    actor =
+                    Reference(
+                        reference = "Patient/${tenant.mnemonic}-patientFhirId",
+                        display = "Patient Name",
+                        type = Uri("Patient")
+                    ),
+                    status = ParticipationStatus.ACCEPTED
+                ),
+                Participant(
+                    actor =
+                    Reference(
+                        reference = "Practitioner/${tenant.mnemonic}-practitionerFhirId",
+                        display = "Coordinator Phoenix, RN",
+                        type = Uri("Practitioner")
+                    ),
+                    status = ParticipationStatus.ACCEPTED
+                )
+            ),
+
+            oncologyAppointment.participant
+        )
     }
 }

@@ -29,8 +29,9 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import com.projectronin.interop.ehr.epic.apporchard.model.Appointment as AppOrchardAppointment
+import com.projectronin.interop.ehr.model.Identifier as EHRIdentifier
+import com.projectronin.interop.ehr.model.Participant as EHRParticipant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant as R4Instant
-
 /**
  * Implementation of [AppointmentTransformer] suitable for Epic Appointments
  */
@@ -48,6 +49,10 @@ class EpicAppointmentTransformer : AppointmentTransformer {
     }
 
     override fun transformAppointment(appointment: Appointment, tenant: Tenant): OncologyAppointment? {
+        return transformAppointment(appointment, tenant, null, emptyMap())
+    }
+
+    fun transformAppointment(appointment: Appointment, tenant: Tenant, patientFhirID: String?, practitionerIdentifierMap: Map<EHRIdentifier, String?>): OncologyAppointment? {
         require(appointment.dataSource == DataSource.EPIC_APPORCHARD) { "Appointment is not an Epic AppOrchard resource" }
 
         val appOrchardAppointment = appointment.resource as AppOrchardAppointment
@@ -60,21 +65,8 @@ class EpicAppointmentTransformer : AppointmentTransformer {
 
         // participants include the patient, and all the providers
         // See [DataPlatform](https://github.com/projectronin/dp-databricks-jobs/blob/01b6ba76dc43046d29359783304b7d1ec7259213/jobs/gold/mdaoc/fhir/appointment.py#L151)
-        val participants = appointment.participants.map { ehrParticipant ->
-            Participant(
-                actor =
-                Reference(
-                    display = ehrParticipant.actor.display,
-                    identifier = Identifier(
-                        value = ehrParticipant.actor.identifier?.value,
-                        type = ehrParticipant.actor.identifier?.type?.text.let { CodeableConcept(text = it) }
-                    ),
-                    type = ehrParticipant.actor.type?.let { Uri(it) }
-                ),
-                status = ParticipationStatus.ACCEPTED,
+        val participants = appointment.participants.map { buildParticipant(it, patientFhirID, practitionerIdentifierMap) }
 
-            )
-        }
         try {
             return OncologyAppointment(
                 id = Id(appOrchardAppointment.id).localize(tenant),
@@ -145,6 +137,34 @@ class EpicAppointmentTransformer : AppointmentTransformer {
         return Pair(
             startDateTime.atZone(zoneId).toInstant(),
             endDateTime.atZone(zoneId).toInstant()
+        )
+    }
+
+    fun buildParticipant(ehrParticipant: EHRParticipant, patientFhirID: String?, practitionerIdentifierMap: Map<EHRIdentifier, String?>): Participant {
+        val participantType = ehrParticipant.actor.type
+        var reference: String? = null
+        var identifier: Identifier? = null
+        if (participantType == "Patient" && patientFhirID != null) {
+            reference = "Patient/$patientFhirID"
+        } else if (participantType == "Practitioner" && practitionerIdentifierMap[ehrParticipant.actor.identifier] != null) {
+            val practitionerFhirId = practitionerIdentifierMap[ehrParticipant.actor.identifier]
+            reference = "Practitioner/$practitionerFhirId"
+        } else {
+            identifier = Identifier(
+                value = ehrParticipant.actor.identifier?.value,
+                type = ehrParticipant.actor.identifier?.type?.text.let { CodeableConcept(text = it) }
+            )
+        }
+        return Participant(
+            actor =
+            Reference(
+                display = ehrParticipant.actor.display,
+                identifier = identifier,
+                reference = reference,
+                type = ehrParticipant.actor.type?.let { Uri(it) }
+            ),
+            status = ParticipationStatus.ACCEPTED,
+
         )
     }
 }
