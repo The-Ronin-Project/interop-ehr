@@ -14,6 +14,7 @@ databaseChangeLog:
               - column:
                   name: io_tenant_provider_pool_id
                   type: BIGINT
+                  autoIncrement: true
                   constraints:
                     nullable: false
                     primaryKey: true

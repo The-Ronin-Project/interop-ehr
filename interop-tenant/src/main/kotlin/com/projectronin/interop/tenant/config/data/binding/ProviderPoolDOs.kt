@@ -7,8 +7,8 @@ import org.ktorm.schema.long
 import org.ktorm.schema.varchar
 
 object ProviderPoolDOs : Table<ProviderPoolDO>("io_tenant_provider_pool") {
-    private val id = long("io_tenant_provider_pool_id").primaryKey().bindTo { it.id }
-    val tenantId = int("io_tenant_id").bindTo { it.tenantId }
+    val id = long("io_tenant_provider_pool_id").primaryKey().bindTo { it.id }
+    val tenantId = int("io_tenant_id").references(TenantDOs) { it.tenantId }
     val providerId = varchar("provider_id").bindTo { it.providerId }
-    private val poolId = varchar("pool_id").bindTo { it.poolId }
+    val poolId = varchar("pool_id").bindTo { it.poolId }
 }

@@ -1,0 +1,36 @@
+io_ehr:
+  - io_ehr_id: 101
+    name: "EPIC"
+    client_id: "12345"
+    public_key: "public"
+    private_key: "private"
+
+io_tenant:
+  - io_tenant_id: 1001
+    mnemonic: "mdaoc"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+  - io_tenant_id: 1002
+    mnemonic: "psj"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+
+io_tenant_provider_pool:
+  - io_tenant_provider_pool_id: 10001
+    io_tenant_id: 1001
+    provider_id: "provider1"
+    pool_id: "pool1"
+  - io_tenant_provider_pool_id: 10002
+    io_tenant_id: 1001
+    provider_id: "provider2"
+    pool_id: "pool2"
+  - io_tenant_provider_pool_id: 10003
+    io_tenant_id: 1001
+    provider_id: "provider3"
+    pool_id: "pool2"
+  - io_tenant_provider_pool_id: 10004
+    io_tenant_id: 1001
+    provider_id: "provider5"
+    pool_id: "pool4"

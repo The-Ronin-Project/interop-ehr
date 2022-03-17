@@ -6,8 +6,9 @@ import org.ktorm.entity.Entity
  * Entity definition for the Provider-Pool data object.
  */
 interface ProviderPoolDO : Entity<ProviderPoolDO> {
-    val id: Long
-    val tenantId: Int
-    val providerId: String
-    val poolId: String
+    companion object : Entity.Factory<ProviderPoolDO>()
+    var id: Long
+    var tenantId: TenantDO
+    var providerId: String
+    var poolId: String
 }
