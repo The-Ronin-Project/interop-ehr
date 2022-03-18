@@ -37,6 +37,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -991,7 +992,7 @@ class R4PatientTransformerTest {
     }
 
     @Test
-    fun `fails for missing maritalStatus`() {
+    fun `defaults for missing maritalStatus`() {
         val r4Patient = R4Patient(
             id = Id("12345"),
             identifier = listOf(
@@ -1040,9 +1041,16 @@ class R4PatientTransformerTest {
             every { dataSource } returns DataSource.FHIR_R4
             every { resource } returns r4Patient
         }
+        val defaultCoding = Coding(
+            system = Uri("http://terminology.hl7.org/CodeSystem/v3-NullFlavor"),
+            code = Code("NI"),
+            display = "NoInformation"
+        )
 
         val oncologyPatient = transformer.transformPatient(patient, tenant)
-        assertNull(oncologyPatient)
+        assertNotNull(oncologyPatient)
+        assertNotNull(oncologyPatient?.maritalStatus)
+        assertEquals(listOf(defaultCoding), oncologyPatient?.maritalStatus?.coding)
     }
 
     @Test
