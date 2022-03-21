@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 class EpicPatientServiceTest {
     private lateinit var epicClient: EpicClient
@@ -43,12 +44,12 @@ class EpicPatientServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Patient",
-                mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "birthDate")
+                mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "2015-01-01")
             )
         } returns httpResponse
 
         val bundle = EpicPatientService(epicClient).findPatient(
-            tenant, "birthDate", "givenName", "familyName"
+            tenant, LocalDate.of(2015, 1, 1), "givenName", "familyName"
         )
         assertEquals(EpicPatientBundle(validPatientBundle), bundle)
     }
@@ -65,13 +66,13 @@ class EpicPatientServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Patient",
-                mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "birthDate")
+                mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "2015-01-01")
             )
         } returns httpResponse
 
         assertThrows<IOException> {
             EpicPatientService(epicClient).findPatient(
-                tenant, "birthDate", "givenName", "familyName"
+                tenant, LocalDate.of(2015, 1, 1), "givenName", "familyName"
             )
         }
     }

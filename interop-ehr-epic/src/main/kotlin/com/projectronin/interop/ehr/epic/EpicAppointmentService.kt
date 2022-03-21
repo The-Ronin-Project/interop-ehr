@@ -18,6 +18,8 @@ import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 /**
  * Service providing access to appointments within Epic.
@@ -31,20 +33,20 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
     private val providerAppointmentSearchUrlPart =
         "/api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments"
     private val identifierService: EpicIdentifierService = EpicIdentifierService()
-
+    private val dateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy")
     override fun findPatientAppointments(
         tenant: Tenant,
         patientMRN: String,
-        startDate: String, // Can be in MM/DD/YYYY format or t+x
-        endDate: String,
+        startDate: LocalDate,
+        endDate: LocalDate,
     ): Bundle<Appointment> {
         logger.info { "Patient appointment search started for ${tenant.mnemonic}" }
 
         val request =
             GetPatientAppointmentsRequest(
                 userID = getEpicVendor(tenant).ehrUserId,
-                startDate = startDate,
-                endDate = endDate,
+                startDate = dateFormat.format(startDate),
+                endDate = dateFormat.format(endDate),
                 patientId = patientMRN,
             )
 
@@ -54,8 +56,8 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
     override fun findProviderAppointments(
         tenant: Tenant,
         providerIDs: List<String>, // Expecting the external Epic provider id
-        startDate: String, // Can be in MM/DD/YYYY format or t+x
-        endDate: String,
+        startDate: LocalDate,
+        endDate: LocalDate,
     ): Bundle<Appointment> {
         logger.info { "Provider appointment search started for ${tenant.mnemonic}" }
 
@@ -63,8 +65,8 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
             GetProviderAppointmentRequest(
                 userID = getEpicVendor(tenant).ehrUserId,
                 providers = providerIDs.map { ScheduleProvider(id = it) },
-                startDate = startDate,
-                endDate = endDate
+                startDate = dateFormat.format(startDate),
+                endDate = dateFormat.format(endDate)
             )
 
         return findAppointments(tenant, providerAppointmentSearchUrlPart, request)

@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.time.LocalDate
 
 class EpicAppointmentServiceTest {
     private lateinit var epicClient: EpicClient
@@ -48,7 +49,7 @@ class EpicAppointmentServiceTest {
             epicClient.post(
                 tenant,
                 "/api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments",
-                GetPatientAppointmentsRequest("ehrUserId", "1/1/2015", "11/1/2015", "E5597", "MRN")
+                GetPatientAppointmentsRequest("ehrUserId", "01/01/2015", "11/01/2015", "E5597", "MRN")
             )
         } returns httpResponse
 
@@ -56,8 +57,8 @@ class EpicAppointmentServiceTest {
             EpicAppointmentService(epicClient).findPatientAppointments(
                 tenant,
                 "E5597",
-                "1/1/2015",
-                "11/1/2015",
+                LocalDate.of(2015, 1, 1),
+                LocalDate.of(2015, 11, 1)
             )
         assertEquals(validPatientAppointmentSearchResponse, bundle.resource)
     }
@@ -78,7 +79,7 @@ class EpicAppointmentServiceTest {
             epicClient.post(
                 tenant,
                 "/api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments",
-                GetPatientAppointmentsRequest("ehrUserId", "1/1/2015", "11/1/2015", "E5597", "MRN")
+                GetPatientAppointmentsRequest("ehrUserId", "01/01/2015", "11/01/2015", "E5597", "MRN")
             )
         } returns httpResponse
 
@@ -86,8 +87,8 @@ class EpicAppointmentServiceTest {
             EpicAppointmentService(epicClient).findPatientAppointments(
                 tenant,
                 "E5597",
-                "1/1/2015",
-                "11/1/2015",
+                LocalDate.of(2015, 1, 1),
+                LocalDate.of(2015, 11, 1)
             )
         }
     }
@@ -111,8 +112,8 @@ class EpicAppointmentServiceTest {
                 GetProviderAppointmentRequest(
                     userID = "ehrUserId",
                     providers = listOf(ScheduleProvider(id = "E1000")),
-                    startDate = "1/1/2015",
-                    endDate = "11/1/2015"
+                    startDate = "01/01/2015",
+                    endDate = "11/01/2015"
                 )
             )
         } returns httpResponse
@@ -121,8 +122,8 @@ class EpicAppointmentServiceTest {
             EpicAppointmentService(epicClient).findProviderAppointments(
                 tenant,
                 listOf("E1000"),
-                "1/1/2015",
-                "11/1/2015",
+                LocalDate.of(2015, 1, 1),
+                LocalDate.of(2015, 11, 1)
             )
         assertEquals(validProviderAppointmentSearchResponse, bundle.resource)
     }
@@ -146,8 +147,8 @@ class EpicAppointmentServiceTest {
                 GetProviderAppointmentRequest(
                     userID = "ehrUserId",
                     providers = listOf(ScheduleProvider(id = "E1000")),
-                    startDate = "1/1/2015",
-                    endDate = "11/1/2015"
+                    startDate = "01/01/2015",
+                    endDate = "11/01/2015"
                 )
             )
         } returns httpResponse
@@ -156,8 +157,8 @@ class EpicAppointmentServiceTest {
             EpicAppointmentService(epicClient).findProviderAppointments(
                 tenant,
                 listOf("E1000"),
-                "1/1/2015",
-                "11/1/2015",
+                LocalDate.of(2015, 1, 1),
+                LocalDate.of(2015, 11, 1)
             )
         }
     }

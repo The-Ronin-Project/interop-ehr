@@ -13,6 +13,8 @@ import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 import com.projectronin.interop.fhir.r4.resource.Bundle as R4Bundle
 
 /**
@@ -25,13 +27,17 @@ class EpicPatientService(private val epicClient: EpicClient) : PatientService {
 
     override fun findPatient(
         tenant: Tenant,
-        birthDate: String,
+        birthDate: LocalDate,
         givenName: String,
         familyName: String
     ): Bundle<Patient> {
         logger.info { "Patient search started for ${tenant.mnemonic}" }
 
-        val parameters = mapOf("given" to givenName, "family" to familyName, "birthdate" to birthDate)
+        val parameters = mapOf(
+            "given" to givenName,
+            "family" to familyName,
+            "birthdate" to DateTimeFormatter.ofPattern("yyyy-MM-dd").format(birthDate)
+        )
         val bundle = runBlocking {
             val httpResponse = epicClient.get(tenant, patientSearchUrlPart, parameters)
             if (httpResponse.status != HttpStatusCode.OK) {
