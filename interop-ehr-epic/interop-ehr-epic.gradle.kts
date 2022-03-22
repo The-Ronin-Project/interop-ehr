@@ -12,8 +12,6 @@ dependencies {
     implementation("com.projectronin.interop.fhir:interop-fhir:${project.property("interopFhirVersion")}")
     implementation(project(":interop-tenant"))
     implementation(project(":interop-ehr"))
-    implementation(project(":interop-ehr-factory"))
-    implementation(project(":interop-ehr-auth"))
     implementation(project(":interop-transform"))
     implementation("org.springframework:spring-context")
 

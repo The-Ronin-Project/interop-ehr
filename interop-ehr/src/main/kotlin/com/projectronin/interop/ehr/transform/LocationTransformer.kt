@@ -1,9 +1,10 @@
-package com.projectronin.interop.transform
+package com.projectronin.interop.ehr.transform
 
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.Location
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.fhir.r4.resource.Location as R4Location
+
 /**
  * Defines a Transformer capable of converting EHR [Location]s into Ronin [OncologyLocation]s.
  */

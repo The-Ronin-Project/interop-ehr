@@ -1,4 +1,4 @@
-package com.projectronin.interop.transform
+package com.projectronin.interop.ehr.transform
 
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle

@@ -3,8 +3,8 @@ package com.projectronin.interop.transform.fhir.r4
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.Location
 import com.projectronin.interop.ehr.model.enums.DataSource
+import com.projectronin.interop.ehr.transform.LocationTransformer
 import com.projectronin.interop.tenant.config.model.Tenant
-import com.projectronin.interop.transform.LocationTransformer
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.transform.util.toFhirIdentifier
 import mu.KotlinLogging

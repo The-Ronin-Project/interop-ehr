@@ -4,4 +4,5 @@
 
 # interop-ehr
 
-Abstraction layer around the various supported EHR vendors
+Abstraction layer around the various supported EHR vendors. Also provides generic support for workflows across all
+vendors, such as a factory access model and authentication brokering.

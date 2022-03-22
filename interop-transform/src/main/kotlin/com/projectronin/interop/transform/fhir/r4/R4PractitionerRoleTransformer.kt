@@ -3,9 +3,9 @@ package com.projectronin.interop.transform.fhir.r4
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.PractitionerRole
 import com.projectronin.interop.ehr.model.enums.DataSource
+import com.projectronin.interop.ehr.transform.PractitionerRoleTransformer
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyPractitionerRole
 import com.projectronin.interop.tenant.config.model.Tenant
-import com.projectronin.interop.transform.PractitionerRoleTransformer
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.transform.util.toFhirIdentifier
 import mu.KotlinLogging

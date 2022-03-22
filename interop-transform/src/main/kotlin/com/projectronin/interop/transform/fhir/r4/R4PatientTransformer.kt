@@ -3,13 +3,13 @@ package com.projectronin.interop.transform.fhir.r4
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.Patient
 import com.projectronin.interop.ehr.model.enums.DataSource
+import com.projectronin.interop.ehr.transform.PatientTransformer
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyPatient
 import com.projectronin.interop.tenant.config.model.Tenant
-import com.projectronin.interop.transform.PatientTransformer
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.transform.util.toFhirIdentifier
 import mu.KotlinLogging

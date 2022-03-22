@@ -9,4 +9,7 @@ dependencies {
     implementation("com.projectronin.interop:interop-common-jackson:${project.property("interopCommonVersion")}")
     implementation("com.projectronin.interop.fhir:interop-fhir:${project.property("interopFhirVersion")}")
     implementation(project(":interop-tenant"))
+
+    // Spring
+    implementation("org.springframework:spring-context")
 }

@@ -4,8 +4,6 @@ include("interop-ehr-liquibase")
 include("interop-tenant")
 include("interop-ehr")
 include("interop-transform")
-include("interop-ehr-factory")
-include("interop-ehr-auth")
 
 include("interop-ehr-epic")
 

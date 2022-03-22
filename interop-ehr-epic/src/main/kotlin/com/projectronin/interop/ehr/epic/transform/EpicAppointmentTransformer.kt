@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr.epic.transform
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.enums.DataSource
+import com.projectronin.interop.ehr.transform.AppointmentTransformer
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.ExtensionMeanings
@@ -18,7 +19,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyAppointment
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
 import com.projectronin.interop.tenant.config.model.Tenant
-import com.projectronin.interop.transform.AppointmentTransformer
 import com.projectronin.interop.transform.fhir.r4.transformResources
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.transform.util.toFhirIdentifier
@@ -32,6 +32,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.Appointment as AppOrch
 import com.projectronin.interop.ehr.model.Identifier as EHRIdentifier
 import com.projectronin.interop.ehr.model.Participant as EHRParticipant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant as R4Instant
+
 /**
  * Implementation of [AppointmentTransformer] suitable for Epic Appointments
  */
@@ -52,7 +53,12 @@ class EpicAppointmentTransformer : AppointmentTransformer {
         return transformAppointment(appointment, tenant, null, emptyMap())
     }
 
-    fun transformAppointment(appointment: Appointment, tenant: Tenant, patientFhirID: String?, practitionerIdentifierMap: Map<EHRIdentifier, String?>): OncologyAppointment? {
+    fun transformAppointment(
+        appointment: Appointment,
+        tenant: Tenant,
+        patientFhirID: String?,
+        practitionerIdentifierMap: Map<EHRIdentifier, String?>
+    ): OncologyAppointment? {
         require(appointment.dataSource == DataSource.EPIC_APPORCHARD) { "Appointment is not an Epic AppOrchard resource" }
 
         val appOrchardAppointment = appointment.resource as AppOrchardAppointment
@@ -65,7 +71,8 @@ class EpicAppointmentTransformer : AppointmentTransformer {
 
         // participants include the patient, and all the providers
         // See [DataPlatform](https://github.com/projectronin/dp-databricks-jobs/blob/01b6ba76dc43046d29359783304b7d1ec7259213/jobs/gold/mdaoc/fhir/appointment.py#L151)
-        val participants = appointment.participants.map { buildParticipant(it, patientFhirID, practitionerIdentifierMap) }
+        val participants =
+            appointment.participants.map { buildParticipant(it, patientFhirID, practitionerIdentifierMap) }
 
         try {
             return OncologyAppointment(
@@ -140,7 +147,11 @@ class EpicAppointmentTransformer : AppointmentTransformer {
         )
     }
 
-    fun buildParticipant(ehrParticipant: EHRParticipant, patientFhirID: String?, practitionerIdentifierMap: Map<EHRIdentifier, String?>): Participant {
+    fun buildParticipant(
+        ehrParticipant: EHRParticipant,
+        patientFhirID: String?,
+        practitionerIdentifierMap: Map<EHRIdentifier, String?>
+    ): Participant {
         val participantType = ehrParticipant.actor.type
         var reference: String? = null
         var identifier: Identifier? = null
@@ -164,7 +175,6 @@ class EpicAppointmentTransformer : AppointmentTransformer {
                 type = ehrParticipant.actor.type?.let { Uri(it) }
             ),
             status = ParticipationStatus.ACCEPTED,
-
         )
     }
 }
