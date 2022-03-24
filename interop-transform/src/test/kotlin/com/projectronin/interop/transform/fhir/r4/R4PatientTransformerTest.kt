@@ -37,7 +37,6 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -87,20 +86,6 @@ class R4PatientTransformerTest {
                     ),
                     system = Uri("http://projectronin.com/id/mrn"),
                     value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
                 )
             ),
             active = true,
@@ -167,12 +152,12 @@ class R4PatientTransformerTest {
         assertEquals(
             listOf(
                 Identifier(type = CodeableConcepts.MRN, system = CodeSystem.MRN.uri, value = "MRN"),
+                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test"),
                 Identifier(
                     type = CodeableConcepts.FHIR_STU3_ID,
                     system = CodeSystem.FHIR_STU3_ID.uri,
-                    value = "fhirId"
+                    value = "12345"
                 ),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test")
             ),
             oncologyPatient.identifier
         )
@@ -217,20 +202,6 @@ class R4PatientTransformerTest {
                     system = Uri("http://projectronin.com/id/mrn"),
                     value = "MRN"
                 ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
             ),
             name = listOf(HumanName(family = "Doe")),
             telecom = listOf(
@@ -242,8 +213,7 @@ class R4PatientTransformerTest {
             ),
             gender = AdministrativeGender.FEMALE,
             birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M")
+            address = listOf(Address(country = "USA"))
         )
         val patient = mockk<Patient> {
             every { dataSource } returns DataSource.FHIR_R4
@@ -251,7 +221,11 @@ class R4PatientTransformerTest {
         }
 
         val oncologyPatient = transformer.transformPatient(patient, tenant)
-
+        val defaultCoding = Coding(
+            system = Uri("http://terminology.hl7.org/CodeSystem/v3-NullFlavor"),
+            code = Code("NI"),
+            display = "NoInformation"
+        )
         oncologyPatient!! // Force it to be treated as non-null
         assertEquals("Patient", oncologyPatient.resourceType)
         assertEquals(Id("test-12345"), oncologyPatient.id)
@@ -265,12 +239,12 @@ class R4PatientTransformerTest {
         assertEquals(
             listOf(
                 Identifier(type = CodeableConcepts.MRN, system = CodeSystem.MRN.uri, value = "MRN"),
+                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test"),
                 Identifier(
                     type = CodeableConcepts.FHIR_STU3_ID,
                     system = CodeSystem.FHIR_STU3_ID.uri,
-                    value = "fhirId"
+                    value = "12345"
                 ),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test")
             ),
             oncologyPatient.identifier
         )
@@ -284,7 +258,7 @@ class R4PatientTransformerTest {
         assertEquals(Date("1975-07-05"), oncologyPatient.birthDate)
         assertNull(oncologyPatient.deceased)
         assertEquals(listOf(Address(country = "USA")), oncologyPatient.address)
-        assertEquals(CodeableConcept(text = "M"), oncologyPatient.maritalStatus)
+        assertEquals(listOf(defaultCoding), oncologyPatient.maritalStatus.coding)
         assertNull(oncologyPatient.multipleBirth)
         assertEquals(listOf<Attachment>(), oncologyPatient.photo)
         assertEquals(listOf<Communication>(), oncologyPatient.communication)
@@ -350,526 +324,6 @@ class R4PatientTransformerTest {
             gender = AdministrativeGender.FEMALE,
             birthDate = Date("1975-07-05"),
             address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M")
-        )
-        val patient = mockk<Patient> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Patient
-        }
-
-        val oncologyPatient = transformer.transformPatient(patient, tenant)
-        assertNull(oncologyPatient)
-    }
-
-    @Test
-    fun `fails for missing mrn`() {
-        val r4Patient = R4Patient(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
-            name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(
-                ContactPoint(
-                    system = ContactPointSystem.PHONE,
-                    use = ContactPointUse.MOBILE,
-                    value = "8675309"
-                )
-            ),
-            gender = AdministrativeGender.FEMALE,
-            birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M")
-        )
-        val patient = mockk<Patient> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Patient
-        }
-
-        val oncologyPatient = transformer.transformPatient(patient, tenant)
-        assertNull(oncologyPatient)
-    }
-
-    @Test
-    fun `fails for bad mrn CodeableConcept`() {
-        val r4Patient = R4Patient(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("ABCD"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
-            name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(
-                ContactPoint(
-                    system = ContactPointSystem.PHONE,
-                    use = ContactPointUse.MOBILE,
-                    value = "8675309"
-                )
-            ),
-            gender = AdministrativeGender.FEMALE,
-            birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M")
-        )
-        val patient = mockk<Patient> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Patient
-        }
-
-        val oncologyPatient = transformer.transformPatient(patient, tenant)
-        assertNull(oncologyPatient)
-    }
-
-    @Test
-    fun `fails for missing mrn value`() {
-        val r4Patient = R4Patient(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn")
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
-            name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(
-                ContactPoint(
-                    system = ContactPointSystem.PHONE,
-                    use = ContactPointUse.MOBILE,
-                    value = "8675309"
-                )
-            ),
-            gender = AdministrativeGender.FEMALE,
-            birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M")
-        )
-        val patient = mockk<Patient> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Patient
-        }
-
-        val oncologyPatient = transformer.transformPatient(patient, tenant)
-        assertNull(oncologyPatient)
-    }
-
-    @Test
-    fun `fails for missing fhir stu3 id`() {
-        val r4Patient = R4Patient(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                )
-            ),
-            name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(
-                ContactPoint(
-                    system = ContactPointSystem.PHONE,
-                    use = ContactPointUse.MOBILE,
-                    value = "8675309"
-                )
-            ),
-            gender = AdministrativeGender.FEMALE,
-            birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M")
-        )
-        val patient = mockk<Patient> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Patient
-        }
-
-        val oncologyPatient = transformer.transformPatient(patient, tenant)
-        assertNull(oncologyPatient)
-    }
-
-    @Test
-    fun `fails for bad fhir stu3 id CodeableConcept`() {
-        val r4Patient = R4Patient(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("ABCD"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
-            name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(
-                ContactPoint(
-                    system = ContactPointSystem.PHONE,
-                    use = ContactPointUse.MOBILE,
-                    value = "8675309"
-                )
-            ),
-            gender = AdministrativeGender.FEMALE,
-            birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M")
-        )
-        val patient = mockk<Patient> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Patient
-        }
-
-        val oncologyPatient = transformer.transformPatient(patient, tenant)
-        assertNull(oncologyPatient)
-    }
-
-    @Test
-    fun `fails for missing value for fhir stu3 id`() {
-        val r4Patient = R4Patient(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir")
-                )
-            ),
-            name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(
-                ContactPoint(
-                    system = ContactPointSystem.PHONE,
-                    use = ContactPointUse.MOBILE,
-                    value = "8675309"
-                )
-            ),
-            gender = AdministrativeGender.FEMALE,
-            birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M")
-        )
-        val patient = mockk<Patient> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Patient
-        }
-
-        val oncologyPatient = transformer.transformPatient(patient, tenant)
-        assertNull(oncologyPatient)
-    }
-
-    @Test
-    fun `fails for no name`() {
-        val r4Patient = R4Patient(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
-            telecom = listOf(
-                ContactPoint(
-                    system = ContactPointSystem.PHONE,
-                    use = ContactPointUse.MOBILE,
-                    value = "8675309"
-                )
-            ),
-            gender = AdministrativeGender.FEMALE,
-            birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M")
-        )
-        val patient = mockk<Patient> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Patient
-        }
-
-        val oncologyPatient = transformer.transformPatient(patient, tenant)
-        assertNull(oncologyPatient)
-    }
-
-    @Test
-    fun `fails for no telecom`() {
-        val r4Patient = R4Patient(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
-            name = listOf(HumanName(family = "Doe")),
-            gender = AdministrativeGender.FEMALE,
-            birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M")
-        )
-        val patient = mockk<Patient> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Patient
-        }
-
-        val oncologyPatient = transformer.transformPatient(patient, tenant)
-        assertNull(oncologyPatient)
-    }
-
-    @Test
-    fun `fails for telecom with missing details`() {
-        val r4Patient = R4Patient(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
-            name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(
-                ContactPoint(
-                    system = ContactPointSystem.PHONE,
-                    value = "8675309"
-                )
-            ),
-            gender = AdministrativeGender.FEMALE,
-            birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M")
-        )
-        val patient = mockk<Patient> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Patient
-        }
-
-        val oncologyPatient = transformer.transformPatient(patient, tenant)
-        assertNull(oncologyPatient)
-    }
-
-    @Test
-    fun `fails for missing address`() {
-        val r4Patient = R4Patient(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
-            name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(
-                ContactPoint(
-                    system = ContactPointSystem.PHONE,
-                    use = ContactPointUse.MOBILE,
-                    value = "8675309"
-                )
-            ),
-            gender = AdministrativeGender.FEMALE,
-            birthDate = Date("1975-07-05"),
             maritalStatus = CodeableConcept(text = "M")
         )
         val patient = mockk<Patient> {
@@ -989,68 +443,6 @@ class R4PatientTransformerTest {
 
         val oncologyPatient = transformer.transformPatient(patient, tenant)
         assertNull(oncologyPatient)
-    }
-
-    @Test
-    fun `defaults for missing maritalStatus`() {
-        val r4Patient = R4Patient(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
-            name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(
-                ContactPoint(
-                    system = ContactPointSystem.PHONE,
-                    use = ContactPointUse.MOBILE,
-                    value = "8675309"
-                )
-            ),
-            gender = AdministrativeGender.FEMALE,
-            birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA"))
-        )
-        val patient = mockk<Patient> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Patient
-        }
-        val defaultCoding = Coding(
-            system = Uri("http://terminology.hl7.org/CodeSystem/v3-NullFlavor"),
-            code = Code("NI"),
-            display = "NoInformation"
-        )
-
-        val oncologyPatient = transformer.transformPatient(patient, tenant)
-        assertNotNull(oncologyPatient)
-        assertNotNull(oncologyPatient?.maritalStatus)
-        assertEquals(listOf(defaultCoding), oncologyPatient?.maritalStatus?.coding)
     }
 
     @Test

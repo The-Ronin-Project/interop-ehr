@@ -4,8 +4,11 @@ import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.Patient
 import com.projectronin.interop.ehr.model.enums.DataSource
 import com.projectronin.interop.ehr.transform.PatientTransformer
+import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
+import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyPatient
@@ -64,6 +67,11 @@ class R4PatientTransformer : PatientTransformer {
                 )
             )
         )
+        val fhirStu3IdIdentifier = Identifier(
+            value = id.value,
+            system = CodeSystem.FHIR_STU3_ID.uri,
+            type = CodeableConcepts.FHIR_STU3_ID
+        )
 
         try {
             return OncologyPatient(
@@ -75,7 +83,7 @@ class R4PatientTransformer : PatientTransformer {
                 contained = r4Patient.contained,
                 extension = r4Patient.extension.map { it.localize(tenant) },
                 modifierExtension = r4Patient.modifierExtension.map { it.localize(tenant) },
-                identifier = r4Patient.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier(),
+                identifier = r4Patient.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier() + fhirStu3IdIdentifier,
                 active = r4Patient.active,
                 name = r4Patient.name.map { it.localize(tenant) },
                 telecom = r4Patient.telecom.map { it.localize(tenant) },
