@@ -29,7 +29,7 @@ class EpicPractitionerServiceTest {
         epicClient = mockk()
         httpResponse = mockk()
         pagingHttpResponse = mockk()
-        practitionerService = EpicPractitionerService(epicClient)
+        practitionerService = EpicPractitionerService(epicClient, 1)
     }
 
     @Test
@@ -133,6 +133,73 @@ class EpicPractitionerServiceTest {
 
         // 142 = 71 practitioner roles from each of 2 locations
         assertEquals(142, bundle.practitionerRoles!!.resources.size)
+        // 142 becomes 71 total because duplicate practitioners are removed by EpicPractitionerBundle
+        assertEquals(71, bundle.practitioners?.resources?.size)
+        // 106 becomes 53 total because duplicate practitioner locations are removed by EpicLocationBundle
+        assertEquals(53, bundle.locations?.resources?.size)
+    }
+
+    @Test
+    fun `ensure multiple locations are supported with batching`() {
+        val batchingPractitionerService = EpicPractitionerService(epicClient, 2)
+
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                "testPrivateKey",
+                "TEST_TENANT"
+            )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.receive<Bundle>() } returns validPractitionerSearchBundle
+
+        /*
+        Uncomment when we are no longer forcing batchSize to 1 in EpicPractitioner and remove the two cases below.
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/PractitionerRole",
+                mapOf(
+                    "_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to "loc1,loc2"
+                )
+            )
+        } returns httpResponse
+         */
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/PractitionerRole",
+                mapOf(
+                    "_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to "loc1"
+                )
+            )
+        } returns httpResponse
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/PractitionerRole",
+                mapOf(
+                    "_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to "loc2"
+                )
+            )
+        } returns httpResponse
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/PractitionerRole",
+                mapOf("_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to "loc3")
+            )
+        } returns httpResponse
+
+        val bundle =
+            batchingPractitionerService.findPractitionersByLocation(
+                tenant,
+                listOf("loc1", "loc2", "loc3")
+            )
+
+        // 142 = 71 practitioner roles from each of 3 batch calls
+        assertEquals(213, bundle.practitionerRoles!!.resources.size)
         // 142 becomes 71 total because duplicate practitioners are removed by EpicPractitionerBundle
         assertEquals(71, bundle.practitioners?.resources?.size)
         // 106 becomes 53 total because duplicate practitioner locations are removed by EpicLocationBundle

@@ -16,7 +16,7 @@ import mu.KotlinLogging
  * Abstract class to simplify Epic services that need to retrieve bundles using paging.
  */
 abstract class EpicPagingService(private val epicClient: EpicClient) {
-    protected val logger = KotlinLogging.logger { }
+    private val logger = KotlinLogging.logger { }
 
     /**
      * When Epic returns a very large response, it limits the amount of resources returned in each request and provides a
@@ -28,7 +28,7 @@ abstract class EpicPagingService(private val epicClient: EpicClient) {
         tenant: Tenant,
         urlPart: String,
         parameters: Map<String, Any?>,
-        creator: (Bundle) -> B
+        creator: (Bundle) -> B,
     ): B {
         logger.info { "Get started for ${tenant.mnemonic}" }
 
@@ -61,7 +61,7 @@ abstract class EpicPagingService(private val epicClient: EpicClient) {
 
     protected fun <R : JSONResource, B : JSONBundle<R, Bundle>> mergeResponses(
         responses: List<B>,
-        creator: (Bundle) -> B
+        creator: (Bundle) -> B,
     ): B {
         var bundle = responses.first().resource
         responses.subList(1, responses.size).forEach { bundle = mergeBundles(bundle, it.resource) }
