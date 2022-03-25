@@ -82,6 +82,7 @@ class TenantDAOTest {
             assertEquals("Ronin Alerts", ehrTenant.messageType)
             assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.836982", ehrTenant.practitionerProviderSystem)
             assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.697780", ehrTenant.practitionerUserSystem)
+            assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14", ehrTenant.mrnSystem)
             assertNull(ehrTenant.hsi)
         }
     }

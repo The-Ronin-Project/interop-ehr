@@ -25,3 +25,4 @@ io_tenant_epic:
     message_type: "Ronin Alerts"
     practitioner_provider_system: "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
     practitioner_user_system: "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+    mrn_system: "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
