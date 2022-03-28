@@ -32,6 +32,7 @@ fun createTestTenant(
     internalId: Int = 1,
     practitionerProviderSystem: String = "providerSystem",
     practitionerUserSystem: String = "userSystem",
+    mrnSystem: String = "mrnSystem",
     hsi: String? = null
 ): Tenant {
     return Tenant(
@@ -47,6 +48,7 @@ fun createTestTenant(
             messageType,
             practitionerProviderSystem,
             practitionerUserSystem,
+            mrnSystem,
             hsi
         )
     )

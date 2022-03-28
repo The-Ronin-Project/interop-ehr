@@ -18,7 +18,9 @@ class EpicTest {
                 "RoninUser",
                 "Ronin Message",
                 "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-                "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+                "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+                "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+
             )
         assertEquals(VendorType.EPIC, epic.type)
         assertEquals("clientId", epic.clientId)
@@ -29,5 +31,6 @@ class EpicTest {
         assertEquals("Ronin Message", epic.messageType)
         assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.836982", epic.practitionerProviderSystem)
         assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.697780", epic.practitionerUserSystem)
+        assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14", epic.mrnSystem)
     }
 }

@@ -48,6 +48,14 @@ class EpicIdentifierService : IdentifierService {
         ) { "No practitioner user identifier found for resource with FHIR id ${identifiers.id.value}" }
     }
 
+    override fun getMRNIdentifier(
+        tenant: Tenant,
+        identifiers: List<R4Identifier>
+    ): R4Identifier {
+        val system = Uri(tenant.vendorAs<Epic>().mrnSystem)
+        return identifiers.firstOrNull { it.system == system } ?: throw VendorIdentifierNotFoundException("No MRN identifier found for Patient")
+    }
+
     private fun getEpicIdentifier(
         identifiers: List<Identifier>,
         system: String?,

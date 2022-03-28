@@ -76,6 +76,7 @@ class TenantService(private val tenantDAO: TenantDAO, private val providerPoolDA
             messageType = epicTenant.messageType,
             practitionerProviderSystem = epicTenant.practitionerProviderSystem,
             practitionerUserSystem = epicTenant.practitionerUserSystem,
+            mrnSystem = epicTenant.mrnSystem,
             hsi = epicTenant.hsi
         )
     }

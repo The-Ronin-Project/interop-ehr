@@ -24,7 +24,8 @@ class IdHelpersTest {
                 ehrUserId = "userId",
                 messageType = "messageType",
                 practitionerProviderSystem = "providerSystem",
-                practitionerUserSystem = "userSystem"
+                practitionerUserSystem = "userSystem",
+                mrnSystem = "mrnSystem"
             )
         )
 

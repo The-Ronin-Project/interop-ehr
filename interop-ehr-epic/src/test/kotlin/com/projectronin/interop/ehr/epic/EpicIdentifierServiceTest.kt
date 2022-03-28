@@ -20,7 +20,8 @@ class EpicIdentifierServiceTest {
     private val service = EpicIdentifierService()
     private val tenant = createTestTenant(
         practitionerProviderSystem = "practitionerProviderSystem",
-        practitionerUserSystem = "practitionerUserSystem"
+        practitionerUserSystem = "practitionerUserSystem",
+        mrnSystem = "mrnSystem"
     )
 
     private val otherType = mockk<CodeableConcept> {
@@ -148,6 +149,7 @@ class EpicIdentifierServiceTest {
         R4Identifier(system = Uri("practitionerUserSystem"), type = R4CodeableConcept(text = "External"))
     private val r4PractitionerUserIdentifierInternal =
         R4Identifier(system = Uri("practitionerUserSystem"), type = R4CodeableConcept(text = "Internal"))
+    private val patientMRNIdentifier = R4Identifier(system = Uri("mrnSystem"), value = "mrn")
 
     @Test
     fun `getPractitionerProviderIdentifier with no matching system`() {
@@ -211,5 +213,19 @@ class EpicIdentifierServiceTest {
         val vendorIdentifier = service.getPractitionerUserIdentifier(tenant, fhirIdentifiers)
         assertFalse(vendorIdentifier.isFhirId)
         assertEquals(r4PractitionerUserIdentifierExternal, vendorIdentifier.identifier)
+    }
+
+    @Test
+    fun `getMRNIdentifier with no matching system`() {
+        val exception = assertThrows<VendorIdentifierNotFoundException> {
+            service.getMRNIdentifier(tenant, listOf(R4Identifier(system = Uri("notTheMRNSystem"), value = "mrn")))
+        }
+        assertEquals("No MRN identifier found for Patient", exception.message)
+    }
+
+    @Test
+    fun `getMRNIdentifier with matching system`() {
+        val mrnIdentifier = service.getMRNIdentifier(tenant, listOf(patientMRNIdentifier))
+        assertEquals(patientMRNIdentifier, mrnIdentifier)
     }
 }

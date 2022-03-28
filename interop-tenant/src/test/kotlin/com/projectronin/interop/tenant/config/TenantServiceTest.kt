@@ -101,6 +101,7 @@ class TenantServiceTest {
             every { messageType } returns "message type"
             every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
             every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+            every { mrnSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
             every { hsi } returns null
         }
         every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
@@ -120,7 +121,8 @@ class TenantServiceTest {
                 ehrUserId = "ehr user",
                 messageType = "message type",
                 practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+                mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
             )
         )
 
@@ -159,6 +161,7 @@ class TenantServiceTest {
             every { messageType } returns "message type"
             every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
             every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+            every { mrnSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
             every { hsi } returns null
         }
         every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
@@ -178,7 +181,8 @@ class TenantServiceTest {
                 ehrUserId = "ehr user",
                 messageType = "message type",
                 practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+                mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
             )
         )
 
@@ -217,6 +221,7 @@ class TenantServiceTest {
             every { messageType } returns "message type"
             every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
             every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+            every { mrnSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
             every { hsi } returns null
         }
         every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
@@ -236,7 +241,8 @@ class TenantServiceTest {
                 ehrUserId = "ehr user",
                 messageType = "message type",
                 practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+                mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
             )
         )
 
@@ -275,6 +281,7 @@ class TenantServiceTest {
             every { messageType } returns "message type"
             every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
             every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+            every { mrnSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
             every { hsi } returns null
         }
         every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
@@ -297,7 +304,8 @@ class TenantServiceTest {
                 ehrUserId = "ehr user",
                 messageType = "message type",
                 practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
-                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+                practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+                mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
             )
         )
 
@@ -382,6 +390,7 @@ class TenantServiceTest {
             every { messageType } returns "message type"
             every { practitionerProviderSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982"
             every { practitionerUserSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780"
+            every { mrnSystem } returns "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
             every { hsi } returns "urn:epic:apporchard.curprod"
         }
         every { tenantDAO.getEHRTenant<EpicTenantDO>(1, VendorType.EPIC) } returns epicTenantDO
@@ -402,6 +411,7 @@ class TenantServiceTest {
                 messageType = "message type",
                 practitionerProviderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
                 practitionerUserSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
+                mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
                 hsi = "urn:epic:apporchard.curprod"
             )
         )

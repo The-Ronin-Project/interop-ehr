@@ -4,6 +4,7 @@ import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.inputs.VendorIdentifier
 import com.projectronin.interop.ehr.model.Identifier
 import com.projectronin.interop.tenant.config.model.Tenant
+import com.projectronin.interop.fhir.r4.datatype.Identifier as R4Identifier
 
 /**
  * Defines services supporting resolution and identification of appropriate Identifiers for a given tenant.
@@ -32,4 +33,10 @@ interface IdentifierService {
      * represents all the FHIR identifiers associated to a Practitioner.
      */
     fun getPractitionerUserIdentifier(tenant: Tenant, identifiers: FHIRIdentifiers): VendorIdentifier<out Any>
+
+    /**
+     * Determines the appropriate [VendorIdentifier] to use as a Ronin MRN for Patient based on the provided [identifiers] and [tenant].
+     * The [identifiers] should be the List of all identifiers returned from an API for a patient.
+     */
+    fun getMRNIdentifier(tenant: Tenant, identifiers: List<R4Identifier>): R4Identifier
 }
