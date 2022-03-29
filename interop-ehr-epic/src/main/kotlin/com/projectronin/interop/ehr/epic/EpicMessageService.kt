@@ -9,7 +9,7 @@ import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
 import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
-import com.projectronin.interop.tenant.config.TenantService
+import com.projectronin.interop.tenant.config.ProviderPoolService
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.call.receive
@@ -25,7 +25,7 @@ import org.springframework.stereotype.Component
  * See: [SendMessage Documentation](https://apporchard.epic.com/Sandbox?api=384)
  */
 @Component
-class EpicMessageService(private val epicClient: EpicClient, private val tenantService: TenantService) :
+class EpicMessageService(private val epicClient: EpicClient, private val providerPoolService: ProviderPoolService) :
     MessageService {
     private val logger = KotlinLogging.logger { }
     private val sendMessageUrlPart = "/api/epic/2014/Common/Utility/SENDMESSAGE/Message"
@@ -79,7 +79,7 @@ class EpicMessageService(private val epicClient: EpicClient, private val tenantS
                 val identifierVendorIdentifier = it.identifier as IdentifierVendorIdentifier
                 identifierVendorIdentifier.identifier.value ?: throw VendorIdentifierNotFoundException()
             }
-        val poolList = tenantService.getPoolsForProviders(tenant, idList)
+        val poolList = providerPoolService.getPoolsForProviders(tenant, idList)
 
         return idList.map { userID ->
             val poolID = poolList[userID]

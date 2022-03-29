@@ -13,7 +13,7 @@ import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
-import com.projectronin.interop.tenant.config.TenantService
+import com.projectronin.interop.tenant.config.ProviderPoolService
 import io.ktor.client.call.receive
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
@@ -29,14 +29,14 @@ import org.junit.jupiter.api.assertThrows
 class EpicMessageServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var httpResponse: HttpResponse
-    private lateinit var tenantService: TenantService
+    private lateinit var providerPoolService: ProviderPoolService
     private val testPrivateKey = this::class.java.getResource("/TestPrivateKey.txt")!!.readText()
 
     @BeforeEach
     fun initTest() {
         epicClient = mockk()
         httpResponse = mockk()
-        tenantService = mockk()
+        providerPoolService = mockk()
     }
 
     @Test
@@ -78,9 +78,9 @@ class EpicMessageServiceTest {
             )
         )
 
-        every { tenantService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
+        every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
-        val messageId = EpicMessageService(epicClient, tenantService).sendMessage(
+        val messageId = EpicMessageService(epicClient, providerPoolService).sendMessage(
             tenant,
             EHRMessageInput(
                 "Message Text", "MRN#1", recipientsList
@@ -130,10 +130,10 @@ class EpicMessageServiceTest {
         )
 
         every {
-            tenantService.getPoolsForProviders(tenant, listOf("CorrectID"))
+            providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID"))
         } returns mapOf("CorrectID" to "PoolID")
 
-        val messageId = EpicMessageService(epicClient, tenantService).sendMessage(
+        val messageId = EpicMessageService(epicClient, providerPoolService).sendMessage(
             tenant,
             EHRMessageInput(
                 "Message Text", "MRN#1", recipientsList
@@ -183,7 +183,7 @@ class EpicMessageServiceTest {
         )
 
         assertThrows<ClassCastException> {
-            EpicMessageService(epicClient, tenantService).sendMessage(
+            EpicMessageService(epicClient, providerPoolService).sendMessage(
                 tenant,
                 EHRMessageInput(
                     "Message Text", "MRN#1", recipientsList
@@ -232,7 +232,7 @@ class EpicMessageServiceTest {
         )
 
         assertThrows<VendorIdentifierNotFoundException> {
-            EpicMessageService(epicClient, tenantService).sendMessage(
+            EpicMessageService(epicClient, providerPoolService).sendMessage(
                 tenant,
                 EHRMessageInput(
                     "Message Text", "MRN#1", recipientsList
@@ -273,10 +273,10 @@ class EpicMessageServiceTest {
             )
         )
 
-        every { tenantService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
+        every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
         assertThrows<IOException> {
-            EpicMessageService(epicClient, tenantService).sendMessage(
+            EpicMessageService(epicClient, providerPoolService).sendMessage(
                 tenant,
                 EHRMessageInput(
                     "Message Text", "MRN#1", recipientsList

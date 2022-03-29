@@ -1,6 +1,5 @@
 package com.projectronin.interop.tenant.config
 
-import com.projectronin.interop.tenant.config.data.ProviderPoolDAO
 import com.projectronin.interop.tenant.config.data.TenantDAO
 import com.projectronin.interop.tenant.config.data.model.EhrDO
 import com.projectronin.interop.tenant.config.data.model.EpicTenantDO
@@ -17,8 +16,9 @@ import org.springframework.stereotype.Service
  * Service responsible for [Tenant]s loaded from a database.
  */
 @Service
-class TenantService(private val tenantDAO: TenantDAO, private val providerPoolDAO: ProviderPoolDAO) {
+class TenantService(private val tenantDAO: TenantDAO) {
     private val logger = KotlinLogging.logger { }
+
     /**
      * Retrieves the [Tenant] for the supplied [mnemonic]. If none exists, null will be returned.
      */
@@ -33,13 +33,6 @@ class TenantService(private val tenantDAO: TenantDAO, private val providerPoolDA
 
         val vendor = createEpicVendor(ehrDO, ehrTenantDO)
         return createTenant(tenantDO, vendor)
-    }
-    /**
-     * Retrieves the pools associated to the supplied [providerIds] in the [tenant]. The provider IDs are expected to be the internal tenant representation of a provider and not something like a FHIR ID.
-     * The returned Map will be keyed by the provider IDs and valued by the pool IDs. Any providers that do not have an associated pool will not be included in the response.
-     */
-    fun getPoolsForProviders(tenant: Tenant, providerIds: List<String>): Map<String, String> {
-        return providerPoolDAO.getPoolsForProviders(tenant.internalId, providerIds)
     }
 
     private fun createTenant(tenantDO: TenantDO, vendor: Vendor): Tenant {
