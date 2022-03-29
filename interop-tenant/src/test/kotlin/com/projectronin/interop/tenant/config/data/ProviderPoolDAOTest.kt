@@ -70,6 +70,25 @@ class ProviderPoolDAOTest {
 
     @Test
     @DataSet(value = ["/dbunit/provider-pool/ProviderPools.yaml"], cleanAfter = true)
+    fun `get allProviders for tenant`() {
+        val dao = ProviderPoolDAO(KtormHelper.database())
+        val poolsByProvider = dao.getAll(1001)
+        assertEquals(3, poolsByProvider.size)
+        assertEquals("pool1", poolsByProvider["provider1"])
+        assertEquals("pool2", poolsByProvider["provider2"])
+        assertEquals("pool2", poolsByProvider["provider3"])
+    }
+
+    @Test
+    @DataSet(value = ["/dbunit/provider-pool/ProviderPools.yaml"], cleanAfter = true)
+    fun `get allProviders for tenant no values`() {
+        val dao = ProviderPoolDAO(KtormHelper.database())
+        val poolsByProvider = dao.getAll(1002)
+        assertTrue(poolsByProvider.isEmpty())
+    }
+
+    @Test
+    @DataSet(value = ["/dbunit/provider-pool/ProviderPools.yaml"], cleanAfter = true)
     @ExpectedDataSet(value = ["/dbunit/provider-pool/ExpectedProviderPoolsAfterInsert.yaml"], ignoreCols = ["io_tenant_provider_pool_id"])
     fun `insert provider`() {
         val providerdao = ProviderPoolDAO(KtormHelper.database())

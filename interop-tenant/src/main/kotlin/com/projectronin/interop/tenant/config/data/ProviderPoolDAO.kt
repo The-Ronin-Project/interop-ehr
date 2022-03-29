@@ -34,6 +34,16 @@ class ProviderPoolDAO(@Qualifier("ehr") private val database: Database) {
         return providerPools.associate { it.providerId to it.poolId }
     }
 
+    /**
+     * Retrieves a Map of pool IDs keyed by provider IDs for the supplied [tenantId].
+     */
+    fun getAll(tenantId: Int): Map<String, String> {
+        val providerPools =
+            database.from(ProviderPoolDOs).select().where(ProviderPoolDOs.tenantId eq tenantId)
+                .map { ProviderPoolDOs.createEntity(it) }
+        return providerPools.associate { it.providerId to it.poolId }
+    }
+
     fun insert(providerPool: ProviderPoolDO): ProviderPoolDO? {
         val providerPoolKey = try {
             database.insertAndGenerateKey(ProviderPoolDOs) {
