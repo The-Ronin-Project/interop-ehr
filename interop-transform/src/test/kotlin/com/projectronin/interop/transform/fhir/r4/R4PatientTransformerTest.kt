@@ -1,5 +1,9 @@
 package com.projectronin.interop.transform.fhir.r4
 
+import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
+import com.projectronin.interop.ehr.IdentifierService
+import com.projectronin.interop.ehr.factory.EHRFactory
+import com.projectronin.interop.ehr.factory.VendorFactory
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.Patient
 import com.projectronin.interop.ehr.model.enums.DataSource
@@ -43,11 +47,28 @@ import org.junit.jupiter.api.assertThrows
 import com.projectronin.interop.fhir.r4.resource.Patient as R4Patient
 
 class R4PatientTransformerTest {
-    private val transformer = R4PatientTransformer()
-
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
+    private val identifierList = listOf(
+        Identifier(
+            type = CodeableConcept(
+                text = "MRN"
+            ),
+            system = Uri("mrnSystem"),
+            value = "An MRN"
+        )
+    )
+    private val mockIdentifierService = mockk<IdentifierService> {
+        every { getMRNIdentifier(tenant, identifierList) } returns identifierList[0]
+        every { getMRNIdentifier(tenant, emptyList()) } throws VendorIdentifierNotFoundException()
+    }
+    private val ehrFactory = mockk<EHRFactory> {
+        every { getVendorFactory(tenant) } returns mockk<VendorFactory> {
+            every { identifierService } returns mockIdentifierService
+        }
+    }
+    private val transformer = R4PatientTransformer(ehrFactory)
 
     @Test
     fun `transforms patient with all attributes`() {
@@ -72,22 +93,7 @@ class R4PatientTransformerTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value")
                 )
             ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                )
-            ),
+            identifier = identifierList,
             active = true,
             name = listOf(HumanName(family = "Doe")),
             telecom = listOf(
@@ -151,13 +157,14 @@ class R4PatientTransformerTest {
         )
         assertEquals(
             listOf(
-                Identifier(type = CodeableConcepts.MRN, system = CodeSystem.MRN.uri, value = "MRN"),
+                identifierList.first(),
                 Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test"),
                 Identifier(
                     type = CodeableConcepts.FHIR_STU3_ID,
                     system = CodeSystem.FHIR_STU3_ID.uri,
                     value = "12345"
                 ),
+                Identifier(type = CodeableConcepts.MRN, system = CodeSystem.MRN.uri, value = "An MRN"),
             ),
             oncologyPatient.identifier
         )
@@ -187,22 +194,7 @@ class R4PatientTransformerTest {
     fun `transforms patient with only required attributes`() {
         val r4Patient = R4Patient(
             id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-            ),
+            identifier = identifierList,
             name = listOf(HumanName(family = "Doe")),
             telecom = listOf(
                 ContactPoint(
@@ -238,13 +230,14 @@ class R4PatientTransformerTest {
         assertEquals(listOf<Extension>(), oncologyPatient.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = CodeableConcepts.MRN, system = CodeSystem.MRN.uri, value = "MRN"),
+                identifierList.first(),
                 Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test"),
                 Identifier(
                     type = CodeableConcepts.FHIR_STU3_ID,
                     system = CodeSystem.FHIR_STU3_ID.uri,
                     value = "12345"
                 ),
+                Identifier(type = CodeableConcepts.MRN, system = CodeSystem.MRN.uri, value = "An MRN"),
             ),
             oncologyPatient.identifier
         )
@@ -283,36 +276,7 @@ class R4PatientTransformerTest {
     @Test
     fun `fails for patient with missing id`() {
         val r4Patient = R4Patient(
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
+            identifier = identifierList,
             name = listOf(HumanName(family = "Doe")),
             telecom = listOf(
                 ContactPoint(
@@ -339,36 +303,7 @@ class R4PatientTransformerTest {
     fun `fails for missing gender`() {
         val r4Patient = R4Patient(
             id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
+            identifier = identifierList,
             name = listOf(HumanName(family = "Doe")),
             telecom = listOf(
                 ContactPoint(
@@ -394,36 +329,7 @@ class R4PatientTransformerTest {
     fun `fails for missing birthDate`() {
         val r4Patient = R4Patient(
             id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
+            identifier = identifierList,
             name = listOf(HumanName(family = "Doe")),
             telecom = listOf(
                 ContactPoint(
@@ -518,36 +424,7 @@ class R4PatientTransformerTest {
 
         val r4Patient = R4Patient(
             id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
+            identifier = identifierList,
             name = listOf(HumanName(family = "Doe")),
             telecom = listOf(
                 ContactPoint(
@@ -580,36 +457,7 @@ class R4PatientTransformerTest {
     fun `bundle transformation returns all when all valid`() {
         val r4Patient = R4Patient(
             id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/mrn"),
-                                code = Code("MR"),
-                                display = "Medical Record Number"
-                            )
-                        ),
-                        text = "MRN"
-                    ),
-                    system = Uri("http://projectronin.com/id/mrn"),
-                    value = "MRN"
-                ),
-                Identifier(
-                    type = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("http://projectronin.com/id/fhir"),
-                                code = Code("STU3"),
-                                display = "FHIR STU3 ID"
-                            )
-                        ),
-                        text = "FHIR STU3"
-                    ),
-                    system = Uri("http://projectronin.com/id/fhir"),
-                    value = "fhirId"
-                )
-            ),
+            identifier = identifierList,
             name = listOf(HumanName(family = "Doe")),
             telecom = listOf(
                 ContactPoint(

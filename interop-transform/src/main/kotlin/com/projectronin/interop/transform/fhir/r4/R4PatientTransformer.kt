@@ -1,5 +1,6 @@
 package com.projectronin.interop.transform.fhir.r4
 
+import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.Patient
 import com.projectronin.interop.ehr.model.enums.DataSource
@@ -23,19 +24,22 @@ import com.projectronin.interop.fhir.r4.resource.Patient as R4Patient
  * Implementation of [PatientTransformer] suitable for all R4 FHIR Patients
  */
 @Component
-class R4PatientTransformer : PatientTransformer {
+class R4PatientTransformer(private val ehrFactory: EHRFactory) : PatientTransformer {
     private val logger = KotlinLogging.logger { }
 
     override fun transformPatients(
         bundle: Bundle<Patient>,
-        tenant: Tenant
+        tenant: Tenant,
     ): List<OncologyPatient> {
         require(bundle.dataSource == DataSource.FHIR_R4) { "Bundle is not an R4 FHIR resource" }
 
         return bundle.transformResources(tenant, this::transformPatient)
     }
 
-    override fun transformPatient(patient: Patient, tenant: Tenant): OncologyPatient? {
+    override fun transformPatient(
+        patient: Patient,
+        tenant: Tenant
+    ): OncologyPatient? {
         require(patient.dataSource == DataSource.FHIR_R4) { "Patient is not an R4 FHIR resource" }
 
         val r4Patient = patient.resource as R4Patient
@@ -72,6 +76,19 @@ class R4PatientTransformer : PatientTransformer {
             system = CodeSystem.FHIR_STU3_ID.uri,
             type = CodeableConcepts.FHIR_STU3_ID
         )
+        val identifierService = ehrFactory.getVendorFactory(tenant).identifierService
+        val existingMRN = try {
+            identifierService.getMRNIdentifier(tenant, r4Patient.identifier)
+        } catch (e: Exception) {
+            logger.warn(e) { "Unable to find MRN  for patient: ${e.message}" }
+            return null
+        }
+
+        val mrnIdentifier = Identifier(
+            value = existingMRN.value,
+            system = CodeSystem.MRN.uri,
+            type = CodeableConcepts.MRN
+        )
 
         try {
             return OncologyPatient(
@@ -83,7 +100,8 @@ class R4PatientTransformer : PatientTransformer {
                 contained = r4Patient.contained,
                 extension = r4Patient.extension.map { it.localize(tenant) },
                 modifierExtension = r4Patient.modifierExtension.map { it.localize(tenant) },
-                identifier = r4Patient.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier() + fhirStu3IdIdentifier,
+                identifier = r4Patient.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier() +
+                    fhirStu3IdIdentifier + mrnIdentifier,
                 active = r4Patient.active,
                 name = r4Patient.name.map { it.localize(tenant) },
                 telecom = r4Patient.telecom.map { it.localize(tenant) },
