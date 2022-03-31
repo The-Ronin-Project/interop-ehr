@@ -196,16 +196,7 @@ class R4PatientTransformerTest {
             id = Id("12345"),
             identifier = identifierList,
             name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(
-                ContactPoint(
-                    system = ContactPointSystem.PHONE,
-                    use = ContactPointUse.MOBILE,
-                    value = "8675309"
-                )
-            ),
             gender = AdministrativeGender.FEMALE,
-            birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA"))
         )
         val patient = mockk<Patient> {
             every { dataSource } returns DataSource.FHIR_R4
@@ -243,14 +234,11 @@ class R4PatientTransformerTest {
         )
         assertNull(oncologyPatient.active)
         assertEquals(listOf(HumanName(family = "Doe")), oncologyPatient.name)
-        assertEquals(
-            listOf(ContactPoint(value = "8675309", system = ContactPointSystem.PHONE, use = ContactPointUse.MOBILE)),
-            oncologyPatient.telecom
-        )
+        assertEquals(emptyList<ContactPoint>(), oncologyPatient.telecom)
         assertEquals(AdministrativeGender.FEMALE, oncologyPatient.gender)
-        assertEquals(Date("1975-07-05"), oncologyPatient.birthDate)
+        assertNull(oncologyPatient.birthDate)
         assertNull(oncologyPatient.deceased)
-        assertEquals(listOf(Address(country = "USA")), oncologyPatient.address)
+        assertEquals(emptyList<Address>(), oncologyPatient.address)
         assertEquals(listOf(defaultCoding), oncologyPatient.maritalStatus.coding)
         assertNull(oncologyPatient.multipleBirth)
         assertEquals(listOf<Attachment>(), oncologyPatient.photo)
@@ -313,32 +301,6 @@ class R4PatientTransformerTest {
                 )
             ),
             birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M")
-        )
-        val patient = mockk<Patient> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Patient
-        }
-
-        val oncologyPatient = transformer.transformPatient(patient, tenant)
-        assertNull(oncologyPatient)
-    }
-
-    @Test
-    fun `fails for missing birthDate`() {
-        val r4Patient = R4Patient(
-            id = Id("12345"),
-            identifier = identifierList,
-            name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(
-                ContactPoint(
-                    system = ContactPointSystem.PHONE,
-                    use = ContactPointUse.MOBILE,
-                    value = "8675309"
-                )
-            ),
-            gender = AdministrativeGender.FEMALE,
             address = listOf(Address(country = "USA")),
             maritalStatus = CodeableConcept(text = "M")
         )

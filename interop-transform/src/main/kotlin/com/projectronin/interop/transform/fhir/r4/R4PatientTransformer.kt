@@ -58,8 +58,8 @@ class R4PatientTransformer(private val ehrFactory: EHRFactory) : PatientTransfor
 
         val birthDate = r4Patient.birthDate
         if (birthDate == null) {
+            // warn, but don't error
             logger.warn { "Unable to transform patient due to missing birth date" }
-            return null
         }
 
         val maritalStatus = r4Patient.maritalStatus ?: CodeableConcept(
