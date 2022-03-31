@@ -7,6 +7,8 @@ import com.projectronin.interop.common.test.database.ktorm.KtormHelper
 import com.projectronin.interop.common.test.database.liquibase.LiquibaseTest
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.tenant.config.data.model.EhrDO
+import io.mockk.every
+import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -91,7 +93,7 @@ class EhrDAOTest {
      * Testing read empty db, clear out db before, returns empty
      */
     @Test
-    @DataSet(value = ["/dbunit/ehr/EHRVendor.yaml"], cleanBefore = true)
+    @DataSet(value = ["/dbunit/ehr/NoEHRVendor.yaml"], cleanBefore = true)
     fun `read ehr no results`() {
         val dao = EhrDAO(KtormHelper.database())
         val result = dao.read()
@@ -102,7 +104,7 @@ class EhrDAOTest {
      * Testing updating empty db, returns null
      */
     @Test
-    @DataSet(value = ["/dbunit/ehr/EHRVendor.yaml"], cleanBefore = true)
+    @DataSet(value = ["/dbunit/ehr/NoEHRVendor.yaml"], cleanBefore = true)
     fun `update ehr fails`() {
         val dao = EhrDAO(KtormHelper.database())
         val testobj = EhrDO {
@@ -110,6 +112,16 @@ class EhrDAOTest {
             clientId = "56789"
             publicKey = "roses"
             privateKey = "peonies"
+        }
+        val result = dao.update(testobj)
+        assertNull(result)
+    }
+
+    @Test
+    fun `update handles exception`() {
+        val dao = EhrDAO(KtormHelper.database())
+        val testobj = mockk<EhrDO>(relaxed = true) {
+            every { vendorType } throws RuntimeException()
         }
         val result = dao.update(testobj)
         assertNull(result)
