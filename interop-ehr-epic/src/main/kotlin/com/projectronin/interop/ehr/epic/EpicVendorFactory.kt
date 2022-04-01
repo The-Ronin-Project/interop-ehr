@@ -7,6 +7,7 @@ import com.projectronin.interop.transform.fhir.r4.R4LocationTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PatientTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PractitionerRoleTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PractitionerTransformer
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 
 /**
@@ -23,9 +24,8 @@ class EpicVendorFactory(
     override val practitionerTransformer: R4PractitionerTransformer,
     override val practitionerRoleTransformer: R4PractitionerRoleTransformer,
     override val locationTransformer: R4LocationTransformer,
-    override val patientTransformer: R4PatientTransformer,
+    @Qualifier("epic") override val patientTransformer: R4PatientTransformer,
     override val appointmentTransformer: EpicAppointmentTransformer
-
 ) : VendorFactory {
     override val vendorType: VendorType
         get() = VendorType.EPIC

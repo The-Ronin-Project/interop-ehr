@@ -2,8 +2,6 @@ package com.projectronin.interop.transform.fhir.r4
 
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.IdentifierService
-import com.projectronin.interop.ehr.factory.EHRFactory
-import com.projectronin.interop.ehr.factory.VendorFactory
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.Patient
 import com.projectronin.interop.ehr.model.enums.DataSource
@@ -63,12 +61,7 @@ class R4PatientTransformerTest {
         every { getMRNIdentifier(tenant, identifierList) } returns identifierList[0]
         every { getMRNIdentifier(tenant, emptyList()) } throws VendorIdentifierNotFoundException()
     }
-    private val ehrFactory = mockk<EHRFactory> {
-        every { getVendorFactory(tenant) } returns mockk<VendorFactory> {
-            every { identifierService } returns mockIdentifierService
-        }
-    }
-    private val transformer = R4PatientTransformer(ehrFactory)
+    private val transformer = R4PatientTransformer(mockIdentifierService)
 
     @Test
     fun `transforms patient with all attributes`() {

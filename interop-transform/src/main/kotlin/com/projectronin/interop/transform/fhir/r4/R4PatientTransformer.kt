@@ -1,6 +1,6 @@
 package com.projectronin.interop.transform.fhir.r4
 
-import com.projectronin.interop.ehr.factory.EHRFactory
+import com.projectronin.interop.ehr.IdentifierService
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.Patient
 import com.projectronin.interop.ehr.model.enums.DataSource
@@ -17,14 +17,12 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.transform.util.toFhirIdentifier
 import mu.KotlinLogging
-import org.springframework.stereotype.Component
 import com.projectronin.interop.fhir.r4.resource.Patient as R4Patient
 
 /**
  * Implementation of [PatientTransformer] suitable for all R4 FHIR Patients
  */
-@Component
-class R4PatientTransformer(private val ehrFactory: EHRFactory) : PatientTransformer {
+class R4PatientTransformer(private val identifierService: IdentifierService) : PatientTransformer {
     private val logger = KotlinLogging.logger { }
 
     override fun transformPatients(
@@ -76,7 +74,6 @@ class R4PatientTransformer(private val ehrFactory: EHRFactory) : PatientTransfor
             system = CodeSystem.FHIR_STU3_ID.uri,
             type = CodeableConcepts.FHIR_STU3_ID
         )
-        val identifierService = ehrFactory.getVendorFactory(tenant).identifierService
         val existingMRN = try {
             identifierService.getMRNIdentifier(tenant, r4Patient.identifier)
         } catch (e: Exception) {
