@@ -23,46 +23,43 @@ import org.springframework.stereotype.Repository
 @Repository
 class ProviderPoolDAO(@Qualifier("ehr") private val database: Database) {
     private val logger = KotlinLogging.logger { }
+
     /**
-     * Retrieves a Map of pool IDs keyed by provider IDs for the supplied [tenantId] and [providerIds]. If no pool was
-     * found for the supplied provider ID, it will not be included in the returned Map.
+     * Retrieves a list of [ProviderPoolDO]s for the supplied [tenantId] and [providerIds].
      */
-    fun getPoolsForProviders(tenantId: Int, providerIds: List<String>): Map<String, String> {
-        val providerPools = database.from(ProviderPoolDOs).select()
+    fun getPoolsForProviders(tenantId: Int, providerIds: List<String>): List<ProviderPoolDO> {
+        return database.from(ProviderPoolDOs).select()
             .where((ProviderPoolDOs.tenantId eq tenantId) and (ProviderPoolDOs.providerId inList providerIds))
             .map { ProviderPoolDOs.createEntity(it) }
-        return providerPools.associate { it.providerId to it.poolId }
     }
 
     /**
-     * Retrieves a Map of pool IDs keyed by provider IDs for the supplied [tenantId].
+     * Retrieves a list of [ProviderPoolDO]s for the supplied [tenantId].
      */
-    fun getAll(tenantId: Int): Map<String, String> {
-        val providerPools =
-            database.from(ProviderPoolDOs).select().where(ProviderPoolDOs.tenantId eq tenantId)
-                .map { ProviderPoolDOs.createEntity(it) }
-        return providerPools.associate { it.providerId to it.poolId }
+    fun getAll(tenantId: Int): List<ProviderPoolDO> {
+        return database.from(ProviderPoolDOs).select().where(ProviderPoolDOs.tenantId eq tenantId)
+            .map { ProviderPoolDOs.createEntity(it) }
     }
 
-    fun insert(providerPool: ProviderPoolDO): ProviderPoolDO? {
+    fun insert(providerPool: ProviderPoolDO): ProviderPoolDO {
         val providerPoolKey = try {
             database.insertAndGenerateKey(ProviderPoolDOs) {
-                set(it.tenantId, providerPool.tenantId.id)
+                set(it.tenantId, providerPool.tenant.id)
                 set(it.providerId, providerPool.providerId)
                 set(it.poolId, providerPool.poolId)
             }
         } catch (e: Exception) {
-            logger.error(e) { "insert failed: $e" }
-            return null
+            logger.warn(e) { "insert failed: $e" }
+            throw e
         }
         providerPool.id = providerPoolKey as Long
         return providerPool
     }
 
-    fun update(providerPool: ProviderPoolDO): Int? {
+    fun update(providerPool: ProviderPoolDO): Int {
         return try {
             database.update(ProviderPoolDOs) {
-                set(it.tenantId, providerPool.tenantId.id)
+                set(it.tenantId, providerPool.tenant.id)
                 set(it.providerId, providerPool.providerId)
                 set(it.poolId, providerPool.poolId)
                 where {
@@ -71,14 +68,14 @@ class ProviderPoolDAO(@Qualifier("ehr") private val database: Database) {
             }
         } catch (e: Exception) {
             logger.error(e) { "update failed: $e" }
-            null
+            throw e
         }
     }
 
-    fun delete(providerPoolId: Long): Int? = try {
+    fun delete(providerPoolId: Long): Int = try {
         database.delete(ProviderPoolDOs) { it.id eq providerPoolId }
     } catch (e: Exception) {
         logger.error(e) { "delete failed: $e" }
-        null
+        throw e
     }
 }

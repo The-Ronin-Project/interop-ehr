@@ -17,5 +17,6 @@ class ProviderPoolService(private val providerPoolDAO: ProviderPoolDAO) {
      */
     fun getPoolsForProviders(tenant: Tenant, providerIds: List<String>): Map<String, String> {
         return providerPoolDAO.getPoolsForProviders(tenant.internalId, providerIds)
+            .associate { it.providerId to it.poolId }
     }
 }

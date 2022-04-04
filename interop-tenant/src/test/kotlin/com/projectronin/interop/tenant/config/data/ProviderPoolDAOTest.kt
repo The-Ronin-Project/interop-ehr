@@ -17,6 +17,8 @@ import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.sql.SQLIntegrityConstraintViolationException
 
 @LiquibaseTest(changeLog = "ehr/db/changelog/ehr.db.changelog-master.yaml")
 class ProviderPoolDAOTest {
@@ -45,8 +47,8 @@ class ProviderPoolDAOTest {
         val dao = ProviderPoolDAO(KtormHelper.database())
         val poolsByProvider = dao.getPoolsForProviders(1001, listOf("provider1", "provider2", "provider5"))
         assertEquals(2, poolsByProvider.size)
-        assertEquals("pool1", poolsByProvider["provider1"])
-        assertEquals("pool2", poolsByProvider["provider2"])
+        assertEquals("pool1", poolsByProvider[0].poolId)
+        assertEquals("pool2", poolsByProvider[1].poolId)
     }
 
     @Test
@@ -55,9 +57,9 @@ class ProviderPoolDAOTest {
         val dao = ProviderPoolDAO(KtormHelper.database())
         val poolsByProvider = dao.getPoolsForProviders(1001, listOf("provider1", "provider2", "provider3"))
         assertEquals(3, poolsByProvider.size)
-        assertEquals("pool1", poolsByProvider["provider1"])
-        assertEquals("pool2", poolsByProvider["provider2"])
-        assertEquals("pool2", poolsByProvider["provider3"])
+        assertEquals("pool1", poolsByProvider[0].poolId)
+        assertEquals("pool2", poolsByProvider[1].poolId)
+        assertEquals("pool2", poolsByProvider[2].poolId)
     }
 
     @Test
@@ -74,9 +76,9 @@ class ProviderPoolDAOTest {
         val dao = ProviderPoolDAO(KtormHelper.database())
         val poolsByProvider = dao.getAll(1001)
         assertEquals(3, poolsByProvider.size)
-        assertEquals("pool1", poolsByProvider["provider1"])
-        assertEquals("pool2", poolsByProvider["provider2"])
-        assertEquals("pool2", poolsByProvider["provider3"])
+        assertEquals("pool1", poolsByProvider[0].poolId)
+        assertEquals("pool2", poolsByProvider[1].poolId)
+        assertEquals("pool2", poolsByProvider[2].poolId)
     }
 
     @Test
@@ -89,7 +91,10 @@ class ProviderPoolDAOTest {
 
     @Test
     @DataSet(value = ["/dbunit/provider-pool/ProviderPools.yaml"], cleanAfter = true)
-    @ExpectedDataSet(value = ["/dbunit/provider-pool/ExpectedProviderPoolsAfterInsert.yaml"], ignoreCols = ["io_tenant_provider_pool_id"])
+    @ExpectedDataSet(
+        value = ["/dbunit/provider-pool/ExpectedProviderPoolsAfterInsert.yaml"],
+        ignoreCols = ["io_tenant_provider_pool_id"]
+    )
     fun `insert provider`() {
         val providerdao = ProviderPoolDAO(KtormHelper.database())
         val ehrDO = mockk<EhrDO> {
@@ -108,7 +113,7 @@ class ProviderPoolDAOTest {
         }
         val insertedProviderPoolDO = ProviderPoolDO {
             id = 0
-            tenantId = tenantDO
+            tenant = tenantDO
             providerId = "provider5"
             poolId = "pool4"
         }
@@ -138,12 +143,14 @@ class ProviderPoolDAOTest {
         }
         val insertedProviderPoolDO = ProviderPoolDO {
             id = 0
-            tenantId = tenantDO
+            tenant = tenantDO
             providerId = "provider1"
             poolId = "poolId"
         }
-        val inserted = dao.insert(insertedProviderPoolDO)
-        assertSame(null, inserted)
+
+        assertThrows<SQLIntegrityConstraintViolationException> {
+            dao.insert(insertedProviderPoolDO)
+        }
     }
 
     @Test
@@ -167,7 +174,7 @@ class ProviderPoolDAOTest {
         }
         val updatedProviderPoolDO = ProviderPoolDO {
             id = 10001
-            tenantId = tenantDO
+            tenant = tenantDO
             providerId = "provider20"
             poolId = "pool1"
         }
@@ -196,13 +203,14 @@ class ProviderPoolDAOTest {
         }
         val updatedProviderPoolDO = ProviderPoolDO {
             id = 10001
-            tenantId = tenantDO
+            tenant = tenantDO
             providerId = "provider2"
             poolId = "pool4"
         }
 
-        val updated = dao.update(updatedProviderPoolDO)
-        assertEquals(null, updated)
+        assertThrows<SQLIntegrityConstraintViolationException> {
+            dao.update(updatedProviderPoolDO)
+        }
     }
 
     @Test
@@ -218,7 +226,7 @@ class ProviderPoolDAOTest {
     @DataSet(value = ["/dbunit/provider-pool/ProviderPools.yaml"], cleanAfter = true)
     fun `no provider to delete`() {
         val dao = ProviderPoolDAO(KtormHelper.database())
-        val deleted = dao.delete((1))
+        val deleted = dao.delete(1)
         assertEquals(0, deleted)
     }
 }
