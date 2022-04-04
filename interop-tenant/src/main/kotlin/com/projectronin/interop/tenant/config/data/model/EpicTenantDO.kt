@@ -6,12 +6,13 @@ import org.ktorm.entity.Entity
  * Entity definition for the Epic-specific tenant data object.
  */
 interface EpicTenantDO : EHRTenantDO, Entity<EpicTenantDO> {
-    val release: String
-    val serviceEndpoint: String
-    val ehrUserId: String
-    val messageType: String
-    val practitionerProviderSystem: String
-    val practitionerUserSystem: String
-    val mrnSystem: String
-    val hsi: String?
+    companion object : Entity.Factory<EpicTenantDO>()
+    var release: String
+    var serviceEndpoint: String
+    var ehrUserId: String
+    var messageType: String
+    var practitionerProviderSystem: String
+    var practitionerUserSystem: String
+    var mrnSystem: String
+    var hsi: String?
 }
