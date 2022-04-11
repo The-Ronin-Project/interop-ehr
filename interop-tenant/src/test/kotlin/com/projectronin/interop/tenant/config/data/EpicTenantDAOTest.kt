@@ -74,15 +74,14 @@ class EpicTenantDAOTest {
         }
 
         val result = dao.insert(testobj)
-        assertNotNull(result)
-        assertEquals(testobj.release, result?.release)
-        assertEquals(testobj.serviceEndpoint, result?.serviceEndpoint)
-        assertEquals(testobj.ehrUserId, result?.ehrUserId)
-        assertEquals(testobj.messageType, result?.messageType)
-        assertEquals(testobj.practitionerProviderSystem, result?.practitionerProviderSystem)
-        assertEquals(testobj.practitionerUserSystem, result?.practitionerUserSystem)
-        assertEquals(testobj.mrnSystem, result?.mrnSystem)
-        assertEquals(testobj.hsi, result?.hsi)
+        assertEquals(testobj.release, result.release)
+        assertEquals(testobj.serviceEndpoint, result.serviceEndpoint)
+        assertEquals(testobj.ehrUserId, result.ehrUserId)
+        assertEquals(testobj.messageType, result.messageType)
+        assertEquals(testobj.practitionerProviderSystem, result.practitionerProviderSystem)
+        assertEquals(testobj.practitionerUserSystem, result.practitionerUserSystem)
+        assertEquals(testobj.mrnSystem, result.mrnSystem)
+        assertEquals(testobj.hsi, result.hsi)
     }
 
     @Test

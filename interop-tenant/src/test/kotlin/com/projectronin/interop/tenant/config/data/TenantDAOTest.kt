@@ -9,7 +9,6 @@ import com.projectronin.interop.common.test.database.liquibase.LiquibaseTest
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.tenant.config.data.binding.TenantDOs
 import com.projectronin.interop.tenant.config.data.model.EhrDO
-import com.projectronin.interop.tenant.config.data.model.EpicTenantDO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import io.mockk.every
 import io.mockk.mockk
@@ -61,47 +60,25 @@ class TenantDAOTest {
     }
 
     @Test
-    @DataSet(value = ["/dbunit/tenant/EHRTenants.yaml"], cleanAfter = true)
-    fun `no ehr tenant found`() {
+    @DataSet(value = ["/dbunit/tenant/Tenants.yaml"], cleanAfter = true)
+    fun `all tenants found`() {
         val dao = TenantDAO(KtormHelper.database())
-        val ehrTenant = dao.getEHRTenant<EpicTenantDO>(1002, VendorType.EPIC)
-        assertNull(ehrTenant)
-    }
+        val tenants = dao.getAllTenants()
+        assertNotNull(tenants)
+        assertEquals(1, tenants.size)
+        val firstTenant = tenants.first()
+        firstTenant.let {
+            assertEquals(1001, firstTenant.id)
+            assertEquals("mdaoc", firstTenant.mnemonic)
+            assertEquals(LocalTime.of(22, 0, 0), firstTenant.availableBatchStart)
+            assertEquals(LocalTime.of(6, 0, 0), firstTenant.availableBatchEnd)
 
-    @Test
-    @DataSet(value = ["/dbunit/tenant/EHRTenants.yaml"], cleanAfter = true)
-    fun `epic tenant found`() {
-        val dao = TenantDAO(KtormHelper.database())
-        val ehrTenant = dao.getEHRTenant<EpicTenantDO>(1001, VendorType.EPIC)
-        assertNotNull(ehrTenant)
-        ehrTenant?.let {
-            assertEquals(1001, ehrTenant.tenantId)
-            assertEquals("2021.10", ehrTenant.release)
-            assertEquals("https://localhost:8080/", ehrTenant.serviceEndpoint)
-            assertEquals("RONIN", ehrTenant.ehrUserId)
-            assertEquals("Ronin Alerts", ehrTenant.messageType)
-            assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.836982", ehrTenant.practitionerProviderSystem)
-            assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.697780", ehrTenant.practitionerUserSystem)
-            assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14", ehrTenant.mrnSystem)
-            assertNull(ehrTenant.hsi)
-        }
-    }
-
-    @Test
-    @DataSet(value = ["/dbunit/tenant/EpicHSITenants.yaml"], cleanAfter = true)
-    fun `epic tenant with hsi found`() {
-        val dao = TenantDAO(KtormHelper.database())
-        val ehrTenant = dao.getEHRTenant<EpicTenantDO>(1001, VendorType.EPIC)
-        assertNotNull(ehrTenant)
-        ehrTenant?.let {
-            assertEquals(1001, ehrTenant.tenantId)
-            assertEquals("2021.10", ehrTenant.release)
-            assertEquals("https://localhost:8080/", ehrTenant.serviceEndpoint)
-            assertEquals("RONIN", ehrTenant.ehrUserId)
-            assertEquals("Ronin Alerts", ehrTenant.messageType)
-            assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.836982", ehrTenant.practitionerProviderSystem)
-            assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.697780", ehrTenant.practitionerUserSystem)
-            assertEquals("urn:epic:apporchard.curprod", ehrTenant.hsi)
+            val ehr = firstTenant.ehr
+            assertEquals(101, ehr.id)
+            assertEquals(VendorType.EPIC, ehr.vendorType)
+            assertEquals("12345", ehr.clientId)
+            assertEquals("public", ehr.publicKey)
+            assertEquals("private", ehr.privateKey)
         }
     }
 

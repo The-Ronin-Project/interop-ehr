@@ -1,5 +1,6 @@
 package com.projectronin.interop.tenant.config.data
 
+import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.tenant.config.data.binding.EhrDOs
 import com.projectronin.interop.tenant.config.data.model.EhrDO
 import mu.KotlinLogging
@@ -67,5 +68,16 @@ class EhrDAO(@Qualifier("ehr") private val database: Database) {
      */
     fun read(): List<EhrDO> {
         return database.from(EhrDOs).select().mapNotNull { EhrDOs.createEntity(it) }
+    }
+
+    /**
+     * Returns all values in table with a matching vendorType
+     */
+    fun getByType(vendorType: VendorType): EhrDO? {
+        return database.from(EhrDOs)
+            .select()
+            .where(EhrDOs.name eq vendorType)
+            .mapNotNull { EhrDOs.createEntity(it) }
+            .single()
     }
 }

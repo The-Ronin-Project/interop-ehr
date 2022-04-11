@@ -10,6 +10,7 @@ import com.projectronin.interop.tenant.config.data.model.EhrDO
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -84,9 +85,9 @@ class EhrDAOTest {
         val dao = EhrDAO(KtormHelper.database())
         val result = dao.read()
         assertTrue(result.size == 1)
-        assertEquals("12345", result?.get(0).clientId)
-        assertEquals("public", result?.get(0).publicKey)
-        assertEquals("private", result?.get(0).privateKey)
+        assertEquals("12345", result[0].clientId)
+        assertEquals("public", result[0].publicKey)
+        assertEquals("private", result[0].privateKey)
     }
 
     /**
@@ -125,5 +126,18 @@ class EhrDAOTest {
         }
         val result = dao.update(testobj)
         assertNull(result)
+    }
+    /**
+     * Testing read, returns row from prepopulated db
+     */
+    @Test
+    @DataSet(value = ["/dbunit/ehr/EHRVendor.yaml"], cleanAfter = true)
+    fun `read by ehr`() {
+        val dao = EhrDAO(KtormHelper.database())
+        val result = dao.getByType(VendorType.EPIC)
+        assertNotNull(result)
+        assertEquals("12345", result?.clientId)
+        assertEquals("public", result?.publicKey)
+        assertEquals("private", result?.privateKey)
     }
 }

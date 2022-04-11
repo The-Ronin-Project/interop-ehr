@@ -1,9 +1,6 @@
 package com.projectronin.interop.tenant.config.data
 
-import com.projectronin.interop.common.vendor.VendorType
-import com.projectronin.interop.tenant.config.data.binding.EpicTenantDOs
 import com.projectronin.interop.tenant.config.data.binding.TenantDOs
-import com.projectronin.interop.tenant.config.data.model.EHRTenantDO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import mu.KotlinLogging
 import org.ktorm.database.Database
@@ -12,7 +9,6 @@ import org.ktorm.dsl.from
 import org.ktorm.dsl.insertAndGenerateKey
 import org.ktorm.dsl.joinReferencesAndSelect
 import org.ktorm.dsl.map
-import org.ktorm.dsl.select
 import org.ktorm.dsl.update
 import org.ktorm.dsl.where
 import org.springframework.beans.factory.annotation.Qualifier
@@ -36,14 +32,11 @@ class TenantDAO(@Qualifier("ehr") private val database: Database) {
     }
 
     /**
-     * Retrieves an [EHRTenantDO] for the supplied [tenantId] and [vendorType]. If no vendor specific configuration is found for the tenant, null will be returned.
+     * Retrieves all [TenantDO]s
      */
-    fun <T : EHRTenantDO> getEHRTenant(tenantId: Int, vendorType: VendorType): T? {
-        // When multiple vendors exist, we should use a when clause across the vendors.
-        val ehrTenants = database.from(EpicTenantDOs).select().where(EpicTenantDOs.tenantId eq tenantId)
-            .map { EpicTenantDOs.createEntity(it) }
-
-        return ehrTenants.getOrNull(0) as T?
+    fun getAllTenants(): List<TenantDO> {
+        return database.from(TenantDOs)
+            .joinReferencesAndSelect().map { TenantDOs.createEntity(it) }
     }
 
     /**

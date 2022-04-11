@@ -2,6 +2,7 @@ package com.projectronin.interop.tenant.config.data
 
 import com.projectronin.interop.tenant.config.data.binding.EpicTenantDOs
 import com.projectronin.interop.tenant.config.data.binding.TenantDOs
+import com.projectronin.interop.tenant.config.data.model.EHRTenantDO
 import com.projectronin.interop.tenant.config.data.model.EpicTenantDO
 import org.ktorm.database.Database
 import org.ktorm.dsl.eq
@@ -14,15 +15,18 @@ import org.ktorm.dsl.select
 import org.ktorm.dsl.update
 import org.ktorm.dsl.where
 import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.stereotype.Repository
 
 /**
  * Provides data access operations for Epic tenant data models.
  */
-class EpicTenantDAO(@Qualifier("ehr") private val database: Database) {
+@Repository
+class EpicTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTenantDAO {
     /**
-     * inserts a new [epicTenant]
+     * inserts a new [EpicTenantDO]
      */
-    fun insert(epicTenant: EpicTenantDO): EpicTenantDO? {
+    override fun insert(ehrTenantDO: EHRTenantDO): EpicTenantDO {
+        val epicTenant = ehrTenantDO as EpicTenantDO
         database.insert(EpicTenantDOs) {
             set(it.tenantId, epicTenant.tenantId)
             set(it.release, epicTenant.release)
@@ -38,13 +42,14 @@ class EpicTenantDAO(@Qualifier("ehr") private val database: Database) {
             .select()
             .where(EpicTenantDOs.tenantId eq epicTenant.tenantId)
             .map { EpicTenantDOs.createEntity(it) }
-        return epicTenants.firstOrNull()
+        return epicTenants.single()
     }
 
     /**
-     * Updates [epicTenant] based on id and returns the number of rows updated.
+     * Updates [EpicTenantDO] based on id and returns the number of rows updated.
      */
-    fun update(epicTenant: EpicTenantDO): Int {
+    override fun update(ehrTenantDO: EHRTenantDO): Int {
+        val epicTenant = ehrTenantDO as EpicTenantDO
         return database.update(EpicTenantDOs) {
             set(it.release, epicTenant.release)
             set(it.serviceEndpoint, epicTenant.serviceEndpoint)
@@ -63,7 +68,7 @@ class EpicTenantDAO(@Qualifier("ehr") private val database: Database) {
     /**
      * Returns an [EpicTenantDO] from the table based on the [tenantMnemonic]
      */
-    fun getByTenantMnemonic(tenantMnemonic: String): EpicTenantDO? {
+    override fun getByTenantMnemonic(tenantMnemonic: String): EpicTenantDO? {
         val epicTenants =
             database.from(EpicTenantDOs)
                 .leftJoin(TenantDOs, on = EpicTenantDOs.tenantId eq TenantDOs.id)
@@ -76,7 +81,7 @@ class EpicTenantDAO(@Qualifier("ehr") private val database: Database) {
     /**
      * Returns all [EpicTenantDO]s in the table
      */
-    fun getAll(): List<EpicTenantDO> {
+    override fun getAll(): List<EpicTenantDO> {
         return database.from(EpicTenantDOs)
             .joinReferencesAndSelect()
             .map { EpicTenantDOs.createEntity(it) }
