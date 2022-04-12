@@ -7,6 +7,7 @@ import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
 import com.projectronin.interop.tenant.config.model.Tenant
 import mu.KotlinLogging
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 /**
  * Service responsible for [Tenant]s loaded from a database.
@@ -54,6 +55,7 @@ class TenantService(
     /**
      * Inserts a new [Tenant] into the database
      */
+    @Transactional
     fun insertTenant(tenant: Tenant): Tenant {
         logger.info { "Creating new tenant for mnemonic : ${tenant.mnemonic}" }
 
@@ -75,6 +77,7 @@ class TenantService(
     /**
      * Updates an existing [Tenant] into the database
      */
+    @Transactional
     fun updateTenant(tenant: Tenant): Tenant {
         logger.info { "Updating tenant for mnemonic : ${tenant.mnemonic}" }
 

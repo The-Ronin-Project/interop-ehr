@@ -10,6 +10,7 @@ dependencies {
 
     implementation("org.springframework:spring-core")
     implementation("org.springframework:spring-context")
+    implementation("org.springframework:spring-tx")
     implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
     implementation("org.apache.commons:commons-text:1.9")
     implementation("com.fasterxml.jackson.dataformat:jackson-dataformat-yaml")
