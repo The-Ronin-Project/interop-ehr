@@ -19,14 +19,14 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
  */
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class SendMessageRequest(
-    val messageText: String,
-    val patientID: String,
-    val recipients: List<SendMessageRecipient>,
-    val senderID: String,
-    val messageType: String,
+    val messageText: String?,
+    val patientID: String?,
+    val recipients: List<SendMessageRecipient>?,
+    val senderID: String?,
+    val messageType: String?,
     val senderIDType: String = "External",
     val patientIDType: String = "MRN",
-    val contactID: String = "",
-    val contactIDType: String = "",
-    val messagePriority: String = ""
+    val contactID: String? = "",
+    val contactIDType: String? = "",
+    val messagePriority: String? = ""
 )

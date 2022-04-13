@@ -8,10 +8,10 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
  */
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class GetPatientAppointmentsRequest(
-    val userID: String,
-    val startDate: String,
-    val endDate: String,
-    val patientId: String,
-    val patientIdType: String = "MRN",
-    val userIDType: String = "External"
+    val userID: String?,
+    val startDate: String?,
+    val endDate: String?,
+    val patientId: String?,
+    val patientIdType: String? = "MRN",
+    val userIDType: String? = "External"
 )
