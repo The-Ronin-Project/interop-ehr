@@ -60,3 +60,25 @@ databaseChangeLog:
                   type: java.sql.Types.VARCHAR(64)
                   constraints:
                     nullable: true
+  - changeSet:
+      id: io-tenant-epic-add-auth-endpoint
+      author: Josh Smith
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_tenant_epic
+                columnName: auth_endpoint
+      changes:
+        - addColumn:
+            tableName: io_tenant_epic
+            columns:
+              - column:
+                  name: auth_endpoint
+                  type: java.sql.Types.VARCHAR(256)
+        - sql:
+            sql: UPDATE io_tenant_epic SET auth_endpoint = CONCAT(service_endpoint, "/oauth2/token")
+        - addNotNullConstraint:
+            tableName: io_tenant_epic
+            columnName: auth_endpoint
+            columnDataType: java.sql.Types.VARCHAR(256)

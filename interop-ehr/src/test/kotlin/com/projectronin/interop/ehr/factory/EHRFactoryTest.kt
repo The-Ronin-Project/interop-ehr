@@ -20,7 +20,7 @@ class EHRFactoryTest {
         val vendor =
             Epic(
                 "clientId",
-                AuthenticationConfig("public", "private"),
+                AuthenticationConfig("authEndpoint", "public", "private"),
                 "endpoint",
                 "release",
                 "userId",
@@ -42,7 +42,7 @@ class EHRFactoryTest {
         val vendor =
             Epic(
                 "clientId",
-                AuthenticationConfig("public", "private"),
+                AuthenticationConfig("authEndpoint", "public", "private"),
                 "endpoint",
                 "release",
                 "userId",

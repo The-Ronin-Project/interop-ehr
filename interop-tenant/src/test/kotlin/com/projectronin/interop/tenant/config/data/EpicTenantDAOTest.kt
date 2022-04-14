@@ -28,6 +28,7 @@ class EpicTenantDAOTest {
         assertEquals(1002, epicTenant?.tenantId)
         assertEquals("2021.10", epicTenant?.release)
         assertEquals("https://localhost:8080/", epicTenant?.serviceEndpoint)
+        assertEquals("https://localhost:8080/auth/", epicTenant?.authEndpoint)
         assertEquals("RONIN", epicTenant?.ehrUserId)
         assertEquals("Ronin Alerts", epicTenant?.messageType)
         assertEquals("urn:oid:provider.system", epicTenant?.practitionerProviderSystem)
@@ -56,7 +57,7 @@ class EpicTenantDAOTest {
 
     @Test
     @DataSet(value = ["/dbunit/epic-tenants/Tenants.yaml"], cleanAfter = true)
-    @ExpectedDataSet(value = ["/dbunit/epic-tenants/ExpectedEpicTenantsAfterInsert.yaml"],)
+    @ExpectedDataSet(value = ["/dbunit/epic-tenants/ExpectedEpicTenantsAfterInsert.yaml"])
     fun `insert epicTenant`() {
         val tenantDao = TenantDAO(KtormHelper.database())
         val tenant = tenantDao.getTenantForMnemonic("tenant")!!
@@ -65,6 +66,7 @@ class EpicTenantDAOTest {
             tenantId = tenant.id
             release = "release"
             serviceEndpoint = "serviceEndpoint"
+            authEndpoint = "authEndpoint"
             ehrUserId = "userID"
             messageType = "messageType"
             practitionerProviderSystem = "providerSystem"
@@ -76,6 +78,7 @@ class EpicTenantDAOTest {
         val result = dao.insert(testobj)
         assertEquals(testobj.release, result.release)
         assertEquals(testobj.serviceEndpoint, result.serviceEndpoint)
+        assertEquals(testobj.authEndpoint, result.authEndpoint)
         assertEquals(testobj.ehrUserId, result.ehrUserId)
         assertEquals(testobj.messageType, result.messageType)
         assertEquals(testobj.practitionerProviderSystem, result.practitionerProviderSystem)
@@ -104,7 +107,7 @@ class EpicTenantDAOTest {
 
     @Test
     @DataSet(value = ["/dbunit/epic-tenants/EpicTenants.yaml"], cleanAfter = true)
-    @ExpectedDataSet(value = ["/dbunit/epic-tenants/ExpectedEpicTenantsAfterUpdate.yaml"],)
+    @ExpectedDataSet(value = ["/dbunit/epic-tenants/ExpectedEpicTenantsAfterUpdate.yaml"])
     fun `update epicTenant`() {
         val tenantDao = TenantDAO(KtormHelper.database())
         val tenant = tenantDao.getTenantForMnemonic("tenant")!!
@@ -113,6 +116,7 @@ class EpicTenantDAOTest {
             tenantId = tenant.id
             release = "release"
             serviceEndpoint = "serviceEndpoint"
+            authEndpoint = "authEndpoint"
             ehrUserId = "userID"
             messageType = "messageType"
             practitionerProviderSystem = "providerSystem"
@@ -127,6 +131,7 @@ class EpicTenantDAOTest {
         val found = dao.getByTenantMnemonic("tenant")
         assertEquals(updated.release, found?.release)
         assertEquals(updated.serviceEndpoint, found?.serviceEndpoint)
+        assertEquals(updated.authEndpoint, found?.authEndpoint)
         assertEquals(updated.ehrUserId, found?.ehrUserId)
         assertEquals(updated.messageType, found?.messageType)
         assertEquals(updated.practitionerProviderSystem, found?.practitionerProviderSystem)

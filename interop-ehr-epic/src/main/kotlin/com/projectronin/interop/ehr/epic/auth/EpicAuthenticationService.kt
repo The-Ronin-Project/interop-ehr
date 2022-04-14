@@ -28,13 +28,12 @@ import java.util.UUID
 @Component
 class EpicAuthenticationService(private val client: HttpClient) : AuthenticationService {
     private val logger = KotlinLogging.logger { }
-    private val authURLPart = "/oauth2/token"
 
     override val vendorType = VendorType.EPIC
 
     override fun getAuthentication(tenant: Tenant): Authentication? {
         val jti = UUID.randomUUID().toString()
-        val authURL = tenant.vendor.serviceEndpoint + authURLPart
+        val authURL = tenant.vendor.authenticationConfig.authEndpoint
         val clientId = tenant.vendor.clientId
 
         logger.debug { "Setting up authentication for $authURL, JTI $jti" }

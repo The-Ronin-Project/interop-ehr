@@ -18,7 +18,11 @@ class IdHelpersTest {
             batchConfig = null,
             vendor = Epic(
                 clientId = "clientId",
-                authenticationConfig = AuthenticationConfig(publicKey = "public", privateKey = "private"),
+                authenticationConfig = AuthenticationConfig(
+                    authEndpoint = "authEndpoint",
+                    publicKey = "public",
+                    privateKey = "private"
+                ),
                 serviceEndpoint = "endpoint",
                 release = "release",
                 ehrUserId = "userId",

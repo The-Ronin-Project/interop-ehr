@@ -44,6 +44,7 @@ class TenantServiceTest {
         every { tenantId } returns 1
         every { release } returns "release"
         every { serviceEndpoint } returns "http://localhost/"
+        every { authEndpoint } returns "http://localhost/oauth2/token"
         every { ehrUserId } returns "ehr user"
         every { messageType } returns "message type"
         every { practitionerProviderSystem } returns "practitionerSystemExample"
@@ -66,6 +67,7 @@ class TenantServiceTest {
         vendor = Epic(
             clientId = "clientId",
             authenticationConfig = AuthenticationConfig(
+                authEndpoint = "http://localhost/oauth2/token",
                 publicKey = "publicKey",
                 privateKey = "privateKey"
             ),
@@ -200,6 +202,7 @@ class TenantServiceTest {
             vendor = Epic(
                 clientId = "clientId",
                 authenticationConfig = AuthenticationConfig(
+                    authEndpoint = "http://localhost/oauth2/token",
                     publicKey = "publicKey",
                     privateKey = "privateKey"
                 ),
@@ -230,6 +233,7 @@ class TenantServiceTest {
             every { tenantId } returns 1
             every { release } returns "release"
             every { serviceEndpoint } returns "http://localhost/"
+            every { authEndpoint } returns "http://localhost/oauth2/token"
             every { ehrUserId } returns "ehr user"
             every { messageType } returns "message type"
             every { practitionerProviderSystem } returns "practitionerSystemExample"
@@ -246,6 +250,7 @@ class TenantServiceTest {
             vendor = Epic(
                 clientId = "clientId",
                 authenticationConfig = AuthenticationConfig(
+                    authEndpoint = "http://localhost/oauth2/token",
                     publicKey = "publicKey",
                     privateKey = "privateKey"
                 ),
@@ -309,6 +314,7 @@ class TenantServiceTest {
             vendor = Epic(
                 clientId = "clientId",
                 authenticationConfig = AuthenticationConfig(
+                    authEndpoint = "http://localhost/oauth2/token",
                     publicKey = "publicKey",
                     privateKey = "privateKey"
                 ),

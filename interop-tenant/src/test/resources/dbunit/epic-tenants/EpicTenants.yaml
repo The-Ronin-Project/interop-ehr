@@ -21,6 +21,7 @@ io_tenant_epic:
   - io_tenant_id: 1002
     release_version: "2021.10"
     service_endpoint: "https://localhost:8080/"
+    auth_endpoint: "https://localhost:8080/auth/"
     ehr_user_id: "RONIN"
     message_type: "Ronin Alerts"
     practitioner_provider_system: "urn:oid:provider.system"
@@ -30,6 +31,7 @@ io_tenant_epic:
   - io_tenant_id: 1003
     release_version: "2021.10"
     service_endpoint: "https://localhost:8080/"
+    auth_endpoint: "https://localhost:8080/auth/"
     ehr_user_id: "RONIN"
     message_type: "Ronin Alerts"
     practitioner_provider_system: "urn:oid:provider.system"

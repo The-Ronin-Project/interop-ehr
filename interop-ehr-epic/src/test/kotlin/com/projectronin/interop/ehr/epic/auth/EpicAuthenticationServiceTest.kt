@@ -22,7 +22,7 @@ class EpicAuthenticationServiceTest {
         val tenant =
             createTestTenant(
                 clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                serviceEndpoint = mockWebServer.url("/interconnect-aocurprd-oauth").toString(),
+                authEndpoint = "${mockWebServer.url("/interconnect-aocurprd-oauth")}/oauth2/token",
                 privateKey = testPrivateKey,
                 tenantMnemonic = "TestTenant"
             )
@@ -50,7 +50,7 @@ class EpicAuthenticationServiceTest {
         val tenant =
             createTestTenant(
                 clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                serviceEndpoint = mockWebServer.url("/interconnect-aocurprd-oauth").toString(),
+                authEndpoint = "${mockWebServer.url("/interconnect-aocurprd-oauth")}/oauth2/token",
                 privateKey = testPrivateKey,
                 tenantMnemonic = "TestTenant"
             )
@@ -101,7 +101,7 @@ class EpicAuthenticationServiceTest {
         val tenant =
             createTestTenant(
                 clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                serviceEndpoint = mockWebServer.url("/interconnect-aocurprd-oauth").toString(),
+                authEndpoint = "${mockWebServer.url("/interconnect-aocurprd-oauth")}/oauth2/token",
                 privateKey = spacedPrivateKey,
                 tenantMnemonic = "TestTenant"
             )
@@ -152,7 +152,7 @@ class EpicAuthenticationServiceTest {
         val tenant =
             createTestTenant(
                 clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                serviceEndpoint = mockWebServer.url("/interconnect-aocurprd-oauth").toString(),
+                authEndpoint = "${mockWebServer.url("/interconnect-aocurprd-oauth")}/oauth2/token",
                 privateKey = flattenedPrivateKey,
                 tenantMnemonic = "TestTenant"
             )
@@ -203,7 +203,7 @@ class EpicAuthenticationServiceTest {
         val tenant =
             createTestTenant(
                 clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                serviceEndpoint = mockWebServer.url("/interconnect-aocurprd-oauth").toString(),
+                authEndpoint = "${mockWebServer.url("/interconnect-aocurprd-oauth")}/oauth2/token",
                 privateKey = flattenedPrivateKey,
                 tenantMnemonic = "TestTenant",
                 hsi = "HSI:Value"

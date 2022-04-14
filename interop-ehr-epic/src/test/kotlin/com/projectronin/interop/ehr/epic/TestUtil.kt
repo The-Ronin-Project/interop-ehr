@@ -33,7 +33,8 @@ fun createTestTenant(
     practitionerProviderSystem: String = "providerSystem",
     practitionerUserSystem: String = "userSystem",
     mrnSystem: String = "mrnSystem",
-    hsi: String? = null
+    hsi: String? = null,
+    authEndpoint: String? = null
 ): Tenant {
     return Tenant(
         internalId,
@@ -41,7 +42,7 @@ fun createTestTenant(
         BatchConfig(LocalTime.MIN, LocalTime.MAX),
         Epic(
             clientId,
-            AuthenticationConfig("pubKey", privateKey),
+            AuthenticationConfig(authEndpoint ?: serviceEndpoint, "pubKey", privateKey),
             serviceEndpoint,
             "release",
             ehrUserId,

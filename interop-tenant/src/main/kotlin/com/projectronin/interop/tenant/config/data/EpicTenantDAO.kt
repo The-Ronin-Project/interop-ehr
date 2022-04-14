@@ -31,6 +31,7 @@ class EpicTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTenan
             set(it.tenantId, epicTenant.tenantId)
             set(it.release, epicTenant.release)
             set(it.serviceEndpoint, epicTenant.serviceEndpoint)
+            set(it.authEndpoint, epicTenant.authEndpoint)
             set(it.ehrUserId, epicTenant.ehrUserId)
             set(it.messageType, epicTenant.messageType)
             set(it.practitionerProviderSystem, epicTenant.practitionerProviderSystem)
@@ -53,6 +54,7 @@ class EpicTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTenan
         return database.update(EpicTenantDOs) {
             set(it.release, epicTenant.release)
             set(it.serviceEndpoint, epicTenant.serviceEndpoint)
+            set(it.authEndpoint, epicTenant.authEndpoint)
             set(it.ehrUserId, epicTenant.ehrUserId)
             set(it.messageType, epicTenant.messageType)
             set(it.practitionerProviderSystem, epicTenant.practitionerProviderSystem)

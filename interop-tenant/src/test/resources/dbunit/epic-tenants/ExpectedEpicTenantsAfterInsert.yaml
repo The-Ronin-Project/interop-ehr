@@ -16,6 +16,7 @@ io_tenant_epic:
   - io_tenant_id: 1001
     release_version: "release"
     service_endpoint: "serviceEndpoint"
+    auth_endpoint: "authEndpoint"
     ehr_user_id: "userID"
     message_type: "messageType"
     practitioner_provider_system: "providerSystem"

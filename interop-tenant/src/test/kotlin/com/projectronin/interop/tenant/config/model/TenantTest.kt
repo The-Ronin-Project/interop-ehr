@@ -9,7 +9,7 @@ class TenantTest {
     @Test
     fun `check getters`() {
         val batchConfig = BatchConfig(LocalTime.of(20, 0), LocalTime.of(6, 30))
-        val authenticationConfig = AuthenticationConfig("public", "private")
+        val authenticationConfig = AuthenticationConfig("authEndpoint", "public", "private")
         val epic =
             Epic(
                 "clientId",

@@ -69,6 +69,7 @@ fun EHRTenantDO.toVendor(ehrDO: EhrDO): Vendor {
  */
 private fun EpicTenantDO.toEpic(ehrDO: EhrDO): Epic {
     val authenticationConfig = AuthenticationConfig(
+        authEndpoint = authEndpoint,
         publicKey = ehrDO.publicKey,
         privateKey = ehrDO.privateKey
     )
@@ -100,6 +101,7 @@ private fun Epic.toEpicTenantDO(tenantID: Int): EpicTenantDO {
         // these this@ are necessary for kotlin to know we're talking about the value on the original Epic object
         // and not the EpicTenantDO we're constructing
         this.serviceEndpoint = this@toEpicTenantDO.serviceEndpoint
+        authEndpoint = this@toEpicTenantDO.authenticationConfig.authEndpoint
         release = this@toEpicTenantDO.release
         ehrUserId = this@toEpicTenantDO.ehrUserId
         messageType = this@toEpicTenantDO.messageType

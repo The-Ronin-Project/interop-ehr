@@ -8,7 +8,7 @@ import org.junit.jupiter.api.Test
 class EpicTest {
     @Test
     fun `check getters`() {
-        val authenticationConfig = AuthenticationConfig("public", "private")
+        val authenticationConfig = AuthenticationConfig("authEndpoint", "public", "private")
         val epic =
             Epic(
                 "clientId",
@@ -20,8 +20,8 @@ class EpicTest {
                 "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
                 "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
                 "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
-
             )
+
         assertEquals(VendorType.EPIC, epic.type)
         assertEquals("clientId", epic.clientId)
         assertEquals(authenticationConfig, epic.authenticationConfig)

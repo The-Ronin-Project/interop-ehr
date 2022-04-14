@@ -7,8 +7,10 @@ import org.ktorm.entity.Entity
  */
 interface EpicTenantDO : EHRTenantDO, Entity<EpicTenantDO> {
     companion object : Entity.Factory<EpicTenantDO>()
+
     var release: String
     var serviceEndpoint: String
+    var authEndpoint: String
     var ehrUserId: String
     var messageType: String
     var practitionerProviderSystem: String

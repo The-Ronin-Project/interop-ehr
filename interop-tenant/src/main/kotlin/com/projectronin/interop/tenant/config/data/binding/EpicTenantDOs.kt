@@ -12,6 +12,7 @@ object EpicTenantDOs : Table<EpicTenantDO>("io_tenant_epic") {
     var tenantId = int("io_tenant_id").bindTo { it.tenantId }
     val release = varchar("release_version").bindTo { it.release }
     val serviceEndpoint = varchar("service_endpoint").bindTo { it.serviceEndpoint }
+    val authEndpoint = varchar("auth_endpoint").bindTo { it.authEndpoint }
     val ehrUserId = varchar("ehr_user_id").bindTo { it.ehrUserId }
     val messageType = varchar("message_type").bindTo { it.messageType }
     val practitionerProviderSystem =
