@@ -5,9 +5,9 @@ plugins {
 }
 
 dependencies {
-    implementation("com.projectronin.interop:interop-common:${project.property("interopCommonVersion")}")
-    implementation("com.projectronin.interop:interop-common-jackson:${project.property("interopCommonVersion")}")
-    implementation("com.projectronin.interop.fhir:interop-fhir:${project.property("interopFhirVersion")}")
+    implementation(libs.interop.common)
+    implementation(libs.interop.commonJackson)
+    implementation(libs.interop.fhir)
     implementation(project(":interop-tenant"))
 
     // Spring

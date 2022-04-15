@@ -7,14 +7,14 @@ plugins {
 }
 
 dependencies {
-    implementation("com.projectronin.interop:interop-common:${project.property("interopCommonVersion")}")
-    implementation("com.projectronin.interop:interop-common-jackson:${project.property("interopCommonVersion")}")
-    implementation("com.projectronin.interop.fhir:interop-fhir:${project.property("interopFhirVersion")}")
+    implementation(libs.interop.common)
+    implementation(libs.interop.commonJackson)
+    implementation(libs.interop.fhir)
     implementation(project(":interop-tenant"))
     implementation(project(":interop-ehr"))
     implementation(project(":interop-transform"))
     implementation("org.springframework:spring-context")
 
     // Using MockWebservice to ensure we can verify the headers set by the ktor engine
-    testImplementation("com.squareup.okhttp3:mockwebserver:4.9.2")
+    testImplementation(libs.mockwebserver)
 }
