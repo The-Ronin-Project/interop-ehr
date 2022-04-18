@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr.epic
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.epic.transform.EpicAppointmentTransformer
 import com.projectronin.interop.ehr.factory.VendorFactory
+import com.projectronin.interop.transform.fhir.r4.R4ConditionTransformer
 import com.projectronin.interop.transform.fhir.r4.R4LocationTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PatientTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PractitionerRoleTransformer
@@ -25,7 +26,8 @@ class EpicVendorFactory(
     override val practitionerRoleTransformer: R4PractitionerRoleTransformer,
     override val locationTransformer: R4LocationTransformer,
     @Qualifier("epic") override val patientTransformer: R4PatientTransformer,
-    override val appointmentTransformer: EpicAppointmentTransformer
+    override val appointmentTransformer: EpicAppointmentTransformer,
+    override val conditionTransformer: R4ConditionTransformer
 ) : VendorFactory {
     override val vendorType: VendorType
         get() = VendorType.EPIC

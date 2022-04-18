@@ -2,11 +2,14 @@ package com.projectronin.interop.transform.fhir.r4.util
 
 import com.projectronin.interop.fhir.r4.datatype.Address
 import com.projectronin.interop.fhir.r4.datatype.Age
+import com.projectronin.interop.fhir.r4.datatype.Annotation
 import com.projectronin.interop.fhir.r4.datatype.Attachment
 import com.projectronin.interop.fhir.r4.datatype.AvailableTime
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Communication
+import com.projectronin.interop.fhir.r4.datatype.ConditionEvidence
+import com.projectronin.interop.fhir.r4.datatype.ConditionStage
 import com.projectronin.interop.fhir.r4.datatype.Contact
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
@@ -28,6 +31,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
+import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.PositiveInt
 import com.projectronin.interop.fhir.r4.datatype.primitive.Time
 import com.projectronin.interop.fhir.r4.datatype.primitive.UnsignedInt
@@ -2369,7 +2373,6 @@ class LocalizersTest {
             id = "12345",
             extension = nonLocalizableExtensions,
             type = Uri("Patient"),
-            identifier = Identifier(value = "123"),
             display = "Patient 123"
         )
 
@@ -2460,5 +2463,304 @@ class LocalizersTest {
             "Location/test-etKZzJux8VWCn.v-YDz2ZLhdhUwhVwqE082St.Jnq1eDXmuSzU9D4HAOFAP3RHkzY3",
             "Location/etKZzJux8VWCn.v-YDz2ZLhdhUwhVwqE082St.Jnq1eDXmuSzU9D4HAOFAP3RHkzY3".localizeReference(tenant)
         )
+    }
+
+    @Test
+    fun `localize ConditionStage`() {
+        val conditionStage = ConditionStage(
+            id = "12345",
+            extension = localizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            summary = CodeableConcept(
+                extension = localizableExtensions,
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://cancerstaging.org"),
+                        code = Code("3C"),
+                        display = "IIIC"
+                    )
+                ),
+            ),
+            assessment = listOf(
+                Reference(
+                    reference = "Condition/ReferenceExample01"
+                )
+            ),
+            type = CodeableConcept(
+                extension = localizableExtensions,
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254360008"),
+                        display = "Dukes staging system"
+                    )
+                )
+
+            )
+        )
+        val localizedConditionStage = conditionStage.localize(tenant)
+        assertTrue(conditionStage !== localizedConditionStage)
+        val expectedConditionStage = ConditionStage(
+            id = "12345",
+            extension = localizedExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            summary = CodeableConcept(
+                extension = localizedExtensions,
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://cancerstaging.org"),
+                        code = Code("3C"),
+                        display = "IIIC"
+                    )
+                ),
+            ),
+            assessment = listOf(
+                Reference(
+                    reference = "Condition/test-ReferenceExample01"
+                )
+            ),
+            type = CodeableConcept(
+                extension = localizedExtensions,
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254360008"),
+                        display = "Dukes staging system"
+                    )
+                )
+
+            )
+        )
+        assertEquals(expectedConditionStage, localizedConditionStage)
+    }
+
+    @Test
+    fun `returns original ConditionStage if no localizable fields`() {
+        val conditionStage = ConditionStage(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            summary = CodeableConcept(
+                extension = nonLocalizableExtensions,
+            )
+        )
+        val localizedConditionStage = conditionStage.localize(tenant)
+        assertEquals(conditionStage, localizedConditionStage)
+    }
+
+    @Test
+    fun `localize ConditionStage with assessment but no summary`() {
+        val conditionStage = ConditionStage(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = localizableExtensions,
+            assessment = listOf(
+                Reference(
+                    reference = "Condition/ReferenceExample01"
+                )
+            )
+        )
+        val localizedConditionStage = conditionStage.localize(tenant)
+        val expectedConditionStage = ConditionStage(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = localizedExtensions,
+            assessment = listOf(
+                Reference(
+                    reference = "Condition/test-ReferenceExample01"
+                )
+            )
+        )
+
+        assertEquals(expectedConditionStage, localizedConditionStage)
+    }
+
+    @Test
+    fun `localize ConditionEvidence`() {
+        val conditionEvidence = ConditionEvidence(
+            id = "12345",
+            extension = localizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            code = listOf(
+                CodeableConcept(
+                    text = "Potatoes"
+                )
+            ),
+            detail = listOf(
+                Reference(
+                    reference = "Condition/ReferenceExample01"
+                )
+            )
+        )
+        val localizedConditionEvidence = conditionEvidence.localize(tenant)
+        assertTrue(conditionEvidence !== localizedConditionEvidence)
+        val expectedConditionEvidence = ConditionEvidence(
+            id = "12345",
+            extension = localizedExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            code = listOf(
+                CodeableConcept(
+                    text = "Potatoes"
+                )
+            ),
+            detail = listOf(
+                Reference(
+                    reference = "Condition/test-ReferenceExample01"
+                )
+            )
+        )
+        assertEquals(expectedConditionEvidence, localizedConditionEvidence)
+    }
+    @Test
+    fun `returns original ConditionEvidence if no localizable fields`() {
+        val conditionEvidence = ConditionEvidence(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            code = listOf(
+                CodeableConcept(
+                    text = "Potatoes"
+                )
+            ),
+            detail = listOf(
+                Reference(
+                    display = "Potato01"
+                )
+            )
+        )
+        val localizedConditionEvidence = conditionEvidence.localize(tenant)
+        assertEquals(conditionEvidence, localizedConditionEvidence)
+    }
+
+    @Test
+    fun `localizes ConditionEvidence if contains detail but no code`() {
+        val conditionEvidence = ConditionEvidence(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            detail = listOf(
+                Reference(
+                    reference = "Condition/ReferenceExample01"
+                )
+            )
+        )
+        val localizedConditionEvidence = conditionEvidence.localize(tenant)
+        val expectedConditionEvidence = ConditionEvidence(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            detail = listOf(
+                Reference(
+                    reference = "Condition/test-ReferenceExample01"
+                )
+            )
+        )
+        assertEquals(expectedConditionEvidence, localizedConditionEvidence)
+    }
+
+    @Test
+    fun `localizes ConditionEvidence if contains code but no detail`() {
+        val conditionEvidence = ConditionEvidence(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            code = listOf(
+                CodeableConcept(
+                    extension = localizableExtensions,
+                    text = "Potatoes"
+                )
+            )
+        )
+        val localizedConditionEvidence = conditionEvidence.localize(tenant)
+        val expectedConditionEvidence = ConditionEvidence(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            code = listOf(
+                CodeableConcept(
+                    extension = localizedExtensions,
+                    text = "Potatoes"
+                )
+            )
+        )
+        assertEquals(expectedConditionEvidence, localizedConditionEvidence)
+    }
+
+    @Test
+    fun `localize Annotations`() {
+        val annotation = Annotation(
+            id = "12345",
+            extension = localizableExtensions,
+            author = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Practitioner/roninPractitionerExample01")),
+            time = DateTime("2022-02"),
+            text = Markdown("Test")
+        )
+        val (localizedAnnotation, updated) = annotation.localizePair(tenant)
+        assertTrue(annotation !== localizedAnnotation)
+        assertTrue(updated)
+
+        val expectedAnnotation = Annotation(
+            id = "12345",
+            extension = localizedExtensions,
+            author = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Practitioner/test-roninPractitionerExample01")),
+            time = DateTime("2022-02"),
+            text = Markdown("Test")
+        )
+        assertEquals(expectedAnnotation, localizedAnnotation)
+    }
+
+    @Test
+    fun `returns original Annotation if no localizable fields`() {
+        val annotation = Annotation(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            time = DateTime("2022-02"),
+            text = Markdown("Test")
+        )
+        val (localizedAnnotation, updated) = annotation.localizePair(tenant)
+        assertEquals(annotation, localizedAnnotation)
+        assertFalse(updated)
+    }
+
+    @Test
+    fun `reference with localizable identifier`() {
+        val reference = Reference(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            type = Uri("Patient"),
+            identifier = Identifier(
+                id = "12345",
+                extension = localizableExtensions,
+                use = IdentifierUse.OFFICIAL,
+                type = CodeableConcept(extension = localizableExtensions, text = "type"),
+                system = Uri("system"),
+                value = "value",
+                period = Period(extension = localizableExtensions, start = DateTime("2021")),
+                assigner = Reference(reference = "Organization/123")
+            ),
+            display = "Patient 123"
+        )
+
+        val (localizedReference, updated) = reference.localizePair(tenant)
+        assertTrue(reference !== localizedReference)
+        assertTrue(updated)
+
+        val expectedReference = Reference(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            type = Uri("Patient"),
+            identifier = Identifier(
+                id = "12345",
+                extension = localizedExtensions,
+                use = IdentifierUse.OFFICIAL,
+                type = CodeableConcept(extension = localizedExtensions, text = "type"),
+                system = Uri("system"),
+                value = "value",
+                period = Period(extension = localizedExtensions, start = DateTime("2021")),
+                assigner = Reference(reference = "Organization/test-123")
+            ),
+            display = "Patient 123"
+        )
+        assertEquals(expectedReference, localizedReference)
     }
 }

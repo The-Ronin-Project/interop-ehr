@@ -1,12 +1,15 @@
 package com.projectronin.interop.transform.fhir.r4.util
 
 import com.projectronin.interop.fhir.r4.datatype.Address
+import com.projectronin.interop.fhir.r4.datatype.Annotation
 import com.projectronin.interop.fhir.r4.datatype.Attachment
 import com.projectronin.interop.fhir.r4.datatype.AvailableTime
 import com.projectronin.interop.fhir.r4.datatype.BackboneElement
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Communication
+import com.projectronin.interop.fhir.r4.datatype.ConditionEvidence
+import com.projectronin.interop.fhir.r4.datatype.ConditionStage
 import com.projectronin.interop.fhir.r4.datatype.Contact
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
@@ -553,19 +556,73 @@ fun Reference.localize(tenant: Tenant): Reference = localizePair(tenant).first
  */
 fun Reference.localizePair(tenant: Tenant): Pair<Reference, Boolean> {
     val updatedExtensions = getUpdatedExtensions(this, tenant)
-    if (updatedExtensions.isNotEmpty() || reference != null) {
+    val updatedIdentifier = identifier?.localizePair(tenant) ?: Pair(null, false)
+    if (updatedExtensions.isNotEmpty() || reference != null || updatedIdentifier.second) {
         return Pair(
             Reference(
                 id,
                 updatedExtensions.ifEmpty { extension },
                 reference?.localizeReference(tenant),
                 type,
-                identifier,
+                updatedIdentifier.first,
                 display
             ),
             true
         )
     }
 
+    return Pair(this, false)
+}
+
+fun ConditionStage.localize(tenant: Tenant): ConditionStage {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
+    val updatedSummary = summary?.localizePair(tenant) ?: Pair(null, false)
+    val updatedAssessment = assessment.map { it.localizePair(tenant) }
+    val assessmentStatus = updatedAssessment.hasUpdates()
+    val updatedType = type?.localizePair(tenant) ?: Pair(null, false)
+    if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || updatedSummary.second || assessmentStatus || updatedType.second) {
+        return ConditionStage(
+            id,
+            updatedExtensions.ifEmpty { extension },
+            updatedModifierExtensions.ifEmpty { modifierExtension },
+            updatedSummary.first,
+            updatedAssessment.values(),
+            updatedType.first
+        )
+    }
+    return this
+}
+
+fun ConditionEvidence.localize(tenant: Tenant): ConditionEvidence {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
+    val updatedCode = code.map { it.localizePair(tenant) }
+    val codeStatus = updatedCode.hasUpdates()
+    val updatedDetail = detail.map { it.localizePair(tenant) }
+    val detailStatus = updatedDetail.hasUpdates()
+    if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || codeStatus || detailStatus) {
+        return ConditionEvidence(
+            id,
+            updatedExtensions.ifEmpty { extension },
+            updatedModifierExtensions.ifEmpty { modifierExtension },
+            updatedCode.values(),
+            updatedDetail.values()
+        )
+    }
+    return this
+}
+
+fun Annotation.localize(tenant: Tenant): Annotation = localizePair(tenant).first
+
+fun Annotation.localizePair(tenant: Tenant): Pair<Annotation, Boolean> {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updateAuthor = author?.type == DynamicValueType.REFERENCE
+    if (updatedExtensions.isNotEmpty() || updateAuthor) {
+        val extensions = updatedExtensions.ifEmpty { extension }
+        val updatedAuthor: DynamicValue<Any>? = if (updateAuthor)
+            DynamicValue(author!!.type, (author!!.value as Reference).localize(tenant)) else author
+        return Pair(Annotation(id, extensions, updatedAuthor, time, text), true)
+    }
     return Pair(this, false)
 }

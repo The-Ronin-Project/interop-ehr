@@ -8,6 +8,7 @@ import com.projectronin.interop.ehr.MessageService
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.PractitionerService
 import com.projectronin.interop.ehr.transform.AppointmentTransformer
+import com.projectronin.interop.ehr.transform.ConditionTransformer
 import com.projectronin.interop.ehr.transform.LocationTransformer
 import com.projectronin.interop.ehr.transform.PatientTransformer
 import com.projectronin.interop.ehr.transform.PractitionerRoleTransformer
@@ -36,4 +37,5 @@ interface VendorFactory {
     val locationTransformer: LocationTransformer
     val patientTransformer: PatientTransformer
     val appointmentTransformer: AppointmentTransformer
+    val conditionTransformer: ConditionTransformer
 }
