@@ -10,7 +10,7 @@ class SendMessageRecipientTest {
             jacksonObjectMapper().writeValueAsString(SendMessageRecipient(iD = "ID", iDType = "Type", isPool = true))
 
         assert(sendMessageRecipientString.contains("\"IsPool\":true"))
-        assert(sendMessageRecipientString.contains("\"Id\":\"ID\""))
-        assert(sendMessageRecipientString.contains("\"Idtype\":\"Type\""))
+        assert(sendMessageRecipientString.contains("\"ID\":\"ID\""))
+        assert(sendMessageRecipientString.contains("\"IDType\":\"Type\""))
     }
 }
