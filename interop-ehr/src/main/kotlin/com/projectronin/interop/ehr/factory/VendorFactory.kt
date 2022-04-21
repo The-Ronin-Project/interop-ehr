@@ -7,6 +7,7 @@ import com.projectronin.interop.ehr.IdentifierService
 import com.projectronin.interop.ehr.MessageService
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.PractitionerService
+import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.transform.AppointmentTransformer
 import com.projectronin.interop.ehr.transform.ConditionTransformer
 import com.projectronin.interop.ehr.transform.LocationTransformer
@@ -38,4 +39,8 @@ interface VendorFactory {
     val patientTransformer: PatientTransformer
     val appointmentTransformer: AppointmentTransformer
     val conditionTransformer: ConditionTransformer
+
+    // Util functions for Mirth
+    fun deserializeAppointment(string: String): Appointment
+    fun <T> serializeObject(t: T): String
 }

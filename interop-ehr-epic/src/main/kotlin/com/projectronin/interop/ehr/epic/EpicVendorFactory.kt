@@ -1,6 +1,8 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.common.vendor.VendorType
+import com.projectronin.interop.ehr.epic.model.EpicAppointment
 import com.projectronin.interop.ehr.epic.transform.EpicAppointmentTransformer
 import com.projectronin.interop.ehr.factory.VendorFactory
 import com.projectronin.interop.transform.fhir.r4.R4ConditionTransformer
@@ -31,4 +33,11 @@ class EpicVendorFactory(
 ) : VendorFactory {
     override val vendorType: VendorType
         get() = VendorType.EPIC
+
+    override fun deserializeAppointment(string: String): EpicAppointment {
+        return JacksonManager.objectMapper.readValue(string, EpicAppointment::class.java)
+    }
+    override fun <T> serializeObject(t: T): String {
+        return JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(t)
+    }
 }

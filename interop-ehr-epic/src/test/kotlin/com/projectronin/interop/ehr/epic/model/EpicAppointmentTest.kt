@@ -1,13 +1,18 @@
 package com.projectronin.interop.ehr.epic.model
 
+import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.common.resource.ResourceType
+import com.projectronin.interop.ehr.epic.EpicIdentifierService
 import com.projectronin.interop.ehr.epic.apporchard.model.Appointment
 import com.projectronin.interop.ehr.epic.apporchard.model.IDType
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
 import com.projectronin.interop.ehr.epic.deformat
+import com.projectronin.interop.ehr.model.ReferenceTypes
 import com.projectronin.interop.ehr.model.enums.DataSource
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
+import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class EpicAppointmentTest {
@@ -386,5 +391,130 @@ class EpicAppointmentTest {
         assertEquals(provider.providerName, epicAppointment.participants.first { it.actor.type == "Practitioner" }.actor.display)
         assertEquals(appointment.patientName, epicAppointment.participants.first { it.actor.type == "Patient" }.actor.display)
         assertEquals(AppointmentStatus.NOSHOW, epicAppointment.status)
+    }
+
+    @Test
+    fun `can serialize`() {
+        val visitIdentifier = IDType(id = "25000", type = "Internal")
+        val providerIdentifier = IDType(id = "2100", type = "Internal")
+        val patientIdentifier = IDType(id = "paitientId", type = "External")
+        val patientIDTypeEpic = EpicIDType(patientIdentifier)
+        val providerIDTypeEpic = EpicIDType(providerIdentifier)
+        val provider = ScheduleProviderReturnWithTime(
+            departmentIDs = listOf(),
+            departmentName = "Blank",
+            providerIDs = listOf(providerIdentifier),
+            duration = "30",
+            providerName = "Davey",
+            time = "900"
+        )
+        val appointment = Appointment(
+            patientName = "LMRTESTING,HERMIONE",
+            date = "12/3/2015",
+            visitTypeName = "TRANSPLANT EVALUATION",
+            appointmentNotes = listOf(),
+            appointmentStartTime = " 3:30 PM",
+            appointmentDuration = "30",
+            appointmentStatus = "No Show",
+            contactIDs = listOf(IDType("22792", "CSN"), IDType("22792", "ASN")),
+            visitTypeIDs = listOf(visitIdentifier),
+            providers = listOf(provider),
+            extraItems = null,
+            extraExtensions = listOf(),
+            patientIDs = listOf(patientIdentifier)
+        )
+
+        val epicAppointment = EpicAppointment(
+            appointment,
+            mapOf(
+                provider to EpicIdentifierService.StandardizedIdentifier(
+                    "systemFromIdentifierService",
+                    providerIDTypeEpic
+                )
+            ),
+            EpicIdentifierService.StandardizedIdentifier(
+                null,
+                patientIDTypeEpic
+            )
+        )
+        val serialized = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epicAppointment)
+        val expected = this::class.java.getResource("/ExampleSerializedEpicAppointment.json")!!.readText()
+        assertEquals(expected, serialized)
+    }
+
+    @Test
+    fun `can serialize with empty providerIDs`() {
+        val visitIdentifier = IDType(id = "25000", type = "Internal")
+        val providerIdentifier = IDType(id = "2100", type = "Internal")
+        val patientIdentifier = IDType(id = "paitientId", type = "External")
+        val provider = ScheduleProviderReturnWithTime(
+            departmentIDs = listOf(),
+            departmentName = "Blank",
+            providerIDs = listOf(providerIdentifier),
+            duration = "30",
+            providerName = "Davey",
+            time = "900"
+        )
+        val appointment = Appointment(
+            patientName = "LMRTESTING,HERMIONE",
+            date = "12/3/2015",
+            visitTypeName = "TRANSPLANT EVALUATION",
+            appointmentNotes = listOf(),
+            appointmentStartTime = " 3:30 PM",
+            appointmentDuration = "30",
+            appointmentStatus = "No Show",
+            contactIDs = listOf(IDType("22792", "CSN"), IDType("22792", "ASN")),
+            visitTypeIDs = listOf(visitIdentifier),
+            providers = listOf(provider),
+            extraItems = null,
+            extraExtensions = listOf(),
+            patientIDs = listOf(patientIdentifier)
+        )
+
+        val epicAppointment = EpicAppointment(
+            appointment,
+            null,
+            null,
+        )
+        val serialized = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epicAppointment)
+        KotlinLogging.logger { }.info { serialized }
+        val expected = this::class.java.getResource("/ExampleSerializedEpicAppointmentWithNulls.json")!!.readText()
+        assertEquals(expected, serialized)
+    }
+
+    @Test
+    fun `can deserialize`() {
+        val json = this::class.java.getResource("/ExampleSerializedEpicAppointment.json")!!.readText()
+        val deserializedAppt = JacksonManager.objectMapper.readValue(json, EpicAppointment::class.java)
+        assertEquals("22792", deserializedAppt.id)
+        assertEquals(2, deserializedAppt.participants.size)
+        val patients = deserializedAppt.participants.filter { it.actor.type == ReferenceTypes.PATIENT }
+        assertEquals(1, patients.size)
+        val patientIdentifier = patients.single().actor.identifier
+        assertEquals("paitientId", patientIdentifier?.value)
+        assertNull(patientIdentifier?.system)
+
+        val providers = deserializedAppt.participants.filter { it.actor.type == ReferenceTypes.PRACTITIONER }
+        assertEquals(1, providers.size)
+        val providerIdentifier = providers.single().actor.identifier
+        assertEquals("2100", providerIdentifier?.value)
+        assertEquals("systemFromIdentifierService", providerIdentifier?.system)
+    }
+
+    @Test
+    fun `can deserialize with nulls`() {
+        val json = this::class.java.getResource("/ExampleSerializedEpicAppointmentWithNulls.json")!!.readText()
+        val deserializedAppt = JacksonManager.objectMapper.readValue(json, EpicAppointment::class.java)
+        assertEquals("22792", deserializedAppt.id)
+        assertEquals(2, deserializedAppt.participants.size)
+        val patients = deserializedAppt.participants.filter { it.actor.type == ReferenceTypes.PATIENT }
+        assertEquals(1, patients.size)
+        val patientIdentifier = patients.single().actor.identifier
+        assertNull(patientIdentifier)
+
+        val providers = deserializedAppt.participants.filter { it.actor.type == ReferenceTypes.PRACTITIONER }
+        assertEquals(1, providers.size)
+        val providerIdentifier = providers.single().actor.identifier
+        assertNull(providerIdentifier)
     }
 }

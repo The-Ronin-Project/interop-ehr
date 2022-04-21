@@ -1,7 +1,13 @@
 package com.projectronin.interop.ehr.epic.model
 
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonNaming
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
+import com.projectronin.interop.ehr.epic.model.inbound.EpicAppointmentDeserializer
+import com.projectronin.interop.ehr.epic.model.outbound.EpicAppointmentSerializer
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.CodeableConcept
 import com.projectronin.interop.ehr.model.Identifier
@@ -12,14 +18,16 @@ import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import com.projectronin.interop.ehr.epic.apporchard.model.Appointment as AppOrchardAppointment
-
 /**
  * Epic's representation of an appointment from [GetPatientAppointments](https://apporchard.epic.com/Sandbox?api=195) API
  */
+@JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
+@JsonSerialize(using = EpicAppointmentSerializer::class)
+@JsonDeserialize(using = EpicAppointmentDeserializer::class)
 class EpicAppointment(
     override val resource: AppOrchardAppointment,
-    private val providerIdMap: Map<ScheduleProviderReturnWithTime, Identifier>?,
-    private val patientIdentifier: Identifier?
+    internal val providerIdMap: Map<ScheduleProviderReturnWithTime, Identifier>?,
+    internal val patientIdentifier: Identifier?
 ) : JSONResource(resource), Appointment {
     override val dataSource: DataSource = DataSource.EPIC_APPORCHARD
     override val resourceType: ResourceType = ResourceType.APPOINTMENT
@@ -47,7 +55,6 @@ class EpicAppointment(
 
         dateTime.format(DateTimeFormatter.ISO_DATE_TIME)
     }
-
     override val participants: List<Participant> by lazy {
         val result: MutableList<Participant> = mutableListOf()
         result.addAll(resource.providers.map { EpicProviderParticipant(it, providerIdMap ?: emptyMap()) })

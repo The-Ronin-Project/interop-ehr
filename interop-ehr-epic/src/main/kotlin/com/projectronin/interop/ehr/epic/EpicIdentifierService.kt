@@ -1,7 +1,12 @@
 package com.projectronin.interop.ehr.epic
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.IdentifierService
+import com.projectronin.interop.ehr.epic.model.EpicIDType
+import com.projectronin.interop.ehr.epic.model.inbound.StandardizedIdentifierDeserializer
+import com.projectronin.interop.ehr.epic.model.outbound.StandardizedIdentifierSerializer
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.ehr.inputs.VendorIdentifier
@@ -61,10 +66,13 @@ class EpicIdentifierService : IdentifierService {
         system: String?,
         exceptionMessage: () -> String
     ): Identifier {
+        // currently, we're only ever using EpicIDTypes, and the logic below sort of assumes this
+        // but this check ensures these objects are so we can serialize / deserialize appropriately
+        if (identifiers.any { it !is EpicIDType }) throw IllegalArgumentException("getEpicIdentifiers only works for EpicIDType")
         val identifier = identifiers.firstOrNull { it.type?.text.equals("external", true) }
             ?: identifiers.firstOrNull { it.type?.text.equals("internal", true) }
         return identifier?.let {
-            StandardizedIdentifier(it.value, system ?: it.system, it.type)
+            StandardizedIdentifier(system ?: it.system, it)
         } ?: throw VendorIdentifierNotFoundException(exceptionMessage.invoke())
     }
 
@@ -79,12 +87,15 @@ class EpicIdentifierService : IdentifierService {
         return IdentifierVendorIdentifier(identifier)
     }
 
+    @JsonSerialize(using = StandardizedIdentifierSerializer::class)
+    @JsonDeserialize(using = StandardizedIdentifierDeserializer::class)
     data class StandardizedIdentifier(
-        override val value: String,
-        override val system: String? = null,
-        override val type: CodeableConcept? = null
+        override val system: String?,
+        private val sourceIdentifier: Identifier
     ) : Identifier {
-        override val raw: String = this.toString()
-        override val element: Any = this
+        override val value: String = sourceIdentifier.value
+        override val type: CodeableConcept? = sourceIdentifier.type
+        override val raw: String = sourceIdentifier.raw
+        override val element: Any = sourceIdentifier.element
     }
 }
