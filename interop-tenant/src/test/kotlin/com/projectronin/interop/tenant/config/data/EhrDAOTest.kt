@@ -7,13 +7,15 @@ import com.projectronin.interop.common.test.database.ktorm.KtormHelper
 import com.projectronin.interop.common.test.database.liquibase.LiquibaseTest
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.tenant.config.data.model.EhrDO
+import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.sql.SQLIntegrityConstraintViolationException
 
 @LiquibaseTest(changeLog = "ehr/db/changelog/ehr.db.changelog-master.yaml")
 class EhrDAOTest {
@@ -33,11 +35,10 @@ class EhrDAOTest {
             privateKey = "private"
         }
         val result = dao.insert(testobj)
-        assertTrue(result != null)
-        assertTrue(result?.id != 0)
-        assertEquals(result?.clientId, testobj.clientId)
-        assertEquals(result?.publicKey, testobj.publicKey)
-        assertEquals(result?.privateKey, testobj.privateKey)
+        assertTrue(result.id != 0)
+        assertEquals(result.clientId, testobj.clientId)
+        assertEquals(result.publicKey, testobj.publicKey)
+        assertEquals(result.privateKey, testobj.privateKey)
     }
 
     /**
@@ -53,8 +54,7 @@ class EhrDAOTest {
             publicKey = "public"
             privateKey = "private"
         }
-        val result = dao.insert(testobj)
-        assertNull(result)
+        assertThrows<SQLIntegrityConstraintViolationException> { dao.insert(testobj) }
     }
 
     /**
@@ -71,9 +71,9 @@ class EhrDAOTest {
             privateKey = "potato"
         }
         val result = dao.update(testobj)
-        assertEquals(result?.clientId, testobj.clientId)
-        assertEquals(result?.publicKey, testobj.publicKey)
-        assertEquals(result?.privateKey, testobj.privateKey)
+        assertEquals(result.clientId, testobj.clientId)
+        assertEquals(result.publicKey, testobj.publicKey)
+        assertEquals(result.privateKey, testobj.privateKey)
     }
 
     /**
@@ -114,8 +114,7 @@ class EhrDAOTest {
             publicKey = "roses"
             privateKey = "peonies"
         }
-        val result = dao.update(testobj)
-        assertNull(result)
+        assertThrows<NoEHRFoundException> { dao.update(testobj) }
     }
 
     @Test
@@ -124,8 +123,7 @@ class EhrDAOTest {
         val testobj = mockk<EhrDO>(relaxed = true) {
             every { vendorType } throws RuntimeException()
         }
-        val result = dao.update(testobj)
-        assertNull(result)
+        assertThrows<RuntimeException> { dao.update(testobj) }
     }
     /**
      * Testing read, returns row from prepopulated db
