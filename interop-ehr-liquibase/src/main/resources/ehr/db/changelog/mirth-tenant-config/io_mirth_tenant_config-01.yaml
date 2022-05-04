@@ -1,0 +1,27 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-mirth-tenant-config-create
+      author: Sam Felt
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - tableExists:
+                tableName: io_mirth_tenant_config
+      changes:
+        - createTable:
+            tableName: io_mirth_tenant_config
+            columns:
+              - column:
+                  name: io_tenant_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    references: io_tenant(io_tenant_id)
+                    foreignKeyName: fk_io_mirth_tenant_config_io_tenant
+                    unique: true
+                    uniqueConstraintName: uk_fk_io_mirth_tenant_config_io_tenant
+              - column:
+                  name: location_ids
+                  type: java.sql.Types.VARCHAR(2048)
+                  constraints:
+                    nullable: true

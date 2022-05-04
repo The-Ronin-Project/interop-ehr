@@ -1,0 +1,3 @@
+databaseChangeLog:
+  - include:
+      file: ehr/db/changelog/mirth-tenant-config/io_mirth_tenant_config-01.yaml
