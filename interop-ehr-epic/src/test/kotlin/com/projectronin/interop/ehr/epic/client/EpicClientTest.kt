@@ -5,7 +5,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointments
 import com.projectronin.interop.ehr.epic.auth.EpicAuthentication
 import com.projectronin.interop.ehr.epic.createTestTenant
 import com.projectronin.interop.ehr.epic.getClient
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -76,7 +76,7 @@ class EpicClientTest {
                 "/api/FHIR/R4/Patient",
                 mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "birthDate")
             )
-            httpResponse.receive<String>()
+            httpResponse.body<String>()
         }
 
         // Validate Response
@@ -109,7 +109,7 @@ class EpicClientTest {
                 tenant,
                 mockWebServer.url("/FHIR-test?sessionId=123").toString()
             )
-            httpResponse.receive<String>()
+            httpResponse.body<String>()
         }
 
         // Validate Response
@@ -142,7 +142,7 @@ class EpicClientTest {
                 tenant,
                 "/api/FHIR/R4/Patient"
             )
-            httpResponse.receive<String>()
+            httpResponse.body<String>()
         }
 
         // Validate Response
@@ -177,7 +177,7 @@ class EpicClientTest {
                     "api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments",
                     GetPatientAppointmentsRequest("1", "1/1/2015", "11/1/2015", "E5597", "EPI")
                 )
-            httpResponse.receive<String>()
+            httpResponse.body<String>()
         }
 
         // Validate Response

@@ -1,7 +1,6 @@
 plugins {
     id("com.projectronin.interop.gradle.spring")
     id("com.projectronin.interop.gradle.junit")
-    id("com.projectronin.interop.gradle.ktor")
     id("com.projectronin.interop.gradle.mockk")
     id("com.projectronin.interop.gradle.jackson")
 }
@@ -14,6 +13,14 @@ dependencies {
     implementation(project(":interop-ehr"))
     implementation(project(":interop-transform"))
     implementation("org.springframework:spring-context")
+    implementation(libs.ktor.client.core)
+    implementation(libs.ktor.client.cio)
+    implementation(libs.ktor.client.content.negotiation)
+    implementation(libs.ktor.serialization.jackson)
+    implementation(libs.ktor.server.auth.jwt) {
+        exclude(group = "junit")
+    }
+    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.4")
     implementation(libs.swagger.annotations)
 
     // Using MockWebservice to ensure we can verify the headers set by the ktor engine

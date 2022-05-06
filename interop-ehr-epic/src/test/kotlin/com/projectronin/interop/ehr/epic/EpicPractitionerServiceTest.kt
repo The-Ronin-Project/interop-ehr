@@ -3,7 +3,7 @@ package com.projectronin.interop.ehr.epic
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.epic.model.EpicFindPractitionersResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.errors.IOException
@@ -43,7 +43,7 @@ class EpicPractitionerServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<Bundle>() } returns validPractitionerSearchBundle
+        coEvery { httpResponse.body<Bundle>() } returns validPractitionerSearchBundle
         coEvery {
             epicClient.get(
                 tenant,
@@ -78,7 +78,7 @@ class EpicPractitionerServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.receive<Bundle>() } returns validPractitionerSearchBundle
+        coEvery { httpResponse.body<Bundle>() } returns validPractitionerSearchBundle
         coEvery {
             epicClient.get(
                 tenant,
@@ -109,7 +109,7 @@ class EpicPractitionerServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<Bundle>() } returns validPractitionerSearchBundle
+        coEvery { httpResponse.body<Bundle>() } returns validPractitionerSearchBundle
         coEvery {
             epicClient.get(
                 tenant,
@@ -152,7 +152,7 @@ class EpicPractitionerServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<Bundle>() } returns validPractitionerSearchBundle
+        coEvery { httpResponse.body<Bundle>() } returns validPractitionerSearchBundle
 
         /*
         Uncomment when we are no longer forcing batchSize to 1 in EpicPractitioner and remove the two cases below.
@@ -218,7 +218,7 @@ class EpicPractitionerServiceTest {
 
         // Mock response with paging
         every { pagingHttpResponse.status } returns HttpStatusCode.OK
-        coEvery { pagingHttpResponse.receive<Bundle>() } returns pagingPractitionerSearchBundle
+        coEvery { pagingHttpResponse.body<Bundle>() } returns pagingPractitionerSearchBundle
         coEvery {
             epicClient.get(
                 tenant,
@@ -232,7 +232,7 @@ class EpicPractitionerServiceTest {
 
         // Mock response without paging
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<Bundle>() } returns validPractitionerSearchBundle
+        coEvery { httpResponse.body<Bundle>() } returns validPractitionerSearchBundle
         coEvery {
             epicClient.get(
                 tenant,

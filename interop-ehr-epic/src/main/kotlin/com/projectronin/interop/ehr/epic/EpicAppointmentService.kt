@@ -12,7 +12,7 @@ import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
@@ -94,7 +94,7 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
                 logger.error { "Appointment search failed for ${tenant.mnemonic}, with a ${httpResponse.status}" }
                 throw IOException("Call to tenant ${tenant.mnemonic} failed with a ${httpResponse.status}")
             }
-            httpResponse.receive<GetAppointmentsResponse>()
+            httpResponse.body<GetAppointmentsResponse>()
         }
         val providerIdMap = getAppointments.appointments.associate { appointment ->
             val providerMap = appointment.providers.associateWith { provider ->

@@ -12,7 +12,7 @@ import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.tenant.config.ProviderPoolService
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
@@ -44,7 +44,7 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
                 logger.error { "SendMessage failed for ${tenant.mnemonic}, with a ${httpResponse.status}" }
                 throw IOException("Call to tenant ${tenant.mnemonic} failed with a ${httpResponse.status}")
             }
-            httpResponse.receive<SendMessageResponse>()
+            httpResponse.body<SendMessageResponse>()
         }
         logger.info { "SendMessage completed for ${tenant.mnemonic}" }
 
@@ -72,9 +72,9 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
         tenant: Tenant,
     ): List<SendMessageRecipient> {
 
+        // The Epic implementation of sendMessage expects the VendorIdentifier to be an IdentifierVendorIdentifier.
+        // with a value. If it isn't, this will rightfully throw an exception.
         val idList =
-            // The Epic implementation of sendMessage expects the VendorIdentifier to be an IdentifierVendorIdentifier.
-            // with a value. If it isn't, this will rightfully throw an exception.
             recipients.map {
                 val identifierVendorIdentifier = it.identifier as IdentifierVendorIdentifier
                 identifierVendorIdentifier.identifier.value ?: throw VendorIdentifierNotFoundException()

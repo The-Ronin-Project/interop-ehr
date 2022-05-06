@@ -2,7 +2,7 @@ package com.projectronin.interop.ehr.epic.auth
 
 import com.projectronin.interop.ehr.epic.createTestTenant
 import com.projectronin.interop.ehr.epic.getClient
-import io.ktor.client.features.ServerResponseException
+import io.ktor.client.plugins.ServerResponseException
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.Assertions.assertEquals

@@ -5,7 +5,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointments
 import com.projectronin.interop.ehr.epic.apporchard.model.GetProviderAppointmentRequest
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProvider
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.errors.IOException
@@ -44,7 +44,7 @@ class EpicAppointmentServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<GetAppointmentsResponse>() } returns validPatientAppointmentSearchResponse
+        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns validPatientAppointmentSearchResponse
         coEvery {
             epicClient.post(
                 tenant,
@@ -74,7 +74,7 @@ class EpicAppointmentServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.receive<GetAppointmentsResponse>() } returns validPatientAppointmentSearchResponse
+        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns validPatientAppointmentSearchResponse
         coEvery {
             epicClient.post(
                 tenant,
@@ -104,7 +104,7 @@ class EpicAppointmentServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<GetAppointmentsResponse>() } returns validProviderAppointmentSearchResponse
+        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns validProviderAppointmentSearchResponse
         coEvery {
             epicClient.post(
                 tenant,
@@ -139,7 +139,7 @@ class EpicAppointmentServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.receive<GetAppointmentsResponse>() } returns validProviderAppointmentSearchResponse
+        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns validProviderAppointmentSearchResponse
         coEvery {
             epicClient.post(
                 tenant,

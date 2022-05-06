@@ -14,7 +14,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.tenant.config.ProviderPoolService
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.errors.IOException
@@ -51,7 +51,7 @@ class EpicMessageServiceTest {
         )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<SendMessageResponse>() } returns SendMessageResponse(
+        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
                     "130375", "Type"
@@ -102,7 +102,7 @@ class EpicMessageServiceTest {
         )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<SendMessageResponse>() } returns SendMessageResponse(
+        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
                     "130375", "Type"
@@ -155,7 +155,7 @@ class EpicMessageServiceTest {
         )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<SendMessageResponse>() } returns SendMessageResponse(
+        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
                     "130375", "Type"
@@ -204,7 +204,7 @@ class EpicMessageServiceTest {
         )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<SendMessageResponse>() } returns SendMessageResponse(
+        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
                     "130375", "Type"

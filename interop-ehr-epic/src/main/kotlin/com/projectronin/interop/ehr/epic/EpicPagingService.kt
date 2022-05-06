@@ -6,7 +6,7 @@ import com.projectronin.interop.ehr.model.base.JSONResource
 import com.projectronin.interop.fhir.r4.mergeBundles
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.tenant.config.model.Tenant
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
@@ -47,7 +47,7 @@ abstract class EpicPagingService(private val epicClient: EpicClient) {
                     logger.error { "Get failed for ${tenant.mnemonic} with a ${httpResponse.status}" }
                     throw IOException("Get failed for ${tenant.mnemonic} with a ${httpResponse.status}")
                 }
-                httpResponse.receive<Bundle>()
+                httpResponse.body<Bundle>()
             }
 
             val response = creator(bundle)

@@ -8,6 +8,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -21,7 +22,7 @@ import org.springframework.stereotype.Component
 @Component
 class EpicClient(
     private val client: HttpClient,
-    private val authenticationBroker: EHRAuthenticationBroker
+    private val authenticationBroker: EHRAuthenticationBroker,
 ) {
     private val logger = KotlinLogging.logger { }
 
@@ -43,7 +44,7 @@ class EpicClient(
             }
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)
-            body = requestBody
+            setBody(requestBody)
         }
 
         logger.debug { "HTTP status, ${response.status}, returned for POST call to tenant: ${tenant.mnemonic}" }

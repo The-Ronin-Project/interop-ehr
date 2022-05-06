@@ -7,7 +7,7 @@ import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Bundle
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.errors.IOException
@@ -39,7 +39,7 @@ class EpicPatientServiceTest {
         )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
+        coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
         coEvery {
             epicClient.get(
                 tenant,
@@ -61,7 +61,7 @@ class EpicPatientServiceTest {
         )
 
         every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
+        coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
         coEvery {
             epicClient.get(
                 tenant,
@@ -83,7 +83,7 @@ class EpicPatientServiceTest {
             "d45049c3-3441-40ef-ab4d-b9cd86a17225", "https://example.org", testPrivateKey, "TEST_TENANT"
         )
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
+        coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
         coEvery {
             epicClient.get(
                 tenant, "/api/FHIR/R4/Patient", mapOf("identifier" to "MRN|202497")
@@ -104,7 +104,7 @@ class EpicPatientServiceTest {
             "d45049c3-3441-40ef-ab4d-b9cd86a17225", "https://example.org", testPrivateKey, "TEST_TENANT"
         )
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
+        coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
         coEvery {
             epicClient.get(
                 tenant, "/api/FHIR/R4/Patient", mapOf("identifier" to "MRN|202497,MRN|202497")
@@ -135,7 +135,7 @@ class EpicPatientServiceTest {
             "d45049c3-3441-40ef-ab4d-b9cd86a17225", "https://example.org", testPrivateKey, "TEST_TENANT"
         )
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
+        coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
         coEvery {
             epicClient.get(
                 tenant, "/api/FHIR/R4/Patient", mapOf("identifier" to "MRN|202497")
@@ -162,7 +162,7 @@ class EpicPatientServiceTest {
             "d45049c3-3441-40ef-ab4d-b9cd86a17225", "https://example.org", testPrivateKey, "TEST_TENANT"
         )
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<Bundle>() } returns validMultiplePatientBundle
+        coEvery { httpResponse.body<Bundle>() } returns validMultiplePatientBundle
         coEvery {
             epicClient.get(
                 tenant, "/api/FHIR/R4/Patient", mapOf("identifier" to "EXTERNAL|Z4572,EXTERNAL|Z5660")
@@ -201,7 +201,7 @@ class EpicPatientServiceTest {
         )
         // 1st batch
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.receive<Bundle>() } returns validMultiplePatientBundle
+        coEvery { httpResponse.body<Bundle>() } returns validMultiplePatientBundle
         coEvery {
             epicClient.get(
                 tenant, "/api/FHIR/R4/Patient", mapOf("identifier" to "EXTERNAL|Z4572,EXTERNAL|Z5660")
@@ -211,7 +211,7 @@ class EpicPatientServiceTest {
         // 2nd batch
         val httpResponse2 = mockk<HttpResponse>()
         every { httpResponse2.status } returns HttpStatusCode.OK
-        coEvery { httpResponse2.receive<Bundle>() } returns validPatientBundle
+        coEvery { httpResponse2.body<Bundle>() } returns validPatientBundle
         coEvery {
             epicClient.get(
                 tenant, "/api/FHIR/R4/Patient", mapOf("identifier" to "MRN|202497")
@@ -256,7 +256,7 @@ class EpicPatientServiceTest {
         )
 
         every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.receive<Bundle>() } returns validPatientBundle
+        coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
         coEvery {
             epicClient.get(
                 tenant, "/api/FHIR/R4/Patient", mapOf("identifier" to "EXTERNAL|Z4572,EXTERNAL|Z5660")

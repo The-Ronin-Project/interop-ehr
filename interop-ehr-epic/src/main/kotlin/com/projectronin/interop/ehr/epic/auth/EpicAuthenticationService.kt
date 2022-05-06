@@ -8,7 +8,7 @@ import com.projectronin.interop.ehr.auth.AuthenticationService
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.HttpClient
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.Parameters
@@ -72,7 +72,7 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
                     },
                     encodeInQuery = false
                 )
-                httpResponse.receive<EpicAuthentication>()
+                httpResponse.body<EpicAuthentication>()
             } catch (e: Exception) {
                 logger.error(e) { "Authentication for $authURL, JTI $jti, failed with exception $e" }
                 throw e

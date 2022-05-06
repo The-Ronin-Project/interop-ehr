@@ -7,7 +7,7 @@ import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.Identifier
 import com.projectronin.interop.ehr.model.Patient
 import com.projectronin.interop.tenant.config.model.Tenant
-import io.ktor.client.call.receive
+import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
@@ -49,7 +49,7 @@ class EpicPatientService(
                 logger.error { "Patient search failed for ${tenant.mnemonic}, with a ${httpResponse.status}" }
                 throw IOException("Call to tenant ${tenant.mnemonic} failed with a ${httpResponse.status}")
             }
-            httpResponse.receive<R4Bundle>()
+            httpResponse.body<R4Bundle>()
         }
 
         logger.info { "Patient search completed for ${tenant.mnemonic}" }
