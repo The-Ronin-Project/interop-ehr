@@ -1,6 +1,5 @@
 package com.projectronin.interop.tenant.config.data
 
-import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.tenant.config.data.binding.EhrDOs
 import com.projectronin.interop.tenant.config.data.model.EhrDO
 import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
@@ -29,6 +28,7 @@ class EhrDAO(@Qualifier("ehr") private val database: Database) {
     fun insert(ehrVendor: EhrDO): EhrDO {
         try {
             database.insertAndGenerateKey(EhrDOs) {
+                set(it.instanceName, ehrVendor.instanceName)
                 set(it.name, ehrVendor.vendorType)
                 set(it.clientId, ehrVendor.clientId)
                 set(it.publicKey, ehrVendor.publicKey)
@@ -38,10 +38,10 @@ class EhrDAO(@Qualifier("ehr") private val database: Database) {
             logger.error(e) { "insert failed: $e" }
             throw e
         }
-        return getByType(ehrVendor.vendorType)
+        return getByInstance(ehrVendor.instanceName)
             // this is almost impossible to hit. The only way is if the insert is successful and either we can't find
             // the EHR DO or there are multiple (but DB constraints prevent that)
-            ?: throw NoEHRFoundException("Failed to find EHR with type: ${ehrVendor.vendorType}")
+            ?: throw NoEHRFoundException("Failed to find EHR with instance: ${ehrVendor.instanceName}")
     }
 
     /**
@@ -50,20 +50,21 @@ class EhrDAO(@Qualifier("ehr") private val database: Database) {
     fun update(ehrVendor: EhrDO): EhrDO {
         try {
             database.update(EhrDOs) {
+                set(it.instanceName, ehrVendor.instanceName)
                 set(it.name, ehrVendor.vendorType)
                 set(it.clientId, ehrVendor.clientId)
                 set(it.privateKey, ehrVendor.privateKey)
                 set(it.publicKey, ehrVendor.publicKey)
                 where {
-                    it.name eq ehrVendor.vendorType
+                    it.instanceName eq ehrVendor.instanceName
                 }
             }
         } catch (e: Exception) {
             logger.error(e) { "update failed: $e" }
             throw e
         }
-        return getByType(ehrVendor.vendorType)
-            ?: throw NoEHRFoundException("No Existing EHR found with type: ${ehrVendor.vendorType}")
+        return getByInstance(ehrVendor.instanceName)
+            ?: throw NoEHRFoundException("No Existing EHR found with instance: ${ehrVendor.instanceName}")
     }
 
     /**
@@ -76,10 +77,10 @@ class EhrDAO(@Qualifier("ehr") private val database: Database) {
     /**
      * Returns single values in table with a matching vendorType
      */
-    fun getByType(vendorType: VendorType): EhrDO? {
+    fun getByInstance(instanceName: String): EhrDO? {
         return database.from(EhrDOs)
             .select()
-            .where(EhrDOs.name eq vendorType)
+            .where(EhrDOs.instanceName eq instanceName)
             .mapNotNull { EhrDOs.createEntity(it) }
             .firstOrNull()
     }

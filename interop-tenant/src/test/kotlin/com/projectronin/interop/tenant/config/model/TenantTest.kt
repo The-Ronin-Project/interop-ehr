@@ -15,6 +15,7 @@ class TenantTest {
                 "clientId",
                 authenticationConfig,
                 "https://localhost:8080/",
+                "Epic Sandbox",
                 "21.10",
                 "RoninUser",
                 "Ronin Message",

@@ -49,12 +49,34 @@ class EhrDAOTest {
     fun `insert ehr fails`() {
         val dao = EhrDAO(KtormHelper.database())
         val testobj = EhrDO {
+            instanceName = "Epic Sandbox"
             vendorType = VendorType.EPIC
             clientId = "12345"
             publicKey = "public"
             privateKey = "private"
         }
         assertThrows<SQLIntegrityConstraintViolationException> { dao.insert(testobj) }
+    }
+
+    /**
+     * Testing insert of a second EHR instance.
+     */
+    @Test
+    @DataSet(value = ["/dbunit/ehr/EHRVendor.yaml"], cleanAfter = true)
+    fun `insert new ehr instance`() {
+        val dao = EhrDAO(KtormHelper.database())
+        val testobj = EhrDO {
+            instanceName = "Epic Prod"
+            vendorType = VendorType.EPIC
+            clientId = "12345"
+            publicKey = "public"
+            privateKey = "private"
+        }
+        val result = dao.insert(testobj)
+        assertEquals(result.clientId, testobj.clientId)
+        assertEquals(result.instanceName, testobj.instanceName)
+        assertEquals(result.publicKey, testobj.publicKey)
+        assertEquals(result.privateKey, testobj.privateKey)
     }
 
     /**
@@ -66,6 +88,7 @@ class EhrDAOTest {
         val dao = EhrDAO(KtormHelper.database())
         val testobj = EhrDO {
             vendorType = VendorType.EPIC
+            instanceName = "Epic Sandbox"
             clientId = "56789"
             publicKey = "tomato"
             privateKey = "potato"
@@ -125,6 +148,7 @@ class EhrDAOTest {
         }
         assertThrows<RuntimeException> { dao.update(testobj) }
     }
+
     /**
      * Testing read, returns row from prepopulated db
      */
@@ -132,7 +156,7 @@ class EhrDAOTest {
     @DataSet(value = ["/dbunit/ehr/EHRVendor.yaml"], cleanAfter = true)
     fun `read by ehr`() {
         val dao = EhrDAO(KtormHelper.database())
-        val result = dao.getByType(VendorType.EPIC)
+        val result = dao.getByInstance("Epic Sandbox")
         assertNotNull(result)
         assertEquals("12345", result?.clientId)
         assertEquals("public", result?.publicKey)

@@ -15,7 +15,7 @@ class JacksonManager {
          * The Yaml object mapper for Jackson.
          */
         val yamlMapper: ObjectMapper =
-            ObjectMapper(YAMLFactory()).registerModule(KotlinModule()).registerModule(JavaTimeModule())
+            ObjectMapper(YAMLFactory()).registerModule(KotlinModule.Builder().build()).registerModule(JavaTimeModule())
                 .registerModule(SimpleModule())
     }
 }

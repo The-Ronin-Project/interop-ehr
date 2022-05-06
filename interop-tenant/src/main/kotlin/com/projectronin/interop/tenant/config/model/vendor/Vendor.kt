@@ -18,6 +18,11 @@ import com.projectronin.interop.tenant.config.model.AuthenticationConfig
 )
 sealed interface Vendor {
     /**
+     * The name of the vendor instance.
+     */
+    val instanceName: String
+
+    /**
      * The type of vendor.
      */
     val type: VendorType

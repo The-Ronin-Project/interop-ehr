@@ -1,0 +1,29 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-ehr-support-epic-instances
+      author: Travis Bean
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_ehr
+                columnName: instance_name
+      changes:
+        - addColumn:
+            tableName: io_ehr
+            columns:
+              - column:
+                  name: instance_name
+                  type: java.sql.Types.VARCHAR(30)
+                  constraints:
+                    unique: true
+                    uniqueConstraintName: uk_io_ehr_display_name
+        - sql:
+            sql: UPDATE io_ehr SET instance_name = name
+        - addNotNullConstraint:
+            tableName: io_ehr
+            columnName: instance_name
+            columnDataType: java.sql.Types.VARCHAR(256)
+        - dropUniqueConstraint:
+            tableName: io_ehr
+            constraintName: uk_io_ehr_name

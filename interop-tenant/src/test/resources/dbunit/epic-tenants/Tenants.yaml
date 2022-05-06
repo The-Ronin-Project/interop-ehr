@@ -1,5 +1,6 @@
 io_ehr:
   - io_ehr_id: 101
+    instance_name: "Epic Sandbox"
     name: "EPIC"
     client_id: "12345"
     public_key: "public"

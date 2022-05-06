@@ -59,8 +59,8 @@ class TenantService(
     fun insertTenant(tenant: Tenant): Tenant {
         logger.info { "Creating new tenant for mnemonic : ${tenant.mnemonic}" }
 
-        val ehrDO = ehrDAO.getByType(tenant.vendor.type)
-            ?: throw NoEHRFoundException("No EHR found with type: ${tenant.vendor.type}")
+        val ehrDO = ehrDAO.getByInstance(tenant.vendor.instanceName)
+            ?: throw NoEHRFoundException("No EHR found with instance: ${tenant.vendor.instanceName}")
 
         val newTenantDO = tenant.toTenantDO(ehrDO)
         logger.debug { "Inserting into tenantDAO" }
@@ -83,8 +83,8 @@ class TenantService(
 
         val existingId = tenantDAO.getTenantForMnemonic(tenant.mnemonic)?.id
             ?: throw NoTenantFoundException("No tenant found with mnemonnic: ${tenant.mnemonic}")
-        val ehrDO = ehrDAO.getByType(tenant.vendor.type)
-            ?: throw NoEHRFoundException("No EHR found with type: ${tenant.vendor.type}")
+        val ehrDO = ehrDAO.getByInstance(tenant.vendor.instanceName)
+            ?: throw NoEHRFoundException("No EHR found with instance: ${tenant.vendor.instanceName}")
 
         val updatedTenantDO = tenant.toTenantDO(ehrDO)
         updatedTenantDO.id = existingId

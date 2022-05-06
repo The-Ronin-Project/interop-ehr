@@ -35,6 +35,7 @@ class TenantServiceTest {
 
     private val standardEHRDO = mockk<EhrDO> {
         every { id } returns 1
+        every { instanceName } returns "Epic Sandbox"
         every { vendorType } returns VendorType.EPIC
         every { clientId } returns "clientId"
         every { publicKey } returns "publicKey"
@@ -66,6 +67,7 @@ class TenantServiceTest {
         batchConfig = null,
         vendor = Epic(
             clientId = "clientId",
+            instanceName = "Epic Sandbox",
             authenticationConfig = AuthenticationConfig(
                 authEndpoint = "http://localhost/oauth2/token",
                 publicKey = "publicKey",
@@ -201,6 +203,7 @@ class TenantServiceTest {
             ),
             vendor = Epic(
                 clientId = "clientId",
+                instanceName = "Epic Sandbox",
                 authenticationConfig = AuthenticationConfig(
                     authEndpoint = "http://localhost/oauth2/token",
                     publicKey = "publicKey",
@@ -249,6 +252,7 @@ class TenantServiceTest {
             batchConfig = null,
             vendor = Epic(
                 clientId = "clientId",
+                instanceName = "Epic Sandbox",
                 authenticationConfig = AuthenticationConfig(
                     authEndpoint = "http://localhost/oauth2/token",
                     publicKey = "publicKey",
@@ -294,7 +298,7 @@ class TenantServiceTest {
 
     @Test
     fun `insert ok`() {
-        every { ehrDAO.getByType(VendorType.EPIC) } returns standardEHRDO
+        every { ehrDAO.getByInstance("Epic Sandbox") } returns standardEHRDO
         every { tenantDAO.insertTenant(any()) } returns standardTenantDO
         every { epicTenantDAO.insert(any()) } returns standardEpicTenantDO
 
@@ -313,6 +317,7 @@ class TenantServiceTest {
             ),
             vendor = Epic(
                 clientId = "clientId",
+                instanceName = "Epic Sandbox",
                 authenticationConfig = AuthenticationConfig(
                     authEndpoint = "http://localhost/oauth2/token",
                     publicKey = "publicKey",
@@ -334,7 +339,7 @@ class TenantServiceTest {
             every { availableBatchStart } returns LocalTime.of(20, 0)
             every { availableBatchEnd } returns LocalTime.of(6, 0)
         }
-        every { ehrDAO.getByType(VendorType.EPIC) } returns standardEHRDO
+        every { ehrDAO.getByInstance("Epic Sandbox") } returns standardEHRDO
         every { tenantDAO.insertTenant(any()) } returns tenantDO
         every { epicTenantDAO.insert(any()) } returns standardEpicTenantDO
 
@@ -344,13 +349,13 @@ class TenantServiceTest {
 
     @Test
     fun `insert bad when there's no EHRs in the db`() {
-        every { ehrDAO.getByType(VendorType.EPIC) } returns null
+        every { ehrDAO.getByInstance("Epic Sandbox") } returns null
         assertThrows<NoEHRFoundException> { service.insertTenant(standardTenant) }
     }
 
     @Test
     fun `update ok`() {
-        every { ehrDAO.getByType(VendorType.EPIC) } returns standardEHRDO
+        every { ehrDAO.getByInstance("Epic Sandbox") } returns standardEHRDO
         every { tenantDAO.getTenantForMnemonic(standardTenant.mnemonic) } returns standardTenantDO
         every { tenantDAO.updateTenant(any()) } returns 1
         every { epicTenantDAO.update(any()) } returns 1
@@ -362,7 +367,7 @@ class TenantServiceTest {
     @Test
     fun `update bad when there's no EHRs in the db`() {
         every { tenantDAO.getTenantForMnemonic(standardTenant.mnemonic) } returns standardTenantDO
-        every { ehrDAO.getByType(VendorType.EPIC) } returns null
+        every { ehrDAO.getByInstance("Epic Sandbox") } returns null
         assertThrows<NoEHRFoundException> { service.updateTenant(standardTenant) }
     }
 

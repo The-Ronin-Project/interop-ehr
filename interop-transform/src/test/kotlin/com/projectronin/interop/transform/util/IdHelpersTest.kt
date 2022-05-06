@@ -23,6 +23,7 @@ class IdHelpersTest {
                     publicKey = "public",
                     privateKey = "private"
                 ),
+                instanceName = "instanceName",
                 serviceEndpoint = "endpoint",
                 release = "release",
                 ehrUserId = "userId",

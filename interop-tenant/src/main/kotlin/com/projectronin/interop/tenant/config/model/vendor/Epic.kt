@@ -19,6 +19,7 @@ data class Epic(
     override val clientId: String,
     override val authenticationConfig: AuthenticationConfig,
     override val serviceEndpoint: String,
+    override val instanceName: String,
     val release: String,
     val ehrUserId: String,
     val messageType: String,

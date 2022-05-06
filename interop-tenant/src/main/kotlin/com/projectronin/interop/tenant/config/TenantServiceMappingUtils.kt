@@ -75,6 +75,7 @@ private fun EpicTenantDO.toEpic(ehrDO: EhrDO): Epic {
     )
     return Epic(
         clientId = ehrDO.clientId,
+        instanceName = ehrDO.instanceName,
         authenticationConfig = authenticationConfig,
         serviceEndpoint = serviceEndpoint,
         release = release,

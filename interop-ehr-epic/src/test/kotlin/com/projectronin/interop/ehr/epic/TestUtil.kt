@@ -44,6 +44,7 @@ fun createTestTenant(
             clientId,
             AuthenticationConfig(authEndpoint ?: serviceEndpoint, "pubKey", privateKey),
             serviceEndpoint,
+            "instanceName",
             "release",
             ehrUserId,
             messageType,

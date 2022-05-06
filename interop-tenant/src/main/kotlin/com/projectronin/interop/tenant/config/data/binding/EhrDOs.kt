@@ -12,6 +12,7 @@ import org.ktorm.schema.varchar
  */
 object EhrDOs : Table<EhrDO>("io_ehr") {
     val id = int("io_ehr_id").primaryKey().bindTo { it.id }
+    val instanceName = varchar("instance_name").bindTo { it.instanceName }
     val name = enum<VendorType>("name").bindTo { it.vendorType }
     val clientId = varchar("client_id").bindTo { it.clientId }
     val publicKey = varchar("public_key").bindTo { it.publicKey }
