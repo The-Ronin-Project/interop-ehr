@@ -14,7 +14,7 @@ dependencies {
     implementation(project(":interop-ehr"))
     implementation(project(":interop-transform"))
     implementation("org.springframework:spring-context")
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.4")
+    implementation(libs.swagger.annotations)
 
     // Using MockWebservice to ensure we can verify the headers set by the ktor engine
     testImplementation(libs.mockwebserver)
