@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.epic.apporchard.model
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
+import io.swagger.v3.oas.annotations.media.Schema
 
 /**
  * Data class for making requests to Epic's [SendMessage](https://apporchard.epic.com/Sandbox?api=384) api.
@@ -17,14 +18,21 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
  * @param senderIDType: The ID Type for the SenderID. Posibilities are CID, RecordID (can be internal or external), Name, SystemLogin, or Alias. Default is internal.
  * @param messagePriority: The priority of the message to be sent. If not passed in, the default priority will be Routine. Also accepts the title.
  */
+@Schema(description = "Model for making requests to Epic's SendMessage API")
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class SendMessageRequest(
+    @field:Schema(example = "your message here", type = "string")
     val messageText: String?,
+    @field:Schema(example = "202497", type = "string")
     val patientID: String?,
     val recipients: List<SendMessageRecipient>?,
+    @field:Schema(example = "IPMD", type = "string")
     val senderID: String?,
+    @field:Schema(example = "Note", type = "string")
     val messageType: String?,
+    @field:Schema(example = "External", type = "string")
     val senderIDType: String = "External",
+    @field:Schema(example = "MRN", type = "string")
     val patientIDType: String = "MRN",
     val contactID: String? = "",
     val contactIDType: String? = "",
