@@ -1,10 +1,12 @@
-name: Build interop-ehr-liquibase image, push to Nexus, and sync with ArgoCD
+name: (Retroactive Release) Build interop-ehr-liquibase image, push to Nexus, and sync with ArgoCD
 
 on:
-  workflow_run:
-    workflows: [ Interop Tenant Tests ]
-    types: [ completed ]
-    branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release'
+        type: string
+        required: true
 
 jobs:
   get-info:
@@ -21,6 +23,7 @@ jobs:
         uses: actions/checkout@v2.1.0
         with:
           fetch-depth: 0
+          ref: ${{ github.event.inputs.tag }}
 
       - name: Set up JDK 17
         uses: actions/setup-java@v2
