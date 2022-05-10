@@ -20,7 +20,6 @@ dependencies {
     implementation(libs.ktor.server.auth.jwt) {
         exclude(group = "junit")
     }
-    implementation("org.springdoc:springdoc-openapi-kotlin:1.6.4")
     implementation(libs.swagger.annotations)
 
     // Using MockWebservice to ensure we can verify the headers set by the ktor engine
