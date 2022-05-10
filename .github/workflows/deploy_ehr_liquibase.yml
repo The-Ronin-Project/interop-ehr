@@ -19,8 +19,6 @@ jobs:
     steps:
       - name: Check out code
         uses: actions/checkout@v2.1.0
-        with:
-          fetch-depth: 0
 
       - name: Set up JDK 17
         uses: actions/setup-java@v2
@@ -35,6 +33,7 @@ jobs:
       - name: Get tag from Gradle
         id: gradle_info
         run: |
+          git fetch --tags --unshallow
           TAG=$(./gradlew currentVersion | awk '{ if(/Project version:/) { print $3; exit } }' | cut -d\- -f1)
           echo ${TAG}
           echo "::set-output name=docker_image_tag::${TAG}"
