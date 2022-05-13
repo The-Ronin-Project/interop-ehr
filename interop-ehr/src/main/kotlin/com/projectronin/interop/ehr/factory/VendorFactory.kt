@@ -41,6 +41,6 @@ interface VendorFactory {
     val conditionTransformer: ConditionTransformer
 
     // Util functions for Mirth
-    fun deserializeAppointment(string: String): Appointment
+    fun deserializeAppointments(string: String): List<Appointment>
     fun <T> serializeObject(t: T): String
 }

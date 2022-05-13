@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.epic.model.EpicAppointment
@@ -34,8 +35,8 @@ class EpicVendorFactory(
     override val vendorType: VendorType
         get() = VendorType.EPIC
 
-    override fun deserializeAppointment(string: String): EpicAppointment {
-        return JacksonManager.objectMapper.readValue(string, EpicAppointment::class.java)
+    override fun deserializeAppointments(string: String): List<EpicAppointment> {
+        return JacksonManager.objectMapper.readValue(string)
     }
     override fun <T> serializeObject(t: T): String {
         return JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(t)

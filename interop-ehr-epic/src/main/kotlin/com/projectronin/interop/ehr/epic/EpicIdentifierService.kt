@@ -67,7 +67,7 @@ class EpicIdentifierService : IdentifierService {
         exceptionMessage: () -> String
     ): Identifier {
         // currently, we're only ever using EpicIDTypes, and the logic below sort of assumes this
-        // but this check ensures these objects are so we can serialize / deserialize appropriately
+        // but this check ensures these objects are, so we can serialize / deserialize appropriately
         if (identifiers.any { it !is EpicIDType }) throw IllegalArgumentException("getEpicIdentifiers only works for EpicIDType")
         val identifier = identifiers.firstOrNull { it.type?.text.equals("external", true) }
             ?: identifiers.firstOrNull { it.type?.text.equals("internal", true) }

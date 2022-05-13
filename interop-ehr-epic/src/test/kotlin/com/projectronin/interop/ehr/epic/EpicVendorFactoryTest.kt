@@ -104,4 +104,13 @@ class EpicVendorFactoryTest {
     fun `returns ConditionTransformer`() {
         assertEquals(conditionTransformer, vendorFactory.conditionTransformer)
     }
+
+    @Test
+    fun `can deserialize and serialize`() {
+        val originalJson = this::class.java.getResource("/ExampleSerializedEpicAppointmentList.json")!!.readText()
+        val appointments = vendorFactory.deserializeAppointments(originalJson)
+        val serializedJson = vendorFactory.serializeObject(appointments)
+        assertEquals(originalJson, serializedJson)
+        assertEquals(2, appointments.size)
+    }
 }
