@@ -1,8 +1,6 @@
 plugins {
     id("com.projectronin.interop.gradle.spring")
     id("com.projectronin.interop.gradle.junit")
-    id("com.projectronin.interop.gradle.mockk")
-    id("com.projectronin.interop.gradle.jackson")
 }
 
 dependencies {
@@ -21,6 +19,8 @@ dependencies {
         exclude(group = "junit")
     }
     implementation(libs.swagger.annotations)
+
+    testImplementation(libs.mockk)
 
     // Using MockWebservice to ensure we can verify the headers set by the ktor engine
     testImplementation(libs.mockwebserver)
