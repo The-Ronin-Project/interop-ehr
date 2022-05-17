@@ -49,7 +49,7 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to "PractitionerRole:practitioner,PractitionerRole:location",
+                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
                     "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
                 )
             )
@@ -84,7 +84,7 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to "PractitionerRole:practitioner,PractitionerRole:location",
+                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
                     "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
                 )
             )
@@ -114,14 +114,14 @@ class EpicPractitionerServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
-                mapOf("_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to "abc")
+                mapOf("_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"), "location" to "abc")
             )
         } returns httpResponse
         coEvery {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
-                mapOf("_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to "123")
+                mapOf("_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"), "location" to "123")
             )
         } returns httpResponse
 
@@ -171,7 +171,8 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to "loc1"
+                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
+                    "location" to "loc1"
                 )
             )
         } returns httpResponse
@@ -180,7 +181,8 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to "loc2"
+                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
+                    "location" to "loc2"
                 )
             )
         } returns httpResponse
@@ -188,7 +190,10 @@ class EpicPractitionerServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
-                mapOf("_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to "loc3")
+                mapOf(
+                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
+                    "location" to "loc3"
+                )
             )
         } returns httpResponse
 
@@ -224,7 +229,7 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to "PractitionerRole:practitioner,PractitionerRole:location",
+                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
                     "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
                 )
             )

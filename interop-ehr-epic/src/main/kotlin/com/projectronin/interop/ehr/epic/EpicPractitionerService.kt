@@ -22,7 +22,7 @@ class EpicPractitionerService(
         val practitionerResponses = locationIds.chunked(1) {
             val locationsParameter = it.joinToString(separator = ",")
             val parameters = mapOf(
-                "_include" to "PractitionerRole:practitioner,PractitionerRole:location",
+                "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
                 "location" to locationsParameter
             )
             getBundleWithPaging(tenant, practitionerSearchUrlPart, parameters, ::EpicFindPractitionersResponse)

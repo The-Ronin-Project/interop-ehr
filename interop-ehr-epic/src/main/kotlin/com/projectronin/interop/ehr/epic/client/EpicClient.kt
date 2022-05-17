@@ -78,7 +78,11 @@ class EpicClient(
             parameters.map {
                 val key = it.key
                 val value = it.value
-                value?.let { parameter(key, value) }
+                if (value is List<*>) {
+                    value.forEach { repetition ->
+                        parameter(key, repetition)
+                    }
+                } else value?.let { parameter(key, value) }
             }
         }
 
