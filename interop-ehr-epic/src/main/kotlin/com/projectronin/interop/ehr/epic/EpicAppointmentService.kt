@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.AppointmentService
 import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
 import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
@@ -8,8 +9,10 @@ import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProvider
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.epic.model.EpicAppointmentBundle
 import com.projectronin.interop.ehr.epic.model.EpicIDType
+import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
+import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.call.body
@@ -55,16 +58,22 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
 
     override fun findProviderAppointments(
         tenant: Tenant,
-        providerIDs: List<String>, // Expecting the external Epic provider id
+        providerIDs: List<FHIRIdentifiers>,
         startDate: LocalDate,
         endDate: LocalDate,
     ): Bundle<Appointment> {
         logger.info { "Provider appointment search started for ${tenant.mnemonic}" }
 
+        val selectedIdentifiers = providerIDs.map {
+            val selectedIdentifier = identifierService.getPractitionerProviderIdentifier(tenant, it)
+            (selectedIdentifier.identifier as Identifier).value
+                ?: throw VendorIdentifierNotFoundException("Unable to find a value on identifier: ${selectedIdentifier.identifier}")
+        }
+
         val request =
             GetProviderAppointmentRequest(
                 userID = getEpicVendor(tenant).ehrUserId,
-                providers = providerIDs.map { ScheduleProvider(id = it) },
+                providers = selectedIdentifiers.map { ScheduleProvider(id = it) },
                 startDate = dateFormat.format(startDate),
                 endDate = dateFormat.format(endDate)
             )

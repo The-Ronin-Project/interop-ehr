@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr
 
+import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -25,7 +26,7 @@ interface AppointmentService {
      */
     fun findProviderAppointments(
         tenant: Tenant,
-        providerIDs: List<String>,
+        providerIDs: List<FHIRIdentifiers>,
         startDate: LocalDate,
         endDate: LocalDate,
     ): Bundle<Appointment>
