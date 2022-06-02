@@ -38,7 +38,8 @@ class EpicVendorFactory(
     override fun deserializeAppointments(string: String): List<EpicAppointment> {
         return JacksonManager.objectMapper.readValue(string)
     }
+
     override fun <T> serializeObject(t: T): String {
-        return JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(t)
+        return JacksonManager.nonAbsentObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(t)
     }
 }

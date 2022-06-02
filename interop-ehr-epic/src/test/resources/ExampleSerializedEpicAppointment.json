@@ -1,6 +1,7 @@
 {
   "appOrchardAppointment" : {
     "AppointmentDuration" : "30",
+    "AppointmentNotes" : [ ],
     "AppointmentStartTime" : " 3:30 PM",
     "AppointmentStatus" : "No Show",
     "ContactIDs" : [ {
@@ -11,14 +12,16 @@
       "Type" : "ASN"
     } ],
     "Date" : "12/3/2015",
+    "ExtraExtensions" : [ ],
     "PatientIDs" : [ {
       "ID" : "paitientId",
       "Type" : "External"
     } ],
     "PatientName" : "LMRTESTING,HERMIONE",
     "Providers" : [ {
+      "DepartmentIDs" : [ ],
       "DepartmentName" : "Blank",
-      "Duration" : "30",
+      "Duration" : "",
       "ProviderIDs" : [ {
         "ID" : "2100",
         "Type" : "Internal"
@@ -34,8 +37,9 @@
   },
   "providerIDMap" : [ {
     "key" : {
+      "DepartmentIDs" : [ ],
       "DepartmentName" : "Blank",
-      "Duration" : "30",
+      "Duration" : "",
       "ProviderIDs" : [ {
         "ID" : "2100",
         "Type" : "Internal"

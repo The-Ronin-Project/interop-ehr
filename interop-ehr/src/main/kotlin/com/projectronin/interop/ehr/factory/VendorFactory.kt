@@ -42,5 +42,8 @@ interface VendorFactory {
 
     // Util functions for Mirth
     fun deserializeAppointments(string: String): List<Appointment>
+
+    // this is used by Mirth, so we don't want to use the default "NON_EMPTY" option for serializing
+    // since an empty string is a valid non-null option, and on deserializing that'll error if it's missing
     fun <T> serializeObject(t: T): String
 }

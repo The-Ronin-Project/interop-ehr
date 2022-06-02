@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.epic.model
 
+import com.fasterxml.jackson.annotation.JsonInclude
 import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.common.resource.ResourceType
 import com.projectronin.interop.ehr.epic.EpicIdentifierService
@@ -149,6 +150,7 @@ class EpicAppointmentTest {
         |  "Date": "12/3/2015",
         |  "ExtraExtensions": [],
         |  "ExtraItems": null,
+        |  "PatientIDs" : [],
         |  "PatientName": "LMRTESTING,HERMIONE",
         |  "Providers": [],
         |  "VisitTypeIDs": [
@@ -182,7 +184,7 @@ class EpicAppointmentTest {
             departmentIDs = listOf(),
             departmentName = "Blank",
             providerIDs = listOf(providerIdentifier),
-            duration = "30",
+            duration = "",
             providerName = "Davey",
             time = "900"
         )
@@ -220,8 +222,9 @@ class EpicAppointmentTest {
         |  "Date": "12/3/2015",
         |  "ExtraExtensions": [],
         |  "ExtraItems": null,
+        |  "PatientIDs":[],
         |  "PatientName": "LMRTESTING,HERMIONE",
-        |  "Providers":[{"DepartmentName":"Blank","Duration":"30","ProviderIDs":[{"ID":"2100","Type":"Internal"}],"ProviderName":"Davey","Time":"900"}],
+        |  "Providers":[{"DepartmentIDs":[],"DepartmentName":"Blank","Duration":"","ProviderIDs":[{"ID":"2100","Type":"Internal"}],"ProviderName":"Davey","Time":"900"}],
         |  "VisitTypeIDs": [
         |    $visitIdentifierJson
         |  ],
@@ -293,8 +296,9 @@ class EpicAppointmentTest {
         |  "Date": "12/3/2015",
         |  "ExtraExtensions": [],
         |  "ExtraItems": null,
+        |  "PatientIDs" : [],
         |  "PatientName": "LMRTESTING,HERMIONE",
-        |  "Providers":[{"DepartmentName":"Blank","Duration":"30","ProviderIDs":[{"ID":"2100","Type":"Internal"}],"ProviderName":"Davey","Time":"900"}],
+        |  "Providers":[{"DepartmentIDs":[],"DepartmentName":"Blank","Duration":"30","ProviderIDs":[{"ID":"2100","Type":"Internal"}],"ProviderName":"Davey","Time":"900"}],
         |  "VisitTypeIDs": [
         |    $visitIdentifierJson
         |  ],
@@ -366,8 +370,9 @@ class EpicAppointmentTest {
         |  "Date": "12/3/2015",
         |  "ExtraExtensions": [],
         |  "ExtraItems": null,
+        |  "PatientIDs":[],
         |  "PatientName": "LMRTESTING,HERMIONE",
-        |  "Providers":[{"DepartmentName":"Blank","Duration":"30","ProviderIDs":[{"ID":"2100","Type":"Internal"}],"ProviderName":"Davey","Time":"900"}],
+        |  "Providers":[{"DepartmentIDs":[], "DepartmentName":"Blank","Duration":"30","ProviderIDs":[{"ID":"2100","Type":"Internal"}],"ProviderName":"Davey","Time":"900"}],
         |  "VisitTypeIDs": [
         |    $visitIdentifierJson
         |  ],
@@ -404,7 +409,7 @@ class EpicAppointmentTest {
             departmentIDs = listOf(),
             departmentName = "Blank",
             providerIDs = listOf(providerIdentifier),
-            duration = "30",
+            duration = "",
             providerName = "Davey",
             time = "900"
         )
@@ -437,7 +442,7 @@ class EpicAppointmentTest {
                 patientIDTypeEpic
             )
         )
-        val serialized = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epicAppointment)
+        val serialized = JacksonManager.nonAbsentObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epicAppointment)
         val expected = this::class.java.getResource("/ExampleSerializedEpicAppointment.json")!!.readText()
         assertEquals(expected, serialized)
     }
@@ -476,7 +481,7 @@ class EpicAppointmentTest {
             null,
             null,
         )
-        val serialized = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epicAppointment)
+        val serialized = JacksonManager.objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_ABSENT).writerWithDefaultPrettyPrinter().writeValueAsString(epicAppointment)
         KotlinLogging.logger { }.info { serialized }
         val expected = this::class.java.getResource("/ExampleSerializedEpicAppointmentWithNulls.json")!!.readText()
         assertEquals(expected, serialized)
