@@ -1,7 +1,14 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.common.vendor.VendorType
+import com.projectronin.interop.ehr.epic.model.EpicAppointment
+import com.projectronin.interop.ehr.epic.model.EpicCondition
+import com.projectronin.interop.ehr.epic.model.EpicPatient
 import com.projectronin.interop.ehr.epic.transform.EpicAppointmentTransformer
+import com.projectronin.interop.ehr.model.Appointment
+import com.projectronin.interop.ehr.model.Condition
+import com.projectronin.interop.ehr.model.Location
+import com.projectronin.interop.ehr.model.Patient
 import com.projectronin.interop.transform.fhir.r4.R4ConditionTransformer
 import com.projectronin.interop.transform.fhir.r4.R4LocationTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PatientTransformer
@@ -10,6 +17,7 @@ import com.projectronin.interop.transform.fhir.r4.R4PractitionerTransformer
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class EpicVendorFactoryTest {
     private val appointmentService = mockk<EpicAppointmentService>()
@@ -106,11 +114,38 @@ class EpicVendorFactoryTest {
     }
 
     @Test
-    fun `can deserialize and serialize`() {
+    fun `can deserialize and serialize appts`() {
         val originalJson = this::class.java.getResource("/ExampleSerializedEpicAppointmentList.json")!!.readText()
         val appointments = vendorFactory.deserializeAppointments(originalJson)
         val serializedJson = vendorFactory.serializeObject(appointments)
         assertEquals(originalJson, serializedJson)
         assertEquals(2, appointments.size)
+    }
+
+    @Test
+    fun `can deserialize and serialize patient`() {
+        val originalJson = this::class.java.getResource("/ExampleSerializedPatient.json")!!.readText()
+        val patient = vendorFactory.deserialize(originalJson, Patient::class)
+        assertEquals(EpicPatient::class, patient::class)
+    }
+
+    @Test
+    fun `can deserialize and serialize appointment`() {
+        val originalJson = this::class.java.getResource("/ExampleSerializedEpicAppointment.json")!!.readText()
+        val appointment = vendorFactory.deserialize(originalJson, Appointment::class)
+        assertEquals(EpicAppointment::class, appointment::class)
+    }
+
+    @Test
+    fun `can deserialize and serialize condition`() {
+        val originalJson = this::class.java.getResource("/ExampleSerializedCondition.json")!!.readText()
+        val condition = vendorFactory.deserialize(originalJson, Condition::class)
+        assertEquals(EpicCondition::class, condition::class)
+    }
+
+    @Test
+    fun `can't deserialize a different class`() {
+        val originalJson = ""
+        assertThrows<NotImplementedError> { vendorFactory.deserialize(originalJson, Location::class) }
     }
 }

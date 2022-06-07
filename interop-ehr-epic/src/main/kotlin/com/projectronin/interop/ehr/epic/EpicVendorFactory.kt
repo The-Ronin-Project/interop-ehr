@@ -4,8 +4,14 @@ import com.fasterxml.jackson.module.kotlin.readValue
 import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.epic.model.EpicAppointment
+import com.projectronin.interop.ehr.epic.model.EpicCondition
+import com.projectronin.interop.ehr.epic.model.EpicPatient
 import com.projectronin.interop.ehr.epic.transform.EpicAppointmentTransformer
 import com.projectronin.interop.ehr.factory.VendorFactory
+import com.projectronin.interop.ehr.model.Appointment
+import com.projectronin.interop.ehr.model.Condition
+import com.projectronin.interop.ehr.model.EHRResource
+import com.projectronin.interop.ehr.model.Patient
 import com.projectronin.interop.transform.fhir.r4.R4ConditionTransformer
 import com.projectronin.interop.transform.fhir.r4.R4LocationTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PatientTransformer
@@ -13,6 +19,7 @@ import com.projectronin.interop.transform.fhir.r4.R4PractitionerRoleTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PractitionerTransformer
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
+import kotlin.reflect.KClass
 
 /**
  * Epic implementation of [VendorFactory].
@@ -37,6 +44,15 @@ class EpicVendorFactory(
 
     override fun deserializeAppointments(string: String): List<EpicAppointment> {
         return JacksonManager.objectMapper.readValue(string)
+    }
+
+    override fun <T : EHRResource> deserialize(string: String, type: KClass<T>): EHRResource {
+        return when (type) {
+            Patient::class -> EpicPatient(JacksonManager.objectMapper.readValue(string))
+            Condition::class -> EpicCondition(JacksonManager.objectMapper.readValue(string))
+            Appointment::class -> JacksonManager.objectMapper.readValue<EpicAppointment>(string)
+            else -> throw NotImplementedError()
+        }
     }
 
     override fun <T> serializeObject(t: T): String {
