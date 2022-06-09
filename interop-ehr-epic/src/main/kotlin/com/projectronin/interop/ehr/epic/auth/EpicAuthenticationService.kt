@@ -78,7 +78,7 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
                 throw e
             }
         }
-        logger.info { "Call for ${tenant.mnemonic} successful authenticated" }
+        logger.info { "Call for ${tenant.mnemonic} successfully authenticated" }
         logger.debug { "Completed authentication for $authURL, JTI $jti" }
         return response
     }

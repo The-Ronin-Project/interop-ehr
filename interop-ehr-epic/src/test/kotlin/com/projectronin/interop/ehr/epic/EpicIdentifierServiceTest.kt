@@ -184,7 +184,7 @@ class EpicIdentifierServiceTest {
         val exception = assertThrows<VendorIdentifierNotFoundException> {
             service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
         }
-        assertEquals("No practitioner provider identifier found for resource with FHIR id 1234", exception.message)
+        assertEquals("No practitioner provider identifier with system 'practitionerProviderSystem' found for resource with FHIR id '1234'", exception.message)
     }
 
     @Test
@@ -196,7 +196,7 @@ class EpicIdentifierServiceTest {
         val exception = assertThrows<VendorIdentifierNotFoundException> {
             service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
         }
-        assertEquals("No practitioner provider identifier found for resource with FHIR id 1234", exception.message)
+        assertEquals("No practitioner provider identifier with system 'practitionerProviderSystem' found for resource with FHIR id '1234'", exception.message)
     }
 
     @Test
@@ -216,7 +216,7 @@ class EpicIdentifierServiceTest {
         val exception = assertThrows<VendorIdentifierNotFoundException> {
             service.getPractitionerUserIdentifier(tenant, fhirIdentifiers)
         }
-        assertEquals("No practitioner user identifier found for resource with FHIR id 1234", exception.message)
+        assertEquals("No practitioner user identifier with system 'practitionerUserSystem' found for resource with FHIR id '1234'", exception.message)
     }
 
     @Test
@@ -228,7 +228,7 @@ class EpicIdentifierServiceTest {
         val exception = assertThrows<VendorIdentifierNotFoundException> {
             service.getPractitionerUserIdentifier(tenant, fhirIdentifiers)
         }
-        assertEquals("No practitioner user identifier found for resource with FHIR id 1234", exception.message)
+        assertEquals("No practitioner user identifier with system 'practitionerUserSystem' found for resource with FHIR id '1234'", exception.message)
     }
 
     @Test
@@ -247,7 +247,7 @@ class EpicIdentifierServiceTest {
         val exception = assertThrows<VendorIdentifierNotFoundException> {
             service.getMRNIdentifier(tenant, listOf(R4Identifier(system = Uri("notTheMRNSystem"), value = "mrn")))
         }
-        assertEquals("No MRN identifier found for Patient", exception.message)
+        assertEquals("No MRN identifier with system 'mrnSystem' found for Patient", exception.message)
     }
 
     @Test

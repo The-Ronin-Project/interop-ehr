@@ -173,12 +173,6 @@ class R4AppointmentTransformerTest {
     fun `transform appointment with only required attributes`() {
         val r4Appointment = R4Appointment(
             id = Id("12345"),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference"),
-                    value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "reference"))
-                )
-            ),
             status = AppointmentStatus.CANCELLED,
             participant = listOf(
                 Participant(
@@ -203,15 +197,6 @@ class R4AppointmentTransformerTest {
         assertNull(oncologyAppointment.language)
         assertNull(oncologyAppointment.text)
         assertEquals(listOf<ContainedResource>(), oncologyAppointment.contained)
-        assertEquals(
-            listOf(
-                Extension(
-                    url = Uri("http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference"),
-                    value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "reference"))
-                )
-            ),
-            oncologyAppointment.extension
-        )
         assertEquals(listOf<Extension>(), oncologyAppointment.modifierExtension)
         assertEquals(
             listOf(
@@ -289,27 +274,6 @@ class R4AppointmentTransformerTest {
     }
 
     @Test
-    fun `fails on missing partnerReference extension`() {
-        val r4Appointment = R4Appointment(
-            id = Id("12345"),
-            status = AppointmentStatus.CANCELLED,
-            participant = listOf(
-                Participant(
-                    actor = Reference(display = "actor"),
-                    status = ParticipationStatus.ACCEPTED
-                )
-            )
-        )
-
-        val appointment = mockk<Appointment> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Appointment
-        }
-
-        assertNull(transformer.transformAppointment(appointment, tenant))
-    }
-
-    @Test
     fun `fails partnerReference extension not being a Reference`() {
         val r4Appointment = R4Appointment(
             id = Id("12345"),
@@ -354,6 +318,12 @@ class R4AppointmentTransformerTest {
         val invalidAppointment = R4Appointment(
             id = Id("12345"),
             status = AppointmentStatus.CANCELLED,
+            extension = listOf(
+                Extension(
+                    url = Uri("http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference"),
+                    value = DynamicValue(DynamicValueType.BOOLEAN, false)
+                )
+            ),
             participant = listOf(
                 Participant(
                     actor = Reference(display = "actor"),
@@ -384,6 +354,12 @@ class R4AppointmentTransformerTest {
     fun `bundle transformation returns only valid transformations`() {
         val invalidAppointment = R4Appointment(
             id = Id("12345"),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference"),
+                    value = DynamicValue(DynamicValueType.BOOLEAN, false)
+                )
+            ),
             status = AppointmentStatus.CANCELLED,
             participant = listOf(
                 Participant(

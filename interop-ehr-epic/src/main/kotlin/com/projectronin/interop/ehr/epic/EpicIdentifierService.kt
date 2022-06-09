@@ -40,7 +40,7 @@ class EpicIdentifierService : IdentifierService {
         return getSystemIdentifier(
             tenant.vendorAs<Epic>().practitionerProviderSystem,
             identifiers.identifiers
-        ) { "No practitioner provider identifier found for resource with FHIR id ${identifiers.id.value}" }
+        ) { "No practitioner provider identifier with system '${tenant.vendorAs<Epic>().practitionerProviderSystem}' found for resource with FHIR id '${identifiers.id.value}'" }
     }
 
     override fun getPractitionerUserIdentifier(
@@ -50,7 +50,7 @@ class EpicIdentifierService : IdentifierService {
         return getSystemIdentifier(
             tenant.vendorAs<Epic>().practitionerUserSystem,
             identifiers.identifiers
-        ) { "No practitioner user identifier found for resource with FHIR id ${identifiers.id.value}" }
+        ) { "No practitioner user identifier with system '${tenant.vendorAs<Epic>().practitionerUserSystem}' found for resource with FHIR id '${identifiers.id.value}'" }
     }
 
     override fun getMRNIdentifier(
@@ -58,7 +58,7 @@ class EpicIdentifierService : IdentifierService {
         identifiers: List<R4Identifier>
     ): R4Identifier {
         val system = Uri(tenant.vendorAs<Epic>().mrnSystem)
-        return identifiers.firstOrNull { it.system == system } ?: throw VendorIdentifierNotFoundException("No MRN identifier found for Patient")
+        return identifiers.firstOrNull { it.system == system } ?: throw VendorIdentifierNotFoundException("No MRN identifier with system '${tenant.vendorAs<Epic>().mrnSystem}' found for Patient")
     }
 
     private fun getEpicIdentifier(
