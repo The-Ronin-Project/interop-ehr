@@ -4,6 +4,7 @@ plugins {
 }
 
 dependencies {
+    implementation(libs.interop.aidbox)
     implementation(libs.interop.common)
     implementation(libs.interop.commonJackson)
     implementation(libs.interop.fhir)

@@ -1,7 +1,13 @@
 package com.projectronin.interop.ehr.epic.transform
 
+import com.projectronin.interop.aidbox.PatientService
+import com.projectronin.interop.aidbox.PractitionerService
+import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.interop.ehr.epic.model.EpicAppointment
+import com.projectronin.interop.ehr.epic.model.EpicPatientParticipant
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
+import com.projectronin.interop.ehr.model.ReferenceTypes
 import com.projectronin.interop.ehr.model.enums.DataSource
 import com.projectronin.interop.ehr.transform.AppointmentTransformer
 import com.projectronin.interop.fhir.r4.CodeSystem
@@ -37,7 +43,11 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Instant as R4Instant
  * Implementation of [AppointmentTransformer] suitable for Epic Appointments
  */
 @Component
-class EpicAppointmentTransformer : AppointmentTransformer {
+class EpicAppointmentTransformer(
+    private val practitionerService: PractitionerService,
+    private val patientService: PatientService
+) :
+    AppointmentTransformer {
     private val logger = KotlinLogging.logger { }
 
     override fun transformAppointments(
@@ -50,17 +60,18 @@ class EpicAppointmentTransformer : AppointmentTransformer {
     }
 
     override fun transformAppointment(appointment: Appointment, tenant: Tenant): OncologyAppointment? {
-        return transformAppointment(appointment, tenant, null, emptyMap())
+        require(appointment.dataSource == DataSource.EPIC_APPORCHARD) { "Appointment is not an Epic AppOrchard resource" }
+        val patientFhirID = findPatientFhirID(appointment as EpicAppointment, tenant.mnemonic)
+        val practitionerFhirIDMap = findProviderIdentifiers(appointment, tenant.mnemonic)
+        return transformAppointmentWithFhirReferences(appointment, tenant, patientFhirID, practitionerFhirIDMap)
     }
 
-    fun transformAppointment(
+    private fun transformAppointmentWithFhirReferences(
         appointment: Appointment,
         tenant: Tenant,
         patientFhirID: String?,
         practitionerIdentifierMap: Map<EHRIdentifier, String?>
     ): OncologyAppointment? {
-        require(appointment.dataSource == DataSource.EPIC_APPORCHARD) { "Appointment is not an Epic AppOrchard resource" }
-
         val appOrchardAppointment = appointment.resource as AppOrchardAppointment
 
         val (startInstant, endInstant) = getStartAndEndInstants(
@@ -132,7 +143,7 @@ class EpicAppointmentTransformer : AppointmentTransformer {
      * [startTime] should be of the format h:mm.
      * [duration] is the number of minutes the appointment should last.
      */
-    fun getStartAndEndInstants(date: String, startTime: String, duration: String): Pair<Instant, Instant> {
+    private fun getStartAndEndInstants(date: String, startTime: String, duration: String): Pair<Instant, Instant> {
         val startDateTime = LocalDateTime.parse(
             "${date.trim()} ${startTime.trim()}",
             DateTimeFormatter.ofPattern("M/d/yyyy h:mm a")
@@ -147,7 +158,7 @@ class EpicAppointmentTransformer : AppointmentTransformer {
         )
     }
 
-    fun buildParticipant(
+    private fun buildParticipant(
         ehrParticipant: EHRParticipant,
         patientFhirID: String?,
         practitionerIdentifierMap: Map<EHRIdentifier, String?>
@@ -176,5 +187,65 @@ class EpicAppointmentTransformer : AppointmentTransformer {
             ),
             status = ParticipationStatus.ACCEPTED,
         )
+    }
+
+    /**
+     * Given an [EpicAppointment] this function resolves the patient identifier against aidbox and
+     * returns their fhir identifier if found
+     */
+    private fun findPatientFhirID(appointment: EpicAppointment, tenantMnemonic: String): String? {
+        val patientParticipant = appointment.participants.singleOrNull { it.actor.type == ReferenceTypes.PATIENT }
+        if (patientParticipant == null) {
+            logger.warn {
+                "Transformed appointment without a patient participant for appointment ${appointment.id} " +
+                    "and tenant $tenantMnemonic"
+            }
+            return null
+        }
+        // Participant has to be an EpicPatientParticipant
+        // and casting it reduces the amount of null checks we need later
+        patientParticipant as EpicPatientParticipant
+        return patientParticipant.actor.identifier?.let { identifier ->
+            val patientMap = patientService.getPatientFHIRIds(
+                tenantMnemonic = tenantMnemonic,
+                identifiers = mapOf(
+                    "any" to SystemValue(
+                        value = identifier.value,
+                        system = identifier.system ?: ""
+                    )
+                )
+            )
+            patientMap["any"]?.removePrefix("$tenantMnemonic-")
+        }
+    }
+
+    /**
+     * Given an [EpicAppointment] this function resolves the practitioner identifiers against aidbox and returns a map
+     * of their [EHRIdentifier] to a fhir ID if found
+     */
+    private fun findProviderIdentifiers(ehrAppointment: EpicAppointment, tenantMnemonic: String): Map<EHRIdentifier, String> {
+        val practitionerIdentifiers = ehrAppointment.participants
+            .filter { participant ->
+                participant.actor.identifier != null &&
+                    participant.actor.type == ReferenceTypes.PRACTITIONER
+            }
+            .associate { participant ->
+                val identifier = participant.actor.identifier!! // we've already filtered out the nulls
+                val systemValue = SystemValue(identifier.value, identifier.system ?: "")
+                identifier to systemValue
+            }
+
+        return if (practitionerIdentifiers.isNotEmpty()) {
+            practitionerService.getPractitionerFHIRIds(
+                tenantMnemonic = tenantMnemonic,
+                identifiers = practitionerIdentifiers
+            )
+                .toList()
+                .associate {
+                    it.first to it.second.removePrefix("$tenantMnemonic-")
+                }
+        } else {
+            emptyMap()
+        }
     }
 }
