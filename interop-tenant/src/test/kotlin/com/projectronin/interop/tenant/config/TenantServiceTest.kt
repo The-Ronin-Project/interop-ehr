@@ -71,7 +71,8 @@ class TenantServiceTest {
         every { messageType } returns "message type2"
         every { practitionerProviderSystem } returns "practitionerSystemExample2"
         every { practitionerUserSystem } returns "userSystemExample2"
-        every { mrnSystem } returns "mrnSystemExample2"
+        every { patientMRNSystem } returns "mrnSystemExample2"
+        every { patientInternalSystem } returns "internalSystemExample2"
         every { hsi } returns null
     }
     private val standardTenantDO = mockk<TenantDO> {
@@ -131,7 +132,8 @@ class TenantServiceTest {
             messageType = "message type2",
             practitionerProviderSystem = "practitionerSystemExample2",
             practitionerUserSystem = "userSystemExample2",
-            mrnSystem = "mrnSystemExample2"
+            patientMRNSystem = "mrnSystemExample2",
+            patientInternalSystem = "internalSystemExample2"
         )
     )
 
