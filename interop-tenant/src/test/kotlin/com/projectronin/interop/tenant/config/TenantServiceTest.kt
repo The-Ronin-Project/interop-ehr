@@ -33,13 +33,21 @@ class TenantServiceTest {
     private lateinit var service: TenantService
     private lateinit var ehrTenantDAOFactory: EHRTenantDAOFactory
 
-    private val standardEHRDO = mockk<EhrDO> {
+    private val standardEHRDO1 = mockk<EhrDO> {
         every { id } returns 1
         every { instanceName } returns "Epic Sandbox"
         every { vendorType } returns VendorType.EPIC
         every { clientId } returns "clientId"
         every { publicKey } returns "publicKey"
         every { privateKey } returns "privateKey"
+    }
+    private val standardEHRDO2 = mockk<EhrDO> {
+        every { id } returns 2
+        every { instanceName } returns "Epic Sandbox Instance 2"
+        every { vendorType } returns VendorType.EPIC
+        every { clientId } returns "clientId2"
+        every { publicKey } returns "publicKey2"
+        every { privateKey } returns "privateKey2"
     }
     private val standardEpicTenantDO = mockk<EpicTenantDO> {
         every { tenantId } returns 1
@@ -53,10 +61,30 @@ class TenantServiceTest {
         every { mrnSystem } returns "mrnSystemExample"
         every { hsi } returns null
     }
+    private val standardEpicTenantDO2 = mockk<EpicTenantDO> {
+        every { tenantId } returns 2
+        every { release } returns "release2"
+        every { serviceEndpoint } returns "http://otherhost/"
+        every { authEndpoint } returns "http://otherhost/oauth2/token"
+        every { ehrUserId } returns "ehr user2"
+        every { messageType } returns "message type2"
+        every { practitionerProviderSystem } returns "practitionerSystemExample2"
+        every { practitionerUserSystem } returns "userSystemExample2"
+        every { mrnSystem } returns "mrnSystemExample2"
+        every { hsi } returns null
+    }
     private val standardTenantDO = mockk<TenantDO> {
         every { id } returns 1
         every { mnemonic } returns "Tenant1"
-        every { ehr } returns standardEHRDO
+        every { ehr } returns standardEHRDO1
+        every { availableBatchStart } returns null
+        every { availableBatchEnd } returns null
+    }
+
+    private val standardTenantDO2 = mockk<TenantDO> {
+        every { id } returns 2
+        every { mnemonic } returns "Tenant2"
+        every { ehr } returns standardEHRDO2
         every { availableBatchStart } returns null
         every { availableBatchEnd } returns null
     }
@@ -80,6 +108,28 @@ class TenantServiceTest {
             practitionerProviderSystem = "practitionerSystemExample",
             practitionerUserSystem = "userSystemExample",
             mrnSystem = "mrnSystemExample"
+        )
+    )
+
+    private val standardTenant2 = Tenant(
+        internalId = 2,
+        mnemonic = "Tenant2",
+        batchConfig = null,
+        vendor = Epic(
+            clientId = "clientId2",
+            instanceName = "Epic Sandbox Instance 2",
+            authenticationConfig = AuthenticationConfig(
+                authEndpoint = "http://otherhost/oauth2/token",
+                publicKey = "publicKey2",
+                privateKey = "privateKey2"
+            ),
+            serviceEndpoint = "http://otherhost/",
+            release = "release2",
+            ehrUserId = "ehr user2",
+            messageType = "message type2",
+            practitionerProviderSystem = "practitionerSystemExample2",
+            practitionerUserSystem = "userSystemExample2",
+            mrnSystem = "mrnSystemExample2"
         )
     )
 
@@ -142,7 +192,7 @@ class TenantServiceTest {
         val tenantDO = mockk<TenantDO> {
             every { id } returns 1
             every { mnemonic } returns "Tenant1"
-            every { ehr } returns standardEHRDO
+            every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns null
             every { availableBatchEnd } returns LocalTime.of(6, 0)
         }
@@ -164,7 +214,7 @@ class TenantServiceTest {
         val tenantDO = mockk<TenantDO> {
             every { id } returns 1
             every { mnemonic } returns "Tenant1"
-            every { ehr } returns standardEHRDO
+            every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns LocalTime.of(20, 0)
             every { availableBatchEnd } returns null
         }
@@ -186,7 +236,7 @@ class TenantServiceTest {
         val tenantDO = mockk<TenantDO> {
             every { id } returns 1
             every { mnemonic } returns "Tenant1"
-            every { ehr } returns standardEHRDO
+            every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns LocalTime.of(20, 0)
             every { availableBatchEnd } returns LocalTime.of(6, 0)
         }
@@ -297,8 +347,18 @@ class TenantServiceTest {
     }
 
     @Test
+    fun `getAll returns multiple tenants with multiple instances`() {
+        every { tenantDAO.getAllTenants() } returns listOf(standardTenantDO, standardTenantDO2)
+        every { epicTenantDAO.getAll() } returns listOf(standardEpicTenantDO, standardEpicTenantDO2)
+
+        val tenants = service.getAllTenants()
+        assertEquals(2, tenants.size)
+        assertEquals(listOf(standardTenant, standardTenant2), tenants)
+    }
+
+    @Test
     fun `insert ok`() {
-        every { ehrDAO.getByInstance("Epic Sandbox") } returns standardEHRDO
+        every { ehrDAO.getByInstance("Epic Sandbox") } returns standardEHRDO1
         every { tenantDAO.insertTenant(any()) } returns standardTenantDO
         every { epicTenantDAO.insert(any()) } returns standardEpicTenantDO
 
@@ -335,11 +395,11 @@ class TenantServiceTest {
         val tenantDO = mockk<TenantDO> {
             every { id } returns 1
             every { mnemonic } returns "Tenant1"
-            every { ehr } returns standardEHRDO
+            every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns LocalTime.of(20, 0)
             every { availableBatchEnd } returns LocalTime.of(6, 0)
         }
-        every { ehrDAO.getByInstance("Epic Sandbox") } returns standardEHRDO
+        every { ehrDAO.getByInstance("Epic Sandbox") } returns standardEHRDO1
         every { tenantDAO.insertTenant(any()) } returns tenantDO
         every { epicTenantDAO.insert(any()) } returns standardEpicTenantDO
 
@@ -355,7 +415,7 @@ class TenantServiceTest {
 
     @Test
     fun `update ok`() {
-        every { ehrDAO.getByInstance("Epic Sandbox") } returns standardEHRDO
+        every { ehrDAO.getByInstance("Epic Sandbox") } returns standardEHRDO1
         every { tenantDAO.getTenantForMnemonic(standardTenant.mnemonic) } returns standardTenantDO
         every { tenantDAO.updateTenant(any()) } returns 1
         every { epicTenantDAO.update(any()) } returns 1

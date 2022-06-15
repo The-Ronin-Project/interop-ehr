@@ -19,6 +19,7 @@ class TenantService(
     private val ehrTenantDAOFactory: EHRTenantDAOFactory
 ) {
     private val logger = KotlinLogging.logger { }
+
     /**
      * Retrieves the [Tenant] for the supplied [mnemonic]. If none exists, null will be returned.
      */
@@ -42,14 +43,14 @@ class TenantService(
         val tenantDOs = tenantDAO.getAllTenants()
         if (tenantDOs.isEmpty()) return emptyList() // if this happens we have gone out of business
         logger.debug { "Found ${tenantDOs.size}" }
-        val ehrDO = tenantDOs.first().ehr // these are the same across tenantDOs
+        val ehrDOByTenantId = tenantDOs.associate { it.id to it.ehr }
         val ehrDAO = ehrTenantDAOFactory.getEHRTenantDAO(tenantDOs.first())
         // this is effectively a "getAllEpicTenants" but can be refactored once we have more vendors
         // likely need some sort of factory to share with getTenantForMnemonic so that given a tenantDO figure out the
         // right EHRTenantDO and vendorType
         val ehrTenantDOMap = ehrDAO.getAll().associateBy { it.tenantId }
         logger.debug { "Found ${ehrTenantDOMap.size} EhrTenantDOs" }
-        return tenantDOs.map { it.toTenant(ehrTenantDOMap[it.id]!!, ehrDO) }
+        return tenantDOs.map { it.toTenant(ehrTenantDOMap[it.id]!!, ehrDOByTenantId[it.id]!!) }
     }
 
     /**
