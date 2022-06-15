@@ -30,7 +30,8 @@ class IdHelpersTest {
                 messageType = "messageType",
                 practitionerProviderSystem = "providerSystem",
                 practitionerUserSystem = "userSystem",
-                mrnSystem = "mrnSystem"
+                patientMRNSystem = "mrnSystem",
+                patientInternalSystem = "internalSystem"
             )
         )
 

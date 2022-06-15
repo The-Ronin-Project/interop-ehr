@@ -83,7 +83,8 @@ private fun EpicTenantDO.toEpic(ehrDO: EhrDO): Epic {
         messageType = messageType,
         practitionerProviderSystem = practitionerProviderSystem,
         practitionerUserSystem = practitionerUserSystem,
-        mrnSystem = mrnSystem,
+        patientMRNSystem = patientMRNSystem,
+        patientInternalSystem = patientInternalSystem,
         hsi = hsi
     )
 }
@@ -108,7 +109,8 @@ private fun Epic.toEpicTenantDO(tenantID: Int): EpicTenantDO {
         messageType = this@toEpicTenantDO.messageType
         practitionerProviderSystem = this@toEpicTenantDO.practitionerProviderSystem
         practitionerUserSystem = this@toEpicTenantDO.practitionerUserSystem
-        mrnSystem = this@toEpicTenantDO.mrnSystem
+        patientMRNSystem = this@toEpicTenantDO.patientMRNSystem
+        patientInternalSystem = this@toEpicTenantDO.patientInternalSystem
         hsi = this@toEpicTenantDO.hsi
     }
 }

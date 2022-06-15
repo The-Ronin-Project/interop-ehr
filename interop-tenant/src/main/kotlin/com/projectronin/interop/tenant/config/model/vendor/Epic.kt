@@ -11,7 +11,8 @@ import com.projectronin.interop.tenant.config.model.AuthenticationConfig
  * @property messageType The type of InBasket message that should be sent to Epic.
  * @property practitionerProviderSystem The system utilized by this Epic instance to represent a practitioner's provider ID.
  * @property practitionerUserSystem The system utilized by this Epic instance to represent a practitioner's user ID.
- * @property mrnSystem The system utilized by this Epic instance to represent the MRN we should use as the patient's MRN
+ * @property patientMRNSystem The system utilized by this Epic instance to represent the MRN we should use as the patient's MRN
+ * @property patientInternalSystem The system utilized by this Epic instance to represent the Epic "internal" identifier
  * @property hsi The HSI value to be used for integration with Epic's Tesseract gateway, null if not leveraging Tesseract.
  */
 @JsonTypeName("EPIC")
@@ -25,7 +26,8 @@ data class Epic(
     val messageType: String,
     val practitionerProviderSystem: String,
     val practitionerUserSystem: String,
-    val mrnSystem: String,
+    val patientMRNSystem: String,
+    val patientInternalSystem: String,
     val hsi: String? = null
 ) : Vendor {
     override val type: VendorType

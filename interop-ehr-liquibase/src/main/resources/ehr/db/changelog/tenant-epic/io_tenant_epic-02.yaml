@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-epic-add-internal-system
+      author: Beau Berger
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_tenant_epic
+                columnName: patient_internal_system
+      changes:
+        - addColumn:
+            tableName: io_tenant_epic
+            columns:
+              - column:
+                  name: patient_internal_system
+                  type: java.sql.Types.VARCHAR(64)
+                  constraints:
+                    nullable: false

@@ -58,7 +58,8 @@ class TenantServiceTest {
         every { messageType } returns "message type"
         every { practitionerProviderSystem } returns "practitionerSystemExample"
         every { practitionerUserSystem } returns "userSystemExample"
-        every { mrnSystem } returns "mrnSystemExample"
+        every { patientMRNSystem } returns "mrnSystemExample"
+        every { patientInternalSystem } returns "internalSystemExample"
         every { hsi } returns null
     }
     private val standardEpicTenantDO2 = mockk<EpicTenantDO> {
@@ -107,7 +108,8 @@ class TenantServiceTest {
             messageType = "message type",
             practitionerProviderSystem = "practitionerSystemExample",
             practitionerUserSystem = "userSystemExample",
-            mrnSystem = "mrnSystemExample"
+            patientMRNSystem = "mrnSystemExample",
+            patientInternalSystem = "internalSystemExample"
         )
     )
 
@@ -265,7 +267,8 @@ class TenantServiceTest {
                 messageType = "message type",
                 practitionerProviderSystem = "practitionerSystemExample",
                 practitionerUserSystem = "userSystemExample",
-                mrnSystem = "mrnSystemExample"
+                patientMRNSystem = "mrnSystemExample",
+                patientInternalSystem = "internalSystemExample"
             )
         )
 
@@ -291,7 +294,8 @@ class TenantServiceTest {
             every { messageType } returns "message type"
             every { practitionerProviderSystem } returns "practitionerSystemExample"
             every { practitionerUserSystem } returns "userSystemExample"
-            every { mrnSystem } returns "mrnSystemExample"
+            every { patientMRNSystem } returns "mrnSystemExample"
+            every { patientInternalSystem } returns "internalSystemExample"
             every { hsi } returns "urn:epic:apporchard.curprod"
         }
         every { epicTenantDAO.getByTenantMnemonic("Tenant1") } returns epicTenantDO
@@ -314,7 +318,8 @@ class TenantServiceTest {
                 messageType = "message type",
                 practitionerProviderSystem = "practitionerSystemExample",
                 practitionerUserSystem = "userSystemExample",
-                mrnSystem = "mrnSystemExample",
+                patientMRNSystem = "mrnSystemExample",
+                patientInternalSystem = "internalSystemExample",
                 hsi = "urn:epic:apporchard.curprod"
             )
         )
@@ -389,7 +394,8 @@ class TenantServiceTest {
                 messageType = "message type",
                 practitionerProviderSystem = "practitionerSystemExample",
                 practitionerUserSystem = "userSystemExample",
-                mrnSystem = "mrnSystemExample"
+                patientMRNSystem = "mrnSystemExample",
+                patientInternalSystem = "internalSystemExample"
             )
         )
         val tenantDO = mockk<TenantDO> {

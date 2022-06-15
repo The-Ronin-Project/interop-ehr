@@ -21,7 +21,8 @@ class TenantTest {
                 "Ronin Message",
                 "urn:oid:1.2.840.114350.1.13.0.1.7.2.836982",
                 "urn:oid:1.2.840.114350.1.13.0.1.7.2.697780",
-                "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+                "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+                "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.15"
             )
         val tenant = Tenant(1, "mnemonic", batchConfig, epic)
         assertEquals(1, tenant.internalId)

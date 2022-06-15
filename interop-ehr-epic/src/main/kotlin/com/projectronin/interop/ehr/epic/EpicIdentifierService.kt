@@ -57,8 +57,9 @@ class EpicIdentifierService : IdentifierService {
         tenant: Tenant,
         identifiers: List<R4Identifier>
     ): R4Identifier {
-        val system = Uri(tenant.vendorAs<Epic>().mrnSystem)
-        return identifiers.firstOrNull { it.system == system } ?: throw VendorIdentifierNotFoundException("No MRN identifier with system '${tenant.vendorAs<Epic>().mrnSystem}' found for Patient")
+        val system = Uri(tenant.vendorAs<Epic>().patientMRNSystem)
+        return identifiers.firstOrNull { it.system == system }
+            ?: throw VendorIdentifierNotFoundException("No MRN identifier with system '${tenant.vendorAs<Epic>().patientMRNSystem}' found for Patient")
     }
 
     private fun getEpicIdentifier(

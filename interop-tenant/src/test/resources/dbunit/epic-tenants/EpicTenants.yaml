@@ -28,6 +28,7 @@ io_tenant_epic:
     practitioner_provider_system: "urn:oid:provider.system"
     practitioner_user_system: "urn:oid:user.system"
     mrn_system: "urn:oid:mrn.system"
+    patient_internal_system: "urn:oid:internal.system"
     hsi: "urn:epic:apporchard.curprod"
   - io_tenant_id: 1003
     release_version: "2021.10"
@@ -38,3 +39,4 @@ io_tenant_epic:
     practitioner_provider_system: "urn:oid:provider.system"
     practitioner_user_system: "urn:oid:user.system"
     mrn_system: "urn:oid:mrn.system"
+    patient_internal_system: "urn:oid:internal.system"

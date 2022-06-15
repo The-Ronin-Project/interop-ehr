@@ -18,6 +18,7 @@ object EpicTenantDOs : Table<EpicTenantDO>("io_tenant_epic") {
     val practitionerProviderSystem =
         varchar("practitioner_provider_system").bindTo { it.practitionerProviderSystem }
     val practitionerUserSystem = varchar("practitioner_user_system").bindTo { it.practitionerUserSystem }
-    val mrnSystem = varchar("mrn_system").bindTo { it.mrnSystem }
+    val patientMRNSystem = varchar("mrn_system").bindTo { it.patientMRNSystem }
+    val patientInternalSystem = varchar("patient_internal_system").bindTo { it.patientInternalSystem }
     val hsi = varchar("hsi").bindTo { it.hsi }
 }

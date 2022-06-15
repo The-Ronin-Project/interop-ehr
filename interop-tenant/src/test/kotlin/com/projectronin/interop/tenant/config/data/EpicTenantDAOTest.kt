@@ -33,7 +33,8 @@ class EpicTenantDAOTest {
         assertEquals("Ronin Alerts", epicTenant?.messageType)
         assertEquals("urn:oid:provider.system", epicTenant?.practitionerProviderSystem)
         assertEquals("urn:oid:user.system", epicTenant?.practitionerUserSystem)
-        assertEquals("urn:oid:mrn.system", epicTenant?.mrnSystem)
+        assertEquals("urn:oid:mrn.system", epicTenant?.patientMRNSystem)
+        assertEquals("urn:oid:internal.system", epicTenant?.patientInternalSystem)
         assertEquals("urn:epic:apporchard.curprod", epicTenant?.hsi)
     }
 
@@ -71,7 +72,8 @@ class EpicTenantDAOTest {
             messageType = "messageType"
             practitionerProviderSystem = "providerSystem"
             practitionerUserSystem = "userSystem"
-            mrnSystem = "mrnSystem"
+            patientMRNSystem = "mrnSystem"
+            patientInternalSystem = "internalSystem"
             hsi = "hsi"
         }
 
@@ -83,7 +85,8 @@ class EpicTenantDAOTest {
         assertEquals(testobj.messageType, result.messageType)
         assertEquals(testobj.practitionerProviderSystem, result.practitionerProviderSystem)
         assertEquals(testobj.practitionerUserSystem, result.practitionerUserSystem)
-        assertEquals(testobj.mrnSystem, result.mrnSystem)
+        assertEquals(testobj.patientMRNSystem, result.patientMRNSystem)
+        assertEquals(testobj.patientInternalSystem, result.patientInternalSystem)
         assertEquals(testobj.hsi, result.hsi)
     }
 
@@ -98,7 +101,8 @@ class EpicTenantDAOTest {
             messageType = "messageType"
             practitionerProviderSystem = "providerSystem"
             practitionerUserSystem = "userSystem"
-            mrnSystem = "mrnSystem"
+            patientMRNSystem = "mrnSystem"
+            patientInternalSystem = "internalSystem"
             hsi = "hsi"
         }
 
@@ -121,7 +125,8 @@ class EpicTenantDAOTest {
             messageType = "messageType"
             practitionerProviderSystem = "providerSystem"
             practitionerUserSystem = "userSystem"
-            mrnSystem = "mrnSystem"
+            patientMRNSystem = "mrnSystem"
+            patientInternalSystem = "internalSystem"
             hsi = "hsi"
         }
         val result = dao.update(updated)
@@ -136,7 +141,8 @@ class EpicTenantDAOTest {
         assertEquals(updated.messageType, found?.messageType)
         assertEquals(updated.practitionerProviderSystem, found?.practitionerProviderSystem)
         assertEquals(updated.practitionerUserSystem, found?.practitionerUserSystem)
-        assertEquals(updated.mrnSystem, found?.mrnSystem)
+        assertEquals(updated.patientMRNSystem, found?.patientMRNSystem)
+        assertEquals(updated.patientInternalSystem, found?.patientInternalSystem)
         assertEquals(updated.hsi, found?.hsi)
     }
 }
