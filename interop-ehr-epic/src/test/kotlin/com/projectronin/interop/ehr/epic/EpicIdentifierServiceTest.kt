@@ -24,7 +24,8 @@ class EpicIdentifierServiceTest {
     private val tenant = createTestTenant(
         practitionerProviderSystem = "practitionerProviderSystem",
         practitionerUserSystem = "practitionerUserSystem",
-        mrnSystem = "mrnSystem"
+        mrnSystem = "mrnSystem",
+        internalSystem = "internalSystem"
     )
 
     private val otherType = mockk<CodeableConcept> {
@@ -93,7 +94,7 @@ class EpicIdentifierServiceTest {
         val exception = assertThrows<VendorIdentifierNotFoundException> {
             service.getPatientIdentifier(tenant, identifiers)
         }
-        assertEquals("No identifier found for patient", exception.message)
+        assertEquals("No matching identifier for the patient with system internalSystem", exception.message)
     }
 
     @Test
@@ -101,7 +102,6 @@ class EpicIdentifierServiceTest {
         val identifiers = listOf(externalIdentifier, otherIdentifier)
 
         val patientIdentifier = service.getPatientIdentifier(tenant, identifiers)
-        assertNull(patientIdentifier.system)
         assertEquals("external-value", patientIdentifier.value)
         assertEquals(externalType, patientIdentifier.type)
     }
@@ -109,7 +109,6 @@ class EpicIdentifierServiceTest {
     @Test
     fun `getPatientIdentifier with external type and system`() {
         val externalIdentifierWithSystem = mockk<EpicIDType> {
-            every { system } returns "external-system"
             every { value } returns "external-value"
             every { type } returns externalType
             every { raw } returns "{}"
@@ -119,7 +118,7 @@ class EpicIdentifierServiceTest {
         val identifiers = listOf(externalIdentifierWithSystem, otherIdentifier)
 
         val patientIdentifier = service.getPatientIdentifier(tenant, identifiers)
-        assertEquals("external-system", patientIdentifier.system)
+        assertEquals("internalSystem", patientIdentifier.system)
         assertEquals("external-value", patientIdentifier.value)
         assertEquals(externalType, patientIdentifier.type)
     }
@@ -129,7 +128,6 @@ class EpicIdentifierServiceTest {
         val identifiers = listOf(internalIdentifier, otherIdentifier)
 
         val patientIdentifier = service.getPatientIdentifier(tenant, identifiers)
-        assertNull(patientIdentifier.system)
         assertEquals("internal-value", patientIdentifier.value)
         assertEquals(internalType, patientIdentifier.type)
     }
@@ -137,7 +135,6 @@ class EpicIdentifierServiceTest {
     @Test
     fun `getPatientIdentifier with internal type and system`() {
         val internalIdentifierWithSystem = mockk<EpicIDType> {
-            every { system } returns "internal-system"
             every { value } returns "internal-value"
             every { type } returns internalType
             every { raw } returns "{}"
@@ -147,7 +144,7 @@ class EpicIdentifierServiceTest {
         val identifiers = listOf(internalIdentifierWithSystem, otherIdentifier)
 
         val patientIdentifier = service.getPatientIdentifier(tenant, identifiers)
-        assertEquals("internal-system", patientIdentifier.system)
+        assertEquals("internalSystem", patientIdentifier.system)
         assertEquals("internal-value", patientIdentifier.value)
         assertEquals(internalType, patientIdentifier.type)
     }
@@ -155,7 +152,6 @@ class EpicIdentifierServiceTest {
     @Test
     fun `getPatientIdentifier with a non-EpicIDType`() {
         val nonEpicIDTypeIdentifier = mockk<Identifier> {
-            every { system } returns "internal-system"
             every { value } returns "internal-value"
             every { type } returns internalType
             every { raw } returns "{}"
@@ -184,7 +180,10 @@ class EpicIdentifierServiceTest {
         val exception = assertThrows<VendorIdentifierNotFoundException> {
             service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
         }
-        assertEquals("No practitioner provider identifier with system 'practitionerProviderSystem' found for resource with FHIR id '1234'", exception.message)
+        assertEquals(
+            "No practitioner provider identifier with system 'practitionerProviderSystem' found for resource with FHIR id '1234'",
+            exception.message
+        )
     }
 
     @Test
@@ -196,7 +195,10 @@ class EpicIdentifierServiceTest {
         val exception = assertThrows<VendorIdentifierNotFoundException> {
             service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
         }
-        assertEquals("No practitioner provider identifier with system 'practitionerProviderSystem' found for resource with FHIR id '1234'", exception.message)
+        assertEquals(
+            "No practitioner provider identifier with system 'practitionerProviderSystem' found for resource with FHIR id '1234'",
+            exception.message
+        )
     }
 
     @Test
@@ -216,7 +218,10 @@ class EpicIdentifierServiceTest {
         val exception = assertThrows<VendorIdentifierNotFoundException> {
             service.getPractitionerUserIdentifier(tenant, fhirIdentifiers)
         }
-        assertEquals("No practitioner user identifier with system 'practitionerUserSystem' found for resource with FHIR id '1234'", exception.message)
+        assertEquals(
+            "No practitioner user identifier with system 'practitionerUserSystem' found for resource with FHIR id '1234'",
+            exception.message
+        )
     }
 
     @Test
@@ -228,7 +233,10 @@ class EpicIdentifierServiceTest {
         val exception = assertThrows<VendorIdentifierNotFoundException> {
             service.getPractitionerUserIdentifier(tenant, fhirIdentifiers)
         }
-        assertEquals("No practitioner user identifier with system 'practitionerUserSystem' found for resource with FHIR id '1234'", exception.message)
+        assertEquals(
+            "No practitioner user identifier with system 'practitionerUserSystem' found for resource with FHIR id '1234'",
+            exception.message
+        )
     }
 
     @Test
@@ -259,8 +267,10 @@ class EpicIdentifierServiceTest {
     @Test
     fun `can serialize StandardizedIdentifier`() {
         val sourceIdentifier = IDType("id", "value")
-        val standardizedIdentifier = EpicIdentifierService.StandardizedIdentifier("system", EpicIDType(sourceIdentifier))
-        val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(standardizedIdentifier)
+        val standardizedIdentifier =
+            EpicIdentifierService.StandardizedIdentifier("system", EpicIDType(sourceIdentifier))
+        val json =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(standardizedIdentifier)
         val expectedJson = """
             {
               "system" : "system",
@@ -285,7 +295,8 @@ class EpicIdentifierServiceTest {
             }
         """.trimIndent()
 
-        val deserializedIdentifier = JacksonManager.objectMapper.readValue(json, EpicIdentifierService.StandardizedIdentifier::class.java)
+        val deserializedIdentifier =
+            JacksonManager.objectMapper.readValue(json, EpicIdentifierService.StandardizedIdentifier::class.java)
         assertEquals("typeValue", deserializedIdentifier.type?.text)
         assertEquals("system", deserializedIdentifier.system)
         assertEquals("id", deserializedIdentifier.value)
@@ -303,7 +314,8 @@ class EpicIdentifierServiceTest {
             }
         """.trimIndent()
 
-        val deserializedIdentifier = JacksonManager.objectMapper.readValue(json, EpicIdentifierService.StandardizedIdentifier::class.java)
+        val deserializedIdentifier =
+            JacksonManager.objectMapper.readValue(json, EpicIdentifierService.StandardizedIdentifier::class.java)
         assertEquals("typeValue", deserializedIdentifier.type?.text)
         assertNull(deserializedIdentifier.system)
         assertEquals("id", deserializedIdentifier.value)
@@ -312,9 +324,12 @@ class EpicIdentifierServiceTest {
     @Test
     fun `can serialize and deserialize StandardizedIdentifier`() {
         val sourceIdentifier = IDType("id", "value")
-        val standardizedIdentifier = EpicIdentifierService.StandardizedIdentifier("system", EpicIDType(sourceIdentifier))
-        val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(standardizedIdentifier)
-        val deserializedIdentifier = JacksonManager.objectMapper.readValue(json, EpicIdentifierService.StandardizedIdentifier::class.java)
+        val standardizedIdentifier =
+            EpicIdentifierService.StandardizedIdentifier("system", EpicIDType(sourceIdentifier))
+        val json =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(standardizedIdentifier)
+        val deserializedIdentifier =
+            JacksonManager.objectMapper.readValue(json, EpicIdentifierService.StandardizedIdentifier::class.java)
         assertEquals(standardizedIdentifier, deserializedIdentifier)
     }
 }

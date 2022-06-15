@@ -29,8 +29,10 @@ class EpicIdentifierService : IdentifierService {
     }
 
     override fun getPatientIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
-        // TODO: Is there a system that should be used here?
-        return getEpicIdentifier(identifiers, null) { "No identifier found for patient" }
+        return getEpicIdentifier(
+            identifiers,
+            tenant.vendorAs<Epic>().patientInternalSystem
+        ) { "No matching identifier for the patient with system ${tenant.vendorAs<Epic>().patientInternalSystem}" }
     }
 
     override fun getPractitionerProviderIdentifier(

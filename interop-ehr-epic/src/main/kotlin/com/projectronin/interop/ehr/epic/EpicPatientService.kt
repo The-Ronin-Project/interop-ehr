@@ -69,7 +69,7 @@ class EpicPatientService(
         // Chunk the identifiers and run the search
         val patientsFound = patientIdentifiers.chunked(batchSize) {
             val identifierParam = it.joinToString(separator = ",") { patientIdentifier ->
-                "${patientIdentifier.type?.text}|${patientIdentifier.value}"
+                "${patientIdentifier.system}|${patientIdentifier.value}"
             }
             getBundleWithPaging(
                 tenant,
