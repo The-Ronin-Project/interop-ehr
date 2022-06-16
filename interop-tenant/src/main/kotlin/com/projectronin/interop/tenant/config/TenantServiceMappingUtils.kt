@@ -18,6 +18,7 @@ internal fun Tenant.toTenantDO(ehrDO: EhrDO): TenantDO {
         // these this@ are necessary for kotlin to know we're talking about the value on the original Tenant object
         // and not the TenantDO we're constructing
         mnemonic = this@toTenantDO.mnemonic
+        name = this@toTenantDO.name
         ehr = ehrDO
         availableBatchStart = this@toTenantDO.batchConfig?.availableStart
         availableBatchEnd = this@toTenantDO.batchConfig?.availableEnd
@@ -36,6 +37,7 @@ fun TenantDO.toTenant(ehrTenantDO: EHRTenantDO, ehrDO: EhrDO): Tenant {
     return Tenant(
         internalId = id,
         mnemonic = mnemonic,
+        name = name,
         batchConfig = batchConfig,
         vendor = ehrTenantDO.toVendor(ehrDO)
     )

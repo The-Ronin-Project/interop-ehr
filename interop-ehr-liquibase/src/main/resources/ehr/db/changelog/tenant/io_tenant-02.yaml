@@ -1,0 +1,23 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-full-name-create
+      author: Susan Korgen
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_tenant
+                columnName: full_name
+      changes:
+        - addColumn:
+            tableName: io_tenant
+            columns:
+              - column:
+                  name: full_name
+                  type: java.sql.Types.VARCHAR(100)
+        - sql:
+            sql: UPDATE io_tenant SET full_name = mnemonic
+        - addNotNullConstraint:
+            tableName: io_tenant
+            columnName: full_name
+            columnDataType: java.sql.Types.VARCHAR(100)

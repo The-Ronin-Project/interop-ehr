@@ -15,6 +15,7 @@ class IdHelpersTest {
         val tenant = Tenant(
             internalId = 1,
             mnemonic = "test",
+            name = "Test Tenant",
             batchConfig = null,
             vendor = Epic(
                 clientId = "clientId",

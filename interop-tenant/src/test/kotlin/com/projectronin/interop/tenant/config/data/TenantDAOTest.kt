@@ -70,6 +70,7 @@ class TenantDAOTest {
         firstTenant.let {
             assertEquals(1001, firstTenant.id)
             assertEquals("mdaoc", firstTenant.mnemonic)
+            assertEquals("Alternate Test Tenant", firstTenant.name)
             assertEquals(LocalTime.of(22, 0, 0), firstTenant.availableBatchStart)
             assertEquals(LocalTime.of(6, 0, 0), firstTenant.availableBatchEnd)
 
@@ -93,6 +94,7 @@ class TenantDAOTest {
         val insertedTenantDO = TenantDO {
             id = 0
             mnemonic = "mnemonic"
+            name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
             ehr = ehrDAO.read().first()
             availableBatchStart = LocalTime.of(22, 0, 0)
             availableBatchEnd = LocalTime.of(6, 0, 0)
@@ -118,6 +120,7 @@ class TenantDAOTest {
         val insertedTenantDO = TenantDO {
             id = 0
             mnemonic = "mnemonic"
+            name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
             ehr = fakeEhrDO
             availableBatchStart = LocalTime.of(22, 0)
             availableBatchEnd = LocalTime.of(6, 0, 0)
@@ -139,6 +142,7 @@ class TenantDAOTest {
         val updatedTenantDO = TenantDO {
             id = 1001
             mnemonic = "mnemonic"
+            name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
             ehr = ehrDAO.read().first()
             availableBatchStart = LocalTime.of(23, 0)
             availableBatchEnd = LocalTime.of(5, 0, 0)
@@ -159,6 +163,7 @@ class TenantDAOTest {
         val updatedTenantDO = TenantDO {
             id = 54321
             mnemonic = "mnemonic"
+            name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
             ehr = ehrDAO.read().first()
             availableBatchStart = LocalTime.of(23, 0)
             availableBatchEnd = LocalTime.of(5, 0, 0)
@@ -178,6 +183,7 @@ class TenantDAOTest {
         val updatedTenantDO = TenantDO {
             id = 54321
             mnemonic = "mnemonic"
+            name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
             ehr = ehrDAO.read().first()
             availableBatchStart = LocalTime.of(23, 0)
             availableBatchEnd = LocalTime.of(5, 0, 0)
@@ -186,6 +192,7 @@ class TenantDAOTest {
         every {
             database.update(TenantDOs) {
                 set(it.mnemonic, updatedTenantDO.mnemonic)
+                set(it.name, updatedTenantDO.name)
                 set(it.ehr, updatedTenantDO.ehr.id)
                 set(it.availableBatchStart, updatedTenantDO.availableBatchStart)
                 set(it.availableBatchEnd, updatedTenantDO.availableBatchEnd)

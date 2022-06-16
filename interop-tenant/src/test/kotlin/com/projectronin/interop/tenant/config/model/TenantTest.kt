@@ -24,9 +24,16 @@ class TenantTest {
                 "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
                 "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.15"
             )
-        val tenant = Tenant(1, "mnemonic", batchConfig, epic)
+        val tenant = Tenant(
+            1,
+            "mnemonic",
+            "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated",
+            batchConfig,
+            epic
+        )
         assertEquals(1, tenant.internalId)
         assertEquals("mnemonic", tenant.mnemonic)
+        assertEquals("Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated", tenant.name)
         assertEquals(batchConfig, tenant.batchConfig)
         assertEquals(epic, tenant.vendor)
     }

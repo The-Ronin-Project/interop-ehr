@@ -78,6 +78,7 @@ class TenantServiceTest {
     private val standardTenantDO = mockk<TenantDO> {
         every { id } returns 1
         every { mnemonic } returns "Tenant1"
+        every { name } returns "Test Tenant"
         every { ehr } returns standardEHRDO1
         every { availableBatchStart } returns null
         every { availableBatchEnd } returns null
@@ -86,6 +87,7 @@ class TenantServiceTest {
     private val standardTenantDO2 = mockk<TenantDO> {
         every { id } returns 2
         every { mnemonic } returns "Tenant2"
+        every { name } returns "Second Alternate Tenant"
         every { ehr } returns standardEHRDO2
         every { availableBatchStart } returns null
         every { availableBatchEnd } returns null
@@ -94,6 +96,7 @@ class TenantServiceTest {
     private val standardTenant = Tenant(
         internalId = 1,
         mnemonic = "Tenant1",
+        name = "Test Tenant",
         batchConfig = null,
         vendor = Epic(
             clientId = "clientId",
@@ -117,6 +120,7 @@ class TenantServiceTest {
     private val standardTenant2 = Tenant(
         internalId = 2,
         mnemonic = "Tenant2",
+        name = "Second Alternate Tenant",
         batchConfig = null,
         vendor = Epic(
             clientId = "clientId2",
@@ -196,6 +200,7 @@ class TenantServiceTest {
         val tenantDO = mockk<TenantDO> {
             every { id } returns 1
             every { mnemonic } returns "Tenant1"
+            every { name } returns "Test Tenant"
             every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns null
             every { availableBatchEnd } returns LocalTime.of(6, 0)
@@ -218,6 +223,7 @@ class TenantServiceTest {
         val tenantDO = mockk<TenantDO> {
             every { id } returns 1
             every { mnemonic } returns "Tenant1"
+            every { name } returns "Test Tenant"
             every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns LocalTime.of(20, 0)
             every { availableBatchEnd } returns null
@@ -240,6 +246,7 @@ class TenantServiceTest {
         val tenantDO = mockk<TenantDO> {
             every { id } returns 1
             every { mnemonic } returns "Tenant1"
+            every { name } returns "Test Tenant"
             every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns LocalTime.of(20, 0)
             every { availableBatchEnd } returns LocalTime.of(6, 0)
@@ -251,6 +258,7 @@ class TenantServiceTest {
         val expectedTenant = Tenant(
             internalId = 1,
             mnemonic = "Tenant1",
+            name = "Test Tenant",
             batchConfig = BatchConfig(
                 availableStart = LocalTime.of(20, 0),
                 availableEnd = LocalTime.of(6, 0)
@@ -305,6 +313,7 @@ class TenantServiceTest {
         val expectedTenant = Tenant(
             internalId = 1,
             mnemonic = "Tenant1",
+            name = "Test Tenant",
             batchConfig = null,
             vendor = Epic(
                 clientId = "clientId",
@@ -378,6 +387,7 @@ class TenantServiceTest {
         val newTenant = Tenant(
             internalId = 1,
             mnemonic = "Tenant1",
+            name = "Test Tenant",
             batchConfig = BatchConfig(
                 availableStart = LocalTime.of(20, 0),
                 availableEnd = LocalTime.of(6, 0)
@@ -403,6 +413,7 @@ class TenantServiceTest {
         val tenantDO = mockk<TenantDO> {
             every { id } returns 1
             every { mnemonic } returns "Tenant1"
+            every { name } returns "Test Tenant"
             every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns LocalTime.of(20, 0)
             every { availableBatchEnd } returns LocalTime.of(6, 0)

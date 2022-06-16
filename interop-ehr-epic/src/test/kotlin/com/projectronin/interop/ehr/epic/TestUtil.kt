@@ -28,6 +28,7 @@ fun createTestTenant(
     serviceEndpoint: String = "http://no.endpo.int",
     privateKey: String = "privateKey",
     tenantMnemonic: String = "mnemonic",
+    tenantName: String = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated",
     ehrUserId: String = "ehrUserId",
     messageType: String = "messageType",
     internalId: Int = 1,
@@ -42,6 +43,7 @@ fun createTestTenant(
     return Tenant(
         internalId,
         tenantMnemonic,
+        tenantName,
         BatchConfig(LocalTime.MIN, LocalTime.MAX),
         Epic(
             clientId,

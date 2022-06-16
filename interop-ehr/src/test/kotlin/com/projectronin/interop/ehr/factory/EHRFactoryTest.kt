@@ -31,7 +31,7 @@ class EHRFactoryTest {
                 "mrnSystem",
                 "internalSystem"
             )
-        val tenant = Tenant(1, "TENANT", null, vendor)
+        val tenant = Tenant(1, "TENANT", "Test Tenant", null, vendor)
 
         val vendorFactory = ehrFactory.getVendorFactory(tenant)
         assertEquals(epicVendorFactory, vendorFactory)
@@ -55,7 +55,7 @@ class EHRFactoryTest {
                 "mrnSystem",
                 "internalSystem"
             )
-        val tenant = Tenant(1, "TENANT", null, vendor)
+        val tenant = Tenant(1, "TENANT", "Test Tenant", null, vendor)
 
         val exception = assertThrows(IllegalStateException::class.java) {
             ehrFactory.getVendorFactory(tenant)

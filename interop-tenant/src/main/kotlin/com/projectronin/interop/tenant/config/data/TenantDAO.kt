@@ -47,6 +47,7 @@ class TenantDAO(@Qualifier("ehr") private val database: Database) {
         val tenantKey = try {
             database.insertAndGenerateKey(TenantDOs) {
                 set(it.mnemonic, tenant.mnemonic)
+                set(it.name, tenant.name)
                 set(it.ehr, tenant.ehr.id)
                 set(it.availableBatchStart, tenant.availableBatchStart)
                 set(it.availableBatchEnd, tenant.availableBatchEnd)
@@ -66,6 +67,7 @@ class TenantDAO(@Qualifier("ehr") private val database: Database) {
         return try {
             database.update(TenantDOs) {
                 set(it.mnemonic, tenant.mnemonic)
+                set(it.name, tenant.name)
                 set(it.ehr, tenant.ehr.id)
                 set(it.availableBatchStart, tenant.availableBatchStart)
                 set(it.availableBatchEnd, tenant.availableBatchEnd)

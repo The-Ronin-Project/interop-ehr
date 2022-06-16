@@ -9,6 +9,7 @@ io_ehr:
 io_tenant:
   - io_tenant_id: 1001
     mnemonic: "tenant"
+    full_name: "Test Tenant"
     io_ehr_id: 101
     available_batch_start: "22:00:00"
     available_batch_end: "06:00:00"

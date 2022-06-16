@@ -46,6 +46,7 @@ class EpicMessageServiceTest {
             "https://example.org",
             testPrivateKey,
             "TEST_TENANT",
+            "Test Tenant",
             "USER#1",
             "Symptom Alert"
         )
@@ -97,6 +98,7 @@ class EpicMessageServiceTest {
             "https://example.org",
             testPrivateKey,
             "TEST_TENANT",
+            "Test Tenant",
             "USER#1",
             "Symptom Alert"
         )
@@ -248,6 +250,7 @@ class EpicMessageServiceTest {
             "https://example.org",
             testPrivateKey,
             "TEST_TENANT",
+            "Test Tenant",
             "USER#1",
             "Symptom Alert"
         )

@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: ehr/db/changelog/tenant-epic/io_tenant_epic-02.yaml
+  - include:
+      file: ehr/db/changelog/tenant/io_tenant-02.yaml

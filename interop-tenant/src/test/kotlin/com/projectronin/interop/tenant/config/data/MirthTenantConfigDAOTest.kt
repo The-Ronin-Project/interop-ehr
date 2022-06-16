@@ -34,6 +34,7 @@ class MirthTenantConfigDAOTest {
     private val tenantDO = mockk<TenantDO> {
         every { id } returns 1001
         every { mnemonic } returns "apposend"
+        every { name } returns "Epic AppOrchard Sandbox"
         every { ehr } returns ehrDO
         every { availableBatchStart } returns null
         every { availableBatchEnd } returns null
