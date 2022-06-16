@@ -23,5 +23,6 @@ io_tenant_epic:
     practitioner_provider_system: "providerSystem"
     practitioner_user_system: "userSystem"
     mrn_system: "mrnSystem"
+    mrn_type_text: "MRN"
     patient_internal_system: "internalSystem"
     hsi: "hsi"

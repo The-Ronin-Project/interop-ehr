@@ -34,6 +34,7 @@ fun createTestTenant(
     practitionerProviderSystem: String = "providerSystem",
     practitionerUserSystem: String = "userSystem",
     mrnSystem: String = "mrnSystem",
+    mrnTypeText: String = "MRN",
     internalSystem: String = "internalSystem",
     hsi: String? = null,
     authEndpoint: String? = null,
@@ -54,6 +55,7 @@ fun createTestTenant(
             practitionerUserSystem,
             mrnSystem,
             internalSystem,
+            patientMRNTypeText = mrnTypeText,
             hsi
         )
     )

@@ -51,6 +51,7 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
                 startDate = dateFormat.format(startDate),
                 endDate = dateFormat.format(endDate),
                 patientId = patientMRN,
+                patientIdType = getEpicVendor(tenant).patientMRNTypeText
             )
 
         return findAppointments(tenant, patientAppointmentSearchUrlPart, request)

@@ -17,5 +17,6 @@ interface EpicTenantDO : EHRTenantDO, Entity<EpicTenantDO> {
     var practitionerUserSystem: String
     var patientMRNSystem: String
     var patientInternalSystem: String
+    var patientMRNTypeText: String
     var hsi: String?
 }

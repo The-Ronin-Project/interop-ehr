@@ -73,6 +73,7 @@ class EpicTenantDAOTest {
             practitionerProviderSystem = "providerSystem"
             practitionerUserSystem = "userSystem"
             patientMRNSystem = "mrnSystem"
+            patientMRNTypeText = "MRN"
             patientInternalSystem = "internalSystem"
             hsi = "hsi"
         }
@@ -86,6 +87,7 @@ class EpicTenantDAOTest {
         assertEquals(testobj.practitionerProviderSystem, result.practitionerProviderSystem)
         assertEquals(testobj.practitionerUserSystem, result.practitionerUserSystem)
         assertEquals(testobj.patientMRNSystem, result.patientMRNSystem)
+        assertEquals(testobj.patientMRNTypeText, result.patientMRNTypeText)
         assertEquals(testobj.patientInternalSystem, result.patientInternalSystem)
         assertEquals(testobj.hsi, result.hsi)
     }
@@ -103,6 +105,7 @@ class EpicTenantDAOTest {
             practitionerUserSystem = "userSystem"
             patientMRNSystem = "mrnSystem"
             patientInternalSystem = "internalSystem"
+            patientMRNTypeText = "MRN"
             hsi = "hsi"
         }
 
@@ -126,6 +129,7 @@ class EpicTenantDAOTest {
             practitionerProviderSystem = "providerSystem"
             practitionerUserSystem = "userSystem"
             patientMRNSystem = "mrnSystem"
+            patientMRNTypeText = "MRN"
             patientInternalSystem = "internalSystem"
             hsi = "hsi"
         }
@@ -142,6 +146,7 @@ class EpicTenantDAOTest {
         assertEquals(updated.practitionerProviderSystem, found?.practitionerProviderSystem)
         assertEquals(updated.practitionerUserSystem, found?.practitionerUserSystem)
         assertEquals(updated.patientMRNSystem, found?.patientMRNSystem)
+        assertEquals(updated.patientMRNTypeText, found?.patientMRNTypeText)
         assertEquals(updated.patientInternalSystem, found?.patientInternalSystem)
         assertEquals(updated.hsi, found?.hsi)
     }

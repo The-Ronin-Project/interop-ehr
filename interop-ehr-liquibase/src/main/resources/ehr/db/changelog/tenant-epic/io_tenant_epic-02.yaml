@@ -17,3 +17,19 @@ databaseChangeLog:
                   type: java.sql.Types.VARCHAR(64)
                   constraints:
                     nullable: false
+  - changeSet:
+      id: io-tenant-epic-add-mrn-text
+      author: Beau Berger
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_tenant_epic
+                columnName: mrn_type_text
+      changes:
+        - addColumn:
+            tableName: io_tenant_epic
+            columns:
+              - column:
+                  name: mrn_type_text
+                  type: java.sql.Types.VARCHAR(64)

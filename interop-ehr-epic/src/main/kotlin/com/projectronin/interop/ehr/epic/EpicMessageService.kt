@@ -60,6 +60,7 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
     ): SendMessageRequest {
         return SendMessageRequest(
             patientID = messageInput.patientMRN,
+            patientIDType = (tenant.vendor as Epic).patientMRNTypeText,
             recipients = translateRecipients(messageInput.recipients, tenant),
             messageText = messageInput.text,
             senderID = userId,
