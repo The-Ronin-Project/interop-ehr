@@ -32,6 +32,16 @@ class TenantDAO(@Qualifier("ehr") private val database: Database) {
     }
 
     /**
+     * Retrieves a [TenantDO] for the supplied [id]. If the [id] is unknown, null will be returned.
+     */
+    fun getTenantForId(id: Int): TenantDO? {
+        val tenants =
+            database.from(TenantDOs).joinReferencesAndSelect().where(TenantDOs.id eq id)
+                .map { TenantDOs.createEntity(it) }
+        return tenants.getOrNull(0)
+    }
+
+    /**
      * Retrieves all [TenantDO]s
      */
     fun getAllTenants(): List<TenantDO> {

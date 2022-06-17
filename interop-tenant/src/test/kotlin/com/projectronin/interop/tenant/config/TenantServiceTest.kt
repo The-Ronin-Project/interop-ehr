@@ -60,6 +60,7 @@ class TenantServiceTest {
         every { practitionerUserSystem } returns "userSystemExample"
         every { patientMRNSystem } returns "mrnSystemExample"
         every { patientInternalSystem } returns "internalSystemExample"
+        every { patientMRNTypeText } returns "patientMRNTypeText"
         every { hsi } returns null
     }
     private val standardEpicTenantDO2 = mockk<EpicTenantDO> {
@@ -73,6 +74,7 @@ class TenantServiceTest {
         every { practitionerUserSystem } returns "userSystemExample2"
         every { patientMRNSystem } returns "mrnSystemExample2"
         every { patientInternalSystem } returns "internalSystemExample2"
+        every { patientMRNTypeText } returns "patientMRNTypeText"
         every { hsi } returns null
     }
     private val standardTenantDO = mockk<TenantDO> {
@@ -113,7 +115,8 @@ class TenantServiceTest {
             practitionerProviderSystem = "practitionerSystemExample",
             practitionerUserSystem = "userSystemExample",
             patientMRNSystem = "mrnSystemExample",
-            patientInternalSystem = "internalSystemExample"
+            patientInternalSystem = "internalSystemExample",
+            patientMRNTypeText = "patientMRNTypeText"
         )
     )
 
@@ -137,7 +140,8 @@ class TenantServiceTest {
             practitionerProviderSystem = "practitionerSystemExample2",
             practitionerUserSystem = "userSystemExample2",
             patientMRNSystem = "mrnSystemExample2",
-            patientInternalSystem = "internalSystemExample2"
+            patientInternalSystem = "internalSystemExample2",
+            patientMRNTypeText = "patientMRNTypeText"
         )
     )
 
@@ -147,7 +151,7 @@ class TenantServiceTest {
         ehrDAO = mockk()
         epicTenantDAO = mockk()
         database = mockk()
-        ehrTenantDAOFactory = mockk<EHRTenantDAOFactory> {
+        ehrTenantDAOFactory = mockk {
             every { getEHRTenantDAO(any()) } returns epicTenantDAO
         }
         service = TenantService(tenantDAO, ehrDAO, ehrTenantDAOFactory)
@@ -278,7 +282,8 @@ class TenantServiceTest {
                 practitionerProviderSystem = "practitionerSystemExample",
                 practitionerUserSystem = "userSystemExample",
                 patientMRNSystem = "mrnSystemExample",
-                patientInternalSystem = "internalSystemExample"
+                patientInternalSystem = "internalSystemExample",
+                patientMRNTypeText = "patientMRNTypeText"
             )
         )
 
@@ -306,6 +311,7 @@ class TenantServiceTest {
             every { practitionerUserSystem } returns "userSystemExample"
             every { patientMRNSystem } returns "mrnSystemExample"
             every { patientInternalSystem } returns "internalSystemExample"
+            every { patientMRNTypeText } returns "patientMRNTypeText"
             every { hsi } returns "urn:epic:apporchard.curprod"
         }
         every { epicTenantDAO.getByTenantMnemonic("Tenant1") } returns epicTenantDO
@@ -331,6 +337,7 @@ class TenantServiceTest {
                 practitionerUserSystem = "userSystemExample",
                 patientMRNSystem = "mrnSystemExample",
                 patientInternalSystem = "internalSystemExample",
+                patientMRNTypeText = "patientMRNTypeText",
                 hsi = "urn:epic:apporchard.curprod"
             )
         )
@@ -407,7 +414,8 @@ class TenantServiceTest {
                 practitionerProviderSystem = "practitionerSystemExample",
                 practitionerUserSystem = "userSystemExample",
                 patientMRNSystem = "mrnSystemExample",
-                patientInternalSystem = "internalSystemExample"
+                patientInternalSystem = "internalSystemExample",
+                patientMRNTypeText = "patientMRNTypeText"
             )
         )
         val tenantDO = mockk<TenantDO> {
@@ -435,7 +443,7 @@ class TenantServiceTest {
     @Test
     fun `update ok`() {
         every { ehrDAO.getByInstance("Epic Sandbox") } returns standardEHRDO1
-        every { tenantDAO.getTenantForMnemonic(standardTenant.mnemonic) } returns standardTenantDO
+        every { tenantDAO.getTenantForId(standardTenant.internalId) } returns standardTenantDO
         every { tenantDAO.updateTenant(any()) } returns 1
         every { epicTenantDAO.update(any()) } returns 1
 
@@ -445,14 +453,14 @@ class TenantServiceTest {
 
     @Test
     fun `update bad when there's no EHRs in the db`() {
-        every { tenantDAO.getTenantForMnemonic(standardTenant.mnemonic) } returns standardTenantDO
+        every { tenantDAO.getTenantForId(standardTenant.internalId) } returns standardTenantDO
         every { ehrDAO.getByInstance("Epic Sandbox") } returns null
         assertThrows<NoEHRFoundException> { service.updateTenant(standardTenant) }
     }
 
     @Test
     fun `update bad when there's no existing tenant in the db`() {
-        every { tenantDAO.getTenantForMnemonic(standardTenant.mnemonic) } returns null
+        every { tenantDAO.getTenantForId(standardTenant.internalId) } returns null
         assertThrows<NoTenantFoundException> { service.updateTenant(standardTenant) }
     }
 }

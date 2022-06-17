@@ -82,8 +82,8 @@ class TenantService(
     fun updateTenant(tenant: Tenant): Tenant {
         logger.info { "Updating tenant for mnemonic : ${tenant.mnemonic}" }
 
-        val existingId = tenantDAO.getTenantForMnemonic(tenant.mnemonic)?.id
-            ?: throw NoTenantFoundException("No tenant found with mnemonnic: ${tenant.mnemonic}")
+        val existingId = tenantDAO.getTenantForId(tenant.internalId)?.id
+            ?: throw NoTenantFoundException("No tenant found with id: ${tenant.internalId}")
         val ehrDO = ehrDAO.getByInstance(tenant.vendor.instanceName)
             ?: throw NoEHRFoundException("No EHR found with instance: ${tenant.vendor.instanceName}")
 

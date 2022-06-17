@@ -8,7 +8,7 @@ import org.ktorm.entity.Entity
 interface ProviderPoolDO : Entity<ProviderPoolDO> {
     companion object : Entity.Factory<ProviderPoolDO>()
 
-    var id: Long
+    var id: Int
     var tenant: TenantDO
     var providerId: String
     var poolId: String

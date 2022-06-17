@@ -75,27 +75,30 @@ class MirthTenantConfigDAOTest {
     @Test
     @DataSet(value = ["/dbunit/mirth-tenant-config/MirthTenantConfig.yaml"], cleanAfter = true)
     @ExpectedDataSet(value = ["/dbunit/mirth-tenant-config/ExpectedAfterUpdate.yaml"])
-    fun `update ehr`() {
+    fun `updateConfig works`() {
         val dao = MirthTenantConfigDAO(KtormHelper.database())
+        val locationIds = "blarn,blurn,blorn"
+
         val testobj = MirthTenantConfigDO {
-            tenant = tenantDO
-            locationIds = "blarn,blurn,blorn"
+            this.tenant = tenantDO
+            this.locationIds = locationIds
         }
-        val result = dao.updateConfig(testobj)
-        assertEquals(1, result)
+        val result = dao.updateConfig(testobj)!!
+        assertEquals(tenantDO.id, result.tenant.id)
+        assertEquals(locationIds, result.locationIds)
     }
 
     @Test
     @DataSet(value = ["/dbunit/mirth-tenant-config/MirthTenantConfig.yaml"], cleanAfter = true)
     @ExpectedDataSet(value = ["/dbunit/mirth-tenant-config/MirthTenantConfig.yaml"])
-    fun `update ehr fails correctly`() {
+    fun `updateConfig fails correctly`() {
         val dao = MirthTenantConfigDAO(KtormHelper.database())
         val testobj = MirthTenantConfigDO {
             tenant = tenantDO2
             locationIds = "blarn,blurn,blorn"
         }
         val result = dao.updateConfig(testobj)
-        assertEquals(0, result)
+        assertNull(result)
     }
 
     @Test
@@ -116,7 +119,7 @@ class MirthTenantConfigDAOTest {
     @DataSet(value = ["/dbunit/mirth-tenant-config/MirthTenantConfig.yaml"], cleanAfter = true)
     fun `insert fails correctly`() {
         val dao = MirthTenantConfigDAO(KtormHelper.database())
-        val faketTenantDO = mockk<TenantDO> {
+        val fakeTenantDO = mockk<TenantDO> {
             every { id } returns -1
             every { mnemonic } returns "no"
             every { ehr } returns ehrDO
@@ -124,7 +127,7 @@ class MirthTenantConfigDAOTest {
             every { availableBatchEnd } returns null
         }
         val testobj = MirthTenantConfigDO {
-            tenant = faketTenantDO
+            tenant = fakeTenantDO
             locationIds = "no"
         }
         assertThrows<SQLIntegrityConstraintViolationException> { dao.insertConfig(testobj) }

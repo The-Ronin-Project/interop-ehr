@@ -29,7 +29,8 @@ class EHRFactoryTest {
                 "providerSystem",
                 "userSystem",
                 "mrnSystem",
-                "internalSystem"
+                "internalSystem",
+                "patientMRNTypeText"
             )
         val tenant = Tenant(1, "TENANT", "Test Tenant", null, vendor)
 
@@ -53,7 +54,8 @@ class EHRFactoryTest {
                 "providerSystem",
                 "userSystem",
                 "mrnSystem",
-                "internalSystem"
+                "internalSystem",
+                "patientMRNTypeText"
             )
         val tenant = Tenant(1, "TENANT", "Test Tenant", null, vendor)
 

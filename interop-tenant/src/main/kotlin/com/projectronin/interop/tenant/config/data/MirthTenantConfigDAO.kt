@@ -43,13 +43,14 @@ class MirthTenantConfigDAO(@Qualifier("ehr") private val database: Database) {
     /**
      * Updates a [MirthTenantConfigDO]
      */
-    fun updateConfig(mirthTenantConfigDO: MirthTenantConfigDO): Int {
-        return database.update(MirthTenantConfigDOs) {
+    fun updateConfig(mirthTenantConfigDO: MirthTenantConfigDO): MirthTenantConfigDO? {
+        database.update(MirthTenantConfigDOs) {
             set(it.locationIds, mirthTenantConfigDO.locationIds)
             where {
                 it.tenantId eq mirthTenantConfigDO.tenant.id
             }
         }
+        return getByTenantId(mirthTenantConfigDO.tenant.id)
     }
 
     /**
@@ -60,11 +61,20 @@ class MirthTenantConfigDAO(@Qualifier("ehr") private val database: Database) {
             set(it.tenantId, mirthTenantConfigDO.tenant.id)
             set(it.locationIds, mirthTenantConfigDO.locationIds)
         }
+        return getByTenantId(mirthTenantConfigDO.tenant.id)
+            // This should be impossible to hit due to DB constraints
+            ?: throw Exception("Inserted tenant config ${mirthTenantConfigDO.tenant.id} not found")
+    }
 
+    /**
+     * Returns a [MirthTenantConfigDO] by the given [tenantId].  If a [MirthTenantConfigDO] doesn't exist for
+     * [tenantId], or multiple somehow do, it returns null.
+     */
+    private fun getByTenantId(tenantId: Int): MirthTenantConfigDO? {
         val mirthTenantConfigs = database.from(MirthTenantConfigDOs)
             .select()
-            .where(MirthTenantConfigDOs.tenantId eq mirthTenantConfigDO.tenant.id)
+            .where(MirthTenantConfigDOs.tenantId eq tenantId)
             .map { MirthTenantConfigDOs.createEntity(it) }
-        return mirthTenantConfigs.single()
+        return mirthTenantConfigs.singleOrNull()
     }
 }

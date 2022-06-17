@@ -45,7 +45,7 @@ class EhrDAO(@Qualifier("ehr") private val database: Database) {
     }
 
     /**
-     * Updates row based on id, returns updated values
+     * Updates row based on instanceName, returns updated values
      */
     fun update(ehrVendor: EhrDO): EhrDO {
         try {
@@ -56,7 +56,7 @@ class EhrDAO(@Qualifier("ehr") private val database: Database) {
                 set(it.privateKey, ehrVendor.privateKey)
                 set(it.publicKey, ehrVendor.publicKey)
                 where {
-                    it.instanceName eq ehrVendor.instanceName
+                    it.id eq ehrVendor.id
                 }
             }
         } catch (e: Exception) {

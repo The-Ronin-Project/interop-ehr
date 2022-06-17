@@ -87,6 +87,7 @@ class EhrDAOTest {
     fun `update ehr`() {
         val dao = EhrDAO(KtormHelper.database())
         val testobj = EhrDO {
+            id = 101
             vendorType = VendorType.EPIC
             instanceName = "Epic Sandbox"
             clientId = "56789"
@@ -132,6 +133,7 @@ class EhrDAOTest {
     fun `update ehr fails`() {
         val dao = EhrDAO(KtormHelper.database())
         val testobj = EhrDO {
+            instanceName = "Epic fake"
             vendorType = VendorType.EPIC
             clientId = "56789"
             publicKey = "roses"

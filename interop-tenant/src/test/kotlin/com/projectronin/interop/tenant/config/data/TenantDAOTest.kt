@@ -40,9 +40,30 @@ class TenantDAOTest {
 
     @Test
     @DataSet(value = ["/dbunit/tenant/Tenants.yaml"], cleanAfter = true)
-    fun `tenant found`() {
+    fun `tenant found by mnemonic`() {
         val dao = TenantDAO(KtormHelper.database())
         val tenant = dao.getTenantForMnemonic("mdaoc")
+        assertNotNull(tenant)
+        tenant?.let {
+            assertEquals(1001, tenant.id)
+            assertEquals("mdaoc", tenant.mnemonic)
+            assertEquals(LocalTime.of(22, 0, 0), tenant.availableBatchStart)
+            assertEquals(LocalTime.of(6, 0, 0), tenant.availableBatchEnd)
+
+            val ehr = tenant.ehr
+            assertEquals(101, ehr.id)
+            assertEquals(VendorType.EPIC, ehr.vendorType)
+            assertEquals("12345", ehr.clientId)
+            assertEquals("public", ehr.publicKey)
+            assertEquals("private", ehr.privateKey)
+        }
+    }
+
+    @Test
+    @DataSet(value = ["/dbunit/tenant/Tenants.yaml"], cleanAfter = true)
+    fun `tenant found by id`() {
+        val dao = TenantDAO(KtormHelper.database())
+        val tenant = dao.getTenantForId(1001)
         assertNotNull(tenant)
         tenant?.let {
             assertEquals(1001, tenant.id)

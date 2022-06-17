@@ -14,7 +14,6 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -79,6 +78,7 @@ class ProviderPoolDAOTest {
         assertEquals("pool1", poolsByProvider[0].poolId)
         assertEquals("pool2", poolsByProvider[1].poolId)
         assertEquals("pool2", poolsByProvider[2].poolId)
+        assertEquals("mdaoc", poolsByProvider[2].tenant.mnemonic)
     }
 
     @Test
@@ -87,6 +87,15 @@ class ProviderPoolDAOTest {
         val dao = ProviderPoolDAO(KtormHelper.database())
         val poolsByProvider = dao.getAll(1002)
         assertTrue(poolsByProvider.isEmpty())
+    }
+
+    @Test
+    @DataSet(value = ["/dbunit/provider-pool/ProviderPools.yaml"], cleanAfter = true)
+    fun `get single provider`() {
+        val dao = ProviderPoolDAO(KtormHelper.database())
+        val providerPool = dao.getPoolById(10001)!!
+        assertEquals(10001, providerPool.id)
+        assertEquals("mdaoc", providerPool.tenant.mnemonic)
     }
 
     @Test
@@ -118,8 +127,11 @@ class ProviderPoolDAOTest {
             poolId = "pool4"
         }
         val actualProviderPoolDO = providerdao.insert(insertedProviderPoolDO)
-        assertSame(insertedProviderPoolDO, actualProviderPoolDO)
-        assertNotEquals(0, insertedProviderPoolDO.id)
+
+        assertNotEquals(insertedProviderPoolDO.id, actualProviderPoolDO.id)
+        assertEquals(insertedProviderPoolDO.tenant.id, actualProviderPoolDO.tenant.id)
+        assertEquals(insertedProviderPoolDO.providerId, actualProviderPoolDO.providerId)
+        assertEquals(insertedProviderPoolDO.poolId, actualProviderPoolDO.poolId)
     }
 
     @Test
@@ -178,8 +190,11 @@ class ProviderPoolDAOTest {
             providerId = "provider20"
             poolId = "pool1"
         }
-        val updated = dao.update(updatedProviderPoolDO)
-        assertSame(1, updated)
+        val updated = dao.update(updatedProviderPoolDO)!!
+        assertEquals(10001, updated.id)
+        assertEquals(1001, updated.tenant.id)
+        assertEquals("provider20", updated.providerId)
+        assertEquals("pool1", updated.poolId)
     }
 
     @Test
