@@ -5,12 +5,14 @@ import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.epic.model.EpicAppointment
 import com.projectronin.interop.ehr.epic.model.EpicCondition
+import com.projectronin.interop.ehr.epic.model.EpicObservation
 import com.projectronin.interop.ehr.epic.model.EpicPatient
 import com.projectronin.interop.ehr.epic.transform.EpicAppointmentTransformer
 import com.projectronin.interop.ehr.factory.VendorFactory
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Condition
 import com.projectronin.interop.ehr.model.EHRResource
+import com.projectronin.interop.ehr.model.Observation
 import com.projectronin.interop.ehr.model.Patient
 import com.projectronin.interop.transform.fhir.r4.R4ConditionTransformer
 import com.projectronin.interop.transform.fhir.r4.R4LocationTransformer
@@ -51,6 +53,7 @@ class EpicVendorFactory(
             Patient::class -> EpicPatient(JacksonManager.objectMapper.readValue(string))
             Condition::class -> EpicCondition(JacksonManager.objectMapper.readValue(string))
             Appointment::class -> JacksonManager.objectMapper.readValue<EpicAppointment>(string)
+            Observation::class -> EpicObservation(JacksonManager.objectMapper.readValue(string))
             else -> throw NotImplementedError()
         }
     }
