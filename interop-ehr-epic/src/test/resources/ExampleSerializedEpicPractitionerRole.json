@@ -1,0 +1,89 @@
+{
+  "resourceType": "PractitionerRole",
+  "id": "12345",
+  "meta": {
+    "profile": [
+      "http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitionerrole"
+    ]
+  },
+  "implicitRules": "implicit-rules",
+  "language": "en-US",
+  "text": {
+    "status": "generated",
+    "div": "div"
+  },
+  "contained": [
+    {
+      "resourceType": "Banana",
+      "field": "24680"
+    }
+  ],
+  "extension": [
+    {
+      "url": "http://localhost/extension",
+      "valueString": "Value"
+    }
+  ],
+  "modifierExtension": [
+    {
+      "url": "http://localhost/modifier-extension",
+      "valueString": "Value"
+    }
+  ],
+  "identifier": [
+    {
+      "value": "id"
+    }
+  ],
+  "active": true,
+  "period": {
+    "end": "2022"
+  },
+  "practitioner": {
+    "reference": "Practitioner/1234"
+  },
+  "organization": {
+    "reference": "Organization/5678"
+  },
+  "code": [
+    {
+      "text": "code"
+    }
+  ],
+  "specialty": [
+    {
+      "text": "specialty"
+    }
+  ],
+  "location": [
+    {
+      "reference": "Location/9012"
+    }
+  ],
+  "healthcareService": [
+    {
+      "reference": "HealthcareService/3456"
+    }
+  ],
+  "telecom": [
+    {
+      "value": "8675309"
+    }
+  ],
+  "availableTime": [
+    {
+      "allDay": false
+    }
+  ],
+  "notAvailable": [
+    {
+      "description": "Not available now"
+    }
+  ],
+  "availabilityExceptions": "exceptions",
+  "endpoint": [
+    {
+      "reference": "Endpoint/1357"
+    }
+  ]
+}

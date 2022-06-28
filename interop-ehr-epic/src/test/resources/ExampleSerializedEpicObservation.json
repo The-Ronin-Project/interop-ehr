@@ -1,0 +1,60 @@
+{
+  "resourceType" : "Observation",
+  "id" : "12345",
+  "meta" : {
+    "profile" : [ "http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitioner" ]
+  },
+  "implicitRules" : "implicit-rules",
+  "language" : "en-US",
+  "text" : {
+    "status" : "generated",
+    "div" : "div"
+  },
+  "contained" : [ {"resourceType":"Banana","field":"24680"} ],
+  "extension" : [ {
+    "url" : "http://localhost/extension",
+    "valueString" : "Value"
+  } ],
+  "modifierExtension" : [ {
+    "url" : "http://localhost/modifier-extension",
+    "valueString" : "Value"
+  } ],
+  "identifier" : [ {
+    "value" : "id"
+  } ],
+  "status" : "final",
+  "category" : [ {
+    "text" : "category"
+  } ],
+  "code" : {
+    "text" : "code"
+  },
+  "subject" : {
+    "reference" : "subject"
+  },
+  "performer" : [ {
+    "reference" : "performer"
+  } ],
+  "valueDateTime" : "2019-04-01",
+  "note" : [ {
+    "text" : "note"
+  } ],
+  "bodySite" : {
+    "text" : "body site"
+  },
+  "component" : [ {
+    "code" : {
+      "coding" : [ {
+        "system" : "http://value.org",
+        "code" : "Quantity value"
+      } ]
+    },
+    "valueQuantity" : {
+      "value" : 17.5,
+      "comparator" : ">=",
+      "unit" : "years",
+      "system" : "http://unitsofmeasure.org",
+      "code" : "a"
+    }
+  } ]
+}
