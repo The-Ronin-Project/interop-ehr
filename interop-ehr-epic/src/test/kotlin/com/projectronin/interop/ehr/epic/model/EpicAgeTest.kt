@@ -85,24 +85,6 @@ class EpicAgeTest {
     }
 
     @Test
-    fun `supports no system`() {
-        val age = Age(
-            value = 20.0,
-            comparator = R4QuantityComparator.LESS_THAN,
-            unit = "years",
-            code = Code("code")
-        )
-
-        val epicAge = EpicAge(age)
-        assertEquals(age, epicAge.element)
-        assertEquals(20.0, epicAge.value)
-        assertEquals(QuantityComparator.LESS_THAN, epicAge.comparator)
-        assertEquals("years", epicAge.unit)
-        assertNull(epicAge.system)
-        assertEquals("code", epicAge.code)
-    }
-
-    @Test
     fun `supports no code`() {
         val age = Age(
             comparator = R4QuantityComparator.LESS_THAN,

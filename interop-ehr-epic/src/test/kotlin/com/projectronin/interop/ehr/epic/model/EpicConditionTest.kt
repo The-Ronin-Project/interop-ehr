@@ -14,6 +14,7 @@ import com.projectronin.interop.ehr.model.Condition.RangeOnset
 import com.projectronin.interop.ehr.model.Condition.StringAbatement
 import com.projectronin.interop.ehr.model.Condition.StringOnset
 import com.projectronin.interop.ehr.model.enums.DataSource
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Age
 import com.projectronin.interop.fhir.r4.datatype.Annotation
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
@@ -433,7 +434,7 @@ class EpicConditionTest {
 
     @Test
     fun `handles onsetAge`() {
-        val age = Age(value = 20.0, code = Code("y"))
+        val age = Age(value = 20.0, code = Code("y"), system = CodeSystem.UCUM.uri)
         val condition = Condition(
             id = Id("123"),
             subject = Reference(id = "1234"),
@@ -514,7 +515,7 @@ class EpicConditionTest {
 
     @Test
     fun `handles abatementAge`() {
-        val age = Age(value = 20.0, code = Code("y"))
+        val age = Age(value = 20.0, code = Code("y"), system = CodeSystem.UCUM.uri)
         val condition = Condition(
             id = Id("123"),
             subject = Reference(id = "1234"),

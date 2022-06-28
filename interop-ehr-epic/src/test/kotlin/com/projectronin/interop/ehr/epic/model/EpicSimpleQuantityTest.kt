@@ -59,22 +59,6 @@ class EpicSimpleQuantityTest {
     }
 
     @Test
-    fun `supports no system`() {
-        val simpleQuantity = SimpleQuantity(
-            value = 1.0,
-            unit = "in",
-            code = Code("code")
-        )
-
-        val epicSimpleQuantity = EpicSimpleQuantity(simpleQuantity)
-        assertEquals(simpleQuantity, epicSimpleQuantity.element)
-        assertEquals(1.0, epicSimpleQuantity.value)
-        assertEquals("in", epicSimpleQuantity.unit)
-        assertNull(epicSimpleQuantity.system)
-        assertEquals("code", epicSimpleQuantity.code)
-    }
-
-    @Test
     fun `supports no code`() {
         val simpleQuantity = SimpleQuantity(
             value = 1.0,
