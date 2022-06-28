@@ -5,6 +5,7 @@ import com.projectronin.interop.ehr.AppointmentService
 import com.projectronin.interop.ehr.ConditionService
 import com.projectronin.interop.ehr.IdentifierService
 import com.projectronin.interop.ehr.MessageService
+import com.projectronin.interop.ehr.ObservationService
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.PractitionerService
 import com.projectronin.interop.ehr.model.EHRResource
@@ -32,6 +33,7 @@ interface VendorFactory {
     val practitionerService: PractitionerService
     val conditionService: ConditionService
     val identifierService: IdentifierService
+    val observationService: ObservationService
 
     // Transformers
     val practitionerTransformer: PractitionerTransformer

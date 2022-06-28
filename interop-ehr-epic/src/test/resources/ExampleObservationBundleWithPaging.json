@@ -1,0 +1,116 @@
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 2,
+  "link": [
+    {
+      "relation": "next",
+      "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation?patient=em2zwhHegmZEu39N4dUEIYA3&category=social-history&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
+    }
+  ],
+  "entry": [
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation/eqEPfgz16V4dmykyfsVrVFq0ms2FpjQP8IdhluqlTGegztPc4qkWubG32Uyd6aMQo3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation/eqEPfgz16V4dmykyfsVrVFq0ms2FpjQP8IdhluqlTGegztPc4qkWubG32Uyd6aMQo3",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "eqEPfgz16V4dmykyfsVrVFq0ms2FpjQP8IdhluqlTGegztPc4qkWubG32Uyd6aMQo3",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ],
+            "text": "Social History"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11343-1",
+              "display": "Drug Use History"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "228366006",
+              "display": "Finding relating to drug misuse behavior (finding)"
+            }
+          ],
+          "text": "Drug Use History"
+        },
+        "subject": {
+          "reference": "Patient/e63wRTbPfr1p8UW81d8Seiw3",
+          "display": "Mychart, Teddy"
+        },
+        "issued": "2022-04-07T05:00:00Z",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "228367002",
+              "display": "Does not misuse drugs (situation)"
+            }
+          ],
+          "text": "No"
+        }
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation/ewK9DoqaVhvVV9xgHUF68ktx-ffHcpjwQMfwJBm6EAzE3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation/ewK9DoqaVhvVV9xgHUF68ktx-ffHcpjwQMfwJBm6EAzE3",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "ewK9DoqaVhvVV9xgHUF68ktx-ffHcpjwQMfwJBm6EAzE3",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ],
+            "text": "Social History"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "29762-2",
+              "display": "Social Documentation"
+            }
+          ],
+          "text": "Social Documentation"
+        },
+        "subject": {
+          "reference": "Patient/e63wRTbPfr1p8UW81d8Seiw3",
+          "display": "Mychart, Teddy"
+        },
+        "valueString": "Patient and wife are avid birdwatchers and make annual trip to birding hotspot.   Pets - Springer spaniel named Lucky."
+      },
+      "search": {
+        "mode": "match"
+      }
+    }
+  ]
+}

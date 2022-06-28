@@ -34,6 +34,7 @@ class EpicVendorFactoryTest {
     private val practitionerService = mockk<EpicPractitionerService>()
     private val conditionService = mockk<EpicConditionService>()
     private val identifierService = mockk<EpicIdentifierService>()
+    private val observationService = mockk<EpicObservationService>()
     private val practitionerTransformer = mockk<R4PractitionerTransformer>()
     private val practitionerRoleTransformer = mockk<R4PractitionerRoleTransformer>()
     private val locationTransformer = mockk<R4LocationTransformer>()
@@ -48,6 +49,7 @@ class EpicVendorFactoryTest {
             practitionerService,
             conditionService,
             identifierService,
+            observationService,
             practitionerTransformer,
             practitionerRoleTransformer,
             locationTransformer,
@@ -89,6 +91,11 @@ class EpicVendorFactoryTest {
     @Test
     fun `returns IdentifierService`() {
         assertEquals(identifierService, vendorFactory.identifierService)
+    }
+
+    @Test
+    fun `returns ObservationService`() {
+        assertEquals(observationService, vendorFactory.observationService)
     }
 
     @Test
@@ -225,6 +232,13 @@ class EpicVendorFactoryTest {
         val practitionerRoles = vendorFactory.deserializeList(originalJson, PractitionerRole::class)
         assertEquals(EpicPractitionerRole::class, practitionerRoles.first()::class)
         assertEquals(1, practitionerRoles.size)
+    }
+
+    @Test
+    fun `can deserialize and serialize observation`() {
+        val originalJson = this::class.java.getResource("/ExampleSerializedObservation.json")!!.readText()
+        val observation = vendorFactory.deserialize(originalJson, Observation::class)
+        assertEquals(EpicObservation::class, observation::class)
     }
 
     @Test

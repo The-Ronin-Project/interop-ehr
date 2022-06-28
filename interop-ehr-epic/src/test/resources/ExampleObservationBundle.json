@@ -1,0 +1,356 @@
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 4,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation?patient=e63wRTbPfr1p8UW81d8Seiw3&category=social-history"
+    }
+  ],
+  "entry": [
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation/eqEPfgz16V4dmykyfsVrVFqf3tK1VBIoKPOSCZPzNL5NcrA17iB44bFDCud60r70B3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation/eqEPfgz16V4dmykyfsVrVFqf3tK1VBIoKPOSCZPzNL5NcrA17iB44bFDCud60r70B3",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "eqEPfgz16V4dmykyfsVrVFqf3tK1VBIoKPOSCZPzNL5NcrA17iB44bFDCud60r70B3",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ],
+            "text": "Social History"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "72166-2",
+              "display": "Tobacco smoking status"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "365980008",
+              "display": "Finding of tobacco use and exposure (finding)"
+            }
+          ],
+          "text": "Smoking History"
+        },
+        "subject": {
+          "reference": "Patient/e63wRTbPfr1p8UW81d8Seiw3",
+          "display": "Mychart, Teddy"
+        },
+        "effectivePeriod": {
+          "end": "2008-10-22"
+        },
+        "issued": "2021-11-08T06:00:00Z",
+        "performer": [
+          {
+            "reference": "Practitioner/e1Dn.3vN4qr3s2mJ3cW2dAA3",
+            "display": "Jim Landers"
+          }
+        ],
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "8517006",
+              "display": "Ex-smoker"
+            }
+          ],
+          "text": "Former"
+        },
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "81228-9",
+                  "display": "Tobacco product"
+                },
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "53661000146106",
+                  "display": "Type of tobacco used (observable entity)"
+                }
+              ],
+              "text": "Type"
+            },
+            "valueCodeableConcept": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "65568007",
+                  "display": "Cigarette Smoker"
+                }
+              ],
+              "text": "Cigarettes"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "401201003",
+                  "display": "Cigarette pack-years (observable entity)"
+                }
+              ],
+              "text": "Cigarette pack-years (observable entity)"
+            },
+            "valueQuantity": {
+              "value": 35,
+              "unit": "{PackYears}",
+              "system": "http://unitsofmeasure.org",
+              "code": "{PackYears}"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "88029-4",
+                  "display": "Tobacco use duration"
+                }
+              ],
+              "text": "Years Used"
+            },
+            "valueQuantity": {
+              "value": 35,
+              "unit": "Years Used",
+              "system": "http://unitsofmeasure.org",
+              "code": "a"
+            }
+          },
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://loinc.org",
+                  "code": "8663-7",
+                  "display": "Cigarettes smoked current (pack per day) - Reported"
+                },
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "266918002",
+                  "display": "Tobacco smoking consumption (observable entity)"
+                }
+              ],
+              "text": "Packs/Day"
+            },
+            "valueQuantity": {
+              "value": 1,
+              "unit": "Packs/Day",
+              "system": "http://snomed.info/sct",
+              "code": "228963008"
+            }
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation/eqEPfgz16V4dmykyfsVrVFulesUOwz-AURkUTiXwdIgj9jKBozjnxmoxAZpSJXrlT3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation/eqEPfgz16V4dmykyfsVrVFulesUOwz-AURkUTiXwdIgj9jKBozjnxmoxAZpSJXrlT3",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "eqEPfgz16V4dmykyfsVrVFulesUOwz-AURkUTiXwdIgj9jKBozjnxmoxAZpSJXrlT3",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ],
+            "text": "Social History"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11331-6",
+              "display": "Alcohol Use History"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "228273003",
+              "display": "Finding relating to alcohol drinking behavior (finding)"
+            }
+          ],
+          "text": "Alcohol Use History"
+        },
+        "subject": {
+          "reference": "Patient/e63wRTbPfr1p8UW81d8Seiw3",
+          "display": "Mychart, Teddy"
+        },
+        "issued": "2022-04-07T05:00:00Z",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "219006",
+              "display": "Current drinker of alcohol (finding)"
+            }
+          ],
+          "text": "Yes"
+        },
+        "note": [
+          {
+            "text": "Beer or wine on weekend"
+          }
+        ],
+        "component": [
+          {
+            "code": {
+              "coding": [
+                {
+                  "system": "http://snomed.info/sct",
+                  "code": "160573003",
+                  "display": "Alcohol intake (observable entity)"
+                }
+              ],
+              "text": "Alcohol intake (observable entity)"
+            },
+            "valueQuantity": {
+              "value": 0.24,
+              "unit": "alcoholic_units/day",
+              "system": "http://unitsofmeasure.org",
+              "code": "{alcoholic_units}/d"
+            }
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation/eqEPfgz16V4dmykyfsVrVFq0ms2FpjQP8IdhluqlTGegztPc4qkWubG32Uyd6aMQo3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation/eqEPfgz16V4dmykyfsVrVFq0ms2FpjQP8IdhluqlTGegztPc4qkWubG32Uyd6aMQo3",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "eqEPfgz16V4dmykyfsVrVFq0ms2FpjQP8IdhluqlTGegztPc4qkWubG32Uyd6aMQo3",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ],
+            "text": "Social History"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "11343-1",
+              "display": "Drug Use History"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "228366006",
+              "display": "Finding relating to drug misuse behavior (finding)"
+            }
+          ],
+          "text": "Drug Use History"
+        },
+        "subject": {
+          "reference": "Patient/e63wRTbPfr1p8UW81d8Seiw3",
+          "display": "Mychart, Teddy"
+        },
+        "issued": "2022-04-07T05:00:00Z",
+        "valueCodeableConcept": {
+          "coding": [
+            {
+              "system": "http://snomed.info/sct",
+              "code": "228367002",
+              "display": "Does not misuse drugs (situation)"
+            }
+          ],
+          "text": "No"
+        }
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation/ewK9DoqaVhvVV9xgHUF68ktx-ffHcpjwQMfwJBm6EAzE3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation/ewK9DoqaVhvVV9xgHUF68ktx-ffHcpjwQMfwJBm6EAzE3",
+      "resource": {
+        "resourceType": "Observation",
+        "id": "ewK9DoqaVhvVV9xgHUF68ktx-ffHcpjwQMfwJBm6EAzE3",
+        "status": "final",
+        "category": [
+          {
+            "coding": [
+              {
+                "system": "http://terminology.hl7.org/CodeSystem/observation-category",
+                "code": "social-history",
+                "display": "Social History"
+              }
+            ],
+            "text": "Social History"
+          }
+        ],
+        "code": {
+          "coding": [
+            {
+              "system": "http://loinc.org",
+              "code": "29762-2",
+              "display": "Social Documentation"
+            }
+          ],
+          "text": "Social Documentation"
+        },
+        "subject": {
+          "reference": "Patient/e63wRTbPfr1p8UW81d8Seiw3",
+          "display": "Mychart, Teddy"
+        },
+        "valueString": "Patient and wife are avid birdwatchers and make annual trip to birding hotspot.   Pets - Springer spaniel named Lucky."
+      },
+      "search": {
+        "mode": "match"
+      }
+    }
+  ]
+}

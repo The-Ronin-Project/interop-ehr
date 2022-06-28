@@ -46,6 +46,7 @@ class EpicVendorFactory(
     override val practitionerService: EpicPractitionerService,
     override val conditionService: EpicConditionService,
     override val identifierService: EpicIdentifierService,
+    override val observationService: EpicObservationService,
     override val practitionerTransformer: R4PractitionerTransformer,
     override val practitionerRoleTransformer: R4PractitionerRoleTransformer,
     override val locationTransformer: R4LocationTransformer,
