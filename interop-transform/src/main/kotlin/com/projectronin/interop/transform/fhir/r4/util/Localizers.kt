@@ -21,6 +21,8 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
 import com.projectronin.interop.fhir.r4.datatype.NotAvailable
+import com.projectronin.interop.fhir.r4.datatype.ObservationComponent
+import com.projectronin.interop.fhir.r4.datatype.ObservationReferenceRange
 import com.projectronin.interop.fhir.r4.datatype.Participant
 import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Period
@@ -625,4 +627,75 @@ fun Annotation.localizePair(tenant: Tenant): Pair<Annotation, Boolean> {
         return Pair(Annotation(id, extensions, updatedAuthor, time, text), true)
     }
     return Pair(this, false)
+}
+
+/**
+ * Localizes the [ObservationReferenceRange] relative to the [tenant], used by ObservationComponent.localize
+ */
+fun ObservationReferenceRange.localizePair(tenant: Tenant): Pair<ObservationReferenceRange, Boolean> {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
+    val updatedType = type?.localizePair(tenant) ?: Pair(type, false)
+    val updatedAppliesTo = appliesTo.map { it.localizePair(tenant) }
+    if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || updatedAppliesTo.isNotEmpty() || updatedType.second) {
+        return Pair(
+            ObservationReferenceRange(
+                id = id,
+                extension = updatedExtensions.ifEmpty { extension },
+                modifierExtension = updatedModifierExtensions.ifEmpty { modifierExtension },
+                low = low,
+                high = high,
+                type = updatedType.first,
+                appliesTo = updatedAppliesTo.values(),
+                age = age,
+                text = text,
+            ),
+            true
+        )
+    }
+
+    return Pair(this, false)
+}
+
+/**
+ * Localizes the [ObservationReferenceRange] relative to the [tenant]
+ */
+fun ObservationReferenceRange.localize(tenant: Tenant): ObservationReferenceRange {
+    return this.localizePair(tenant).first
+}
+
+/**
+ * Localizes the [ObservationComponent] relative to the [tenant]
+ */
+fun ObservationComponent.localize(tenant: Tenant): ObservationComponent {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
+    val updatedDataAbsentReason = dataAbsentReason?.localizePair(tenant) ?: Pair(dataAbsentReason, false)
+    val updatedInterpretation = interpretation.map { it.localizePair(tenant) }
+    val updatedReferenceRange = referenceRange.map { it.localizePair(tenant) }
+    val updateValue = value?.type == DynamicValueType.REFERENCE
+    val updatedCode = code.localizePair(tenant)
+    if (updatedExtensions.isNotEmpty() ||
+        updatedModifierExtensions.isNotEmpty() ||
+        updatedDataAbsentReason.second ||
+        updatedInterpretation.hasUpdates() ||
+        updatedReferenceRange.hasUpdates() ||
+        updatedCode.second ||
+        updateValue
+    ) {
+        val updatedValue: DynamicValue<Any>? = if (updateValue)
+            DynamicValue(value!!.type, (value!!.value as Reference).localize(tenant)) else value
+        return ObservationComponent(
+            id = id,
+            extension = updatedExtensions.ifEmpty { extension },
+            modifierExtension = updatedModifierExtensions.ifEmpty { modifierExtension },
+            code = updatedCode.first,
+            value = updatedValue,
+            dataAbsentReason = updatedDataAbsentReason.first,
+            interpretation = updatedInterpretation.values(),
+            referenceRange = updatedReferenceRange.values(),
+        )
+    }
+
+    return this
 }

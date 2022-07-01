@@ -20,11 +20,15 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
 import com.projectronin.interop.fhir.r4.datatype.NotAvailable
+import com.projectronin.interop.fhir.r4.datatype.ObservationComponent
+import com.projectronin.interop.fhir.r4.datatype.ObservationReferenceRange
 import com.projectronin.interop.fhir.r4.datatype.Participant
 import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Period
 import com.projectronin.interop.fhir.r4.datatype.Qualification
+import com.projectronin.interop.fhir.r4.datatype.Range
 import com.projectronin.interop.fhir.r4.datatype.Reference
+import com.projectronin.interop.fhir.r4.datatype.SimpleQuantity
 import com.projectronin.interop.fhir.r4.datatype.primitive.Base64Binary
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
@@ -52,6 +56,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
+import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -181,7 +186,7 @@ class LocalizersTest {
         )
 
         val localizedAddress = address.localize(tenant)
-        assertTrue(address !== localizedAddress)
+        assertNotEquals(address, localizedAddress)
 
         val expectedAddress = Address(
             id = "12345",
@@ -218,7 +223,7 @@ class LocalizersTest {
         )
 
         val localizedAddress = address.localize(tenant)
-        assertTrue(address !== localizedAddress)
+        assertNotEquals(address, localizedAddress)
 
         val expectedAddress = Address(
             id = "12345",
@@ -255,7 +260,7 @@ class LocalizersTest {
         )
 
         val localizedAddress = address.localize(tenant)
-        assertTrue(address !== localizedAddress)
+        assertNotEquals(address, localizedAddress)
 
         val expectedAddress = Address(
             id = "12345",
@@ -307,7 +312,7 @@ class LocalizersTest {
             creation = DateTime("2021")
         )
         val localizedAttachment = attachment.localize(tenant)
-        assertTrue(attachment !== localizedAttachment)
+        assertNotEquals(attachment, localizedAttachment)
 
         val expectedAttachment = Attachment(
             id = "12345",
@@ -351,7 +356,7 @@ class LocalizersTest {
             availableEndTime = Time("20:00:00")
         )
         val localizedAvailableTime = availableTime.localize(tenant)
-        assertTrue(availableTime !== localizedAvailableTime)
+        assertNotEquals(availableTime, localizedAvailableTime)
 
         val expectedAvailableTime = AvailableTime(
             id = "12345",
@@ -377,7 +382,7 @@ class LocalizersTest {
             availableEndTime = Time("20:00:00")
         )
         val localizedAvailableTime = availableTime.localize(tenant)
-        assertTrue(availableTime !== localizedAvailableTime)
+        assertNotEquals(availableTime, localizedAvailableTime)
 
         val expectedAvailableTime = AvailableTime(
             id = "12345",
@@ -403,7 +408,7 @@ class LocalizersTest {
             availableEndTime = Time("20:00:00")
         )
         val localizedAvailableTime = availableTime.localize(tenant)
-        assertTrue(availableTime !== localizedAvailableTime)
+        assertNotEquals(availableTime, localizedAvailableTime)
 
         val expectedAvailableTime = AvailableTime(
             id = "12345",
@@ -438,7 +443,7 @@ class LocalizersTest {
             text = "Text"
         )
         val localizedCodeableConcept = codeableConcept.localize(tenant)
-        assertTrue(codeableConcept !== localizedCodeableConcept)
+        assertNotEquals(codeableConcept, localizedCodeableConcept)
 
         val expectedCodeableConcept = CodeableConcept(
             id = "12345",
@@ -471,7 +476,7 @@ class LocalizersTest {
             text = "Text"
         )
         val (localizedCodeableConcept, updated) = codeableConcept.localizePair(tenant)
-        assertTrue(codeableConcept !== localizedCodeableConcept)
+        assertNotEquals(codeableConcept, localizedCodeableConcept)
         assertTrue(updated)
 
         val expectedCodeableConcept = CodeableConcept(
@@ -492,7 +497,7 @@ class LocalizersTest {
             text = "Text"
         )
         val (localizedCodeableConcept, updated) = codeableConcept.localizePair(tenant)
-        assertTrue(codeableConcept !== localizedCodeableConcept)
+        assertNotEquals(codeableConcept, localizedCodeableConcept)
         assertTrue(updated)
 
         val expectedCodeableConcept = CodeableConcept(
@@ -513,7 +518,7 @@ class LocalizersTest {
             text = "Text"
         )
         val (localizedCodeableConcept, updated) = codeableConcept.localizePair(tenant)
-        assertTrue(codeableConcept !== localizedCodeableConcept)
+        assertNotEquals(codeableConcept, localizedCodeableConcept)
         assertTrue(updated)
 
         val expectedCodeableConcept = CodeableConcept(
@@ -553,7 +558,7 @@ class LocalizersTest {
             userSelected = true
         )
         val (localizedCoding, updated) = coding.localizePair(tenant)
-        assertTrue(coding !== localizedCoding)
+        assertNotEquals(coding, localizedCoding)
         assertTrue(updated)
 
         val expectedCoding = Coding(
@@ -589,7 +594,7 @@ class LocalizersTest {
             language = CodeableConcept(extension = nonLocalizableExtensions)
         )
         val localizedCommunication = communication.localize(tenant)
-        assertTrue(localizedCommunication !== communication)
+        assertNotEquals(localizedCommunication, communication)
 
         val expectedCommunication = Communication(
             id = "12345",
@@ -609,7 +614,7 @@ class LocalizersTest {
             language = CodeableConcept(extension = nonLocalizableExtensions)
         )
         val localizedCommunication = communication.localize(tenant)
-        assertTrue(localizedCommunication !== communication)
+        assertNotEquals(localizedCommunication, communication)
 
         val expectedCommunication = Communication(
             id = "12345",
@@ -629,7 +634,7 @@ class LocalizersTest {
             language = CodeableConcept(extension = localizableExtensions)
         )
         val localizedCommunication = communication.localize(tenant)
-        assertTrue(localizedCommunication !== communication)
+        assertNotEquals(localizedCommunication, communication)
 
         val expectedCommunication = Communication(
             id = "12345",
@@ -649,7 +654,7 @@ class LocalizersTest {
             language = CodeableConcept(extension = localizableExtensions)
         )
         val localizedCommunication = communication.localize(tenant)
-        assertTrue(localizedCommunication !== communication)
+        assertNotEquals(localizedCommunication, communication)
 
         val expectedCommunication = Communication(
             id = "12345",
@@ -689,7 +694,7 @@ class LocalizersTest {
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedContact = contact.localize(tenant)
-        assertTrue(localizedContact !== contact)
+        assertNotEquals(localizedContact, contact)
 
         val expectedContact = Contact(
             id = "12345",
@@ -717,7 +722,7 @@ class LocalizersTest {
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedContact = contact.localize(tenant)
-        assertTrue(localizedContact !== contact)
+        assertNotEquals(localizedContact, contact)
 
         val expectedContact = Contact(
             id = "12345",
@@ -745,7 +750,7 @@ class LocalizersTest {
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedContact = contact.localize(tenant)
-        assertTrue(localizedContact !== contact)
+        assertNotEquals(localizedContact, contact)
 
         val expectedContact = Contact(
             id = "12345",
@@ -773,7 +778,7 @@ class LocalizersTest {
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedContact = contact.localize(tenant)
-        assertTrue(localizedContact !== contact)
+        assertNotEquals(localizedContact, contact)
 
         val expectedContact = Contact(
             id = "12345",
@@ -801,7 +806,7 @@ class LocalizersTest {
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedContact = contact.localize(tenant)
-        assertTrue(localizedContact !== contact)
+        assertNotEquals(localizedContact, contact)
 
         val expectedContact = Contact(
             id = "12345",
@@ -829,7 +834,7 @@ class LocalizersTest {
             period = Period(extension = localizableExtensions)
         )
         val localizedContact = contact.localize(tenant)
-        assertTrue(localizedContact !== contact)
+        assertNotEquals(localizedContact, contact)
 
         val expectedContact = Contact(
             id = "12345",
@@ -857,7 +862,7 @@ class LocalizersTest {
             period = Period(extension = localizableExtensions)
         )
         val localizedContact = contact.localize(tenant)
-        assertTrue(localizedContact !== contact)
+        assertNotEquals(localizedContact, contact)
 
         val expectedContact = Contact(
             id = "12345",
@@ -882,7 +887,7 @@ class LocalizersTest {
             telecom = listOf(ContactPoint(extension = localizableExtensions))
         )
         val localizedContact = contact.localize(tenant)
-        assertTrue(localizedContact !== contact)
+        assertNotEquals(localizedContact, contact)
 
         val expectedContact = Contact(
             id = "12345",
@@ -921,7 +926,7 @@ class LocalizersTest {
             period = Period(start = DateTime("2021"))
         )
         val localizedContactPoint = contactPoint.localize(tenant)
-        assertTrue(contactPoint !== localizedContactPoint)
+        assertNotEquals(contactPoint, localizedContactPoint)
 
         val expectedContactPoint = ContactPoint(
             id = "12345",
@@ -947,7 +952,7 @@ class LocalizersTest {
             period = Period(extension = localizableExtensions, start = DateTime("2021"))
         )
         val localizedContactPoint = contactPoint.localize(tenant)
-        assertTrue(contactPoint !== localizedContactPoint)
+        assertNotEquals(contactPoint, localizedContactPoint)
 
         val expectedContactPoint = ContactPoint(
             id = "12345",
@@ -973,7 +978,7 @@ class LocalizersTest {
             period = Period(extension = localizableExtensions, start = DateTime("2021"))
         )
         val localizedContactPoint = contactPoint.localize(tenant)
-        assertTrue(contactPoint !== localizedContactPoint)
+        assertNotEquals(contactPoint, localizedContactPoint)
 
         val expectedContactPoint = ContactPoint(
             id = "12345",
@@ -1016,7 +1021,7 @@ class LocalizersTest {
             period = Period(start = DateTime("2021"))
         )
         val (localizedContactPoint, updated) = contactPoint.localizePair(tenant)
-        assertTrue(contactPoint !== localizedContactPoint)
+        assertNotEquals(contactPoint, localizedContactPoint)
         assertTrue(updated)
 
         val expectedContactPoint = ContactPoint(
@@ -1043,7 +1048,7 @@ class LocalizersTest {
             period = Period(extension = localizableExtensions, start = DateTime("2021"))
         )
         val (localizedContactPoint, updated) = contactPoint.localizePair(tenant)
-        assertTrue(contactPoint !== localizedContactPoint)
+        assertNotEquals(contactPoint, localizedContactPoint)
         assertTrue(updated)
 
         val expectedContactPoint = ContactPoint(
@@ -1070,7 +1075,7 @@ class LocalizersTest {
             period = Period(extension = localizableExtensions, start = DateTime("2021"))
         )
         val (localizedContactPoint, updated) = contactPoint.localizePair(tenant)
-        assertTrue(contactPoint !== localizedContactPoint)
+        assertNotEquals(contactPoint, localizedContactPoint)
         assertTrue(updated)
 
         val expectedContactPoint = ContactPoint(
@@ -1106,7 +1111,7 @@ class LocalizersTest {
             value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/123"))
         )
         val localizedExtension = extension.localize(tenant)
-        assertTrue(extension !== localizedExtension)
+        assertNotEquals(extension, localizedExtension)
 
         val expectedExtension = Extension(
             id = "12345",
@@ -1139,7 +1144,7 @@ class LocalizersTest {
             value = DynamicValue(DynamicValueType.STRING, "Value")
         )
         val (localizedExtension, updated) = extension.localizePair(tenant)
-        assertTrue(extension !== localizedExtension)
+        assertNotEquals(extension, localizedExtension)
         assertTrue(updated)
 
         val expectedExtension = Extension(
@@ -1160,7 +1165,7 @@ class LocalizersTest {
             value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/123"))
         )
         val (localizedExtension, updated) = extension.localizePair(tenant)
-        assertTrue(extension !== localizedExtension)
+        assertNotEquals(extension, localizedExtension)
         assertTrue(updated)
 
         val expectedExtension = Extension(
@@ -1181,7 +1186,7 @@ class LocalizersTest {
             value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/123"))
         )
         val (localizedExtension, updated) = extension.localizePair(tenant)
-        assertTrue(extension !== localizedExtension)
+        assertNotEquals(extension, localizedExtension)
         assertTrue(updated)
 
         val expectedExtension = Extension(
@@ -1224,7 +1229,7 @@ class LocalizersTest {
             period = Period(start = DateTime("2021"))
         )
         val localizedHumanName = humanName.localize(tenant)
-        assertTrue(humanName !== localizedHumanName)
+        assertNotEquals(humanName, localizedHumanName)
 
         val expectedHumanName = HumanName(
             id = "12345",
@@ -1254,7 +1259,7 @@ class LocalizersTest {
             period = Period(extension = localizableExtensions, start = DateTime("2021"))
         )
         val localizedHumanName = humanName.localize(tenant)
-        assertTrue(humanName !== localizedHumanName)
+        assertNotEquals(humanName, localizedHumanName)
 
         val expectedHumanName = HumanName(
             id = "12345",
@@ -1284,7 +1289,7 @@ class LocalizersTest {
             period = Period(extension = localizableExtensions, start = DateTime("2021"))
         )
         val localizedHumanName = humanName.localize(tenant)
-        assertTrue(humanName !== localizedHumanName)
+        assertNotEquals(humanName, localizedHumanName)
 
         val expectedHumanName = HumanName(
             id = "12345",
@@ -1329,7 +1334,7 @@ class LocalizersTest {
             assigner = Reference(display = "assigner")
         )
         val localizedIdentifier = identifier.localize(tenant)
-        assertTrue(identifier !== localizedIdentifier)
+        assertNotEquals(identifier, localizedIdentifier)
 
         val expectedIdentifier = Identifier(
             id = "12345",
@@ -1374,7 +1379,7 @@ class LocalizersTest {
             assigner = Reference(display = "assigner")
         )
         val (localizedIdentifier, updated) = identifier.localizePair(tenant)
-        assertTrue(identifier !== localizedIdentifier)
+        assertNotEquals(identifier, localizedIdentifier)
         assertTrue(updated)
 
         val expectedIdentifier = Identifier(
@@ -1403,7 +1408,7 @@ class LocalizersTest {
             assigner = Reference(display = "assigner")
         )
         val (localizedIdentifier, updated) = identifier.localizePair(tenant)
-        assertTrue(identifier !== localizedIdentifier)
+        assertNotEquals(identifier, localizedIdentifier)
         assertTrue(updated)
 
         val expectedIdentifier = Identifier(
@@ -1432,7 +1437,7 @@ class LocalizersTest {
             assigner = Reference(display = "assigner")
         )
         val (localizedIdentifier, updated) = identifier.localizePair(tenant)
-        assertTrue(identifier !== localizedIdentifier)
+        assertNotEquals(identifier, localizedIdentifier)
         assertTrue(updated)
 
         val expectedIdentifier = Identifier(
@@ -1461,7 +1466,7 @@ class LocalizersTest {
             assigner = Reference(reference = "Organization/123")
         )
         val (localizedIdentifier, updated) = identifier.localizePair(tenant)
-        assertTrue(identifier !== localizedIdentifier)
+        assertNotEquals(identifier, localizedIdentifier)
         assertTrue(updated)
 
         val expectedIdentifier = Identifier(
@@ -1490,7 +1495,7 @@ class LocalizersTest {
             assigner = Reference(reference = "Organization/123")
         )
         val (localizedIdentifier, updated) = identifier.localizePair(tenant)
-        assertTrue(identifier !== localizedIdentifier)
+        assertNotEquals(identifier, localizedIdentifier)
         assertTrue(updated)
 
         val expectedIdentifier = Identifier(
@@ -1529,7 +1534,7 @@ class LocalizersTest {
             type = LinkType.REPLACES
         )
         val localizedLink = link.localize(tenant)
-        assertTrue(localizedLink !== link)
+        assertNotEquals(localizedLink, link)
 
         val expectedLink = PatientLink(
             id = "12345",
@@ -1551,7 +1556,7 @@ class LocalizersTest {
             type = LinkType.REPLACES
         )
         val localizedLink = link.localize(tenant)
-        assertTrue(localizedLink !== link)
+        assertNotEquals(localizedLink, link)
 
         val expectedLink = PatientLink(
             id = "12345",
@@ -1573,7 +1578,7 @@ class LocalizersTest {
             type = LinkType.REPLACES
         )
         val localizedLink = link.localize(tenant)
-        assertTrue(localizedLink !== link)
+        assertNotEquals(localizedLink, link)
 
         val expectedLink = PatientLink(
             id = "12345",
@@ -1595,7 +1600,7 @@ class LocalizersTest {
             type = LinkType.REPLACES
         )
         val localizedLink = link.localize(tenant)
-        assertTrue(localizedLink !== link)
+        assertNotEquals(localizedLink, link)
 
         val expectedLink = PatientLink(
             id = "12345",
@@ -1636,7 +1641,7 @@ class LocalizersTest {
             tag = listOf(Coding(display = "tag"))
         )
         val localizedMeta = meta.localize(tenant)
-        assertTrue(meta !== localizedMeta)
+        assertNotEquals(meta, localizedMeta)
 
         val expectedMeta = Meta(
             id = "12345",
@@ -1664,7 +1669,7 @@ class LocalizersTest {
             tag = listOf(Coding(display = "tag"))
         )
         val localizedMeta = meta.localize(tenant)
-        assertTrue(meta !== localizedMeta)
+        assertNotEquals(meta, localizedMeta)
 
         val expectedMeta = Meta(
             id = "12345",
@@ -1692,7 +1697,7 @@ class LocalizersTest {
             tag = listOf(Coding(extension = localizableExtensions, display = "tag"))
         )
         val localizedMeta = meta.localize(tenant)
-        assertTrue(meta !== localizedMeta)
+        assertNotEquals(meta, localizedMeta)
 
         val expectedMeta = Meta(
             id = "12345",
@@ -1720,7 +1725,7 @@ class LocalizersTest {
             tag = listOf(Coding(extension = localizableExtensions, display = "tag"))
         )
         val localizedMeta = meta.localize(tenant)
-        assertTrue(meta !== localizedMeta)
+        assertNotEquals(meta, localizedMeta)
 
         val expectedMeta = Meta(
             id = "12345",
@@ -1756,7 +1761,7 @@ class LocalizersTest {
             div = "div"
         )
         val localizedNarrative = narrative.localize(tenant)
-        assertTrue(narrative !== localizedNarrative)
+        assertNotEquals(narrative, localizedNarrative)
 
         val expectedNarrative = Narrative(
             id = "12345",
@@ -1790,7 +1795,7 @@ class LocalizersTest {
             during = Period(start = DateTime("2021"))
         )
         val localizedNotAvailable = notAvailable.localize(tenant)
-        assertTrue(notAvailable !== localizedNotAvailable)
+        assertNotEquals(notAvailable, localizedNotAvailable)
 
         val expectedNotAvailable = NotAvailable(
             id = "12345",
@@ -1812,7 +1817,7 @@ class LocalizersTest {
             during = Period(start = DateTime("2021"))
         )
         val localizedNotAvailable = notAvailable.localize(tenant)
-        assertTrue(notAvailable !== localizedNotAvailable)
+        assertNotEquals(notAvailable, localizedNotAvailable)
 
         val expectedNotAvailable = NotAvailable(
             id = "12345",
@@ -1834,7 +1839,7 @@ class LocalizersTest {
             during = Period(extension = localizableExtensions, start = DateTime("2021"))
         )
         val localizedNotAvailable = notAvailable.localize(tenant)
-        assertTrue(notAvailable !== localizedNotAvailable)
+        assertNotEquals(notAvailable, localizedNotAvailable)
 
         val expectedNotAvailable = NotAvailable(
             id = "12345",
@@ -1856,7 +1861,7 @@ class LocalizersTest {
             during = Period(extension = localizableExtensions, start = DateTime("2021"))
         )
         val localizedNotAvailable = notAvailable.localize(tenant)
-        assertTrue(notAvailable !== localizedNotAvailable)
+        assertNotEquals(notAvailable, localizedNotAvailable)
 
         val expectedNotAvailable = NotAvailable(
             id = "12345",
@@ -1912,7 +1917,7 @@ class LocalizersTest {
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
-        assertTrue(localizedParticipant !== participant)
+        assertNotEquals(localizedParticipant, participant)
 
         val expectedParticipant = Participant(
             id = "12345",
@@ -1939,7 +1944,7 @@ class LocalizersTest {
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
-        assertTrue(localizedParticipant !== participant)
+        assertNotEquals(localizedParticipant, participant)
 
         val expectedParticipant = Participant(
             id = "12345",
@@ -1966,7 +1971,7 @@ class LocalizersTest {
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
-        assertTrue(localizedParticipant !== participant)
+        assertNotEquals(localizedParticipant, participant)
 
         val expectedParticipant = Participant(
             id = "12345",
@@ -1994,7 +1999,7 @@ class LocalizersTest {
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
-        assertTrue(localizedParticipant !== participant)
+        assertNotEquals(localizedParticipant, participant)
 
         val expectedParticipant = Participant(
             id = "12345",
@@ -2022,7 +2027,7 @@ class LocalizersTest {
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
-        assertTrue(localizedParticipant !== participant)
+        assertNotEquals(localizedParticipant, participant)
 
         val expectedParticipant = Participant(
             id = "12345",
@@ -2050,7 +2055,7 @@ class LocalizersTest {
             period = Period(extension = localizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
-        assertTrue(localizedParticipant !== participant)
+        assertNotEquals(localizedParticipant, participant)
 
         val expectedParticipant = Participant(
             id = "12345",
@@ -2086,7 +2091,7 @@ class LocalizersTest {
             end = DateTime("2023")
         )
         val localizedPeriod = period.localize(tenant)
-        assertTrue(period !== localizedPeriod)
+        assertNotEquals(period, localizedPeriod)
 
         val expectedPeriod = Period(
             id = "12345",
@@ -2119,7 +2124,7 @@ class LocalizersTest {
             end = DateTime("2023")
         )
         val (localizedPeriod, updated) = period.localizePair(tenant)
-        assertTrue(period !== localizedPeriod)
+        assertNotEquals(period, localizedPeriod)
         assertTrue(updated)
 
         val expectedPeriod = Period(
@@ -2158,7 +2163,7 @@ class LocalizersTest {
             issuer = Reference(display = "issuer")
         )
         val localizedQualification = qualification.localize(tenant)
-        assertTrue(qualification !== localizedQualification)
+        assertNotEquals(qualification, localizedQualification)
 
         val expectedQualification = Qualification(
             id = "12345",
@@ -2184,7 +2189,7 @@ class LocalizersTest {
             issuer = Reference(display = "issuer")
         )
         val localizedQualification = qualification.localize(tenant)
-        assertTrue(qualification !== localizedQualification)
+        assertNotEquals(qualification, localizedQualification)
 
         val expectedQualification = Qualification(
             id = "12345",
@@ -2210,7 +2215,7 @@ class LocalizersTest {
             issuer = Reference(display = "issuer")
         )
         val localizedQualification = qualification.localize(tenant)
-        assertTrue(qualification !== localizedQualification)
+        assertNotEquals(qualification, localizedQualification)
 
         val expectedQualification = Qualification(
             id = "12345",
@@ -2236,7 +2241,7 @@ class LocalizersTest {
             issuer = Reference(display = "issuer")
         )
         val localizedQualification = qualification.localize(tenant)
-        assertTrue(qualification !== localizedQualification)
+        assertNotEquals(qualification, localizedQualification)
 
         val expectedQualification = Qualification(
             id = "12345",
@@ -2262,7 +2267,7 @@ class LocalizersTest {
             issuer = Reference(display = "issuer")
         )
         val localizedQualification = qualification.localize(tenant)
-        assertTrue(qualification !== localizedQualification)
+        assertNotEquals(qualification, localizedQualification)
 
         val expectedQualification = Qualification(
             id = "12345",
@@ -2288,7 +2293,7 @@ class LocalizersTest {
             issuer = Reference(extension = localizableExtensions, display = "issuer")
         )
         val localizedQualification = qualification.localize(tenant)
-        assertTrue(qualification !== localizedQualification)
+        assertNotEquals(qualification, localizedQualification)
 
         val expectedQualification = Qualification(
             id = "12345",
@@ -2314,7 +2319,7 @@ class LocalizersTest {
             issuer = Reference(extension = localizableExtensions, display = "issuer")
         )
         val localizedQualification = qualification.localize(tenant)
-        assertTrue(qualification !== localizedQualification)
+        assertNotEquals(qualification, localizedQualification)
 
         val expectedQualification = Qualification(
             id = "12345",
@@ -2354,7 +2359,7 @@ class LocalizersTest {
         )
 
         val localizedReference = reference.localize(tenant)
-        assertTrue(reference !== localizedReference)
+        assertNotEquals(reference, localizedReference)
 
         val expectedReference = Reference(
             id = "12345",
@@ -2392,7 +2397,7 @@ class LocalizersTest {
         )
 
         val (localizedReference, updated) = reference.localizePair(tenant)
-        assertTrue(reference !== localizedReference)
+        assertNotEquals(reference, localizedReference)
         assertTrue(updated)
 
         val expectedReference = Reference(
@@ -2417,7 +2422,7 @@ class LocalizersTest {
         )
 
         val (localizedReference, updated) = reference.localizePair(tenant)
-        assertTrue(reference !== localizedReference)
+        assertNotEquals(reference, localizedReference)
         assertTrue(updated)
 
         val expectedReference = Reference(
@@ -2443,7 +2448,7 @@ class LocalizersTest {
         )
 
         val (localizedReference, updated) = reference.localizePair(tenant)
-        assertTrue(reference !== localizedReference)
+        assertNotEquals(reference, localizedReference)
         assertTrue(updated)
 
         val expectedReference = Reference(
@@ -2499,7 +2504,7 @@ class LocalizersTest {
             )
         )
         val localizedConditionStage = conditionStage.localize(tenant)
-        assertTrue(conditionStage !== localizedConditionStage)
+        assertNotEquals(conditionStage, localizedConditionStage)
         val expectedConditionStage = ConditionStage(
             id = "12345",
             extension = localizedExtensions,
@@ -2593,7 +2598,7 @@ class LocalizersTest {
             )
         )
         val localizedConditionEvidence = conditionEvidence.localize(tenant)
-        assertTrue(conditionEvidence !== localizedConditionEvidence)
+        assertNotEquals(conditionEvidence, localizedConditionEvidence)
         val expectedConditionEvidence = ConditionEvidence(
             id = "12345",
             extension = localizedExtensions,
@@ -2611,6 +2616,7 @@ class LocalizersTest {
         )
         assertEquals(expectedConditionEvidence, localizedConditionEvidence)
     }
+
     @Test
     fun `returns original ConditionEvidence if no localizable fields`() {
         val conditionEvidence = ConditionEvidence(
@@ -2691,18 +2697,24 @@ class LocalizersTest {
         val annotation = Annotation(
             id = "12345",
             extension = localizableExtensions,
-            author = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Practitioner/roninPractitionerExample01")),
+            author = DynamicValue(
+                DynamicValueType.REFERENCE,
+                Reference(reference = "Practitioner/roninPractitionerExample01")
+            ),
             time = DateTime("2022-02"),
             text = Markdown("Test")
         )
         val (localizedAnnotation, updated) = annotation.localizePair(tenant)
-        assertTrue(annotation !== localizedAnnotation)
+        assertNotEquals(annotation, localizedAnnotation)
         assertTrue(updated)
 
         val expectedAnnotation = Annotation(
             id = "12345",
             extension = localizedExtensions,
-            author = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Practitioner/test-roninPractitionerExample01")),
+            author = DynamicValue(
+                DynamicValueType.REFERENCE,
+                Reference(reference = "Practitioner/test-roninPractitionerExample01")
+            ),
             time = DateTime("2022-02"),
             text = Markdown("Test")
         )
@@ -2742,7 +2754,7 @@ class LocalizersTest {
         )
 
         val (localizedReference, updated) = reference.localizePair(tenant)
-        assertTrue(reference !== localizedReference)
+        assertNotEquals(reference, localizedReference)
         assertTrue(updated)
 
         val expectedReference = Reference(
@@ -2762,5 +2774,280 @@ class LocalizersTest {
             display = "Patient 123"
         )
         assertEquals(expectedReference, localizedReference)
+    }
+
+    @Test
+    fun `ObservationReferenceRange localizes`() {
+        val localizableCodeableConcept = CodeableConcept(
+            id = "12345",
+            extension = localizableExtensions,
+            coding = listOf(Coding(display = "coding")),
+            text = "Text"
+        )
+        val expectedCodeableConcept = CodeableConcept(
+            id = "12345",
+            extension = localizedExtensions,
+            coding = listOf(Coding(display = "coding")),
+            text = "Text"
+        )
+        val observationReferenceRange = ObservationReferenceRange(
+            id = "12345",
+            extension = localizableExtensions,
+            modifierExtension = localizableExtensions,
+            low = SimpleQuantity(),
+            high = SimpleQuantity(),
+            type = localizableCodeableConcept,
+            appliesTo = emptyList(),
+            age = Range(),
+            text = "Text",
+        )
+        val expectedObservationReferenceRange = ObservationReferenceRange(
+            id = "12345",
+            extension = localizedExtensions,
+            modifierExtension = localizedExtensions,
+            low = SimpleQuantity(),
+            high = SimpleQuantity(),
+            type = expectedCodeableConcept,
+            appliesTo = emptyList(),
+            age = Range(),
+            text = "Text",
+        )
+
+        val (localizedObservationReferenceRange, updated) = observationReferenceRange.localizePair(tenant)
+
+        assertNotEquals(observationReferenceRange, localizedObservationReferenceRange)
+        assertTrue(updated)
+        assertEquals(localizedObservationReferenceRange, observationReferenceRange.localize(tenant))
+        assertEquals(expectedObservationReferenceRange, localizedObservationReferenceRange)
+    }
+
+    @Test
+    fun `ObservationReferenceRange localizes when lots of things are null`() {
+        val localizableCodeableConcept = CodeableConcept(
+            id = "12345",
+            extension = localizableExtensions,
+            coding = listOf(Coding(display = "coding")),
+            text = "Text"
+        )
+        val expectedCodeableConcept = CodeableConcept(
+            id = "12345",
+            extension = localizedExtensions,
+            coding = listOf(Coding(display = "coding")),
+            text = "Text"
+        )
+        val observationReferenceRange = ObservationReferenceRange(
+            id = "12345",
+            extension = emptyList(),
+            modifierExtension = emptyList(),
+            type = null,
+            appliesTo = listOf(localizableCodeableConcept),
+            age = Range(),
+            text = "Text",
+        )
+        val expectedObservationReferenceRange = ObservationReferenceRange(
+            id = "12345",
+            extension = emptyList(),
+            modifierExtension = emptyList(),
+            type = null,
+            appliesTo = listOf(expectedCodeableConcept),
+            age = Range(),
+            text = "Text",
+        )
+
+        val (localizedObservationReferenceRange, updated) = observationReferenceRange.localizePair(tenant)
+
+        assertNotEquals(observationReferenceRange, localizedObservationReferenceRange)
+        assertTrue(updated)
+        assertEquals(expectedObservationReferenceRange, localizedObservationReferenceRange)
+    }
+
+    @Test
+    fun `ObservationReferenceRange doesn't localize when no localization needed`() {
+        val nonlocalizableCodeableConcept = CodeableConcept(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            coding = listOf(Coding(display = "coding")),
+            text = "Text"
+        )
+        val observationReferenceRange = ObservationReferenceRange(
+            id = "12345",
+            type = nonlocalizableCodeableConcept,
+            text = "Text"
+        )
+
+        val (localizedObservationReferenceRange, updated) = observationReferenceRange.localizePair(tenant)
+
+        assertEquals(observationReferenceRange, localizedObservationReferenceRange)
+        assertFalse(updated)
+    }
+
+    @Test
+    fun `ObservationComponent localizes`() {
+        val localizableCodeableConcept = CodeableConcept(
+            id = "12345",
+            extension = localizableExtensions,
+            coding = listOf(Coding(display = "coding")),
+            text = "Text"
+        )
+        val expectedCodeableConcept = CodeableConcept(
+            id = "12345",
+            extension = localizedExtensions,
+            coding = listOf(Coding(display = "coding")),
+            text = "Text"
+        )
+        val observationReferenceRange = ObservationReferenceRange(
+            id = "12345",
+            type = localizableCodeableConcept,
+            text = "Text"
+        )
+        val localizedObservationReferenceRange = ObservationReferenceRange(
+            id = "12345",
+            type = expectedCodeableConcept,
+            text = "Text"
+        )
+        val observationComponent = ObservationComponent(
+            id = "12345",
+            extension = localizableExtensions,
+            modifierExtension = localizableExtensions,
+            code = localizableCodeableConcept,
+            value = DynamicValue(
+                DynamicValueType.REFERENCE,
+                Reference(reference = "Practitioner/123")
+            ),
+            dataAbsentReason = null,
+            interpretation = listOf(localizableCodeableConcept),
+            referenceRange = listOf(observationReferenceRange)
+        )
+
+        val expectedObservationComponent = ObservationComponent(
+            id = "12345",
+            extension = localizedExtensions,
+            modifierExtension = localizedExtensions,
+            code = expectedCodeableConcept,
+            value = DynamicValue(
+                DynamicValueType.REFERENCE,
+                Reference(reference = "Practitioner/test-123")
+            ),
+            dataAbsentReason = null,
+            interpretation = listOf(expectedCodeableConcept),
+            referenceRange = listOf(localizedObservationReferenceRange)
+        )
+
+        val localizedObservationComponent = observationComponent.localize(tenant)
+
+        assertNotEquals(observationComponent, localizedObservationComponent)
+        assertEquals(expectedObservationComponent, localizedObservationComponent)
+    }
+
+    @Test
+    fun `ObservationComponent localizes with nulls`() {
+        val localizableCodeableConcept = CodeableConcept(
+            id = "12345",
+            extension = localizableExtensions,
+            coding = listOf(Coding(display = "coding")),
+            text = "Text"
+        )
+        val expectedCodeableConcept = CodeableConcept(
+            id = "12345",
+            extension = localizedExtensions,
+            coding = listOf(Coding(display = "coding")),
+            text = "Text"
+        )
+        val observationComponent = ObservationComponent(
+            id = "12345",
+            code = localizableCodeableConcept,
+            value = null
+        )
+
+        val expectedObservationComponent = ObservationComponent(
+            id = "12345",
+            code = expectedCodeableConcept,
+            value = null
+        )
+
+        val localizedObservationComponent = observationComponent.localize(tenant)
+
+        assertNotEquals(observationComponent, localizedObservationComponent)
+        assertEquals(expectedObservationComponent, localizedObservationComponent)
+    }
+
+    @Test
+    fun `ObservationComponent localizes with null dynamic value`() {
+        val localizableCodeableConcept = CodeableConcept(
+            id = "12345",
+            extension = localizableExtensions,
+            coding = listOf(Coding(display = "coding")),
+            text = "Text"
+        )
+        val nonLocalizableCodeableConcept = CodeableConcept(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            coding = listOf(Coding(display = "coding")),
+            text = "Text"
+        )
+        val expectedCodeableConcept = CodeableConcept(
+            id = "12345",
+            extension = localizedExtensions,
+            coding = listOf(Coding(display = "coding")),
+            text = "Text"
+        )
+        val observationComponent = ObservationComponent(
+            id = "12345",
+            extension = emptyList(),
+            modifierExtension = emptyList(),
+            code = nonLocalizableCodeableConcept,
+            value = null,
+            dataAbsentReason = localizableCodeableConcept,
+            interpretation = emptyList(),
+            referenceRange = emptyList()
+        )
+
+        val expectedObservationComponent = ObservationComponent(
+            id = "12345",
+            extension = emptyList(),
+            modifierExtension = emptyList(),
+            code = nonLocalizableCodeableConcept,
+            value = null,
+            dataAbsentReason = expectedCodeableConcept,
+            interpretation = emptyList(),
+            referenceRange = emptyList()
+        )
+
+        val localizedObservationComponent = observationComponent.localize(tenant)
+
+        assertNotEquals(observationComponent, localizedObservationComponent)
+        assertEquals(expectedObservationComponent, localizedObservationComponent)
+    }
+
+    @Test
+    fun `ObservationComponent doesn't localize`() {
+        val nonLocalizableCodeableConcept = CodeableConcept(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            coding = listOf(Coding(display = "coding")),
+            text = "Text"
+        )
+        val observationReferenceRange = ObservationReferenceRange(
+            id = "12345",
+            type = nonLocalizableCodeableConcept,
+            text = "Text"
+        )
+        val observationComponent = ObservationComponent(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions,
+            code = nonLocalizableCodeableConcept,
+            value = DynamicValue(
+                DynamicValueType.STRING,
+                Reference(reference = "TEST")
+            ),
+            dataAbsentReason = null,
+            interpretation = listOf(nonLocalizableCodeableConcept),
+            referenceRange = listOf(observationReferenceRange)
+        )
+
+        val localizedObservationComponent = observationComponent.localize(tenant)
+
+        assertEquals(observationComponent, localizedObservationComponent)
     }
 }
