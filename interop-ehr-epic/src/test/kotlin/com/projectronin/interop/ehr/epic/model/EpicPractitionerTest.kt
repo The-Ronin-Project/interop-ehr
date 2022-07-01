@@ -13,6 +13,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
+import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.NameUse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -27,7 +28,7 @@ class EpicPractitionerTest {
             coding = listOf(Coding(system = Uri("abc"), code = Code("11"), display = "English")),
             text = "English"
         )
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val practitioner = Practitioner(
             id = Id("eYQbg.zDI2aP7oRI8LT.BzA3"),
             identifier = listOf(identifier),
@@ -105,7 +106,7 @@ class EpicPractitionerTest {
             coding = listOf(Coding(system = Uri("abc"), code = Code("11"), display = "English")),
             text = "English"
         )
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val practitioner = Practitioner(
             id = Id("eYQbg.zDI2aP7oRI8LT.BzA3"),
             identifier = listOf(identifier),
@@ -120,7 +121,7 @@ class EpicPractitionerTest {
         val nameJSON = """{"use":"usual","family":"Staywell","given":["Physician"]}"""
         val communicationJSON =
             """{"coding":[{"system":"abc","code":"11","display":"English"}],"text":"English"}"""
-        val telecomJson = """{"value":"123-456-7890"}"""
+        val telecomJson = """{"system":"phone","value":"123-456-7890"}"""
 
         val json = """{
             |"resourceType": "Practitioner",

@@ -12,6 +12,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
+import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.NameUse
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
@@ -22,7 +23,7 @@ class EpicPatientTest {
     fun `can build from object`() {
         val identifier = Identifier(system = Uri("SSN"), value = "123-45-6789")
         val name = HumanName(use = NameUse.USUAL)
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val address = Address(state = "MO")
         val patient = Patient(
             id = Id("1234567890"),
@@ -58,7 +59,7 @@ class EpicPatientTest {
     @Test
     fun `supports no identifier`() {
         val name = HumanName(use = NameUse.USUAL)
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val address = Address(state = "MO")
         val patient = Patient(
             id = Id("1234567890"),
@@ -91,7 +92,7 @@ class EpicPatientTest {
         val identifier1 = Identifier(system = Uri("SSN"), value = "123-45-6789")
         val identifier2 = Identifier(system = Uri("PID"), value = "98765")
         val name = HumanName(use = NameUse.USUAL)
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val address = Address(state = "MO")
         val patient = Patient(
             id = Id("1234567890"),
@@ -124,7 +125,7 @@ class EpicPatientTest {
     @Test
     fun `supports no name`() {
         val identifier = Identifier(system = Uri("SSN"), value = "123-45-6789")
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val address = Address(state = "MO")
         val patient = Patient(
             id = Id("1234567890"),
@@ -157,7 +158,7 @@ class EpicPatientTest {
         val identifier = Identifier(system = Uri("SSN"), value = "123-45-6789")
         val name1 = HumanName(use = NameUse.USUAL)
         val name2 = HumanName(use = NameUse.MAIDEN)
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val address = Address(state = "MO")
         val patient = Patient(
             id = Id("1234567890"),
@@ -191,7 +192,7 @@ class EpicPatientTest {
     fun `supports no gender`() {
         val identifier = Identifier(system = Uri("SSN"), value = "123-45-6789")
         val name = HumanName(use = NameUse.USUAL)
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val address = Address(state = "MO")
         val patient = Patient(
             id = Id("1234567890"),
@@ -223,7 +224,7 @@ class EpicPatientTest {
     fun `supports no birth date`() {
         val identifier = Identifier(system = Uri("SSN"), value = "123-45-6789")
         val name = HumanName(use = NameUse.USUAL)
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val address = Address(state = "MO")
         val patient = Patient(
             id = Id("1234567890"),
@@ -286,8 +287,8 @@ class EpicPatientTest {
     fun `supports multiple telecoms`() {
         val identifier = Identifier(system = Uri("SSN"), value = "123-45-6789")
         val name = HumanName(use = NameUse.USUAL)
-        val telecom1 = ContactPoint(value = "123-456-7890")
-        val telecom2 = ContactPoint(value = "test@projectronin.com")
+        val telecom1 = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
+        val telecom2 = ContactPoint(system = ContactPointSystem.EMAIL, value = "test@projectronin.com")
         val address = Address(state = "MO")
         val patient = Patient(
             id = Id("1234567890"),
@@ -321,7 +322,7 @@ class EpicPatientTest {
     fun `supports no address`() {
         val identifier = Identifier(system = Uri("SSN"), value = "123-45-6789")
         val name = HumanName(use = NameUse.USUAL)
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val patient = Patient(
             id = Id("1234567890"),
             identifier = listOf(identifier),
@@ -352,7 +353,7 @@ class EpicPatientTest {
     fun `supports multiple addresses`() {
         val identifier = Identifier(system = Uri("SSN"), value = "123-45-6789")
         val name = HumanName(use = NameUse.USUAL)
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val address1 = Address(state = "MO")
         val address2 = Address(state = "GA")
         val patient = Patient(
@@ -387,7 +388,7 @@ class EpicPatientTest {
     fun `returns JSON as raw`() {
         val identifier = Identifier(system = Uri("SSN"), value = "123-45-6789")
         val name = HumanName(use = NameUse.USUAL)
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val address = Address(state = "MO")
         val patient = Patient(
             id = Id("1234567890"),
@@ -401,7 +402,7 @@ class EpicPatientTest {
 
         val identifierJson = """{"system":"SSN","value":"123-45-6789"}"""
         val nameJson = """{"use":"usual"}"""
-        val telecomJson = """{"value":"123-456-7890"}"""
+        val telecomJson = """{"system":"phone","value":"123-456-7890"}"""
         val addressJson = """{"state":"MO"}"""
 
         val json = """{

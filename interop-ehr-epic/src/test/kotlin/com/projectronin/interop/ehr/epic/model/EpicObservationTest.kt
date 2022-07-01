@@ -25,18 +25,18 @@ class EpicObservationTest {
 
     val goodR4Observation = R4Observation(
         id = R4Id("OBS1"),
-        basedOn = listOf(R4Reference("PROCEDURE1")),
+        basedOn = listOf(R4Reference(display = "PROCEDURE1")),
         status = ObservationStatus.AMENDED,
         category = listOf(R4CodeableConcept(text = "CAT1")),
         code = R4CodeableConcept(text = "CODE1"),
-        subject = R4Reference("PAT1"),
-        encounter = R4Reference("ENCOUNTER1"),
+        subject = R4Reference(display = "PAT1"),
+        encounter = R4Reference(display = "ENCOUNTER1"),
         effective = DynamicValue(
             type = DynamicValueType.DATE_TIME,
             value = R4DateTime("2015-02-07T13:28:17-05:00")
         ),
         issued = R4Instant("2017-01-01T00:00:00Z"),
-        performer = listOf(R4Reference("PRACT1")),
+        performer = listOf(R4Reference(display = "PRACT1")),
         value = DynamicValue(
             type = DynamicValueType.STRING,
             value = "ValueString"
@@ -44,10 +44,10 @@ class EpicObservationTest {
         dataAbsentReason = null, // if value is populated, data isn't absent!
         interpretation = listOf(R4CodeableConcept(text = "INTERPRETATION1")),
         method = R4CodeableConcept(text = "METHOD1"),
-        specimen = R4Reference("SPECIMEN1"),
+        specimen = R4Reference(display = "SPECIMEN1"),
         referenceRange = listOf(ObservationReferenceRange("REFRANGE1", high = R4SimpleQuantity(value = 10.0))),
-        hasMember = listOf(R4Reference("HASMEMBER1")),
-        derivedFrom = listOf(R4Reference("DERIVED1")),
+        hasMember = listOf(R4Reference(display = "HASMEMBER1")),
+        derivedFrom = listOf(R4Reference(display = "DERIVED1")),
         note = listOf(R4Annotation("ANNOTATION1", text = R4Markdown("Some sort of note."))),
     )
 
@@ -182,7 +182,7 @@ class EpicObservationTest {
             status = ObservationStatus.AMENDED,
             category = listOf(),
             code = R4CodeableConcept(text = "CODE1"),
-            subject = R4Reference("PAT1"),
+            subject = R4Reference(display = "PAT1"),
             encounter = null,
             effective = null,
             issued = null,

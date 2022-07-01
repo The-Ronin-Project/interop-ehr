@@ -10,6 +10,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -19,7 +20,7 @@ class EpicLocationTest {
     fun `can build from object`() {
         val id = Id("e4aPTZoZLqOja.QwzaEzp0A3")
         val identifier = Identifier(system = Uri("abc123"), type = CodeableConcept(text = "Internal"), value = "E14345")
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val address = Address(line = listOf("1 Maple Drive", "Apt A"), city = "Anytown", state = "MD", postalCode = "12345")
         val location = Location(id = id, name = "My Office", identifier = listOf(identifier), telecom = listOf(telecom), address = address)
         val epicLocation = EpicLocation(location)
@@ -67,14 +68,14 @@ class EpicLocationTest {
     fun `return JSON as raw`() {
         val id = Id("e4aPTZoZLqOja.QwzaEzp0A3")
         val identifier = Identifier(system = Uri("abc123"), type = CodeableConcept(text = "Internal"), value = "E14345")
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val address = Address(line = listOf("1 Maple Drive", "Apt A"), city = "Anytown", state = "MD", postalCode = "12345")
         val location = Location(id = id, name = "My Office", identifier = listOf(identifier), telecom = listOf(telecom), address = address)
         val epicLocation = EpicLocation(location)
         assertEquals(location, epicLocation.resource)
 
         val identifierJSON = """{"type":{"text":"Internal"},"system":"abc123","value":"E14345"}"""
-        val telecomJson = """{"value":"123-456-7890"}"""
+        val telecomJson = """{"system":"phone","value":"123-456-7890"}"""
         val addressJSON = """{"line":["1 Maple Drive","Apt A"],"city":"Anytown","state":"MD","postalCode":"12345"}"""
         val json = """{
             |"resourceType": "Location",

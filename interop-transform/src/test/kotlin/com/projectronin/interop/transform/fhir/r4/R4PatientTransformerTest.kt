@@ -107,7 +107,7 @@ class R4PatientTransformerTest {
             communication = listOf(Communication(language = CodeableConcept(text = "English"))),
             generalPractitioner = listOf(Reference(display = "GP")),
             managingOrganization = Reference(display = "organization"),
-            link = listOf(PatientLink(other = Reference(), type = LinkType.REPLACES))
+            link = listOf(PatientLink(other = Reference(display = "other patient"), type = LinkType.REPLACES))
         )
         val patient = mockk<Patient> {
             every { dataSource } returns DataSource.FHIR_R4
@@ -180,7 +180,7 @@ class R4PatientTransformerTest {
         assertEquals(listOf(Communication(language = CodeableConcept(text = "English"))), oncologyPatient.communication)
         assertEquals(listOf(Reference(display = "GP")), oncologyPatient.generalPractitioner)
         assertEquals(Reference(display = "organization"), oncologyPatient.managingOrganization)
-        assertEquals(listOf(PatientLink(other = Reference(), type = LinkType.REPLACES)), oncologyPatient.link)
+        assertEquals(listOf(PatientLink(other = Reference(display = "other patient"), type = LinkType.REPLACES)), oncologyPatient.link)
     }
 
     @Test

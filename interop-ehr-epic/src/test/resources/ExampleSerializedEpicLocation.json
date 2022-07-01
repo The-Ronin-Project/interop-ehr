@@ -32,7 +32,8 @@
   ],
   "identifier": [
     {
-      "value": "id"
+      "value": "id",
+      "system": "ronin"
     }
   ],
   "status": "active",
@@ -55,7 +56,8 @@
   ],
   "telecom": [
     {
-      "value": "8675309"
+      "value": "8675309",
+      "system": "phone"
     }
   ],
   "address": {

@@ -24,6 +24,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.DayOfWeek
 import com.projectronin.interop.fhir.r4.valueset.LocationMode
 import com.projectronin.interop.fhir.r4.valueset.LocationStatus
@@ -107,7 +108,7 @@ class R4LocationTransformerTest {
             description = "Sun Room",
             mode = LocationMode.INSTANCE,
             type = type,
-            telecom = listOf(ContactPoint(value = "123-456-7890")),
+            telecom = listOf(ContactPoint(value = "123-456-7890", system = ContactPointSystem.PHONE)),
             address = Address(country = "USA"),
             physicalType = physicalType,
             position = position,
@@ -170,7 +171,7 @@ class R4LocationTransformerTest {
         assertEquals("Sun Room", oncologyLocation.description)
         assertEquals(LocationMode.INSTANCE, oncologyLocation.mode)
         assertEquals(type, oncologyLocation.type)
-        assertEquals(listOf(ContactPoint(value = "123-456-7890")), oncologyLocation.telecom)
+        assertEquals(listOf(ContactPoint(value = "123-456-7890", system = ContactPointSystem.PHONE)), oncologyLocation.telecom)
         assertEquals(Address(country = "USA"), oncologyLocation.address)
         assertEquals(physicalType, oncologyLocation.physicalType)
         assertEquals(position, oncologyLocation.position)

@@ -25,6 +25,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.valueset.ConditionVerificationStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -547,59 +548,8 @@ class R4ConditionTransformerTest {
     }
 
     @Test
-    fun `clinical status must be valid code if populated, condition transformation returns empty when not valid`() {
-        val r4Condition = R4Condition(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    type = CodeableConcepts.RONIN_TENANT,
-                    value = "tenantId"
-                )
-            ),
-            clinicalStatus = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://terminology.hl7.org/CodeSystem/condition-clinical"),
-                        code = Code("potato"),
-                        display = "Potato"
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            code = Code("encounter-diagnosis")
-                        )
-                    ),
-                    text = "Encounter Diagnosis"
-                )
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer"
-                    )
-                )
-            ),
-            subject = Reference(
-                reference = "Patient/roninPatientExample01"
-            )
-        )
-        val condition = mockk<Condition> {
-            every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns r4Condition
-        }
-        assertNull(transformer.transformCondition(condition, tenant))
-    }
-
-    @Test
     fun `bundle transformation returns empty when no valid transformations`() {
-        val invalidCondition = R4Condition(
-            id = Id("12345"),
+        val invalidConditionNoId = R4Condition(
             identifier = listOf(
                 Identifier(
                     id = "testId"
@@ -609,8 +559,7 @@ class R4ConditionTransformerTest {
                 coding = listOf(
                     Coding(
                         system = Uri("http://terminology.hl7.org/CodeSystem/condition-ver-status"),
-                        code = Code("potato"),
-                        display = "Potato"
+                        code = Code(value = ConditionVerificationStatus.CONFIRMED.code),
                     )
                 )
             ),
@@ -639,11 +588,11 @@ class R4ConditionTransformerTest {
         )
         val condition1 = mockk<Condition> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns invalidCondition
+            every { resource } returns invalidConditionNoId
         }
         val condition2 = mockk<Condition> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns invalidCondition
+            every { resource } returns invalidConditionNoId
         }
 
         val bundle = mockk<Bundle<Condition>> {
@@ -657,8 +606,7 @@ class R4ConditionTransformerTest {
 
     @Test
     fun `bundle transformation returns only valid transformations`() {
-        val invalidCondition = R4Condition(
-            id = Id("12345"),
+        val invalidConditionNoId = R4Condition(
             identifier = listOf(
                 Identifier(
                     id = "testId"
@@ -668,8 +616,7 @@ class R4ConditionTransformerTest {
                 coding = listOf(
                     Coding(
                         system = Uri("http://terminology.hl7.org/CodeSystem/condition-ver-status"),
-                        code = Code("potato"),
-                        display = "Potato"
+                        code = Code(value = ConditionVerificationStatus.CONFIRMED.code),
                     )
                 )
             ),
@@ -726,7 +673,7 @@ class R4ConditionTransformerTest {
         )
         val condition1 = mockk<Condition> {
             every { dataSource } returns DataSource.FHIR_R4
-            every { resource } returns invalidCondition
+            every { resource } returns invalidConditionNoId
         }
         val condition2 = mockk<Condition> {
             every { dataSource } returns DataSource.FHIR_R4

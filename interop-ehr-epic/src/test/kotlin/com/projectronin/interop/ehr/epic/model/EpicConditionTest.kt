@@ -106,12 +106,12 @@ class EpicConditionTest {
             ),
             text = "Left Ear"
         )
-        val subject = Reference(id = "1234")
-        val encounter = Reference(id = "5678")
+        val subject = Reference(display = "1234")
+        val encounter = Reference(display = "5678")
         val onset = DynamicValue(DynamicValueType.STRING, "Onset")
         val abatement = DynamicValue(DynamicValueType.STRING, "Abatement")
-        val recorder = Reference(id = "9012")
-        val asserter = Reference(id = "13579")
+        val recorder = Reference(display = "9012")
+        val asserter = Reference(display = "13579")
         val stage = ConditionStage(
             assessment = listOf(
                 Reference(display = "Genetic analysis master panel")
@@ -194,7 +194,7 @@ class EpicConditionTest {
             identifier = listOf(),
             category = listOf(),
             code = null,
-            subject = Reference(id = "1234")
+            subject = Reference(display = "1234")
         )
 
         val epicCondition = EpicCondition(condition)
@@ -209,7 +209,7 @@ class EpicConditionTest {
         assertNull(epicCondition.severity)
         assertNull(epicCondition.code)
         assertEquals(0, epicCondition.bodySite.size)
-        assertEquals(Reference(id = "1234"), epicCondition.subject.element)
+        assertEquals(Reference(display = "1234"), epicCondition.subject.element)
         assertNull(epicCondition.encounter)
         assertNull(epicCondition.onset)
         assertNull(epicCondition.abatement)
@@ -284,12 +284,12 @@ class EpicConditionTest {
             ),
             text = "Left Ear"
         )
-        val subject = Reference(id = "1234")
-        val encounter = Reference(id = "5678")
+        val subject = Reference(display = "1234")
+        val encounter = Reference(display = "5678")
         val onset = DynamicValue(DynamicValueType.STRING, "Onset")
         val abatement = DynamicValue(DynamicValueType.STRING, "Abatement")
-        val recorder = Reference(id = "9012")
-        val asserter = Reference(id = "13579")
+        val recorder = Reference(display = "9012")
+        val asserter = Reference(display = "13579")
         val stage = ConditionStage(
             assessment = listOf(
                 Reference(display = "Genetic analysis master panel")
@@ -334,10 +334,10 @@ class EpicConditionTest {
         val codeJSON = """{"coding":[{"system":"http://snomed.info/sct","code":"39065001"}],"text":"Burn of ear"}"""
         val bodySiteJSON =
             """{"coding":[{"system":"http://snomed.info/sct","code":"49521004","display":"Left external ear structure"}],"text":"Left Ear"}"""
-        val subjectJSON = """{"id":"1234"}"""
-        val encounterJSON = """{"id":"5678"}"""
-        val recorderJSON = """{"id":"9012"}"""
-        val asserterJSON = """{"id":"13579"}"""
+        val subjectJSON = """{"display":"1234"}"""
+        val encounterJSON = """{"display":"5678"}"""
+        val recorderJSON = """{"display":"9012"}"""
+        val asserterJSON = """{"display":"13579"}"""
         val stageJSON = """{"assessment":[{"display":"Genetic analysis master panel"}]}"""
         val evidenceJSON = """{"detail":[{"display":"Temperature"}]}"""
         val noteJSON = """{"text":"The patient is anuric."}"""
@@ -423,7 +423,7 @@ class EpicConditionTest {
     fun `handles onsetDateTime`() {
         val condition = Condition(
             id = Id("123"),
-            subject = Reference(id = "1234"),
+            subject = Reference(display = "1234"),
             onset = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2021-06-01"))
         )
         val epicCondition = EpicCondition(condition)
@@ -437,7 +437,7 @@ class EpicConditionTest {
         val age = Age(value = 20.0, code = Code("y"), system = CodeSystem.UCUM.uri)
         val condition = Condition(
             id = Id("123"),
-            subject = Reference(id = "1234"),
+            subject = Reference(display = "1234"),
             onset = DynamicValue(DynamicValueType.AGE, age)
         )
         val epicCondition = EpicCondition(condition)
@@ -451,7 +451,7 @@ class EpicConditionTest {
         val period = Period(start = DateTime("2020-03-20"), end = DateTime("2022-05-19"))
         val condition = Condition(
             id = Id("123"),
-            subject = Reference(id = "1234"),
+            subject = Reference(display = "1234"),
             onset = DynamicValue(DynamicValueType.PERIOD, period)
         )
         val epicCondition = EpicCondition(condition)
@@ -465,7 +465,7 @@ class EpicConditionTest {
         val range = Range(low = SimpleQuantity(value = 5.0), high = SimpleQuantity(value = 7.5))
         val condition = Condition(
             id = Id("123"),
-            subject = Reference(id = "1234"),
+            subject = Reference(display = "1234"),
             onset = DynamicValue(DynamicValueType.RANGE, range)
         )
         val epicCondition = EpicCondition(condition)
@@ -478,7 +478,7 @@ class EpicConditionTest {
     fun `handles onsetString`() {
         val condition = Condition(
             id = Id("123"),
-            subject = Reference(id = "1234"),
+            subject = Reference(display = "1234"),
             onset = DynamicValue(DynamicValueType.STRING, "yesterday")
         )
         val epicCondition = EpicCondition(condition)
@@ -504,8 +504,17 @@ class EpicConditionTest {
     fun `handles abatementDateTime`() {
         val condition = Condition(
             id = Id("123"),
-            subject = Reference(id = "1234"),
-            abatement = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2021-06-01"))
+            subject = Reference(display = "1234"),
+            abatement = DynamicValue(DynamicValueType.DATE_TIME, DateTime("2021-06-01")),
+            clinicalStatus = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://terminology.hl7.org/CodeSystem/condition-clinical"),
+                        code = Code("remission"),
+                        display = "Remission"
+                    )
+                )
+            ),
         )
         val epicCondition = EpicCondition(condition)
 
@@ -518,8 +527,17 @@ class EpicConditionTest {
         val age = Age(value = 20.0, code = Code("y"), system = CodeSystem.UCUM.uri)
         val condition = Condition(
             id = Id("123"),
-            subject = Reference(id = "1234"),
-            abatement = DynamicValue(DynamicValueType.AGE, age)
+            subject = Reference(display = "1234"),
+            abatement = DynamicValue(DynamicValueType.AGE, age),
+            clinicalStatus = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://terminology.hl7.org/CodeSystem/condition-clinical"),
+                        code = Code("resolved"),
+                        display = "Resolved"
+                    )
+                )
+            ),
         )
         val epicCondition = EpicCondition(condition)
 
@@ -532,8 +550,17 @@ class EpicConditionTest {
         val period = Period(start = DateTime("2020-03-20"), end = DateTime("2022-05-19"))
         val condition = Condition(
             id = Id("123"),
-            subject = Reference(id = "1234"),
-            abatement = DynamicValue(DynamicValueType.PERIOD, period)
+            subject = Reference(display = "1234"),
+            abatement = DynamicValue(DynamicValueType.PERIOD, period),
+            clinicalStatus = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://terminology.hl7.org/CodeSystem/condition-clinical"),
+                        code = Code("inactive"),
+                        display = "Inactive"
+                    )
+                )
+            ),
         )
         val epicCondition = EpicCondition(condition)
 
@@ -546,8 +573,17 @@ class EpicConditionTest {
         val range = Range(low = SimpleQuantity(value = 5.0), high = SimpleQuantity(value = 7.5))
         val condition = Condition(
             id = Id("123"),
-            subject = Reference(id = "1234"),
-            abatement = DynamicValue(DynamicValueType.RANGE, range)
+            subject = Reference(display = "1234"),
+            abatement = DynamicValue(DynamicValueType.RANGE, range),
+            clinicalStatus = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://terminology.hl7.org/CodeSystem/condition-clinical"),
+                        code = Code("inactive"),
+                        display = "Inactive"
+                    )
+                )
+            ),
         )
         val epicCondition = EpicCondition(condition)
 
@@ -559,8 +595,17 @@ class EpicConditionTest {
     fun `handles abatementString`() {
         val condition = Condition(
             id = Id("123"),
-            subject = Reference(id = "1234"),
-            abatement = DynamicValue(DynamicValueType.STRING, "yesterday")
+            subject = Reference(display = "1234"),
+            abatement = DynamicValue(DynamicValueType.STRING, "yesterday"),
+            clinicalStatus = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://terminology.hl7.org/CodeSystem/condition-clinical"),
+                        code = Code("resolved"),
+                        display = "Resolved"
+                    )
+                )
+            ),
         )
         val epicCondition = EpicCondition(condition)
 

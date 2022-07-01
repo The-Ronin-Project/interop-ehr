@@ -66,18 +66,45 @@ class LocalizersTest {
     }
     private val nonLocalizableExtensions = listOf(
         Extension(
+            id = "9012",
             url = Uri("http://localhost/extension"),
             value = DynamicValue(DynamicValueType.STRING, "Value")
         )
     )
+    private val someNonLocalizableExtensions = listOf(
+        Extension(
+            id = "9012",
+            url = Uri("http://localhost/extension"),
+            value = DynamicValue(DynamicValueType.STRING, "Value")
+        ),
+        Extension(
+            id = "5678",
+            url = Uri("http://localhost/extension"),
+            value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/1234"))
+        )
+    )
     private val localizableExtensions = listOf(
         Extension(
+            id = "5678",
             url = Uri("http://localhost/extension"),
             value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/1234"))
         )
     )
     private val localizedExtensions = listOf(
         Extension(
+            id = "5678",
+            url = Uri("http://localhost/extension"),
+            value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/test-1234"))
+        )
+    )
+    private val mixedLocalizedExtensions = listOf(
+        Extension(
+            id = "9012",
+            url = Uri("http://localhost/extension"),
+            value = DynamicValue(DynamicValueType.STRING, "Value")
+        ),
+        Extension(
+            id = "5678",
             url = Uri("http://localhost/extension"),
             value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/test-1234"))
         )
@@ -1091,19 +1118,7 @@ class LocalizersTest {
     }
 
     @Test
-    fun `returns current extension if extension has no localizable information`() {
-        val extension = Extension(
-            id = "12345",
-            extension = nonLocalizableExtensions,
-            url = Uri("url"),
-            value = DynamicValue(DynamicValueType.STRING, "Value")
-        )
-        val localizedExtension = extension.localize(tenant)
-        assertTrue(extension === localizedExtension)
-    }
-
-    @Test
-    fun `localizes extension with localizable value`() {
+    fun `does not localize an extension with non-localizable extension set`() {
         val extension = Extension(
             id = "12345",
             extension = nonLocalizableExtensions,
@@ -1119,29 +1134,29 @@ class LocalizersTest {
             url = Uri("url"),
             value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/test-123"))
         )
-        assertEquals(expectedExtension, localizedExtension)
-    }
-
-    @Test
-    fun `returns current extension as not updated if extension has no localizable information`() {
-        val extension = Extension(
-            id = "12345",
-            extension = nonLocalizableExtensions,
-            url = Uri("url"),
-            value = DynamicValue(DynamicValueType.STRING, "Value")
-        )
         val (localizedExtension, updated) = extension.localizePair(tenant)
-        assertTrue(extension === localizedExtension)
+        assertTrue(extension == localizedExtension)
         assertFalse(updated)
     }
 
     @Test
-    fun `localizes extension and sets as updated with localizable extension`() {
+    fun `does not localize an extension with non-localizable value`() {
+        val extension = Extension(
+            id = "12345",
+            url = Uri("url"),
+            value = DynamicValue(DynamicValueType.STRING, "Value")
+        )
+        val (localizedExtension, updated) = extension.localizePair(tenant)
+        assertTrue(extension == localizedExtension)
+        assertFalse(updated)
+    }
+
+    @Test
+    fun `localizes extension with all localizable extension set`() {
         val extension = Extension(
             id = "12345",
             extension = localizableExtensions,
             url = Uri("url"),
-            value = DynamicValue(DynamicValueType.STRING, "Value")
         )
         val (localizedExtension, updated) = extension.localizePair(tenant)
         assertNotEquals(extension, localizedExtension)
@@ -1151,16 +1166,33 @@ class LocalizersTest {
             id = "12345",
             extension = localizedExtensions,
             url = Uri("url"),
-            value = DynamicValue(DynamicValueType.STRING, "Value")
         )
         assertEquals(expectedExtension, localizedExtension)
     }
 
     @Test
-    fun `localizes extension and sets as updated with localizable value`() {
+    fun `localizes only the extension set members with localizable values in a mixed extension set`() {
         val extension = Extension(
             id = "12345",
-            extension = nonLocalizableExtensions,
+            extension = someNonLocalizableExtensions,
+            url = Uri("url"),
+        )
+        val (localizedExtension, updated) = extension.localizePair(tenant)
+        assertNotEquals(extension, localizedExtension)
+        assertTrue(updated)
+
+        val expectedExtension = Extension(
+            id = "12345",
+            extension = mixedLocalizedExtensions,
+            url = Uri("url"),
+        )
+        assertEquals(expectedExtension, localizedExtension)
+    }
+
+    @Test
+    fun `localizes an extension with localizable value`() {
+        val extension = Extension(
+            id = "12345",
             url = Uri("url"),
             value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/123"))
         )
@@ -1170,28 +1202,6 @@ class LocalizersTest {
 
         val expectedExtension = Extension(
             id = "12345",
-            extension = nonLocalizableExtensions,
-            url = Uri("url"),
-            value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/test-123"))
-        )
-        assertEquals(expectedExtension, localizedExtension)
-    }
-
-    @Test
-    fun `localizes extension and sets as updated with localizable extension and value`() {
-        val extension = Extension(
-            id = "12345",
-            extension = localizableExtensions,
-            url = Uri("url"),
-            value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/123"))
-        )
-        val (localizedExtension, updated) = extension.localizePair(tenant)
-        assertNotEquals(extension, localizedExtension)
-        assertTrue(updated)
-
-        val expectedExtension = Extension(
-            id = "12345",
-            extension = localizedExtensions,
             url = Uri("url"),
             value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/test-123"))
         )

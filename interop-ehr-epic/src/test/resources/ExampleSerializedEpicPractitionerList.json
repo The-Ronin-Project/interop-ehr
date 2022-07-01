@@ -33,6 +33,7 @@
     ],
     "identifier": [
       {
+        "system": "ronin",
         "value": "id"
       }
     ],
@@ -44,6 +45,7 @@
     ],
     "telecom": [
       {
+        "system": "phone",
         "value": "8675309"
       }
     ],

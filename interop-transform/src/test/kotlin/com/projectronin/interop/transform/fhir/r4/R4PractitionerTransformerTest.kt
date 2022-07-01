@@ -25,6 +25,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
+import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -121,7 +122,7 @@ class R4PractitionerTransformerTest {
             identifier = listOf(Identifier(value = "id")),
             active = true,
             name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(ContactPoint(value = "8675309")),
+            telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE, value = "8675309")),
             address = listOf(Address(country = "USA")),
             gender = AdministrativeGender.FEMALE,
             birthDate = Date("1975-07-05"),
@@ -177,7 +178,7 @@ class R4PractitionerTransformerTest {
         )
         assertEquals(true, oncologyPractitioner.active)
         assertEquals(listOf(HumanName(family = "Doe")), oncologyPractitioner.name)
-        assertEquals(listOf(ContactPoint(value = "8675309")), oncologyPractitioner.telecom)
+        assertEquals(listOf(ContactPoint(system = ContactPointSystem.PHONE, value = "8675309")), oncologyPractitioner.telecom)
         assertEquals(listOf(Address(country = "USA")), oncologyPractitioner.address)
         assertEquals(AdministrativeGender.FEMALE, oncologyPractitioner.gender)
         assertEquals(Date("1975-07-05"), oncologyPractitioner.birthDate)

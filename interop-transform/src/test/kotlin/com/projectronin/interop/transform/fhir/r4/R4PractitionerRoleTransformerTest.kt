@@ -307,7 +307,7 @@ class R4PractitionerRoleTransformerTest {
             id = Id("12345"),
             practitioner = Reference(reference = "Practitioner/1234"),
             organization = Reference(reference = "Organization/5678"),
-            telecom = listOf(ContactPoint(value = "8675309"), ContactPoint(system = ContactPointSystem.EMAIL))
+            telecom = listOf(ContactPoint(id = "first"), ContactPoint(id = "second"))
         )
         val practitionerRole = mockk<PractitionerRole> {
             every { dataSource } returns DataSource.FHIR_R4
@@ -354,7 +354,9 @@ class R4PractitionerRoleTransformerTest {
             practitioner = Reference(reference = "Practitioner/1234"),
             organization = Reference(reference = "Organization/5678"),
             telecom = listOf(
-                ContactPoint(value = "8675309"),
+                ContactPoint(system = ContactPointSystem.PHONE, value = "8675309"),
+                ContactPoint(id = "second"),
+                ContactPoint(id = "third"),
                 ContactPoint(system = ContactPointSystem.EMAIL, value = "doctor@hospital.org")
             )
         )
@@ -390,7 +392,10 @@ class R4PractitionerRoleTransformerTest {
         assertEquals(listOf<Reference>(), oncologyPractitionerRole.location)
         assertEquals(listOf<Reference>(), oncologyPractitionerRole.healthcareService)
         assertEquals(
-            listOf(ContactPoint(system = ContactPointSystem.EMAIL, value = "doctor@hospital.org")),
+            listOf(
+                ContactPoint(system = ContactPointSystem.PHONE, value = "8675309"),
+                ContactPoint(system = ContactPointSystem.EMAIL, value = "doctor@hospital.org")
+            ),
             oncologyPractitionerRole.telecom
         )
         assertEquals(listOf<AvailableTime>(), oncologyPractitionerRole.availableTime)

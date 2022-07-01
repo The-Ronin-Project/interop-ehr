@@ -25,20 +25,6 @@ class EpicContactPointTest {
     }
 
     @Test
-    fun `supports no system`() {
-        val contactPoint = ContactPoint(
-            value = "0648352638",
-            use = ContactPointUse.MOBILE
-        )
-
-        val epicContactPoint = EpicContactPoint(contactPoint)
-        assertEquals(contactPoint, epicContactPoint.element)
-        assertNull(epicContactPoint.system)
-        assertEquals(ContactPointUse.MOBILE, epicContactPoint.use)
-        assertEquals("0648352638", epicContactPoint.value)
-    }
-
-    @Test
     fun `supports no use`() {
         val contactPoint = ContactPoint(
             system = ContactPointSystem.PHONE,

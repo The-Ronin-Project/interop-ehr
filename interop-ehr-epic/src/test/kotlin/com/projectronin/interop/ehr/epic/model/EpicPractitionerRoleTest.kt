@@ -11,6 +11,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.PractitionerRole
+import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -27,7 +28,7 @@ class EpicPractitionerRoleTest {
             text = "Physician"
         )
         val location = Reference(reference = "Location/abc123")
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val specialty = CodeableConcept(
             coding = listOf(Coding(system = Uri("abc"), code = Code("11"), display = "MD")),
             text = "MD"
@@ -109,7 +110,7 @@ class EpicPractitionerRoleTest {
             text = "Physician"
         )
         val location = Reference(reference = "Location/abc123")
-        val telecom = ContactPoint(value = "123-456-7890")
+        val telecom = ContactPoint(system = ContactPointSystem.PHONE, value = "123-456-7890")
         val specialty = CodeableConcept(
             coding = listOf(Coding(system = Uri("abc"), code = Code("11"), display = "MD")),
             text = "MD"
@@ -127,7 +128,7 @@ class EpicPractitionerRoleTest {
         val practitionerJSON = """{"reference":"Practitioner/abc123","display":"John Adams, MD"}"""
         val codeJSON = """{"coding":[{"system":"abc123","code":"1","display":"Physician"}],"text":"Physician"}"""
         val locationJSON = """{"reference":"Location/abc123"}"""
-        val telecomJson = """{"value":"123-456-7890"}"""
+        val telecomJson = """{"system":"phone","value":"123-456-7890"}"""
         val specialtyJSON = """{"coding":[{"system":"abc","code":"11","display":"MD"}],"text":"MD"}"""
 
         val json = """{
