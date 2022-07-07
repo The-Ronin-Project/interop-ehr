@@ -1123,16 +1123,6 @@ class LocalizersTest {
             id = "12345",
             extension = nonLocalizableExtensions,
             url = Uri("url"),
-            value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/123"))
-        )
-        val localizedExtension = extension.localize(tenant)
-        assertNotEquals(extension, localizedExtension)
-
-        val expectedExtension = Extension(
-            id = "12345",
-            extension = nonLocalizableExtensions,
-            url = Uri("url"),
-            value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/test-123"))
         )
         val (localizedExtension, updated) = extension.localizePair(tenant)
         assertTrue(extension == localizedExtension)
