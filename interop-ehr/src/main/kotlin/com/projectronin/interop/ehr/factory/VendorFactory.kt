@@ -12,6 +12,7 @@ import com.projectronin.interop.ehr.model.EHRResource
 import com.projectronin.interop.ehr.transform.AppointmentTransformer
 import com.projectronin.interop.ehr.transform.ConditionTransformer
 import com.projectronin.interop.ehr.transform.LocationTransformer
+import com.projectronin.interop.ehr.transform.ObservationTransformer
 import com.projectronin.interop.ehr.transform.PatientTransformer
 import com.projectronin.interop.ehr.transform.PractitionerRoleTransformer
 import com.projectronin.interop.ehr.transform.PractitionerTransformer
@@ -42,6 +43,7 @@ interface VendorFactory {
     val patientTransformer: PatientTransformer
     val appointmentTransformer: AppointmentTransformer
     val conditionTransformer: ConditionTransformer
+    val observationTransformer: ObservationTransformer
 
     // Util functions for Mirth
     fun <T : EHRResource> deserialize(string: String, type: KClass<T>): EHRResource

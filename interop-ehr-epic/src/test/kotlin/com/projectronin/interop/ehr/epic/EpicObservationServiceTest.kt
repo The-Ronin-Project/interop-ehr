@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.epic.model.EpicObservationBundle
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
@@ -264,7 +265,7 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "abc",
-                    "category" to "http://terminology.hl7.org/CodeSystem/observation-category|social-history"
+                    "category" to "${CodeSystem.OBSERVATION_CATEGORY}|social-history"
                 )
             )
         } returns httpResponse
@@ -273,7 +274,7 @@ class EpicObservationServiceTest {
             observationService.findObservationsByPatient(
                 tenant,
                 listOf("abc"),
-                listOf("http://terminology.hl7.org/CodeSystem/observation-category|social-history")
+                listOf("${CodeSystem.OBSERVATION_CATEGORY}|social-history")
             )
 
         // 1 patient had 4 social-history observations

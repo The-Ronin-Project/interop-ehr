@@ -19,6 +19,7 @@ import com.projectronin.interop.ehr.model.Practitioner
 import com.projectronin.interop.ehr.model.PractitionerRole
 import com.projectronin.interop.transform.fhir.r4.R4ConditionTransformer
 import com.projectronin.interop.transform.fhir.r4.R4LocationTransformer
+import com.projectronin.interop.transform.fhir.r4.R4ObservationTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PatientTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PractitionerRoleTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PractitionerTransformer
@@ -41,6 +42,7 @@ class EpicVendorFactoryTest {
     private val patientTransformer = mockk<R4PatientTransformer>()
     private val appointmentTransformer = mockk<EpicAppointmentTransformer>()
     private val conditionTransformer = mockk<R4ConditionTransformer>()
+    private val observationTransformer = mockk<R4ObservationTransformer>()
     private val vendorFactory =
         EpicVendorFactory(
             patientService,
@@ -55,7 +57,8 @@ class EpicVendorFactoryTest {
             locationTransformer,
             patientTransformer,
             appointmentTransformer,
-            conditionTransformer
+            conditionTransformer,
+            observationTransformer,
         )
 
     @Test
@@ -126,6 +129,11 @@ class EpicVendorFactoryTest {
     @Test
     fun `returns ConditionTransformer`() {
         assertEquals(conditionTransformer, vendorFactory.conditionTransformer)
+    }
+
+    @Test
+    fun `returns ObservationTransformer`() {
+        assertEquals(observationTransformer, vendorFactory.observationTransformer)
     }
 
     @Test

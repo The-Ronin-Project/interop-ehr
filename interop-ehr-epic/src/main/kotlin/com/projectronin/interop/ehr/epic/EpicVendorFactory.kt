@@ -22,6 +22,7 @@ import com.projectronin.interop.ehr.model.Practitioner
 import com.projectronin.interop.ehr.model.PractitionerRole
 import com.projectronin.interop.transform.fhir.r4.R4ConditionTransformer
 import com.projectronin.interop.transform.fhir.r4.R4LocationTransformer
+import com.projectronin.interop.transform.fhir.r4.R4ObservationTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PatientTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PractitionerRoleTransformer
 import com.projectronin.interop.transform.fhir.r4.R4PractitionerTransformer
@@ -52,7 +53,8 @@ class EpicVendorFactory(
     override val locationTransformer: R4LocationTransformer,
     @Qualifier("epic") override val patientTransformer: R4PatientTransformer,
     override val appointmentTransformer: EpicAppointmentTransformer,
-    override val conditionTransformer: R4ConditionTransformer
+    override val conditionTransformer: R4ConditionTransformer,
+    override val observationTransformer: R4ObservationTransformer,
 ) : VendorFactory {
     private val objectMapper = JacksonManager.objectMapper
     override val vendorType: VendorType
