@@ -61,9 +61,9 @@ class EpicPatientService(
 
         // Gather the full batch of identifiers to request.
         val patientIdentifiers = patientIdsByKey.filter { entry ->
-            val typeFound = entry.value.type != null
-            if (!typeFound) logger.warn { "Type missing on key, ${entry.key}. Key was removed." }
-            typeFound
+            val systemFound = entry.value.system != null
+            if (!systemFound) logger.warn { "System missing on key, ${entry.key}. Key was removed." }
+            systemFound
         }.values.toSet()
 
         // Chunk the identifiers and run the search
@@ -84,15 +84,15 @@ class EpicPatientService(
         // Index patients found based on identifiers
         val foundPatientsByIdentifier = epicPatientBundle.resources.flatMap { patient ->
             patient.identifier.map { identifier ->
-                TypeValueIdentifier(typeText = identifier.type?.text?.uppercase(), value = identifier.value) to patient
+                SystemValueIdentifier(systemText = identifier.system?.uppercase(), value = identifier.value) to patient
             }
         }.toMap()
 
         // Re-key to the request based on requested identifier
         val patientsFoundByKey = patientIdsByKey.mapNotNull { requestEntry ->
             val foundPatient = foundPatientsByIdentifier[
-                TypeValueIdentifier(
-                    typeText = requestEntry.value.type?.text?.uppercase(), value = requestEntry.value.value
+                SystemValueIdentifier(
+                    systemText = requestEntry.value.system?.uppercase(), value = requestEntry.value.value
                 )
             ]
             if (foundPatient != null) requestEntry.key to foundPatient else null
@@ -102,5 +102,5 @@ class EpicPatientService(
         return patientsFoundByKey
     }
 
-    data class TypeValueIdentifier(val typeText: String?, val value: String)
+    data class SystemValueIdentifier(val systemText: String?, val value: String)
 }

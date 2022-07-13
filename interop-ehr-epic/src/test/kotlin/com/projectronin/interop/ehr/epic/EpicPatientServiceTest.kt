@@ -156,7 +156,7 @@ class EpicPatientServiceTest {
     }
 
     @Test
-    fun `ensure, find patient by identifier, request missing type is not returned`() {
+    fun `ensure, find patient by identifier, request missing system is not returned`() {
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
             "https://example.org",
@@ -184,7 +184,7 @@ class EpicPatientServiceTest {
                         type = CodeableConcept(text = "MRN")
                     )
                 ),
-                "badIdentifier" to EpicIdentifier(Identifier(value = "202497", type = null))
+                "badIdentifier" to EpicIdentifier(Identifier(value = "202497", system = null))
             )
         )
 
