@@ -8,12 +8,14 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.transform.util.toFhirIdentifier
 import mu.KotlinLogging
+import org.springframework.stereotype.Component
 import com.projectronin.interop.ehr.model.Observation as EHRObservation
 import com.projectronin.interop.fhir.r4.resource.Observation as R4Observation
 
 /**
  * Implementation of [ObservationTransformer] suitable for all R4 FHIR Observations
  */
+@Component
 class R4ObservationTransformer : ObservationTransformer {
     private val logger = KotlinLogging.logger { }
 
