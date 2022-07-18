@@ -172,13 +172,17 @@ class R4PractitionerTransformerTest {
         assertEquals(
             listOf(
                 Identifier(value = "id"),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test")
+                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test"),
+                Identifier(type = CodeableConcepts.FHIR_STU3_ID, system = CodeSystem.FHIR_STU3_ID.uri, value = "12345")
             ),
             oncologyPractitioner.identifier
         )
         assertEquals(true, oncologyPractitioner.active)
         assertEquals(listOf(HumanName(family = "Doe")), oncologyPractitioner.name)
-        assertEquals(listOf(ContactPoint(system = ContactPointSystem.PHONE, value = "8675309")), oncologyPractitioner.telecom)
+        assertEquals(
+            listOf(ContactPoint(system = ContactPointSystem.PHONE, value = "8675309")),
+            oncologyPractitioner.telecom
+        )
         assertEquals(listOf(Address(country = "USA")), oncologyPractitioner.address)
         assertEquals(AdministrativeGender.FEMALE, oncologyPractitioner.gender)
         assertEquals(Date("1975-07-05"), oncologyPractitioner.birthDate)
@@ -215,7 +219,8 @@ class R4PractitionerTransformerTest {
         assertEquals(listOf<Extension>(), oncologyPractitioner.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test")
+                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test"),
+                Identifier(type = CodeableConcepts.FHIR_STU3_ID, system = CodeSystem.FHIR_STU3_ID.uri, value = "12345")
             ),
             oncologyPractitioner.identifier
         )

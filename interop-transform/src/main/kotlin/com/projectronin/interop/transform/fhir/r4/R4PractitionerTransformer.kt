@@ -4,6 +4,9 @@ import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.Practitioner
 import com.projectronin.interop.ehr.model.enums.DataSource
 import com.projectronin.interop.ehr.transform.PractitionerTransformer
+import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.CodeableConcepts
+import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyPractitioner
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.fhir.r4.util.localize
@@ -50,6 +53,12 @@ class R4PractitionerTransformer : PractitionerTransformer {
             return null
         }
 
+        val fhirStu3IdIdentifier = Identifier(
+            value = id.value,
+            system = CodeSystem.FHIR_STU3_ID.uri,
+            type = CodeableConcepts.FHIR_STU3_ID
+        )
+
         return OncologyPractitioner(
             id = id.localize(tenant),
             meta = r4Practitioner.meta?.localize(tenant),
@@ -59,7 +68,7 @@ class R4PractitionerTransformer : PractitionerTransformer {
             contained = r4Practitioner.contained,
             extension = r4Practitioner.extension.map { it.localize(tenant) },
             modifierExtension = r4Practitioner.modifierExtension.map { it.localize(tenant) },
-            identifier = r4Practitioner.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier(),
+            identifier = r4Practitioner.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier() + fhirStu3IdIdentifier,
             active = r4Practitioner.active,
             name = r4Practitioner.name.map { it.localize(tenant) },
             telecom = r4Practitioner.telecom.map { it.localize(tenant) },
