@@ -1,0 +1,53 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-server-create
+      author: Sam Felt
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - tableExists:
+                tableName: io_tenant_server
+      changes:
+        - createTable:
+            tableName: io_tenant_server
+            columns:
+              - column:
+                  name: io_server_id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: pk_io_tenant_server
+              - column:
+                  name: io_tenant_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    references: io_tenant(io_tenant_id)
+                    foreignKeyName: fk_io_tenant_Server_io_tenant
+              - column:
+                  name: message_type
+                  type: java.sql.Types.VARCHAR(3)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: address
+                  type: java.sql.Types.VARCHAR(128)
+                  constraints:
+                    nullable: false
+              - column:
+                  name: port
+                  type: INT
+                  constraints:
+                    nullable: false
+              - column:
+                  name: server_type
+                  type: java.sql.Types.VARCHAR(20)
+                  defaultValue: 'NONPRODUCTIONTESTING'
+                  constraints:
+                    nullable: false
+        - addUniqueConstraint:
+            tableName: io_tenant_server
+            constraintName: uk_io_tenant_server_type
+            columnNames: io_tenant_id, message_type

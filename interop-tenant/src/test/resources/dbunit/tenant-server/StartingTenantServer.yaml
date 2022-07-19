@@ -1,0 +1,29 @@
+io_ehr:
+  - io_ehr_id: 101
+    instance_name: "Epic Sandbox"
+    name: "EPIC"
+    client_id: "12345"
+    public_key: "public"
+    private_key: "private"
+
+io_tenant:
+  - io_tenant_id: 1002
+    mnemonic: "tenant"
+    full_name: "Test Tenant"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+  - io_tenant_id: 2001
+    mnemonic: "tnanet"
+    full_name: "Tnanet Tset"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+
+io_tenant_server:
+  - io_server_id: 1
+    io_tenant_id: 1002
+    message_type: "MDM"
+    address: "127.0.0.1"
+    port: 8080
+    server_type: "NONPRODUCTIONTESTING"
