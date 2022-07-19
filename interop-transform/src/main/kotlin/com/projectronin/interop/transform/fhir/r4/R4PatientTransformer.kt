@@ -69,23 +69,12 @@ class R4PatientTransformer(private val identifierService: IdentifierService) : P
                 )
             )
         )
-        val fhirStu3IdIdentifier = Identifier(
-            value = id.value,
-            system = CodeSystem.FHIR_STU3_ID.uri,
-            type = CodeableConcepts.FHIR_STU3_ID
-        )
-        val existingMRN = try {
-            identifierService.getMRNIdentifier(tenant, r4Patient.identifier)
-        } catch (e: Exception) {
-            logger.warn(e) { "Unable to find MRN  for patient: ${e.message}" }
+
+        val roninIdentifiers = getRoninIdentifiers(patient, tenant)
+        if (roninIdentifiers.none { it.system == CodeSystem.MRN.uri }) {
+            logger.warn { "No MRN found for patient with id $id" }
             return null
         }
-
-        val mrnIdentifier = Identifier(
-            value = existingMRN.value,
-            system = CodeSystem.MRN.uri,
-            type = CodeableConcepts.MRN
-        )
 
         try {
             return OncologyPatient(
@@ -98,7 +87,7 @@ class R4PatientTransformer(private val identifierService: IdentifierService) : P
                 extension = r4Patient.extension.map { it.localize(tenant) },
                 modifierExtension = r4Patient.modifierExtension.map { it.localize(tenant) },
                 identifier = r4Patient.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier() +
-                    fhirStu3IdIdentifier + mrnIdentifier,
+                    roninIdentifiers,
                 active = r4Patient.active,
                 name = r4Patient.name.map { it.localize(tenant) },
                 telecom = r4Patient.telecom.map { it.localize(tenant) },
@@ -119,5 +108,40 @@ class R4PatientTransformer(private val identifierService: IdentifierService) : P
             logger.warn(e) { "Unable to transform patient: ${e.message}" }
             return null
         }
+    }
+
+    override fun getRoninIdentifiers(patient: Patient, tenant: Tenant): List<Identifier> {
+        require(patient.dataSource == DataSource.FHIR_R4) { "Patient is not an R4 FHIR resource" }
+        val r4Patient = patient.resource as R4Patient
+
+        val id = r4Patient.id
+        if (id == null) {
+            logger.warn { "Unable to build Ronin identifiers for patient due to missing ID" }
+            return emptyList()
+        }
+
+        val identifiers = mutableListOf<Identifier>()
+
+        val fhirStu3IdIdentifier = Identifier(
+            value = id.value,
+            system = CodeSystem.FHIR_STU3_ID.uri,
+            type = CodeableConcepts.FHIR_STU3_ID
+        )
+        identifiers.add(fhirStu3IdIdentifier)
+
+        try {
+            val existingMRN = identifierService.getMRNIdentifier(tenant, r4Patient.identifier)
+            identifiers.add(
+                Identifier(
+                    value = existingMRN.value,
+                    system = CodeSystem.MRN.uri,
+                    type = CodeableConcepts.MRN
+                )
+            )
+        } catch (e: Exception) {
+            logger.warn(e) { "Unable to find MRN  for patient: ${e.message}" }
+        }
+
+        return identifiers
     }
 }

@@ -180,7 +180,10 @@ class R4PatientTransformerTest {
         assertEquals(listOf(Communication(language = CodeableConcept(text = "English"))), oncologyPatient.communication)
         assertEquals(listOf(Reference(display = "GP")), oncologyPatient.generalPractitioner)
         assertEquals(Reference(display = "organization"), oncologyPatient.managingOrganization)
-        assertEquals(listOf(PatientLink(other = Reference(display = "other patient"), type = LinkType.REPLACES)), oncologyPatient.link)
+        assertEquals(
+            listOf(PatientLink(other = Reference(display = "other patient"), type = LinkType.REPLACES)),
+            oncologyPatient.link
+        )
     }
 
     @Test
@@ -443,5 +446,86 @@ class R4PatientTransformerTest {
 
         val oncologyPatients = transformer.transformPatients(bundle, tenant)
         assertEquals(2, oncologyPatients.size)
+    }
+
+    @Test
+    fun `ronin identifiers throws exception for patient with non-r4 bundle`() {
+        val patient = mockk<Patient> {
+            every { dataSource } returns DataSource.EPIC_APPORCHARD
+        }
+
+        val exception = assertThrows<IllegalArgumentException> {
+            transformer.getRoninIdentifiers(patient, tenant)
+        }
+
+        assertEquals("Patient is not an R4 FHIR resource", exception.message)
+    }
+
+    @Test
+    fun `ronin identifiers returns empty list for patient with no id`() {
+        val r4Patient = R4Patient(
+            identifier = identifierList,
+            name = listOf(HumanName(family = "Doe")),
+            gender = AdministrativeGender.FEMALE,
+        )
+        val patient = mockk<Patient> {
+            every { dataSource } returns DataSource.FHIR_R4
+            every { resource } returns r4Patient
+        }
+
+        val roninIdentifiers = transformer.getRoninIdentifiers(patient, tenant)
+
+        assertEquals(emptyList<Identifier>(), roninIdentifiers)
+    }
+
+    @Test
+    fun `ronin identifiers returns without MRN if no MRN is found`() {
+        val r4Patient = R4Patient(
+            id = Id("12345"),
+            identifier = emptyList(),
+            name = listOf(HumanName(family = "Doe")),
+            gender = AdministrativeGender.FEMALE,
+        )
+        val patient = mockk<Patient> {
+            every { dataSource } returns DataSource.FHIR_R4
+            every { resource } returns r4Patient
+        }
+
+        val roninIdentifiers = transformer.getRoninIdentifiers(patient, tenant)
+
+        val fhirId = Identifier(
+            value = "12345",
+            system = CodeSystem.FHIR_STU3_ID.uri,
+            type = CodeableConcepts.FHIR_STU3_ID
+        )
+        assertEquals(listOf(fhirId), roninIdentifiers)
+    }
+
+    @Test
+    fun `ronin identifiers includes all identifiers`() {
+        val r4Patient = R4Patient(
+            id = Id("12345"),
+            identifier = identifierList,
+            name = listOf(HumanName(family = "Doe")),
+            gender = AdministrativeGender.FEMALE,
+        )
+        val patient = mockk<Patient> {
+            every { dataSource } returns DataSource.FHIR_R4
+            every { resource } returns r4Patient
+        }
+
+        val roninIdentifiers = transformer.getRoninIdentifiers(patient, tenant)
+
+        val fhirId = Identifier(
+            value = "12345",
+            system = CodeSystem.FHIR_STU3_ID.uri,
+            type = CodeableConcepts.FHIR_STU3_ID
+        )
+        val mrnId = Identifier(
+            value = "An MRN",
+            system = CodeSystem.MRN.uri,
+            type = CodeableConcepts.MRN
+        )
+        assertEquals(listOf(fhirId, mrnId), roninIdentifiers)
     }
 }

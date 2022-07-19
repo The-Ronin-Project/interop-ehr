@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.transform
 
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.Patient
+import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyPatient
 import com.projectronin.interop.tenant.config.model.Tenant
 
@@ -20,4 +21,9 @@ interface PatientTransformer {
      * could be transformed successfully will be included in the response.
      */
     fun transformPatients(bundle: Bundle<Patient>, tenant: Tenant): List<OncologyPatient>
+
+    /**
+     * Gets the Ronin-specific identifiers for the [patient] relative to the [tenant].
+     */
+    fun getRoninIdentifiers(patient: Patient, tenant: Tenant): List<Identifier>
 }
