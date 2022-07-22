@@ -265,7 +265,7 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "abc",
-                    "category" to "${CodeSystem.OBSERVATION_CATEGORY}|social-history"
+                    "category" to "${CodeSystem.OBSERVATION_CATEGORY.uri.value}|social-history"
                 )
             )
         } returns httpResponse
@@ -274,7 +274,7 @@ class EpicObservationServiceTest {
             observationService.findObservationsByPatient(
                 tenant,
                 listOf("abc"),
-                listOf("${CodeSystem.OBSERVATION_CATEGORY}|social-history")
+                listOf("${CodeSystem.OBSERVATION_CATEGORY.uri.value}|social-history")
             )
 
         // 1 patient had 4 social-history observations

@@ -10,7 +10,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 interface ObservationService {
     /**
      * Finds observations at the requested [tenant],
-     * given the list of [fhirPatientIds] at the tenant, and the list of [observationCategoryCodes].
+     * given the list of [patientFhirIds] at the tenant, and the list of [observationCategoryCodes].
      *
      * When entering [observationCategoryCodes],
      * The Observation.category.coding.code may be entered by itself, or the caller may use FHIR token format,
@@ -38,7 +38,7 @@ interface ObservationService {
      */
     fun findObservationsByPatient(
         tenant: Tenant,
-        fhirPatientIds: List<String>,
+        patientFhirIds: List<String>,
         observationCategoryCodes: List<String>
     ): Bundle<Observation>
 }
