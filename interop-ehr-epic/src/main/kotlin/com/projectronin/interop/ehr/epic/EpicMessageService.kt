@@ -38,13 +38,18 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
         val sendMessageRequest =
             translateMessageInput(messageInput, vendor.ehrUserId, vendor.messageType, tenant)
 
-        val response = runBlocking {
-            val httpResponse = epicClient.post(tenant, sendMessageUrlPart, sendMessageRequest)
-            if (httpResponse.status != HttpStatusCode.OK) {
-                logger.error { "SendMessage failed for ${tenant.mnemonic}, with a ${httpResponse.status}" }
-                throw IOException("Call to tenant ${tenant.mnemonic} failed with a ${httpResponse.status}")
+        val response = try {
+            runBlocking {
+                val httpResponse = epicClient.post(tenant, sendMessageUrlPart, sendMessageRequest)
+                if (httpResponse.status != HttpStatusCode.OK) {
+                    logger.error { "SendMessage failed for ${tenant.mnemonic}, with a ${httpResponse.status}" }
+                    throw IOException("Call to tenant ${tenant.mnemonic} failed with a ${httpResponse.status}")
+                }
+                httpResponse.body<SendMessageResponse>()
             }
-            httpResponse.body<SendMessageResponse>()
+        } catch (e: Exception) { // further investigation required to see if this is a sustainable solution
+            logger.error { "SendMessage failed for ${tenant.mnemonic}, with exception ${e.message}" }
+            throw e
         }
         logger.info { "SendMessage completed for ${tenant.mnemonic}" }
 

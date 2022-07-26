@@ -287,4 +287,48 @@ class EpicMessageServiceTest {
             )
         }
     }
+
+    @Test
+    fun `ensure other error handled`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            "Test Tenant",
+            "USER#1",
+            "Symptom Alert"
+        )
+
+        coEvery {
+            epicClient.post(
+                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                SendMessageRequest(
+                    patientID = "MRN#1",
+                    recipients = listOf(SendMessageRecipient("CorrectID", false)),
+                    messageText = "Message Text",
+                    senderID = "USER#1",
+                    messageType = "Symptom Alert"
+                )
+            )
+        } throws Exception("something went wrong")
+
+        val recipientsList = listOf(
+            EHRRecipient(
+                "PROV#1",
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+            )
+        )
+
+        every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
+
+        assertThrows<Exception> {
+            EpicMessageService(epicClient, providerPoolService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text", "MRN#1", recipientsList
+                )
+            )
+        }
+    }
 }
