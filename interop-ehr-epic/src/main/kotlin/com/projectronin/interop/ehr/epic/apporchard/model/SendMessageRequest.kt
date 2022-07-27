@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.epic.apporchard.model
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.annotation.JsonNaming
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Schema
 
 /**
@@ -21,8 +22,8 @@ import io.swagger.v3.oas.annotations.media.Schema
 @Schema(description = "Model for making requests to Epic's SendMessage API")
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class SendMessageRequest(
-    @field:Schema(example = "your message here", type = "string")
-    val messageText: String?,
+    @field:ArraySchema(schema = Schema(example = "your message here", type = "array"))
+    val messageText: List<String>?,
     @field:Schema(example = "202497", type = "string")
     val patientID: String?,
     val recipients: List<SendMessageRecipient>?,
