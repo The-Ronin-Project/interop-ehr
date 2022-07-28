@@ -1,7 +1,6 @@
 package com.projectronin.interop.ehr
 
-import com.projectronin.interop.ehr.model.Bundle
-import com.projectronin.interop.ehr.model.Observation
+import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.tenant.config.model.Tenant
 
 /**
@@ -40,5 +39,5 @@ interface ObservationService {
         tenant: Tenant,
         patientFhirIds: List<String>,
         observationCategoryCodes: List<String>
-    ): Bundle<Observation>
+    ): List<Observation>
 }

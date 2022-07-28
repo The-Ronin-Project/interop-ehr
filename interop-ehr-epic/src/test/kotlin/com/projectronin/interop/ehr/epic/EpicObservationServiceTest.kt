@@ -1,7 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.epic.model.EpicObservationBundle
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.body
@@ -62,9 +61,9 @@ class EpicObservationServiceTest {
                 listOf("social-history")
             )
 
-        val expectedObservationBundle = EpicObservationBundle(validObservationSearchBundle)
+        val expectedObservationBundle = (validObservationSearchBundle).entry.map { it.resource }
         assertEquals(expectedObservationBundle, bundle)
-        assertEquals(4, bundle.resources.size)
+        assertEquals(4, bundle.size)
     }
 
     @Test
@@ -140,7 +139,7 @@ class EpicObservationServiceTest {
             )
 
         // each of 2 patients had 4 social-history observations
-        assertEquals(8, bundle.resources.size)
+        assertEquals(8, bundle.size)
     }
 
     @Test
@@ -210,7 +209,7 @@ class EpicObservationServiceTest {
             )
 
         // each of 3 patients had 4 social-history observations
-        assertEquals(12, bundle.resources.size)
+        assertEquals(12, bundle.size)
     }
 
     @Test
@@ -244,7 +243,7 @@ class EpicObservationServiceTest {
             )
 
         // 1 patient had 4 social-history observations and 0 laboratory observations
-        assertEquals(4, bundle.resources.size)
+        assertEquals(4, bundle.size)
     }
 
     @Test
@@ -278,7 +277,7 @@ class EpicObservationServiceTest {
             )
 
         // 1 patient had 4 social-history observations
-        assertEquals(4, bundle.resources.size)
+        assertEquals(4, bundle.size)
     }
 
     @Test
@@ -323,6 +322,6 @@ class EpicObservationServiceTest {
             )
 
         // 4 observations on the first page + 2 observations on the second page
-        assertEquals(6, bundle.resources.size)
+        assertEquals(6, bundle.size)
     }
 }

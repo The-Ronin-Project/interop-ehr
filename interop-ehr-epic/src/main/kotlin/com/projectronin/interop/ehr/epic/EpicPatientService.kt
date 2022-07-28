@@ -2,10 +2,9 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.epic.model.EpicPatientBundle
-import com.projectronin.interop.ehr.model.Bundle
-import com.projectronin.interop.ehr.model.Identifier
-import com.projectronin.interop.ehr.model.Patient
+import com.projectronin.interop.ehr.util.toListOfType
+import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
@@ -35,7 +34,7 @@ class EpicPatientService(
         birthDate: LocalDate,
         givenName: String,
         familyName: String,
-    ): Bundle<Patient> {
+    ): List<Patient> {
         logger.info { "Patient search started for ${tenant.mnemonic}" }
 
         val parameters = mapOf(
@@ -53,7 +52,7 @@ class EpicPatientService(
         }
 
         logger.info { "Patient search completed for ${tenant.mnemonic}" }
-        return EpicPatientBundle(bundle)
+        return bundle.toListOfType()
     }
 
     override fun <K> findPatientsById(tenant: Tenant, patientIdsByKey: Map<K, Identifier>): Map<K, Patient> {
@@ -69,22 +68,24 @@ class EpicPatientService(
         // Chunk the identifiers and run the search
         val patientsFound = patientIdentifiers.chunked(batchSize) {
             val identifierParam = it.joinToString(separator = ",") { patientIdentifier ->
-                "${patientIdentifier.system}|${patientIdentifier.value}"
+                "${patientIdentifier.system?.value}|${patientIdentifier.value}"
             }
             getBundleWithPaging(
                 tenant,
                 patientSearchUrlPart,
-                mapOf("identifier" to identifierParam),
-                ::EpicPatientBundle
+                mapOf("identifier" to identifierParam)
             )
         }
 
-        // Translate to the Epic Patients
-        val epicPatientBundle = mergeResponses(patientsFound, ::EpicPatientBundle)
+        // Translate to Patients
+        val patientList = mergeResponses(patientsFound).toListOfType<Patient>()
         // Index patients found based on identifiers
-        val foundPatientsByIdentifier = epicPatientBundle.resources.flatMap { patient ->
+        val foundPatientsByIdentifier = patientList.flatMap { patient ->
             patient.identifier.map { identifier ->
-                SystemValueIdentifier(systemText = identifier.system?.uppercase(), value = identifier.value) to patient
+                SystemValueIdentifier(
+                    systemText = identifier.system?.value?.uppercase(),
+                    value = identifier.value
+                ) to patient
             }
         }.toMap()
 
@@ -92,7 +93,7 @@ class EpicPatientService(
         val patientsFoundByKey = patientIdsByKey.mapNotNull { requestEntry ->
             val foundPatient = foundPatientsByIdentifier[
                 SystemValueIdentifier(
-                    systemText = requestEntry.value.system?.uppercase(), value = requestEntry.value.value
+                    systemText = requestEntry.value.system?.value?.uppercase(), value = requestEntry.value.value
                 )
             ]
             if (foundPatient != null) requestEntry.key to foundPatient else null
@@ -102,5 +103,5 @@ class EpicPatientService(
         return patientsFoundByKey
     }
 
-    data class SystemValueIdentifier(val systemText: String?, val value: String)
+    data class SystemValueIdentifier(val systemText: String?, val value: String?)
 }

@@ -1,8 +1,7 @@
 package com.projectronin.interop.ehr
 
-import com.projectronin.interop.ehr.model.Bundle
-import com.projectronin.interop.ehr.model.Identifier
-import com.projectronin.interop.ehr.model.Patient
+import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.tenant.config.model.Tenant
 import java.time.LocalDate
 
@@ -14,7 +13,7 @@ interface PatientService {
      * Finds the Bundle of patients associated to the requested
      * [tenant], [birthDate], [givenName], and [familyName] from an EHR tenant.
      */
-    fun findPatient(tenant: Tenant, birthDate: LocalDate, givenName: String, familyName: String): Bundle<Patient>
+    fun findPatient(tenant: Tenant, birthDate: LocalDate, givenName: String, familyName: String): List<Patient>
 
     /**
      * Finds the patient associated to any of the requested vendor's [patientIdsByKey] for a particular EHR [tenant].

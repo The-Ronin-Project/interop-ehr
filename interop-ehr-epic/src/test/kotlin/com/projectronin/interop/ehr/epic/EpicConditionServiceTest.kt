@@ -1,7 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.epic.model.EpicConditionBundle
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
@@ -32,7 +31,7 @@ class EpicConditionServiceTest {
     }
 
     @Test
-    fun `ensure practitioners are returned`() {
+    fun `ensure conditions are returned`() {
         val patientFhirId = "fhirId"
         val conditionCategoryCode = "catCode"
         val clinicalStatus = "clinicalStatus"
@@ -67,7 +66,7 @@ class EpicConditionServiceTest {
                 clinicalStatus
             )
 
-        assertEquals(EpicConditionBundle(validConditionSearch), bundle)
+        assertEquals(validConditionSearch.entry.map { it.resource }, bundle)
     }
 
     @Test
@@ -147,7 +146,7 @@ class EpicConditionServiceTest {
             )
         } returns httpResponse
 
-        val bundle =
+        val list =
             conditionService.findConditions(
                 tenant,
                 patientFhirId,
@@ -156,6 +155,6 @@ class EpicConditionServiceTest {
             )
 
         // 7 resources from the first query, 7 from the second
-        assertEquals(14, bundle.resources.size)
+        assertEquals(14, list.size)
     }
 }

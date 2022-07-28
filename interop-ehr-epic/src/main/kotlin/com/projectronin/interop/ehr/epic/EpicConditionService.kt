@@ -2,9 +2,8 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.ConditionService
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.epic.model.EpicConditionBundle
-import com.projectronin.interop.ehr.model.Bundle
-import com.projectronin.interop.ehr.model.Condition
+import com.projectronin.interop.ehr.util.toListOfType
+import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
 
@@ -20,13 +19,13 @@ class EpicConditionService(epicClient: EpicClient) : ConditionService, EpicPagin
         patientFhirId: String,
         conditionCategoryCode: String,
         clinicalStatus: String,
-    ): Bundle<Condition> {
+    ): List<Condition> {
         val parameters = mapOf(
             "patient" to patientFhirId,
             "category" to conditionCategoryCode,
             "clinical-status" to clinicalStatus
         )
 
-        return getBundleWithPaging(tenant, conditionSearchUrlPart, parameters, ::EpicConditionBundle)
+        return getBundleWithPaging(tenant, conditionSearchUrlPart, parameters).toListOfType()
     }
 }
