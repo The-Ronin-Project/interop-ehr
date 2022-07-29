@@ -2,15 +2,17 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
-import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
 import com.projectronin.interop.ehr.epic.apporchard.model.GetProviderAppointmentRequest
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProvider
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
+import com.projectronin.interop.ehr.util.toListOfType
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.resource.Appointment
+import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
@@ -28,7 +30,7 @@ class EpicAppointmentServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var httpResponse: HttpResponse
     private val validPatientAppointmentSearchResponse =
-        readResource<GetAppointmentsResponse>("/ExampleAppointmentBundle.json")
+        readResource<Bundle>("/ExampleFHIRAppointmentBundle.json")
     private val validProviderAppointmentSearchResponse =
         readResource<GetAppointmentsResponse>("/ExampleProviderAppointmentBundle.json")
     private val testPrivateKey = this::class.java.getResource("/TestPrivateKey.txt")!!.readText()
@@ -63,12 +65,16 @@ class EpicAppointmentServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns validPatientAppointmentSearchResponse
+        coEvery { httpResponse.body<Bundle>() } returns validPatientAppointmentSearchResponse
         coEvery {
-            epicClient.post(
+            epicClient.get(
                 tenant,
-                "/api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments",
-                GetPatientAppointmentsRequest("ehrUserId", "01/01/2015", "11/01/2015", "E5597", "MRN")
+                "/api/FHIR/STU3/Appointment",
+                mapOf(
+                    "patient" to "E5597",
+                    "status" to "booked",
+                    "date" to "ge2015-01-01&date=le2015-11-01"
+                )
             )
         } returns httpResponse
 
@@ -79,7 +85,7 @@ class EpicAppointmentServiceTest {
                 LocalDate.of(2015, 1, 1),
                 LocalDate.of(2015, 11, 1)
             )
-        assertEquals(validPatientAppointmentSearchResponse, bundle.resource)
+        assertEquals(validPatientAppointmentSearchResponse.toListOfType<Appointment>(), bundle)
     }
 
     @Test
@@ -93,12 +99,16 @@ class EpicAppointmentServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns validPatientAppointmentSearchResponse
+        coEvery { httpResponse.body<Bundle>() } returns validPatientAppointmentSearchResponse
         coEvery {
-            epicClient.post(
+            epicClient.get(
                 tenant,
-                "/api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments",
-                GetPatientAppointmentsRequest("ehrUserId", "01/01/2015", "11/01/2015", "E5597", "MRN")
+                "/api/FHIR/STU3/Appointment",
+                mapOf(
+                    "patient" to "E5597",
+                    "status" to "booked",
+                    "date" to "ge2015-01-01&date=le2015-11-01"
+                )
             )
         } returns httpResponse
 

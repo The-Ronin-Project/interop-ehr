@@ -1,8 +1,8 @@
 package com.projectronin.interop.ehr
 
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
-import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
+import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.tenant.config.model.Tenant
 import java.time.LocalDate
 
@@ -16,10 +16,10 @@ interface AppointmentService {
      */
     fun findPatientAppointments(
         tenant: Tenant,
-        patientMRN: String,
+        patientFHIRId: String,
         startDate: LocalDate,
         endDate: LocalDate,
-    ): Bundle<Appointment>
+    ): List<Appointment>
 
     /**
      * Finds the appointments at a given [tenant] for the [providerIDs] between the [startDate] and [endDate].
@@ -29,5 +29,5 @@ interface AppointmentService {
         providerIDs: List<FHIRIdentifiers>,
         startDate: LocalDate,
         endDate: LocalDate,
-    ): Bundle<Appointment>
+    ): Bundle<com.projectronin.interop.ehr.model.Appointment>
 }

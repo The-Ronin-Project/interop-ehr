@@ -3,16 +3,16 @@ package com.projectronin.interop.ehr.epic
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.AppointmentService
 import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
-import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
 import com.projectronin.interop.ehr.epic.apporchard.model.GetProviderAppointmentRequest
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProvider
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.epic.model.EpicAppointmentBundle
 import com.projectronin.interop.ehr.epic.model.EpicIDType
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
-import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
+import com.projectronin.interop.ehr.util.toListOfType
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.call.body
@@ -29,32 +29,28 @@ import java.time.format.DateTimeFormatter
  */
 @Component
 class EpicAppointmentService(private val epicClient: EpicClient) :
-    AppointmentService {
+    AppointmentService, EpicPagingService(epicClient) {
     private val logger = KotlinLogging.logger { }
     private val patientAppointmentSearchUrlPart =
-        "/api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments"
+        "/api/FHIR/STU3/Appointment"
     private val providerAppointmentSearchUrlPart =
         "/api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments"
     private val identifierService: EpicIdentifierService = EpicIdentifierService()
     private val dateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy")
     override fun findPatientAppointments(
         tenant: Tenant,
-        patientMRN: String,
+        patientFHIRId: String,
         startDate: LocalDate,
         endDate: LocalDate,
-    ): Bundle<Appointment> {
+    ): List<Appointment> {
         logger.info { "Patient appointment search started for ${tenant.mnemonic}" }
 
-        val request =
-            GetPatientAppointmentsRequest(
-                userID = getEpicVendor(tenant).ehrUserId,
-                startDate = dateFormat.format(startDate),
-                endDate = dateFormat.format(endDate),
-                patientId = patientMRN,
-                patientIdType = getEpicVendor(tenant).patientMRNTypeText
-            )
-
-        return findAppointments(tenant, patientAppointmentSearchUrlPart, request)
+        val parameters = mapOf(
+            "patient" to patientFHIRId,
+            "status" to "booked",
+            "date" to "ge$startDate&date=le$endDate"
+        )
+        return getBundleWithPaging(tenant, patientAppointmentSearchUrlPart, parameters).toListOfType()
     }
 
     override fun findProviderAppointments(
@@ -62,7 +58,7 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
         providerIDs: List<FHIRIdentifiers>,
         startDate: LocalDate,
         endDate: LocalDate,
-    ): Bundle<Appointment> {
+    ): Bundle<com.projectronin.interop.ehr.model.Appointment> {
         logger.info { "Provider appointment search started for ${tenant.mnemonic}" }
 
         val selectedIdentifiers = providerIDs.map {
@@ -95,7 +91,7 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
         tenant: Tenant,
         urlPart: String,
         request: Any,
-    ): Bundle<Appointment> {
+    ): Bundle<com.projectronin.interop.ehr.model.Appointment> {
         logger.info { "Appointment search started for ${tenant.mnemonic}" }
 
         val getAppointments = runBlocking {
