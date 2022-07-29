@@ -12,7 +12,7 @@ class FindPractitionersResponse(val resource: Bundle) {
      *  Resources is a list of PractitionerRole, Practitioner, and Location resources.
      *  This simplifies merging bundles later when we have to deal with paging in FHIR results.
      */
-    val resources: List<Resource> by lazy {
+    val resources: List<Resource<*>> by lazy {
         resource.entry.mapNotNull { it.resource }
     }
 

@@ -26,6 +26,11 @@ coverage:
         threshold: 1%
         flags:
           - ehr-epic
+      fhir-ronin:
+        target: auto
+        threshold: 1%
+        flags:
+          - fhir-ronin
 
     patch:
       tenant:
@@ -52,6 +57,12 @@ coverage:
         base: auto
         flags:
           - ehr-epic
+      fhir-ronin:
+        target: 80
+        threshold: 1%
+        base: auto
+        flags:
+          - fhir-ronin
 
 comment:
   layout: "reach, diff, flags, files"
@@ -78,4 +89,8 @@ flags:
   ehr-epic:
     paths:
       - interop-ehr-epic/
+    carryforward: true
+  fhir-ronin:
+    paths:
+      - interop-fhir-ronin/
     carryforward: true

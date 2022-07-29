@@ -24,7 +24,7 @@ class R4LocationTransformer : LocationTransformer {
     ): List<R4Location> {
         require(bundle.dataSource == DataSource.FHIR_R4) { "Bundle is not an R4 FHIR resource" }
 
-        return bundle.transformResources(tenant, this::transformLocation)
+        return bundle.transformNonRoninResources(tenant, this::transformLocation)
     }
 
     override fun transformLocation(location: Location, tenant: Tenant): R4Location? {
