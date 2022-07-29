@@ -14,7 +14,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
-import io.ktor.utils.io.errors.IOException
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -83,36 +82,6 @@ class EpicAppointmentServiceTest {
     }
 
     @Test
-    fun `ensure patient http error handled`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns validPatientAppointmentSearchResponse
-        coEvery {
-            epicClient.post(
-                tenant,
-                "/api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments",
-                GetPatientAppointmentsRequest("ehrUserId", "01/01/2015", "11/01/2015", "E5597", "MRN")
-            )
-        } returns httpResponse
-
-        assertThrows<IOException> {
-            EpicAppointmentService(epicClient).findPatientAppointments(
-                tenant,
-                "E5597",
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
-        }
-    }
-
-    @Test
     fun `ensure provider appointments are returned`() {
         val tenant =
             createTestTenant(
@@ -145,41 +114,6 @@ class EpicAppointmentServiceTest {
                 LocalDate.of(2015, 11, 1)
             )
         assertEquals(validProviderAppointmentSearchResponse, bundle.resource)
-    }
-
-    @Test
-    fun `ensure provider http error handled`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns validProviderAppointmentSearchResponse
-        coEvery {
-            epicClient.post(
-                tenant,
-                "/api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments",
-                GetProviderAppointmentRequest(
-                    userID = "ehrUserId",
-                    providers = listOf(ScheduleProvider(id = "E1000")),
-                    startDate = "01/01/2015",
-                    endDate = "11/01/2015"
-                )
-            )
-        } returns httpResponse
-
-        assertThrows<IOException> {
-            EpicAppointmentService(epicClient).findProviderAppointments(
-                tenant,
-                listOf(goodProviderFHIRIdentifier),
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
-        }
     }
 
     @Test

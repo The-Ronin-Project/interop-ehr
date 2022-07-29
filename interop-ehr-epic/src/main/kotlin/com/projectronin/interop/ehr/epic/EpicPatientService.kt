@@ -8,8 +8,6 @@ import com.projectronin.interop.ehr.model.Identifier
 import com.projectronin.interop.ehr.model.Patient
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
-import io.ktor.http.HttpStatusCode
-import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
@@ -45,10 +43,6 @@ class EpicPatientService(
         )
         val bundle = runBlocking {
             val httpResponse = epicClient.get(tenant, patientSearchUrlPart, parameters)
-            if (httpResponse.status != HttpStatusCode.OK) {
-                logger.error { "Patient search failed for ${tenant.mnemonic}, with a ${httpResponse.status}" }
-                throw IOException("Call to tenant ${tenant.mnemonic} failed with a ${httpResponse.status}")
-            }
             httpResponse.body<R4Bundle>()
         }
 

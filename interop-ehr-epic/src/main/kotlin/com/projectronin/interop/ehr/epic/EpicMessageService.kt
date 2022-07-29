@@ -13,8 +13,6 @@ import com.projectronin.interop.tenant.config.ProviderPoolService
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.call.body
-import io.ktor.http.HttpStatusCode
-import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -41,10 +39,6 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
         val response = try {
             runBlocking {
                 val httpResponse = epicClient.post(tenant, sendMessageUrlPart, sendMessageRequest)
-                if (httpResponse.status != HttpStatusCode.OK) {
-                    logger.error { "SendMessage failed for ${tenant.mnemonic}, with a ${httpResponse.status}" }
-                    throw IOException("Call to tenant ${tenant.mnemonic} failed with a ${httpResponse.status}")
-                }
                 httpResponse.body<SendMessageResponse>()
             }
         } catch (e: Exception) { // further investigation required to see if this is a sustainable solution

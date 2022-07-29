@@ -71,6 +71,5 @@ fun getClient(): HttpClient {
                 setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
             }
         }
-        expectSuccess = true
     }
 }

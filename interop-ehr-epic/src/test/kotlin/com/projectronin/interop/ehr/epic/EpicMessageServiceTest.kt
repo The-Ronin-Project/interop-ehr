@@ -17,7 +17,6 @@ import com.projectronin.interop.tenant.config.ProviderPoolService
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
-import io.ktor.utils.io.errors.IOException
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -286,51 +285,6 @@ class EpicMessageServiceTest {
         )
 
         assertThrows<VendorIdentifierNotFoundException> {
-            EpicMessageService(epicClient, providerPoolService).sendMessage(
-                tenant,
-                EHRMessageInput(
-                    "Message Text", "MRN#1", recipientsList
-                )
-            )
-        }
-    }
-
-    @Test
-    fun `ensure http error handled`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
-
-        every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery {
-            epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
-                SendMessageRequest(
-                    patientID = "MRN#1",
-                    recipients = listOf(SendMessageRecipient("CorrectID", false)),
-                    messageText = listOf("Message Text"),
-                    senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
-            )
-        } returns httpResponse
-
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
-            )
-        )
-
-        every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
-
-        assertThrows<IOException> {
             EpicMessageService(epicClient, providerPoolService).sendMessage(
                 tenant,
                 EHRMessageInput(

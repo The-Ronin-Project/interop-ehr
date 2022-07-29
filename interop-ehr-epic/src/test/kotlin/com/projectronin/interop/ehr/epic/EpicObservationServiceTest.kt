@@ -7,14 +7,12 @@ import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
-import io.ktor.utils.io.errors.IOException
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class EpicObservationServiceTest {
     private lateinit var epicClient: EpicClient
@@ -65,38 +63,6 @@ class EpicObservationServiceTest {
         val expectedObservationBundle = EpicObservationBundle(validObservationSearchBundle)
         assertEquals(expectedObservationBundle, bundle)
         assertEquals(4, bundle.resources.size)
-    }
-
-    @Test
-    fun `ensure http error handled`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                "testPrivateKey",
-                "TEST_TENANT"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.body<Bundle>() } returns validObservationSearchBundle
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/Observation",
-                mapOf(
-                    "patient" to "em2zwhHegmZEu39N4dUEIYA3",
-                    "category" to "social-history"
-                )
-            )
-        } returns httpResponse
-
-        assertThrows<IOException> {
-            observationService.findObservationsByPatient(
-                tenant,
-                listOf("em2zwhHegmZEu39N4dUEIYA3"),
-                listOf("social-history")
-            )
-        }
     }
 
     @Test

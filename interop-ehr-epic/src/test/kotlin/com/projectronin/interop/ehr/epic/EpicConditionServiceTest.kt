@@ -6,14 +6,12 @@ import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
-import io.ktor.utils.io.errors.IOException
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 
 class EpicConditionServiceTest {
     private lateinit var epicClient: EpicClient
@@ -68,44 +66,6 @@ class EpicConditionServiceTest {
             )
 
         assertEquals(EpicConditionBundle(validConditionSearch), bundle)
-    }
-
-    @Test
-    fun `ensure http error handled`() {
-        val patientFhirId = "fhirId"
-        val conditionCategoryCode = "catCode"
-        val clinicalStatus = "clinicalStatus"
-
-        val tenant =
-            createTestTenant(
-                "clientId",
-                "https://example.org",
-                "testPrivateKey",
-                "tenantId"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.NotFound
-        coEvery { httpResponse.body<Bundle>() } returns validConditionSearch
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/Condition",
-                mapOf(
-                    "patient" to patientFhirId,
-                    "category" to conditionCategoryCode,
-                    "clinical-status" to clinicalStatus
-                )
-            )
-        } returns httpResponse
-
-        assertThrows<IOException> {
-            conditionService.findConditions(
-                tenant,
-                patientFhirId,
-                conditionCategoryCode,
-                clinicalStatus
-            )
-        }
     }
 
     @Test

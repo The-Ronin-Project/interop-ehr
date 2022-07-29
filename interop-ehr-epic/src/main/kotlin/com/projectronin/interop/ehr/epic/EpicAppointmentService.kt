@@ -16,8 +16,6 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.call.body
-import io.ktor.http.HttpStatusCode
-import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -100,10 +98,6 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
 
         val getAppointments = runBlocking {
             val httpResponse = epicClient.post(tenant, urlPart, request)
-            if (httpResponse.status != HttpStatusCode.OK) {
-                logger.error { "Appointment search failed for ${tenant.mnemonic}, with a ${httpResponse.status}" }
-                throw IOException("Call to tenant ${tenant.mnemonic} failed with a ${httpResponse.status}")
-            }
             httpResponse.body<GetAppointmentsResponse>()
         }
         val providerIdMap = getAppointments.appointments.associate { appointment ->
