@@ -56,7 +56,7 @@ class EpicAppointmentBundleTest {
 
         val appointment1 = bundle.resources[0]
         assertEquals("22792", appointment1.id)
-        assertEquals(visitIdentifier1, appointment1.identifier[0].element)
+        assertEquals(visitIdentifier1.id, appointment1.identifier[0].value)
         assertEquals("25000", appointment1.identifier[0].value)
         assertEquals("Internal", appointment1.identifier[0].type?.text)
         assertEquals(null, appointment1.identifier[0].system)
@@ -67,7 +67,7 @@ class EpicAppointmentBundleTest {
 
         val appointment2 = bundle.resources[1]
         assertEquals("22793", appointment2.id)
-        assertEquals(visitIdentifier2, appointment2.identifier[0].element)
+        assertEquals(visitIdentifier2.id, appointment2.identifier[0].value)
         assertEquals("25001", appointment2.identifier[0].value)
         assertEquals("Internal", appointment2.identifier[0].type?.text)
         assertEquals(null, appointment2.identifier[0].system)
@@ -184,11 +184,9 @@ class EpicAppointmentBundleTest {
         assertEquals(deformat(json), bundle.raw)
 
         val appointment1 = bundle.resources[0]
-        assertEquals(visitIdentifier1, appointment1.identifier[0].element)
-        assertEquals(visitIdentifierJson1, appointment1.identifier[0].raw)
+        assertEquals(visitIdentifier1.id, appointment1.identifier[0].value)
 
         val appointment2 = bundle.resources[1]
-        assertEquals(visitIdentifier2, appointment2.identifier[0].element)
-        assertEquals(visitIdentifierJson2, appointment2.identifier[0].raw)
+        assertEquals(visitIdentifier2.id, appointment2.identifier[0].value)
     }
 }

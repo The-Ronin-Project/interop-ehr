@@ -10,7 +10,6 @@ import com.projectronin.interop.ehr.epic.apporchard.model.LineValue
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
 import com.projectronin.interop.ehr.epic.apporchard.model.SubLine
 import com.projectronin.interop.ehr.epic.model.EpicAppointment
-import com.projectronin.interop.ehr.epic.model.EpicIDType
 import com.projectronin.interop.ehr.epic.model.EpicPatientParticipant
 import com.projectronin.interop.ehr.epic.model.EpicPatientReference
 import com.projectronin.interop.ehr.epic.model.EpicProviderParticipant
@@ -47,7 +46,6 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import com.projectronin.interop.ehr.epic.apporchard.model.Appointment as AOAppointment
-import com.projectronin.interop.ehr.model.Identifier as EHRIdentifier
 import com.projectronin.interop.ehr.model.Participant as EHRParticipant
 import com.projectronin.interop.ehr.model.Reference as EHRReference
 
@@ -63,12 +61,12 @@ class EpicAppointmentTransformerTest {
 
     private val epicAppointment = readResource<AOAppointment>("/ExampleEpicAppointment.json")
     private val patientParticipant = EpicPatientParticipant(
-        element = "Patient Name", identifier = EpicIDType(IDType("patientEpicId", "External"))
+        element = "Patient Name", identifier = IDType("patientEpicId", "External").toIdentifier()
     )
-    private val mockProviderIdentifier = mockk<EHRIdentifier> {
+    private val mockProviderIdentifier = mockk<Identifier> {
         every { value } returns "providerId"
         every { type?.text } returns "External"
-        every { system } returns ""
+        every { system } returns mockk { every { value } returns "" }
     }
     private val mockProviderReference = mockk<EpicProviderReference> {
         every { display } returns "Coordinator Phoenix, RN"
@@ -811,7 +809,7 @@ class EpicAppointmentTransformerTest {
 
     @Test
     fun `null participant checks`() {
-        val mockIdentifier = mockk<EHRIdentifier> {
+        val mockIdentifier = mockk<Identifier> {
             every { value } returns "providerId"
             every { type } returns null
         }
@@ -896,10 +894,10 @@ class EpicAppointmentTransformerTest {
 
     @Test
     fun `transform appointment works when we already have systems`() {
-        val mockPatientIdentifier = mockk<EHRIdentifier> {
+        val mockPatientIdentifier = mockk<Identifier> {
             every { value } returns "patientEpicId"
             every { type?.text } returns "External"
-            every { system } returns "mrnSystem"
+            every { system } returns mockk { every { value } returns "mrnSystem" }
         }
         val mockPatientReference = mockk<EpicPatientReference> {
             every { display } returns "Patient Name"
@@ -909,7 +907,7 @@ class EpicAppointmentTransformerTest {
         val patientParticipant = mockk<EpicPatientParticipant> {
             every { actor } returns mockPatientReference
         }
-        val mockProviderIdentifier = mockk<EHRIdentifier> {
+        val mockProviderIdentifier = mockk<Identifier> {
             every { value } returns "providerId"
             every { type?.text } returns "External"
             every { system } returns null

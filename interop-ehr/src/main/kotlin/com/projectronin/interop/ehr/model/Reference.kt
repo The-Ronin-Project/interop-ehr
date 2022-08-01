@@ -1,5 +1,7 @@
 package com.projectronin.interop.ehr.model
 
+import com.projectronin.interop.fhir.r4.datatype.Identifier
+
 /**
  * Representation of a [Reference].
  */

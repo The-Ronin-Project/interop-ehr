@@ -49,19 +49,12 @@
       "Time" : "900"
     },
     "value" : {
-      "system" : "systemFromIdentifierService",
-      "element" : {
-        "ID" : "2100",
-        "Type" : "Internal"
-      }
+      "extension" : [ ],
+      "system" : "systemFromIdentifierService"
     }
   } ],
   "patientIdentifier" : {
-    "system" : null,
-    "element" : {
-      "ID" : "paitientId",
-      "Type" : "External"
-    }
+    "extension" : [ ]
   }
 }, {
   "appOrchardAppointment" : {

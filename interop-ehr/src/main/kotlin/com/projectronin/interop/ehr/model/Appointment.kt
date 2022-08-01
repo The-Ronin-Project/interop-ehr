@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.model
 
+import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 
 /**

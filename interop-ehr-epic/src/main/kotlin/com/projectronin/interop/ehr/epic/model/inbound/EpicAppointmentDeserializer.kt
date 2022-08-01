@@ -5,11 +5,10 @@ import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import com.projectronin.interop.common.jackson.JacksonManager
-import com.projectronin.interop.ehr.epic.EpicIdentifierService.StandardizedIdentifier
 import com.projectronin.interop.ehr.epic.apporchard.model.Appointment
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
 import com.projectronin.interop.ehr.epic.model.EpicAppointment
-import com.projectronin.interop.ehr.model.Identifier
+import com.projectronin.interop.fhir.r4.datatype.Identifier
 
 /**
  * Custom deserializer for [EpicAppointment]
@@ -27,16 +26,19 @@ class EpicAppointmentDeserializer : StdDeserializer<EpicAppointment>(EpicAppoint
         val providerMap = mutableMapOf<ScheduleProviderReturnWithTime, Identifier>()
         rootNode.get("providerIDMap").elements().forEach {
             val scheduleProviderReturnWithTimeRaw = it.get("key").toString()
-            val scheduleProviderReturnWithTime = JacksonManager.objectMapper.readValue(scheduleProviderReturnWithTimeRaw, ScheduleProviderReturnWithTime::class.java)
+            val scheduleProviderReturnWithTime = JacksonManager.objectMapper.readValue(
+                scheduleProviderReturnWithTimeRaw,
+                ScheduleProviderReturnWithTime::class.java
+            )
             val identifierRaw = it.get("value").toString()
-            val identifier = JacksonManager.objectMapper.readValue(identifierRaw, StandardizedIdentifier::class.java)
+            val identifier = JacksonManager.objectMapper.readValue(identifierRaw, Identifier::class.java)
             providerMap[scheduleProviderReturnWithTime] = identifier
         }
         val patientIdentifierRaw = if (rootNode.hasNonNull("patientIdentifier")) {
             rootNode.get("patientIdentifier").toString()
         } else null
         val patientIdentifier = if (patientIdentifierRaw != null) {
-            JacksonManager.objectMapper.readValue(patientIdentifierRaw, StandardizedIdentifier::class.java)
+            JacksonManager.objectMapper.readValue(patientIdentifierRaw, Identifier::class.java)
         } else null
         return EpicAppointment(appOrchardAppt, providerMap, patientIdentifier)
     }

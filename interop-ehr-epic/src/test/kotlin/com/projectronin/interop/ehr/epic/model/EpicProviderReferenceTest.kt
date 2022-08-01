@@ -14,7 +14,7 @@ class EpicProviderReferenceTest {
     )
 
     private val okIdentifiers = okIDTypes.map {
-        EpicIDType(it)
+        it.toIdentifier()
     }
 
     private val okProviders = listOf(
@@ -38,7 +38,7 @@ class EpicProviderReferenceTest {
 
     // cheating here by just assuming the first one is what Identifier service would return
     private val providerIdMap = okProviders.associateWith {
-        EpicIDType(it.providerIDs[0])
+        it.providerIDs[0].toIdentifier()
     }
 
     @Test
@@ -68,7 +68,7 @@ class EpicProviderReferenceTest {
         )
         // none of the providers in our map had more than 1 identifier
         val localProviderIdMap = listOf(provider).associateWith {
-            EpicIDType(it.providerIDs[0])
+            it.providerIDs[0].toIdentifier()
         }
         val epicReference = EpicProviderReference(provider, localProviderIdMap)
         assertEquals(provider.providerName, epicReference.display)

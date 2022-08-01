@@ -2,10 +2,10 @@ package com.projectronin.interop.ehr.epic.model
 
 import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
-import com.projectronin.interop.ehr.model.Identifier
 import com.projectronin.interop.ehr.model.Link
 import com.projectronin.interop.ehr.model.base.JSONBundle
 import com.projectronin.interop.ehr.model.enums.DataSource
+import com.projectronin.interop.fhir.r4.datatype.Identifier
 
 /**
  * A bundle of Epic appointments as returned from [GetPatientAppointments](https://apporchard.epic.com/Sandbox?api=195) API

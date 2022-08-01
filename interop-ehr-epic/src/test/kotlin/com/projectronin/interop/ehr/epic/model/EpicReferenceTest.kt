@@ -25,7 +25,6 @@ class EpicReferenceTest {
         assertEquals("Practitioner/eUqvfRVFNUVeJmt1pCf8YS24CEOUR6bhBnL-xrSXlTdc3", epicReference.reference)
         assertEquals("John Adams, MD", epicReference.display)
         assertEquals("5678", epicReference.id)
-        assertEquals(identifier, epicReference.identifier?.element)
         assertEquals("type", epicReference.type)
     }
 
@@ -67,8 +66,5 @@ class EpicReferenceTest {
         val epicReference = EpicReference(reference)
         assertEquals(reference, epicReference.element)
         assertEquals(deformat(json), epicReference.raw)
-
-        assertEquals(identifier, epicReference.identifier?.element)
-        assertEquals(identifierJSON, epicReference.identifier?.raw)
     }
 }

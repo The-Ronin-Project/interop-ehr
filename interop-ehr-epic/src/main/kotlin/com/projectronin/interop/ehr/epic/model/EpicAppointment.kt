@@ -10,14 +10,15 @@ import com.projectronin.interop.ehr.epic.model.inbound.EpicAppointmentDeserializ
 import com.projectronin.interop.ehr.epic.model.outbound.EpicAppointmentSerializer
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.CodeableConcept
-import com.projectronin.interop.ehr.model.Identifier
 import com.projectronin.interop.ehr.model.Participant
 import com.projectronin.interop.ehr.model.base.JSONResource
 import com.projectronin.interop.ehr.model.enums.DataSource
+import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 import com.projectronin.interop.ehr.epic.apporchard.model.Appointment as AppOrchardAppointment
+
 /**
  * Epic's representation of an appointment from [GetPatientAppointments](https://apporchard.epic.com/Sandbox?api=195) API
  */
@@ -37,7 +38,7 @@ class EpicAppointment(
     override val status: AppointmentStatus = resource.status
 
     override val identifier: List<Identifier> by lazy {
-        resource.visitTypeIDs.map(::EpicIDType)
+        resource.visitTypeIDs.map { it.toIdentifier() }
     }
 
     override val serviceType: List<CodeableConcept> by lazy {

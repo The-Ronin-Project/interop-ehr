@@ -7,11 +7,9 @@ import com.projectronin.interop.ehr.epic.apporchard.model.GetProviderAppointment
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProvider
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.epic.model.EpicAppointmentBundle
-import com.projectronin.interop.ehr.epic.model.EpicIDType
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.util.toListOfType
-import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
@@ -63,8 +61,8 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
 
         val selectedIdentifiers = providerIDs.map {
             val selectedIdentifier = identifierService.getPractitionerProviderIdentifier(tenant, it)
-            (selectedIdentifier.identifier as Identifier).value
-                ?: throw VendorIdentifierNotFoundException("Unable to find a value on identifier: ${selectedIdentifier.identifier}")
+            selectedIdentifier.value
+                ?: throw VendorIdentifierNotFoundException("Unable to find a value on identifier: $selectedIdentifier")
         }
 
         val request =
@@ -104,13 +102,13 @@ class EpicAppointmentService(private val epicClient: EpicClient) :
         }
         val providerIdMap = getAppointments.appointments.associate { appointment ->
             val providerMap = appointment.providers.associateWith { provider ->
-                val providerIdentifiers = provider.providerIDs.map { EpicIDType(it) }
+                val providerIdentifiers = provider.providerIDs.map { it.toIdentifier() }
                 identifierService.getPractitionerIdentifier(tenant, providerIdentifiers)
             }
             appointment.id to providerMap
         }
         val patientIdsMap = getAppointments.appointments.associate { appointment ->
-            val allPatientIdentifiers = appointment.patientIDs.map { EpicIDType(it) }
+            val allPatientIdentifiers = appointment.patientIDs.map { it.toIdentifier() }
             val patientIdentifier = identifierService.getPatientIdentifier(tenant, allPatientIdentifiers)
             appointment.id to patientIdentifier
         }

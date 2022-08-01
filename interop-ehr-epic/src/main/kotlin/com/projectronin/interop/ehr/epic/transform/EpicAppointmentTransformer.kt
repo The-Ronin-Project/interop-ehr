@@ -35,7 +35,6 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import com.projectronin.interop.ehr.epic.apporchard.model.Appointment as AppOrchardAppointment
-import com.projectronin.interop.ehr.model.Identifier as EHRIdentifier
 import com.projectronin.interop.ehr.model.Participant as EHRParticipant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant as R4Instant
 
@@ -70,7 +69,7 @@ class EpicAppointmentTransformer(
         appointment: Appointment,
         tenant: Tenant,
         patientFhirID: String?,
-        practitionerIdentifierMap: Map<EHRIdentifier, String?>
+        practitionerIdentifierMap: Map<Identifier, String?>
     ): OncologyAppointment? {
         val appOrchardAppointment = appointment.resource as AppOrchardAppointment
 
@@ -161,7 +160,7 @@ class EpicAppointmentTransformer(
     private fun buildParticipant(
         ehrParticipant: EHRParticipant,
         patientFhirID: String?,
-        practitionerIdentifierMap: Map<EHRIdentifier, String?>
+        practitionerIdentifierMap: Map<Identifier, String?>
     ): Participant {
         val participantType = ehrParticipant.actor.type
         var reference: String? = null
@@ -210,8 +209,8 @@ class EpicAppointmentTransformer(
                 tenantMnemonic = tenantMnemonic,
                 identifiers = mapOf(
                     "any" to SystemValue(
-                        value = identifier.value,
-                        system = identifier.system ?: ""
+                        value = identifier.value ?: "",
+                        system = identifier.system?.value ?: ""
                     )
                 )
             )
@@ -221,9 +220,12 @@ class EpicAppointmentTransformer(
 
     /**
      * Given an [EpicAppointment] this function resolves the practitioner identifiers against aidbox and returns a map
-     * of their [EHRIdentifier] to a fhir ID if found
+     * of their [Identifier] to a fhir ID if found
      */
-    private fun findProviderIdentifiers(ehrAppointment: EpicAppointment, tenantMnemonic: String): Map<EHRIdentifier, String> {
+    private fun findProviderIdentifiers(
+        ehrAppointment: EpicAppointment,
+        tenantMnemonic: String
+    ): Map<Identifier, String> {
         val practitionerIdentifiers = ehrAppointment.participants
             .filter { participant ->
                 participant.actor.identifier != null &&
@@ -231,7 +233,7 @@ class EpicAppointmentTransformer(
             }
             .associate { participant ->
                 val identifier = participant.actor.identifier!! // we've already filtered out the nulls
-                val systemValue = SystemValue(identifier.value, identifier.system ?: "")
+                val systemValue = SystemValue(identifier.value ?: "", identifier.system?.value ?: "")
                 identifier to systemValue
             }
 

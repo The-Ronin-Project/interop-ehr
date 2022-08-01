@@ -14,7 +14,7 @@
     "Date" : "12/3/2015",
     "ExtraExtensions" : [ ],
     "PatientIDs" : [ {
-      "ID" : "paitientId",
+      "ID" : "patientId",
       "Type" : "External"
     } ],
     "PatientName" : "LMRTESTING,HERMIONE",
@@ -48,18 +48,24 @@
       "Time" : "900"
     },
     "value" : {
+      "extension" : [ ],
+      "type" : {
+        "extension" : [ ],
+        "coding" : [ ],
+        "text" : "Internal"
+      },
       "system" : "systemFromIdentifierService",
-      "element" : {
-        "ID" : "2100",
-        "Type" : "Internal"
-      }
+      "value" : "2100"
     }
   } ],
   "patientIdentifier" : {
-    "system" : null,
-    "element" : {
-      "ID" : "paitientId",
-      "Type" : "External"
-    }
+    "extension" : [ ],
+    "type" : {
+      "extension" : [ ],
+      "coding" : [ ],
+      "text" : "External"
+    },
+    "system" : "systemFromIdentifierService",
+    "value" : "patientId"
   }
 }

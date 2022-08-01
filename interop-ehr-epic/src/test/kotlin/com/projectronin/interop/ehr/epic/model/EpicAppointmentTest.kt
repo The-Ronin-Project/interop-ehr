@@ -3,13 +3,15 @@ package com.projectronin.interop.ehr.epic.model
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.common.resource.ResourceType
-import com.projectronin.interop.ehr.epic.EpicIdentifierService
 import com.projectronin.interop.ehr.epic.apporchard.model.Appointment
 import com.projectronin.interop.ehr.epic.apporchard.model.IDType
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
 import com.projectronin.interop.ehr.epic.deformat
 import com.projectronin.interop.ehr.model.ReferenceTypes
 import com.projectronin.interop.ehr.model.enums.DataSource
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
+import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import mu.KotlinLogging
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -40,7 +42,7 @@ class EpicAppointmentTest {
         assertEquals(DataSource.EPIC_APPORCHARD, epicAppointment.dataSource)
         assertEquals(ResourceType.APPOINTMENT, epicAppointment.resourceType)
         assertEquals("22792", epicAppointment.id)
-        assertEquals(visitIdentifier, epicAppointment.identifier[0].element)
+        assertEquals(visitIdentifier.id, epicAppointment.identifier[0].value)
         assertEquals("25000", epicAppointment.identifier[0].value)
         assertEquals("Internal", epicAppointment.identifier[0].type?.text)
         assertEquals(null, epicAppointment.identifier[0].system)
@@ -72,7 +74,7 @@ class EpicAppointmentTest {
         assertEquals(DataSource.EPIC_APPORCHARD, epicAppointment.dataSource)
         assertEquals(ResourceType.APPOINTMENT, epicAppointment.resourceType)
         assertEquals("22792", epicAppointment.id)
-        assertEquals(visitIdentifier, epicAppointment.identifier[0].element)
+        assertEquals(visitIdentifier.id, epicAppointment.identifier[0].value)
         assertEquals("25000", epicAppointment.identifier[0].value)
         assertEquals("Internal", epicAppointment.identifier[0].type?.text)
         assertEquals(null, epicAppointment.identifier[0].system)
@@ -104,7 +106,7 @@ class EpicAppointmentTest {
         assertEquals(DataSource.EPIC_APPORCHARD, epicAppointment.dataSource)
         assertEquals(ResourceType.APPOINTMENT, epicAppointment.resourceType)
         assertEquals("22792", epicAppointment.id)
-        assertEquals(visitIdentifier, epicAppointment.identifier[0].element)
+        assertEquals(visitIdentifier.id, epicAppointment.identifier[0].value)
         assertEquals("25000", epicAppointment.identifier[0].value)
         assertEquals("Internal", epicAppointment.identifier[0].type?.text)
         assertEquals(null, epicAppointment.identifier[0].system)
@@ -166,8 +168,7 @@ class EpicAppointmentTest {
         assertEquals(DataSource.EPIC_APPORCHARD, epicAppointment.dataSource)
         assertEquals(ResourceType.APPOINTMENT, epicAppointment.resourceType)
         assertEquals("22792", epicAppointment.id)
-        assertEquals(visitIdentifier, epicAppointment.identifier[0].element)
-        assertEquals(visitIdentifierJson, epicAppointment.identifier[0].raw)
+        assertEquals(visitIdentifier.id, epicAppointment.identifier[0].value)
         assertEquals("25000", epicAppointment.identifier[0].value)
         assertEquals("Internal", epicAppointment.identifier[0].type?.text)
         assertEquals(null, epicAppointment.identifier[0].system)
@@ -238,8 +239,6 @@ class EpicAppointmentTest {
         assertEquals(DataSource.EPIC_APPORCHARD, epicAppointment.dataSource)
         assertEquals(ResourceType.APPOINTMENT, epicAppointment.resourceType)
         assertEquals("22792", epicAppointment.id)
-        assertEquals(visitIdentifier, epicAppointment.identifier[0].element)
-        assertEquals(visitIdentifierJson, epicAppointment.identifier[0].raw)
         assertEquals("25000", epicAppointment.identifier[0].value)
         assertEquals("Internal", epicAppointment.identifier[0].type?.text)
         assertEquals(null, epicAppointment.identifier[0].system)
@@ -311,8 +310,6 @@ class EpicAppointmentTest {
         assertEquals(DataSource.EPIC_APPORCHARD, epicAppointment.dataSource)
         assertEquals(ResourceType.APPOINTMENT, epicAppointment.resourceType)
         assertEquals("22792", epicAppointment.id)
-        assertEquals(visitIdentifier, epicAppointment.identifier[0].element)
-        assertEquals(visitIdentifierJson, epicAppointment.identifier[0].raw)
         assertEquals("25000", epicAppointment.identifier[0].value)
         assertEquals("Internal", epicAppointment.identifier[0].type?.text)
         assertEquals(null, epicAppointment.identifier[0].system)
@@ -327,7 +324,7 @@ class EpicAppointmentTest {
     fun `patient participants`() {
         val visitIdentifier = IDType(id = "25000", type = "Internal")
         val providerIdentifier = IDType(id = "2100", type = "Internal")
-        val patientIdentifier = EpicIDType(IDType(id = "paitientId", type = "External"))
+        val patientIdentifier = IDType(id = "paitientId", type = "External").toIdentifier()
         val provider = ScheduleProviderReturnWithTime(
             departmentIDs = listOf(),
             departmentName = "Blank",
@@ -385,16 +382,20 @@ class EpicAppointmentTest {
         assertEquals(DataSource.EPIC_APPORCHARD, epicAppointment.dataSource)
         assertEquals(ResourceType.APPOINTMENT, epicAppointment.resourceType)
         assertEquals("22792", epicAppointment.id)
-        assertEquals(visitIdentifier, epicAppointment.identifier[0].element)
-        assertEquals(visitIdentifierJson, epicAppointment.identifier[0].raw)
         assertEquals("25000", epicAppointment.identifier[0].value)
         assertEquals("Internal", epicAppointment.identifier[0].type?.text)
         assertEquals(null, epicAppointment.identifier[0].system)
         assertEquals("2015-12-03T15:30:00", epicAppointment.start)
         assertEquals("TRANSPLANT EVALUATION", epicAppointment.serviceType[0].text)
         assertEquals(2, epicAppointment.participants.size)
-        assertEquals(provider.providerName, epicAppointment.participants.first { it.actor.type == "Practitioner" }.actor.display)
-        assertEquals(appointment.patientName, epicAppointment.participants.first { it.actor.type == "Patient" }.actor.display)
+        assertEquals(
+            provider.providerName,
+            epicAppointment.participants.first { it.actor.type == "Practitioner" }.actor.display
+        )
+        assertEquals(
+            appointment.patientName,
+            epicAppointment.participants.first { it.actor.type == "Patient" }.actor.display
+        )
         assertEquals(AppointmentStatus.NOSHOW, epicAppointment.status)
     }
 
@@ -402,9 +403,17 @@ class EpicAppointmentTest {
     fun `can serialize`() {
         val visitIdentifier = IDType(id = "25000", type = "Internal")
         val providerIdentifier = IDType(id = "2100", type = "Internal")
-        val patientIdentifier = IDType(id = "paitientId", type = "External")
-        val patientIDTypeEpic = EpicIDType(patientIdentifier)
-        val providerIDTypeEpic = EpicIDType(providerIdentifier)
+        val patientIdentifier = IDType(id = "patientId", type = "External")
+        val patientIDTypeEpic = Identifier(
+            value = "patientId",
+            type = CodeableConcept(text = "External"),
+            system = Uri("systemFromIdentifierService")
+        )
+        val providerIDTypeEpic = Identifier(
+            value = "2100",
+            type = CodeableConcept(text = "Internal"),
+            system = Uri("systemFromIdentifierService")
+        )
         val provider = ScheduleProviderReturnWithTime(
             departmentIDs = listOf(),
             departmentName = "Blank",
@@ -432,17 +441,14 @@ class EpicAppointmentTest {
         val epicAppointment = EpicAppointment(
             appointment,
             mapOf(
-                provider to EpicIdentifierService.StandardizedIdentifier(
-                    "systemFromIdentifierService",
-                    providerIDTypeEpic
-                )
+                provider to providerIDTypeEpic
             ),
-            EpicIdentifierService.StandardizedIdentifier(
-                null,
-                patientIDTypeEpic
-            )
+            patientIDTypeEpic
         )
-        val serialized = JacksonManager.nonAbsentObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epicAppointment)
+        val serialized =
+            JacksonManager.nonAbsentObjectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(epicAppointment)
+        KotlinLogging.logger { }.info { serialized }
+
         val expected = this::class.java.getResource("/ExampleSerializedEpicAppointment.json")!!.readText()
         assertEquals(expected, serialized)
     }
@@ -481,8 +487,8 @@ class EpicAppointmentTest {
             null,
             null,
         )
-        val serialized = JacksonManager.objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_ABSENT).writerWithDefaultPrettyPrinter().writeValueAsString(epicAppointment)
-        KotlinLogging.logger { }.info { serialized }
+        val serialized = JacksonManager.objectMapper.copy().setSerializationInclusion(JsonInclude.Include.NON_ABSENT)
+            .writerWithDefaultPrettyPrinter().writeValueAsString(epicAppointment)
         val expected = this::class.java.getResource("/ExampleSerializedEpicAppointmentWithNulls.json")!!.readText()
         assertEquals(expected, serialized)
     }
@@ -496,14 +502,13 @@ class EpicAppointmentTest {
         val patients = deserializedAppt.participants.filter { it.actor.type == ReferenceTypes.PATIENT }
         assertEquals(1, patients.size)
         val patientIdentifier = patients.single().actor.identifier
-        assertEquals("paitientId", patientIdentifier?.value)
-        assertNull(patientIdentifier?.system)
+        assertEquals("patientId", patientIdentifier?.value)
 
         val providers = deserializedAppt.participants.filter { it.actor.type == ReferenceTypes.PRACTITIONER }
         assertEquals(1, providers.size)
         val providerIdentifier = providers.single().actor.identifier
         assertEquals("2100", providerIdentifier?.value)
-        assertEquals("systemFromIdentifierService", providerIdentifier?.system)
+        assertEquals("systemFromIdentifierService", providerIdentifier?.system?.value)
     }
 
     @Test
