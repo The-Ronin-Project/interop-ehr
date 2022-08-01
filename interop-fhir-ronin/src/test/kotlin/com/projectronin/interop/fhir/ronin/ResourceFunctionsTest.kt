@@ -5,6 +5,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Resource
+import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -45,5 +46,9 @@ class ResourceFunctionsTest {
         override val language: Code? = null,
         override val meta: Meta? = null,
         override val resourceType: String = "Sample"
-    ) : Resource<SampleResource>
+    ) : Resource<SampleResource> {
+        override fun validate(): Validation {
+            TODO("Not yet implemented")
+        }
+    }
 }

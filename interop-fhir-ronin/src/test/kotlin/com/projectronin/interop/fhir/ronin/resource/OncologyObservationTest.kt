@@ -58,7 +58,7 @@ class OncologyObservationTest {
         )
         val exception =
             assertThrows<IllegalArgumentException> {
-                OncologyObservation.validate(observation)
+                OncologyObservation.validate(observation).alertIfErrors()
             }
         assertEquals("Tenant identifier is required", exception.message)
     }

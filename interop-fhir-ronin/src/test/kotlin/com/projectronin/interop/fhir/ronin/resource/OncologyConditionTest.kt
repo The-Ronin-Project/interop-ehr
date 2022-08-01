@@ -72,7 +72,7 @@ class OncologyConditionTest {
         )
         val exception =
             assertThrows<IllegalArgumentException> {
-                OncologyCondition.validate(condition)
+                OncologyCondition.validate(condition).alertIfErrors()
             }
         assertEquals("Tenant identifier is required", exception.message)
     }
@@ -103,9 +103,43 @@ class OncologyConditionTest {
         )
         val exception =
             assertThrows<IllegalArgumentException> {
-                OncologyCondition.validate(condition)
+                OncologyCondition.validate(condition).alertIfErrors()
             }
         assertEquals("At least one category must be provided", exception.message)
+    }
+
+    @Test
+    fun `validate fails for multiple issues`() {
+        val condition = Condition(
+            identifier = listOf(
+                Identifier(
+                    system = CodeSystem.MRN.uri,
+                    type = CodeableConcepts.MRN,
+                    value = "MRN"
+                ),
+            ),
+            category = listOf(),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = "Non-small cell lung cancer"
+                    )
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/roninPatientExample01"
+            )
+        )
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                OncologyCondition.validate(condition).alertIfErrors()
+            }
+        assertEquals(
+            "Encountered multiple validation errors:\nTenant identifier is required\nAt least one category must be provided",
+            exception.message
+        )
     }
 
     @Test

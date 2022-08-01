@@ -3,6 +3,8 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
+import com.projectronin.interop.fhir.validate.Validation
+import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import mu.KotlinLogging
 
@@ -10,19 +12,19 @@ import mu.KotlinLogging
  * Validator and Transformer for the Ronin [OncologyObservation](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-observation.html) profile.
  */
 object OncologyObservation : BaseRoninProfile<Observation>(KotlinLogging.logger { }) {
-    override fun validate(resource: Observation) {
-        requireTenantIdentifier(resource.identifier)
+    override fun validateInternal(resource: Observation, validation: Validation) {
+        validation.apply {
+            requireTenantIdentifier(resource.identifier, this)
+        }
     }
 
-    override fun transformInternal(original: Observation, tenant: Tenant): Observation? {
-        val id = original.id
-        if (id == null) {
-            logger.warn { "Unable to transform Observation due to missing ID" }
-            return null
+    override fun transformInternal(original: Observation, tenant: Tenant): Pair<Observation, Validation> {
+        val validation = validation {
+            notNull(original.id) { "no FHIR id" }
         }
 
-        return original.copy(
-            id = id.localize(tenant),
+        val transformed = original.copy(
+            id = original.id?.localize(tenant),
             meta = original.meta?.localize(tenant),
             text = original.text?.localize(tenant),
             extension = original.extension.map { it.localize(tenant) },
@@ -48,5 +50,6 @@ object OncologyObservation : BaseRoninProfile<Observation>(KotlinLogging.logger 
             component = original.component.map { it.localize(tenant) },
             note = original.note.map { it.localize(tenant) }
         )
+        return Pair(transformed, validation)
     }
 }

@@ -45,7 +45,7 @@ class OncologyPractitionerTest {
             name = listOf(HumanName(family = "Smith"))
         )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitioner.validate(practitioner)
+            OncologyPractitioner.validate(practitioner).alertIfErrors()
         }
         assertEquals("Tenant identifier is required", exception.message)
     }
@@ -53,11 +53,17 @@ class OncologyPractitionerTest {
     @Test
     fun `validate fails if tenant does not have tenant codeable concept`() {
         val practitioner = Practitioner(
-            identifier = listOf(Identifier(system = CodeSystem.RONIN_TENANT.uri, type = CodeableConcepts.SER)),
+            identifier = listOf(
+                Identifier(
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    type = CodeableConcepts.SER,
+                    value = "test"
+                )
+            ),
             name = listOf(HumanName(family = "Smith"))
         )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitioner.validate(practitioner)
+            OncologyPractitioner.validate(practitioner).alertIfErrors()
         }
         assertEquals("Tenant identifier provided without proper CodeableConcept defined", exception.message)
     }
@@ -76,7 +82,7 @@ class OncologyPractitionerTest {
             name = listOf(HumanName(family = "Smith"))
         )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitioner.validate(practitioner)
+            OncologyPractitioner.validate(practitioner).alertIfErrors()
         }
         assertEquals("SER provided without proper CodeableConcept defined", exception.message)
     }
@@ -94,7 +100,7 @@ class OncologyPractitionerTest {
             name = listOf()
         )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitioner.validate(practitioner)
+            OncologyPractitioner.validate(practitioner).alertIfErrors()
         }
         assertEquals("At least one name must be provided", exception.message)
     }
@@ -112,9 +118,30 @@ class OncologyPractitionerTest {
             name = listOf(HumanName())
         )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitioner.validate(practitioner)
+            OncologyPractitioner.validate(practitioner).alertIfErrors()
         }
         assertEquals("All names must have a family name provided", exception.message)
+    }
+
+    @Test
+    fun `validate fails for multiple issues`() {
+        val practitioner = Practitioner(
+            identifier = listOf(
+                Identifier(
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    type = CodeableConcepts.SER,
+                    value = "test"
+                )
+            ),
+            name = listOf()
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            OncologyPractitioner.validate(practitioner).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered multiple validation errors:\nTenant identifier provided without proper CodeableConcept defined\nAt least one name must be provided",
+            exception.message
+        )
     }
 
     @Test

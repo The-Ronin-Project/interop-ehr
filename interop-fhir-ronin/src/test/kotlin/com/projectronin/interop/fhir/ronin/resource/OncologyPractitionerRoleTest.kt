@@ -38,33 +38,39 @@ class OncologyPractitionerRoleTest {
     }
 
     @Test
-    fun `fails if no tenant identifier provided`() {
+    fun `validate fails if no tenant identifier provided`() {
         val practitionerRole = PractitionerRole(
             identifier = listOf(),
             practitioner = Reference(reference = "Practitioner/1234"),
             organization = Reference(reference = "Organization/1234")
         )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitionerRole.validate(practitionerRole)
+            OncologyPractitionerRole.validate(practitionerRole).alertIfErrors()
         }
         assertEquals("Tenant identifier is required", exception.message)
     }
 
     @Test
-    fun `fails if tenant does not have tenant codeable concept`() {
+    fun `validate fails if tenant does not have tenant codeable concept`() {
         val practitionerRole = PractitionerRole(
-            identifier = listOf(Identifier(system = CodeSystem.RONIN_TENANT.uri, type = CodeableConcepts.SER)),
+            identifier = listOf(
+                Identifier(
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    type = CodeableConcepts.SER,
+                    value = "test"
+                )
+            ),
             practitioner = Reference(reference = "Practitioner/1234"),
             organization = Reference(reference = "Organization/1234")
         )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitionerRole.validate(practitionerRole)
+            OncologyPractitionerRole.validate(practitionerRole).alertIfErrors()
         }
         assertEquals("Tenant identifier provided without proper CodeableConcept defined", exception.message)
     }
 
     @Test
-    fun `fails if telecom missing system`() {
+    fun `validate fails if telecom missing system`() {
         val practitionerRole = PractitionerRole(
             identifier = listOf(
                 Identifier(
@@ -79,13 +85,13 @@ class OncologyPractitionerRoleTest {
             telecom = listOf(ContactPoint(use = ContactPointUse.HOME))
         )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitionerRole.validate(practitionerRole)
+            OncologyPractitionerRole.validate(practitionerRole).alertIfErrors()
         }
         assertEquals("All PractitionerRole telecoms require a value and system", exception.message)
     }
 
     @Test
-    fun `fails if telecom missing value`() {
+    fun `validate fails if telecom missing value`() {
         val practitionerRole = PractitionerRole(
             identifier = listOf(
                 Identifier(
@@ -99,9 +105,32 @@ class OncologyPractitionerRoleTest {
             telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE))
         )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitionerRole.validate(practitionerRole)
+            OncologyPractitionerRole.validate(practitionerRole).alertIfErrors()
         }
         assertEquals("All PractitionerRole telecoms require a value and system", exception.message)
+    }
+
+    @Test
+    fun `validate fails for multiple issues`() {
+        val practitionerRole = PractitionerRole(
+            identifier = listOf(
+                Identifier(
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    type = CodeableConcepts.SER,
+                    value = "tenantId"
+                )
+            ),
+            practitioner = Reference(reference = "Practitioner/1234"),
+            organization = Reference(reference = "Organization/1234"),
+            telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE))
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            OncologyPractitionerRole.validate(practitionerRole).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered multiple validation errors:\nTenant identifier provided without proper CodeableConcept defined\nAll PractitionerRole telecoms require a value and system",
+            exception.message
+        )
     }
 
     @Test

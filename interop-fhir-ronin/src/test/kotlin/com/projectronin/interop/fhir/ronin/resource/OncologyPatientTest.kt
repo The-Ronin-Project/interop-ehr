@@ -93,7 +93,7 @@ class OncologyPatientTest {
             )
         val exception =
             assertThrows<IllegalArgumentException> {
-                oncologyPatient.validate(patient)
+                oncologyPatient.validate(patient).alertIfErrors()
             }
         assertEquals("Tenant identifier is required", exception.message)
     }
@@ -134,7 +134,7 @@ class OncologyPatientTest {
             )
         val exception =
             assertThrows<IllegalArgumentException> {
-                oncologyPatient.validate(patient)
+                oncologyPatient.validate(patient).alertIfErrors()
             }
         assertEquals("Tenant identifier provided without proper CodeableConcept defined", exception.message)
     }
@@ -174,7 +174,7 @@ class OncologyPatientTest {
             )
         val exception =
             assertThrows<IllegalArgumentException> {
-                oncologyPatient.validate(patient)
+                oncologyPatient.validate(patient).alertIfErrors()
             }
         assertEquals("tenant identifier value is required", exception.message)
     }
@@ -210,7 +210,7 @@ class OncologyPatientTest {
             )
         val exception =
             assertThrows<IllegalArgumentException> {
-                oncologyPatient.validate(patient)
+                oncologyPatient.validate(patient).alertIfErrors()
             }
         assertEquals("mrn identifier is required", exception.message)
     }
@@ -251,7 +251,7 @@ class OncologyPatientTest {
             )
         val exception =
             assertThrows<IllegalArgumentException> {
-                oncologyPatient.validate(patient)
+                oncologyPatient.validate(patient).alertIfErrors()
             }
         assertEquals("mrn identifier type defined without proper CodeableConcept", exception.message)
     }
@@ -291,7 +291,7 @@ class OncologyPatientTest {
             )
         val exception =
             assertThrows<IllegalArgumentException> {
-                oncologyPatient.validate(patient)
+                oncologyPatient.validate(patient).alertIfErrors()
             }
         assertEquals("mrn value is required", exception.message)
     }
@@ -327,7 +327,7 @@ class OncologyPatientTest {
             )
         val exception =
             assertThrows<IllegalArgumentException> {
-                oncologyPatient.validate(patient)
+                oncologyPatient.validate(patient).alertIfErrors()
             }
         assertEquals("fhir_stu3_id identifier is required", exception.message)
     }
@@ -368,7 +368,7 @@ class OncologyPatientTest {
             )
         val exception =
             assertThrows<IllegalArgumentException> {
-                oncologyPatient.validate(patient)
+                oncologyPatient.validate(patient).alertIfErrors()
             }
         assertEquals(
             "fhir_stu3_id identifier type defined without proper CodeableConcept",
@@ -411,7 +411,7 @@ class OncologyPatientTest {
             )
         val exception =
             assertThrows<IllegalArgumentException> {
-                oncologyPatient.validate(patient)
+                oncologyPatient.validate(patient).alertIfErrors()
             }
         assertEquals("fhir_stu3_id value is required", exception.message)
     }
@@ -452,9 +452,48 @@ class OncologyPatientTest {
             )
         val exception =
             assertThrows<IllegalArgumentException> {
-                oncologyPatient.validate(patient)
+                oncologyPatient.validate(patient).alertIfErrors()
             }
         assertEquals("At least one name must be provided", exception.message)
+    }
+
+    @Test
+    fun `validate fails for multiple issues`() {
+        val patient =
+            Patient(
+                identifier = listOf(
+                    Identifier(
+                        system = CodeSystem.RONIN_TENANT.uri,
+                        type = CodeableConcepts.RONIN_TENANT,
+                        value = "tenantId"
+                    ),
+                    Identifier(
+                        system = CodeSystem.FHIR_STU3_ID.uri,
+                        type = CodeableConcepts.FHIR_STU3_ID,
+                        value = "fhirId"
+                    )
+                ),
+                name = listOf(),
+                telecom = listOf(
+                    ContactPoint(
+                        system = ContactPointSystem.PHONE,
+                        value = "8675309",
+                        use = ContactPointUse.MOBILE
+                    )
+                ),
+                gender = AdministrativeGender.FEMALE,
+                birthDate = Date("1975-07-05"),
+                address = listOf(Address(country = "USA")),
+                maritalStatus = CodeableConcept(text = "M")
+            )
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                oncologyPatient.validate(patient).alertIfErrors()
+            }
+        assertEquals(
+            "Encountered multiple validation errors:\nmrn identifier is required\nAt least one name must be provided",
+            exception.message
+        )
     }
 
     @Test

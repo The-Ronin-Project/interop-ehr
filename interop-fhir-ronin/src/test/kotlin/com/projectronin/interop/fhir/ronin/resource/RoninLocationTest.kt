@@ -48,7 +48,7 @@ class RoninLocationTest {
         )
         val exception =
             assertThrows<IllegalArgumentException> {
-                RoninLocation.validate(location)
+                RoninLocation.validate(location).alertIfErrors()
             }
         assertEquals("Tenant identifier is required", exception.message)
     }

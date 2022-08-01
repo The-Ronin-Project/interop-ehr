@@ -38,12 +38,36 @@ class OncologyAppointmentTest {
     }
 
     @Test
+    fun `validate fails if no tenant identifier provided`() {
+        val appointment = Appointment(
+            extension = listOf(
+                Extension(
+                    url = ExtensionMeanings.PARTNER_DEPARTMENT.uri,
+                    value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "reference"))
+                )
+            ),
+            identifier = listOf(),
+            status = AppointmentStatus.PROPOSED,
+            participant = listOf(
+                Participant(
+                    actor = Reference(display = "actor"),
+                    status = ParticipationStatus.ACCEPTED
+                )
+            )
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            OncologyAppointment.validate(appointment).alertIfErrors()
+        }
+        assertEquals("Tenant identifier is required", exception.message)
+    }
+
+    @Test
     fun `validate fails if partnerReference value is not a Reference`() {
         val appointment = Appointment(
             extension = listOf(
                 Extension(
                     url = ExtensionMeanings.PARTNER_DEPARTMENT.uri,
-                    value = DynamicValue(DynamicValueType.STRING, Reference(reference = "reference"))
+                    value = DynamicValue(DynamicValueType.STRING, "reference")
                 )
             ),
             identifier = listOf(
@@ -62,7 +86,7 @@ class OncologyAppointmentTest {
             )
         )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyAppointment.validate(appointment)
+            OncologyAppointment.validate(appointment).alertIfErrors()
         }
         assertEquals("Partner department reference must be of type Reference", exception.message)
     }
@@ -72,8 +96,7 @@ class OncologyAppointmentTest {
         val appointment = Appointment(
             extension = listOf(
                 Extension(
-                    url = ExtensionMeanings.PARTNER_DEPARTMENT.uri,
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                    url = ExtensionMeanings.PARTNER_DEPARTMENT.uri
                 )
             ),
             identifier = listOf(
@@ -92,13 +115,13 @@ class OncologyAppointmentTest {
             )
         )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyAppointment.validate(appointment)
+            OncologyAppointment.validate(appointment).alertIfErrors()
         }
         assertEquals("Partner department reference must be of type Reference", exception.message)
     }
 
     @Test
-    fun `validate fails if partnerReference value is null`() {
+    fun `validate fails for multiple issues`() {
         val appointment = Appointment(
             extension = listOf(
                 Extension(
@@ -106,13 +129,7 @@ class OncologyAppointmentTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value")
                 )
             ),
-            identifier = listOf(
-                Identifier(
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    type = CodeableConcepts.RONIN_TENANT,
-                    value = "tenantId"
-                )
-            ),
+            identifier = listOf(),
             status = AppointmentStatus.PROPOSED,
             participant = listOf(
                 Participant(
@@ -122,9 +139,12 @@ class OncologyAppointmentTest {
             )
         )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyAppointment.validate(appointment)
+            OncologyAppointment.validate(appointment).alertIfErrors()
         }
-        assertEquals("Partner department reference must be of type Reference", exception.message)
+        assertEquals(
+            "Encountered multiple validation errors:\nTenant identifier is required\nPartner department reference must be of type Reference",
+            exception.message
+        )
     }
 
     @Test

@@ -5,6 +5,8 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
+import com.projectronin.interop.fhir.validate.Validation
+import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import mu.KotlinLogging
 
@@ -12,26 +14,26 @@ import mu.KotlinLogging
  * Validator and Transformer for the Ronin [OncologyAppointment](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-appointment.html) profile.
  */
 object OncologyAppointment : BaseRoninProfile<Appointment>(KotlinLogging.logger { }) {
-    override fun validate(resource: Appointment) {
-        requireTenantIdentifier(resource.identifier)
+    override fun validateInternal(resource: Appointment, validation: Validation) {
+        validation.apply {
+            requireTenantIdentifier(resource.identifier, this)
 
-        val partnerDepartment = resource.extension.find { it.url == ExtensionMeanings.PARTNER_DEPARTMENT.uri }
-        partnerDepartment?.let {
-            require(it.value?.type == DynamicValueType.REFERENCE) {
-                "Partner department reference must be of type Reference"
+            val partnerDepartment = resource.extension.find { it.url == ExtensionMeanings.PARTNER_DEPARTMENT.uri }
+            partnerDepartment?.let {
+                check(it.value?.type == DynamicValueType.REFERENCE) {
+                    "Partner department reference must be of type Reference"
+                }
             }
         }
     }
 
-    override fun transformInternal(original: Appointment, tenant: Tenant): Appointment? {
-        val id = original.id
-        if (id == null) {
-            logger.warn { "Unable to transform Appointment due to missing ID" }
-            return null
+    override fun transformInternal(original: Appointment, tenant: Tenant): Pair<Appointment, Validation> {
+        val validation = validation {
+            notNull(original.id) { "no FHIR id" }
         }
 
-        return original.copy(
-            id = id.localize(tenant),
+        val transformed = original.copy(
+            id = original.id?.localize(tenant),
             meta = original.meta?.localize(tenant),
             text = original.text?.localize(tenant),
             extension = original.extension.map { it.localize(tenant) },
@@ -50,5 +52,6 @@ object OncologyAppointment : BaseRoninProfile<Appointment>(KotlinLogging.logger 
             participant = original.participant.map { it.localize(tenant) },
             requestedPeriod = original.requestedPeriod.map { it.localize(tenant) }
         )
+        return Pair(transformed, validation)
     }
 }
