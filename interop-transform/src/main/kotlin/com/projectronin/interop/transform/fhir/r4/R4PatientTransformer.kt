@@ -13,6 +13,8 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyPatient
+import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
+import com.projectronin.interop.fhir.validate.validateAndAlert
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.transform.util.toFhirIdentifier
@@ -42,22 +44,12 @@ class R4PatientTransformer(private val identifierService: IdentifierService) : P
 
         val r4Patient = patient.resource as R4Patient
 
-        val id = r4Patient.id
-        if (id == null) {
-            logger.warn { "Unable to transform patient due to missing ID" }
-            return null
-        }
-
-        val gender = r4Patient.gender
-        if (gender == null) {
-            logger.warn { "Unable to transform patient due to missing gender" }
-            return null
-        }
+        val gender = r4Patient.gender ?: AdministrativeGender.UNKNOWN
 
         val birthDate = r4Patient.birthDate
         if (birthDate == null) {
             // warn, but don't error
-            logger.warn { "Unable to transform patient due to missing birth date" }
+            logger.warn { "Unable to transform patient ${r4Patient.id} due to missing birth date" }
         }
 
         val maritalStatus = r4Patient.maritalStatus ?: CodeableConcept(
@@ -71,42 +63,47 @@ class R4PatientTransformer(private val identifierService: IdentifierService) : P
         )
 
         val roninIdentifiers = getRoninIdentifiers(patient, tenant)
-        if (roninIdentifiers.none { it.system == CodeSystem.MRN.uri }) {
-            logger.warn { "No MRN found for patient with id $id" }
-            return null
-        }
 
-        try {
-            return OncologyPatient(
-                id = id.localize(tenant),
-                meta = r4Patient.meta?.localize(tenant),
-                implicitRules = r4Patient.implicitRules,
-                language = r4Patient.language,
-                text = r4Patient.text?.localize(tenant),
-                contained = r4Patient.contained,
-                extension = r4Patient.extension.map { it.localize(tenant) },
-                modifierExtension = r4Patient.modifierExtension.map { it.localize(tenant) },
-                identifier = r4Patient.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier() +
-                    roninIdentifiers,
-                active = r4Patient.active,
-                name = r4Patient.name.map { it.localize(tenant) },
-                telecom = r4Patient.telecom.map { it.localize(tenant) },
-                gender = gender,
-                birthDate = birthDate,
-                deceased = r4Patient.deceased,
-                address = r4Patient.address.map { it.localize(tenant) },
-                maritalStatus = maritalStatus,
-                multipleBirth = r4Patient.multipleBirth,
-                photo = r4Patient.photo.map { it.localize(tenant) },
-                contact = r4Patient.contact.map { it.localize(tenant) },
-                communication = r4Patient.communication.map { it.localize(tenant) },
-                generalPractitioner = r4Patient.generalPractitioner.map { it.localize(tenant) },
-                managingOrganization = r4Patient.managingOrganization?.localize(tenant),
-                link = r4Patient.link.map { it.localize(tenant) }
-            )
+        val oncologyPatient = OncologyPatient(
+            id = r4Patient.id?.localize(tenant),
+            meta = r4Patient.meta?.localize(tenant),
+            implicitRules = r4Patient.implicitRules,
+            language = r4Patient.language,
+            text = r4Patient.text?.localize(tenant),
+            contained = r4Patient.contained,
+            extension = r4Patient.extension.map { it.localize(tenant) },
+            modifierExtension = r4Patient.modifierExtension.map { it.localize(tenant) },
+            identifier = r4Patient.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier() +
+                roninIdentifiers,
+            active = r4Patient.active,
+            name = r4Patient.name.map { it.localize(tenant) },
+            telecom = r4Patient.telecom.map { it.localize(tenant) },
+            gender = gender,
+            birthDate = birthDate,
+            deceased = r4Patient.deceased,
+            address = r4Patient.address.map { it.localize(tenant) },
+            maritalStatus = maritalStatus,
+            multipleBirth = r4Patient.multipleBirth,
+            photo = r4Patient.photo.map { it.localize(tenant) },
+            contact = r4Patient.contact.map { it.localize(tenant) },
+            communication = r4Patient.communication.map { it.localize(tenant) },
+            generalPractitioner = r4Patient.generalPractitioner.map { it.localize(tenant) },
+            managingOrganization = r4Patient.managingOrganization?.localize(tenant),
+            link = r4Patient.link.map { it.localize(tenant) }
+        )
+
+        return try {
+            validateAndAlert {
+                notNull(r4Patient.id) { "no FHIR id" }
+                notNull(r4Patient.gender) { "no gender" }
+
+                merge(oncologyPatient.validate())
+            }
+
+            oncologyPatient
         } catch (e: Exception) {
-            logger.warn(e) { "Unable to transform patient: ${e.message}" }
-            return null
+            logger.error(e) { "Unable to transform patient" }
+            null
         }
     }
 

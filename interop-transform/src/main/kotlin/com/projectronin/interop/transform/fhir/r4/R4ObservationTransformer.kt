@@ -4,6 +4,7 @@ import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.enums.DataSource
 import com.projectronin.interop.ehr.transform.ObservationTransformer
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyObservation
+import com.projectronin.interop.fhir.validate.validateAndAlert
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.transform.util.toFhirIdentifier
@@ -29,14 +30,8 @@ class R4ObservationTransformer : ObservationTransformer {
 
         val r4Observation = observation.resource as R4Observation
 
-        val id = r4Observation.id
-        if (id == null) {
-            logger.warn { "Unable to transform Observation due to missing ID" }
-            return null
-        }
-
-        return OncologyObservation(
-            id = id.localize(tenant),
+        val oncologyObservation = OncologyObservation(
+            id = r4Observation.id?.localize(tenant),
             meta = r4Observation.meta?.localize(tenant),
             implicitRules = r4Observation.implicitRules,
             language = r4Observation.language,
@@ -69,5 +64,18 @@ class R4ObservationTransformer : ObservationTransformer {
             component = r4Observation.component.map { it.localize(tenant) },
             note = r4Observation.note.map { it.localize(tenant) }
         )
+
+        return try {
+            validateAndAlert {
+                notNull(r4Observation.id) { "no FHIR id" }
+
+                merge(oncologyObservation.validate())
+            }
+
+            oncologyObservation
+        } catch (e: Exception) {
+            logger.error(e) { "Unable to transform observation" }
+            null
+        }
     }
 }

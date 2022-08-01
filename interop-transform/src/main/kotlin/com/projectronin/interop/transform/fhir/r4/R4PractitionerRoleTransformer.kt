@@ -4,7 +4,9 @@ import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.PractitionerRole
 import com.projectronin.interop.ehr.model.enums.DataSource
 import com.projectronin.interop.ehr.transform.PractitionerRoleTransformer
+import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyPractitionerRole
+import com.projectronin.interop.fhir.validate.validateAndAlert
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.transform.util.toFhirIdentifier
@@ -36,28 +38,16 @@ class R4PractitionerRoleTransformer : PractitionerRoleTransformer {
 
         val r4PractitionerRole = practitionerRole.resource as R4PractitionerRole
 
-        val id = r4PractitionerRole.id
-        if (id == null) {
-            logger.warn { "Unable to transform PractitionerRole due to missing ID" }
-            return null
-        }
-
-        val practitionerReference = r4PractitionerRole.practitioner
-        if (practitionerReference == null) {
-            logger.warn { "Unable to transform PractitionerRole $id due to missing practitioner reference" }
-            return null
-        }
-
-        val organizationReference = r4PractitionerRole.organization
+        val practitionerReference = r4PractitionerRole.practitioner ?: Reference(display = "Unknown")
 
         val telecoms = r4PractitionerRole.telecom.filter { it.system != null && it.value != null }
         val telecomDifference = r4PractitionerRole.telecom.size - telecoms.size
         if (telecomDifference > 0) {
-            logger.info { "$telecomDifference telecoms removed from PractitionerRole $id due to missing system and/or value" }
+            logger.info { "$telecomDifference telecoms removed from PractitionerRole ${r4PractitionerRole.id} due to missing system and/or value" }
         }
 
-        return OncologyPractitionerRole(
-            id = id.localize(tenant),
+        val oncologyPractitionerRole = OncologyPractitionerRole(
+            id = r4PractitionerRole.id?.localize(tenant),
             meta = r4PractitionerRole.meta?.localize(tenant),
             implicitRules = r4PractitionerRole.implicitRules,
             language = r4PractitionerRole.language,
@@ -69,7 +59,7 @@ class R4PractitionerRoleTransformer : PractitionerRoleTransformer {
             active = r4PractitionerRole.active,
             period = r4PractitionerRole.period?.localize(tenant),
             practitioner = practitionerReference.localize(tenant),
-            organization = organizationReference?.localize(tenant),
+            organization = r4PractitionerRole.organization?.localize(tenant),
             code = r4PractitionerRole.code.map { it.localize(tenant) },
             specialty = r4PractitionerRole.specialty.map { it.localize(tenant) },
             location = r4PractitionerRole.location.map { it.localize(tenant) },
@@ -80,5 +70,19 @@ class R4PractitionerRoleTransformer : PractitionerRoleTransformer {
             availabilityExceptions = r4PractitionerRole.availabilityExceptions,
             endpoint = r4PractitionerRole.endpoint.map { it.localize(tenant) }
         )
+
+        return try {
+            validateAndAlert {
+                notNull(r4PractitionerRole.id) { "no FHIR id" }
+                notNull(r4PractitionerRole.practitioner) { "no practitioner" }
+
+                merge(oncologyPractitionerRole.validate())
+            }
+
+            oncologyPractitionerRole
+        } catch (e: Exception) {
+            logger.error(e) { "Unable to transform practitioner role" }
+            null
+        }
     }
 }

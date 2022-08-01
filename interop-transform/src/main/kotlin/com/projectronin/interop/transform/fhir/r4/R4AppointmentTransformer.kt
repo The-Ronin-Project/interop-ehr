@@ -5,6 +5,7 @@ import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.enums.DataSource
 import com.projectronin.interop.ehr.transform.AppointmentTransformer
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyAppointment
+import com.projectronin.interop.fhir.validate.validateAndAlert
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.transform.util.toFhirIdentifier
@@ -33,48 +34,49 @@ class R4AppointmentTransformer : AppointmentTransformer {
 
         val r4Appointment = appointment.resource as R4Appointment
 
-        val id = r4Appointment.id
-        if (id == null) {
-            logger.warn { "Unable to transform Appointment due to missing ID" }
-            return null
-        }
+        val oncologyAppointment = OncologyAppointment(
+            id = r4Appointment.id?.localize(tenant),
+            meta = r4Appointment.meta?.localize(tenant),
+            implicitRules = r4Appointment.implicitRules,
+            language = r4Appointment.language,
+            text = r4Appointment.text?.localize(tenant),
+            contained = r4Appointment.contained,
+            extension = r4Appointment.extension.map { it.localize(tenant) },
+            modifierExtension = r4Appointment.modifierExtension.map { it.localize(tenant) },
+            identifier = r4Appointment.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier(),
+            status = r4Appointment.status,
+            cancelationReason = r4Appointment.cancelationReason?.localize(tenant),
+            serviceCategory = r4Appointment.serviceCategory.map { it.localize(tenant) },
+            serviceType = r4Appointment.serviceType.map { it.localize(tenant) },
+            specialty = r4Appointment.specialty.map { it.localize(tenant) },
+            appointmentType = r4Appointment.appointmentType?.localize(tenant),
+            reasonCode = r4Appointment.reasonCode.map { it.localize(tenant) },
+            reasonReference = r4Appointment.reasonReference.map { it.localize(tenant) },
+            priority = r4Appointment.priority,
+            description = r4Appointment.description,
+            supportingInformation = r4Appointment.supportingInformation.map { it.localize(tenant) },
+            start = r4Appointment.start,
+            end = r4Appointment.end,
+            minutesDuration = r4Appointment.minutesDuration,
+            slot = r4Appointment.slot.map { it.localize(tenant) },
+            created = r4Appointment.created,
+            comment = r4Appointment.comment,
+            patientInstruction = r4Appointment.patientInstruction,
+            basedOn = r4Appointment.basedOn.map { it.localize(tenant) },
+            participant = r4Appointment.participant.map { it.localize(tenant) },
+            requestedPeriod = r4Appointment.requestedPeriod.map { it.localize(tenant) }
+        )
 
-        try {
-            return OncologyAppointment(
-                id = id.localize(tenant),
-                meta = r4Appointment.meta?.localize(tenant),
-                implicitRules = r4Appointment.implicitRules,
-                language = r4Appointment.language,
-                text = r4Appointment.text?.localize(tenant),
-                contained = r4Appointment.contained,
-                extension = r4Appointment.extension.map { it.localize(tenant) },
-                modifierExtension = r4Appointment.modifierExtension.map { it.localize(tenant) },
-                identifier = r4Appointment.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier(),
-                status = r4Appointment.status,
-                cancelationReason = r4Appointment.cancelationReason?.localize(tenant),
-                serviceCategory = r4Appointment.serviceCategory.map { it.localize(tenant) },
-                serviceType = r4Appointment.serviceType.map { it.localize(tenant) },
-                specialty = r4Appointment.specialty.map { it.localize(tenant) },
-                appointmentType = r4Appointment.appointmentType?.localize(tenant),
-                reasonCode = r4Appointment.reasonCode.map { it.localize(tenant) },
-                reasonReference = r4Appointment.reasonReference.map { it.localize(tenant) },
-                priority = r4Appointment.priority,
-                description = r4Appointment.description,
-                supportingInformation = r4Appointment.supportingInformation.map { it.localize(tenant) },
-                start = r4Appointment.start,
-                end = r4Appointment.end,
-                minutesDuration = r4Appointment.minutesDuration,
-                slot = r4Appointment.slot.map { it.localize(tenant) },
-                created = r4Appointment.created,
-                comment = r4Appointment.comment,
-                patientInstruction = r4Appointment.patientInstruction,
-                basedOn = r4Appointment.basedOn.map { it.localize(tenant) },
-                participant = r4Appointment.participant.map { it.localize(tenant) },
-                requestedPeriod = r4Appointment.requestedPeriod.map { it.localize(tenant) }
-            )
+        return try {
+            validateAndAlert {
+                notNull(r4Appointment.id) { "no FHIR id" }
+
+                merge(oncologyAppointment.validate())
+            }
+            oncologyAppointment
         } catch (e: Exception) {
-            logger.warn(e) { "Unable to transform Appointment: ${e.message}" }
-            return null
+            logger.error(e) { "Unable to transform Appointment" }
+            null
         }
     }
 }

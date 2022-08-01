@@ -8,6 +8,7 @@ import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.ronin.resource.OncologyPractitioner
+import com.projectronin.interop.fhir.validate.validateAndAlert
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.transform.util.toFhirIdentifier
@@ -36,31 +37,14 @@ class R4PractitionerTransformer : PractitionerTransformer {
 
         val r4Practitioner = practitioner.resource as R4Practitioner
 
-        val id = r4Practitioner.id
-        if (id == null) {
-            logger.warn { "Unable to transform Practitioner due to missing ID" }
-            return null
-        }
-
-        if (r4Practitioner.name.isEmpty()) {
-            logger.warn { "Unable to transform Practitioner $id due to missing name" }
-            return null
-        }
-
-        // If any provided names are missing a family name, it is considered an invalid practitioner.
-        if (r4Practitioner.name.any { it.family == null }) {
-            logger.warn { "Unable to transform Practitioner $id due to missing family name" }
-            return null
-        }
-
         val fhirStu3IdIdentifier = Identifier(
-            value = id.value,
+            value = r4Practitioner.id?.value,
             system = CodeSystem.FHIR_STU3_ID.uri,
             type = CodeableConcepts.FHIR_STU3_ID
         )
 
-        return OncologyPractitioner(
-            id = id.localize(tenant),
+        val oncologyPractitioner = OncologyPractitioner(
+            id = r4Practitioner.id?.localize(tenant),
             meta = r4Practitioner.meta?.localize(tenant),
             implicitRules = r4Practitioner.implicitRules,
             language = r4Practitioner.language,
@@ -79,5 +63,18 @@ class R4PractitionerTransformer : PractitionerTransformer {
             qualification = r4Practitioner.qualification.map { it.localize(tenant) },
             communication = r4Practitioner.communication.map { it.localize(tenant) }
         )
+
+        return try {
+            validateAndAlert {
+                notNull(r4Practitioner.id) { "no FHIR id" }
+
+                merge(oncologyPractitioner.validate())
+            }
+
+            oncologyPractitioner
+        } catch (e: Exception) {
+            logger.error(e) { "Unable to transform practitioner" }
+            null
+        }
     }
 }

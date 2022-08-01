@@ -85,8 +85,8 @@ class EpicAppointmentTransformer(
         val participants =
             appointment.participants.map { buildParticipant(it, patientFhirID, practitionerIdentifierMap) }
 
-        try {
-            return OncologyAppointment(
+        return try {
+            val oncologyAppointment = OncologyAppointment(
                 id = Id(appOrchardAppointment.id).localize(tenant),
 
                 // Extension is mapped to a list of [Provider] departments
@@ -125,9 +125,12 @@ class EpicAppointmentTransformer(
                     .let { if (it == "") null else it },
                 participant = participants.map { it.localize(tenant) }
             )
+
+            oncologyAppointment.validate().alertIfErrors()
+            oncologyAppointment
         } catch (e: Exception) {
-            logger.warn(e) { "Unable to transform Appointment: ${e.message}" }
-            return null
+            logger.error(e) { "Unable to transform Appointment" }
+            null
         }
     }
 
@@ -223,7 +226,10 @@ class EpicAppointmentTransformer(
      * Given an [EpicAppointment] this function resolves the practitioner identifiers against aidbox and returns a map
      * of their [EHRIdentifier] to a fhir ID if found
      */
-    private fun findProviderIdentifiers(ehrAppointment: EpicAppointment, tenantMnemonic: String): Map<EHRIdentifier, String> {
+    private fun findProviderIdentifiers(
+        ehrAppointment: EpicAppointment,
+        tenantMnemonic: String
+    ): Map<EHRIdentifier, String> {
         val practitionerIdentifiers = ehrAppointment.participants
             .filter { participant ->
                 participant.actor.identifier != null &&

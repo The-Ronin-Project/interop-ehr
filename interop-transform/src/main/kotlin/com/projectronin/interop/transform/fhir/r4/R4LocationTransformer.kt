@@ -4,6 +4,7 @@ import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.Location
 import com.projectronin.interop.ehr.model.enums.DataSource
 import com.projectronin.interop.ehr.transform.LocationTransformer
+import com.projectronin.interop.fhir.validate.validateAndAlert
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.transform.fhir.r4.util.localize
 import com.projectronin.interop.transform.util.toFhirIdentifier
@@ -32,14 +33,8 @@ class R4LocationTransformer : LocationTransformer {
 
         val r4Location = location.resource as R4Location
 
-        val id = r4Location.id
-        if (id == null) {
-            logger.warn { "Unable to transform Location due to missing ID" }
-            return null
-        }
-
-        return R4Location(
-            id = id.localize(tenant),
+        val transformedLocation = R4Location(
+            id = r4Location.id?.localize(tenant),
             meta = r4Location.meta?.localize(tenant),
             implicitRules = r4Location.implicitRules,
             language = r4Location.language,
@@ -65,5 +60,18 @@ class R4LocationTransformer : LocationTransformer {
             availabilityExceptions = r4Location.availabilityExceptions,
             endpoint = r4Location.endpoint.map { it.localize(tenant) },
         )
+
+        return try {
+            validateAndAlert {
+                notNull(r4Location.id) { "no FHIR id" }
+
+                merge(transformedLocation.validate())
+            }
+
+            transformedLocation
+        } catch (e: Exception) {
+            logger.error(e) { "Unable to transform location" }
+            null
+        }
     }
 }
