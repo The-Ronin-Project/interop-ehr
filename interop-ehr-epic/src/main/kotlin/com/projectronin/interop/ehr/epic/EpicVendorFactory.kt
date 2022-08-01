@@ -10,7 +10,6 @@ import com.projectronin.interop.ehr.epic.model.EpicObservation
 import com.projectronin.interop.ehr.epic.model.EpicPatient
 import com.projectronin.interop.ehr.epic.model.EpicPractitioner
 import com.projectronin.interop.ehr.epic.model.EpicPractitionerRole
-import com.projectronin.interop.ehr.epic.transform.EpicAppointmentTransformer
 import com.projectronin.interop.ehr.factory.VendorFactory
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Condition
@@ -20,13 +19,6 @@ import com.projectronin.interop.ehr.model.Observation
 import com.projectronin.interop.ehr.model.Patient
 import com.projectronin.interop.ehr.model.Practitioner
 import com.projectronin.interop.ehr.model.PractitionerRole
-import com.projectronin.interop.transform.fhir.r4.R4ConditionTransformer
-import com.projectronin.interop.transform.fhir.r4.R4LocationTransformer
-import com.projectronin.interop.transform.fhir.r4.R4ObservationTransformer
-import com.projectronin.interop.transform.fhir.r4.R4PatientTransformer
-import com.projectronin.interop.transform.fhir.r4.R4PractitionerRoleTransformer
-import com.projectronin.interop.transform.fhir.r4.R4PractitionerTransformer
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 import kotlin.reflect.KClass
 import com.projectronin.interop.fhir.r4.resource.Condition as R4Condition
@@ -47,14 +39,7 @@ class EpicVendorFactory(
     override val practitionerService: EpicPractitionerService,
     override val conditionService: EpicConditionService,
     override val identifierService: EpicIdentifierService,
-    override val observationService: EpicObservationService,
-    override val practitionerTransformer: R4PractitionerTransformer,
-    override val practitionerRoleTransformer: R4PractitionerRoleTransformer,
-    override val locationTransformer: R4LocationTransformer,
-    @Qualifier("epic") override val patientTransformer: R4PatientTransformer,
-    override val appointmentTransformer: EpicAppointmentTransformer,
-    override val conditionTransformer: R4ConditionTransformer,
-    override val observationTransformer: R4ObservationTransformer,
+    override val observationService: EpicObservationService
 ) : VendorFactory {
     private val objectMapper = JacksonManager.objectMapper
     override val vendorType: VendorType

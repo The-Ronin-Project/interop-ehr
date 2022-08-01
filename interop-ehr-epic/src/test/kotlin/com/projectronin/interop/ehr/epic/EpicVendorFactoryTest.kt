@@ -8,7 +8,6 @@ import com.projectronin.interop.ehr.epic.model.EpicObservation
 import com.projectronin.interop.ehr.epic.model.EpicPatient
 import com.projectronin.interop.ehr.epic.model.EpicPractitioner
 import com.projectronin.interop.ehr.epic.model.EpicPractitionerRole
-import com.projectronin.interop.ehr.epic.transform.EpicAppointmentTransformer
 import com.projectronin.interop.ehr.model.Appointment
 import com.projectronin.interop.ehr.model.Bundle
 import com.projectronin.interop.ehr.model.Condition
@@ -17,12 +16,6 @@ import com.projectronin.interop.ehr.model.Observation
 import com.projectronin.interop.ehr.model.Patient
 import com.projectronin.interop.ehr.model.Practitioner
 import com.projectronin.interop.ehr.model.PractitionerRole
-import com.projectronin.interop.transform.fhir.r4.R4ConditionTransformer
-import com.projectronin.interop.transform.fhir.r4.R4LocationTransformer
-import com.projectronin.interop.transform.fhir.r4.R4ObservationTransformer
-import com.projectronin.interop.transform.fhir.r4.R4PatientTransformer
-import com.projectronin.interop.transform.fhir.r4.R4PractitionerRoleTransformer
-import com.projectronin.interop.transform.fhir.r4.R4PractitionerTransformer
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -36,13 +29,6 @@ class EpicVendorFactoryTest {
     private val conditionService = mockk<EpicConditionService>()
     private val identifierService = mockk<EpicIdentifierService>()
     private val observationService = mockk<EpicObservationService>()
-    private val practitionerTransformer = mockk<R4PractitionerTransformer>()
-    private val practitionerRoleTransformer = mockk<R4PractitionerRoleTransformer>()
-    private val locationTransformer = mockk<R4LocationTransformer>()
-    private val patientTransformer = mockk<R4PatientTransformer>()
-    private val appointmentTransformer = mockk<EpicAppointmentTransformer>()
-    private val conditionTransformer = mockk<R4ConditionTransformer>()
-    private val observationTransformer = mockk<R4ObservationTransformer>()
     private val vendorFactory =
         EpicVendorFactory(
             patientService,
@@ -51,14 +37,7 @@ class EpicVendorFactoryTest {
             practitionerService,
             conditionService,
             identifierService,
-            observationService,
-            practitionerTransformer,
-            practitionerRoleTransformer,
-            locationTransformer,
-            patientTransformer,
-            appointmentTransformer,
-            conditionTransformer,
-            observationTransformer,
+            observationService
         )
 
     @Test
@@ -99,41 +78,6 @@ class EpicVendorFactoryTest {
     @Test
     fun `returns ObservationService`() {
         assertEquals(observationService, vendorFactory.observationService)
-    }
-
-    @Test
-    fun `returns PractitionerTransformer`() {
-        assertEquals(practitionerTransformer, vendorFactory.practitionerTransformer)
-    }
-
-    @Test
-    fun `returns PractitionerRoleTransformer`() {
-        assertEquals(practitionerRoleTransformer, vendorFactory.practitionerRoleTransformer)
-    }
-
-    @Test
-    fun `returns LocationTransformer`() {
-        assertEquals(locationTransformer, vendorFactory.locationTransformer)
-    }
-
-    @Test
-    fun `returns PatientTransformer`() {
-        assertEquals(patientTransformer, vendorFactory.patientTransformer)
-    }
-
-    @Test
-    fun `returns AppointmentTransformer`() {
-        assertEquals(appointmentTransformer, vendorFactory.appointmentTransformer)
-    }
-
-    @Test
-    fun `returns ConditionTransformer`() {
-        assertEquals(conditionTransformer, vendorFactory.conditionTransformer)
-    }
-
-    @Test
-    fun `returns ObservationTransformer`() {
-        assertEquals(observationTransformer, vendorFactory.observationTransformer)
     }
 
     @Test
