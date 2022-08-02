@@ -1,10 +1,13 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
 import com.projectronin.interop.ehr.util.toListOfType
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
 import io.ktor.http.HttpStatusCode
@@ -15,6 +18,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
 import com.projectronin.interop.fhir.r4.resource.Bundle as R4Bundle
 
 /**
@@ -24,6 +28,7 @@ import com.projectronin.interop.fhir.r4.resource.Bundle as R4Bundle
 class EpicPatientService(
     private val epicClient: EpicClient,
     @Value("\${epic.fhir.batchSize:100}") private val batchSize: Int,
+    private val aidboxPatientService: AidboxPatientService,
 ) : PatientService,
     EpicPagingService(epicClient) {
     private val patientSearchUrlPart = "/api/FHIR/R4/Patient"
@@ -101,6 +106,39 @@ class EpicPatientService(
 
         logger.info { "Patient find by id for ${tenant.mnemonic} found ${patientsFoundByKey.size} patients" }
         return patientsFoundByKey
+    }
+
+    /**
+     * Finds a Patient's FHIR ID (non-localized), based on the Epic Identifer (MRN or Internal). Searches Aidbox first before querying the EHR.
+     * If a patient is found in the EHR, this will return the [Patient] object that was found to save on future queries.
+     * Returns a [GetFHIRIDResponse]
+     */
+    override fun getPatientFHIRId(tenant: Tenant, patientIDValue: String, patientIDSystem: String): GetFHIRIDResponse {
+        val patientID = SystemValue(patientIDValue, patientIDSystem)
+        // try Aidbox first
+        val fhirID = runCatching {
+            aidboxPatientService.getPatientFHIRIds(tenantMnemonic = tenant.mnemonic, mapOf("key" to patientID))
+                .getValue("key")
+        }.getOrNull()
+        fhirID?.let { return GetFHIRIDResponse(it.unlocalize(tenant)) }
+
+        // else try EHR
+        val parameters = mapOf("identifier" to patientID.queryString)
+        val bundle = runBlocking {
+            val httpResponse = epicClient.get(tenant, patientSearchUrlPart, parameters)
+            if (httpResponse.status != HttpStatusCode.OK) {
+                logger.error { "Patient search failed for ${tenant.mnemonic}, with a ${httpResponse.status}" }
+                throw IOException("Call to tenant ${tenant.mnemonic} failed with a ${httpResponse.status}")
+            }
+            httpResponse.body<R4Bundle>()
+        }
+        val patList = bundle.toListOfType<Patient>()
+        if (patList.size != 1) {
+            logger.error { "Multiple patients found in ${tenant.mnemonic} for MRN value ${patientID.value}." }
+            throw IOException("Multiple patients found in ${tenant.mnemonic} for MRN value ${patientID.value}.")
+        }
+        val patient = patList.first()
+        return GetFHIRIDResponse(patient.id!!.value, patient)
     }
 
     data class SystemValueIdentifier(val systemText: String?, val value: String?)

@@ -10,6 +10,7 @@ dependencies {
     implementation(libs.interop.fhir)
     implementation(project(":interop-tenant"))
     implementation(project(":interop-ehr"))
+    implementation(project(":interop-fhir-ronin"))
     implementation("org.springframework:spring-context")
     implementation(libs.ktor.client.core)
     implementation(libs.ktor.client.cio)

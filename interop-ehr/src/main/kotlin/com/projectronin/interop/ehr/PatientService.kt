@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr
 
+import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -20,4 +21,9 @@ interface PatientService {
      * Will return a map of supplied key, of type [K], to [Patient]s when found, otherwise no entry for that key.
      */
     fun <K> findPatientsById(tenant: Tenant, patientIdsByKey: Map<K, Identifier>): Map<K, Patient>
+
+    /**
+     * Deprecated.
+     */
+    fun getPatientFHIRId(tenant: Tenant, patientIDValue: String, patientIDSystem: String): GetFHIRIDResponse
 }
