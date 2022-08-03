@@ -11,6 +11,6 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
  */
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class GetAppointmentsResponse(
-    val appointments: List<Appointment>,
+    val appointments: List<EpicAppointment>,
     val error: String?,
 )

@@ -8,8 +8,6 @@ import com.projectronin.interop.ehr.MessageService
 import com.projectronin.interop.ehr.ObservationService
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.PractitionerService
-import com.projectronin.interop.ehr.model.EHRResource
-import kotlin.reflect.KClass
 
 /**
  * Interface defining a factory capable of handling all EHR service implementations for a specific vendor.
@@ -28,13 +26,4 @@ interface VendorFactory {
     val conditionService: ConditionService
     val identifierService: IdentifierService
     val observationService: ObservationService
-
-    // Util functions for Mirth
-    fun <T : EHRResource> deserialize(string: String, type: KClass<T>): EHRResource
-
-    fun <T : EHRResource> deserializeList(string: String, type: KClass<T>): List<EHRResource>
-
-    // this is used by Mirth, so we don't want to use the default "NON_EMPTY" option for serializing
-    // since an empty string is a valid non-null option, and on deserializing that'll error if it's missing
-    fun <T> serializeObject(t: T): String
 }

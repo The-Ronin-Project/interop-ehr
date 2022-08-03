@@ -60,6 +60,7 @@ class TenantServiceTest {
         every { practitionerUserSystem } returns "userSystemExample"
         every { patientMRNSystem } returns "mrnSystemExample"
         every { patientInternalSystem } returns "internalSystemExample"
+        every { encounterCSNSystem } returns "csnSystem"
         every { patientMRNTypeText } returns "patientMRNTypeText"
         every { hsi } returns null
     }
@@ -74,6 +75,7 @@ class TenantServiceTest {
         every { practitionerUserSystem } returns "userSystemExample2"
         every { patientMRNSystem } returns "mrnSystemExample2"
         every { patientInternalSystem } returns "internalSystemExample2"
+        every { encounterCSNSystem } returns "csnSystem2"
         every { patientMRNTypeText } returns "patientMRNTypeText"
         every { hsi } returns null
     }
@@ -116,6 +118,7 @@ class TenantServiceTest {
             practitionerUserSystem = "userSystemExample",
             patientMRNSystem = "mrnSystemExample",
             patientInternalSystem = "internalSystemExample",
+            encounterCSNSystem = "csnSystem",
             patientMRNTypeText = "patientMRNTypeText"
         )
     )
@@ -141,6 +144,7 @@ class TenantServiceTest {
             practitionerUserSystem = "userSystemExample2",
             patientMRNSystem = "mrnSystemExample2",
             patientInternalSystem = "internalSystemExample2",
+            encounterCSNSystem = "csnSystem2",
             patientMRNTypeText = "patientMRNTypeText"
         )
     )
@@ -283,6 +287,7 @@ class TenantServiceTest {
                 practitionerUserSystem = "userSystemExample",
                 patientMRNSystem = "mrnSystemExample",
                 patientInternalSystem = "internalSystemExample",
+                encounterCSNSystem = "csnSystem",
                 patientMRNTypeText = "patientMRNTypeText"
             )
         )
@@ -311,6 +316,7 @@ class TenantServiceTest {
             every { practitionerUserSystem } returns "userSystemExample"
             every { patientMRNSystem } returns "mrnSystemExample"
             every { patientInternalSystem } returns "internalSystemExample"
+            every { encounterCSNSystem } returns "csnSystem"
             every { patientMRNTypeText } returns "patientMRNTypeText"
             every { hsi } returns "urn:epic:apporchard.curprod"
         }
@@ -337,6 +343,7 @@ class TenantServiceTest {
                 practitionerUserSystem = "userSystemExample",
                 patientMRNSystem = "mrnSystemExample",
                 patientInternalSystem = "internalSystemExample",
+                encounterCSNSystem = "csnSystem",
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = "urn:epic:apporchard.curprod"
             )
@@ -415,6 +422,7 @@ class TenantServiceTest {
                 practitionerUserSystem = "userSystemExample",
                 patientMRNSystem = "mrnSystemExample",
                 patientInternalSystem = "internalSystemExample",
+                encounterCSNSystem = "csnSystem",
                 patientMRNTypeText = "patientMRNTypeText"
             )
         )
