@@ -94,30 +94,6 @@ class OncologyPatient private constructor(private val identifierService: Identif
             )
         )
 
-        val roninIdentifiers = mutableListOf<Identifier>()
-        original.id?.let {
-            roninIdentifiers.add(
-                Identifier(
-                    value = it.value,
-                    system = CodeSystem.FHIR_STU3_ID.uri,
-                    type = CodeableConcepts.FHIR_STU3_ID
-                )
-            )
-        }
-
-        try {
-            val existingMRN = identifierService.getMRNIdentifier(tenant, original.identifier)
-            roninIdentifiers.add(
-                Identifier(
-                    value = existingMRN.value,
-                    system = CodeSystem.MRN.uri,
-                    type = CodeableConcepts.MRN
-                )
-            )
-        } catch (e: Exception) {
-            // We will handle this during validation.
-        }
-
         val transformed = original.copy(
             id = original.id?.localize(tenant),
             meta = original.meta?.localize(tenant),
@@ -125,7 +101,7 @@ class OncologyPatient private constructor(private val identifierService: Identif
             extension = original.extension.map { it.localize(tenant) },
             modifierExtension = original.modifierExtension.map { it.localize(tenant) },
             identifier = original.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier() +
-                roninIdentifiers,
+                getRoninIdentifiers(original, tenant),
             name = original.name.map { it.localize(tenant) },
             telecom = original.telecom.map { it.localize(tenant) },
             address = original.address.map { it.localize(tenant) },
@@ -138,5 +114,32 @@ class OncologyPatient private constructor(private val identifierService: Identif
             link = original.link.map { it.localize(tenant) }
         )
         return Pair(transformed, validation)
+    }
+
+    fun getRoninIdentifiers(patient: Patient, tenant: Tenant): List<Identifier> {
+        val roninIdentifiers = mutableListOf<Identifier>()
+        patient.id?.let {
+            roninIdentifiers.add(
+                Identifier(
+                    value = it.value,
+                    system = CodeSystem.FHIR_STU3_ID.uri,
+                    type = CodeableConcepts.FHIR_STU3_ID
+                )
+            )
+        }
+
+        try {
+            val existingMRN = identifierService.getMRNIdentifier(tenant, patient.identifier)
+            roninIdentifiers.add(
+                Identifier(
+                    value = existingMRN.value,
+                    system = CodeSystem.MRN.uri,
+                    type = CodeableConcepts.MRN
+                )
+            )
+        } catch (e: Exception) {
+            // We will handle this during validation.
+        }
+        return roninIdentifiers
     }
 }

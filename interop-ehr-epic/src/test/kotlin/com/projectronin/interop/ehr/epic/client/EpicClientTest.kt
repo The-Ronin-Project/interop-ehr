@@ -1,7 +1,7 @@
 package com.projectronin.interop.ehr.epic.client
 
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
-import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
+import com.projectronin.interop.ehr.epic.apporchard.model.GetProviderAppointmentRequest
 import com.projectronin.interop.ehr.epic.auth.EpicAuthentication
 import com.projectronin.interop.ehr.epic.createTestTenant
 import com.projectronin.interop.ehr.epic.getClient
@@ -17,7 +17,6 @@ import org.junit.jupiter.api.assertThrows
 
 class EpicClientTest {
     private val validPatientSearchJson = this::class.java.getResource("/ExamplePatientBundle.json")!!.readText()
-    private val validAppointmentSearchJson = this::class.java.getResource("/ExampleAppointmentBundle.json")!!.readText()
     private val authenticationBroker = mockk<EHRAuthenticationBroker>()
     private val epicClient = EpicClient(getClient(), authenticationBroker)
 
@@ -184,10 +183,11 @@ class EpicClientTest {
     }
 
     @Test
+
     fun `ensure post operation returns correctly`() {
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(
-            MockResponse().setBody(validAppointmentSearchJson).setHeader("Content-Type", "application/json")
+            MockResponse().setBody(validPatientSearchJson).setHeader("Content-Type", "application/json")
         )
         mockWebServer.start()
 
@@ -209,12 +209,19 @@ class EpicClientTest {
                 epicClient.post(
                     tenant,
                     "api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments",
-                    GetPatientAppointmentsRequest("1", "1/1/2015", "11/1/2015", "E5597", "EPI")
+                    GetProviderAppointmentRequest(
+                        "1",
+                        "EMP",
+                        "1/1/2015",
+                        "11/1/2015",
+                        "false",
+                        providers = listOf()
+                    )
                 )
             httpResponse.bodyAsText()
         }
 
         // Validate Response
-        assertEquals(validAppointmentSearchJson, response)
+        assertEquals(validPatientSearchJson, response)
     }
 }
