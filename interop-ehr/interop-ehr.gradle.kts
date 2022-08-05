@@ -8,7 +8,7 @@ dependencies {
     implementation(libs.interop.common)
     implementation(libs.interop.commonJackson)
     implementation(libs.interop.fhir)
-
+    implementation(libs.ktor.client.core)
     implementation(libs.jackson.databind)
     implementation("org.springframework:spring-context")
 

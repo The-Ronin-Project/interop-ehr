@@ -10,7 +10,6 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
-import io.ktor.http.HttpStatusCode
 import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
@@ -49,10 +48,6 @@ class EpicPatientService(
         )
         val bundle = runBlocking {
             val httpResponse = epicClient.get(tenant, patientSearchUrlPart, parameters)
-            if (httpResponse.status != HttpStatusCode.OK) {
-                logger.error { "Patient search failed for ${tenant.mnemonic}, with a ${httpResponse.status}" }
-                throw IOException("Call to tenant ${tenant.mnemonic} failed with a ${httpResponse.status}")
-            }
             httpResponse.body<R4Bundle>()
         }
 
@@ -126,10 +121,6 @@ class EpicPatientService(
         val parameters = mapOf("identifier" to patientID.queryString)
         val bundle = runBlocking {
             val httpResponse = epicClient.get(tenant, patientSearchUrlPart, parameters)
-            if (httpResponse.status != HttpStatusCode.OK) {
-                logger.error { "Patient search failed for ${tenant.mnemonic}, with a ${httpResponse.status}" }
-                throw IOException("Call to tenant ${tenant.mnemonic} failed with a ${httpResponse.status}")
-            }
             httpResponse.body<R4Bundle>()
         }
         val patList = bundle.toListOfType<Patient>()

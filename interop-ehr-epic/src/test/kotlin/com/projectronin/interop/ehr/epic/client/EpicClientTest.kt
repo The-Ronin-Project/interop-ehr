@@ -6,6 +6,8 @@ import com.projectronin.interop.ehr.epic.auth.EpicAuthentication
 import com.projectronin.interop.ehr.epic.createTestTenant
 import com.projectronin.interop.ehr.epic.getClient
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
+import io.ktor.utils.io.errors.IOException
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -183,7 +185,84 @@ class EpicClientTest {
     }
 
     @Test
+    fun `ensure get operation throws exception on bad http status`() {
+        val mockWebServer = MockWebServer()
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(HttpStatusCode.InternalServerError.value)
+                .setHeader("Content-Type", "application/json")
+        )
+        mockWebServer.start()
 
+        // Set up mock tenant service
+        val tenantId = "TEST_EPIC"
+        val tenant = createTestTenant(
+            clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            serviceEndpoint = mockWebServer.url("/FHIR-test").toString(),
+            privateKey = "testPrivateKey",
+            tenantMnemonic = tenantId
+        )
+
+        val authentication = EpicAuthentication("accessToken", "tokenType", 3600, "scope")
+        every { authenticationBroker.getAuthentication(tenant) } returns authentication
+
+        // Execute test
+        assertThrows<IOException> {
+            runBlocking {
+                val httpResponse = epicClient.get(
+                    tenant,
+                    "/api/FHIR/R4/Patient",
+                    mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "birthDate")
+                )
+                httpResponse.bodyAsText()
+            }
+        }
+    }
+
+    @Test
+    fun `ensure post operation throws exception on bad http status`() {
+        val mockWebServer = MockWebServer()
+        mockWebServer.enqueue(
+            MockResponse()
+                .setResponseCode(HttpStatusCode.InternalServerError.value)
+                .setHeader("Content-Type", "application/json")
+        )
+        mockWebServer.start()
+
+        // Set up mock tenant service
+        val tenantId = "TEST_EPIC"
+        val tenant = createTestTenant(
+            clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            serviceEndpoint = mockWebServer.url("/FHIR-test").toString(),
+            privateKey = "testPrivateKey",
+            tenantMnemonic = tenantId
+        )
+
+        val authentication = EpicAuthentication("accessToken", "tokenType", 3600, "scope")
+        every { authenticationBroker.getAuthentication(tenant) } returns authentication
+
+        // Execute test
+        assertThrows<IOException> {
+            runBlocking {
+                val httpResponse =
+                    epicClient.post(
+                        tenant,
+                        "api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments",
+                        GetProviderAppointmentRequest(
+                            "1",
+                            "EMP",
+                            "1/1/2015",
+                            "11/1/2015",
+                            "false",
+                            providers = listOf()
+                        )
+                    )
+                httpResponse.bodyAsText()
+            }
+        }
+    }
+
+    @Test
     fun `ensure post operation returns correctly`() {
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(

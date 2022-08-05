@@ -5,12 +5,14 @@ import com.auth0.jwt.algorithms.Algorithm
 import com.projectronin.interop.common.auth.Authentication
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.auth.AuthenticationService
+import com.projectronin.interop.ehr.util.handleErrorStatus
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.statement.HttpResponse
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
@@ -72,6 +74,10 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
                     },
                     encodeInQuery = false
                 )
+
+                if (httpResponse.status != HttpStatusCode.OK) {
+                    httpResponse.status.handleErrorStatus("Epic Authentication", tenant.mnemonic)
+                }
                 httpResponse.body<EpicAuthentication>()
             } catch (e: Exception) {
                 logger.error(e) { "Authentication for $authURL, JTI $jti, failed with exception $e" }

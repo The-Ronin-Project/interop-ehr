@@ -2,7 +2,7 @@ package com.projectronin.interop.ehr.epic.auth
 
 import com.projectronin.interop.ehr.epic.createTestTenant
 import com.projectronin.interop.ehr.epic.getClient
-import io.ktor.client.plugins.ServerResponseException
+import io.ktor.utils.io.errors.IOException
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -27,7 +27,7 @@ class EpicAuthenticationServiceTest {
                 tenantMnemonic = "TestTenant"
             )
 
-        assertThrows<ServerResponseException> {
+        assertThrows<IOException> {
             authenticationService.getAuthentication(tenant)
         }
     }

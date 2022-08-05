@@ -13,8 +13,6 @@ import com.projectronin.interop.tenant.config.ProviderPoolService
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.call.body
-import io.ktor.http.HttpStatusCode
-import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -38,13 +36,14 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
         val sendMessageRequest =
             translateMessageInput(messageInput, vendor.ehrUserId, vendor.messageType, tenant)
 
-        val response = runBlocking {
-            val httpResponse = epicClient.post(tenant, sendMessageUrlPart, sendMessageRequest)
-            if (httpResponse.status != HttpStatusCode.OK) {
-                logger.error { "SendMessage failed for ${tenant.mnemonic}, with a ${httpResponse.status}" }
-                throw IOException("Call to tenant ${tenant.mnemonic} failed with a ${httpResponse.status}")
+        val response = try {
+            runBlocking {
+                val httpResponse = epicClient.post(tenant, sendMessageUrlPart, sendMessageRequest)
+                httpResponse.body<SendMessageResponse>()
             }
-            httpResponse.body<SendMessageResponse>()
+        } catch (e: Exception) { // further investigation required to see if this is a sustainable solution
+            logger.error { "SendMessage failed for ${tenant.mnemonic}, with exception ${e.message}" }
+            throw e
         }
         logger.info { "SendMessage completed for ${tenant.mnemonic}" }
 
@@ -62,7 +61,7 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
             patientID = messageInput.patientMRN,
             patientIDType = (tenant.vendor as Epic).patientMRNTypeText,
             recipients = translateRecipients(messageInput.recipients, tenant),
-            messageText = messageInput.text,
+            messageText = messageInput.text.split("\n"),
             senderID = userId,
             messageType = messageType
         )

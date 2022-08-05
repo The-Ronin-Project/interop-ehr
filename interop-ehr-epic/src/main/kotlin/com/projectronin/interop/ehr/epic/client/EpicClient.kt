@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic.client
 
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
+import com.projectronin.interop.ehr.util.handleErrorStatus
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
@@ -12,6 +13,7 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -48,6 +50,12 @@ class EpicClient(
         }
 
         logger.debug { "HTTP status, ${response.status}, returned for POST call to tenant: ${tenant.mnemonic}" }
+
+        // If we didn't get an OK back, throw the correct exception
+        if (response.status != HttpStatusCode.OK) {
+            response.status.handleErrorStatus(urlPart, tenant.mnemonic)
+        }
+
         return response
     }
 
@@ -87,6 +95,12 @@ class EpicClient(
         }
 
         logger.debug { "HTTP status, ${response.status}, returned for GET call to tenant: ${tenant.mnemonic}" }
+
+        // If we didn't get an OK back, throw the correct exception
+        if (response.status != HttpStatusCode.OK) {
+            response.status.handleErrorStatus(urlPart, tenant.mnemonic)
+        }
+
         return response
     }
 }

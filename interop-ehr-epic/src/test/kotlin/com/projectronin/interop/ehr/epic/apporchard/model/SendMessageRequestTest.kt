@@ -10,7 +10,7 @@ internal class SendMessageRequestTest {
         val sendMessageString =
             jacksonObjectMapper().writeValueAsString(
                 SendMessageRequest(
-                    messageText = "Message Text",
+                    messageText = listOf("Message Text", "Line 2"),
                     patientID = "MRN#1",
                     patientIDType = "MRN",
                     recipients = listOf(),
@@ -23,7 +23,7 @@ internal class SendMessageRequestTest {
             )
 
         assertEquals(
-            """{"MessageText":"Message Text","PatientID":"MRN#1","Recipients":[],"SenderID":"Sender#1","MessageType":"MessageType","SenderIDType":"SendType#1","PatientIDType":"MRN","ContactID":"Con#1","ContactIDType":"ConType#1","MessagePriority":""}""",
+            """{"MessageText":["Message Text","Line 2"],"PatientID":"MRN#1","Recipients":[],"SenderID":"Sender#1","MessageType":"MessageType","SenderIDType":"SendType#1","PatientIDType":"MRN","ContactID":"Con#1","ContactIDType":"ConType#1","MessagePriority":""}""",
             sendMessageString
         )
     }
@@ -33,7 +33,7 @@ internal class SendMessageRequestTest {
         val sendMessageString =
             jacksonObjectMapper().writeValueAsString(
                 SendMessageRequest(
-                    messageText = "Message Text",
+                    messageText = listOf("Message Text"),
                     patientID = "MRN#1",
                     recipients = listOf(),
                     senderID = "Sender#1",
@@ -42,7 +42,7 @@ internal class SendMessageRequestTest {
             )
 
         assertEquals(
-            """{"MessageText":"Message Text","PatientID":"MRN#1","Recipients":[],"SenderID":"Sender#1","MessageType":"Symptom Alerts","SenderIDType":"External","PatientIDType":"MRN","ContactID":"","ContactIDType":"","MessagePriority":""}""",
+            """{"MessageText":["Message Text"],"PatientID":"MRN#1","Recipients":[],"SenderID":"Sender#1","MessageType":"Symptom Alerts","SenderIDType":"External","PatientIDType":"MRN","ContactID":"","ContactIDType":"","MessagePriority":""}""",
             sendMessageString
         )
     }
