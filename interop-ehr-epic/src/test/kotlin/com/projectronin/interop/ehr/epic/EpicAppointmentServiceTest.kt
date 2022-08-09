@@ -15,6 +15,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.stu3.resource.STU3Bundle
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
@@ -33,7 +34,7 @@ class EpicAppointmentServiceTest {
     private lateinit var identifierService: EpicIdentifierService
     private lateinit var httpResponse: HttpResponse
     private val validPatientAppointmentSearchResponse =
-        readResource<Bundle>("/ExampleFHIRAppointmentBundle.json")
+        readResource<STU3Bundle>("/ExampleFHIRAppointmentBundle.json")
     private val validProviderAppointmentSearchResponse =
         readResource<GetAppointmentsResponse>("/ExampleProviderAppointmentBundle.json")
     private val validPatientBundle = readResource<Bundle>("/ExamplePatientBundle.json")
@@ -70,7 +71,7 @@ class EpicAppointmentServiceTest {
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns validPatientAppointmentSearchResponse
+        coEvery { httpResponse.body<STU3Bundle>() } returns validPatientAppointmentSearchResponse
         coEvery {
             epicClient.get(
                 tenant,
@@ -78,7 +79,7 @@ class EpicAppointmentServiceTest {
                 mapOf(
                     "patient" to "E5597",
                     "status" to "booked",
-                    "date" to "ge2015-01-01&date=le2015-11-01"
+                    "date" to listOf("ge2015-01-01", "le2015-11-01")
                 )
             )
         } returns httpResponse
@@ -90,7 +91,7 @@ class EpicAppointmentServiceTest {
                 LocalDate.of(2015, 1, 1),
                 LocalDate.of(2015, 11, 1)
             )
-        assertEquals(validPatientAppointmentSearchResponse.toListOfType<Appointment>(), bundle)
+        assertEquals(validPatientAppointmentSearchResponse.transformToR4().toListOfType<Appointment>(), bundle)
     }
 
     @Test
@@ -153,7 +154,7 @@ class EpicAppointmentServiceTest {
 
         val httpResponse2 = mockk<HttpResponse>()
         every { httpResponse2.status } returns HttpStatusCode.OK
-        coEvery { httpResponse2.body<Bundle>() } returns validPatientAppointmentSearchResponse
+        coEvery { httpResponse2.body<STU3Bundle>() } returns validPatientAppointmentSearchResponse
         coEvery {
             epicClient.get(
                 tenant,
@@ -223,7 +224,7 @@ class EpicAppointmentServiceTest {
                 LocalDate.of(2015, 11, 1)
             )
         assertEquals(
-            validPatientAppointmentSearchResponse.toListOfType<Appointment>().first(),
+            validPatientAppointmentSearchResponse.transformToR4().toListOfType<Appointment>().first(),
             response.appointments.first()
         )
         assertEquals(6, response.appointments.size)

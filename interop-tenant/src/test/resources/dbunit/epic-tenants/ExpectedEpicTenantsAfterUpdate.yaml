@@ -31,6 +31,7 @@ io_tenant_epic:
     mrn_system: "mrnSystem"
     mrn_type_text: "MRN"
     patient_internal_system: "internalSystem"
+    encounter_csn_system: "csnSystem"
     hsi: "hsi"
   - io_tenant_id: 1003
     release_version: "2021.10"
@@ -43,3 +44,4 @@ io_tenant_epic:
     mrn_system: "urn:oid:mrn.system"
     mrn_type_text: "MRN"
     patient_internal_system: "urn:oid:internal.system"
+    encounter_csn_system: "urn:oid:encounter.system"

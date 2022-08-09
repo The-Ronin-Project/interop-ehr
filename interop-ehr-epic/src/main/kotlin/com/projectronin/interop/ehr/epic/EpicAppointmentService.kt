@@ -29,11 +29,9 @@ class EpicAppointmentService(
     private val epicClient: EpicClient,
     private val patientService: EpicPatientService,
     private val identifierService: EpicIdentifierService
-) :
-    AppointmentService, EpicPagingService(epicClient) {
+) : AppointmentService, EpicPagingService(epicClient) {
     private val logger = KotlinLogging.logger { }
-    private val patientAppointmentSearchUrlPart =
-        "/api/FHIR/STU3/Appointment"
+    private val patientAppointmentSearchUrlPart = "/api/FHIR/STU3/Appointment"
     private val providerAppointmentSearchUrlPart =
         "/api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments"
     private val dateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy")
@@ -46,11 +44,9 @@ class EpicAppointmentService(
         logger.info { "Patient appointment search started for ${tenant.mnemonic}" }
 
         val parameters = mapOf(
-            "patient" to patientFHIRId,
-            "status" to "booked",
-            "date" to "ge$startDate&date=le$endDate"
+            "patient" to patientFHIRId, "status" to "booked", "date" to listOf("ge$startDate", "le$endDate")
         )
-        return getBundleWithPaging(tenant, patientAppointmentSearchUrlPart, parameters).toListOfType()
+        return getBundleWithPagingSTU3(tenant, patientAppointmentSearchUrlPart, parameters).toListOfType()
     }
 
     override fun findProviderAppointments(
@@ -72,13 +68,12 @@ class EpicAppointmentService(
         }
 
         // call GetProviderAppointments
-        val request =
-            GetProviderAppointmentRequest(
-                userID = tenant.vendorAs<Epic>().ehrUserId,
-                providers = selectedIdentifiers.map { ScheduleProvider(id = it) },
-                startDate = dateFormat.format(startDate),
-                endDate = dateFormat.format(endDate)
-            )
+        val request = GetProviderAppointmentRequest(
+            userID = tenant.vendorAs<Epic>().ehrUserId,
+            providers = selectedIdentifiers.map { ScheduleProvider(id = it) },
+            startDate = dateFormat.format(startDate),
+            endDate = dateFormat.format(endDate)
+        )
         val getAppointments = runBlocking {
             val httpResponse = epicClient.post(tenant, providerAppointmentSearchUrlPart, request)
             httpResponse.body<GetAppointmentsResponse>()
@@ -88,16 +83,14 @@ class EpicAppointmentService(
         getAppointments.appointments.forEach { appointment ->
             // need to get patient FHIR ID for appointment query
             val patientFHIRIdResponse = patientService.getPatientFHIRId(
-                tenant,
-                appointment.patientId!!,
-                tenant.vendorAs<Epic>().patientInternalSystem
+                tenant, appointment.patientId!!, tenant.vendorAs<Epic>().patientInternalSystem
             )
             val parameters = mapOf(
                 "patient" to patientFHIRIdResponse.fhirID,
                 "identifier" to SystemValue(appointment.id, tenant.vendorAs<Epic>().encounterCSNSystem).queryString
             )
             val fhirResponse =
-                getBundleWithPaging(tenant, patientAppointmentSearchUrlPart, parameters).toListOfType<Appointment>()
+                getBundleWithPagingSTU3(tenant, patientAppointmentSearchUrlPart, parameters).toListOfType<Appointment>()
                     .first() // assume only one appointment returned
             appointments.add(fhirResponse)
             // if we needed to query Epic for a patient, cache it to save performance later

@@ -31,6 +31,7 @@ io_tenant_epic:
     practitioner_user_system: "urn:oid:user.system"
     mrn_system: "urn:oid:mrn.system"
     patient_internal_system: "urn:oid:internal.system"
+    encounter_csn_system: "urn:oid:encounter.system"
     hsi: "urn:epic:apporchard.curprod"
   - io_tenant_id: 1003
     release_version: "2021.10"
@@ -40,6 +41,7 @@ io_tenant_epic:
     message_type: "Ronin Alerts"
     practitioner_provider_system: "urn:oid:provider.system"
     practitioner_user_system: "urn:oid:user.system"
+    encounter_csn_system: "urn:oid:encounter.system"
     mrn_system: "urn:oid:mrn.system"
     mrn_type_text: "MRN"
     patient_internal_system: "urn:oid:internal.system"

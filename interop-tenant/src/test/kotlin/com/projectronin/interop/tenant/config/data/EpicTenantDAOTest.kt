@@ -35,6 +35,7 @@ class EpicTenantDAOTest {
         assertEquals("urn:oid:user.system", epicTenant?.practitionerUserSystem)
         assertEquals("urn:oid:mrn.system", epicTenant?.patientMRNSystem)
         assertEquals("urn:oid:internal.system", epicTenant?.patientInternalSystem)
+        assertEquals("urn:oid:encounter.system", epicTenant?.encounterCSNSystem)
         assertEquals("urn:epic:apporchard.curprod", epicTenant?.hsi)
     }
 
@@ -75,6 +76,7 @@ class EpicTenantDAOTest {
             patientMRNSystem = "mrnSystem"
             patientMRNTypeText = "MRN"
             patientInternalSystem = "internalSystem"
+            encounterCSNSystem = "csnSystem"
             hsi = "hsi"
         }
 
@@ -89,6 +91,7 @@ class EpicTenantDAOTest {
         assertEquals(testobj.patientMRNSystem, result.patientMRNSystem)
         assertEquals(testobj.patientMRNTypeText, result.patientMRNTypeText)
         assertEquals(testobj.patientInternalSystem, result.patientInternalSystem)
+        assertEquals(testobj.encounterCSNSystem, result.encounterCSNSystem)
         assertEquals(testobj.hsi, result.hsi)
     }
 
@@ -105,6 +108,7 @@ class EpicTenantDAOTest {
             practitionerUserSystem = "userSystem"
             patientMRNSystem = "mrnSystem"
             patientInternalSystem = "internalSystem"
+            encounterCSNSystem = "csnSystem"
             patientMRNTypeText = "MRN"
             hsi = "hsi"
         }
@@ -131,6 +135,7 @@ class EpicTenantDAOTest {
             patientMRNSystem = "mrnSystem"
             patientMRNTypeText = "MRN"
             patientInternalSystem = "internalSystem"
+            encounterCSNSystem = "csnSystem"
             hsi = "hsi"
         }
         val result = dao.update(updated)
@@ -148,6 +153,7 @@ class EpicTenantDAOTest {
         assertEquals(updated.patientMRNSystem, found?.patientMRNSystem)
         assertEquals(updated.patientMRNTypeText, found?.patientMRNTypeText)
         assertEquals(updated.patientInternalSystem, found?.patientInternalSystem)
+        assertEquals(updated.encounterCSNSystem, found?.encounterCSNSystem)
         assertEquals(updated.hsi, found?.hsi)
     }
 }
