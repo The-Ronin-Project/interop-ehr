@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.epic.client
 
+import com.projectronin.interop.common.http.exceptions.ServerFailureException
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
 import com.projectronin.interop.ehr.epic.apporchard.model.GetProviderAppointmentRequest
 import com.projectronin.interop.ehr.epic.auth.EpicAuthentication
@@ -7,7 +8,6 @@ import com.projectronin.interop.ehr.epic.createTestTenant
 import com.projectronin.interop.ehr.epic.getClient
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
-import io.ktor.utils.io.errors.IOException
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -207,7 +207,7 @@ class EpicClientTest {
         every { authenticationBroker.getAuthentication(tenant) } returns authentication
 
         // Execute test
-        assertThrows<IOException> {
+        assertThrows<ServerFailureException> {
             runBlocking {
                 val httpResponse = epicClient.get(
                     tenant,
@@ -242,7 +242,7 @@ class EpicClientTest {
         every { authenticationBroker.getAuthentication(tenant) } returns authentication
 
         // Execute test
-        assertThrows<IOException> {
+        assertThrows<ServerFailureException> {
             runBlocking {
                 val httpResponse =
                     epicClient.post(
