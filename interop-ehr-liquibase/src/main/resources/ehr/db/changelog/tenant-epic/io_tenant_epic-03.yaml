@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-epic-add-encounter-system
+      author: Beau Berger
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_tenant_epic
+                columnName: encounter_csn_system
+      changes:
+        - addColumn:
+            tableName: io_tenant_epic
+            columns:
+              - column:
+                  name: encounter_csn_system
+                  type: java.sql.Types.VARCHAR(64)
+                  constraints:
+                    nullable: true

@@ -1,7 +1,7 @@
 package com.projectronin.interop.ehr.epic.client
 
+import com.projectronin.interop.common.http.ktor.throwExceptionFromHttpStatus
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
-import com.projectronin.interop.ehr.util.handleErrorStatus
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
@@ -53,7 +53,7 @@ class EpicClient(
 
         // If we didn't get an OK back, throw the correct exception
         if (response.status != HttpStatusCode.OK) {
-            response.status.handleErrorStatus(urlPart, tenant.mnemonic)
+            response.throwExceptionFromHttpStatus("Epic Organization: ${tenant.name}", urlPart)
         }
 
         return response
@@ -98,7 +98,7 @@ class EpicClient(
 
         // If we didn't get an OK back, throw the correct exception
         if (response.status != HttpStatusCode.OK) {
-            response.status.handleErrorStatus(urlPart, tenant.mnemonic)
+            response.throwExceptionFromHttpStatus("Epic Organization: ${tenant.name}", urlPart)
         }
 
         return response

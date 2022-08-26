@@ -1,0 +1,297 @@
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 4,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Appointment?patient=etDlAJmia6.s1SYmsooxV6Q3&status=booked"
+    }
+  ],
+  "entry": [
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Appointment/e8KD7le7Hh9rssjDvvLkPAiO7ge.kH7bfrAqUjsJFMOE3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Appointment/e8KD7le7Hh9rssjDvvLkPAiO7ge.kH7bfrAqUjsJFMOE3",
+      "resource": {
+        "resourceType": "Appointment",
+        "id": "e8KD7le7Hh9rssjDvvLkPAiO7ge.kH7bfrAqUjsJFMOE3",
+        "identifier": [
+          {
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value": "31565"
+          }
+        ],
+        "status": "booked",
+        "serviceType": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.808267",
+                "code": "1004",
+                "display": "Office Visit"
+              }
+            ]
+          }
+        ],
+        "appointmentType": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.5.4",
+              "code": "AMB",
+              "display": "Ambulatory"
+            }
+          ]
+        },
+        "start": "2020-05-29T19:45:00Z",
+        "end": "2020-05-29T20:00:00Z",
+        "minutesDuration": 15,
+        "created": "2020-05-29",
+        "comment": "Please bring any insurance information and a copayment if required by your insurance company.\n",
+        "participant": [
+          {
+            "actor": {
+              "reference": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Patient/etDlAJmia6.s1SYmsooxV6Q3",
+              "display": "Ambulatory,Joanna"
+            },
+            "status": "accepted"
+          },
+          {
+            "actor": {
+              "reference": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+              "display": "Family Medicine Physician, MD"
+            },
+            "status": "accepted"
+          },
+          {
+            "actor": {
+              "reference": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Location/e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03",
+              "display": "EMC Family Medicine"
+            },
+            "status": "accepted"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Appointment/e8KD7le7Hh9rssjDvvLkPArenpsYbgm7f0yefjPNxl-I3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Appointment/e8KD7le7Hh9rssjDvvLkPArenpsYbgm7f0yefjPNxl-I3",
+      "resource": {
+        "resourceType": "Appointment",
+        "id": "e8KD7le7Hh9rssjDvvLkPArenpsYbgm7f0yefjPNxl-I3",
+        "identifier": [
+          {
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value": "31568"
+          }
+        ],
+        "status": "booked",
+        "serviceType": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.808267",
+                "code": "1004",
+                "display": "Office Visit"
+              }
+            ]
+          }
+        ],
+        "appointmentType": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.5.4",
+              "code": "AMB",
+              "display": "Ambulatory"
+            }
+          ]
+        },
+        "start": "2020-08-17T13:45:00Z",
+        "end": "2020-08-17T14:00:00Z",
+        "minutesDuration": 15,
+        "created": "2020-05-29",
+        "comment": "Please bring any insurance information and a copayment if required by your insurance company.\n",
+        "participant": [
+          {
+            "actor": {
+              "reference": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Patient/etDlAJmia6.s1SYmsooxV6Q3",
+              "display": "Ambulatory,Joanna"
+            },
+            "status": "accepted"
+          },
+          {
+            "actor": {
+              "reference": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+              "display": "Family Medicine Physician, MD"
+            },
+            "status": "accepted"
+          },
+          {
+            "actor": {
+              "reference": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Location/e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03",
+              "display": "EMC Family Medicine"
+            },
+            "status": "accepted"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Appointment/e8KD7le7Hh9rssjDvvLkPAguYxx.OW.IquDvV4yhbD.c3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Appointment/e8KD7le7Hh9rssjDvvLkPAguYxx.OW.IquDvV4yhbD.c3",
+      "resource": {
+        "resourceType": "Appointment",
+        "id": "e8KD7le7Hh9rssjDvvLkPAguYxx.OW.IquDvV4yhbD.c3",
+        "identifier": [
+          {
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value": "31567"
+          }
+        ],
+        "status": "booked",
+        "serviceType": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.808267",
+                "code": "1004",
+                "display": "Office Visit"
+              }
+            ]
+          }
+        ],
+        "appointmentType": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.5.4",
+              "code": "AMB",
+              "display": "Ambulatory"
+            }
+          ]
+        },
+        "start": "2020-08-18T13:30:00Z",
+        "end": "2020-08-18T13:45:00Z",
+        "minutesDuration": 15,
+        "created": "2020-05-29",
+        "comment": "Please bring any insurance information and a copayment if required by your insurance company.\n",
+        "participant": [
+          {
+            "actor": {
+              "reference": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Patient/etDlAJmia6.s1SYmsooxV6Q3",
+              "display": "Ambulatory,Joanna"
+            },
+            "status": "accepted"
+          },
+          {
+            "actor": {
+              "reference": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+              "display": "Family Medicine Physician, MD"
+            },
+            "status": "accepted"
+          },
+          {
+            "actor": {
+              "reference": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Location/e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03",
+              "display": "EMC Family Medicine"
+            },
+            "status": "accepted"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    },
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Appointment/e8KD7le7Hh9rssjDvvLkPAqv9DkLy9TA33cZafFiiN0M3"
+        }
+      ],
+      "fullUrl": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Appointment/e8KD7le7Hh9rssjDvvLkPAqv9DkLy9TA33cZafFiiN0M3",
+      "resource": {
+        "resourceType": "Appointment",
+        "id": "e8KD7le7Hh9rssjDvvLkPAqv9DkLy9TA33cZafFiiN0M3",
+        "identifier": [
+          {
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value": "31569"
+          }
+        ],
+        "status": "booked",
+        "serviceType": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.2.808267",
+                "code": "1001",
+                "display": "Consultation"
+              }
+            ]
+          }
+        ],
+        "appointmentType": {
+          "coding": [
+            {
+              "system": "urn:oid:2.16.840.1.113883.5.4",
+              "code": "AMB",
+              "display": "Ambulatory"
+            }
+          ]
+        },
+        "start": "2020-08-19T13:00:00Z",
+        "end": "2020-08-19T13:30:00Z",
+        "minutesDuration": 30,
+        "created": "2020-05-29",
+        "comment": "Please bring any insurance information and a copayment if required by your insurance company.\n",
+        "participant": [
+          {
+            "actor": {
+              "reference": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Patient/etDlAJmia6.s1SYmsooxV6Q3",
+              "display": "Ambulatory,Joanna"
+            },
+            "status": "accepted"
+          },
+          {
+            "actor": {
+              "reference": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+              "display": "Family Medicine Physician, MD"
+            },
+            "status": "accepted"
+          },
+          {
+            "actor": {
+              "reference": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/STU3/Location/e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03",
+              "display": "EMC Family Medicine"
+            },
+            "status": "accepted"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    }
+  ]
+}

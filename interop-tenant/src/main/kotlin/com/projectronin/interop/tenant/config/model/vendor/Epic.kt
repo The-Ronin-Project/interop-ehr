@@ -28,6 +28,7 @@ data class Epic(
     val practitionerUserSystem: String,
     val patientMRNSystem: String,
     val patientInternalSystem: String,
+    val encounterCSNSystem: String,
     val patientMRNTypeText: String,
     val hsi: String? = null
 ) : Vendor {

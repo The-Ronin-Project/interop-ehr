@@ -87,6 +87,7 @@ private fun EpicTenantDO.toEpic(ehrDO: EhrDO): Epic {
         practitionerUserSystem = practitionerUserSystem,
         patientMRNSystem = patientMRNSystem,
         patientInternalSystem = patientInternalSystem,
+        encounterCSNSystem = encounterCSNSystem,
         patientMRNTypeText = patientMRNTypeText,
         hsi = hsi
     )
@@ -114,6 +115,7 @@ private fun Epic.toEpicTenantDO(tenantID: Int): EpicTenantDO {
         practitionerUserSystem = this@toEpicTenantDO.practitionerUserSystem
         patientMRNSystem = this@toEpicTenantDO.patientMRNSystem
         patientInternalSystem = this@toEpicTenantDO.patientInternalSystem
+        encounterCSNSystem = this@toEpicTenantDO.encounterCSNSystem
         patientMRNTypeText = this@toEpicTenantDO.patientMRNTypeText
         hsi = this@toEpicTenantDO.hsi
     }

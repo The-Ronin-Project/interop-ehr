@@ -1,6 +1,6 @@
 package com.projectronin.interop.ehr
 
-import com.projectronin.interop.ehr.model.FindPractitionersResponse
+import com.projectronin.interop.ehr.outputs.FindPractitionersResponse
 import com.projectronin.interop.tenant.config.model.Tenant
 
 /**

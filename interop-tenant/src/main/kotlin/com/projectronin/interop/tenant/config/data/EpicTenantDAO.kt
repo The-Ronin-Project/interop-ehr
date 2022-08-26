@@ -38,6 +38,7 @@ class EpicTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTenan
             set(it.practitionerUserSystem, epicTenant.practitionerUserSystem)
             set(it.patientMRNSystem, epicTenant.patientMRNSystem)
             set(it.patientInternalSystem, epicTenant.patientInternalSystem)
+            set(it.encounterCSNSystem, epicTenant.encounterCSNSystem)
             set(it.patientMRNTypeText, epicTenant.patientMRNTypeText)
             set(it.hsi, epicTenant.hsi)
         }
@@ -63,6 +64,7 @@ class EpicTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTenan
             set(it.practitionerUserSystem, epicTenant.practitionerUserSystem)
             set(it.patientMRNSystem, epicTenant.patientMRNSystem)
             set(it.patientInternalSystem, epicTenant.patientInternalSystem)
+            set(it.encounterCSNSystem, epicTenant.encounterCSNSystem)
             set(it.patientMRNTypeText, epicTenant.patientMRNTypeText)
             set(it.hsi, epicTenant.hsi)
             where {

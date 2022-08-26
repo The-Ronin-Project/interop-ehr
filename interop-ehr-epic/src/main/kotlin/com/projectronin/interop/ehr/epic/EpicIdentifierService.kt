@@ -1,22 +1,13 @@
 package com.projectronin.interop.ehr.epic
 
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.fasterxml.jackson.databind.annotation.JsonSerialize
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.IdentifierService
-import com.projectronin.interop.ehr.epic.model.EpicIDType
-import com.projectronin.interop.ehr.epic.model.inbound.StandardizedIdentifierDeserializer
-import com.projectronin.interop.ehr.epic.model.outbound.StandardizedIdentifierSerializer
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
-import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
-import com.projectronin.interop.ehr.inputs.VendorIdentifier
-import com.projectronin.interop.ehr.model.CodeableConcept
-import com.projectronin.interop.ehr.model.Identifier
+import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import org.springframework.stereotype.Service
-import com.projectronin.interop.fhir.r4.datatype.Identifier as R4Identifier
 
 /**
  * Epic implementation of [IdentifierService]
@@ -25,12 +16,13 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier as R4Identifier
 class EpicIdentifierService : IdentifierService {
     override fun getPractitionerIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
         val system = tenant.vendorAs<Epic>().practitionerProviderSystem
-        return getEpicIdentifier(identifiers, system) { "No identifier found for practitioner" }
+        return getIdentifierByType(identifiers, "internal", system) { "No identifier found for practitioner" }
     }
 
     override fun getPatientIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
-        return getEpicIdentifier(
+        return getIdentifierByType(
             identifiers,
+            "internal",
             tenant.vendorAs<Epic>().patientInternalSystem
         ) { "No matching identifier for the patient with system ${tenant.vendorAs<Epic>().patientInternalSystem}" }
     }
@@ -38,7 +30,7 @@ class EpicIdentifierService : IdentifierService {
     override fun getPractitionerProviderIdentifier(
         tenant: Tenant,
         identifiers: FHIRIdentifiers
-    ): VendorIdentifier<out Any> {
+    ): Identifier {
         return getSystemIdentifier(
             tenant.vendorAs<Epic>().practitionerProviderSystem,
             identifiers.identifiers
@@ -48,7 +40,7 @@ class EpicIdentifierService : IdentifierService {
     override fun getPractitionerUserIdentifier(
         tenant: Tenant,
         identifiers: FHIRIdentifiers
-    ): VendorIdentifier<out Any> {
+    ): Identifier {
         return getSystemIdentifier(
             tenant.vendorAs<Epic>().practitionerUserSystem,
             identifiers.identifiers
@@ -57,48 +49,36 @@ class EpicIdentifierService : IdentifierService {
 
     override fun getMRNIdentifier(
         tenant: Tenant,
-        identifiers: List<R4Identifier>
-    ): R4Identifier {
+        identifiers: List<Identifier>
+    ): Identifier {
         val system = Uri(tenant.vendorAs<Epic>().patientMRNSystem)
         return identifiers.firstOrNull { it.system == system }
             ?: throw VendorIdentifierNotFoundException("No MRN identifier with system '${tenant.vendorAs<Epic>().patientMRNSystem}' found for Patient")
     }
 
-    private fun getEpicIdentifier(
+    private fun getIdentifierByType(
         identifiers: List<Identifier>,
-        system: String?,
+        typeString: String,
+        newSystem: String,
         exceptionMessage: () -> String
     ): Identifier {
-        // currently, we're only ever using EpicIDTypes, and the logic below sort of assumes this
-        // but this check ensures these objects are, so we can serialize / deserialize appropriately
-        if (identifiers.any { it !is EpicIDType }) throw IllegalArgumentException("getEpicIdentifiers only works for EpicIDType")
-        val identifier = identifiers.firstOrNull { it.type?.text.equals("external", true) }
-            ?: identifiers.firstOrNull { it.type?.text.equals("internal", true) }
-        return identifier?.let {
-            StandardizedIdentifier(system ?: it.system, it)
-        } ?: throw VendorIdentifierNotFoundException(exceptionMessage.invoke())
+        val identifier = identifiers.firstOrNull { it.type?.text.equals(typeString, true) }
+            ?: throw VendorIdentifierNotFoundException(exceptionMessage.invoke())
+        if (identifier.system?.value != null) return identifier // preservers system if it's present
+        return Identifier(
+            system = Uri(value = newSystem),
+            value = identifier.value,
+            type = identifier.type
+        )
     }
 
     private fun getSystemIdentifier(
         system: String,
-        identifiers: List<R4Identifier>,
+        identifiers: List<Identifier>,
         exceptionMessage: () -> String
-    ): IdentifierVendorIdentifier {
+    ): Identifier {
         val systemUri = Uri(system)
-        val identifier = identifiers.firstOrNull { it.system == systemUri && it.type?.text.equals("external", true) }
+        return identifiers.firstOrNull { it.system == systemUri && it.type?.text.equals("external", true) }
             ?: throw VendorIdentifierNotFoundException(exceptionMessage.invoke())
-        return IdentifierVendorIdentifier(identifier)
-    }
-
-    @JsonSerialize(using = StandardizedIdentifierSerializer::class)
-    @JsonDeserialize(using = StandardizedIdentifierDeserializer::class)
-    data class StandardizedIdentifier(
-        override val system: String?,
-        private val sourceIdentifier: Identifier
-    ) : Identifier {
-        override val value: String = sourceIdentifier.value
-        override val type: CodeableConcept? = sourceIdentifier.type
-        override val raw: String = sourceIdentifier.raw
-        override val element: Any = sourceIdentifier.element
     }
 }

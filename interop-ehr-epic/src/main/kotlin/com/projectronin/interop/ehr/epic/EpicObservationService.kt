@@ -2,9 +2,8 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.ObservationService
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.epic.model.EpicObservationBundle
-import com.projectronin.interop.ehr.model.Bundle
-import com.projectronin.interop.ehr.model.Observation
+import com.projectronin.interop.ehr.util.toListOfType
+import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -51,7 +50,7 @@ class EpicObservationService(
         tenant: Tenant,
         patientFhirIds: List<String>,
         observationCategoryCodes: List<String>
-    ): Bundle<Observation> {
+    ): List<Observation> {
         // Epic has a problem handling multiple patients in 1 call, so in the meantime force batch size to 1.
         // See https://sherlock.epic.com/default.aspx?view=slg/home#id=6953019&rv=0
         val observationResponses = patientFhirIds.chunked(1) {
@@ -59,8 +58,8 @@ class EpicObservationService(
                 "patient" to it.joinToString(separator = ","),
                 "category" to observationCategoryCodes.joinToString(separator = ","),
             )
-            getBundleWithPaging(tenant, observationSearchUrlPart, parameters, ::EpicObservationBundle)
+            getBundleWithPaging(tenant, observationSearchUrlPart, parameters)
         }
-        return mergeResponses(observationResponses, ::EpicObservationBundle)
+        return mergeResponses(observationResponses).toListOfType()
     }
 }

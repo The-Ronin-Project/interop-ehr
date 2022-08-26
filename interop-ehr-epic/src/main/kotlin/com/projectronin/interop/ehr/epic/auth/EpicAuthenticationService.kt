@@ -3,9 +3,9 @@ package com.projectronin.interop.ehr.epic.auth
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.projectronin.interop.common.auth.Authentication
+import com.projectronin.interop.common.http.ktor.throwExceptionFromHttpStatus
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.auth.AuthenticationService
-import com.projectronin.interop.ehr.util.handleErrorStatus
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.HttpClient
@@ -76,7 +76,7 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
                 )
 
                 if (httpResponse.status != HttpStatusCode.OK) {
-                    httpResponse.status.handleErrorStatus("Epic Authentication", tenant.mnemonic)
+                    httpResponse.throwExceptionFromHttpStatus("Epic Authentication: ${tenant.name}", authURL)
                 }
                 httpResponse.body<EpicAuthentication>()
             } catch (e: Exception) {

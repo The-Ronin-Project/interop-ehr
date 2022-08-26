@@ -35,6 +35,7 @@ fun createTestTenant(
     practitionerProviderSystem: String = "providerSystem",
     practitionerUserSystem: String = "userSystem",
     mrnSystem: String = "mrnSystem",
+    csnSystem: String = "csnSystem",
     mrnTypeText: String = "MRN",
     internalSystem: String = "internalSystem",
     hsi: String? = null,
@@ -57,7 +58,8 @@ fun createTestTenant(
             practitionerUserSystem,
             mrnSystem,
             internalSystem,
-            patientMRNTypeText = mrnTypeText,
+            csnSystem,
+            mrnTypeText,
             hsi
         )
     )

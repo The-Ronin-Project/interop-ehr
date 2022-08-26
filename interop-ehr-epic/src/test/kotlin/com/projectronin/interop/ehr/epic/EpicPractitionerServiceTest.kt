@@ -1,7 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.epic.model.EpicFindPractitionersResponse
+import com.projectronin.interop.ehr.outputs.FindPractitionersResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
@@ -58,11 +58,11 @@ class EpicPractitionerServiceTest {
                 tenant,
                 listOf("e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03")
             )
-
-        assertEquals(EpicFindPractitionersResponse(validPractitionerSearchBundle), bundle)
-        assertEquals(71, bundle.practitionerRoles!!.resources.size)
-        assertEquals(71, bundle.practitioners?.resources?.size)
-        assertEquals(53, bundle.locations?.resources?.size)
+        val expected = FindPractitionersResponse(validPractitionerSearchBundle)
+        assertEquals(expected.practitionerRoles, bundle.practitionerRoles)
+        assertEquals(expected.practitioners, bundle.practitioners)
+        assertEquals(expected.locations, bundle.locations)
+        assertEquals(expected.resources, bundle.resources)
     }
 
     @Test
@@ -99,11 +99,11 @@ class EpicPractitionerServiceTest {
             )
 
         // 142 = 71 practitioner roles from each of 2 locations
-        assertEquals(142, bundle.practitionerRoles!!.resources.size)
+        assertEquals(142, bundle.practitionerRoles.size)
         // 142 becomes 71 total because duplicate practitioners are removed by EpicPractitionerBundle
-        assertEquals(71, bundle.practitioners?.resources?.size)
+        assertEquals(71, bundle.practitioners.size)
         // 106 becomes 53 total because duplicate practitioner locations are removed by EpicLocationBundle
-        assertEquals(53, bundle.locations?.resources?.size)
+        assertEquals(53, bundle.locations.size)
     }
 
     @Test
@@ -171,11 +171,11 @@ class EpicPractitionerServiceTest {
             )
 
         // 142 = 71 practitioner roles from each of 3 batch calls
-        assertEquals(213, bundle.practitionerRoles!!.resources.size)
+        assertEquals(213, bundle.practitionerRoles.size)
         // 142 becomes 71 total because duplicate practitioners are removed by EpicPractitionerBundle
-        assertEquals(71, bundle.practitioners?.resources?.size)
+        assertEquals(71, bundle.practitioners.size)
         // 106 becomes 53 total because duplicate practitioner locations are removed by EpicLocationBundle
-        assertEquals(53, bundle.locations?.resources?.size)
+        assertEquals(53, bundle.locations.size)
     }
 
     @Test
@@ -219,12 +219,12 @@ class EpicPractitionerServiceTest {
             )
 
         // 2 Resources from the first query, 71 from the second
-        assertEquals(73, bundle.practitionerRoles?.resources?.size)
+        assertEquals(73, bundle.practitionerRoles.size)
 
         // 2 of the practitioners are duplicates and get filtered out
-        assertEquals(71, bundle.practitioners?.resources?.size)
+        assertEquals(71, bundle.practitioners.size)
 
         // 2 of the practitioner locations are duplicates and get filtered out
-        assertEquals(53, bundle.locations?.resources?.size)
+        assertEquals(53, bundle.locations.size)
     }
 }

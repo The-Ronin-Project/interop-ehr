@@ -2,8 +2,7 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.PractitionerService
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.epic.model.EpicFindPractitionersResponse
-import com.projectronin.interop.ehr.model.FindPractitionersResponse
+import com.projectronin.interop.ehr.outputs.FindPractitionersResponse
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
@@ -25,8 +24,8 @@ class EpicPractitionerService(
                 "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
                 "location" to locationsParameter
             )
-            getBundleWithPaging(tenant, practitionerSearchUrlPart, parameters, ::EpicFindPractitionersResponse)
+            getBundleWithPaging(tenant, practitionerSearchUrlPart, parameters)
         }
-        return mergeResponses(practitionerResponses, ::EpicFindPractitionersResponse)
+        return FindPractitionersResponse(mergeResponses(practitionerResponses))
     }
 }

@@ -1,19 +1,23 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.epic.model.EpicPatientBundle
-import com.projectronin.interop.ehr.model.Bundle
-import com.projectronin.interop.ehr.model.Identifier
-import com.projectronin.interop.ehr.model.Patient
+import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
+import com.projectronin.interop.ehr.util.toListOfType
+import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
+import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
 import com.projectronin.interop.fhir.r4.resource.Bundle as R4Bundle
 
 /**
@@ -23,6 +27,7 @@ import com.projectronin.interop.fhir.r4.resource.Bundle as R4Bundle
 class EpicPatientService(
     private val epicClient: EpicClient,
     @Value("\${epic.fhir.batchSize:100}") private val batchSize: Int,
+    private val aidboxPatientService: AidboxPatientService,
 ) : PatientService,
     EpicPagingService(epicClient) {
     private val patientSearchUrlPart = "/api/FHIR/R4/Patient"
@@ -33,7 +38,7 @@ class EpicPatientService(
         birthDate: LocalDate,
         givenName: String,
         familyName: String,
-    ): Bundle<Patient> {
+    ): List<Patient> {
         logger.info { "Patient search started for ${tenant.mnemonic}" }
 
         val parameters = mapOf(
@@ -47,7 +52,7 @@ class EpicPatientService(
         }
 
         logger.info { "Patient search completed for ${tenant.mnemonic}" }
-        return EpicPatientBundle(bundle)
+        return bundle.toListOfType()
     }
 
     override fun <K> findPatientsById(tenant: Tenant, patientIdsByKey: Map<K, Identifier>): Map<K, Patient> {
@@ -63,22 +68,24 @@ class EpicPatientService(
         // Chunk the identifiers and run the search
         val patientsFound = patientIdentifiers.chunked(batchSize) {
             val identifierParam = it.joinToString(separator = ",") { patientIdentifier ->
-                "${patientIdentifier.system}|${patientIdentifier.value}"
+                "${patientIdentifier.system?.value}|${patientIdentifier.value}"
             }
             getBundleWithPaging(
                 tenant,
                 patientSearchUrlPart,
-                mapOf("identifier" to identifierParam),
-                ::EpicPatientBundle
+                mapOf("identifier" to identifierParam)
             )
         }
 
-        // Translate to the Epic Patients
-        val epicPatientBundle = mergeResponses(patientsFound, ::EpicPatientBundle)
+        // Translate to Patients
+        val patientList = mergeResponses(patientsFound).toListOfType<Patient>()
         // Index patients found based on identifiers
-        val foundPatientsByIdentifier = epicPatientBundle.resources.flatMap { patient ->
+        val foundPatientsByIdentifier = patientList.flatMap { patient ->
             patient.identifier.map { identifier ->
-                SystemValueIdentifier(systemText = identifier.system?.uppercase(), value = identifier.value) to patient
+                SystemValueIdentifier(
+                    systemText = identifier.system?.value?.uppercase(),
+                    value = identifier.value
+                ) to patient
             }
         }.toMap()
 
@@ -86,7 +93,7 @@ class EpicPatientService(
         val patientsFoundByKey = patientIdsByKey.mapNotNull { requestEntry ->
             val foundPatient = foundPatientsByIdentifier[
                 SystemValueIdentifier(
-                    systemText = requestEntry.value.system?.uppercase(), value = requestEntry.value.value
+                    systemText = requestEntry.value.system?.value?.uppercase(), value = requestEntry.value.value
                 )
             ]
             if (foundPatient != null) requestEntry.key to foundPatient else null
@@ -96,5 +103,34 @@ class EpicPatientService(
         return patientsFoundByKey
     }
 
-    data class SystemValueIdentifier(val systemText: String?, val value: String)
+    /**
+     * Finds a Patient's FHIR ID (non-localized), based on the Epic Identifer (MRN or Internal). Searches Aidbox first before querying the EHR.
+     * If a patient is found in the EHR, this will return the [Patient] object that was found to save on future queries.
+     * Returns a [GetFHIRIDResponse]
+     */
+    override fun getPatientFHIRId(tenant: Tenant, patientIDValue: String, patientIDSystem: String): GetFHIRIDResponse {
+        val patientID = SystemValue(patientIDValue, patientIDSystem)
+        // try Aidbox first
+        val fhirID = runCatching {
+            aidboxPatientService.getPatientFHIRIds(tenantMnemonic = tenant.mnemonic, mapOf("key" to patientID))
+                .getValue("key")
+        }.getOrNull()
+        fhirID?.let { return GetFHIRIDResponse(it.unlocalize(tenant)) }
+
+        // else try EHR
+        val parameters = mapOf("identifier" to patientID.queryString)
+        val bundle = runBlocking {
+            val httpResponse = epicClient.get(tenant, patientSearchUrlPart, parameters)
+            httpResponse.body<R4Bundle>()
+        }
+        val patList = bundle.toListOfType<Patient>()
+        if (patList.size != 1) {
+            logger.error { "Multiple patients found in ${tenant.mnemonic} for MRN value ${patientID.value}." }
+            throw IOException("Multiple patients found in ${tenant.mnemonic} for MRN value ${patientID.value}.")
+        }
+        val patient = patList.first()
+        return GetFHIRIDResponse(patient.id!!.value, patient)
+    }
+
+    data class SystemValueIdentifier(val systemText: String?, val value: String?)
 }
