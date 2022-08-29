@@ -2,23 +2,22 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.util.toListOfType
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.Patient
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
-import io.ktor.utils.io.errors.IOException
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.spyk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
 
@@ -40,7 +39,10 @@ class EpicPatientServiceTest {
     @Test
     fun `ensure, find patient, patient is returned`() {
         val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225", "https://example.org", testPrivateKey, "TEST_TENANT"
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
         )
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -54,7 +56,10 @@ class EpicPatientServiceTest {
         } returns httpResponse
 
         val bundle = EpicPatientService(epicClient, 100, aidboxClient).findPatient(
-            tenant, LocalDate.of(2015, 1, 1), "givenName", "familyName"
+            tenant,
+            LocalDate.of(2015, 1, 1),
+            "givenName",
+            "familyName"
         )
         assertEquals(validPatientBundle.entry.map { it.resource }.filterIsInstance<Patient>(), bundle)
     }
@@ -162,7 +167,8 @@ class EpicPatientServiceTest {
             )
         )
         assertEquals(
-            mapOf("goodIdentifier" to validPatientBundle.entry.first().resource), resultPatientsByKey
+            mapOf("goodIdentifier" to validPatientBundle.entry.first().resource),
+            resultPatientsByKey
         )
     }
 
@@ -266,98 +272,172 @@ class EpicPatientServiceTest {
     }
 
     @Test
-    fun `MRN to FHIR ID retrieval works with patient in aidbox`() {
+    fun `getPatientsFHIRIds works with patient in aidbox`() {
+        val mrn = "MRN"
+        val fhirID = "FHIRID"
+        val mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
             "https://example.org",
             testPrivateKey,
             "TEST_TENANT",
-            mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+            mrnSystem = mrnSystem,
             internalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
         )
+
         every {
             aidboxClient.getPatientFHIRIds(
                 tenant.mnemonic,
-                mapOf("key" to SystemValue("MRN", "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"))
-            ).getValue("key")
-        } returns "TEST_TENANT-FHIRID"
-        val response = EpicPatientService(epicClient, 100, aidboxClient).getPatientFHIRId(
+                mapOf(mrn to SystemValue(mrn, mrnSystem))
+            )
+        } returns mapOf(mrn to "${tenant.mnemonic}-$fhirID")
+
+        val response = EpicPatientService(epicClient, 100, aidboxClient).getPatientsFHIRIds(
             tenant,
-            "MRN",
-            "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+            mrnSystem,
+            listOf(mrn)
         )
-        assertEquals(response.fhirID, "FHIRID")
+
+        assertEquals(fhirID, response[mrn]!!.fhirID)
     }
 
     @Test
-    fun `MRN to FHIR ID retrieval works with patient not in aidbox`() {
+    fun `getPatientsFHIRIds works with patient not in aidbox`() {
+        val mrn = "MRN"
+        val fhirID = "FHIRID"
+        val mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+
+        val epicPatientService = spyk(EpicPatientService(epicClient, 100, aidboxClient))
+
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
             "https://example.org",
             testPrivateKey,
             "TEST_TENANT",
-            mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+            mrnSystem = mrnSystem,
             internalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
         )
+
         every {
             aidboxClient.getPatientFHIRIds(
                 tenant.mnemonic,
-                mapOf("key" to SystemValue("MRN", "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"))
-            ).getValue("key")
-        } throws Exception()
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/Patient",
-                mapOf("identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14|MRN")
+                mapOf(mrn to SystemValue(mrn, mrnSystem))
             )
-        } returns httpResponse
+        } returns mapOf()
 
-        val response = EpicPatientService(epicClient, 100, aidboxClient).getPatientFHIRId(
+        every {
+            epicPatientService.findPatientsById(tenant, mapOf(mrn to Identifier(value = mrn, system = Uri(mrnSystem))))
+        } returns mapOf(mrn to Patient(id = Id(fhirID)))
+
+        val response = epicPatientService.getPatientsFHIRIds(
             tenant,
-            "MRN",
-            "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+            mrnSystem,
+            listOf(mrn)
         )
-        assertEquals(response.fhirID, "eJzlzKe3KPzAV5TtkxmNivQ3")
-        assertEquals(response.newPatientObject, validPatientBundle.toListOfType<Patient>().first())
+
+        assertEquals(fhirID, response[mrn]!!.fhirID)
     }
 
     @Test
-    fun `MRN to FHIR ID retrieval, multiple patients found`() {
+    fun `getPatientsFHIRIds works with a mix of patients in and out of aidbox`() {
+        val mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+        val aidBoxMRN1 = "AB_MRN1"
+        val aidBoxMRN2 = "AB_MRN2"
+        val aidBoxFhirId1 = "AB_FHIR_1"
+        val aidBoxFhirId2 = "AB_FHIR_2"
+        val ehrMRN1 = "EHR_MRN1"
+        val ehrMRN2 = "EHR_MRN2"
+        val ehrFhirId1 = "EHRFHIR1"
+        val ehrFhirId2 = "EHRFHIR2"
+
+        val epicPatientService = spyk(EpicPatientService(epicClient, 100, aidboxClient))
+
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
             "https://example.org",
             testPrivateKey,
             "TEST_TENANT",
-            mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
+            mrnSystem = mrnSystem,
             internalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
         )
+
         every {
             aidboxClient.getPatientFHIRIds(
                 tenant.mnemonic,
-                mapOf("key" to SystemValue("MRN", "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"))
-            ).getValue("key")
-        } throws Exception()
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns validMultiPatientBundle
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/Patient",
-                mapOf("identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14|MRN")
+                mapOf(
+                    aidBoxMRN1 to SystemValue(aidBoxMRN1, mrnSystem),
+                    aidBoxMRN2 to SystemValue(aidBoxMRN2, mrnSystem),
+                    ehrMRN1 to SystemValue(ehrMRN1, mrnSystem),
+                    ehrMRN2 to SystemValue(ehrMRN2, mrnSystem)
+                )
             )
-        } returns httpResponse
+        } returns mapOf(
+            aidBoxMRN1 to "${tenant.mnemonic}-$aidBoxFhirId1",
+            aidBoxMRN2 to "${tenant.mnemonic}-$aidBoxFhirId2"
+        )
 
-        assertThrows<IOException> {
-            EpicPatientService(epicClient, 100, aidboxClient).getPatientFHIRId(
+        every {
+            epicPatientService.findPatientsById(
                 tenant,
-                "MRN",
-                "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+                mapOf(
+                    ehrMRN1 to Identifier(value = ehrMRN1, system = Uri(mrnSystem)),
+                    ehrMRN2 to Identifier(value = ehrMRN2, system = Uri(mrnSystem))
+                )
             )
-        }
+        } returns mapOf(
+            ehrMRN1 to Patient(id = Id(ehrFhirId1)),
+            ehrMRN2 to Patient(id = Id(ehrFhirId2))
+        )
+
+        val response = epicPatientService.getPatientsFHIRIds(
+            tenant,
+            mrnSystem,
+            listOf(aidBoxMRN1, aidBoxMRN2, ehrMRN1, ehrMRN2)
+        )
+
+        assertEquals(4, response.size)
+        assertEquals(aidBoxFhirId1, response[aidBoxMRN1]!!.fhirID)
+        assertEquals(aidBoxFhirId2, response[aidBoxMRN2]!!.fhirID)
+        assertEquals(ehrFhirId1, response[ehrMRN1]!!.fhirID)
+        assertEquals(ehrFhirId1, response[ehrMRN1]!!.newPatientObject!!.id!!.value)
+        assertEquals(ehrFhirId2, response[ehrMRN2]!!.fhirID)
+        assertEquals(ehrFhirId2, response[ehrMRN2]!!.newPatientObject!!.id!!.value)
+    }
+
+    @Test
+    fun `getPatientsFHIRIds handles no patients found`() {
+        val mrn = "MRN"
+        val mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+
+        val epicPatientService = spyk(EpicPatientService(epicClient, 100, aidboxClient))
+
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            mrnSystem = mrnSystem,
+            internalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
+        )
+
+        every {
+            aidboxClient.getPatientFHIRIds(
+                tenant.mnemonic,
+                mapOf(mrn to SystemValue(mrn, mrnSystem))
+            )
+        } returns mapOf()
+
+        every {
+            epicPatientService.findPatientsById(tenant, mapOf(mrn to Identifier(value = mrn, system = Uri(mrnSystem))))
+        } returns mapOf()
+
+        val response = epicPatientService.getPatientsFHIRIds(
+            tenant,
+            mrnSystem,
+            listOf(mrn)
+        )
+
+        assertEquals(0, response.size)
     }
 }

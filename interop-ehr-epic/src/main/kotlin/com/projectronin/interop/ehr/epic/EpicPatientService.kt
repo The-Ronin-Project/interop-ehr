@@ -6,11 +6,11 @@ import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
 import com.projectronin.interop.ehr.util.toListOfType
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
-import io.ktor.utils.io.errors.IOException
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
@@ -26,8 +26,8 @@ import com.projectronin.interop.fhir.r4.resource.Bundle as R4Bundle
 @Component
 class EpicPatientService(
     private val epicClient: EpicClient,
-    @Value("\${epic.fhir.batchSize:100}") private val batchSize: Int,
-    private val aidboxPatientService: AidboxPatientService,
+    @Value("\${epic.fhir.batchSize:5}") private val batchSize: Int,
+    private val aidboxPatientService: AidboxPatientService
 ) : PatientService,
     EpicPagingService(epicClient) {
     private val patientSearchUrlPart = "/api/FHIR/R4/Patient"
@@ -37,7 +37,7 @@ class EpicPatientService(
         tenant: Tenant,
         birthDate: LocalDate,
         givenName: String,
-        familyName: String,
+        familyName: String
     ): List<Patient> {
         logger.info { "Patient search started for ${tenant.mnemonic}" }
 
@@ -93,7 +93,8 @@ class EpicPatientService(
         val patientsFoundByKey = patientIdsByKey.mapNotNull { requestEntry ->
             val foundPatient = foundPatientsByIdentifier[
                 SystemValueIdentifier(
-                    systemText = requestEntry.value.system?.value?.uppercase(), value = requestEntry.value.value
+                    systemText = requestEntry.value.system?.value?.uppercase(),
+                    value = requestEntry.value.value
                 )
             ]
             if (foundPatient != null) requestEntry.key to foundPatient else null
@@ -103,33 +104,27 @@ class EpicPatientService(
         return patientsFoundByKey
     }
 
-    /**
-     * Finds a Patient's FHIR ID (non-localized), based on the Epic Identifer (MRN or Internal). Searches Aidbox first before querying the EHR.
-     * If a patient is found in the EHR, this will return the [Patient] object that was found to save on future queries.
-     * Returns a [GetFHIRIDResponse]
-     */
-    override fun getPatientFHIRId(tenant: Tenant, patientIDValue: String, patientIDSystem: String): GetFHIRIDResponse {
-        val patientID = SystemValue(patientIDValue, patientIDSystem)
-        // try Aidbox first
-        val fhirID = runCatching {
-            aidboxPatientService.getPatientFHIRIds(tenantMnemonic = tenant.mnemonic, mapOf("key" to patientID))
-                .getValue("key")
-        }.getOrNull()
-        fhirID?.let { return GetFHIRIDResponse(it.unlocalize(tenant)) }
+    override fun getPatientsFHIRIds(tenant: Tenant, patientIDSystem: String, patientIDValues: List<String>): Map<String, GetFHIRIDResponse> {
+        // Try the list of patients against Aidbox first
+        val aidboxResponse = aidboxPatientService.getPatientFHIRIds(
+            tenantMnemonic = tenant.mnemonic,
+            patientIDValues.associateWith { SystemValue(it, patientIDSystem) }
+        ).mapValues { GetFHIRIDResponse(it.value.unlocalize(tenant)) }
 
-        // else try EHR
-        val parameters = mapOf("identifier" to patientID.queryString)
-        val bundle = runBlocking {
-            val httpResponse = epicClient.get(tenant, patientSearchUrlPart, parameters)
-            httpResponse.body<R4Bundle>()
+        // Search for any patients that weren't in Aidbox in the EHR.  If there aren't any, return the Aidbox patients.
+        val ehrPatientIDValues = patientIDValues.filterNot { patientID ->
+            aidboxResponse.keys.contains(patientID)
         }
-        val patList = bundle.toListOfType<Patient>()
-        if (patList.size != 1) {
-            logger.error { "Multiple patients found in ${tenant.mnemonic} for MRN value ${patientID.value}." }
-            throw IOException("Multiple patients found in ${tenant.mnemonic} for MRN value ${patientID.value}.")
-        }
-        val patient = patList.first()
-        return GetFHIRIDResponse(patient.id!!.value, patient)
+        if (ehrPatientIDValues.isEmpty()) return aidboxResponse
+
+        val ehrResponse = findPatientsById(
+            tenant = tenant,
+            ehrPatientIDValues.associateWith { Identifier(value = it, system = Uri(patientIDSystem)) }
+        ).filterNot {
+            it.value.id == null
+        }.mapValues { GetFHIRIDResponse(it.value.id!!.value.unlocalize(tenant), it.value) }
+
+        return aidboxResponse + ehrResponse
     }
 
     data class SystemValueIdentifier(val systemText: String?, val value: String?)

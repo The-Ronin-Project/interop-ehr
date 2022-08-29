@@ -23,7 +23,10 @@ interface PatientService {
     fun <K> findPatientsById(tenant: Tenant, patientIdsByKey: Map<K, Identifier>): Map<K, Patient>
 
     /**
-     * Deprecated.
+     * Finds FHIR IDs (non-localized) for a list of patients, based on the Epic Identifer (MRN or Internal). Searches
+     * Aidbox first before querying the EHR. If a patient is found in the EHR, this will return the [Patient] object
+     * that was found to save on future queries. Returns a map of the patient's searched ID to its [GetFHIRIDResponse].
+     * If the patient's FHIR ID can't be found, the patient won't be included in the map.
      */
-    fun getPatientFHIRId(tenant: Tenant, patientIDValue: String, patientIDSystem: String): GetFHIRIDResponse
+    fun getPatientsFHIRIds(tenant: Tenant, patientIDSystem: String, patientIDValues: List<String>): Map<String, GetFHIRIDResponse>
 }
