@@ -11,8 +11,16 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
  */
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class EpicAppointment(
+    val appointmentDuration: String,
+    val appointmentNotes: List<String> = listOf(), // The spec says this is a string, but in their sample data it's an array
+    val appointmentStartTime: String,
+    val appointmentStatus: String,
     val contactIDs: List<IDType> = listOf(),
+    val date: String,
     val patientIDs: List<IDType> = listOf(),
+    val patientName: String,
+    val providers: List<ScheduleProviderReturnWithTime> = listOf(),
+    val visitTypeName: String
 ) {
     @get:JsonIgnore
     val id: String by lazy {

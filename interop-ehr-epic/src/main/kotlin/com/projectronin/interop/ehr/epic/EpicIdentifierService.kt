@@ -16,13 +16,13 @@ import org.springframework.stereotype.Service
 class EpicIdentifierService : IdentifierService {
     override fun getPractitionerIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
         val system = tenant.vendorAs<Epic>().practitionerProviderSystem
-        return getIdentifierByType(identifiers, "internal", system) { "No identifier found for practitioner" }
+        return getIdentifierByType(identifiers, listOf("internal", "external"), system) { "No identifier found for practitioner" }
     }
 
     override fun getPatientIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
         return getIdentifierByType(
             identifiers,
-            "internal",
+            listOf("internal"),
             tenant.vendorAs<Epic>().patientInternalSystem
         ) { "No matching identifier for the patient with system ${tenant.vendorAs<Epic>().patientInternalSystem}" }
     }
@@ -58,12 +58,18 @@ class EpicIdentifierService : IdentifierService {
 
     private fun getIdentifierByType(
         identifiers: List<Identifier>,
-        typeString: String,
+        typeString: List<String>,
         newSystem: String,
         exceptionMessage: () -> String
     ): Identifier {
-        val identifier = identifiers.firstOrNull { it.type?.text.equals(typeString, true) }
-            ?: throw VendorIdentifierNotFoundException(exceptionMessage.invoke())
+        val identifier = typeString.firstNotNullOfOrNull { type ->
+            identifiers.firstOrNull {
+                it.type?.text.equals(
+                    type,
+                    true
+                )
+            }
+        } ?: throw VendorIdentifierNotFoundException(exceptionMessage.invoke())
         if (identifier.system?.value != null) return identifier // preservers system if it's present
         return Identifier(
             system = Uri(value = newSystem),

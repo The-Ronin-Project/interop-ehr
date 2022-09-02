@@ -11,25 +11,67 @@ class EpicAppointmentTest {
     @Test
     fun `can serialize and deserialize JSON`() {
         val appointment = EpicAppointment(
+            appointmentDuration = "30",
+            appointmentNotes = listOf("Notes"),
+            appointmentStartTime = "3:30 PM",
+            appointmentStatus = "No Show",
+            date = "4/30/2015",
+            patientName = "Test Name",
+            providers = listOf(
+                ScheduleProviderReturnWithTime(
+                    departmentIDs = listOf(
+                        IDType(id = "6789", type = "Internal")
+                    ),
+                    departmentName = "Test department",
+                    duration = "30",
+                    providerIDs = listOf(
+                        IDType(id = "9876", type = "Internal")
+                    ),
+                    providerName = "Test Doc",
+                    time = "3:30 PM"
+                )
+            ),
+            visitTypeName = "Test visit type",
             contactIDs = listOf(
                 IDType(id = "12345", type = "CSN")
             ),
             patientIDs = listOf(
                 IDType(id = "54321", type = "Internal")
-            ),
+            )
         )
         val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(appointment)
 
         val expectedJson = """
             {
+              "AppointmentDuration" : "30",
+              "AppointmentNotes" : [ "Notes" ],
+              "AppointmentStartTime" : "3:30 PM",
+              "AppointmentStatus" : "No Show",
               "ContactIDs" : [ {
                 "ID" : "12345",
                 "Type" : "CSN"
               } ],
+              "Date" : "4/30/2015",
               "PatientIDs" : [ {
                 "ID" : "54321",
                 "Type" : "Internal"
-              } ]
+              } ],
+              "PatientName" : "Test Name",
+              "Providers" : [ {
+                "DepartmentIDs" : [ {
+                  "ID" : "6789",
+                  "Type" : "Internal"
+                } ],
+                "DepartmentName" : "Test department",
+                "Duration" : "30",
+                "ProviderIDs" : [ {
+                  "ID" : "9876",
+                  "Type" : "Internal"
+                } ],
+                "ProviderName" : "Test Doc",
+                "Time" : "3:30 PM"
+              } ],
+              "VisitTypeName" : "Test visit type"
             }
         """.trimIndent()
         assertEquals(expectedJson, json)
@@ -41,6 +83,27 @@ class EpicAppointmentTest {
     @Test
     fun `check that computed fields are returned`() {
         val appointment = EpicAppointment(
+            appointmentDuration = "30",
+            appointmentNotes = listOf("Notes"),
+            appointmentStartTime = "3:30 PM",
+            appointmentStatus = "No Show",
+            date = "4/30/2015",
+            patientName = "Test Name",
+            providers = listOf(
+                ScheduleProviderReturnWithTime(
+                    departmentIDs = listOf(
+                        IDType(id = "6789", type = "Internal")
+                    ),
+                    departmentName = "Test department",
+                    duration = "30",
+                    providerIDs = listOf(
+                        IDType(id = "9876", type = "Internal")
+                    ),
+                    providerName = "Test Doc",
+                    time = "3:30 PM"
+                )
+            ),
+            visitTypeName = "Test visit type",
             contactIDs = listOf(
                 IDType(id = "12345", type = "CSN")
             ),
@@ -56,12 +119,12 @@ class EpicAppointmentTest {
     @Test
     fun `check that computed fields return null when not returned`() {
         val appointment = EpicAppointment(
-            contactIDs = listOf(
-                IDType(id = "12345", type = "CSN")
-            ),
-            patientIDs = listOf(
-                IDType(id = "12345", type = "bad-Internal")
-            ),
+            appointmentDuration = "30",
+            appointmentStartTime = "3:30 PM",
+            appointmentStatus = "No Show",
+            date = "4/30/2015",
+            patientName = "Test Name",
+            visitTypeName = "Test visit type",
         )
 
         assertNull(appointment.patientId)
@@ -70,13 +133,56 @@ class EpicAppointmentTest {
     @Test
     fun `serialized JSON ignores null and empty fields`() {
         val appointment = EpicAppointment(
+            appointmentDuration = "30",
+            appointmentNotes = listOf("Notes"),
+            appointmentStartTime = "3:30 PM",
+            appointmentStatus = "No Show",
+            date = "4/30/2015",
+            patientName = "Test Name",
+            providers = listOf(
+                ScheduleProviderReturnWithTime(
+                    departmentIDs = listOf(
+                        IDType(id = "6789", type = "Internal")
+                    ),
+                    departmentName = "Test department",
+                    duration = "30",
+                    providerIDs = listOf(
+                        IDType(id = "9876", type = "Internal")
+                    ),
+                    providerName = "Test Doc",
+                    time = "3:30 PM"
+                )
+            ),
+            visitTypeName = "Test visit type",
             contactIDs = listOf(),
             patientIDs = listOf(),
         )
         val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(appointment)
 
         val expectedJson = """
-            { }
+            {
+              "AppointmentDuration" : "30",
+              "AppointmentNotes" : [ "Notes" ],
+              "AppointmentStartTime" : "3:30 PM",
+              "AppointmentStatus" : "No Show",
+              "Date" : "4/30/2015",
+              "PatientName" : "Test Name",
+              "Providers" : [ {
+                "DepartmentIDs" : [ {
+                  "ID" : "6789",
+                  "Type" : "Internal"
+                } ],
+                "DepartmentName" : "Test department",
+                "Duration" : "30",
+                "ProviderIDs" : [ {
+                  "ID" : "9876",
+                  "Type" : "Internal"
+                } ],
+                "ProviderName" : "Test Doc",
+                "Time" : "3:30 PM"
+              } ],
+              "VisitTypeName" : "Test visit type"
+            }
         """.trimIndent()
         assertEquals(expectedJson, json)
     }
@@ -98,7 +204,8 @@ class EpicAppointmentTest {
               "AppointmentStatus" : "No Show",
               "Date" : "4/30/2015",
               "PatientName" : "Test Name",
-              "VisitTypeName" : "Test visit type"
+              "VisitTypeName" : "Test visit type",
+              "NonExisting" : "Bad Data"
             }
         """.trimIndent()
         val appointment = JacksonManager.objectMapper.readValue<EpicAppointment>(json)
@@ -110,6 +217,27 @@ class EpicAppointmentTest {
     @Test
     fun `fails if we attempt to access an id that doesn't exist`() {
         val appointment = EpicAppointment(
+            appointmentDuration = "30",
+            appointmentNotes = listOf("Notes"),
+            appointmentStartTime = "3:30 PM",
+            appointmentStatus = "No Show",
+            date = "4/30/2015",
+            patientName = "Test Name",
+            providers = listOf(
+                ScheduleProviderReturnWithTime(
+                    departmentIDs = listOf(
+                        IDType(id = "6789", type = "Internal")
+                    ),
+                    departmentName = "Test department",
+                    duration = "30",
+                    providerIDs = listOf(
+                        IDType(id = "9876", type = "Internal")
+                    ),
+                    providerName = "Test Doc",
+                    time = "3:30 PM"
+                )
+            ),
+            visitTypeName = "Test visit type",
             contactIDs = listOf(),
             patientIDs = listOf(),
         )

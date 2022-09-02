@@ -48,6 +48,38 @@ class EpicIdentifierServiceTest {
     }
 
     @Test
+    fun `getPractitionerIdentifier properly finds external`() {
+        val externalIdentifier = mockk<Identifier> {
+            every { system } returns null
+            every { value } returns "external-value"
+            every { type } returns mockk {
+                every { text } returns "external"
+            }
+        }
+        val identifiers = listOf(otherIdentifier, otherIdentifier, externalIdentifier)
+        val practitionerIdentifier = service.getPractitionerIdentifier(tenant, identifiers)
+        assertEquals("practitionerProviderSystem", practitionerIdentifier.system?.value)
+        assertEquals("external-value", practitionerIdentifier.value)
+        assertEquals(externalIdentifier.type?.text, practitionerIdentifier.type?.text)
+    }
+
+    @Test
+    fun `getPractitionerIdentifier properly cascades`() {
+        val externalIdentifier = mockk<Identifier> {
+            every { system } returns null
+            every { value } returns "external-value"
+            every { type } returns mockk {
+                every { text } returns "external"
+            }
+        }
+        val identifiers = listOf(internalIdentifier, otherIdentifier, externalIdentifier)
+        val practitionerIdentifier = service.getPractitionerIdentifier(tenant, identifiers)
+        assertEquals("practitionerProviderSystem", practitionerIdentifier.system?.value)
+        assertEquals("internal-value", practitionerIdentifier.value)
+        assertEquals(internalType.text, practitionerIdentifier.type?.text)
+    }
+
+    @Test
     fun `getPractitionerIdentifier with internal type`() {
         val identifiers = listOf(internalIdentifier, otherIdentifier)
 
@@ -147,6 +179,7 @@ class EpicIdentifierServiceTest {
             service.getPractitionerUserIdentifier(tenant, fhirIdentifiers)
         }
         assertEquals(
+            "No practitioner user identifier with system 'practitionerUserSystem' found for resource with FHIR id '1234'",
             "No practitioner user identifier with system 'practitionerUserSystem' found for resource with FHIR id '1234'",
             exception.message
         )
