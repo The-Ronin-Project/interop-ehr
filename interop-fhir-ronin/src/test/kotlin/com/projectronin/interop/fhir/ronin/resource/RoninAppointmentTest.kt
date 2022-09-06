@@ -1,8 +1,5 @@
 package com.projectronin.interop.fhir.ronin.resource
 
-import com.projectronin.interop.fhir.r4.CodeSystem
-import com.projectronin.interop.fhir.r4.CodeableConcepts
-import com.projectronin.interop.fhir.r4.ExtensionMeanings
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
@@ -21,152 +18,131 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.validate.resource.R4AppointmentValidator
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
+import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
+import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.util.asCode
+import com.projectronin.interop.fhir.validate.LocationContext
+import com.projectronin.interop.fhir.validate.RequiredFieldError
+import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.jupiter.api.Assertions
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class OncologyAppointmentTest {
+class RoninAppointmentTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
 
     @Test
-    fun `validate fails if no tenant identifier provided`() {
-        val appointment = Appointment(
-            extension = listOf(
-                Extension(
-                    url = ExtensionMeanings.PARTNER_DEPARTMENT.uri,
-                    value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "reference"))
-                )
-            ),
-            identifier = listOf(),
-            status = AppointmentStatus.PROPOSED,
-            participant = listOf(
-                Participant(
-                    actor = Reference(display = "actor"),
-                    status = ParticipationStatus.ACCEPTED
+    fun `always qualifies`() {
+        assertTrue(
+            RoninAppointment.qualifies(
+                Appointment(
+                    status = AppointmentStatus.CANCELLED.asCode(),
+                    participant = listOf(
+                        Participant(
+                            actor = Reference(display = "actor"),
+                            status = ParticipationStatus.ACCEPTED.asCode()
+                        )
+                    )
                 )
             )
         )
-        val exception = assertThrows<IllegalArgumentException> {
-            OncologyAppointment.validate(appointment).alertIfErrors()
-        }
-        assertEquals("Tenant identifier is required", exception.message)
     }
 
     @Test
-    fun `validate fails if partnerReference value is not a Reference`() {
+    fun `validate checks ronin identifiers`() {
         val appointment = Appointment(
-            extension = listOf(
-                Extension(
-                    url = ExtensionMeanings.PARTNER_DEPARTMENT.uri,
-                    value = DynamicValue(DynamicValueType.STRING, "reference")
-                )
-            ),
-            identifier = listOf(
-                Identifier(
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    type = CodeableConcepts.RONIN_TENANT,
-                    value = "tenantId"
-                )
-            ),
-            status = AppointmentStatus.PROPOSED,
+            id = Id("12345"),
+            status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
                     actor = Reference(display = "actor"),
-                    status = ParticipationStatus.ACCEPTED
+                    status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
         )
-        val exception = assertThrows<IllegalArgumentException> {
-            OncologyAppointment.validate(appointment).alertIfErrors()
-        }
-        assertEquals("Partner department reference must be of type Reference", exception.message)
-    }
 
-    @Test
-    fun `validate fails if partnerReference value is missing`() {
-        val appointment = Appointment(
-            extension = listOf(
-                Extension(
-                    url = ExtensionMeanings.PARTNER_DEPARTMENT.uri
-                )
-            ),
-            identifier = listOf(
-                Identifier(
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    type = CodeableConcepts.RONIN_TENANT,
-                    value = "tenantId"
-                )
-            ),
-            status = AppointmentStatus.PROPOSED,
-            participant = listOf(
-                Participant(
-                    actor = Reference(display = "actor"),
-                    status = ParticipationStatus.ACCEPTED
-                )
-            )
-        )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyAppointment.validate(appointment).alertIfErrors()
+            RoninAppointment.validate(appointment, null).alertIfErrors()
         }
-        assertEquals("Partner department reference must be of type Reference", exception.message)
-    }
 
-    @Test
-    fun `validate fails for multiple issues`() {
-        val appointment = Appointment(
-            extension = listOf(
-                Extension(
-                    url = ExtensionMeanings.PARTNER_DEPARTMENT.uri,
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            identifier = listOf(),
-            status = AppointmentStatus.PROPOSED,
-            participant = listOf(
-                Participant(
-                    actor = Reference(display = "actor"),
-                    status = ParticipationStatus.ACCEPTED
-                )
-            )
-        )
-        val exception = assertThrows<IllegalArgumentException> {
-            OncologyAppointment.validate(appointment).alertIfErrors()
-        }
         assertEquals(
-            "Encountered multiple validation errors:\nTenant identifier is required\nPartner department reference must be of type Reference",
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ Appointment.identifier\n" +
+                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Appointment.identifier",
             exception.message
         )
     }
 
     @Test
-    fun `validate succeeds if partnerReference is missing`() {
+    fun `validate checks R4 profile`() {
         val appointment = Appointment(
+            id = Id("12345"),
             identifier = listOf(
-                Identifier(
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    type = CodeableConcepts.RONIN_TENANT,
-                    value = "tenantId"
-                )
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
             ),
-            status = AppointmentStatus.CANCELLED,
+            status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
                     actor = Reference(display = "actor"),
-                    status = ParticipationStatus.ACCEPTED
+                    status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
         )
 
-        OncologyAppointment.validate(appointment)
+        mockkObject(R4AppointmentValidator)
+        every { R4AppointmentValidator.validate(appointment, LocationContext(Appointment::class)) } returns validation {
+            checkNotNull(
+                null,
+                RequiredFieldError(Appointment::basedOn),
+                LocationContext(Appointment::class)
+            )
+        }
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninAppointment.validate(appointment, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: basedOn is a required element @ Appointment.basedOn",
+            exception.message
+        )
+
+        unmockkObject(R4AppointmentValidator)
+    }
+
+    @Test
+    fun `validate succeeds`() {
+        val appointment = Appointment(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+            ),
+            status = AppointmentStatus.CANCELLED.asCode(),
+            participant = listOf(
+                Participant(
+                    actor = Reference(display = "actor"),
+                    status = ParticipationStatus.ACCEPTED.asCode()
+                )
+            )
+        )
+
+        RoninAppointment.validate(appointment, null).alertIfErrors()
     }
 
     @Test
@@ -174,16 +150,16 @@ class OncologyAppointmentTest {
         val appointment = Appointment(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitioner"))
+                profile = listOf(Canonical("http://hl7.org/fhir/R4/appointment.html"))
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED, div = "div"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             extension = listOf(
                 Extension(
-                    url = Uri("http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference"),
-                    value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "reference"))
+                    url = Uri("http://hl7.org/extension-1"),
+                    value = DynamicValue(DynamicValueType.STRING, "value")
                 )
             ),
             modifierExtension = listOf(
@@ -193,7 +169,7 @@ class OncologyAppointmentTest {
                 )
             ),
             identifier = listOf(Identifier(value = "id")),
-            status = AppointmentStatus.CANCELLED,
+            status = AppointmentStatus.CANCELLED.asCode(),
             cancelationReason = CodeableConcept(text = "cancel reason"),
             serviceCategory = listOf(CodeableConcept(text = "service category")),
             serviceType = listOf(CodeableConcept(text = "service type")),
@@ -215,24 +191,24 @@ class OncologyAppointmentTest {
             participant = listOf(
                 Participant(
                     actor = Reference(display = "actor"),
-                    status = ParticipationStatus.ACCEPTED
+                    status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
             requestedPeriod = listOf(Period(start = DateTime("2021-11-16")))
         )
 
-        val transformed = OncologyAppointment.transform(appointment, tenant)
+        val transformed = RoninAppointment.transform(appointment, tenant)
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Appointment", transformed.resourceType)
         assertEquals(Id(value = "test-12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitioner"))),
+            Meta(profile = listOf(Canonical(RONIN_APPOINTMENT_PROFILE))),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED, div = "div"), transformed.text)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"), transformed.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             transformed.contained
@@ -240,8 +216,8 @@ class OncologyAppointmentTest {
         assertEquals(
             listOf(
                 Extension(
-                    url = Uri("http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference"),
-                    value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "reference"))
+                    url = Uri("http://hl7.org/extension-1"),
+                    value = DynamicValue(DynamicValueType.STRING, "value")
                 )
             ),
             transformed.extension
@@ -258,11 +234,12 @@ class OncologyAppointmentTest {
         assertEquals(
             listOf(
                 Identifier(value = "id"),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test")
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
             ),
             transformed.identifier
         )
-        assertEquals(AppointmentStatus.CANCELLED, transformed.status)
+        assertEquals(AppointmentStatus.CANCELLED.asCode(), transformed.status)
         assertEquals(CodeableConcept(text = "cancel reason"), transformed.cancelationReason)
         assertEquals((listOf(CodeableConcept(text = "service category"))), transformed.serviceCategory)
         assertEquals((listOf(CodeableConcept(text = "service type"))), transformed.serviceType)
@@ -284,7 +261,7 @@ class OncologyAppointmentTest {
             listOf(
                 Participant(
                     actor = Reference(display = "actor"),
-                    status = ParticipationStatus.ACCEPTED
+                    status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
             transformed.participant
@@ -296,55 +273,59 @@ class OncologyAppointmentTest {
     fun `transform appointment with only required attributes`() {
         val appointment = Appointment(
             id = Id("12345"),
-            status = AppointmentStatus.CANCELLED,
+            status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
                     actor = Reference(display = "actor"),
-                    status = ParticipationStatus.ACCEPTED
+                    status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
         )
 
-        val transformed = OncologyAppointment.transform(appointment, tenant)
+        val transformed = RoninAppointment.transform(appointment, tenant)
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Appointment", transformed.resourceType)
         assertEquals(Id(value = "test-12345"), transformed.id)
-        Assertions.assertNull(transformed.meta)
-        Assertions.assertNull(transformed.implicitRules)
-        Assertions.assertNull(transformed.language)
-        Assertions.assertNull(transformed.text)
+        assertEquals(
+            Meta(profile = listOf(Canonical(RONIN_APPOINTMENT_PROFILE))),
+            transformed.meta
+        )
+        assertNull(transformed.implicitRules)
+        assertNull(transformed.language)
+        assertNull(transformed.text)
         assertEquals(listOf<ContainedResource>(), transformed.contained)
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test")
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
             ),
             transformed.identifier
         )
-        assertEquals(AppointmentStatus.CANCELLED, transformed.status)
-        Assertions.assertNull(transformed.cancelationReason)
+        assertEquals(AppointmentStatus.CANCELLED.asCode(), transformed.status)
+        assertNull(transformed.cancelationReason)
         assertEquals(listOf<CodeableConcept>(), transformed.serviceCategory)
         assertEquals(listOf<CodeableConcept>(), transformed.serviceType)
         assertEquals(listOf<CodeableConcept>(), transformed.specialty)
-        Assertions.assertNull(transformed.appointmentType)
+        assertNull(transformed.appointmentType)
         assertEquals(listOf<CodeableConcept>(), transformed.reasonCode)
         assertEquals(listOf<Reference>(), transformed.reasonReference)
-        Assertions.assertNull(transformed.priority)
-        Assertions.assertNull(transformed.description)
+        assertNull(transformed.priority)
+        assertNull(transformed.description)
         assertEquals(listOf<Reference>(), transformed.supportingInformation)
-        Assertions.assertNull(transformed.start)
-        Assertions.assertNull(transformed.end)
-        Assertions.assertNull(transformed.minutesDuration)
+        assertNull(transformed.start)
+        assertNull(transformed.end)
+        assertNull(transformed.minutesDuration)
         assertEquals(listOf<Reference>(), transformed.slot)
-        Assertions.assertNull(transformed.created)
-        Assertions.assertNull(transformed.patientInstruction)
+        assertNull(transformed.created)
+        assertNull(transformed.patientInstruction)
         assertEquals(listOf<Reference>(), transformed.basedOn)
         assertEquals(
             listOf(
                 Participant(
                     actor = Reference(display = "actor"),
-                    status = ParticipationStatus.ACCEPTED
+                    status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
             transformed.participant
@@ -361,17 +342,17 @@ class OncologyAppointmentTest {
                     value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "reference"))
                 )
             ),
-            status = AppointmentStatus.CANCELLED,
+            status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
                     actor = Reference(display = "actor"),
-                    status = ParticipationStatus.ACCEPTED
+                    status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
         )
 
-        val transformed = OncologyAppointment.transform(appointment, tenant)
+        val transformed = RoninAppointment.transform(appointment, tenant)
 
-        Assertions.assertNull(transformed)
+        assertNull(transformed)
     }
 }

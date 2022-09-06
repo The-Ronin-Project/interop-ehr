@@ -28,5 +28,9 @@ interface PatientService {
      * that was found to save on future queries. Returns a map of the patient's searched ID to its [GetFHIRIDResponse].
      * If the patient's FHIR ID can't be found, the patient won't be included in the map.
      */
-    fun getPatientsFHIRIds(tenant: Tenant, patientIDSystem: String, patientIDValues: List<String>): Map<String, GetFHIRIDResponse>
+    fun getPatientsFHIRIds(
+        tenant: Tenant,
+        patientIDSystem: String,
+        patientIDValues: List<String>
+    ): Map<String, GetFHIRIDResponse>
 }

@@ -6,6 +6,7 @@ plugins {
 dependencies {
     implementation(project(":interop-tenant"))
     implementation(libs.interop.common)
+    implementation(libs.interop.commonHttp)
     implementation(libs.interop.commonJackson)
     implementation(libs.interop.fhir)
     implementation(libs.ktor.client.core)

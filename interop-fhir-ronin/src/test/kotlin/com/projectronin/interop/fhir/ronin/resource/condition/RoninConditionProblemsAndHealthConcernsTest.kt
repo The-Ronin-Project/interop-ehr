@@ -1,7 +1,6 @@
-package com.projectronin.interop.fhir.ronin.resource
+package com.projectronin.interop.fhir.ronin.resource.condition
 
 import com.projectronin.interop.fhir.r4.CodeSystem
-import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Annotation
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
@@ -23,160 +22,328 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.validate.resource.R4ConditionValidator
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
+import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
+import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.util.asCode
+import com.projectronin.interop.fhir.validate.LocationContext
+import com.projectronin.interop.fhir.validate.RequiredFieldError
+import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class OncologyConditionTest {
+class RoninConditionProblemsAndHealthConcernsTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
 
     @Test
-    fun `validate fails if no tenant identifier provided`() {
+    fun `does not qualify when no categories`() {
         val condition = Condition(
-            identifier = listOf(
-                Identifier(
-                    system = CodeSystem.MRN.uri,
-                    type = CodeableConcepts.MRN,
-                    value = "MRN"
-                ),
-            ),
+            id = Id("12345"),
+            code = CodeableConcept(text = "code"),
+            subject = Reference(display = "reference")
+        )
+
+        val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
+        assertFalse(qualified)
+    }
+
+    @Test
+    fun `does not qualify when category with no codings`() {
+        val condition = Condition(
+            id = Id("12345"),
+            code = CodeableConcept(text = "code"),
+            subject = Reference(display = "reference"),
+            category = listOf(CodeableConcept(text = "category"))
+        )
+
+        val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
+        assertFalse(qualified)
+    }
+
+    @Test
+    fun `does not qualify when coding code is not for a qualifying value`() {
+        val condition = Condition(
+            id = Id("12345"),
+            code = CodeableConcept(text = "code"),
+            subject = Reference(display = "reference"),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
                         Coding(
-                            code = Code("encounter-diagnosis")
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("something")
                         )
-                    ),
-                    text = "Encounter Diagnosis"
-                )
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer"
                     )
                 )
-            ),
-            subject = Reference(
-                reference = "Patient/roninPatientExample01"
             )
         )
-        val exception =
-            assertThrows<IllegalArgumentException> {
-                OncologyCondition.validate(condition).alertIfErrors()
-            }
-        assertEquals("Tenant identifier is required", exception.message)
+
+        val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
+        assertFalse(qualified)
     }
 
     @Test
-    fun `validate category cannot be empty`() {
+    fun `does not qualify when coding code is for qualifying code and wrong system`() {
         val condition = Condition(
-            identifier = listOf(
-                Identifier(
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    type = CodeableConcepts.RONIN_TENANT,
-                    value = "tenantId"
-                )
-            ),
-            category = listOf(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer"
+            id = Id("12345"),
+            code = CodeableConcept(text = "code"),
+            subject = Reference(display = "reference"),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        )
                     )
                 )
-            ),
-            subject = Reference(
-                reference = "Patient/roninPatientExample01"
             )
         )
-        val exception =
-            assertThrows<IllegalArgumentException> {
-                OncologyCondition.validate(condition).alertIfErrors()
-            }
-        assertEquals("At least one category must be provided", exception.message)
+
+        val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
+        assertFalse(qualified)
     }
 
     @Test
-    fun `validate fails for multiple issues`() {
+    fun `qualifies for problem list item`() {
         val condition = Condition(
-            identifier = listOf(
-                Identifier(
-                    system = CodeSystem.MRN.uri,
-                    type = CodeableConcepts.MRN,
-                    value = "MRN"
-                ),
-            ),
-            category = listOf(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer"
+            id = Id("12345"),
+            code = CodeableConcept(text = "code"),
+            subject = Reference(display = "reference"),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        )
                     )
                 )
-            ),
-            subject = Reference(
-                reference = "Patient/roninPatientExample01"
             )
         )
-        val exception =
-            assertThrows<IllegalArgumentException> {
-                OncologyCondition.validate(condition).alertIfErrors()
-            }
+
+        val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
+        assertTrue(qualified)
+    }
+
+    @Test
+    fun `qualifies for health concern`() {
+        val condition = Condition(
+            id = Id("12345"),
+            code = CodeableConcept(text = "code"),
+            subject = Reference(display = "reference"),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("health-concern")
+                        )
+                    )
+                )
+            )
+        )
+
+        val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
+        assertTrue(qualified)
+    }
+
+    @Test
+    fun `validate checks ronin identifiers`() {
+        val condition = Condition(
+            id = Id("12345"),
+            code = CodeableConcept(text = "code"),
+            subject = Reference(display = "reference"),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+        }
+
         assertEquals(
-            "Encountered multiple validation errors:\nTenant identifier is required\nAt least one category must be provided",
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ Condition.identifier\n" +
+                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Condition.identifier",
             exception.message
         )
     }
 
     @Test
-    fun `validate succeeds for valid condition`() {
+    fun `validate fails if no code`() {
         val condition = Condition(
+            id = Id("12345"),
             identifier = listOf(
-                Identifier(
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    type = CodeableConcepts.RONIN_TENANT,
-                    value = "tenantId"
-                )
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
             ),
+            code = null,
+            subject = Reference(display = "reference"),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
                         Coding(
-                            code = Code("encounter-diagnosis")
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
                         )
-                    ),
-                    text = "Encounter Diagnosis"
-                )
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer"
                     )
                 )
-            ),
-            subject = Reference(
-                reference = "Patient/roninPatientExample01"
             )
         )
 
-        OncologyCondition.validate(condition)
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: code is a required element @ Condition.code",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if not a qualifying category`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
+            ),
+            code = CodeableConcept(text = "code"),
+            subject = Reference(display = "reference"),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_CNDPAHC_001: One of the following condition categories required for US Core Condition Problem and Health Concerns profile: problem-list-item, health-concern @ Condition.category",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate checks R4 profile`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
+            ),
+            code = CodeableConcept(text = "code"),
+            subject = Reference(display = "reference"),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        mockkObject(R4ConditionValidator)
+        every { R4ConditionValidator.validate(condition, LocationContext(Condition::class)) } returns validation {
+            checkNotNull(
+                null,
+                RequiredFieldError(Condition::onset),
+                LocationContext(Condition::class)
+            )
+        }
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: onset is a required element @ Condition.onset",
+            exception.message
+        )
+
+        unmockkObject(R4ConditionValidator)
+    }
+
+    @Test
+    fun `validate succeeds`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
+            ),
+            code = CodeableConcept(text = "code"),
+            subject = Reference(display = "reference"),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+    }
+
+    @Test
+    fun `transform fails for condition with no ID`() {
+        val condition = Condition(
+            code = CodeableConcept(text = "code"),
+            subject = Reference(display = "reference"),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        val transformed = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
+        assertNull(transformed)
     }
 
     @Test
@@ -184,12 +351,12 @@ class OncologyConditionTest {
         val condition = Condition(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-condition"))
+                profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner"))
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
             text = Narrative(
-                status = NarrativeStatus.GENERATED,
+                status = NarrativeStatus.GENERATED.asCode(),
                 div = "div"
             ),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"13579"}""")),
@@ -230,10 +397,10 @@ class OncologyConditionTest {
                 CodeableConcept(
                     coding = listOf(
                         Coding(
-                            code = Code("encounter-diagnosis")
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
                         )
-                    ),
-                    text = "Encounter Diagnosis"
+                    )
                 )
             ),
             severity = CodeableConcept(
@@ -316,17 +483,17 @@ class OncologyConditionTest {
             )
         )
 
-        val transformed = OncologyCondition.transform(condition, tenant)
+        val transformed = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
         transformed!!
         assertEquals("Condition", transformed.resourceType)
         assertEquals(Id("test-12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-condition"))),
+            Meta(profile = listOf(Canonical(RONIN_CONDITION_PROBLEMS_PROFILE))),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED, div = "div"), transformed.text)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"), transformed.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","id":"13579"}""")),
             transformed.contained
@@ -352,7 +519,8 @@ class OncologyConditionTest {
         assertEquals(
             listOf(
                 Identifier(value = "id"),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test")
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
             ),
             transformed.identifier
         )
@@ -385,10 +553,10 @@ class OncologyConditionTest {
                 CodeableConcept(
                     coding = listOf(
                         Coding(
-                            code = Code("encounter-diagnosis")
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
                         )
-                    ),
-                    text = "Encounter Diagnosis"
+                    )
                 )
             ),
             transformed.category
@@ -494,18 +662,6 @@ class OncologyConditionTest {
             ),
             transformed.note
         )
-        assertEquals(
-            CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer"
-                    )
-                )
-            ),
-            transformed.code
-        )
     }
 
     @Test
@@ -519,10 +675,10 @@ class OncologyConditionTest {
                 CodeableConcept(
                     coding = listOf(
                         Coding(
-                            code = Code("encounter-diagnosis")
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
                         )
-                    ),
-                    text = "Encounter Diagnosis"
+                    )
                 )
             ),
             code = CodeableConcept(
@@ -539,125 +695,71 @@ class OncologyConditionTest {
             )
         )
 
-        val transformed = OncologyCondition.transform(condition, tenant)
+        val transformed = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
         transformed!!
         assertEquals("Condition", transformed.resourceType)
         assertEquals(Id("test-12345"), transformed.id)
         assertEquals(
+            Meta(profile = listOf(Canonical(RONIN_CONDITION_PROBLEMS_PROFILE))),
+            transformed.meta
+        )
+        assertNull(transformed.implicitRules)
+        assertNull(transformed.language)
+        assertNull(transformed.text)
+        assertEquals(listOf<ContainedResource>(), transformed.contained)
+        assertEquals(listOf<Extension>(), transformed.extension)
+        assertEquals(listOf<Extension>(), transformed.modifierExtension)
+        assertEquals(
             listOf(
                 Identifier(value = "id"),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test")
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
             ),
             transformed.identifier
         )
+        assertNull(transformed.clinicalStatus)
+        assertNull(transformed.verificationStatus)
         assertEquals(
             listOf(
                 CodeableConcept(
                     coding = listOf(
                         Coding(
-                            code = Code("encounter-diagnosis")
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
                         )
-                    ),
-                    text = "Encounter Diagnosis"
+                    )
                 )
             ),
             transformed.category
         )
+        assertNull(transformed.severity)
+        assertEquals(
+            CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = "Non-small cell lung cancer"
+                    )
+                )
+            ),
+            transformed.code
+        )
+        assertEquals(listOf<CodeableConcept>(), transformed.bodySite)
         assertEquals(
             Reference(
                 reference = "Patient/test-roninPatientExample01"
             ),
             transformed.subject
         )
-    }
-
-    @Test
-    fun `transform fails for no id`() {
-        val condition = Condition(
-            identifier = listOf(
-                Identifier(value = "id")
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            code = Code("encounter-diagnosis")
-                        )
-                    ),
-                    text = "Encounter Diagnosis"
-                )
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer"
-                    )
-                )
-            ),
-            subject = Reference(
-                reference = "Patient/roninPatientExample01"
-            )
-        )
-
-        val transformed = OncologyCondition.transform(condition, tenant)
-        assertNull(transformed)
-    }
-
-    @Test
-    fun `transform fails for empty category`() {
-        val condition = Condition(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    type = CodeableConcepts.RONIN_TENANT,
-                    value = "tenantId"
-                )
-            ),
-            category = listOf(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer"
-                    )
-                )
-            ),
-            subject = Reference(
-                reference = "Patient/roninPatientExample01"
-            )
-        )
-
-        val transformed = OncologyCondition.transform(condition, tenant)
-        assertNull(transformed)
-    }
-
-    @Test
-    fun `transform fails for null code`() {
-        val condition = Condition(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(value = "id")
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            code = Code("encounter-diagnosis")
-                        )
-                    ),
-                    text = "Encounter Diagnosis"
-                )
-            ),
-            subject = Reference(
-                reference = "Patient/roninPatientExample01"
-            )
-        )
-
-        val transformed = OncologyCondition.transform(condition, tenant)
-        assertNull(transformed)
+        assertNull(transformed.encounter)
+        assertNull(transformed.onset)
+        assertNull(transformed.abatement)
+        assertNull(transformed.recordedDate)
+        assertNull(transformed.recorder)
+        assertNull(transformed.asserter)
+        assertEquals(listOf<ConditionStage>(), transformed.stage)
+        assertEquals(listOf<ConditionEvidence>(), transformed.evidence)
+        assertEquals(listOf<Annotation>(), transformed.note)
     }
 }

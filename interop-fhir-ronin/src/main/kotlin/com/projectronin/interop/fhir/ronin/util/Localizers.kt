@@ -66,18 +66,18 @@ fun String.localizeReference(tenant: Tenant): String {
 /**
  * Returns true if this list of [Element] update pairs contains any pair indicating an update occurred.
  */
-fun <T : Element> List<Pair<T, Boolean>>.hasUpdates(): Boolean = any { it.second }
+fun <T : Element<T>> List<Pair<T, Boolean>>.hasUpdates(): Boolean = any { it.second }
 
 /**
  * Returns a list of the [Element]s from this list.
  */
-fun <T : Element> List<Pair<T, Boolean>>.values(): List<T> = map { it.first }
+fun <T : Element<T>> List<Pair<T, Boolean>>.values(): List<T> = map { it.first }
 
-private fun getUpdatedExtensions(element: Element, tenant: Tenant): List<Extension> {
+private fun getUpdatedExtensions(element: Element<*>, tenant: Tenant): List<Extension> {
     return getUpdatedExtensions(element.extension, tenant)
 }
 
-private fun getUpdatedModifierExtensions(element: BackboneElement, tenant: Tenant): List<Extension> {
+private fun getUpdatedModifierExtensions(element: BackboneElement<*>, tenant: Tenant): List<Extension> {
     return getUpdatedExtensions(element.modifierExtension, tenant)
 }
 
@@ -198,7 +198,7 @@ fun Coding.localizePair(tenant: Tenant): Pair<Coding, Boolean> {
 fun Communication.localize(tenant: Tenant): Communication {
     val updatedExtensions = getUpdatedExtensions(this, tenant)
     val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
-    val updatedLanguage = language.localize(tenant)
+    val updatedLanguage = language?.localize(tenant)
 
     if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || updatedLanguage !== language) {
         return Communication(
@@ -381,7 +381,7 @@ fun Identifier.localizePair(tenant: Tenant): Pair<Identifier, Boolean> {
 fun PatientLink.localize(tenant: Tenant): PatientLink {
     val updatedExtensions = getUpdatedExtensions(this, tenant)
     val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
-    val updatedOther = other.localize(tenant)
+    val updatedOther = other?.localize(tenant)
 
     if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || updatedOther !== other) {
         return PatientLink(
@@ -526,7 +526,7 @@ fun Qualification.localize(tenant: Tenant): Qualification {
     val identifierLocalizations = identifier.map { it.localizePair(tenant) }
     val updatedIdentifiers = identifierLocalizations.hasUpdates()
 
-    val codePair = code.localizePair(tenant)
+    val codePair = code?.localizePair(tenant) ?: Pair(null, false)
     val periodPair = period?.localizePair(tenant) ?: Pair(null, false)
     val issuerPair = issuer?.localizePair(tenant) ?: Pair(null, false)
 
@@ -674,7 +674,7 @@ fun ObservationComponent.localize(tenant: Tenant): ObservationComponent {
     val updatedInterpretation = interpretation.map { it.localizePair(tenant) }
     val updatedReferenceRange = referenceRange.map { it.localizePair(tenant) }
     val updateValue = value?.type == DynamicValueType.REFERENCE
-    val updatedCode = code.localizePair(tenant)
+    val updatedCode = code?.localizePair(tenant) ?: Pair(null, false)
     if (updatedExtensions.isNotEmpty() ||
         updatedModifierExtensions.isNotEmpty() ||
         updatedDataAbsentReason.second ||

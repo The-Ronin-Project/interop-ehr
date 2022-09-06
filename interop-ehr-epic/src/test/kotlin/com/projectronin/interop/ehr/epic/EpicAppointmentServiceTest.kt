@@ -13,6 +13,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.IDType
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProvider
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.epic.util.asCode
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
 import com.projectronin.interop.ehr.util.toListOfType
@@ -82,12 +83,12 @@ class EpicAppointmentServiceTest {
             BundleEntry(
                 resource = Appointment(
                     id = Id("123"),
-                    status = AppointmentStatus.BOOKED,
+                    status = AppointmentStatus.BOOKED.asCode(),
                     participant = listOf()
                 )
             )
         ),
-        type = BundleType.TRANSACTION_RESPONSE
+        type = BundleType.TRANSACTION_RESPONSE.asCode()
     )
     private val multipleAppointmentBundle = Bundle(
         id = null,
@@ -95,19 +96,19 @@ class EpicAppointmentServiceTest {
             BundleEntry(
                 resource = Appointment(
                     id = Id("123"),
-                    status = AppointmentStatus.BOOKED,
+                    status = AppointmentStatus.BOOKED.asCode(),
                     participant = listOf()
                 )
             ),
             BundleEntry(
                 resource = Appointment(
                     id = Id("456"),
-                    status = AppointmentStatus.BOOKED,
+                    status = AppointmentStatus.BOOKED.asCode(),
                     participant = listOf()
                 )
             )
         ),
-        type = BundleType.TRANSACTION_RESPONSE
+        type = BundleType.TRANSACTION_RESPONSE.asCode()
     )
 
     @BeforeEach
@@ -962,6 +963,7 @@ class EpicAppointmentServiceTest {
         }
         assertEquals("Missing FHIR ID in Aidbox for the 3 providers", exception.message)
     }
+
     @Test
     fun `findProviderAppointments - detailed test`() {
         val tenant =
@@ -1056,7 +1058,8 @@ class EpicAppointmentServiceTest {
                 GetFHIRIDResponse("PatientFhirID", null)
         )
         val provider = epicAppointment.providers.first()
-        val mockInternalIdentifier = Identifier(value = "internal ID", system = Uri(epicVendor.practitionerProviderSystem))
+        val mockInternalIdentifier =
+            Identifier(value = "internal ID", system = Uri(epicVendor.practitionerProviderSystem))
         every {
             identifierService.getPractitionerIdentifier(
                 tenant,
@@ -1085,7 +1088,7 @@ class EpicAppointmentServiceTest {
         assertNull(appt.meta)
         assertEquals(2, appt.identifier.size)
         assertEquals(epicVendor.encounterCSNSystem, appt.identifier[1].system?.value)
-        assertEquals(AppointmentStatus.ENTERED_IN_ERROR, appt.status)
+        assertEquals(AppointmentStatus.ENTERED_IN_ERROR.asCode(), appt.status)
         assertEquals(CodeableConcept(text = epicAppointment.visitTypeName), appt.appointmentType)
         val participants = appt.participant
         assertEquals("Patient/PatientFhirID", participants[0].actor?.reference)

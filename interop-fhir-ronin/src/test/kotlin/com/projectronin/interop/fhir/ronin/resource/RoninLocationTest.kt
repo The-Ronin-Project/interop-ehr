@@ -1,7 +1,5 @@
 package com.projectronin.interop.fhir.ronin.resource
 
-import com.projectronin.interop.fhir.r4.CodeSystem
-import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Address
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
@@ -22,17 +20,26 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.DayOfWeek
 import com.projectronin.interop.fhir.r4.valueset.LocationMode
 import com.projectronin.interop.fhir.r4.valueset.LocationStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
-import com.projectronin.interop.fhir.ronin.util.localize
+import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
+import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.util.asCode
+import com.projectronin.interop.fhir.validate.LocationContext
+import com.projectronin.interop.fhir.validate.RequiredFieldError
+import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -42,30 +49,95 @@ class RoninLocationTest {
     }
 
     @Test
-    fun `validate fails if no tenant identifier provided`() {
-        val location = Location(
-            identifier = listOf(Identifier(value = "id"))
-        )
-        val exception =
-            assertThrows<IllegalArgumentException> {
-                RoninLocation.validate(location).alertIfErrors()
-            }
-        assertEquals("Tenant identifier is required", exception.message)
+    fun `always qualifies`() {
+        assertTrue(RoninLocation.qualifies(Location()))
     }
 
     @Test
-    fun `validate succeeds for valid location`() {
+    fun `validate checks ronin identifiers`() {
         val location = Location(
+            id = Id("12345"),
+            name = "Name"
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninLocation.validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ Location.identifier\n" +
+                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Location.identifier",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails for no name`() {
+        val location = Location(
+            id = Id("12345"),
             identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test"
-                )
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
             )
         )
 
-        RoninLocation.validate(location)
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninLocation.validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: name is a required element @ Location.name",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate checks R4 profile`() {
+        val location = Location(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+            ),
+            name = "My Office"
+        )
+
+        mockkObject(R4LocationValidator)
+        every { R4LocationValidator.validate(location, LocationContext(Location::class)) } returns validation {
+            checkNotNull(
+                null,
+                RequiredFieldError(Location::mode),
+                LocationContext(Location::class)
+            )
+        }
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninLocation.validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: mode is a required element @ Location.mode",
+            exception.message
+        )
+
+        unmockkObject(R4LocationValidator)
+    }
+
+    @Test
+    fun `validate succeeds`() {
+        val location = Location(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+            ),
+            name = "My Office"
+        )
+
+        RoninLocation.validate(location, null).alertIfErrors()
     }
 
     @Test
@@ -101,10 +173,14 @@ class RoninLocationTest {
             )
         )
         val hoursOfOperation =
-            listOf(LocationHoursOfOperation(daysOfWeek = listOf(DayOfWeek.SATURDAY, DayOfWeek.SUNDAY), allDay = true))
+            listOf(
+                LocationHoursOfOperation(
+                    daysOfWeek = listOf(DayOfWeek.SATURDAY.asCode(), DayOfWeek.SUNDAY.asCode()),
+                    allDay = true
+                )
+            )
         val position = LocationPosition(longitude = Decimal(13.81531), latitude = Decimal(66.077132))
         val endpoint = listOf(Reference(reference = "Endpoint/4321"))
-        val local = """${tenant.mnemonic}-"""
         val location = Location(
             id = Id("12345"),
             meta = Meta(
@@ -112,7 +188,7 @@ class RoninLocationTest {
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED, div = "div"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             extension = listOf(
                 Extension(
@@ -127,14 +203,14 @@ class RoninLocationTest {
                 )
             ),
             identifier = listOf(Identifier(value = "id")),
-            status = LocationStatus.ACTIVE,
+            status = LocationStatus.ACTIVE.asCode(),
             operationalStatus = operationalStatus,
             name = "My Office",
             alias = listOf("Guest Room"),
             description = "Sun Room",
-            mode = LocationMode.INSTANCE,
+            mode = LocationMode.INSTANCE.asCode(),
             type = type,
-            telecom = listOf(ContactPoint(value = "123-456-7890", system = ContactPointSystem.PHONE)),
+            telecom = listOf(ContactPoint(value = "123-456-7890", system = ContactPointSystem.PHONE.asCode())),
             address = Address(country = "USA"),
             physicalType = physicalType,
             position = position,
@@ -149,14 +225,14 @@ class RoninLocationTest {
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Location", transformed.resourceType)
-        assertEquals(Id("""${local}12345"""), transformed.id)
+        assertEquals(Id("test-12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical("https://www.hl7.org/fhir/location"))),
+            Meta(profile = listOf(Canonical(RONIN_LOCATION_PROFILE))),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED, div = "div"), transformed.text)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"), transformed.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             transformed.contained
@@ -182,35 +258,37 @@ class RoninLocationTest {
         assertEquals(
             listOf(
                 Identifier(value = "id"),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test")
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
             ),
             transformed.identifier
         )
-        assertEquals(LocationStatus.ACTIVE, transformed.status)
+        assertEquals(LocationStatus.ACTIVE.asCode(), transformed.status)
         assertEquals(operationalStatus, transformed.operationalStatus)
         assertEquals("My Office", transformed.name)
         assertEquals("Guest Room", transformed.alias.first())
         assertEquals("Sun Room", transformed.description)
-        assertEquals(LocationMode.INSTANCE, transformed.mode)
+        assertEquals(LocationMode.INSTANCE.asCode(), transformed.mode)
         assertEquals(type, transformed.type)
         assertEquals(
-            listOf(ContactPoint(value = "123-456-7890", system = ContactPointSystem.PHONE)),
+            listOf(ContactPoint(value = "123-456-7890", system = ContactPointSystem.PHONE.asCode())),
             transformed.telecom
         )
         assertEquals(Address(country = "USA"), transformed.address)
         assertEquals(physicalType, transformed.physicalType)
         assertEquals(position, transformed.position)
-        assertEquals(Reference(reference = """Organization/${local}1234"""), transformed.managingOrganization)
-        assertEquals(Reference(reference = """Location/${local}1234"""), transformed.partOf)
+        assertEquals(Reference(reference = "Organization/test-1234"), transformed.managingOrganization)
+        assertEquals(Reference(reference = "Location/test-1234"), transformed.partOf)
         assertEquals(hoursOfOperation, transformed.hoursOfOperation)
         assertEquals("Call for details", transformed.availabilityExceptions)
-        assertEquals(endpoint.map { it.localize(tenant) }, transformed.endpoint)
+        assertEquals(listOf(Reference(reference = "Endpoint/test-4321")), transformed.endpoint)
     }
 
     @Test
     fun `transforms location with only required attributes`() {
         val location = Location(
             id = Id("12345"),
+            name = "Name"
         )
 
         val transformed = RoninLocation.transform(location, tenant)
@@ -218,7 +296,10 @@ class RoninLocationTest {
         transformed!! // Force it to be treated as non-null
         assertEquals("Location", transformed.resourceType)
         assertEquals(Id("test-12345"), transformed.id)
-        assertNull(transformed.meta)
+        assertEquals(
+            Meta(profile = listOf(Canonical(RONIN_LOCATION_PROFILE))),
+            transformed.meta
+        )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
         assertNull(transformed.text)
@@ -227,12 +308,26 @@ class RoninLocationTest {
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test")
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
             ),
             transformed.identifier
         )
-        assertNull(transformed.name)
+        assertNull(transformed.status)
+        assertNull(transformed.operationalStatus)
+        assertEquals("Name", transformed.name)
+        assertEquals(listOf<String>(), transformed.alias)
+        assertNull(transformed.description)
+        assertNull(transformed.mode)
+        assertEquals(listOf<CodeableConcept>(), transformed.type)
         assertEquals(listOf<ContactPoint>(), transformed.telecom)
         assertNull(transformed.address)
+        assertNull(transformed.physicalType)
+        assertNull(transformed.position)
+        assertNull(transformed.managingOrganization)
+        assertNull(transformed.partOf)
+        assertEquals(listOf<LocationHoursOfOperation>(), transformed.hoursOfOperation)
+        assertNull(transformed.availabilityExceptions)
+        assertEquals(listOf<Reference>(), transformed.endpoint)
     }
 }

@@ -21,6 +21,7 @@ import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Participant
 import com.projectronin.interop.fhir.r4.datatype.Reference
+import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
@@ -133,7 +134,8 @@ class EpicAppointmentService(
         )
 
         val patientFhirIdToAppointments = getAppointmentsResponse.appointments.groupBy {
-            patientFhirIdResponse[it.patientId]?.fhirID ?: throw VendorIdentifierNotFoundException("FHIR ID not found for patient ${it.patientId}")
+            patientFhirIdResponse[it.patientId]?.fhirID
+                ?: throw VendorIdentifierNotFoundException("FHIR ID not found for patient ${it.patientId}")
         }
 
         val r4AppointmentsToReturn = if (useFhirAPI) {
@@ -165,7 +167,10 @@ class EpicAppointmentService(
         }
     }
 
-    private fun retrieveAppointmentFromEpic(tenant: Tenant, patientFhirIdToAppointments: Map<String, List<EpicAppointment>>): List<Appointment> {
+    private fun retrieveAppointmentFromEpic(
+        tenant: Tenant,
+        patientFhirIdToAppointments: Map<String, List<EpicAppointment>>
+    ): List<Appointment> {
         // Setup list of appointments to return
         val appointmentsToReturn: MutableList<Appointment> = mutableListOf()
         // Loop over patients and query Epic for full FHIR object
@@ -204,7 +209,8 @@ class EpicAppointmentService(
         // grab al schedule providers and associate them with their system value for lookup in aidbox
         val allProviders = patientFhirIdToAppointments.values.flatten().map { it.providers }.flatten()
         val providerIdMap = allProviders.associateWith { provider ->
-            val identifier = identifierService.getPractitionerIdentifier(tenant, provider.providerIDs.map { it.toIdentifier() })
+            val identifier =
+                identifierService.getPractitionerIdentifier(tenant, provider.providerIDs.map { it.toIdentifier() })
             if (identifier.system == null || identifier.value == null) {
                 throw VendorIdentifierNotFoundException("Provider identifier missing either system or value: ${identifier.system}, ${identifier.value}")
             } else {
@@ -236,8 +242,7 @@ class EpicAppointmentService(
         }
 
         // now transform all the appointments
-        return patientFhirIdToAppointments.map {
-            entries ->
+        return patientFhirIdToAppointments.map { entries ->
             entries.value.map { appointment ->
                 appointment.transform(
                     patientFHIRId = entries.key,
@@ -278,7 +283,7 @@ class EpicAppointmentService(
                 reference = "Patient/$patientFHIRId",
                 display = this.patientName
             ),
-            status = ParticipationStatus.ACCEPTED
+            status = Code(ParticipationStatus.ACCEPTED.code)
         )
 
         val providerParticipants: List<Participant> = this.providers.map { epicProvider ->
@@ -289,7 +294,7 @@ class EpicAppointmentService(
                     reference = "Practitioner/${providerFhirIdMap[epicProvider]!!}",
                     display = epicProvider.providerName
                 ),
-                status = ParticipationStatus.ACCEPTED
+                status = Code(ParticipationStatus.ACCEPTED.code)
             )
         }
 
@@ -314,7 +319,7 @@ class EpicAppointmentService(
                     system = Uri(csnSystem),
                     type = CodeableConcept(text = "CSN")
                 ),
-            status = transformedStatus,
+            status = Code(transformedStatus.code),
             cancelationReason = null,
             serviceCategory = emptyList(),
             serviceType = emptyList(),
@@ -357,7 +362,11 @@ class EpicAppointmentService(
      * [startTime] should be of the format h:mm.
      * [duration] is the number of minutes the appointment should last.
      */
-    private fun getStartAndEndInstants(date: String, startTime: String, duration: String): Pair<JavaInstant, JavaInstant> {
+    private fun getStartAndEndInstants(
+        date: String,
+        startTime: String,
+        duration: String
+    ): Pair<JavaInstant, JavaInstant> {
         val startDateTime = LocalDateTime.parse(
             "${date.trim()} ${startTime.trim()}",
             DateTimeFormatter.ofPattern("M/d/yyyy h:mm a")

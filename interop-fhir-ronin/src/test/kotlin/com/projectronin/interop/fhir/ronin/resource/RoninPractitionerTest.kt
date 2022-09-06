@@ -1,7 +1,5 @@
 package com.projectronin.interop.fhir.ronin.resource
 
-import com.projectronin.interop.fhir.r4.CodeSystem
-import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Address
 import com.projectronin.interop.fhir.r4.datatype.Attachment
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
@@ -22,154 +20,184 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Practitioner
+import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerValidator
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
+import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
+import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.util.asCode
+import com.projectronin.interop.fhir.validate.LocationContext
+import com.projectronin.interop.fhir.validate.RequiredFieldError
+import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkObject
+import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class OncologyPractitionerTest {
+class RoninPractitionerTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
 
     @Test
-    fun `validate fails if no tenant identifier provided`() {
-        val practitioner = Practitioner(
-            identifier = listOf(),
-            name = listOf(HumanName(family = "Smith"))
-        )
-        val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitioner.validate(practitioner).alertIfErrors()
-        }
-        assertEquals("Tenant identifier is required", exception.message)
+    fun `always qualifies`() {
+        assertTrue(RoninPractitioner.qualifies(Practitioner()))
     }
 
     @Test
-    fun `validate fails if tenant does not have tenant codeable concept`() {
+    fun `validate checks ronin identifiers`() {
         val practitioner = Practitioner(
-            identifier = listOf(
-                Identifier(
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    type = CodeableConcepts.SER,
-                    value = "test"
-                )
-            ),
-            name = listOf(HumanName(family = "Smith"))
+            id = Id("12345"),
+            name = listOf(HumanName(family = "Doe"))
         )
-        val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitioner.validate(practitioner).alertIfErrors()
-        }
-        assertEquals("Tenant identifier provided without proper CodeableConcept defined", exception.message)
-    }
 
-    @Test
-    fun `validate fails if SER does not have SER codeable concept`() {
-        val practitioner = Practitioner(
-            identifier = listOf(
-                Identifier(
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    type = CodeableConcepts.RONIN_TENANT,
-                    value = "tenantId"
-                ),
-                Identifier(system = CodeSystem.SER.uri, type = CodeableConcepts.RONIN_TENANT)
-            ),
-            name = listOf(HumanName(family = "Smith"))
-        )
         val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitioner.validate(practitioner).alertIfErrors()
+            RoninPractitioner.validate(practitioner, null).alertIfErrors()
         }
-        assertEquals("SER provided without proper CodeableConcept defined", exception.message)
-    }
 
-    @Test
-    fun `validate fails if no name provided`() {
-        val practitioner = Practitioner(
-            identifier = listOf(
-                Identifier(
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    type = CodeableConcepts.RONIN_TENANT,
-                    value = "tenantId"
-                )
-            ),
-            name = listOf()
-        )
-        val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitioner.validate(practitioner).alertIfErrors()
-        }
-        assertEquals("At least one name must be provided", exception.message)
-    }
-
-    @Test
-    fun `validate fails if name provided without family`() {
-        val practitioner = Practitioner(
-            identifier = listOf(
-                Identifier(
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    type = CodeableConcepts.RONIN_TENANT,
-                    value = "tenantId"
-                )
-            ),
-            name = listOf(HumanName())
-        )
-        val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitioner.validate(practitioner).alertIfErrors()
-        }
-        assertEquals("All names must have a family name provided", exception.message)
-    }
-
-    @Test
-    fun `validate fails for multiple issues`() {
-        val practitioner = Practitioner(
-            identifier = listOf(
-                Identifier(
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    type = CodeableConcepts.SER,
-                    value = "test"
-                )
-            ),
-            name = listOf()
-        )
-        val exception = assertThrows<IllegalArgumentException> {
-            OncologyPractitioner.validate(practitioner).alertIfErrors()
-        }
         assertEquals(
-            "Encountered multiple validation errors:\nTenant identifier provided without proper CodeableConcept defined\nAt least one name must be provided",
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ Practitioner.identifier\n" +
+                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Practitioner.identifier",
             exception.message
         )
+    }
+
+    @Test
+    fun `validate fails if no name`() {
+        val practitioner = Practitioner(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
+            ),
+            name = listOf()
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninPractitioner.validate(practitioner, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: name is a required element @ Practitioner.name",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if no family name`() {
+        val practitioner = Practitioner(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
+            ),
+            name = listOf(HumanName(given = listOf("George")))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninPractitioner.validate(practitioner, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: family is a required element @ Practitioner.name[0].family",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails for multiple names with no family name`() {
+        val practitioner = Practitioner(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
+            ),
+            name = listOf(
+                HumanName(given = listOf("George")),
+                HumanName(family = "Smith"),
+                HumanName(given = listOf("John"))
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninPractitioner.validate(practitioner, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: family is a required element @ Practitioner.name[0].family\n" +
+                "ERROR REQ_FIELD: family is a required element @ Practitioner.name[2].family",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate checks R4 profile`() {
+        val practitioner = Practitioner(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
+            ),
+            name = listOf(HumanName(family = "Doe"))
+        )
+
+        mockkObject(R4PractitionerValidator)
+        every {
+            R4PractitionerValidator.validate(
+                practitioner,
+                LocationContext(Practitioner::class)
+            )
+        } returns validation {
+            checkNotNull(
+                null,
+                RequiredFieldError(Practitioner::address),
+                LocationContext(Practitioner::class)
+            )
+        }
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninPractitioner.validate(practitioner, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: address is a required element @ Practitioner.address",
+            exception.message
+        )
+
+        unmockkObject(R4PractitionerValidator)
+    }
+
+    @Test
+    fun `validate succeeds`() {
+        val practitioner = Practitioner(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
+            ),
+            name = listOf(HumanName(family = "Doe"))
+        )
+
+        RoninPractitioner.validate(practitioner, null).alertIfErrors()
     }
 
     @Test
     fun `transform fails for practitioner with no ID`() {
         val practitioner = Practitioner()
 
-        val transformed = OncologyPractitioner.transform(practitioner, tenant)
-        assertNull(transformed)
-    }
-
-    @Test
-    fun `transform fails for practitioner with no name`() {
-        val practitioner = Practitioner(
-            id = Id("12345")
-        )
-
-        val transformed = OncologyPractitioner.transform(practitioner, tenant)
-        assertNull(transformed)
-    }
-
-    @Test
-    fun `transform fails for practitioner name with no family name`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            name = listOf(HumanName(given = listOf("Jane")))
-        )
-
-        val transformed = OncologyPractitioner.transform(practitioner, tenant)
+        val transformed = RoninPractitioner.transform(practitioner, tenant)
         assertNull(transformed)
     }
 
@@ -178,11 +206,11 @@ class OncologyPractitionerTest {
         val practitioner = Practitioner(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitioner"))
+                profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner"))
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED, div = "div"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             extension = listOf(
                 Extension(
@@ -199,27 +227,27 @@ class OncologyPractitionerTest {
             identifier = listOf(Identifier(value = "id")),
             active = true,
             name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE, value = "8675309")),
+            telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309")),
             address = listOf(Address(country = "USA")),
-            gender = AdministrativeGender.FEMALE,
+            gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05"),
             photo = listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
             qualification = listOf(Qualification(code = CodeableConcept(text = "code"))),
             communication = listOf(CodeableConcept(text = "communication"))
         )
 
-        val transformed = OncologyPractitioner.transform(practitioner, tenant)
+        val transformed = RoninPractitioner.transform(practitioner, tenant)
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Practitioner", transformed.resourceType)
         assertEquals(Id("test-12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical("http://projectronin.com/fhir/us/ronin/StructureDefinition/oncology-practitioner"))),
+            Meta(profile = listOf(Canonical(RONIN_PRACTITIONER_PROFILE))),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED, div = "div"), transformed.text)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"), transformed.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             transformed.contained
@@ -245,19 +273,19 @@ class OncologyPractitionerTest {
         assertEquals(
             listOf(
                 Identifier(value = "id"),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test"),
-                Identifier(type = CodeableConcepts.FHIR_STU3_ID, system = CodeSystem.FHIR_STU3_ID.uri, value = "12345")
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
             ),
             transformed.identifier
         )
         assertEquals(true, transformed.active)
         assertEquals(listOf(HumanName(family = "Doe")), transformed.name)
         assertEquals(
-            listOf(ContactPoint(system = ContactPointSystem.PHONE, value = "8675309")),
+            listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309")),
             transformed.telecom
         )
         assertEquals(listOf(Address(country = "USA")), transformed.address)
-        assertEquals(AdministrativeGender.FEMALE, transformed.gender)
+        assertEquals(AdministrativeGender.FEMALE.asCode(), transformed.gender)
         assertEquals(Date("1975-07-05"), transformed.birthDate)
         assertEquals(
             listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
@@ -274,12 +302,15 @@ class OncologyPractitionerTest {
             name = listOf(HumanName(family = "Doe"))
         )
 
-        val transformed = OncologyPractitioner.transform(practitioner, tenant)
+        val transformed = RoninPractitioner.transform(practitioner, tenant)
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Practitioner", transformed.resourceType)
         assertEquals(Id("test-12345"), transformed.id)
-        assertNull(transformed.meta)
+        assertEquals(
+            Meta(profile = listOf(Canonical(RONIN_PRACTITIONER_PROFILE))),
+            transformed.meta
+        )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
         assertNull(transformed.text)
@@ -288,8 +319,8 @@ class OncologyPractitionerTest {
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test"),
-                Identifier(type = CodeableConcepts.FHIR_STU3_ID, system = CodeSystem.FHIR_STU3_ID.uri, value = "12345")
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
             ),
             transformed.identifier
         )

@@ -180,8 +180,8 @@ class LocalizersTest {
         val address = Address(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = AddressUse.HOME,
-            type = AddressType.POSTAL,
+            use = AddressUse.HOME.asCode(),
+            type = AddressType.POSTAL.asCode(),
             text = "Address",
             line = listOf("Line"),
             city = "City",
@@ -200,8 +200,8 @@ class LocalizersTest {
         val address = Address(
             id = "12345",
             extension = localizableExtensions,
-            use = AddressUse.HOME,
-            type = AddressType.POSTAL,
+            use = AddressUse.HOME.asCode(),
+            type = AddressType.POSTAL.asCode(),
             text = "Address",
             line = listOf("Line"),
             city = "City",
@@ -218,8 +218,8 @@ class LocalizersTest {
         val expectedAddress = Address(
             id = "12345",
             extension = localizedExtensions,
-            use = AddressUse.HOME,
-            type = AddressType.POSTAL,
+            use = AddressUse.HOME.asCode(),
+            type = AddressType.POSTAL.asCode(),
             text = "Address",
             line = listOf("Line"),
             city = "City",
@@ -237,8 +237,8 @@ class LocalizersTest {
         val address = Address(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = AddressUse.HOME,
-            type = AddressType.POSTAL,
+            use = AddressUse.HOME.asCode(),
+            type = AddressType.POSTAL.asCode(),
             text = "Address",
             line = listOf("Line"),
             city = "City",
@@ -255,8 +255,8 @@ class LocalizersTest {
         val expectedAddress = Address(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = AddressUse.HOME,
-            type = AddressType.POSTAL,
+            use = AddressUse.HOME.asCode(),
+            type = AddressType.POSTAL.asCode(),
             text = "Address",
             line = listOf("Line"),
             city = "City",
@@ -274,8 +274,8 @@ class LocalizersTest {
         val address = Address(
             id = "12345",
             extension = localizableExtensions,
-            use = AddressUse.HOME,
-            type = AddressType.POSTAL,
+            use = AddressUse.HOME.asCode(),
+            type = AddressType.POSTAL.asCode(),
             text = "Address",
             line = listOf("Line"),
             city = "City",
@@ -292,8 +292,8 @@ class LocalizersTest {
         val expectedAddress = Address(
             id = "12345",
             extension = localizedExtensions,
-            use = AddressUse.HOME,
-            type = AddressType.POSTAL,
+            use = AddressUse.HOME.asCode(),
+            type = AddressType.POSTAL.asCode(),
             text = "Address",
             line = listOf("Line"),
             city = "City",
@@ -931,9 +931,9 @@ class LocalizersTest {
         val contactPoint = ContactPoint(
             id = "12345",
             extension = nonLocalizableExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(start = DateTime("2021"))
         )
@@ -946,9 +946,9 @@ class LocalizersTest {
         val contactPoint = ContactPoint(
             id = "12345",
             extension = localizableExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(start = DateTime("2021"))
         )
@@ -958,9 +958,9 @@ class LocalizersTest {
         val expectedContactPoint = ContactPoint(
             id = "12345",
             extension = localizedExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(start = DateTime("2021"))
         )
@@ -972,9 +972,9 @@ class LocalizersTest {
         val contactPoint = ContactPoint(
             id = "12345",
             extension = nonLocalizableExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(extension = localizableExtensions, start = DateTime("2021"))
         )
@@ -984,9 +984,9 @@ class LocalizersTest {
         val expectedContactPoint = ContactPoint(
             id = "12345",
             extension = nonLocalizableExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(extension = localizedExtensions, start = DateTime("2021"))
         )
@@ -998,9 +998,9 @@ class LocalizersTest {
         val contactPoint = ContactPoint(
             id = "12345",
             extension = localizableExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(extension = localizableExtensions, start = DateTime("2021"))
         )
@@ -1010,9 +1010,9 @@ class LocalizersTest {
         val expectedContactPoint = ContactPoint(
             id = "12345",
             extension = localizedExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(extension = localizedExtensions, start = DateTime("2021"))
         )
@@ -1024,9 +1024,9 @@ class LocalizersTest {
         val contactPoint = ContactPoint(
             id = "12345",
             extension = nonLocalizableExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(start = DateTime("2021"))
         )
@@ -1041,9 +1041,9 @@ class LocalizersTest {
         val contactPoint = ContactPoint(
             id = "12345",
             extension = localizableExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(start = DateTime("2021"))
         )
@@ -1054,9 +1054,9 @@ class LocalizersTest {
         val expectedContactPoint = ContactPoint(
             id = "12345",
             extension = localizedExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(start = DateTime("2021"))
         )
@@ -1068,9 +1068,9 @@ class LocalizersTest {
         val contactPoint = ContactPoint(
             id = "12345",
             extension = nonLocalizableExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(extension = localizableExtensions, start = DateTime("2021"))
         )
@@ -1081,9 +1081,9 @@ class LocalizersTest {
         val expectedContactPoint = ContactPoint(
             id = "12345",
             extension = nonLocalizableExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(extension = localizedExtensions, start = DateTime("2021"))
         )
@@ -1095,9 +1095,9 @@ class LocalizersTest {
         val contactPoint = ContactPoint(
             id = "12345",
             extension = localizableExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(extension = localizableExtensions, start = DateTime("2021"))
         )
@@ -1108,9 +1108,9 @@ class LocalizersTest {
         val expectedContactPoint = ContactPoint(
             id = "12345",
             extension = localizedExtensions,
-            system = ContactPointSystem.PHONE,
+            system = ContactPointSystem.PHONE.asCode(),
             value = "8675309",
-            use = ContactPointUse.OLD,
+            use = ContactPointUse.OLD.asCode(),
             rank = PositiveInt(3),
             period = Period(extension = localizedExtensions, start = DateTime("2021"))
         )
@@ -1203,7 +1203,7 @@ class LocalizersTest {
         val humanName = HumanName(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = NameUse.OFFICIAL,
+            use = NameUse.OFFICIAL.asCode(),
             text = "Text",
             family = "Family",
             given = listOf("Given"),
@@ -1220,7 +1220,7 @@ class LocalizersTest {
         val humanName = HumanName(
             id = "12345",
             extension = localizableExtensions,
-            use = NameUse.OFFICIAL,
+            use = NameUse.OFFICIAL.asCode(),
             text = "Text",
             family = "Family",
             given = listOf("Given"),
@@ -1234,7 +1234,7 @@ class LocalizersTest {
         val expectedHumanName = HumanName(
             id = "12345",
             extension = localizedExtensions,
-            use = NameUse.OFFICIAL,
+            use = NameUse.OFFICIAL.asCode(),
             text = "Text",
             family = "Family",
             given = listOf("Given"),
@@ -1250,7 +1250,7 @@ class LocalizersTest {
         val humanName = HumanName(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = NameUse.OFFICIAL,
+            use = NameUse.OFFICIAL.asCode(),
             text = "Text",
             family = "Family",
             given = listOf("Given"),
@@ -1264,7 +1264,7 @@ class LocalizersTest {
         val expectedHumanName = HumanName(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = NameUse.OFFICIAL,
+            use = NameUse.OFFICIAL.asCode(),
             text = "Text",
             family = "Family",
             given = listOf("Given"),
@@ -1280,7 +1280,7 @@ class LocalizersTest {
         val humanName = HumanName(
             id = "12345",
             extension = localizableExtensions,
-            use = NameUse.OFFICIAL,
+            use = NameUse.OFFICIAL.asCode(),
             text = "Text",
             family = "Family",
             given = listOf("Given"),
@@ -1294,7 +1294,7 @@ class LocalizersTest {
         val expectedHumanName = HumanName(
             id = "12345",
             extension = localizedExtensions,
-            use = NameUse.OFFICIAL,
+            use = NameUse.OFFICIAL.asCode(),
             text = "Text",
             family = "Family",
             given = listOf("Given"),
@@ -1310,7 +1310,7 @@ class LocalizersTest {
         val identifier = Identifier(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1326,7 +1326,7 @@ class LocalizersTest {
         val identifier = Identifier(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1339,7 +1339,7 @@ class LocalizersTest {
         val expectedIdentifier = Identifier(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1354,7 +1354,7 @@ class LocalizersTest {
         val identifier = Identifier(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1371,7 +1371,7 @@ class LocalizersTest {
         val identifier = Identifier(
             id = "12345",
             extension = localizableExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1385,7 +1385,7 @@ class LocalizersTest {
         val expectedIdentifier = Identifier(
             id = "12345",
             extension = localizedExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1400,7 +1400,7 @@ class LocalizersTest {
         val identifier = Identifier(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(extension = localizableExtensions, text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1414,7 +1414,7 @@ class LocalizersTest {
         val expectedIdentifier = Identifier(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(extension = localizedExtensions, text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1429,7 +1429,7 @@ class LocalizersTest {
         val identifier = Identifier(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1443,7 +1443,7 @@ class LocalizersTest {
         val expectedIdentifier = Identifier(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1458,7 +1458,7 @@ class LocalizersTest {
         val identifier = Identifier(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1472,7 +1472,7 @@ class LocalizersTest {
         val expectedIdentifier = Identifier(
             id = "12345",
             extension = nonLocalizableExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1487,7 +1487,7 @@ class LocalizersTest {
         val identifier = Identifier(
             id = "12345",
             extension = localizableExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(extension = localizableExtensions, text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1501,7 +1501,7 @@ class LocalizersTest {
         val expectedIdentifier = Identifier(
             id = "12345",
             extension = localizedExtensions,
-            use = IdentifierUse.OFFICIAL,
+            use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(extension = localizedExtensions, text = "type"),
             system = Uri("system"),
             value = "value",
@@ -1518,7 +1518,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             other = Reference(extension = nonLocalizableExtensions),
-            type = LinkType.REPLACES
+            type = LinkType.REPLACES.asCode()
         )
         val localizedLink = link.localize(tenant)
         assertTrue(localizedLink === link)
@@ -1531,7 +1531,7 @@ class LocalizersTest {
             extension = localizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             other = Reference(extension = nonLocalizableExtensions),
-            type = LinkType.REPLACES
+            type = LinkType.REPLACES.asCode()
         )
         val localizedLink = link.localize(tenant)
         assertNotEquals(localizedLink, link)
@@ -1541,7 +1541,7 @@ class LocalizersTest {
             extension = localizedExtensions,
             modifierExtension = nonLocalizableExtensions,
             other = Reference(extension = nonLocalizableExtensions),
-            type = LinkType.REPLACES
+            type = LinkType.REPLACES.asCode()
         )
         assertEquals(expectedLink, localizedLink)
     }
@@ -1553,7 +1553,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = localizableExtensions,
             other = Reference(extension = nonLocalizableExtensions),
-            type = LinkType.REPLACES
+            type = LinkType.REPLACES.asCode()
         )
         val localizedLink = link.localize(tenant)
         assertNotEquals(localizedLink, link)
@@ -1563,7 +1563,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = localizedExtensions,
             other = Reference(extension = nonLocalizableExtensions),
-            type = LinkType.REPLACES
+            type = LinkType.REPLACES.asCode()
         )
         assertEquals(expectedLink, localizedLink)
     }
@@ -1575,7 +1575,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             other = Reference(extension = localizableExtensions),
-            type = LinkType.REPLACES
+            type = LinkType.REPLACES.asCode()
         )
         val localizedLink = link.localize(tenant)
         assertNotEquals(localizedLink, link)
@@ -1585,7 +1585,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             other = Reference(extension = localizedExtensions),
-            type = LinkType.REPLACES
+            type = LinkType.REPLACES.asCode()
         )
         assertEquals(expectedLink, localizedLink)
     }
@@ -1597,7 +1597,7 @@ class LocalizersTest {
             extension = localizableExtensions,
             modifierExtension = localizableExtensions,
             other = Reference(extension = localizableExtensions),
-            type = LinkType.REPLACES
+            type = LinkType.REPLACES.asCode()
         )
         val localizedLink = link.localize(tenant)
         assertNotEquals(localizedLink, link)
@@ -1607,7 +1607,7 @@ class LocalizersTest {
             extension = localizedExtensions,
             modifierExtension = localizedExtensions,
             other = Reference(extension = localizedExtensions),
-            type = LinkType.REPLACES
+            type = LinkType.REPLACES.asCode()
         )
         assertEquals(expectedLink, localizedLink)
     }
@@ -1745,7 +1745,7 @@ class LocalizersTest {
         val narrative = Narrative(
             id = "12345",
             extension = nonLocalizableExtensions,
-            status = NarrativeStatus.GENERATED,
+            status = NarrativeStatus.GENERATED.asCode(),
             div = "div"
         )
         val localizedNarrative = narrative.localize(tenant)
@@ -1757,7 +1757,7 @@ class LocalizersTest {
         val narrative = Narrative(
             id = "12345",
             extension = localizableExtensions,
-            status = NarrativeStatus.GENERATED,
+            status = NarrativeStatus.GENERATED.asCode(),
             div = "div"
         )
         val localizedNarrative = narrative.localize(tenant)
@@ -1766,7 +1766,7 @@ class LocalizersTest {
         val expectedNarrative = Narrative(
             id = "12345",
             extension = localizedExtensions,
-            status = NarrativeStatus.GENERATED,
+            status = NarrativeStatus.GENERATED.asCode(),
             div = "div"
         )
         assertEquals(expectedNarrative, localizedNarrative)
@@ -1881,8 +1881,8 @@ class LocalizersTest {
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
             actor = Reference(extension = nonLocalizableExtensions),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
@@ -1896,8 +1896,8 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
@@ -1912,8 +1912,8 @@ class LocalizersTest {
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
             actor = Reference(extension = nonLocalizableExtensions),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
@@ -1925,8 +1925,8 @@ class LocalizersTest {
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
             actor = Reference(extension = nonLocalizableExtensions),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = nonLocalizableExtensions)
         )
         assertEquals(expectedParticipant, localizedParticipant)
@@ -1939,8 +1939,8 @@ class LocalizersTest {
             extension = localizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
@@ -1951,8 +1951,8 @@ class LocalizersTest {
             extension = localizedExtensions,
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = nonLocalizableExtensions)
         )
         assertEquals(expectedParticipant, localizedParticipant)
@@ -1966,8 +1966,8 @@ class LocalizersTest {
             modifierExtension = localizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
             actor = Reference(extension = nonLocalizableExtensions),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
@@ -1979,8 +1979,8 @@ class LocalizersTest {
             modifierExtension = localizedExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
             actor = Reference(extension = nonLocalizableExtensions),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = nonLocalizableExtensions)
         )
         assertEquals(expectedParticipant, localizedParticipant)
@@ -1994,8 +1994,8 @@ class LocalizersTest {
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = localizableExtensions)),
             actor = Reference(extension = nonLocalizableExtensions),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
@@ -2007,8 +2007,8 @@ class LocalizersTest {
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = localizedExtensions)),
             actor = Reference(extension = nonLocalizableExtensions),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = nonLocalizableExtensions)
         )
         assertEquals(expectedParticipant, localizedParticipant)
@@ -2022,8 +2022,8 @@ class LocalizersTest {
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
             actor = Reference(extension = localizableExtensions),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
@@ -2035,8 +2035,8 @@ class LocalizersTest {
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
             actor = Reference(extension = localizedExtensions),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = nonLocalizableExtensions)
         )
         assertEquals(expectedParticipant, localizedParticipant)
@@ -2050,8 +2050,8 @@ class LocalizersTest {
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
             actor = Reference(extension = nonLocalizableExtensions),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = localizableExtensions)
         )
         val localizedParticipant = participant.localize(tenant)
@@ -2063,8 +2063,8 @@ class LocalizersTest {
             modifierExtension = nonLocalizableExtensions,
             type = listOf(CodeableConcept(extension = nonLocalizableExtensions)),
             actor = Reference(extension = nonLocalizableExtensions),
-            required = ParticipantRequired.REQUIRED,
-            status = ParticipationStatus.ACCEPTED,
+            required = ParticipantRequired.REQUIRED.asCode(),
+            status = ParticipationStatus.ACCEPTED.asCode(),
             period = Period(extension = localizedExtensions)
         )
         assertEquals(expectedParticipant, localizedParticipant)
@@ -2743,7 +2743,7 @@ class LocalizersTest {
             identifier = Identifier(
                 id = "12345",
                 extension = localizableExtensions,
-                use = IdentifierUse.OFFICIAL,
+                use = IdentifierUse.OFFICIAL.asCode(),
                 type = CodeableConcept(extension = localizableExtensions, text = "type"),
                 system = Uri("system"),
                 value = "value",
@@ -2764,7 +2764,7 @@ class LocalizersTest {
             identifier = Identifier(
                 id = "12345",
                 extension = localizedExtensions,
-                use = IdentifierUse.OFFICIAL,
+                use = IdentifierUse.OFFICIAL.asCode(),
                 type = CodeableConcept(extension = localizedExtensions, text = "type"),
                 system = Uri("system"),
                 value = "value",

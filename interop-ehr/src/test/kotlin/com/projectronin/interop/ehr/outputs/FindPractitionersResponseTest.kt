@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.outputs
 
+import com.projectronin.interop.ehr.util.asCode
 import com.projectronin.interop.fhir.r4.datatype.BundleEntry
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.resource.Bundle
@@ -20,7 +21,7 @@ internal class FindPractitionersResponseTest {
         entries.add(BundleEntry(resource = Location(id = Id("LOCALE1"))))
         val bundle = Bundle(
             id = Id("123"),
-            type = BundleType.BATCH_RESPONSE,
+            type = BundleType.BATCH_RESPONSE.asCode(),
             entry = entries
         )
         val response = FindPractitionersResponse(bundle)

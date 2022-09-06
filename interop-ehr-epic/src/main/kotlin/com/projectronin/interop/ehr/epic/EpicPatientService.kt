@@ -104,7 +104,11 @@ class EpicPatientService(
         return patientsFoundByKey
     }
 
-    override fun getPatientsFHIRIds(tenant: Tenant, patientIDSystem: String, patientIDValues: List<String>): Map<String, GetFHIRIDResponse> {
+    override fun getPatientsFHIRIds(
+        tenant: Tenant,
+        patientIDSystem: String,
+        patientIDValues: List<String>
+    ): Map<String, GetFHIRIDResponse> {
         // Try the list of patients against Aidbox first
         val aidboxResponse = aidboxPatientService.getPatientFHIRIds(
             tenantMnemonic = tenant.mnemonic,

@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.outputs
 
+import com.projectronin.interop.ehr.util.asCode
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.resource.Patient
@@ -13,7 +14,7 @@ internal class FindPractitionerAppointmentsResponseTest {
     fun test() {
         val patients = listOf(Patient(id = Id("12345")))
         val appointments =
-            listOf(Appointment(id = Id("54321"), participant = listOf(), status = AppointmentStatus.BOOKED))
+            listOf(Appointment(id = Id("54321"), participant = listOf(), status = AppointmentStatus.BOOKED.asCode()))
         val obj = FindPractitionerAppointmentsResponse(appointments, patients)
         assertEquals(appointments, obj.appointments)
         assertEquals(patients, obj.newPatients)
