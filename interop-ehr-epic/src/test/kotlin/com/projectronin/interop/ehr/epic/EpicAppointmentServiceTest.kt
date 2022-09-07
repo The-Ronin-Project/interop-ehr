@@ -39,6 +39,7 @@ import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.spyk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -872,7 +873,7 @@ class EpicAppointmentServiceTest {
     }
 
     @Test
-    fun `findProviderAppointments - ensure when provider doesn't exist in aidbox we error`() {
+    fun `findProviderAppointments - ensure when provider doesn't exist in aidbox we are cool`() {
         val tenant =
             createTestTenant(
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
@@ -953,15 +954,17 @@ class EpicAppointmentServiceTest {
         }
         every { aidboxPractitionerService.getPractitionerFHIRIds(tenant.mnemonic, fakeMap) } returns emptyMap()
 
-        val exception = assertThrows<IllegalStateException> {
-            epicAppointmentService.findProviderAppointments(
-                tenant,
-                listOf(goodProviderFHIRIdentifier),
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
-        }
-        assertEquals("Missing FHIR ID in Aidbox for the 3 providers", exception.message)
+        val response = epicAppointmentService.findProviderAppointments(
+            tenant,
+            listOf(goodProviderFHIRIdentifier),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
+
+        assertEquals(6, response.appointments.size)
+        val providerParticipant = response.appointments.first().participant.first { it.actor?.type == Uri("Practitioner") }
+        assertNotNull(providerParticipant)
+        assertNotNull(providerParticipant.actor?.identifier)
     }
 
     @Test

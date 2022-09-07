@@ -222,29 +222,20 @@ class EpicAppointmentService(
             // strip of the tenant prefix we get from aidbox on those values
             .entries.associate { it.key to it.value.unlocalize(tenant) }
 
-        // getPractitionerFHIRIds will return null for cases it didn't find a FHIR ID, we should check here before
-        // attempting to transform the appointments so we can provide better error messages
-        val missingProviders = providerIdMap.mapNotNull {
+        providerIdMap.entries.forEach {
             if (providerToFhirIdMap[it.key] == null) {
                 logger.warn {
                     "Missing FHIR ID in Aidbox for provider with " +
                         "Name: ${it.key.providerName} and SystemValue: ${it.value.queryString}"
                 }
-                it.value
-            } else {
-                null
             }
-        }
-        if (missingProviders.isNotEmpty()) {
-            throw IllegalStateException(
-                "Missing FHIR ID in Aidbox for the ${missingProviders.size} providers"
-            )
         }
 
         // now transform all the appointments
         return patientFhirIdToAppointments.map { entries ->
             entries.value.map { appointment ->
                 appointment.transform(
+                    tenant = tenant,
                     patientFHIRId = entries.key,
                     providerFhirIdMap = providerToFhirIdMap,
                     csnSystem = tenant.vendorAs<Epic>().encounterCSNSystem
@@ -258,6 +249,7 @@ class EpicAppointmentService(
      *  a [providerFhirIdMap] where any provider on the appointment can be looked up and find the FHIR id
      */
     private fun EpicAppointment.transform(
+        tenant: Tenant,
         patientFHIRId: String,
         providerFhirIdMap: Map<ScheduleProviderReturnWithTime, String>,
         csnSystem: String
@@ -281,21 +273,33 @@ class EpicAppointmentService(
         val patientParticipant = Participant(
             actor = Reference(
                 reference = "Patient/$patientFHIRId",
-                display = this.patientName
+                display = this.patientName,
+                type = Uri("Patient")
             ),
             status = Code(ParticipationStatus.ACCEPTED.code)
         )
 
         val providerParticipants: List<Participant> = this.providers.map { epicProvider ->
-            Participant(
-                actor = Reference(
-                    // if for some reason the providerMap doesn't have the provider here from the lookup
-                    // we'll blow up here, we have a check earlier so this should never happen
-                    reference = "Practitioner/${providerFhirIdMap[epicProvider]!!}",
-                    display = epicProvider.providerName
-                ),
-                status = Code(ParticipationStatus.ACCEPTED.code)
-            )
+            val fhirID = providerFhirIdMap[epicProvider]
+            if (fhirID == null) {
+                Participant(
+                    actor = Reference(
+                        identifier = identifierService.getPractitionerIdentifier(tenant, epicProvider.providerIDs.map { it.toIdentifier() }),
+                        display = epicProvider.providerName,
+                        type = Uri("Practitioner")
+                    ),
+                    status = Code(ParticipationStatus.ACCEPTED.code)
+                )
+            } else {
+                Participant(
+                    actor = Reference(
+                        reference = "Practitioner/$fhirID",
+                        display = epicProvider.providerName,
+                        type = Uri("Practitioner")
+                    ),
+                    status = Code(ParticipationStatus.ACCEPTED.code)
+                )
+            }
         }
 
         val participants = listOf(patientParticipant).plus(providerParticipants)
