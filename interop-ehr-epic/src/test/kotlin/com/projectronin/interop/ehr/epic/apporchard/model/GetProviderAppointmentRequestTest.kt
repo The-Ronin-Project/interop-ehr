@@ -51,7 +51,8 @@ class GetProviderAppointmentRequestTest {
               } ],
               "Departments" : [ ],
               "Subgroups" : [ ],
-              "ExtraExtensions" : [ ]
+              "ExtraExtensions" : [ ],
+              "IncludeAllStatuses" : "true"
             }
         """.trimIndent()
         assertEquals(expectedJson, actualJson)
@@ -95,7 +96,8 @@ class GetProviderAppointmentRequestTest {
               } ],
               "Departments" : [ ],
               "Subgroups" : [ ],
-              "ExtraExtensions" : [ ]
+              "ExtraExtensions" : [ ],
+              "IncludeAllStatuses" : "true"
             }
         """.trimIndent()
         assertEquals(expectedJson, actualJson)
