@@ -36,6 +36,7 @@ class EpicTenantDAOTest {
         assertEquals("urn:oid:mrn.system", epicTenant?.patientMRNSystem)
         assertEquals("urn:oid:internal.system", epicTenant?.patientInternalSystem)
         assertEquals("urn:oid:encounter.system", epicTenant?.encounterCSNSystem)
+        assertEquals("urn:oid:department.system", epicTenant?.departmentInternalSystem)
         assertEquals("urn:epic:apporchard.curprod", epicTenant?.hsi)
     }
 
@@ -78,6 +79,7 @@ class EpicTenantDAOTest {
             patientInternalSystem = "internalSystem"
             encounterCSNSystem = "csnSystem"
             hsi = "hsi"
+            departmentInternalSystem = "departmentSystem"
         }
 
         val result = dao.insert(testobj)
@@ -93,6 +95,7 @@ class EpicTenantDAOTest {
         assertEquals(testobj.patientInternalSystem, result.patientInternalSystem)
         assertEquals(testobj.encounterCSNSystem, result.encounterCSNSystem)
         assertEquals(testobj.hsi, result.hsi)
+        assertEquals(testobj.departmentInternalSystem, result.departmentInternalSystem)
     }
 
     @Test
@@ -137,6 +140,7 @@ class EpicTenantDAOTest {
             patientInternalSystem = "internalSystem"
             encounterCSNSystem = "csnSystem"
             hsi = "hsi"
+            departmentInternalSystem = "departmentSystem"
         }
         val result = dao.update(updated)
         assertNotNull(result)
@@ -155,5 +159,6 @@ class EpicTenantDAOTest {
         assertEquals(updated.patientInternalSystem, found?.patientInternalSystem)
         assertEquals(updated.encounterCSNSystem, found?.encounterCSNSystem)
         assertEquals(updated.hsi, found?.hsi)
+        assertEquals(updated.departmentInternalSystem, found?.departmentInternalSystem)
     }
 }

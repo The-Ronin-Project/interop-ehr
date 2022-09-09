@@ -23,4 +23,5 @@ object EpicTenantDOs : Table<EpicTenantDO>("io_tenant_epic") {
     val encounterCSNSystem = varchar("encounter_csn_system").bindTo { it.encounterCSNSystem }
     val patientMRNTypeText = varchar("mrn_type_text").bindTo { it.patientMRNTypeText }
     val hsi = varchar("hsi").bindTo { it.hsi }
+    val departmentInternalSystem = varchar("department_internal_system").bindTo { it.departmentInternalSystem }
 }

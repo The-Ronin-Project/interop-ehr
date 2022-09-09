@@ -1,0 +1,3 @@
+databaseChangeLog:
+  - include:
+      file: ehr/db/changelog/tenant-epic/io_tenant_epic-04.yaml
