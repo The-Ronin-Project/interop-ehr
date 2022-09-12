@@ -2,7 +2,10 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.ObservationService
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.inputs.FHIRSearchToken
 import com.projectronin.interop.ehr.util.toListOfType
+import com.projectronin.interop.ehr.util.toOrParams
+import com.projectronin.interop.ehr.util.toSearchTokens
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.beans.factory.annotation.Value
@@ -20,6 +23,8 @@ class EpicObservationService(
     private val observationSearchUrlPart = "/api/FHIR/R4/Observation"
 
     /**
+     * Service providing access to observations within Epic.
+     *
      * Finds observations at the requested [tenant],
      * given the list of [patientFhirIds] at the tenant, and the list of [observationCategoryCodes].
      * When entering [observationCategoryCodes],
@@ -28,7 +33,6 @@ class EpicObservationService(
      * ```
      * system|code
      * ```
-     *
      * The FHIR preferred choices for category code values are vital-signs, laboratory, social-history, and others
      * from the system [http://terminology.hl7.org/Codesystem/observation-category](https://terminology.hl7.org/3.1.0/CodeSystem-observation-category.html)
      * The vital-signs code from this system can be input to [observationCategoryCodes] as:
@@ -51,12 +55,30 @@ class EpicObservationService(
         patientFhirIds: List<String>,
         observationCategoryCodes: List<String>
     ): List<Observation> {
+
+        return findObservationsByPatientAndCategory(
+            tenant,
+            patientFhirIds,
+            observationCategoryCodes.toSearchTokens()
+        )
+    }
+
+    /**
+     * Finds the [List] of [Observation]s associated with the requested [tenant], list of [patientFhirId]s,
+     * and list of [conditionCategoryCodes].
+     * Supports lists of codes or system|value tokens for category.
+     */
+    override fun findObservationsByPatientAndCategory(
+        tenant: Tenant,
+        patientFhirIds: List<String>,
+        observationCategoryCodes: List<FHIRSearchToken>
+    ): List<Observation> {
         // Epic has a problem handling multiple patients in 1 call, so in the meantime force batch size to 1.
         // See https://sherlock.epic.com/default.aspx?view=slg/home#id=6953019&rv=0
         val observationResponses = patientFhirIds.chunked(1) {
             val parameters = mapOf(
                 "patient" to it.joinToString(separator = ","),
-                "category" to observationCategoryCodes.joinToString(separator = ","),
+                "category" to observationCategoryCodes.toOrParams(),
             )
             getBundleWithPaging(tenant, observationSearchUrlPart, parameters)
         }

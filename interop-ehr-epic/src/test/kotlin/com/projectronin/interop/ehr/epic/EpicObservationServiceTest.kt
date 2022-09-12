@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.inputs.FHIRSearchToken
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.body
@@ -20,6 +21,7 @@ class EpicObservationServiceTest {
     private lateinit var pagingHttpResponse: HttpResponse
     private val validObservationSearchBundle = readResource<Bundle>("/ExampleObservationBundle.json")
     private val pagingObservationSearchBundle = readResource<Bundle>("/ExampleObservationBundleWithPaging.json")
+    private val categorySystem = CodeSystem.OBSERVATION_CATEGORY.uri.value
 
     @BeforeEach
     fun setup() {
@@ -187,6 +189,11 @@ class EpicObservationServiceTest {
                 "testPrivateKey",
                 "TEST_TENANT"
             )
+        val categoryCodes = listOf(
+            FHIRSearchToken(system = categorySystem, code = "social-history"),
+            FHIRSearchToken(system = categorySystem, code = "laboratory")
+        )
+        val categoryTokens = "$categorySystem|social-history,$categorySystem|laboratory"
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validObservationSearchBundle
@@ -196,16 +203,16 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "abc",
-                    "category" to "social-history,laboratory"
+                    "category" to categoryTokens
                 )
             )
         } returns httpResponse
 
         val bundle =
-            observationService.findObservationsByPatient(
+            observationService.findObservationsByPatientAndCategory(
                 tenant,
                 listOf("abc"),
-                listOf("social-history", "laboratory")
+                categoryCodes
             )
 
         // 1 patient had 4 social-history observations and 0 laboratory observations
@@ -221,6 +228,9 @@ class EpicObservationServiceTest {
                 "testPrivateKey",
                 "TEST_TENANT"
             )
+        val categoryCodes = listOf(
+            FHIRSearchToken(system = categorySystem, code = "social-history")
+        )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validObservationSearchBundle
@@ -230,16 +240,16 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "abc",
-                    "category" to "${CodeSystem.OBSERVATION_CATEGORY.uri.value}|social-history"
+                    "category" to "$categorySystem|social-history"
                 )
             )
         } returns httpResponse
 
         val bundle =
-            observationService.findObservationsByPatient(
+            observationService.findObservationsByPatientAndCategory(
                 tenant,
                 listOf("abc"),
-                listOf("${CodeSystem.OBSERVATION_CATEGORY.uri.value}|social-history")
+                categoryCodes
             )
 
         // 1 patient had 4 social-history observations
@@ -255,6 +265,9 @@ class EpicObservationServiceTest {
                 "testPrivateKey",
                 "TEST_TENANT"
             )
+        val categoryCodes = listOf(
+            FHIRSearchToken(system = categorySystem, code = "social-history")
+        )
 
         // Mock response with paging
         every { pagingHttpResponse.status } returns HttpStatusCode.OK
@@ -265,7 +278,7 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "em2zwhHegmZEu39N4dUEIYA3",
-                    "category" to "social-history"
+                    "category" to "$categorySystem|social-history"
                 )
             )
         } returns pagingHttpResponse
@@ -281,10 +294,10 @@ class EpicObservationServiceTest {
         } returns httpResponse
 
         val bundle =
-            observationService.findObservationsByPatient(
+            observationService.findObservationsByPatientAndCategory(
                 tenant,
                 listOf("em2zwhHegmZEu39N4dUEIYA3"),
-                listOf("social-history")
+                categoryCodes
             )
 
         // 4 observations on the first page + 2 observations on the second page
