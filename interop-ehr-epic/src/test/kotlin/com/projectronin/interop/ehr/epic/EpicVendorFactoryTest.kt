@@ -13,6 +13,7 @@ class EpicVendorFactoryTest {
     private val conditionService = mockk<EpicConditionService>()
     private val identifierService = mockk<EpicIdentifierService>()
     private val observationService = mockk<EpicObservationService>()
+    private val locationService = mockk<EpicLocationService>()
 
     private val vendorFactory =
         EpicVendorFactory(
@@ -23,6 +24,7 @@ class EpicVendorFactoryTest {
             conditionService,
             identifierService,
             observationService,
+            locationService
         )
 
     @Test
@@ -63,5 +65,10 @@ class EpicVendorFactoryTest {
     @Test
     fun `returns ObservationService`() {
         assertEquals(observationService, vendorFactory.observationService)
+    }
+
+    @Test
+    fun `returns LocationService`() {
+        assertEquals(locationService, vendorFactory.locationService)
     }
 }

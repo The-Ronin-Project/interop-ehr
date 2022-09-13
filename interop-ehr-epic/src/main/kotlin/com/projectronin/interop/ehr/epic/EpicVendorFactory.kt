@@ -15,7 +15,8 @@ class EpicVendorFactory(
     override val practitionerService: EpicPractitionerService,
     override val conditionService: EpicConditionService,
     override val identifierService: EpicIdentifierService,
-    override val observationService: EpicObservationService
+    override val observationService: EpicObservationService,
+    override val locationService: EpicLocationService
 
 ) : VendorFactory {
     override val vendorType: VendorType
