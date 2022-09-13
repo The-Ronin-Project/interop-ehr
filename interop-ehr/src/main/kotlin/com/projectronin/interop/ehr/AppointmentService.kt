@@ -22,6 +22,18 @@ interface AppointmentService {
     ): List<Appointment>
 
     /**
+     * Finds the appointments at a given [tenant] for a patient identified by the [mrn] between
+     * the [startDate] and [endDate] from an EHR tenant.
+     */
+    @Deprecated("FHIR-based lookup should generally be used. This only exists to support some legacy cases based off MRN")
+    fun findPatientAppointmentsByMRN(
+        tenant: Tenant,
+        mrn: String,
+        startDate: LocalDate,
+        endDate: LocalDate,
+    ): List<Appointment>
+
+    /**
      * Finds the appointments at a given [tenant] for the [providerIDs] between the [startDate] and [endDate].
      */
     fun findProviderAppointments(

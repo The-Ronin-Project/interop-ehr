@@ -63,6 +63,7 @@ class EpicAppointmentService(
     private val providerAppointmentSearchUrlPart =
         "/api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments"
     private val dateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy")
+
     override fun findPatientAppointments(
         tenant: Tenant,
         patientFHIRId: String,
@@ -83,23 +84,33 @@ class EpicAppointmentService(
             val patient = aidboxPatientService.getPatient(tenant.mnemonic, patientFHIRId.localize(tenant))
             val mrn = identifierService.getMRNIdentifier(tenant, patient.identifier)
 
-            val request =
-                GetPatientAppointmentsRequest(
-                    userID = tenant.vendorAs<Epic>().ehrUserId,
-                    startDate = dateFormat.format(startDate),
-                    endDate = dateFormat.format(endDate),
-                    patientId = mrn.value,
-                    patientIdType = tenant.vendorAs<Epic>().patientMRNTypeText
-                )
-            val getAppointmentsResponse = findAppointments(tenant, patientAppointmentSearchUrlPart, request)
-
-            // only one patient here so ok to construct this map of patient -> fhir ID all appointments
-            val patientFhirIdToAppointments = mapOf(patientFHIRId to getAppointmentsResponse.appointments)
-            transformEpicAppointments(
-                tenant,
-                patientFhirIdToAppointments
-            )
+            mrn.value?.let {
+                findPatientAppointmentsByMRN(tenant, it, startDate, endDate)
+            } ?: emptyList()
         }
+    }
+
+    override fun findPatientAppointmentsByMRN(
+        tenant: Tenant,
+        mrn: String,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): List<Appointment> {
+        logger.info { "Patient appointment search by MRN started for ${tenant.mnemonic}" }
+
+        val request =
+            GetPatientAppointmentsRequest(
+                userID = tenant.vendorAs<Epic>().ehrUserId,
+                startDate = dateFormat.format(startDate),
+                endDate = dateFormat.format(endDate),
+                patientId = mrn,
+                patientIdType = tenant.vendorAs<Epic>().patientMRNTypeText
+            )
+        val getAppointmentsResponse = findAppointments(tenant, patientAppointmentSearchUrlPart, request)
+
+        // only one patient here so ok to construct this map of patient -> fhir ID all appointments
+        val patientMRNToAppointments = mapOf(mrn to getAppointmentsResponse.appointments)
+        return transformEpicAppointments(tenant, patientMRNToAppointments)
     }
 
     override fun findProviderAppointments(
@@ -284,7 +295,10 @@ class EpicAppointmentService(
             if (fhirID == null) {
                 Participant(
                     actor = Reference(
-                        identifier = identifierService.getPractitionerIdentifier(tenant, epicProvider.providerIDs.map { it.toIdentifier() }),
+                        identifier = identifierService.getPractitionerIdentifier(
+                            tenant,
+                            epicProvider.providerIDs.map { it.toIdentifier() }
+                        ),
                         display = epicProvider.providerName,
                         type = Uri("Practitioner")
                     ),

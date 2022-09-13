@@ -770,6 +770,74 @@ class EpicAppointmentServiceTest {
     }
 
     @Test
+    fun `findPatientAppointmentsByMRN returns patient appointments`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT"
+            )
+        every { httpResponse.status } returns HttpStatusCode.OK
+        mockkStatic(HttpResponse::throwExceptionFromHttpStatus)
+        justRun { httpResponse.throwExceptionFromHttpStatus("GetAppointments", patientAppointmentSearchUrlPart) }
+        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns validOldPatientAppointmentSearchResponse
+        coEvery {
+            epicClient.post(
+                tenant,
+                patientAppointmentSearchUrlPart,
+                GetPatientAppointmentsRequest(
+                    userID = "ehrUserId",
+                    startDate = "01/01/2015",
+                    endDate = "11/01/2015",
+                    patientId = "MRN",
+                    patientIdType = tenant.vendorAs<Epic>().patientMRNTypeText
+                )
+            )
+        } returns httpResponse
+
+        val allProviders = validOldPatientAppointmentSearchResponse.appointments.map {
+            it.providers
+        }.flatten()
+
+        val fakeProvIDs = allProviders.associateWith { prov ->
+            val idents = prov.providerIDs.map { Identifier(value = it.id, type = CodeableConcept(text = it.type)) }
+            Pair(prov.providerName + "ID", idents)
+        }
+        fakeProvIDs.entries.forEach {
+            it.value
+            every { identifierService.getPractitionerIdentifier(tenant, it.value.second) } returns mockk {
+                every { value } returns it.value.first
+                every { system } returns Uri(tenant.vendorAs<Epic>().practitionerProviderSystem)
+            }
+        }
+
+        val fakeMap = fakeProvIDs.entries.associate {
+            it.key to SystemValue(value = it.value.first, system = tenant.vendorAs<Epic>().practitionerProviderSystem)
+        }
+        val fakeResults = fakeProvIDs.entries.associate {
+            it.key to it.value.first
+        }
+        every { aidboxPractitionerService.getPractitionerFHIRIds(tenant.mnemonic, fakeMap) } returns fakeResults
+        val bundle =
+            EpicAppointmentService(
+                epicClient,
+                patientService,
+                identifierService,
+                aidboxPractitionerService,
+                aidboxPatientService,
+                5,
+                false
+            ).findPatientAppointmentsByMRN(
+                tenant,
+                "MRN",
+                LocalDate.of(2015, 1, 1),
+                LocalDate.of(2015, 11, 1)
+            )
+        assertEquals(4, bundle.size)
+    }
+
+    @Test
     fun `findProviderAppointments - ensure old API works`() {
         val tenant =
             createTestTenant(
@@ -962,7 +1030,8 @@ class EpicAppointmentServiceTest {
         )
 
         assertEquals(6, response.appointments.size)
-        val providerParticipant = response.appointments.first().participant.first { it.actor?.type == Uri("Practitioner") }
+        val providerParticipant =
+            response.appointments.first().participant.first { it.actor?.type == Uri("Practitioner") }
         assertNotNull(providerParticipant)
         assertNotNull(providerParticipant.actor?.identifier)
     }
