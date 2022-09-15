@@ -38,6 +38,7 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -73,7 +74,7 @@ class RoninLocationTest {
     }
 
     @Test
-    fun `validate fails for no name`() {
+    fun `no name is provided - Unnamed Location`() {
         val location = Location(
             id = Id("12345"),
             identifier = listOf(
@@ -82,15 +83,35 @@ class RoninLocationTest {
             )
         )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            RoninLocation.validate(location, null).alertIfErrors()
-        }
-
+        val locationPair = RoninLocation.transformInternal(location, LocationContext(Location::class), tenant)
+        val roninLocation = locationPair.first
+        assertNotNull(roninLocation)
         assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: name is a required element @ Location.name",
-            exception.message
+            "Unnamed Location",
+            roninLocation!!.name
         )
+        RoninLocation.validate(roninLocation, null).alertIfErrors()
+    }
+
+    @Test
+    fun `empty name is provided - Unnamed Location`() {
+        val location = Location(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+            ),
+            name = ""
+        )
+
+        val locationPair = RoninLocation.transformInternal(location, LocationContext(Location::class), tenant)
+        val roninLocation = locationPair.first
+        assertNotNull(roninLocation)
+        assertEquals(
+            "Unnamed Location",
+            roninLocation!!.name
+        )
+        RoninLocation.validate(roninLocation, null).alertIfErrors()
     }
 
     @Test
@@ -127,7 +148,7 @@ class RoninLocationTest {
     }
 
     @Test
-    fun `validate succeeds`() {
+    fun `validate succeeds with name provided`() {
         val location = Location(
             id = Id("12345"),
             identifier = listOf(
