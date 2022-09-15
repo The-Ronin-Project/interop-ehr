@@ -21,9 +21,9 @@ object RoninAppointment :
         R4AppointmentValidator,
         RONIN_APPOINTMENT_PROFILE
     ) {
-    override fun validate(resource: Appointment, parentContext: LocationContext, validation: Validation) {
+    override fun validate(element: Appointment, parentContext: LocationContext, validation: Validation) {
         validation.apply {
-            requireRoninIdentifiers(resource.identifier, parentContext, this)
+            requireRoninIdentifiers(element.identifier, parentContext, this)
 
             // TODO: RoninNormalizedAppointmentStatus extension
         }
