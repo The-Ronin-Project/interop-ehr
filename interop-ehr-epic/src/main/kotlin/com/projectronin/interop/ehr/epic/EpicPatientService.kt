@@ -104,6 +104,10 @@ class EpicPatientService(
         return patientsFoundByKey
     }
 
+    override fun getPatient(tenant: Tenant, patientFHIRID: String): Patient {
+        return runBlocking { epicClient.get(tenant, "$patientSearchUrlPart/$patientFHIRID").body() }
+    }
+
     override fun getPatientsFHIRIds(
         tenant: Tenant,
         patientIDSystem: String,

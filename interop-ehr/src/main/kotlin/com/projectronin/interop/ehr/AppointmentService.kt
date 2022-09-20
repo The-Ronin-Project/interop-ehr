@@ -12,25 +12,15 @@ import java.time.LocalDate
 interface AppointmentService {
     /**
      * Finds the appointments at a given [tenant] for a patient identified by the [patientFHIRId] between
-     * the [startDate] and [endDate] from an EHR tenant.
+     * the [startDate] and [endDate] from an EHR tenant. Optionally takes a [patientMRN] if available,
+     * to save on unnecessary calls to Aidbox.
      */
     fun findPatientAppointments(
         tenant: Tenant,
         patientFHIRId: String,
         startDate: LocalDate,
         endDate: LocalDate,
-    ): List<Appointment>
-
-    /**
-     * Finds the appointments at a given [tenant] for a patient identified by the [mrn] between
-     * the [startDate] and [endDate] from an EHR tenant.
-     */
-    @Deprecated("FHIR-based lookup should generally be used. This only exists to support some legacy cases based off MRN")
-    fun findPatientAppointmentsByMRN(
-        tenant: Tenant,
-        mrn: String,
-        startDate: LocalDate,
-        endDate: LocalDate,
+        patientMRN: String? = null
     ): List<Appointment>
 
     /**

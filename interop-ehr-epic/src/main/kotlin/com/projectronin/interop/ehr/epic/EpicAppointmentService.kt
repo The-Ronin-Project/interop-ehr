@@ -39,7 +39,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.Instant as JavaInstant
 
@@ -68,7 +68,8 @@ class EpicAppointmentService(
         tenant: Tenant,
         patientFHIRId: String,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
+        patientMRN: String? // leverage the MRN if we already have it to avoid unnecessary calls to external systems
     ): List<Appointment> {
         logger.info { "Patient appointment search started for ${tenant.mnemonic}" }
 
@@ -80,37 +81,29 @@ class EpicAppointmentService(
         return if (useFhirAPI) {
             getBundleWithPagingSTU3(tenant, patientAppointmentFhirSearchUrlPart, parameters).toListOfType()
         } else {
-            // retrieve the MRN needed to call the proprietary API
-            val patient = aidboxPatientService.getPatient(tenant.mnemonic, patientFHIRId.localize(tenant))
-            val mrn = identifierService.getMRNIdentifier(tenant, patient.identifier)
-
-            mrn.value?.let {
-                findPatientAppointmentsByMRN(tenant, it, startDate, endDate)
-            } ?: emptyList()
+            val mrnToUse = patientMRN ?: getPatientMRN(tenant, patientFHIRId)
+            val appointments = mrnToUse?.let {
+                findAppointments(
+                    tenant, patientAppointmentSearchUrlPart,
+                    GetPatientAppointmentsRequest(
+                        userID = tenant.vendorAs<Epic>().ehrUserId,
+                        startDate = dateFormat.format(startDate),
+                        endDate = dateFormat.format(endDate),
+                        patientId = it,
+                        patientIdType = tenant.vendorAs<Epic>().patientMRNTypeText
+                    )
+                ).appointments
+            }
+            appointments?.let { transformEpicAppointments(tenant, mapOf(patientFHIRId to it)) } ?: emptyList()
         }
     }
 
-    override fun findPatientAppointmentsByMRN(
-        tenant: Tenant,
-        mrn: String,
-        startDate: LocalDate,
-        endDate: LocalDate
-    ): List<Appointment> {
-        logger.info { "Patient appointment search by MRN started for ${tenant.mnemonic}" }
-
-        val request =
-            GetPatientAppointmentsRequest(
-                userID = tenant.vendorAs<Epic>().ehrUserId,
-                startDate = dateFormat.format(startDate),
-                endDate = dateFormat.format(endDate),
-                patientId = mrn,
-                patientIdType = tenant.vendorAs<Epic>().patientMRNTypeText
-            )
-        val getAppointmentsResponse = findAppointments(tenant, patientAppointmentSearchUrlPart, request)
-
-        // only one patient here so ok to construct this map of patient -> fhir ID all appointments
-        val patientMRNToAppointments = mapOf(mrn to getAppointmentsResponse.appointments)
-        return transformEpicAppointments(tenant, patientMRNToAppointments)
+    private fun getPatientMRN(tenant: Tenant, patientFHIRId: String): String? {
+        // try aidbox first
+        val patient = runCatching { aidboxPatientService.getPatient(tenant.mnemonic, patientFHIRId.localize(tenant)) }
+            // try EHR next
+            .getOrElse { patientService.getPatient(tenant, patientFHIRId) }
+        return identifierService.getMRNIdentifier(tenant, patient.identifier).value
     }
 
     override fun findProviderAppointments(
@@ -161,8 +154,8 @@ class EpicAppointmentService(
         )
     }
 
-    /***
-     Calls an Epic proprietary and returns a [GetAppointmentsResponse]
+    /**
+     * Calls an Epic proprietary and returns a [GetAppointmentsResponse]
      */
     private fun findAppointments(
         tenant: Tenant,
@@ -391,11 +384,9 @@ class EpicAppointmentService(
         )
         val endDateTime = startDateTime.plusMinutes(duration.toLong())
 
-        val zoneId = ZoneId.of("America/Chicago")
-
         return Pair(
-            startDateTime.atZone(zoneId).toInstant(),
-            endDateTime.atZone(zoneId).toInstant()
+            startDateTime.toInstant(ZoneOffset.UTC), // not actually UTC, but we don't want to alter the value.
+            endDateTime.toInstant(ZoneOffset.UTC)
         )
     }
 }

@@ -65,6 +65,22 @@ class EpicPatientServiceTest {
     }
 
     @Test
+    fun `getPatient - works`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
+        val fakePat = mockk<Patient>()
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Patient>() } returns fakePat
+        coEvery { epicClient.get(tenant, "/api/FHIR/R4/Patient/FHIRID") } returns httpResponse
+        val actual = EpicPatientService(epicClient, 100, aidboxClient).getPatient(tenant, "FHIRID")
+        assertEquals(fakePat, actual)
+    }
+
+    @Test
     fun `ensure, find patient by identifier, returns single patient`() {
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",

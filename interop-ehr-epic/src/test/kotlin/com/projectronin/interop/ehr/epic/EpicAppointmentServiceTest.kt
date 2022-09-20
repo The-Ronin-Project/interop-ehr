@@ -828,13 +828,83 @@ class EpicAppointmentServiceTest {
                 aidboxPatientService,
                 5,
                 false
-            ).findPatientAppointmentsByMRN(
+            ).findPatientAppointments(
                 tenant,
-                "MRN",
+                "FHIRID",
                 LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
+                LocalDate.of(2015, 11, 1),
+                "MRN"
             )
         assertEquals(4, bundle.size)
+    }
+
+    @Test
+    fun `findPatientAppointmentsByMRN no MRN test`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT"
+            )
+        val fakeID = mockk<Identifier>()
+        val fakePat = mockk<Patient> {
+            every { identifier } returns listOf(fakeID)
+        }
+        every { aidboxPatientService.getPatient("TEST_TENANT", "TEST_TENANT-FHIRID") } returns fakePat
+        every { identifierService.getMRNIdentifier(tenant, listOf(fakeID)).value } returns null
+        val bundle =
+            EpicAppointmentService(
+                epicClient,
+                patientService,
+                identifierService,
+                aidboxPractitionerService,
+                aidboxPatientService,
+                5,
+                false
+            ).findPatientAppointments(
+                tenant,
+                "FHIRID",
+                LocalDate.of(2015, 1, 1),
+                LocalDate.of(2015, 11, 1),
+                null
+            )
+        assertEquals(0, bundle.size)
+    }
+
+    @Test
+    fun `findPatientAppointmentsByMRN no MRN no aidbox test`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT"
+            )
+        val fakeID = mockk<Identifier>()
+        val fakePat = mockk<Patient> {
+            every { identifier } returns listOf(fakeID)
+        }
+        every { aidboxPatientService.getPatient("TEST_TENANT", "TEST_TENANT-FHIRID") } throws Exception()
+        every { patientService.getPatient(tenant, "FHIRID") } returns fakePat
+        every { identifierService.getMRNIdentifier(tenant, listOf(fakeID)).value } returns null
+        val bundle =
+            EpicAppointmentService(
+                epicClient,
+                patientService,
+                identifierService,
+                aidboxPractitionerService,
+                aidboxPatientService,
+                5,
+                false
+            ).findPatientAppointments(
+                tenant,
+                "FHIRID",
+                LocalDate.of(2015, 1, 1),
+                LocalDate.of(2015, 11, 1),
+                null
+            )
+        assertEquals(0, bundle.size)
     }
 
     @Test
@@ -1157,6 +1227,8 @@ class EpicAppointmentServiceTest {
         assertEquals(1, response.appointments.size)
         val appt = response.appointments.first()
         assertEquals(epicAppointment.id, appt.id?.value)
+        assertEquals("2015-04-30T15:30:00Z", appt.start?.value)
+        assertEquals("2015-04-30T16:00:00Z", appt.end?.value)
         assertNull(appt.meta)
         assertEquals(2, appt.identifier.size)
         assertEquals(epicVendor.encounterCSNSystem, appt.identifier[1].system?.value)

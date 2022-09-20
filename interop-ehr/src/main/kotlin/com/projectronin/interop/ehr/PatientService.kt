@@ -23,6 +23,11 @@ interface PatientService {
     fun <K> findPatientsById(tenant: Tenant, patientIdsByKey: Map<K, Identifier>): Map<K, Patient>
 
     /**
+     * Returns a single patient based on their FHIR ID.
+     */
+    fun getPatient(tenant: Tenant, patientFHIRID: String): Patient
+
+    /**
      * Finds FHIR IDs (non-localized) for a list of patients, based on the Epic Identifer (MRN or Internal). Searches
      * Aidbox first before querying the EHR. If a patient is found in the EHR, this will return the [Patient] object
      * that was found to save on future queries. Returns a map of the patient's searched ID to its [GetFHIRIDResponse].
