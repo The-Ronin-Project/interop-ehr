@@ -1,6 +1,5 @@
 package com.projectronin.interop.ehr
 
-import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -23,19 +22,16 @@ interface PatientService {
     fun <K> findPatientsById(tenant: Tenant, patientIdsByKey: Map<K, Identifier>): Map<K, Patient>
 
     /**
-     * Returns a single patient based on their FHIR ID.
+     * Returns a single [Patient] based on their FHIR ID.
      */
     fun getPatient(tenant: Tenant, patientFHIRID: String): Patient
 
     /**
-     * Finds FHIR IDs (non-localized) for a list of patients, based on the Epic Identifer (MRN or Internal). Searches
-     * Aidbox first before querying the EHR. If a patient is found in the EHR, this will return the [Patient] object
-     * that was found to save on future queries. Returns a map of the patient's searched ID to its [GetFHIRIDResponse].
-     * If the patient's FHIR ID can't be found, the patient won't be included in the map.
+     * Finds FHIR ID (non-localized) for a patient, based on an Identifier value. Searches Aidbox first before querying
+     * the EHR. Implementations of this interface must 'know' the correct identifier system to apply to this value.
      */
-    fun getPatientsFHIRIds(
+    fun getPatientFHIRId(
         tenant: Tenant,
-        patientIDSystem: String,
-        patientIDValues: List<String>
-    ): Map<String, GetFHIRIDResponse>
+        patientIDValue: String
+    ): String
 }

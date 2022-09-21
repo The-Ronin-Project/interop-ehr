@@ -10,6 +10,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
+import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
@@ -108,7 +109,15 @@ class EpicPatientService(
         return runBlocking { epicClient.get(tenant, "$patientSearchUrlPart/$patientFHIRID").body() }
     }
 
-    override fun getPatientsFHIRIds(
+    override fun getPatientFHIRId(tenant: Tenant, patientIDValue: String): String {
+        return getPatientsFHIRIds(
+            tenant,
+            tenant.vendorAs<Epic>().patientMRNSystem,
+            listOf(patientIDValue)
+        )[patientIDValue]!!.fhirID
+    }
+
+    fun getPatientsFHIRIds(
         tenant: Tenant,
         patientIDSystem: String,
         patientIDValues: List<String>

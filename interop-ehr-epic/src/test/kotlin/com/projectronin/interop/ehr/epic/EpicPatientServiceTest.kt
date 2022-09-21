@@ -319,6 +319,36 @@ class EpicPatientServiceTest {
     }
 
     @Test
+    fun `getPatientFHIRId works with patient in aidbox`() {
+        val mrn = "MRN"
+        val fhirID = "FHIRID"
+        val mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            mrnSystem = mrnSystem,
+            internalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
+        )
+
+        every {
+            aidboxClient.getPatientFHIRIds(
+                tenant.mnemonic,
+                mapOf(mrn to SystemValue(mrn, mrnSystem))
+            )
+        } returns mapOf(mrn to "${tenant.mnemonic}-$fhirID")
+
+        val response = EpicPatientService(epicClient, 100, aidboxClient).getPatientFHIRId(
+            tenant,
+            mrn
+        )
+
+        assertEquals(fhirID, response)
+    }
+
+    @Test
     fun `getPatientsFHIRIds works with patient not in aidbox`() {
         val mrn = "MRN"
         val fhirID = "FHIRID"
