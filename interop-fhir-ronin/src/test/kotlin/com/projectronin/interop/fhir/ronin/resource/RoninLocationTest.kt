@@ -74,7 +74,7 @@ class RoninLocationTest {
     }
 
     @Test
-    fun `no name is provided - Unnamed Location`() {
+    fun `validate fails for no name`() {
         val location = Location(
             id = Id("12345"),
             identifier = listOf(
@@ -83,35 +83,15 @@ class RoninLocationTest {
             )
         )
 
-        val locationPair = RoninLocation.transformInternal(location, LocationContext(Location::class), tenant)
-        val roninLocation = locationPair.first
-        assertNotNull(roninLocation)
-        assertEquals(
-            "Unnamed Location",
-            roninLocation!!.name
-        )
-        RoninLocation.validate(roninLocation, null).alertIfErrors()
-    }
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninLocation.validate(location, null).alertIfErrors()
+        }
 
-    @Test
-    fun `empty name is provided - Unnamed Location`() {
-        val location = Location(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
-            ),
-            name = ""
-        )
-
-        val locationPair = RoninLocation.transformInternal(location, LocationContext(Location::class), tenant)
-        val roninLocation = locationPair.first
-        assertNotNull(roninLocation)
         assertEquals(
-            "Unnamed Location",
-            roninLocation!!.name
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: name is a required element @ Location.name",
+            exception.message
         )
-        RoninLocation.validate(roninLocation, null).alertIfErrors()
     }
 
     @Test
@@ -350,5 +330,46 @@ class RoninLocationTest {
         assertEquals(listOf<LocationHoursOfOperation>(), transformed.hoursOfOperation)
         assertNull(transformed.availabilityExceptions)
         assertEquals(listOf<Reference>(), transformed.endpoint)
+    }
+
+    @Test
+    fun `transforms location when no name is provided`() {
+        val location = Location(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+            )
+        )
+
+        val locationPair = RoninLocation.transformInternal(location, LocationContext(Location::class), tenant)
+        val roninLocation = locationPair.first
+        assertNotNull(roninLocation)
+        assertEquals(
+            "Unnamed Location",
+            roninLocation!!.name
+        )
+        RoninLocation.validate(roninLocation, null).alertIfErrors()
+    }
+
+    @Test
+    fun `transforms location when empty name is provided`() {
+        val location = Location(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+            ),
+            name = ""
+        )
+
+        val locationPair = RoninLocation.transformInternal(location, LocationContext(Location::class), tenant)
+        val roninLocation = locationPair.first
+        assertNotNull(roninLocation)
+        assertEquals(
+            "Unnamed Location",
+            roninLocation!!.name
+        )
+        RoninLocation.validate(roninLocation, null).alertIfErrors()
     }
 }
