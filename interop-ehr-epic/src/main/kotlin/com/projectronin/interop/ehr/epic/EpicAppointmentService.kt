@@ -248,6 +248,36 @@ class EpicAppointmentService(
         }.flatten()
     }
 
+    // This is PSJ-specific. We will need to update this with the ConceptMap logic once it is ready.
+    private val psjStatusToFHIRStatus = mapOf(
+        "arrived" to AppointmentStatus.ARRIVED,
+        "canceled" to AppointmentStatus.CANCELLED,
+        "completed" to AppointmentStatus.FULFILLED,
+        "hh incomplete" to AppointmentStatus.CANCELLED,
+        "hsp incomplete" to AppointmentStatus.CANCELLED,
+        "left without seen" to AppointmentStatus.NOSHOW,
+        "no show" to AppointmentStatus.NOSHOW,
+        "phoned patient" to AppointmentStatus.BOOKED,
+        "present" to AppointmentStatus.ARRIVED,
+        "proposed" to AppointmentStatus.PROPOSED,
+        "scheduled" to AppointmentStatus.BOOKED
+    )
+
+    /**
+     * Transforms from an Epic status to a FHIR status. This is internal to simplify testing.
+     */
+    internal fun transformStatus(epicStatus: String): String {
+        // TODO: Replace with ConceptMap
+        val transformedStatus = psjStatusToFHIRStatus[epicStatus.lowercase()]
+        return if (transformedStatus != null) {
+            transformedStatus.code
+        } else {
+            logger.warn { "No mapping found for status $epicStatus" }
+            // We leave the bad appointment status so that we can
+            epicStatus
+        }
+    }
+
     /***
      * Given an [EpicAppointment], transform it into an [Appointment]. Expects a resolved [patientFHIRId] and
      *  a [providerFhirIdMap] where any provider on the appointment can be looked up and find the FHIR id
@@ -258,15 +288,8 @@ class EpicAppointmentService(
         providerFhirIdMap: Map<ScheduleProviderReturnWithTime, String>,
         csnSystem: String
     ): Appointment {
-        // Default to entered-in-error to agree with [Data Platform](https://github.com/projectronin/dp-databricks-jobs/blob/513cd599955f5905dd20623b2714de2ab4d9c3c0/jobs/gold/mdaoc/fhir/appointment.py#L114)
-        val transformedStatus =
-            when (this.appointmentStatus.lowercase()) {
-                "completed" -> AppointmentStatus.FULFILLED
-                "scheduled" -> AppointmentStatus.PENDING
-                "no show" -> AppointmentStatus.NOSHOW
-                "arrived" -> AppointmentStatus.ARRIVED
-                else -> AppointmentStatus.ENTERED_IN_ERROR
-            }
+        // TODO: Replace with ConceptMap
+        val transformedStatus = transformStatus(appointmentStatus)
 
         val (transformedStartInstant, transformedEndInstant) = getStartAndEndInstants(
             this.date,
@@ -330,7 +353,7 @@ class EpicAppointmentService(
                     system = Uri(csnSystem),
                     type = CodeableConcept(text = "CSN")
                 ),
-            status = Code(transformedStatus.code),
+            status = Code(transformedStatus),
             cancelationReason = null,
             serviceCategory = emptyList(),
             serviceType = emptyList(),

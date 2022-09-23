@@ -20,6 +20,7 @@ import com.projectronin.interop.ehr.util.toListOfType
 import com.projectronin.interop.fhir.r4.datatype.BundleEntry
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Appointment
@@ -1232,10 +1233,56 @@ class EpicAppointmentServiceTest {
         assertNull(appt.meta)
         assertEquals(2, appt.identifier.size)
         assertEquals(epicVendor.encounterCSNSystem, appt.identifier[1].system?.value)
-        assertEquals(AppointmentStatus.ENTERED_IN_ERROR.asCode(), appt.status)
+        assertEquals(Code("Deliberately new"), appt.status)
         assertEquals(CodeableConcept(text = epicAppointment.visitTypeName), appt.appointmentType)
         val participants = appt.participant
         assertEquals("Patient/PatientFhirID", participants[0].actor?.reference)
         assertEquals("Practitioner/PractitionerFhirID", participants[1].actor?.reference)
+    }
+
+    @Test
+    fun `all status transformations succeed`() {
+        val expectedMappings = mapOf(
+            "Arrived" to AppointmentStatus.ARRIVED,
+            "Canceled" to AppointmentStatus.CANCELLED,
+            "Completed" to AppointmentStatus.FULFILLED,
+            "HH incomplete" to AppointmentStatus.CANCELLED,
+            "HSP incomplete" to AppointmentStatus.CANCELLED,
+            "Left without seen" to AppointmentStatus.NOSHOW,
+            "No Show" to AppointmentStatus.NOSHOW,
+            "Phoned Patient" to AppointmentStatus.BOOKED,
+            "Present" to AppointmentStatus.ARRIVED,
+            "Proposed" to AppointmentStatus.PROPOSED,
+            "Scheduled" to AppointmentStatus.BOOKED
+        )
+
+        val epicAppointmentService = EpicAppointmentService(
+            epicClient,
+            patientService,
+            identifierService,
+            aidboxPractitionerService,
+            aidboxPatientService,
+            5,
+            false
+        )
+        for ((epicStatus, fhirStatus) in expectedMappings) {
+            val transformedStatus = epicAppointmentService.transformStatus(epicStatus)
+            assertEquals(fhirStatus.code, transformedStatus, "Expected $fhirStatus for $epicStatus")
+        }
+    }
+
+    @Test
+    fun `unknown status does not transform`() {
+        val epicAppointmentService = EpicAppointmentService(
+            epicClient,
+            patientService,
+            identifierService,
+            aidboxPractitionerService,
+            aidboxPatientService,
+            5,
+            false
+        )
+        val transformedStatus = epicAppointmentService.transformStatus("This is an Unknown and Unmapped status")
+        assertEquals("This is an Unknown and Unmapped status", transformedStatus)
     }
 }
