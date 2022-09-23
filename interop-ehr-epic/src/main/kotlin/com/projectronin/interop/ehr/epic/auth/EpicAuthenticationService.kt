@@ -3,7 +3,7 @@ package com.projectronin.interop.ehr.epic.auth
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.projectronin.interop.common.auth.Authentication
-import com.projectronin.interop.common.http.ktor.throwExceptionFromHttpStatus
+import com.projectronin.interop.common.http.throwExceptionFromHttpStatus
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.auth.AuthenticationService
 import com.projectronin.interop.tenant.config.model.Tenant

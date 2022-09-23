@@ -4,7 +4,7 @@ import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
-import com.projectronin.interop.common.http.ktor.throwExceptionFromHttpStatus
+import com.projectronin.interop.common.http.throwExceptionFromHttpStatus
 import com.projectronin.interop.ehr.epic.apporchard.model.EpicAppointment
 import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
 import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
