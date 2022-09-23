@@ -6,7 +6,9 @@ import com.projectronin.interop.ehr.util.toListOfType
 import com.projectronin.interop.fhir.r4.resource.Medication
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.stereotype.Component
 
+@Component
 class EpicMedicationService(
     epicClient: EpicClient,
     @Value("\${epic.fhir.batchSize:5}") private val batchSize: Int
