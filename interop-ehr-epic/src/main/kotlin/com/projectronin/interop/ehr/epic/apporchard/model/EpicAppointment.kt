@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 /**
  * Represents an Appointment for a patient returned from Epic AppOrchard.
  *
- * See [GetPatientAppointments](https://apporchard.epic.com/Sandbox?api=195)
+ * See [GetPatientAppointments](https://appmarket.epic.com/Sandbox?api=195)
  */
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class EpicAppointment(

@@ -1,0 +1,149 @@
+{
+  "resourceType": "MedicationStatement",
+  "id": "e8t3zjLeHVt.mv5I5Eu-6.6Wc4BCkPi1DVNUkU8YkOAY3",
+  "extension": [
+    {
+      "valueBoolean": true,
+      "url": "http://nictiz.nl/fhir/StructureDefinition/zib-MedicationUse-AsAgreedIndicator"
+    },
+    {
+      "valueReference": {
+        "reference": "https://haikuor-staging.providence.org/fhirproxy/api/FHIR/STU3/Practitioner/eHslNfDwc8EJ6EmUuZ57B2g3",
+        "display": "James E McDonald, MD"
+      },
+      "url": "http://nictiz.nl/fhir/StructureDefinition/zib-MedicationUse-Prescriber"
+    }
+  ],
+  "identifier": [
+    {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.297.3.7.2.798268",
+      "value": "1459443"
+    }
+  ],
+  "basedOn": [
+    {
+      "reference": "https://haikuor-staging.providence.org/fhirproxy/api/FHIR/STU3/MedicationRequest/e8ixJzV6DsmGqa53DH79O7dXcaK30w9Ac9.aiUluay583",
+      "identifier": {
+        "use": "usual",
+        "system": "urn:oid:1.2.840.114350.1.13.297.3.7.2.798268",
+        "value": "1459443"
+      },
+      "display": "acetaminophen (TYLENOL) 325 mg tablet"
+    }
+  ],
+  "status": "unknown",
+  "category": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/medication-statement-category",
+        "code": "community",
+        "display": "Community"
+      }
+    ],
+    "text": "Community"
+  },
+  "medicationReference": {
+    "reference": "https://haikuor-staging.providence.org/fhirproxy/api/FHIR/STU3/Medication/eDlPq3mAwabsQZpNFwXR2vZ6v3-YAmsPR8uXhU.TbtLFSseuXrt2ZCwA05U-5jj2T3",
+    "display": "acetaminophen (TYLENOL) tablet"
+  },
+  "effectivePeriod": {
+    "start": "2022-02-16"
+  },
+  "dateAsserted": "2022-02-16",
+  "informationSource": {
+    "reference": "https://haikuor-staging.providence.org/fhirproxy/api/FHIR/STU3/Practitioner/eHslNfDwc8EJ6EmUuZ57B2g3",
+    "display": "James E McDonald, MD"
+  },
+  "subject": {
+    "reference": "https://haikuor-staging.providence.org/fhirproxy/api/FHIR/STU3/Patient/eQ6bfRoF2gnLFGdZ3Gu-cyg3",
+    "display": "Beacon, Cindy \"CeCe\""
+  },
+  "dosage": [
+    {
+      "extension": [
+        {
+          "valueRange": {
+            "low": {
+              "value": 1,
+              "unit": "tablet",
+              "system": "http://unitsofmeasure.org",
+              "code": "{tbl}"
+            },
+            "high": {
+              "value": 2,
+              "unit": "tablet",
+              "system": "http://unitsofmeasure.org",
+              "code": "{tbl}"
+            }
+          },
+          "url": "https://open.epic.com/fhir/extensions/admin-amount"
+        },
+        {
+          "valueRange": {
+            "low": {
+              "value": 325,
+              "unit": "mg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg"
+            },
+            "high": {
+              "value": 650,
+              "unit": "mg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg"
+            }
+          },
+          "url": "https://open.epic.com/fhir/extensions/ordered-dose"
+        }
+      ],
+      "text": "Take 1-2 tablets by mouth every 6 hours as needed for Pain.",
+      "patientInstruction": "Take 1-2 tablets by mouth every 6 hours as needed for Pain.",
+      "timing": {
+        "repeat": {
+          "boundsPeriod": {
+            "start": "2022-02-16"
+          },
+          "frequency": 1,
+          "period": 6,
+          "periodUnit": "h"
+        },
+        "code": {
+          "text": "Q6H PRN"
+        }
+      },
+      "asNeededBoolean": true,
+      "route": {
+        "coding": [
+          {
+            "system": "urn:oid:1.2.840.114350.1.13.297.3.7.4.798268.7025",
+            "code": "15",
+            "display": "Oral"
+          }
+        ],
+        "text": "Oral"
+      },
+      "method": {
+        "text": "Take"
+      },
+      "doseAndRate": [
+        {
+          "doseRange": {
+            "low": {
+              "value": 325,
+              "unit": "mg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg"
+            },
+            "high": {
+              "value": 650,
+              "unit": "mg",
+              "system": "http://unitsofmeasure.org",
+              "code": "mg"
+            }
+          }
+        }
+      ]
+    }
+  ]
+}

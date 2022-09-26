@@ -1,0 +1,12 @@
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 0,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://appmarket.epic.com/interconnect-amcurprd-oauth/api/FHIR/STU3/MedicationStatement?patient=enh2Q1c0oNRtWzXArnG4tKw3&category=inpatient&status=active&effective=%7Bdate%7D"
+    }
+  ],
+  "entry": []
+}

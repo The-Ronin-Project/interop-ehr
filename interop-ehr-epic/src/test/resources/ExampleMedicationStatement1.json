@@ -1,0 +1,137 @@
+{
+  "resourceType": "MedicationStatement",
+  "id": "e-Vg66OIhWXBKqYrsP.XNZVYk.Q7JvA7ZsmahScUJ.843",
+  "extension": [
+    {
+      "valueBoolean": true,
+      "url": "http://nictiz.nl/fhir/StructureDefinition/zib-MedicationUse-AsAgreedIndicator"
+    },
+    {
+      "valueReference": {
+        "reference": "https://haikuor-staging.providence.org/fhirproxy/api/FHIR/STU3/Practitioner/eHslNfDwc8EJ6EmUuZ57B2g3",
+        "display": "James E McDonald, MD"
+      },
+      "url": "http://nictiz.nl/fhir/StructureDefinition/zib-MedicationUse-Prescriber"
+    }
+  ],
+  "identifier": [
+    {
+      "use": "usual",
+      "system": "urn:oid:1.2.840.114350.1.13.297.3.7.2.798268",
+      "value": "1459445"
+    }
+  ],
+  "basedOn": [
+    {
+      "reference": "https://haikuor-staging.providence.org/fhirproxy/api/FHIR/STU3/MedicationRequest/eTwTuzmZcvMfrmpImG8HVkCMCe9Me0QkDY3tOi5tMmaw3",
+      "identifier": {
+        "use": "usual",
+        "system": "urn:oid:1.2.840.114350.1.13.297.3.7.2.798268",
+        "value": "1459445"
+      },
+      "display": "aspirin 325 mg tablet"
+    }
+  ],
+  "status": "not-taken",
+  "statusReason": [
+    {
+      "coding": [
+        {
+          "system": "http://snomed.info/sct",
+          "code": "182872003",
+          "display": "Drug discontinued - too expensive (situation)"
+        }
+      ],
+      "text": "Drug discontinued - too expensive (situation)"
+    }
+  ],
+  "category": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/medication-statement-category",
+        "code": "community",
+        "display": "Community"
+      }
+    ],
+    "text": "Community"
+  },
+  "medicationReference": {
+    "reference": "https://haikuor-staging.providence.org/fhirproxy/api/FHIR/STU3/Medication/eTAIvGhpCy8ZByVCWiOugzi8cpkDpphfE76QRH-cjkyQIEF0dPEuQjRj3sFiNEmzB3",
+    "display": "aspirin tablet"
+  },
+  "effectivePeriod": {
+    "start": "2022-02-16"
+  },
+  "dateAsserted": "2022-02-16",
+  "informationSource": {
+    "reference": "https://haikuor-staging.providence.org/fhirproxy/api/FHIR/STU3/Practitioner/eHslNfDwc8EJ6EmUuZ57B2g3",
+    "display": "James E McDonald, MD"
+  },
+  "subject": {
+    "reference": "https://haikuor-staging.providence.org/fhirproxy/api/FHIR/STU3/Patient/eQ6bfRoF2gnLFGdZ3Gu-cyg3",
+    "display": "Beacon, Cindy \"CeCe\""
+  },
+  "dosage": [
+    {
+      "extension": [
+        {
+          "valueQuantity": {
+            "value": 1,
+            "unit": "tablet",
+            "system": "http://unitsofmeasure.org",
+            "code": "{tbl}"
+          },
+          "url": "https://open.epic.com/fhir/extensions/admin-amount"
+        },
+        {
+          "valueQuantity": {
+            "value": 325,
+            "unit": "mg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg"
+          },
+          "url": "https://open.epic.com/fhir/extensions/ordered-dose"
+        }
+      ],
+      "text": "Take 1 tablet by mouth Daily.",
+      "patientInstruction": "Take 1 tablet by mouth Daily.",
+      "timing": {
+        "repeat": {
+          "boundsPeriod": {
+            "start": "2022-02-16"
+          },
+          "timeOfDay": [
+            "09:00:00"
+          ]
+        },
+        "code": {
+          "text": "0900"
+        }
+      },
+      "asNeededBoolean": false,
+      "route": {
+        "coding": [
+          {
+            "system": "urn:oid:1.2.840.114350.1.13.297.3.7.4.798268.7025",
+            "code": "15",
+            "display": "Oral"
+          }
+        ],
+        "text": "Oral"
+      },
+      "method": {
+        "text": "Take"
+      },
+      "doseAndRate": [
+        {
+          "doseQuantity": {
+            "value": 325,
+            "unit": "mg",
+            "system": "http://unitsofmeasure.org",
+            "code": "mg"
+          }
+        }
+      ]
+    }
+  ]
+}
