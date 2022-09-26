@@ -29,6 +29,8 @@ import com.projectronin.interop.fhir.r4.datatype.Period
 import com.projectronin.interop.fhir.r4.datatype.Qualification
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.ronin.code.normalizeCoding
+import com.projectronin.interop.fhir.ronin.code.normalizeIdentifier
 import com.projectronin.interop.tenant.config.model.Tenant
 
 // Localizers for Strings and String-like wrappers
@@ -178,11 +180,18 @@ fun CodeableConcept.localizePair(tenant: Tenant): Pair<CodeableConcept, Boolean>
  */
 fun Coding.localizePair(tenant: Tenant): Pair<Coding, Boolean> {
     val updatedExtensions = getUpdatedExtensions(this, tenant)
-    if (updatedExtensions.isNotEmpty()) {
-        return Pair(Coding(id, updatedExtensions, system, version, code, display, userSelected), true)
-    }
-
-    return Pair(this, false)
+    return Pair(
+        Coding(
+            id,
+            updatedExtensions.ifEmpty { extension },
+            system?.normalizeCoding(),
+            version,
+            code,
+            display,
+            userSelected
+        ),
+        updatedExtensions.isNotEmpty()
+    )
 }
 
 /**
@@ -349,23 +358,19 @@ fun Identifier.localizePair(tenant: Tenant): Pair<Identifier, Boolean> {
     val typePair = type?.localizePair(tenant) ?: Pair(null, false)
     val periodPair = period?.localizePair(tenant) ?: Pair(null, false)
     val assignerPair = assigner?.localizePair(tenant) ?: Pair(null, false)
-    if (updatedExtensions.isNotEmpty() || typePair.second || periodPair.second || assignerPair.second) {
-        return Pair(
-            Identifier(
-                id,
-                updatedExtensions.ifEmpty { extension },
-                use,
-                typePair.first,
-                system,
-                value,
-                periodPair.first,
-                assignerPair.first
-            ),
-            true
-        )
-    }
-
-    return Pair(this, false)
+    return Pair(
+        Identifier(
+            id,
+            updatedExtensions.ifEmpty { extension },
+            use,
+            typePair.first,
+            system?.normalizeIdentifier(),
+            value,
+            periodPair.first,
+            assignerPair.first
+        ),
+        (updatedExtensions.isNotEmpty() || typePair.second || periodPair.second || assignerPair.second)
+    )
 }
 
 /**

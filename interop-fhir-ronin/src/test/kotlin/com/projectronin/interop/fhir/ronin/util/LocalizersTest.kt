@@ -569,7 +569,7 @@ class LocalizersTest {
             userSelected = true
         )
         val (localizedCoding, updated) = coding.localizePair(tenant)
-        assertTrue(coding === localizedCoding)
+        assertTrue(coding == localizedCoding)
         assertFalse(updated)
     }
 
@@ -600,6 +600,58 @@ class LocalizersTest {
         assertEquals(expectedCoding, localizedCoding)
     }
 
+    @Test
+    fun `localizes coding - mapped system`() {
+        val coding = Coding(
+            id = "12345",
+            extension = localizableExtensions,
+            system = Uri("2.16.840.1.113883.6.1"),
+            version = "version",
+            code = Code("code"),
+            display = "Display",
+            userSelected = true
+        )
+        val (localizedCoding, updated) = coding.localizePair(tenant)
+        assertNotEquals(coding, localizedCoding)
+        assertTrue(updated)
+
+        val expectedCoding = Coding(
+            id = "12345",
+            extension = localizedExtensions,
+            system = Uri("http://loinc.org"),
+            version = "version",
+            code = Code("code"),
+            display = "Display",
+            userSelected = true
+        )
+        assertEquals(expectedCoding, localizedCoding)
+    }
+    @Test
+    fun `localizes coding - mapped system with urn`() {
+        val coding = Coding(
+            id = "12345",
+            extension = localizableExtensions,
+            system = Uri("urn:oid:2.16.840.1.113883.6.1"),
+            version = "version",
+            code = Code("code"),
+            display = "Display",
+            userSelected = true
+        )
+        val (localizedCoding, updated) = coding.localizePair(tenant)
+        assertNotEquals(coding, localizedCoding)
+        assertTrue(updated)
+
+        val expectedCoding = Coding(
+            id = "12345",
+            extension = localizedExtensions,
+            system = Uri("http://loinc.org"),
+            version = "version",
+            code = Code("code"),
+            display = "Display",
+            userSelected = true
+        )
+        assertEquals(expectedCoding, localizedCoding)
+    }
     @Test
     fun `returns current communication if communication has no localizable information`() {
         val communication = Communication(
@@ -1318,7 +1370,7 @@ class LocalizersTest {
             assigner = Reference(display = "assigner")
         )
         val localizedIdentifier = identifier.localize(tenant)
-        assertTrue(identifier === localizedIdentifier)
+        assertTrue(identifier == localizedIdentifier)
     }
 
     @Test
@@ -1362,7 +1414,7 @@ class LocalizersTest {
             assigner = Reference(display = "assigner")
         )
         val (localizedIdentifier, updated) = identifier.localizePair(tenant)
-        assertTrue(identifier === localizedIdentifier)
+        assertTrue(identifier == localizedIdentifier)
         assertFalse(updated)
     }
 
@@ -1388,6 +1440,63 @@ class LocalizersTest {
             use = IdentifierUse.OFFICIAL.asCode(),
             type = CodeableConcept(text = "type"),
             system = Uri("system"),
+            value = "value",
+            period = Period(start = DateTime("2021")),
+            assigner = Reference(display = "assigner")
+        )
+        assertEquals(expectedIdentifier, localizedIdentifier)
+    }
+
+    @Test
+    fun `localizes identifier - mapped system`() {
+        val identifier = Identifier(
+            id = "12345",
+            extension = localizableExtensions,
+            use = IdentifierUse.OFFICIAL.asCode(),
+            type = CodeableConcept(text = "type"),
+            system = Uri("2.16.840.1.113883.4.1"),
+            value = "value",
+            period = Period(start = DateTime("2021")),
+            assigner = Reference(display = "assigner")
+        )
+        val (localizedIdentifier, updated) = identifier.localizePair(tenant)
+        assertNotEquals(identifier, localizedIdentifier)
+        assertTrue(updated)
+
+        val expectedIdentifier = Identifier(
+            id = "12345",
+            extension = localizedExtensions,
+            use = IdentifierUse.OFFICIAL.asCode(),
+            type = CodeableConcept(text = "type"),
+            system = Uri("http://hl7.org/fhir/sid/us-ssn"),
+            value = "value",
+            period = Period(start = DateTime("2021")),
+            assigner = Reference(display = "assigner")
+        )
+        assertEquals(expectedIdentifier, localizedIdentifier)
+    }
+    @Test
+    fun `localizes identifier - mapped system with urn`() {
+        val identifier = Identifier(
+            id = "12345",
+            extension = localizableExtensions,
+            use = IdentifierUse.OFFICIAL.asCode(),
+            type = CodeableConcept(text = "type"),
+            system = Uri("urn:oid:2.16.840.1.113883.4.1"),
+            value = "value",
+            period = Period(start = DateTime("2021")),
+            assigner = Reference(display = "assigner")
+        )
+        val (localizedIdentifier, updated) = identifier.localizePair(tenant)
+        assertNotEquals(identifier, localizedIdentifier)
+        assertTrue(updated)
+
+        val expectedIdentifier = Identifier(
+            id = "12345",
+            extension = localizedExtensions,
+            use = IdentifierUse.OFFICIAL.asCode(),
+            type = CodeableConcept(text = "type"),
+            system = Uri("http://hl7.org/fhir/sid/us-ssn"),
             value = "value",
             period = Period(start = DateTime("2021")),
             assigner = Reference(display = "assigner")
