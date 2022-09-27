@@ -1,6 +1,6 @@
 [libraries]
 commons-text = "org.apache.commons:commons-text:1.9"
-interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:4.0.0"
+interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:4.0.1"
 interop-common = "com.projectronin.interop:interop-common:3.0.1"
 interop-commonHttp = "com.projectronin.interop:interop-common-http:3.0.1"
 interop-commonJackson = "com.projectronin.interop:interop-common-jackson:3.0.1"
