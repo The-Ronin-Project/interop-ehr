@@ -18,7 +18,7 @@ mockk = "io.mockk:mockk:1.13.1"
 mockwebserver = "com.squareup.okhttp3:mockwebserver:4.10.0"
 mysql-connector-java = "mysql:mysql-connector-java:8.0.30"
 rider-core = "com.github.database-rider:rider-core:1.34.0"
-swagger-annotations = "io.swagger.core.v3:swagger-annotations:2.2.2"
+swagger-annotations = "io.swagger.core.v3:swagger-annotations:2.2.3"
 testcontainers-mysql = "org.testcontainers:mysql:1.17.3"
 
 [bundles]
