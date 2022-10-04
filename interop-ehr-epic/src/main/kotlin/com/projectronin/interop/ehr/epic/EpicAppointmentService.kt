@@ -39,7 +39,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneOffset
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.Instant as JavaInstant
 
@@ -388,9 +388,7 @@ class EpicAppointmentService(
      * Takes a string representation of the date, start time and duration of an appointment and returns a pair of
      * [Instant]s representing the start and end times of the appointment.
      *
-     * Note: We're assuming the [date] and [startTime] are in CST
-     * see [DataPlatform](https://github.com/projectronin/dp-databricks-jobs/blob/01b6ba76dc43046d29359783304b7d1ec7259213/jobs/gold/mdaoc/fhir/appointment.py#L231)
-     * We should probably look into adding timezone to the tenant and use that instead.
+     * Note: We're assuming the [date] and [startTime] are in PST for now. This should be changed to rely on a tenant-level configuration.
      *
      * [date] should be of the format M/d/yyyy.
      * [startTime] should be of the format h:mm.
@@ -408,8 +406,10 @@ class EpicAppointmentService(
         val endDateTime = startDateTime.plusMinutes(duration.toLong())
 
         return Pair(
-            startDateTime.toInstant(ZoneOffset.UTC), // not actually UTC, but we don't want to alter the value.
-            endDateTime.toInstant(ZoneOffset.UTC)
+            startDateTime.atZone(pacificZoneId).toInstant(),
+            endDateTime.atZone(pacificZoneId).toInstant()
         )
     }
+
+    private var pacificZoneId = ZoneId.of("America/Los_Angeles")
 }
