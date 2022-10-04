@@ -19,7 +19,6 @@ dependencies {
     testImplementation(libs.interop.commonTestDb)
 
     testImplementation(libs.mockk)
-    testImplementation(libs.rider.core)
 
     testRuntimeOnly(libs.bundles.test.mysql)
 }

@@ -13,10 +13,6 @@ dependencies {
     implementation(project(":interop-ehr"))
     implementation(project(":interop-fhir-ronin"))
     implementation("org.springframework:spring-context")
-    implementation(libs.ktor.client.core)
-    implementation(libs.ktor.client.cio)
-    implementation(libs.ktor.client.content.negotiation)
-    implementation(libs.ktor.serialization.jackson)
     implementation(libs.ktor.server.auth.jwt) {
         exclude(group = "junit")
     }

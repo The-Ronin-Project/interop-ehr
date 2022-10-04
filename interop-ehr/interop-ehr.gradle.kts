@@ -9,8 +9,6 @@ dependencies {
     implementation(libs.interop.commonHttp)
     implementation(libs.interop.commonJackson)
     implementation(libs.interop.fhir)
-    implementation(libs.ktor.client.core)
-    implementation(libs.jackson.databind)
     implementation("org.springframework:spring-context")
 
     testImplementation(libs.mockk)

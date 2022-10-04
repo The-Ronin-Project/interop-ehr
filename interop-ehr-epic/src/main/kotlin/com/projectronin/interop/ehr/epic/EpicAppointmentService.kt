@@ -228,7 +228,7 @@ class EpicAppointmentService(
 
         providerIdMap.entries.forEach {
             if (providerToFhirIdMap[it.key] == null) {
-                logger.warn {
+                logger.info {
                     "Missing FHIR ID in Aidbox for provider with " +
                         "Name: ${it.key.providerName} and SystemValue: ${it.value.queryString}"
                 }
