@@ -167,7 +167,8 @@ class RoninPatientTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_PAT_003: MRN identifier value is required @ Patient.identifier",
+                "ERROR RONIN_PAT_003: MRN identifier value is required @ Patient.identifier\n" +
+                "ERROR REQ_FIELD: value is a required element @ Patient.identifier[2].value",
             exception.message
         )
     }
@@ -243,6 +244,111 @@ class RoninPatientTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: gender is a required element @ Patient.gender",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails for missing identifier system`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = null, value = "missing system")
+            ),
+            name = listOf(HumanName(family = "Doe")),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05")
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPatient.validate(patient, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: system is a required element @ Patient.identifier[3].system",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails for missing identifier value`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri)
+            ),
+            name = listOf(HumanName(family = "Doe")),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05")
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPatient.validate(patient, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: value is a required element @ Patient.identifier[3].value",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails for missing telecom system`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+            ),
+            name = listOf(HumanName(family = "Doe")),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05"),
+            telecom = listOf(ContactPoint(value = "1234567890"))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPatient.validate(patient, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: system is a required element @ Patient.telecom[0].system\n" +
+                "ERROR R4_CNTCTPT_001: A system is required if a value is provided @ Patient.telecom[0]",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails for missing telecom value`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+            ),
+            name = listOf(HumanName(family = "Doe")),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05"),
+            telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPatient.validate(patient, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: value is a required element @ Patient.telecom[0].value",
             exception.message
         )
     }
@@ -390,7 +496,7 @@ class RoninPatientTest {
                     system = RoninCodeSystem.FHIR_ID.uri,
                     value = "12345"
                 ),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
             ),
             oncologyPatient.identifier
         )
@@ -464,7 +570,7 @@ class RoninPatientTest {
                     system = RoninCodeSystem.FHIR_ID.uri,
                     value = "12345"
                 ),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
             ),
             oncologyPatient.identifier
         )

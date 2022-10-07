@@ -3,6 +3,7 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.ehr.IdentifierService
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
+import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
@@ -19,6 +20,7 @@ import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
+import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
 
 const val RONIN_PATIENT_PROFILE =
@@ -88,6 +90,12 @@ class RoninPatient private constructor(private val identifierService: Identifier
         location = LocationContext(Patient::name)
     )
 
+    private val requiredIdentifierSystemError = RequiredFieldError(Identifier::system)
+    private val requiredIdentifierValueError = RequiredFieldError(Identifier::value)
+
+    private val requiredTelecomSystemError = RequiredFieldError(ContactPoint::system)
+    private val requiredTelecomValueError = RequiredFieldError(ContactPoint::value)
+
     override fun validateUSCore(element: Patient, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             checkTrue(element.name.isNotEmpty(), requiredNameError, parentContext)
@@ -95,6 +103,17 @@ class RoninPatient private constructor(private val identifierService: Identifier
             checkNotNull(element.gender, requiredGenderError, parentContext)
 
             // A patient identifier is also required, but Ronin has already checked for a MRN, so we will bypass the checks here.
+            element.identifier.forEachIndexed { index, identifier ->
+                val currentContext = parentContext.append(LocationContext("Patient", "identifier[$index]"))
+                checkNotNull(identifier.system, requiredIdentifierSystemError, currentContext)
+                checkNotNull(identifier.value, requiredIdentifierValueError, currentContext)
+            }
+
+            element.telecom.forEachIndexed { index, telecom ->
+                val currentContext = parentContext.append(LocationContext("Patient", "telecom[$index]"))
+                checkNotNull(telecom.system, requiredTelecomSystemError, currentContext)
+                checkNotNull(telecom.value, requiredTelecomValueError, currentContext)
+            }
         }
     }
 
