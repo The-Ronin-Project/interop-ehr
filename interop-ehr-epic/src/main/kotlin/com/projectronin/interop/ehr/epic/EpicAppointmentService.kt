@@ -48,7 +48,7 @@ import java.time.Instant as JavaInstant
  */
 @Component
 class EpicAppointmentService(
-    private val epicClient: EpicClient,
+    epicClient: EpicClient,
     private val patientService: EpicPatientService,
     private val identifierService: EpicIdentifierService,
     private val aidboxPractitionerService: PractitionerService,

@@ -1,8 +1,14 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.common.http.exceptions.ClientFailureException
+import com.projectronin.interop.common.http.exceptions.ServerFailureException
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.outputs.FindPractitionersResponse
+import com.projectronin.interop.fhir.r4.datatype.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Bundle
+import com.projectronin.interop.fhir.r4.resource.Practitioner
+import com.projectronin.interop.fhir.r4.resource.Resource
+import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
@@ -12,6 +18,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class EpicPractitionerServiceTest {
     private lateinit var epicClient: EpicClient
@@ -81,14 +88,20 @@ class EpicPractitionerServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
-                mapOf("_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"), "location" to "abc")
+                mapOf(
+                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
+                    "location" to "abc"
+                )
             )
         } returns httpResponse
         coEvery {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
-                mapOf("_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"), "location" to "123")
+                mapOf(
+                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
+                    "location" to "123"
+                )
             )
         } returns httpResponse
 
@@ -226,5 +239,120 @@ class EpicPractitionerServiceTest {
 
         // 2 of the practitioner locations are duplicates and get filtered out
         assertEquals(53, bundle.locations.size)
+    }
+
+    @Test
+    fun `getPractitioner works when practitioner exists`() {
+        val tenant = mockk<Tenant>()
+        val mockPractitioner = mockk<Practitioner>()
+
+        coEvery { httpResponse.body<Practitioner>() } returns mockPractitioner
+        coEvery { epicClient.get(tenant, "/api/FHIR/R4/Practitioner/PracFHIRID") } returns httpResponse
+
+        val actual = practitionerService.getPractitioner(tenant, "PracFHIRID")
+        assertEquals(mockPractitioner, actual)
+    }
+
+    @Test
+    fun `getPractitioner propogates exceptions`() {
+        val tenant = mockk<Tenant>()
+
+        val thrownException = ClientFailureException(HttpStatusCode.NotFound, "Not Found")
+        coEvery { httpResponse.body<Practitioner>() } throws thrownException
+        coEvery { epicClient.get(tenant, "/api/FHIR/R4/Practitioner/PracFHIRID") } returns httpResponse
+
+        val exception =
+            assertThrows<ClientFailureException> { practitionerService.getPractitioner(tenant, "PracFHIRID") }
+
+        assertEquals(thrownException, exception)
+    }
+
+    @Test
+    fun `getPractitionerByProvider works when single practitioner found`() {
+        val tenant = mockk<Tenant>()
+        val mockPractitioner = mockk<Practitioner>()
+
+        coEvery { httpResponse.body<Bundle>() } returns mockBundle(mockPractitioner)
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Practitioner",
+                mapOf("identifier" to "External|ProviderId")
+            )
+        } returns httpResponse
+
+        val actual = practitionerService.getPractitionerByProvider(tenant, "ProviderId")
+        assertEquals(mockPractitioner, actual)
+    }
+
+    @Test
+    fun `getPractitionerByProvider throws exception when no practitioner found`() {
+        val tenant = mockk<Tenant>()
+
+        coEvery { httpResponse.body<Bundle>() } returns mockBundle()
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Practitioner",
+                mapOf("identifier" to "External|ProviderId")
+            )
+        } returns httpResponse
+
+        assertThrows<NoSuchElementException> { practitionerService.getPractitionerByProvider(tenant, "ProviderId") }
+    }
+
+    @Test
+    fun `getPractitionerByProvider throws exception when multiple practitioners found`() {
+        val tenant = mockk<Tenant>()
+        val mockPractitioner1 = mockk<Practitioner>()
+        val mockPractitioner2 = mockk<Practitioner>()
+        val mockPractitioner3 = mockk<Practitioner>()
+
+        coEvery { httpResponse.body<Bundle>() } returns mockBundle(
+            mockPractitioner1,
+            mockPractitioner2,
+            mockPractitioner3
+        )
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Practitioner",
+                mapOf("identifier" to "External|ProviderId")
+            )
+        } returns httpResponse
+
+        assertThrows<IllegalArgumentException> { practitionerService.getPractitionerByProvider(tenant, "ProviderId") }
+    }
+
+    @Test
+    fun `getPractitionerByProvider propogates exceptions`() {
+        val tenant = mockk<Tenant>()
+
+        val thrownException = ServerFailureException(HttpStatusCode.InternalServerError, "Server Error")
+        coEvery { httpResponse.body<Bundle>() } throws thrownException
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Practitioner",
+                mapOf("identifier" to "External|ProviderId")
+            )
+        } returns httpResponse
+
+        val exception =
+            assertThrows<ServerFailureException> { practitionerService.getPractitionerByProvider(tenant, "ProviderId") }
+
+        assertEquals(thrownException, exception)
+    }
+
+    private fun <R : Resource<R>> mockBundle(vararg resources: R): Bundle {
+        val entries = resources.map {
+            mockk<BundleEntry> {
+                every { resource } returns it
+            }
+        }
+
+        return mockk {
+            every { entry } returns entries
+        }
     }
 }

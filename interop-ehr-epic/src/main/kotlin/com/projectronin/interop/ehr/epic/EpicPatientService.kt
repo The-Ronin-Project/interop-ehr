@@ -26,7 +26,7 @@ import com.projectronin.interop.fhir.r4.resource.Bundle as R4Bundle
  */
 @Component
 class EpicPatientService(
-    private val epicClient: EpicClient,
+    epicClient: EpicClient,
     @Value("\${epic.fhir.batchSize:5}") private val batchSize: Int,
     private val aidboxPatientService: AidboxPatientService
 ) : PatientService,

@@ -12,7 +12,7 @@ import mu.KotlinLogging
 /**
  * Abstract class to simplify Epic services that need to retrieve bundles using paging.
  */
-abstract class EpicPagingService(private val epicClient: EpicClient) {
+abstract class EpicPagingService(protected val epicClient: EpicClient) {
     private val logger = KotlinLogging.logger { }
 
     /**
