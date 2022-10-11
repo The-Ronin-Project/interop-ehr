@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.swagger.annotations)
 
     testImplementation(libs.mockk)
+    testImplementation(libs.interop.datalake)
 
     // Using MockWebservice to ensure we can verify the headers set by the ktor engine
     testImplementation(libs.mockwebserver)

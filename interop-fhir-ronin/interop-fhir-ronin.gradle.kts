@@ -4,9 +4,10 @@ plugins {
 
 dependencies {
     implementation(libs.interop.common)
+    implementation(libs.interop.commonJackson)
+    implementation(libs.interop.datalake)
     implementation(libs.interop.fhir)
     implementation(project(":interop-tenant"))
     implementation(project(":interop-ehr"))
-
     testImplementation(libs.mockk)
 }
