@@ -1,0 +1,25 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-timezone-create
+      author: Josh Smith
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_tenant
+                columnName: timezone
+      changes:
+        - addColumn:
+            tableName: io_tenant
+            columns:
+              - column:
+                  name: timezone
+                  type: VARCHAR(50)
+                  constraints:
+                    nullable: true
+        - sql:
+            sql: UPDATE io_tenant SET timezone = "Etc/UTC"
+        - addNotNullConstraint:
+            tableName: io_tenant
+            columnName: timezone
+            columnDataType: VARCHAR(50)

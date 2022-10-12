@@ -1114,7 +1114,8 @@ class EpicAppointmentServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 testPrivateKey,
-                "TEST_TENANT"
+                "TEST_TENANT",
+                timezone = "America/Denver"
             )
         val epicVendor = tenant.vendorAs<Epic>()
 
@@ -1228,8 +1229,8 @@ class EpicAppointmentServiceTest {
         assertEquals(1, response.appointments.size)
         val appt = response.appointments.first()
         assertEquals(epicAppointment.id, appt.id?.value)
-        assertEquals("2015-04-30T22:30:00Z", appt.start?.value)
-        assertEquals("2015-04-30T23:00:00Z", appt.end?.value)
+        assertEquals("2015-04-30T21:30:00Z", appt.start?.value)
+        assertEquals("2015-04-30T22:00:00Z", appt.end?.value)
         assertNull(appt.meta)
         assertEquals(2, appt.identifier.size)
         assertEquals(epicVendor.encounterCSNSystem, appt.identifier[1].system?.value)

@@ -9,6 +9,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
+import java.time.ZoneOffset
 
 class EHRFactoryTest {
     @Test
@@ -33,7 +34,7 @@ class EHRFactoryTest {
                 "csnSystem",
                 "patientMRNTypeText"
             )
-        val tenant = Tenant(1, "TENANT", "Test Tenant", null, vendor)
+        val tenant = Tenant(1, "TENANT", "Test Tenant", ZoneOffset.UTC, null, vendor)
 
         val vendorFactory = ehrFactory.getVendorFactory(tenant)
         assertEquals(epicVendorFactory, vendorFactory)
@@ -59,7 +60,7 @@ class EHRFactoryTest {
                 "csnSystem",
                 "patientMRNTypeText"
             )
-        val tenant = Tenant(1, "TENANT", "Test Tenant", null, vendor)
+        val tenant = Tenant(1, "TENANT", "Test Tenant", ZoneOffset.UTC, null, vendor)
 
         val exception = assertThrows(IllegalStateException::class.java) {
             ehrFactory.getVendorFactory(tenant)

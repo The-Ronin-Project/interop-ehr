@@ -20,6 +20,7 @@ internal fun Tenant.toTenantDO(ehrDO: EhrDO): TenantDO {
         mnemonic = this@toTenantDO.mnemonic
         name = this@toTenantDO.name
         ehr = ehrDO
+        timezone = this@toTenantDO.timezone
         availableBatchStart = this@toTenantDO.batchConfig?.availableStart
         availableBatchEnd = this@toTenantDO.batchConfig?.availableEnd
     }
@@ -38,6 +39,7 @@ fun TenantDO.toTenant(ehrTenantDO: EHRTenantDO, ehrDO: EhrDO): Tenant {
         internalId = id,
         mnemonic = mnemonic,
         name = name,
+        timezone = timezone,
         batchConfig = batchConfig,
         vendor = ehrTenantDO.toVendor(ehrDO)
     )

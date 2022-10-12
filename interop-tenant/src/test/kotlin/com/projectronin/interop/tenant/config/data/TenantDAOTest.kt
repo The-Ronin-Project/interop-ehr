@@ -24,6 +24,7 @@ import org.ktorm.dsl.eq
 import org.ktorm.dsl.update
 import java.sql.SQLIntegrityConstraintViolationException
 import java.time.LocalTime
+import java.time.ZoneId
 
 @LiquibaseTest(changeLog = "ehr/db/changelog/ehr.db.changelog-master.yaml")
 class TenantDAOTest {
@@ -116,6 +117,7 @@ class TenantDAOTest {
             id = 0
             mnemonic = "mnemonic"
             name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
+            timezone = ZoneId.of("America/Chicago")
             ehr = ehrDAO.read().first()
             availableBatchStart = LocalTime.of(22, 0, 0)
             availableBatchEnd = LocalTime.of(6, 0, 0)
@@ -142,6 +144,7 @@ class TenantDAOTest {
             id = 0
             mnemonic = "mnemonic"
             name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
+            timezone = ZoneId.of("America/Chicago")
             ehr = fakeEhrDO
             availableBatchStart = LocalTime.of(22, 0)
             availableBatchEnd = LocalTime.of(6, 0, 0)
@@ -164,6 +167,7 @@ class TenantDAOTest {
             id = 1001
             mnemonic = "mnemonic"
             name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
+            timezone = ZoneId.of("America/Denver")
             ehr = ehrDAO.read().first()
             availableBatchStart = LocalTime.of(23, 0)
             availableBatchEnd = LocalTime.of(5, 0, 0)
@@ -185,6 +189,7 @@ class TenantDAOTest {
             id = 54321
             mnemonic = "mnemonic"
             name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
+            timezone = ZoneId.of("America/Denver")
             ehr = ehrDAO.read().first()
             availableBatchStart = LocalTime.of(23, 0)
             availableBatchEnd = LocalTime.of(5, 0, 0)
@@ -205,6 +210,7 @@ class TenantDAOTest {
             id = 54321
             mnemonic = "mnemonic"
             name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
+            timezone = ZoneId.of("America/Los_Angeles")
             ehr = ehrDAO.read().first()
             availableBatchStart = LocalTime.of(23, 0)
             availableBatchEnd = LocalTime.of(5, 0, 0)
@@ -215,6 +221,7 @@ class TenantDAOTest {
                 set(it.mnemonic, updatedTenantDO.mnemonic)
                 set(it.name, updatedTenantDO.name)
                 set(it.ehr, updatedTenantDO.ehr.id)
+                set(it.timezone, updatedTenantDO.timezone)
                 set(it.availableBatchStart, updatedTenantDO.availableBatchStart)
                 set(it.availableBatchEnd, updatedTenantDO.availableBatchEnd)
                 where {

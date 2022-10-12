@@ -10,12 +10,14 @@ io_tenant:
   - io_tenant_id: 1002
     mnemonic: "tenant"
     full_name: "Test Tenant"
+    timezone: "America/New_York"
     io_ehr_id: 101
     available_batch_start: "22:00:00"
     available_batch_end: "06:00:00"
   - io_tenant_id: 2001
     mnemonic: "tnanet"
     full_name: "Tnanet Tset"
+    timezone: "America/Chicago"
     io_ehr_id: 101
     available_batch_start: "22:00:00"
     available_batch_end: "06:00:00"

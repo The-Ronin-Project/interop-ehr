@@ -13,6 +13,7 @@ import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.serialization.jackson.jackson
 import java.time.LocalTime
+import java.time.ZoneId
 
 inline fun <reified T> readResource(resource: String): T =
     objectMapper.readValue(T::class.java.getResource(resource)!!.readText())
@@ -40,11 +41,13 @@ fun createTestTenant(
     internalSystem: String = "internalSystem",
     hsi: String? = null,
     authEndpoint: String? = null,
+    timezone: String = "Etc/UTC"
 ): Tenant {
     return Tenant(
         internalId,
         tenantMnemonic,
         tenantName,
+        ZoneId.of(timezone),
         BatchConfig(LocalTime.MIN, LocalTime.MAX),
         Epic(
             clientId,

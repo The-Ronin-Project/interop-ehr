@@ -2,6 +2,7 @@ package com.projectronin.interop.tenant.config.data.model
 
 import org.ktorm.entity.Entity
 import java.time.LocalTime
+import java.time.ZoneId
 
 /**
  * Entity definition for the Tenant data object.
@@ -21,4 +22,5 @@ interface TenantDO : Entity<TenantDO> {
     var ehr: EhrDO
     var availableBatchStart: LocalTime?
     var availableBatchEnd: LocalTime?
+    var timezone: ZoneId
 }

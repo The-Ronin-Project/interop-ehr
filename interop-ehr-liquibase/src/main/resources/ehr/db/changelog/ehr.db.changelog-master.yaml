@@ -11,3 +11,5 @@ databaseChangeLog:
       file: ehr/db/changelog/ehr.db.changelog-3.0.0.yaml
   - include:
       file: ehr/db/changelog/ehr.db.changelog-3.0.1.yaml
+  - include:
+      file: ehr/db/changelog/ehr.db.changelog-4.3.0.yaml

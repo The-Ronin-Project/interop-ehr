@@ -16,4 +16,5 @@ object TenantDOs : Table<TenantDO>("io_tenant") {
     val ehr = int("io_ehr_id").references(EhrDOs) { it.ehr }
     val availableBatchStart = time("available_batch_start").bindTo { it.availableBatchStart }
     val availableBatchEnd = time("available_batch_end").bindTo { it.availableBatchEnd }
+    val timezone = timezone("timezone").bindTo { it.timezone }
 }

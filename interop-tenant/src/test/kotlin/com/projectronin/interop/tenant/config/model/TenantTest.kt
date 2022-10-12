@@ -4,12 +4,14 @@ import com.projectronin.interop.tenant.config.model.vendor.Epic
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import java.time.LocalTime
+import java.time.ZoneId
 
 class TenantTest {
     @Test
     fun `check getters`() {
         val batchConfig = BatchConfig(LocalTime.of(20, 0), LocalTime.of(6, 30))
         val authenticationConfig = AuthenticationConfig("authEndpoint", "public", "private")
+        val timezone = ZoneId.of("America/Chicago")
         val epic =
             Epic(
                 "clientId",
@@ -30,12 +32,14 @@ class TenantTest {
             1,
             "mnemonic",
             "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated",
+            timezone,
             batchConfig,
             epic
         )
         assertEquals(1, tenant.internalId)
         assertEquals("mnemonic", tenant.mnemonic)
         assertEquals("Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated", tenant.name)
+        assertEquals(timezone, tenant.timezone)
         assertEquals(batchConfig, tenant.batchConfig)
         assertEquals(epic, tenant.vendor)
     }

@@ -24,6 +24,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.ktorm.database.Database
 import java.time.LocalTime
+import java.time.ZoneId
 
 class TenantServiceTest {
     private lateinit var database: Database
@@ -83,6 +84,7 @@ class TenantServiceTest {
         every { id } returns 1
         every { mnemonic } returns "Tenant1"
         every { name } returns "Test Tenant"
+        every { timezone } returns ZoneId.of("America/Chicago")
         every { ehr } returns standardEHRDO1
         every { availableBatchStart } returns null
         every { availableBatchEnd } returns null
@@ -92,6 +94,7 @@ class TenantServiceTest {
         every { id } returns 2
         every { mnemonic } returns "Tenant2"
         every { name } returns "Second Alternate Tenant"
+        every { timezone } returns ZoneId.of("America/Los_Angeles")
         every { ehr } returns standardEHRDO2
         every { availableBatchStart } returns null
         every { availableBatchEnd } returns null
@@ -101,6 +104,7 @@ class TenantServiceTest {
         internalId = 1,
         mnemonic = "Tenant1",
         name = "Test Tenant",
+        timezone = ZoneId.of("America/Chicago"),
         batchConfig = null,
         vendor = Epic(
             clientId = "clientId",
@@ -127,6 +131,7 @@ class TenantServiceTest {
         internalId = 2,
         mnemonic = "Tenant2",
         name = "Second Alternate Tenant",
+        timezone = ZoneId.of("America/Los_Angeles"),
         batchConfig = null,
         vendor = Epic(
             clientId = "clientId2",
@@ -209,6 +214,7 @@ class TenantServiceTest {
             every { id } returns 1
             every { mnemonic } returns "Tenant1"
             every { name } returns "Test Tenant"
+            every { timezone } returns ZoneId.of("America/Chicago")
             every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns null
             every { availableBatchEnd } returns LocalTime.of(6, 0)
@@ -232,6 +238,7 @@ class TenantServiceTest {
             every { id } returns 1
             every { mnemonic } returns "Tenant1"
             every { name } returns "Test Tenant"
+            every { timezone } returns ZoneId.of("America/Chicago")
             every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns LocalTime.of(20, 0)
             every { availableBatchEnd } returns null
@@ -256,6 +263,7 @@ class TenantServiceTest {
             every { mnemonic } returns "Tenant1"
             every { name } returns "Test Tenant"
             every { ehr } returns standardEHRDO1
+            every { timezone } returns ZoneId.of("America/Chicago")
             every { availableBatchStart } returns LocalTime.of(20, 0)
             every { availableBatchEnd } returns LocalTime.of(6, 0)
         }
@@ -267,6 +275,7 @@ class TenantServiceTest {
             internalId = 1,
             mnemonic = "Tenant1",
             name = "Test Tenant",
+            timezone = ZoneId.of("America/Chicago"),
             batchConfig = BatchConfig(
                 availableStart = LocalTime.of(20, 0),
                 availableEnd = LocalTime.of(6, 0)
@@ -326,6 +335,7 @@ class TenantServiceTest {
             internalId = 1,
             mnemonic = "Tenant1",
             name = "Test Tenant",
+            timezone = ZoneId.of("America/Chicago"),
             batchConfig = null,
             vendor = Epic(
                 clientId = "clientId",
@@ -402,6 +412,7 @@ class TenantServiceTest {
             internalId = 1,
             mnemonic = "Tenant1",
             name = "Test Tenant",
+            timezone = ZoneId.of("America/Chicago"),
             batchConfig = BatchConfig(
                 availableStart = LocalTime.of(20, 0),
                 availableEnd = LocalTime.of(6, 0)
@@ -430,6 +441,7 @@ class TenantServiceTest {
             every { id } returns 1
             every { mnemonic } returns "Tenant1"
             every { name } returns "Test Tenant"
+            every { timezone } returns ZoneId.of("America/Chicago")
             every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns LocalTime.of(20, 0)
             every { availableBatchEnd } returns LocalTime.of(6, 0)

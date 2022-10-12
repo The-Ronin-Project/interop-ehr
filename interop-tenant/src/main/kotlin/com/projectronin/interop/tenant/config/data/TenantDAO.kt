@@ -59,6 +59,7 @@ class TenantDAO(@Qualifier("ehr") private val database: Database) {
                 set(it.mnemonic, tenant.mnemonic)
                 set(it.name, tenant.name)
                 set(it.ehr, tenant.ehr.id)
+                set(it.timezone, tenant.timezone)
                 set(it.availableBatchStart, tenant.availableBatchStart)
                 set(it.availableBatchEnd, tenant.availableBatchEnd)
             }
@@ -79,6 +80,7 @@ class TenantDAO(@Qualifier("ehr") private val database: Database) {
                 set(it.mnemonic, tenant.mnemonic)
                 set(it.name, tenant.name)
                 set(it.ehr, tenant.ehr.id)
+                set(it.timezone, tenant.timezone)
                 set(it.availableBatchStart, tenant.availableBatchStart)
                 set(it.availableBatchEnd, tenant.availableBatchEnd)
                 where {

@@ -18,6 +18,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.sql.SQLIntegrityConstraintViolationException
+import java.time.ZoneId
 
 @LiquibaseTest(changeLog = "ehr/db/changelog/ehr.db.changelog-master.yaml")
 class ProviderPoolDAOTest {
@@ -180,6 +181,7 @@ class ProviderPoolDAOTest {
         val tenantDO = mockk<TenantDO> {
             every { id } returns 1001
             every { mnemonic } returns "blah"
+            every { timezone } returns ZoneId.of("America/New_York")
             every { ehr } returns ehrDO
             every { availableBatchStart } returns null
             every { availableBatchEnd } returns null

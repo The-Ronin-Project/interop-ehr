@@ -39,7 +39,6 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.LocalDateTime
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.Instant as JavaInstant
 
@@ -294,7 +293,8 @@ class EpicAppointmentService(
         val (transformedStartInstant, transformedEndInstant) = getStartAndEndInstants(
             this.date,
             this.appointmentStartTime,
-            this.appointmentDuration
+            this.appointmentDuration,
+            tenant
         )
 
         val patientParticipant = Participant(
@@ -397,19 +397,19 @@ class EpicAppointmentService(
     private fun getStartAndEndInstants(
         date: String,
         startTime: String,
-        duration: String
+        duration: String,
+        tenant: Tenant
     ): Pair<JavaInstant, JavaInstant> {
         val startDateTime = LocalDateTime.parse(
             "${date.trim()} ${startTime.trim()}",
             DateTimeFormatter.ofPattern("M/d/yyyy h:mm a")
         )
         val endDateTime = startDateTime.plusMinutes(duration.toLong())
+        val timezone = tenant.timezone
 
         return Pair(
-            startDateTime.atZone(pacificZoneId).toInstant(),
-            endDateTime.atZone(pacificZoneId).toInstant()
+            startDateTime.atZone(timezone).toInstant(),
+            endDateTime.atZone(timezone).toInstant()
         )
     }
-
-    private var pacificZoneId = ZoneId.of("America/Los_Angeles")
 }

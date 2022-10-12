@@ -9,6 +9,7 @@ io_tenant:
   - io_tenant_id: 1001
     mnemonic: "mnemonic"
     full_name: "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
+    timezone: "America/Denver"
     io_ehr_id: 101
     available_batch_start: "23:00:00"
     available_batch_end: "05:00:00"
