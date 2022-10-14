@@ -143,6 +143,110 @@ class EpicMessageServiceTest {
     }
 
     @Test
+    fun `ensure multi-line messages with carriage returns can be sent`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            "Test Tenant",
+            "USER#1",
+            "Symptom Alert"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
+            listOf(
+                IDType(
+                    "130375", "Type"
+                )
+            )
+        )
+        coEvery {
+            epicClient.post(
+                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                SendMessageRequest(
+                    patientID = "MRN#1",
+                    recipients = listOf(SendMessageRecipient("CorrectID", false)),
+                    messageText = listOf("Message Text", "Line 2", "", "Line 4"),
+                    senderID = "USER#1",
+                    messageType = "Symptom Alert"
+                )
+            )
+        } returns httpResponse
+
+        val recipientsList = listOf(
+            EHRRecipient(
+                "PROV#1",
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+            )
+        )
+
+        every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
+
+        val messageId = EpicMessageService(epicClient, providerPoolService).sendMessage(
+            tenant,
+            EHRMessageInput(
+                "Message Text\r\nLine 2\r\n\r\nLine 4", "MRN#1", recipientsList
+            )
+        )
+
+        assertEquals("130375", messageId)
+    }
+
+    @Test
+    fun `ensure multi-line messages with mixed newlines and carriage returned newlines can be sent`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            "Test Tenant",
+            "USER#1",
+            "Symptom Alert"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
+            listOf(
+                IDType(
+                    "130375", "Type"
+                )
+            )
+        )
+        coEvery {
+            epicClient.post(
+                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                SendMessageRequest(
+                    patientID = "MRN#1",
+                    recipients = listOf(SendMessageRecipient("CorrectID", false)),
+                    messageText = listOf("Message Text", "Line 2", "", "Line 4"),
+                    senderID = "USER#1",
+                    messageType = "Symptom Alert"
+                )
+            )
+        } returns httpResponse
+
+        val recipientsList = listOf(
+            EHRRecipient(
+                "PROV#1",
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+            )
+        )
+
+        every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
+
+        val messageId = EpicMessageService(epicClient, providerPoolService).sendMessage(
+            tenant,
+            EHRMessageInput(
+                "Message Text\r\nLine 2\n\nLine 4", "MRN#1", recipientsList
+            )
+        )
+
+        assertEquals("130375", messageId)
+    }
+
+    @Test
     fun `ensure pool ID works can be sent`() {
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",

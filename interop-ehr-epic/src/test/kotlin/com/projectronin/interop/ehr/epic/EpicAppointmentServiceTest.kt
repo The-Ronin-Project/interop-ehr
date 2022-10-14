@@ -4,7 +4,6 @@ import com.projectronin.interop.aidbox.LocationService
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.aidbox.model.SystemValue
-import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.common.http.throwExceptionFromHttpStatus
 import com.projectronin.interop.ehr.epic.apporchard.model.EpicAppointment
 import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
@@ -83,6 +82,10 @@ class EpicAppointmentServiceTest {
     private val goodProviderFHIRIdentifier = FHIRIdentifiers(
         id = Id("ProviderFhirId"),
         identifiers = listOf(goodProviderIdentifier1, goodProviderIdentifier2)
+    )
+    private val badProviderFHIRIdentifier = FHIRIdentifiers(
+        id = Id("test2"),
+        identifiers = listOf()
     )
     private val patientFhirAppointmentSearchUrlPart = "/api/FHIR/STU3/Appointment"
     private val patientAppointmentSearchUrlPart =
@@ -608,7 +611,7 @@ class EpicAppointmentServiceTest {
     }
 
     @Test
-    fun `findProviderAppointments - ensure provider appointments handles failed identifier service call `() {
+    fun `findProviderAppointments- ensure provider appointments handles failed identifier service call for all providers`() {
         val tenant =
             createTestTenant(
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
@@ -638,14 +641,138 @@ class EpicAppointmentServiceTest {
             )
         } returns Identifier(value = null)
 
-        assertThrows<VendorIdentifierNotFoundException> {
+        val response =
             epicAppointmentService.findProviderAppointments(
                 tenant,
                 listOf(goodProviderFHIRIdentifier),
                 LocalDate.of(2015, 1, 1),
                 LocalDate.of(2015, 11, 1)
             )
-        }
+
+        assertEquals(0, response.appointments.size)
+        assertNull(response.newPatients)
+    }
+
+    @Test
+    fun `findProviderAppointments - ensure provider appointments handles failed identifier service call for some providers`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT"
+            )
+
+        val epicAppointmentService = spyk(
+            EpicAppointmentService(
+                epicClient,
+                patientService,
+                identifierService,
+                aidboxPractitionerService,
+                aidboxLocationService,
+                aidboxPatientService,
+                5,
+                true
+            )
+        )
+
+        // Identifier service
+        every {
+            identifierService.getPractitionerProviderIdentifier(
+                tenant,
+                goodProviderFHIRIdentifier
+            )
+        } returns goodProviderIdentifier1
+        every {
+            identifierService.getPractitionerProviderIdentifier(
+                tenant,
+                badProviderFHIRIdentifier
+            )
+        } returns Identifier(value = null)
+
+        // GetAppointments request
+        mockkStatic(HttpResponse::throwExceptionFromHttpStatus)
+        justRun { httpResponse.throwExceptionFromHttpStatus("GetAppointments", providerAppointmentSearchUrlPart) }
+        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns validProviderAppointmentSearchResponse
+        coEvery {
+            epicClient.post(
+                tenant,
+                "/api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments",
+                GetProviderAppointmentRequest(
+                    userID = "ehrUserId",
+                    providers = listOf(ScheduleProvider(id = "E1000")),
+                    startDate = "01/01/2015",
+                    endDate = "11/01/2015"
+                )
+            )
+        } returns httpResponse
+
+        // Patient service request
+        every {
+            patientService.getPatientsFHIRIds(
+                tenant = tenant,
+                patientIDSystem = tenant.vendorAs<Epic>().patientInternalSystem,
+                patientIDValues = listOf("     Z6156", "     Z6740", "     Z6783", "     Z4575")
+            )
+        } returns mapOf(
+            "     Z6156" to GetFHIRIDResponse("fhirID1", Patient(id = Id("123"))),
+            "     Z6740" to GetFHIRIDResponse("fhirID2", Patient(id = Id("456"))),
+            "     Z6783" to GetFHIRIDResponse("fhirID3"),
+            "     Z4575" to GetFHIRIDResponse("fhirID4")
+        )
+
+        // STU3 appointment search
+        every {
+            epicAppointmentService.getBundleWithPagingSTU3(
+                tenant,
+                patientFhirAppointmentSearchUrlPart,
+                mapOf(
+                    "patient" to "fhirID1",
+                    "identifier" to "csnSystem|38033,csnSystem|38035"
+                )
+            )
+        } returns multipleAppointmentBundle
+        every {
+            epicAppointmentService.getBundleWithPagingSTU3(
+                tenant,
+                patientFhirAppointmentSearchUrlPart,
+                mapOf(
+                    "patient" to "fhirID2",
+                    "identifier" to "csnSystem|38034,csnSystem|38036"
+                )
+            )
+        } returns multipleAppointmentBundle
+        every {
+            epicAppointmentService.getBundleWithPagingSTU3(
+                tenant,
+                patientFhirAppointmentSearchUrlPart,
+                mapOf(
+                    "patient" to "fhirID3",
+                    "identifier" to "csnSystem|38037"
+                )
+            )
+        } returns singleAppointmentBundle
+        every {
+            epicAppointmentService.getBundleWithPagingSTU3(
+                tenant,
+                patientFhirAppointmentSearchUrlPart,
+                mapOf(
+                    "patient" to "fhirID4",
+                    "identifier" to "csnSystem|38184"
+                )
+            )
+        } returns singleAppointmentBundle
+
+        val response =
+            epicAppointmentService.findProviderAppointments(
+                tenant,
+                listOf(goodProviderFHIRIdentifier, badProviderFHIRIdentifier),
+                LocalDate.of(2015, 1, 1),
+                LocalDate.of(2015, 11, 1)
+            )
+
+        assertEquals(6, response.appointments.size)
+        assertEquals(2, response.newPatients!!.size)
     }
 
     @Test
@@ -705,16 +832,16 @@ class EpicAppointmentServiceTest {
             )
         } returns mapOf()
 
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
+        val response =
             epicAppointmentService.findProviderAppointments(
                 tenant,
                 listOf(goodProviderFHIRIdentifier),
                 LocalDate.of(2015, 1, 1),
                 LocalDate.of(2015, 11, 1)
             )
-        }
 
-        assertEquals("FHIR ID not found for patient      Z6156", exception.message)
+        assertEquals(0, response.appointments.size)
+        assertEquals(0, response.newPatients!!.size)
     }
 
     @Test
@@ -1750,7 +1877,10 @@ class EpicAppointmentServiceTest {
         assertEquals(epicAppointment1.id, appt0.id?.value)
         assertNull(appt0.meta)
         assertEquals(2, appt0.identifier.size)
-        assertFalse(appt0.identifier.filter { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } }.isEmpty())
+        assertFalse(
+            appt0.identifier.filter { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } }
+                .isEmpty()
+        )
         assertEquals(Code("Deliberately new"), appt0.status)
         assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName), appt0.appointmentType)
         assertEquals(7, appt0.participant.size) // 5 would be the size if we listed only distinct providers

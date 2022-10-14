@@ -4,7 +4,6 @@ import com.projectronin.interop.aidbox.LocationService
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.aidbox.model.SystemValue
-import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.common.http.throwExceptionFromHttpStatus
 import com.projectronin.interop.ehr.AppointmentService
 import com.projectronin.interop.ehr.epic.apporchard.model.EpicAppointment
@@ -116,10 +115,19 @@ class EpicAppointmentService(
         logger.info { "Provider appointment search started for ${tenant.mnemonic}" }
 
         // Get correct provider IDs for request
-        val selectedIdentifiers = providerIDs.map {
+        val selectedIdentifiers = providerIDs.mapNotNull {
             val selectedIdentifier = identifierService.getPractitionerProviderIdentifier(tenant, it)
-            selectedIdentifier.value
-                ?: throw VendorIdentifierNotFoundException("Unable to find a value on identifier: $selectedIdentifier")
+
+            if (selectedIdentifier.value == null) {
+                logger.warn { "Unable to find a value on identifier: $selectedIdentifier" }
+                null
+            } else {
+                selectedIdentifier.value
+            }
+        }
+
+        if (selectedIdentifiers.isEmpty()) {
+            return FindPractitionerAppointmentsResponse(emptyList())
         }
 
         // Call GetProviderAppointments
@@ -138,10 +146,15 @@ class EpicAppointmentService(
             getAppointmentsResponse.appointments.map { it.patientId!! }.toSet().toList() // Make Id list unique
         )
 
-        val patientFhirIdToAppointments = getAppointmentsResponse.appointments.groupBy {
-            patientFhirIdResponse[it.patientId]?.fhirID
-                ?: throw VendorIdentifierNotFoundException("FHIR ID not found for patient ${it.patientId}")
-        }
+        val patientFhirIdToAppointments = getAppointmentsResponse.appointments.filter {
+            val patient = patientFhirIdResponse[it.patientId]
+            if (patient == null) {
+                logger.warn { "FHIR ID not found for patient ${it.patientId}" }
+                false
+            } else {
+                true
+            }
+        }.groupBy { patientFhirIdResponse[it.patientId]!!.fhirID }
 
         val r4AppointmentsToReturn = if (useFhirAPI) {
             retrieveAppointmentFromEpic(tenant, patientFhirIdToAppointments)
