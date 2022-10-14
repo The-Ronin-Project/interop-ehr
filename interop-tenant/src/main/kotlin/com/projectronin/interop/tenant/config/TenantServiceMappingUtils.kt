@@ -91,7 +91,8 @@ private fun EpicTenantDO.toEpic(ehrDO: EhrDO): Epic {
         patientInternalSystem = patientInternalSystem,
         encounterCSNSystem = encounterCSNSystem,
         patientMRNTypeText = patientMRNTypeText,
-        hsi = hsi
+        hsi = hsi,
+        departmentInternalSystem = departmentInternalSystem,
     )
 }
 
@@ -120,5 +121,6 @@ private fun Epic.toEpicTenantDO(tenantID: Int): EpicTenantDO {
         encounterCSNSystem = this@toEpicTenantDO.encounterCSNSystem
         patientMRNTypeText = this@toEpicTenantDO.patientMRNTypeText
         hsi = this@toEpicTenantDO.hsi
+        departmentInternalSystem = this@toEpicTenantDO.departmentInternalSystem
     }
 }

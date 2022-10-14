@@ -36,7 +36,7 @@ class EpicTenantDAOTest {
         assertEquals("urn:oid:mrn.system", epicTenant?.patientMRNSystem)
         assertEquals("urn:oid:internal.system", epicTenant?.patientInternalSystem)
         assertEquals("urn:oid:encounter.system", epicTenant?.encounterCSNSystem)
-        assertEquals("urn:oid:department.system", epicTenant?.departmentInternalSystem)
+        assertEquals("urn:oid:1.2.840.114350.1.13.297.3.7.2.686980", epicTenant?.departmentInternalSystem)
         assertEquals("urn:epic:apporchard.curprod", epicTenant?.hsi)
     }
 

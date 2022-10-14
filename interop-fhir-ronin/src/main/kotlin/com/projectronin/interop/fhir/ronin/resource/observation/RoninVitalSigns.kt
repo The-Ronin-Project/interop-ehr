@@ -3,6 +3,7 @@ package com.projectronin.interop.fhir.ronin.resource.observation
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -12,11 +13,8 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 
-const val RONIN_VITAL_SIGNS_PROFILE =
-    "http://projectronin.io/fhir/ronin.common-fhir-model.uscore-r4/StructureDefinition/ronin-vitalSigns"
-
 object RoninVitalSigns :
-    USCoreBasedProfile<Observation>(USCoreVitalSignsValidator, RONIN_VITAL_SIGNS_PROFILE) {
+    USCoreBasedProfile<Observation>(USCoreVitalSignsValidator, RoninProfile.OBSERVATION_VITAL_SIGNS.value) {
     private val specificVitalSignsCodes = listOf(RoninBodyHeight.bodyHeightCode, RoninBodyWeight.bodyWeightCode)
 
     override fun qualifies(resource: Observation): Boolean {

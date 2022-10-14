@@ -16,10 +16,7 @@ import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
-import com.projectronin.interop.fhir.ronin.resource.observation.RONIN_BODY_HEIGHT_PROFILE
-import com.projectronin.interop.fhir.ronin.resource.observation.RONIN_BODY_WEIGHT_PROFILE
-import com.projectronin.interop.fhir.ronin.resource.observation.RONIN_LAB_RESULT_PROFILE
-import com.projectronin.interop.fhir.ronin.resource.observation.RONIN_VITAL_SIGNS_PROFILE
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyHeight
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyWeight
 import com.projectronin.interop.fhir.ronin.resource.observation.USCoreVitalSignsValidator
@@ -259,7 +256,7 @@ class RoninObservationsTest {
         val transformed = RoninObservations.transform(observation, tenant)
         transformed!!
         assertEquals(
-            Meta(profile = listOf(Canonical(RONIN_BODY_WEIGHT_PROFILE))),
+            Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_WEIGHT.value))),
             transformed.meta
         )
     }
@@ -298,7 +295,7 @@ class RoninObservationsTest {
         val transformed = RoninObservations.transform(observation, tenant)
         transformed!!
         assertEquals(
-            Meta(profile = listOf(Canonical(RONIN_BODY_HEIGHT_PROFILE))),
+            Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value))),
             transformed.meta
         )
     }
@@ -330,7 +327,7 @@ class RoninObservationsTest {
         val transformed = RoninObservations.transform(observation, tenant)
         transformed!!
         assertEquals(
-            Meta(profile = listOf(Canonical(RONIN_VITAL_SIGNS_PROFILE))),
+            Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_VITAL_SIGNS.value))),
             transformed.meta
         )
     }
@@ -362,7 +359,7 @@ class RoninObservationsTest {
         val transformed = RoninObservations.transform(observation, tenant)
         transformed!!
         assertEquals(
-            Meta(profile = listOf(Canonical(RONIN_LAB_RESULT_PROFILE))),
+            Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_LABORATORY_RESULT.value))),
             transformed.meta
         )
     }

@@ -5,6 +5,7 @@ import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.resource.PractitionerRole
 import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerRoleValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -24,7 +25,7 @@ const val RONIN_PRACTITIONER_ROLE_PROFILE =
  */
 object RoninPractitionerRole : USCoreBasedProfile<PractitionerRole>(
     R4PractitionerRoleValidator,
-    RONIN_PRACTITIONER_ROLE_PROFILE
+    RoninProfile.PRACTITIONER_ROLE.value
 ) {
     private val requiredPractitionerError = RequiredFieldError(PractitionerRole::practitioner)
 

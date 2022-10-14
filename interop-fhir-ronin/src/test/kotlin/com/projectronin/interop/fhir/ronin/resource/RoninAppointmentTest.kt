@@ -24,6 +24,7 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -203,7 +204,7 @@ class RoninAppointmentTest {
         assertEquals("Appointment", transformed.resourceType)
         assertEquals(Id(value = "test-12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RONIN_APPOINTMENT_PROFILE))),
+            Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value))),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
@@ -288,7 +289,7 @@ class RoninAppointmentTest {
         assertEquals("Appointment", transformed.resourceType)
         assertEquals(Id(value = "test-12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RONIN_APPOINTMENT_PROFILE))),
+            Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value))),
             transformed.meta
         )
         assertNull(transformed.implicitRules)
@@ -336,12 +337,6 @@ class RoninAppointmentTest {
     @Test
     fun `transform fails for appointment with missing id`() {
         val appointment = Appointment(
-            extension = listOf(
-                Extension(
-                    url = Uri("http://projectronin.com/fhir/us/ronin/StructureDefinition/partnerDepartmentReference"),
-                    value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "reference"))
-                )
-            ),
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(

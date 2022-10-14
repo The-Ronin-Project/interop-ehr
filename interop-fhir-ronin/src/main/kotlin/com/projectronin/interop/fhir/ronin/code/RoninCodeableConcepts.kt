@@ -6,7 +6,7 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 
 /**
- * Provides access to common [CodeableConcept]s.
+ * Access to common Ronin [CodeableConcept]s
  */
 object RoninCodeableConcepts {
     val TENANT = CodeableConcept(

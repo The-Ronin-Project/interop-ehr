@@ -13,8 +13,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
-import com.projectronin.interop.fhir.ronin.resource.condition.RONIN_CONDITION_ENCOUNTER_DIAGNOSIS_PROFILE
-import com.projectronin.interop.fhir.ronin.resource.condition.RONIN_CONDITION_PROBLEMS_PROFILE
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -116,7 +115,7 @@ class RoninConditionsTest {
         val transformed = RoninConditions.transform(condition, tenant)
         transformed!!
         assertEquals(
-            Meta(profile = listOf(Canonical(RONIN_CONDITION_ENCOUNTER_DIAGNOSIS_PROFILE))),
+            Meta(profile = listOf(Canonical(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value))),
             transformed.meta
         )
     }
@@ -155,7 +154,7 @@ class RoninConditionsTest {
         val transformed = RoninConditions.transform(condition, tenant)
         transformed!!
         assertEquals(
-            Meta(profile = listOf(Canonical(RONIN_CONDITION_PROBLEMS_PROFILE))),
+            Meta(profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value))),
             transformed.meta
         )
     }

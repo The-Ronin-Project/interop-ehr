@@ -35,7 +35,7 @@ io_tenant_epic:
     patient_internal_system: "urn:oid:internal.system"
     encounter_csn_system: "urn:oid:encounter.system"
     hsi: "urn:epic:apporchard.curprod"
-    department_internal_system: "urn:oid:department.system"
+    department_internal_system: "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980"
   - io_tenant_id: 1003
     release_version: "2021.10"
     service_endpoint: "https://localhost:8080/"

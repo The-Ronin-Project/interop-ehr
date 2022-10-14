@@ -6,6 +6,7 @@ import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -18,11 +19,8 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 
-const val RONIN_BODY_HEIGHT_PROFILE =
-    "http://projectronin.io/fhir/ronin.common-fhir-model.uscore-r4/StructureDefinition/ronin-bodyHeight"
-
 object RoninBodyHeight :
-    USCoreBasedProfile<Observation>(USCoreVitalSignsValidator, RONIN_BODY_HEIGHT_PROFILE) {
+    USCoreBasedProfile<Observation>(USCoreVitalSignsValidator, RoninProfile.OBSERVATION_BODY_HEIGHT.value) {
     internal val bodyHeightCode = Code("8302-2")
 
     override fun qualifies(resource: Observation): Boolean {

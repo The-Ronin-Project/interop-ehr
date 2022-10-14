@@ -5,6 +5,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -16,11 +17,8 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 
-const val RONIN_LAB_RESULT_PROFILE =
-    "http://projectronin.io/fhir/ronin.common-fhir-model.uscore-r4/StructureDefinition/ronin-laboratoryresultobservation"
-
 object RoninLaboratoryResultObservation :
-    USCoreBasedProfile<Observation>(R4ObservationValidator, RONIN_LAB_RESULT_PROFILE) {
+    USCoreBasedProfile<Observation>(R4ObservationValidator, RoninProfile.OBSERVATION_LABORATORY_RESULT.value) {
     private val laboratoryCode = Code("laboratory")
 
     override fun qualifies(resource: Observation): Boolean {

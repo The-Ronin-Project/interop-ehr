@@ -3,6 +3,7 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -13,14 +14,11 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.tenant.config.model.Tenant
 
-const val RONIN_LOCATION_PROFILE =
-    "http://projectronin.io/fhir/ronin.common-fhir-model.uscore-r4/StructureDefinition/ronin-location"
-
 /**
  * Validator and Transformer for the Ronin Location profile.
  */
 object RoninLocation :
-    USCoreBasedProfile<Location>(R4LocationValidator, RONIN_LOCATION_PROFILE) {
+    USCoreBasedProfile<Location>(R4LocationValidator, RoninProfile.LOCATION.value) {
     override fun validateRonin(element: Location, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, validation)

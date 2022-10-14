@@ -41,6 +41,7 @@ fun createTestTenant(
     internalSystem: String = "internalSystem",
     hsi: String? = null,
     authEndpoint: String? = null,
+    departmentInternalSystem: String = "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980",
     timezone: String = "Etc/UTC"
 ): Tenant {
     return Tenant(
@@ -63,7 +64,8 @@ fun createTestTenant(
             internalSystem,
             csnSystem,
             mrnTypeText,
-            hsi
+            hsi,
+            departmentInternalSystem,
         )
     )
 }

@@ -34,6 +34,8 @@ class TenantServiceTest {
     private lateinit var service: TenantService
     private lateinit var ehrTenantDAOFactory: EHRTenantDAOFactory
 
+    private val epicHsiValue = "urn:epic:apporchard.curprod"
+    private val epicDepartmentSystem = "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980"
     private val standardEHRDO1 = mockk<EhrDO> {
         every { id } returns 1
         every { instanceName } returns "Epic Sandbox"
@@ -63,7 +65,8 @@ class TenantServiceTest {
         every { patientInternalSystem } returns "internalSystemExample"
         every { encounterCSNSystem } returns "csnSystem"
         every { patientMRNTypeText } returns "patientMRNTypeText"
-        every { hsi } returns null
+        every { hsi } returns epicHsiValue
+        every { departmentInternalSystem } returns epicDepartmentSystem
     }
     private val standardEpicTenantDO2 = mockk<EpicTenantDO> {
         every { tenantId } returns 2
@@ -78,7 +81,8 @@ class TenantServiceTest {
         every { patientInternalSystem } returns "internalSystemExample2"
         every { encounterCSNSystem } returns "csnSystem2"
         every { patientMRNTypeText } returns "patientMRNTypeText"
-        every { hsi } returns null
+        every { hsi } returns epicHsiValue
+        every { departmentInternalSystem } returns epicDepartmentSystem
     }
     private val standardTenantDO = mockk<TenantDO> {
         every { id } returns 1
@@ -123,7 +127,9 @@ class TenantServiceTest {
             patientMRNSystem = "mrnSystemExample",
             patientInternalSystem = "internalSystemExample",
             encounterCSNSystem = "csnSystem",
-            patientMRNTypeText = "patientMRNTypeText"
+            patientMRNTypeText = "patientMRNTypeText",
+            hsi = epicHsiValue,
+            departmentInternalSystem = epicDepartmentSystem,
         )
     )
 
@@ -150,7 +156,9 @@ class TenantServiceTest {
             patientMRNSystem = "mrnSystemExample2",
             patientInternalSystem = "internalSystemExample2",
             encounterCSNSystem = "csnSystem2",
-            patientMRNTypeText = "patientMRNTypeText"
+            patientMRNTypeText = "patientMRNTypeText",
+            hsi = epicHsiValue,
+            departmentInternalSystem = epicDepartmentSystem,
         )
     )
 
@@ -297,7 +305,9 @@ class TenantServiceTest {
                 patientMRNSystem = "mrnSystemExample",
                 patientInternalSystem = "internalSystemExample",
                 encounterCSNSystem = "csnSystem",
-                patientMRNTypeText = "patientMRNTypeText"
+                patientMRNTypeText = "patientMRNTypeText",
+                hsi = epicHsiValue,
+                departmentInternalSystem = epicDepartmentSystem,
             )
         )
 
@@ -327,7 +337,8 @@ class TenantServiceTest {
             every { patientInternalSystem } returns "internalSystemExample"
             every { encounterCSNSystem } returns "csnSystem"
             every { patientMRNTypeText } returns "patientMRNTypeText"
-            every { hsi } returns "urn:epic:apporchard.curprod"
+            every { hsi } returns epicHsiValue
+            every { departmentInternalSystem } returns epicDepartmentSystem
         }
         every { epicTenantDAO.getByTenantMnemonic("Tenant1") } returns epicTenantDO
 
@@ -355,7 +366,8 @@ class TenantServiceTest {
                 patientInternalSystem = "internalSystemExample",
                 encounterCSNSystem = "csnSystem",
                 patientMRNTypeText = "patientMRNTypeText",
-                hsi = "urn:epic:apporchard.curprod"
+                hsi = epicHsiValue,
+                departmentInternalSystem = epicDepartmentSystem,
             )
         )
 
@@ -434,7 +446,9 @@ class TenantServiceTest {
                 patientMRNSystem = "mrnSystemExample",
                 patientInternalSystem = "internalSystemExample",
                 encounterCSNSystem = "csnSystem",
-                patientMRNTypeText = "patientMRNTypeText"
+                patientMRNTypeText = "patientMRNTypeText",
+                hsi = epicHsiValue,
+                departmentInternalSystem = epicDepartmentSystem,
             )
         )
         val tenantDO = mockk<TenantDO> {

@@ -26,6 +26,7 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4ConditionValidator
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -488,7 +489,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
         assertEquals("Condition", transformed.resourceType)
         assertEquals(Id("test-12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RONIN_CONDITION_PROBLEMS_PROFILE))),
+            Meta(profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value))),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
@@ -700,7 +701,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
         assertEquals("Condition", transformed.resourceType)
         assertEquals(Id("test-12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RONIN_CONDITION_PROBLEMS_PROFILE))),
+            Meta(profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value))),
             transformed.meta
         )
         assertNull(transformed.implicitRules)

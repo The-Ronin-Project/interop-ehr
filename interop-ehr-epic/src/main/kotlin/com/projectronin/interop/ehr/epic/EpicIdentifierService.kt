@@ -16,7 +16,11 @@ import org.springframework.stereotype.Service
 class EpicIdentifierService : IdentifierService {
     override fun getPractitionerIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
         val system = tenant.vendorAs<Epic>().practitionerProviderSystem
-        return getIdentifierByType(identifiers, listOf("internal", "external"), system) { "No identifier found for practitioner" }
+        return getIdentifierByType(
+            identifiers,
+            listOf("internal", "external"),
+            system
+        ) { "No practitioner identifier with system '$system' found" }
     }
 
     override fun getPatientIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
@@ -86,5 +90,14 @@ class EpicIdentifierService : IdentifierService {
         val systemUri = Uri(system)
         return identifiers.firstOrNull { it.system == systemUri && it.type?.text.equals("external", true) }
             ?: throw VendorIdentifierNotFoundException(exceptionMessage.invoke())
+    }
+
+    override fun getLocationIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
+        val system = tenant.vendorAs<Epic>().departmentInternalSystem
+        return getIdentifierByType(
+            identifiers,
+            listOf("internal"),
+            system
+        ) { "No location identifier with system '$system' found" }
     }
 }

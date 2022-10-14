@@ -3,7 +3,7 @@ package com.projectronin.interop.fhir.ronin.code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 
 /**
- * Enumeration of Ronin-specific code systems used in FHIR.
+ * Access to common Ronin-specific code systems
  */
 enum class RoninCodeSystem(uriString: String) {
     TENANT("http://projectronin.com/id/tenantId"),

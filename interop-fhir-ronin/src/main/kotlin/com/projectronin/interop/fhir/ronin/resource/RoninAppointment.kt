@@ -3,6 +3,7 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.validate.resource.R4AppointmentValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.BaseRoninProfile
 import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -10,17 +11,11 @@ import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
 
-const val RONIN_APPOINTMENT_PROFILE =
-    "http://projectronin.io/fhir/ronin.common-fhir-model.uscore-r4/StructureDefinition/ronin-appointment"
-
 /**
  * Validator and Transformer for the Ronin Appointment profile.
  */
 object RoninAppointment :
-    BaseRoninProfile<Appointment>(
-        R4AppointmentValidator,
-        RONIN_APPOINTMENT_PROFILE
-    ) {
+    BaseRoninProfile<Appointment>(R4AppointmentValidator, RoninProfile.APPOINTMENT.value) {
     override fun validate(element: Appointment, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)

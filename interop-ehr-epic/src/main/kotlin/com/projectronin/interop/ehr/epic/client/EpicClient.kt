@@ -13,7 +13,6 @@ import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -52,9 +51,7 @@ class EpicClient(
         logger.debug { "HTTP status, ${response.status}, returned for POST call to tenant: ${tenant.mnemonic}" }
 
         // If we didn't get an OK back, throw the correct exception
-        if (response.status != HttpStatusCode.OK) {
-            response.throwExceptionFromHttpStatus("Epic Organization: ${tenant.name}", urlPart)
-        }
+        response.throwExceptionFromHttpStatus("Epic Organization: ${tenant.name}", urlPart)
 
         return response
     }
@@ -97,9 +94,7 @@ class EpicClient(
         logger.debug { "HTTP status, ${response.status}, returned for GET call to tenant: ${tenant.mnemonic}" }
 
         // If we didn't get an OK back, throw the correct exception
-        if (response.status != HttpStatusCode.OK) {
-            response.throwExceptionFromHttpStatus("Epic Organization: ${tenant.name}", urlPart)
-        }
+        response.throwExceptionFromHttpStatus("Epic Organization: ${tenant.name}", urlPart)
 
         return response
     }

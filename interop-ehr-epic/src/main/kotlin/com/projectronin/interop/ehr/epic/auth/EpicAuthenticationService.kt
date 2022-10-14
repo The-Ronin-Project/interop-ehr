@@ -12,7 +12,6 @@ import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.submitForm
 import io.ktor.client.statement.HttpResponse
-import io.ktor.http.HttpStatusCode
 import io.ktor.http.Parameters
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
@@ -75,9 +74,7 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
                     encodeInQuery = false
                 )
 
-                if (httpResponse.status != HttpStatusCode.OK) {
-                    httpResponse.throwExceptionFromHttpStatus("Epic Authentication: ${tenant.name}", authURL)
-                }
+                httpResponse.throwExceptionFromHttpStatus("Epic Authentication: ${tenant.name}", authURL)
                 httpResponse.body<EpicAuthentication>()
             } catch (e: Exception) {
                 logger.error(e) { "Authentication for $authURL, JTI $jti, failed with exception $e" }

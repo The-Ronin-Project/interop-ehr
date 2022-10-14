@@ -26,6 +26,7 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -492,7 +493,7 @@ class RoninVitalSignsTest {
         transformed!!
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("test-123"), transformed.id)
-        assertEquals(Meta(profile = listOf(Canonical(RONIN_VITAL_SIGNS_PROFILE))), transformed.meta)
+        assertEquals(Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_VITAL_SIGNS.value))), transformed.meta)
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"), transformed.text)
@@ -615,7 +616,7 @@ class RoninVitalSignsTest {
         transformed!!
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("test-123"), transformed.id)
-        assertEquals(Meta(profile = listOf(Canonical(RONIN_VITAL_SIGNS_PROFILE))), transformed.meta)
+        assertEquals(Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_VITAL_SIGNS.value))), transformed.meta)
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
         assertNull(transformed.text)

@@ -11,6 +11,7 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.toFhirIdentifier
 import com.projectronin.interop.fhir.ronin.util.localize
@@ -30,7 +31,7 @@ const val RONIN_PATIENT_PROFILE =
  * Validator and Transformer for the Ronin Patient profile.
  */
 class RoninPatient private constructor(private val identifierService: IdentifierService) :
-    USCoreBasedProfile<Patient>(R4PatientValidator, RONIN_PATIENT_PROFILE) {
+    USCoreBasedProfile<Patient>(R4PatientValidator, RoninProfile.PATIENT.value) {
     companion object {
         /**
          * Creates a RoninPatient with the supplied [identifierService].

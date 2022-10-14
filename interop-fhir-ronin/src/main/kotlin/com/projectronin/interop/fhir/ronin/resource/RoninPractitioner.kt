@@ -4,6 +4,7 @@ import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -20,7 +21,7 @@ const val RONIN_PRACTITIONER_PROFILE =
  * Validator and Transformer for the Ronin Practitioner profile.
  */
 object RoninPractitioner :
-    USCoreBasedProfile<Practitioner>(R4PractitionerValidator, RONIN_PRACTITIONER_PROFILE) {
+    USCoreBasedProfile<Practitioner>(R4PractitionerValidator, RoninProfile.PRACTITIONER.value) {
 
     override fun validateRonin(element: Practitioner, parentContext: LocationContext, validation: Validation) {
         validation.apply {

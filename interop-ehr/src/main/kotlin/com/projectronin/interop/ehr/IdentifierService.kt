@@ -37,4 +37,9 @@ interface IdentifierService {
      * The [identifiers] should be the List of all identifiers returned from an API for a patient.
      */
     fun getMRNIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier
+
+    /**
+     * Determines the appropriate [Identifier] for a Location for this [tenant].
+     */
+    fun getLocationIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier
 }

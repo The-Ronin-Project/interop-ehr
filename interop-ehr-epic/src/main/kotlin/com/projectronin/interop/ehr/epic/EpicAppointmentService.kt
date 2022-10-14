@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.aidbox.LocationService
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.aidbox.model.SystemValue
@@ -10,10 +11,10 @@ import com.projectronin.interop.ehr.epic.apporchard.model.EpicAppointment
 import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
 import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
 import com.projectronin.interop.ehr.epic.apporchard.model.GetProviderAppointmentRequest
-import com.projectronin.interop.ehr.epic.apporchard.model.IDType
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProvider
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.epic.util.toIdentifier
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.outputs.FindPractitionerAppointmentsResponse
 import com.projectronin.interop.ehr.util.toListOfType
@@ -51,6 +52,7 @@ class EpicAppointmentService(
     private val patientService: EpicPatientService,
     private val identifierService: EpicIdentifierService,
     private val aidboxPractitionerService: PractitionerService,
+    private val aidboxLocationService: LocationService,
     private val aidboxPatientService: PatientService,
     @Value("\${epic.fhir.batchSize:5}") private val batchSize: Int,
     @Value("\${epic.api.useFhirAPI:false}") private val useFhirAPI: Boolean
@@ -197,40 +199,97 @@ class EpicAppointmentService(
         return appointmentsToReturn
     }
 
-    // The following should be safely deleted when we're no longer calling the new API is available, and we can get
-    // FHIR objects directly from Epic
+    // The following should be safely deleted when we can get FHIR objects directly from Epic
 
     /***
-     *  Transforms the [EpicAppointment] in [patientFhirIdToAppointments] into R4 [Appointment]s,
-     *  by using the FHIR reference from that map for patients and retrieving the provider references from Aidbox
+     *  Transforms the [EpicAppointment] in [patientFhirIdToAppointments] into R4 [Appointment]s.
+     *  The Epic appointment provider participants (Epic department or Epic provider)
+     *  are looked up in Aidbox to find the FHIR id (FHIR Location or FHIR Practitioner) for participant references.
+     *  When a FHIR id is found, for Location or Practitioner, populate the R4 Appointment.participant.reference.
+     *  For Practitioner only, if the FHIR id is not found, populate the R4 Appointment.participant.identifer.
      */
     private fun transformEpicAppointments(
         tenant: Tenant,
         patientFhirIdToAppointments: Map<String, List<EpicAppointment>>
     ): List<Appointment> {
-
-        // grab al schedule providers and associate them with their system value for lookup in aidbox
+        // grab all Epic schedule providers and departments
         val allProviders = patientFhirIdToAppointments.values.flatten().map { it.providers }.flatten()
-        val providerIdMap = allProviders.associateWith { provider ->
-            val identifier =
+
+        // get provider Identifiers
+        val provToIdentifier = allProviders.associateWith { provider ->
+            val provIdentifier =
                 identifierService.getPractitionerIdentifier(tenant, provider.providerIDs.map { it.toIdentifier() })
-            if (identifier.system == null || identifier.value == null) {
-                throw VendorIdentifierNotFoundException("Provider identifier missing either system or value: ${identifier.system}, ${identifier.value}")
+            if (provIdentifier.system != null && provIdentifier.value != null) {
+                provIdentifier
             } else {
-                SystemValue(identifier.value!!, identifier.system!!.value)
+                logger.info {
+                    "Missing identifier data in Epic appointment provider with Name: ${provider.providerName}: " +
+                        "System: ${provIdentifier.system?.value} Value: ${provIdentifier.value}"
+                }
+                null
+            }
+        }.filterNot { it.value == null }
+        // associate Identifier with SystemValue for lookup
+        val provToSystem = provToIdentifier.keys.associateWith { provider ->
+            val provIdentifier = provToIdentifier[provider]
+            SystemValue(provIdentifier?.value!!, provIdentifier.system!!.value)
+        }
+        // aidbox lookup for Practitioner FHIR id
+        val provSystemToFhirID = aidboxPractitionerService.getPractitionerFHIRIds(
+            tenant.mnemonic,
+            provToSystem.values.distinct().associateWith { it }
+        ) // strip off the tenant prefix found in aidbox
+            .entries.associate { it.key to it.value.unlocalize(tenant) }
+        // use FHIR id (if found), otherwise Identifier
+        val provToParticipant = provToSystem.keys.associateWith { provider ->
+            val system = provToSystem[provider]
+            if (provSystemToFhirID.containsKey(system)) {
+                provSystemToFhirID[system]
+            } else {
+                logger.info {
+                    "Unable to find Practitioner FHIR ID in Ronin clinical data store, for Epic provider with " +
+                        "Name: ${provider.providerName} and SystemValue: ${system?.queryString}"
+                }
+                provToIdentifier[provider]
             }
         }
-        // lookup those SystemValues in aidbox
-        val providerToFhirIdMap = aidboxPractitionerService.getPractitionerFHIRIds(tenant.mnemonic, providerIdMap)
-            // strip of the tenant prefix we get from aidbox on those values
-            .entries.associate { it.key to it.value.unlocalize(tenant) }
 
-        providerIdMap.entries.forEach {
-            if (providerToFhirIdMap[it.key] == null) {
+        // get department Identifiers
+        val deptToIdentifier = allProviders.associateWith { provider ->
+            val deptIdentifier =
+                identifierService.getLocationIdentifier(tenant, provider.departmentIDs.map { it.toIdentifier() })
+            if (deptIdentifier.system != null && deptIdentifier.value != null) {
+                deptIdentifier
+            } else {
                 logger.info {
-                    "Missing FHIR ID in Aidbox for provider with " +
-                        "Name: ${it.key.providerName} and SystemValue: ${it.value.queryString}"
+                    "Missing identifier data in Epic appointment provider with Name: ${provider.departmentName}: " +
+                        "System: ${deptIdentifier.system?.value} Value: ${deptIdentifier.value}"
                 }
+                null
+            }
+        }.filterNot { it.value == null }
+        // associate Identifier with SystemValue for lookup in aidbox
+        val deptToSystem = deptToIdentifier.keys.associateWith { provider ->
+            val deptIdentifier = deptToIdentifier[provider]
+            SystemValue(deptIdentifier?.value!!, deptIdentifier.system!!.value)
+        }
+        // aidbox lookup for Location FHIR id
+        val deptSystemToFhirID = aidboxLocationService.getLocationFHIRIds(
+            tenant.mnemonic,
+            deptToSystem.values.distinct().associateWith { it }
+        ) // strip off the tenant prefix found in aidbox
+            .entries.associate { it.key to it.value.unlocalize(tenant) }
+        // use FHIR id (if found), otherwise null to omit that Location
+        val deptToParticipant = deptToSystem.keys.associateWith { provider ->
+            val system = deptToSystem[provider]
+            if (deptSystemToFhirID.containsKey(system)) {
+                deptSystemToFhirID[system]
+            } else {
+                logger.info {
+                    "Unable to find Location FHIR ID in Ronin clinical data store, for Epic department with " +
+                        "Name: ${provider.departmentName} and SystemValue: ${system?.queryString}"
+                }
+                null
             }
         }
 
@@ -240,8 +299,8 @@ class EpicAppointmentService(
                 appointment.transform(
                     tenant = tenant,
                     patientFHIRId = entries.key,
-                    providerFhirIdMap = providerToFhirIdMap,
-                    csnSystem = tenant.vendorAs<Epic>().encounterCSNSystem
+                    providerToPractitionerFHIRIds = provToParticipant,
+                    providerToLocationFHIRIds = deptToParticipant,
                 )
             }
         }.flatten()
@@ -279,13 +338,22 @@ class EpicAppointmentService(
 
     /***
      * Given an [EpicAppointment], transform it into an [Appointment]. Expects a resolved [patientFHIRId] and
-     *  a [providerFhirIdMap] where any provider on the appointment can be looked up and find the FHIR id
+     * [providerToPractitionerFHIRIds] and [providerToLocationFHIRIds] maps containing data to complete the Appointment.participant
+     * list for this Appointment. The data in the identifier maps may pertain to any number of EpicAppointments
+     * retrieved at the same time; this function will filter these maps for providers for only this EpicAppointment.
+     * @param tenant the Tenant
+     * @param patientFHIRId is the Patient FHIR ID for the Appointment.participant reference to the patient.
+     * @param providerToPractitionerFHIRIds Epic schedule providers mapped to a Practitioner FHIR ID or Identifier.
+     *         A FHIR ID means: create an Appointment.participant.actor with a reference attribute using the FHIR ID.
+     *         An Identifier means: create an Appointment.participant.actor with an identifier using the Identifier.
+     * @param providerToLocationFHIRIds Epic schedule providers mapped to a Location FHIR ID, or to null if no id.
+     *         Creates an Appointment.participant.actor with a reference attribute using the FHIR ID.
      */
     private fun EpicAppointment.transform(
         tenant: Tenant,
         patientFHIRId: String,
-        providerFhirIdMap: Map<ScheduleProviderReturnWithTime, String>,
-        csnSystem: String
+        providerToPractitionerFHIRIds: Map<ScheduleProviderReturnWithTime, Any?>,
+        providerToLocationFHIRIds: Map<ScheduleProviderReturnWithTime, String?>,
     ): Appointment {
         // TODO: Replace with ConceptMap
         val transformedStatus = transformStatus(appointmentStatus)
@@ -306,33 +374,51 @@ class EpicAppointmentService(
             status = Code(ParticipationStatus.ACCEPTED.code)
         )
 
-        val providerParticipants: List<Participant> = this.providers.map { epicProvider ->
-            val fhirID = providerFhirIdMap[epicProvider]
-            if (fhirID == null) {
-                Participant(
-                    actor = Reference(
-                        identifier = identifierService.getPractitionerIdentifier(
-                            tenant,
-                            epicProvider.providerIDs.map { it.toIdentifier() }
+        val practitionerParticipants: List<Participant> = providers.mapNotNull { provider ->
+            when (val id = providerToPractitionerFHIRIds[provider]) {
+                is Identifier -> {
+                    Participant(
+                        actor = Reference(
+                            identifier = id,
+                            display = provider.providerName,
+                            type = Uri("Practitioner")
                         ),
-                        display = epicProvider.providerName,
-                        type = Uri("Practitioner")
-                    ),
-                    status = Code(ParticipationStatus.ACCEPTED.code)
-                )
-            } else {
-                Participant(
-                    actor = Reference(
-                        reference = "Practitioner/$fhirID",
-                        display = epicProvider.providerName,
-                        type = Uri("Practitioner")
-                    ),
-                    status = Code(ParticipationStatus.ACCEPTED.code)
-                )
+                        status = Code(ParticipationStatus.ACCEPTED.code)
+                    )
+                }
+                is String -> {
+                    Participant(
+                        actor = Reference(
+                            reference = "Practitioner/$id",
+                            display = provider.providerName,
+                            type = Uri("Practitioner")
+                        ),
+                        status = Code(ParticipationStatus.ACCEPTED.code)
+                    )
+                }
+                else -> {
+                    null
+                }
             }
         }
 
-        val participants = listOf(patientParticipant).plus(providerParticipants)
+        val locationParticipants: List<Participant> = providers.mapNotNull { provider ->
+            when (val id = providerToLocationFHIRIds[provider]) {
+                null -> {
+                    null
+                }
+                else -> {
+                    Participant(
+                        actor = Reference(
+                            reference = "Location/$id",
+                            display = provider.departmentName,
+                            type = Uri("Location")
+                        ),
+                        status = Code(ParticipationStatus.ACCEPTED.code)
+                    )
+                }
+            }
+        }
 
         // even tho some of these nulls are automatically injected upon creation, the whole FHIR object is here,
         // so you can clearly see the logic we are and aren't running
@@ -350,7 +436,7 @@ class EpicAppointmentService(
                 // to find the old non-FHIR object
                 Identifier(
                     value = this.id,
-                    system = Uri(csnSystem),
+                    system = Uri(tenant.vendorAs<Epic>().encounterCSNSystem),
                     type = CodeableConcept(text = "CSN")
                 ),
             status = Code(transformedStatus),
@@ -358,7 +444,11 @@ class EpicAppointmentService(
             serviceCategory = emptyList(),
             serviceType = emptyList(),
             specialty = emptyList(),
-            appointmentType = CodeableConcept(text = this.visitTypeName),
+            appointmentType = if (this.visitTypeName.isNotEmpty()) {
+                CodeableConcept(text = this.visitTypeName)
+            } else {
+                null
+            },
             reasonCode = emptyList(),
             reasonReference = emptyList(),
             priority = null,
@@ -372,16 +462,9 @@ class EpicAppointmentService(
             comment = this.appointmentNotes.joinToString(separator = "/n").let { if (it == "") null else it },
             patientInstruction = null,
             basedOn = emptyList(),
-            participant = participants,
+            participant = listOf(patientParticipant) + practitionerParticipants + locationParticipants,
             requestedPeriod = emptyList(),
         )
-    }
-
-    /***
-     * standardized way to turn an Epic [IDType] API Response object into a FHIR [Identifier]
-     */
-    private fun IDType.toIdentifier(): Identifier {
-        return Identifier(value = this.id, type = CodeableConcept(text = this.type))
     }
 
     /**

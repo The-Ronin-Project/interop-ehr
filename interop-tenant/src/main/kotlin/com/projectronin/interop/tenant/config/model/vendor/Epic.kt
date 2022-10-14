@@ -14,6 +14,7 @@ import com.projectronin.interop.tenant.config.model.AuthenticationConfig
  * @property patientMRNSystem The system utilized by this Epic instance to represent the MRN we should use as the patient's MRN
  * @property patientInternalSystem The system utilized by this Epic instance to represent the Epic "internal" identifier
  * @property hsi The HSI value to be used for integration with Epic's Tesseract gateway, null if not leveraging Tesseract.
+ * @property departmentInternalSystem The system that represent the Epic "internal" department identifier on a Location.
  */
 @JsonTypeName("EPIC")
 data class Epic(
@@ -31,7 +32,7 @@ data class Epic(
     val encounterCSNSystem: String,
     val patientMRNTypeText: String,
     val hsi: String? = null,
-    val departmentInternalSystem: String? = null
+    val departmentInternalSystem: String,
 ) : Vendor {
     override val type: VendorType
         get() = VendorType.EPIC

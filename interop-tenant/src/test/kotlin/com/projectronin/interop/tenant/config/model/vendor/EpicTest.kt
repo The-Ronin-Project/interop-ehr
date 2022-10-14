@@ -23,7 +23,9 @@ class EpicTest {
                 "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14",
                 "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.15",
                 "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.8",
-                "MRN"
+                "MRN",
+                "hsiValue",
+                "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980",
             )
 
         assertEquals(VendorType.EPIC, epic.type)
@@ -37,5 +39,7 @@ class EpicTest {
         assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.697780", epic.practitionerUserSystem)
         assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14", epic.patientMRNSystem)
         assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.15", epic.patientInternalSystem)
+        assertEquals("hsiValue", epic.hsi)
+        assertEquals("urn:oid:1.2.840.114350.1.13.297.3.7.2.686980", epic.departmentInternalSystem)
     }
 }
