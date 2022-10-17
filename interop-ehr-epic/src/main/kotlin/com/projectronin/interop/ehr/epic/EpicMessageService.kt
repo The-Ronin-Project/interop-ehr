@@ -61,7 +61,7 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
             patientID = messageInput.patientMRN,
             patientIDType = (tenant.vendor as Epic).patientMRNTypeText,
             recipients = translateRecipients(messageInput.recipients, tenant),
-            messageText = messageInput.text.split("\r\n", "\n"),
+            messageText = messageInput.text.split("\r\n", "\n").map { if (it.isEmpty()) " " else it },
             senderID = userId,
             messageType = messageType
         )

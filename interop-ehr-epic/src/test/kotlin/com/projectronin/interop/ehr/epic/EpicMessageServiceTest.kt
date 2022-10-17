@@ -116,7 +116,7 @@ class EpicMessageServiceTest {
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
-                    messageText = listOf("Message Text", "Line 2", "", "Line 4"),
+                    messageText = listOf("Message Text", "Line 2", " ", "Line 4"),
                     senderID = "USER#1",
                     messageType = "Symptom Alert"
                 )
@@ -168,7 +168,7 @@ class EpicMessageServiceTest {
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
-                    messageText = listOf("Message Text", "Line 2", "", "Line 4"),
+                    messageText = listOf("Message Text", "Line 2", " ", "Line 4"),
                     senderID = "USER#1",
                     messageType = "Symptom Alert"
                 )
@@ -220,7 +220,7 @@ class EpicMessageServiceTest {
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
-                    messageText = listOf("Message Text", "Line 2", "", "Line 4"),
+                    messageText = listOf("Message Text", "Line 2", " ", "Line 4"),
                     senderID = "USER#1",
                     messageType = "Symptom Alert"
                 )
@@ -241,6 +241,192 @@ class EpicMessageServiceTest {
             EHRMessageInput(
                 "Message Text\r\nLine 2\n\nLine 4", "MRN#1", recipientsList
             )
+        )
+
+        assertEquals("130375", messageId)
+    }
+
+    @Test
+    fun `ensure multi-line messages preserve blank lines using spaces - newlines only`() {
+
+        // test private fun translateMessageInput() messageText input processing logic
+
+        val messageInput = "\n\nMessage Text\n\nLine 2\nLine 3\nLine 4\n\n\nLine 7\n\nLine 8\n"
+        val messageText = messageInput.split("\r\n", "\n").map { if (it.isEmpty()) " " else it }
+        assertEquals(
+            listOf(" ", " ", "Message Text", " ", "Line 2", "Line 3", "Line 4", " ", " ", "Line 7", " ", "Line 8", " "),
+            messageText
+        )
+
+        // now do the unit test with mocking
+
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            "Test Tenant",
+            "USER#1",
+            "Symptom Alert"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
+            listOf(
+                IDType(
+                    "130375", "Type"
+                )
+            )
+        )
+        coEvery {
+            epicClient.post(
+                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                SendMessageRequest(
+                    patientID = "MRN#1",
+                    recipients = listOf(SendMessageRecipient("CorrectID", false)),
+                    messageText = messageText,
+                    senderID = "USER#1",
+                    messageType = "Symptom Alert"
+                )
+            )
+        } returns httpResponse
+
+        val recipientsList = listOf(
+            EHRRecipient(
+                "PROV#1",
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+            )
+        )
+
+        every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
+
+        val messageId = EpicMessageService(epicClient, providerPoolService).sendMessage(
+            tenant,
+            EHRMessageInput(messageInput, "MRN#1", recipientsList)
+        )
+
+        assertEquals("130375", messageId)
+    }
+
+    @Test
+    fun `ensure multi-line messages preserve blank lines using spaces - carriage returned newlines only`() {
+
+        // test private fun translateMessageInput() messageText input processing logic
+
+        val messageInput = "\r\n\r\nMessage Text\r\n\r\nLine 2\r\nLine 3\r\nLine 4\r\n\r\n\r\nLine 7\r\n\r\nLine 8\r\n"
+        val messageText = messageInput.split("\r\n", "\n").map { if (it.isEmpty()) " " else it }
+        assertEquals(
+            listOf(" ", " ", "Message Text", " ", "Line 2", "Line 3", "Line 4", " ", " ", "Line 7", " ", "Line 8", " "),
+            messageText
+        )
+
+        // now do the unit test with mocking
+
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            "Test Tenant",
+            "USER#1",
+            "Symptom Alert"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
+            listOf(
+                IDType(
+                    "130375", "Type"
+                )
+            )
+        )
+        coEvery {
+            epicClient.post(
+                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                SendMessageRequest(
+                    patientID = "MRN#1",
+                    recipients = listOf(SendMessageRecipient("CorrectID", false)),
+                    messageText = messageText,
+                    senderID = "USER#1",
+                    messageType = "Symptom Alert"
+                )
+            )
+        } returns httpResponse
+
+        val recipientsList = listOf(
+            EHRRecipient(
+                "PROV#1",
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+            )
+        )
+
+        every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
+
+        val messageId = EpicMessageService(epicClient, providerPoolService).sendMessage(
+            tenant,
+            EHRMessageInput(messageInput, "MRN#1", recipientsList)
+        )
+
+        assertEquals("130375", messageId)
+    }
+
+    @Test
+    fun `ensure multi-line messages preserve blank lines using spaces - mixed newlines and carriage returned newlines`() {
+
+        // test private fun translateMessageInput() messageText input processing logic
+
+        val messageInput = "\r\n\nMessage Text\n\r\nLine 2\r\nLine 3\nLine 4\n\r\n\nLine 7\r\n\r\nLine 8\n"
+        val messageText = messageInput.split("\r\n", "\n").map { if (it.isEmpty()) " " else it }
+        assertEquals(
+            listOf(" ", " ", "Message Text", " ", "Line 2", "Line 3", "Line 4", " ", " ", "Line 7", " ", "Line 8", " "),
+            messageText
+        )
+
+        // now do the unit test with mocking
+
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            "Test Tenant",
+            "USER#1",
+            "Symptom Alert"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
+            listOf(
+                IDType(
+                    "130375", "Type"
+                )
+            )
+        )
+        coEvery {
+            epicClient.post(
+                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                SendMessageRequest(
+                    patientID = "MRN#1",
+                    recipients = listOf(SendMessageRecipient("CorrectID", false)),
+                    messageText = messageText,
+                    senderID = "USER#1",
+                    messageType = "Symptom Alert"
+                )
+            )
+        } returns httpResponse
+
+        val recipientsList = listOf(
+            EHRRecipient(
+                "PROV#1",
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+            )
+        )
+
+        every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
+
+        val messageId = EpicMessageService(epicClient, providerPoolService).sendMessage(
+            tenant,
+            EHRMessageInput(messageInput, "MRN#1", recipientsList)
         )
 
         assertEquals("130375", messageId)
