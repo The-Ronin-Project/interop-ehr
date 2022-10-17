@@ -107,7 +107,11 @@ class RoninPatient private constructor(private val identifierService: Identifier
             element.identifier.forEachIndexed { index, identifier ->
                 val currentContext = parentContext.append(LocationContext("Patient", "identifier[$index]"))
                 checkNotNull(identifier.system, requiredIdentifierSystemError, currentContext)
-                checkNotNull(identifier.value, requiredIdentifierValueError, currentContext)
+                checkTrue(
+                    identifier.value != null || identifier.valueData?.extension?.isNotEmpty() == true,
+                    requiredIdentifierValueError,
+                    currentContext
+                )
             }
 
             element.telecom.forEachIndexed { index, telecom ->

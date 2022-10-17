@@ -17,6 +17,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
 import com.projectronin.interop.fhir.r4.datatype.PatientLink
+import com.projectronin.interop.fhir.r4.datatype.PrimitiveData
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Base64Binary
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
@@ -30,10 +31,12 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
+import com.projectronin.interop.fhir.r4.valueset.IdentifierUse
 import com.projectronin.interop.fhir.r4.valueset.LinkType
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -610,5 +613,122 @@ class RoninPatientTest {
 
         val oncologyPatient = roninPatient.transform(patient, tenant)
         assertNull(oncologyPatient)
+    }
+
+    @Test
+    fun `validate succeeds for identifier with value extension`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN"),
+                Identifier(
+                    use = IdentifierUse.USUAL.asCode(),
+                    system = Uri("urn:oid:2.16.840.1.113883.4.1"),
+                    valueData = PrimitiveData(
+                        extension = listOf(
+                            Extension(
+                                url = Uri("http://hl7.org/fhir/StructureDefinition/rendered-value"),
+                                value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234")
+                            )
+                        )
+                    )
+                )
+            ),
+            name = listOf(HumanName(family = "Doe")),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05")
+        )
+
+        roninPatient.validate(patient, null).alertIfErrors()
+    }
+
+    @Test
+    fun `transforms patient with value extensions`() {
+        val identifierWithExtension = Identifier(
+            use = IdentifierUse.USUAL.asCode(),
+            system = Uri("urn:oid:2.16.840.1.113883.4.1"),
+            valueData = PrimitiveData(
+                extension = listOf(
+                    Extension(
+                        url = Uri("http://hl7.org/fhir/StructureDefinition/rendered-value"),
+                        value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234")
+                    )
+                )
+            )
+        )
+
+        val identifiers = identifierList + identifierWithExtension
+
+        every { identifierService.getMRNIdentifier(tenant, identifiers) } returns identifiers[0]
+
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = identifiers,
+            name = listOf(HumanName(family = "Doe")),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05")
+        )
+
+        val oncologyPatient = roninPatient.transform(patient, tenant)
+
+        val defaultCoding = Coding(
+            system = Uri("http://terminology.hl7.org/CodeSystem/v3-NullFlavor"),
+            code = Code("NI"),
+            display = "NoInformation"
+        )
+        oncologyPatient!! // Force it to be treated as non-null
+        assertEquals("Patient", oncologyPatient.resourceType)
+        assertEquals(Id("test-12345"), oncologyPatient.id)
+        assertEquals(
+            Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value))),
+            oncologyPatient.meta
+        )
+        assertNull(oncologyPatient.implicitRules)
+        assertNull(oncologyPatient.language)
+        assertNull(oncologyPatient.text)
+        assertEquals(listOf<ContainedResource>(), oncologyPatient.contained)
+        assertEquals(listOf<Extension>(), oncologyPatient.extension)
+        assertEquals(listOf<Extension>(), oncologyPatient.modifierExtension)
+        assertEquals(
+            listOf(
+                identifierList.first(),
+                Identifier(
+                    use = IdentifierUse.USUAL.asCode(),
+                    system = Uri("http://hl7.org/fhir/sid/us-ssn"),
+                    valueData = PrimitiveData(
+                        extension = listOf(
+                            Extension(
+                                url = Uri("http://hl7.org/fhir/StructureDefinition/rendered-value"),
+                                value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234")
+                            )
+                        )
+                    )
+                ),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345"
+                ),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+            ),
+            oncologyPatient.identifier
+        )
+        assertNull(oncologyPatient.active)
+        assertEquals(listOf(HumanName(family = "Doe")), oncologyPatient.name)
+        assertEquals(emptyList<ContactPoint>(), oncologyPatient.telecom)
+        assertEquals(AdministrativeGender.FEMALE.asCode(), oncologyPatient.gender)
+        assertEquals(Date("1975-07-05"), oncologyPatient.birthDate)
+        assertNull(oncologyPatient.deceased)
+        assertEquals(emptyList<Address>(), oncologyPatient.address)
+        assertEquals(listOf(defaultCoding), oncologyPatient.maritalStatus?.coding)
+        assertNull(oncologyPatient.multipleBirth)
+        assertEquals(listOf<Attachment>(), oncologyPatient.photo)
+        assertEquals(listOf<Communication>(), oncologyPatient.communication)
+        assertEquals(listOf<Reference>(), oncologyPatient.generalPractitioner)
+        assertNull(oncologyPatient.managingOrganization)
+        assertEquals(listOf<PatientLink>(), oncologyPatient.link)
     }
 }

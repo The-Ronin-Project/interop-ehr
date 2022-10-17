@@ -25,6 +25,7 @@ import com.projectronin.interop.fhir.r4.datatype.ObservationReferenceRange
 import com.projectronin.interop.fhir.r4.datatype.Participant
 import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Period
+import com.projectronin.interop.fhir.r4.datatype.PrimitiveData
 import com.projectronin.interop.fhir.r4.datatype.Qualification
 import com.projectronin.interop.fhir.r4.datatype.Range
 import com.projectronin.interop.fhir.r4.datatype.Reference
@@ -626,6 +627,7 @@ class LocalizersTest {
         )
         assertEquals(expectedCoding, localizedCoding)
     }
+
     @Test
     fun `localizes coding - mapped system with urn`() {
         val coding = Coding(
@@ -652,6 +654,7 @@ class LocalizersTest {
         )
         assertEquals(expectedCoding, localizedCoding)
     }
+
     @Test
     fun `returns current communication if communication has no localizable information`() {
         val communication = Communication(
@@ -1475,6 +1478,7 @@ class LocalizersTest {
         )
         assertEquals(expectedIdentifier, localizedIdentifier)
     }
+
     @Test
     fun `localizes identifier - mapped system with urn`() {
         val identifier = Identifier(
@@ -1592,7 +1596,38 @@ class LocalizersTest {
     }
 
     @Test
-    fun `localizes identifier and sets as updated with localizable extension, type, period and assigner`() {
+    fun `localizes identifier and sets as updated with localizable value data`() {
+        val identifier = Identifier(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            use = IdentifierUse.OFFICIAL.asCode(),
+            type = CodeableConcept(text = "type"),
+            system = Uri("system"),
+            value = "value",
+            period = Period(start = DateTime("2021")),
+            assigner = Reference(display = "assigner"),
+            valueData = PrimitiveData(extension = localizableExtensions)
+        )
+        val (localizedIdentifier, updated) = identifier.localizePair(tenant)
+        assertNotEquals(identifier, localizedIdentifier)
+        assertTrue(updated)
+
+        val expectedIdentifier = Identifier(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            use = IdentifierUse.OFFICIAL.asCode(),
+            type = CodeableConcept(text = "type"),
+            system = Uri("system"),
+            value = "value",
+            period = Period(start = DateTime("2021")),
+            assigner = Reference(display = "assigner"),
+            valueData = PrimitiveData(extension = localizedExtensions)
+        )
+        assertEquals(expectedIdentifier, localizedIdentifier)
+    }
+
+    @Test
+    fun `localizes identifier and sets as updated with localizable extension, type, period, assigner and value data`() {
         val identifier = Identifier(
             id = "12345",
             extension = localizableExtensions,
@@ -1601,7 +1636,8 @@ class LocalizersTest {
             system = Uri("system"),
             value = "value",
             period = Period(extension = localizableExtensions, start = DateTime("2021")),
-            assigner = Reference(reference = "Organization/123")
+            assigner = Reference(reference = "Organization/123"),
+            valueData = PrimitiveData(extension = localizableExtensions)
         )
         val (localizedIdentifier, updated) = identifier.localizePair(tenant)
         assertNotEquals(identifier, localizedIdentifier)
@@ -1615,7 +1651,8 @@ class LocalizersTest {
             system = Uri("system"),
             value = "value",
             period = Period(extension = localizedExtensions, start = DateTime("2021")),
-            assigner = Reference(reference = "Organization/test-123")
+            assigner = Reference(reference = "Organization/test-123"),
+            valueData = PrimitiveData(extension = localizedExtensions)
         )
         assertEquals(expectedIdentifier, localizedIdentifier)
     }
@@ -2243,6 +2280,34 @@ class LocalizersTest {
             end = DateTime("2023")
         )
         assertEquals(expectedPeriod, localizedPeriod)
+    }
+
+    @Test
+    fun `returns current primitive data as not updated if primitive data has no localizable information`() {
+        val primitiveData = PrimitiveData(
+            id = "12345",
+            extension = nonLocalizableExtensions
+        )
+        val (localizedPrimitiveData, updated) = primitiveData.localizePair(tenant)
+        assertTrue(primitiveData === localizedPrimitiveData)
+        assertFalse(updated)
+    }
+
+    @Test
+    fun `localizes primitive data and sets as updated with localizable extension`() {
+        val primitiveData = PrimitiveData(
+            id = "12345",
+            extension = localizableExtensions
+        )
+        val (localizedPrimitiveData, updated) = primitiveData.localizePair(tenant)
+        assertNotEquals(primitiveData, localizedPrimitiveData)
+        assertTrue(updated)
+
+        val expectedPrimitiveData = PrimitiveData(
+            id = "12345",
+            extension = localizedExtensions
+        )
+        assertEquals(expectedPrimitiveData, localizedPrimitiveData)
     }
 
     @Test

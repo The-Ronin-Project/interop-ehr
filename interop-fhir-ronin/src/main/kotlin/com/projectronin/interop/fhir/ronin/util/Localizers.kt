@@ -26,6 +26,7 @@ import com.projectronin.interop.fhir.r4.datatype.ObservationReferenceRange
 import com.projectronin.interop.fhir.r4.datatype.Participant
 import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Period
+import com.projectronin.interop.fhir.r4.datatype.PrimitiveData
 import com.projectronin.interop.fhir.r4.datatype.Qualification
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
@@ -358,6 +359,7 @@ fun Identifier.localizePair(tenant: Tenant): Pair<Identifier, Boolean> {
     val typePair = type?.localizePair(tenant) ?: Pair(null, false)
     val periodPair = period?.localizePair(tenant) ?: Pair(null, false)
     val assignerPair = assigner?.localizePair(tenant) ?: Pair(null, false)
+    val valueDataPair = valueData?.localizePair(tenant) ?: Pair(null, false)
     return Pair(
         Identifier(
             id,
@@ -367,32 +369,11 @@ fun Identifier.localizePair(tenant: Tenant): Pair<Identifier, Boolean> {
             system?.normalizeIdentifier(),
             value,
             periodPair.first,
-            assignerPair.first
+            assignerPair.first,
+            valueDataPair.first
         ),
-        (updatedExtensions.isNotEmpty() || typePair.second || periodPair.second || assignerPair.second)
+        (updatedExtensions.isNotEmpty() || typePair.second || periodPair.second || assignerPair.second || valueDataPair.second)
     )
-}
-
-/**
- * Localizes this [PatientLink] relative to the [tenant].  If this [PatientLink] does not contain any localizable
- * information, the current [PatientLink] will be returned.
- */
-fun PatientLink.localize(tenant: Tenant): PatientLink {
-    val updatedExtensions = getUpdatedExtensions(this, tenant)
-    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
-    val updatedOther = other?.localize(tenant)
-
-    if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || updatedOther !== other) {
-        return PatientLink(
-            id = id,
-            extension = updatedExtensions.ifEmpty { extension },
-            modifierExtension = updatedModifierExtensions.ifEmpty { modifierExtension },
-            other = updatedOther,
-            type = type
-        )
-    }
-
-    return this
 }
 
 /**
@@ -495,6 +476,28 @@ fun Participant.localize(tenant: Tenant): Participant {
 }
 
 /**
+ * Localizes this [PatientLink] relative to the [tenant].  If this [PatientLink] does not contain any localizable
+ * information, the current [PatientLink] will be returned.
+ */
+fun PatientLink.localize(tenant: Tenant): PatientLink {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
+    val updatedOther = other?.localize(tenant)
+
+    if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || updatedOther !== other) {
+        return PatientLink(
+            id = id,
+            extension = updatedExtensions.ifEmpty { extension },
+            modifierExtension = updatedModifierExtensions.ifEmpty { modifierExtension },
+            other = updatedOther,
+            type = type
+        )
+    }
+
+    return this
+}
+
+/**
  * Localizes this Period relative to the [tenant]. If this Period does not contain any localizable information, the
  * current Period will be returned.
  */
@@ -512,6 +515,20 @@ fun Period.localizePair(tenant: Tenant): Pair<Period, Boolean> {
     }
 
     return Pair(this, false)
+}
+
+/**
+ * Attempts to localize this PrimitiveData relative to the [tenant] and returns the localized PrimitiveData and its update
+ * status as a pair. If this PrimitiveData does not contain any localizable information, a Pair containing the current
+ * PrimitiveData and false will be returned.
+ */
+fun PrimitiveData.localizePair(tenant: Tenant): Pair<PrimitiveData, Boolean> {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    if (updatedExtensions.isEmpty()) {
+        return Pair(this, false)
+    }
+
+    return Pair(PrimitiveData(id, updatedExtensions), true)
 }
 
 /**
