@@ -54,7 +54,8 @@ class EpicConditionServiceTest {
                 mapOf(
                     "patient" to patientFhirId,
                     "category" to category,
-                    "clinical-status" to clinicalStatus
+                    "clinical-status" to clinicalStatus,
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -97,7 +98,8 @@ class EpicConditionServiceTest {
                 mapOf(
                     "patient" to patientFhirId,
                     "category" to "problem-list-item,encounter-diagnosis",
-                    "clinical-status" to "active"
+                    "clinical-status" to "active",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -143,7 +145,8 @@ class EpicConditionServiceTest {
                 mapOf(
                     "patient" to patientFhirId,
                     "category" to categoryToken,
-                    "clinical-status" to clinicalStatusTokens
+                    "clinical-status" to clinicalStatusTokens,
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -182,7 +185,8 @@ class EpicConditionServiceTest {
                 mapOf(
                     "patient" to patientFhirId,
                     "category" to categoryToken,
-                    "clinical-status" to clinicalStatusToken
+                    "clinical-status" to clinicalStatusToken,
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -221,7 +225,8 @@ class EpicConditionServiceTest {
                 mapOf(
                     "patient" to patientFhirId,
                     "category" to categoryToken,
-                    "clinical-status" to clinicalStatusToken
+                    "clinical-status" to clinicalStatusToken,
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -261,7 +266,8 @@ class EpicConditionServiceTest {
                 mapOf(
                     "patient" to patientFhirId,
                     "category" to categoryToken,
-                    "clinical-status" to clinicalStatusToken
+                    "clinical-status" to clinicalStatusToken,
+                    "_count" to 50
                 )
             )
         } returns pagingHttpResponse

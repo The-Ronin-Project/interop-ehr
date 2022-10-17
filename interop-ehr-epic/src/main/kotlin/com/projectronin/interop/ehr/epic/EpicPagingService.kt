@@ -15,6 +15,8 @@ import mu.KotlinLogging
 abstract class EpicPagingService(protected val epicClient: EpicClient) {
     private val logger = KotlinLogging.logger { }
 
+    private val standardParameters: Map<String, Any> = mapOf("_count" to 50)
+
     /**
      * When Epic returns a very large response, it limits the amount of resources returned in each request and provides a
      * follow-up link to retrieve the rest of them.  This function performs a GET to the url provided by the [tenant] +
@@ -28,13 +30,15 @@ abstract class EpicPagingService(protected val epicClient: EpicClient) {
     ): Bundle {
         logger.info { "Get started for ${tenant.mnemonic}" }
 
+        val standardizedParameters = standardizeParameters(parameters)
+
         val responses: MutableList<Bundle> = mutableListOf()
         var nextURL: String? = null
         do {
             val bundle = runBlocking {
                 val httpResponse =
                     if (nextURL == null) {
-                        epicClient.get(tenant, urlPart, parameters)
+                        epicClient.get(tenant, urlPart, standardizedParameters)
                     } else {
                         epicClient.get(tenant, nextURL!!)
                     }
@@ -60,13 +64,15 @@ abstract class EpicPagingService(protected val epicClient: EpicClient) {
     ): Bundle {
         logger.info { "Get started for ${tenant.mnemonic}" }
 
+        val standardizedParameters = standardizeParameters(parameters)
+
         val responses: MutableList<Bundle> = mutableListOf()
         var nextURL: String? = null
         do {
             val bundle = runBlocking {
                 val httpResponse =
                     if (nextURL == null) {
-                        epicClient.get(tenant, urlPart, parameters)
+                        epicClient.get(tenant, urlPart, standardizedParameters)
                     } else {
                         epicClient.get(tenant, nextURL!!)
                     }
@@ -86,5 +92,19 @@ abstract class EpicPagingService(protected val epicClient: EpicClient) {
         var bundle = responses.first()
         responses.subList(1, responses.size).forEach { bundle = mergeBundles(bundle, it) }
         return bundle
+    }
+
+    /**
+     * Standardizes the [parameters], including any standard parameters that have not already been included and returning the combined map.
+     */
+    private fun standardizeParameters(parameters: Map<String, Any?>): Map<String, Any?> {
+        val parametersToAdd = standardParameters.mapNotNull {
+            if (parameters.containsKey(it.key)) {
+                null
+            } else {
+                it.toPair()
+            }
+        }
+        return parameters + parametersToAdd
     }
 }

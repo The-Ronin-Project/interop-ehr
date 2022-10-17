@@ -298,7 +298,8 @@ class EpicAppointmentServiceTest {
                 mapOf(
                     "patient" to "E5597",
                     "status" to "booked",
-                    "date" to listOf("ge2015-01-01", "le2015-11-01")
+                    "date" to listOf("ge2015-01-01", "le2015-11-01"),
+                    "_count" to 50
                 )
             )
         } returns httpResponse

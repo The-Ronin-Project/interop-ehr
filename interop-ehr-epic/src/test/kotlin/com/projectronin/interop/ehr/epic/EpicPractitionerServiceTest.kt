@@ -55,7 +55,8 @@ class EpicPractitionerServiceTest {
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
                     "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
+                    "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -90,7 +91,8 @@ class EpicPractitionerServiceTest {
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
                     "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "abc"
+                    "location" to "abc",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -100,7 +102,8 @@ class EpicPractitionerServiceTest {
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
                     "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "123"
+                    "location" to "123",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -152,7 +155,8 @@ class EpicPractitionerServiceTest {
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
                     "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "loc1"
+                    "location" to "loc1",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -162,7 +166,8 @@ class EpicPractitionerServiceTest {
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
                     "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "loc2"
+                    "location" to "loc2",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -172,7 +177,8 @@ class EpicPractitionerServiceTest {
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
                     "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "loc3"
+                    "location" to "loc3",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -210,7 +216,8 @@ class EpicPractitionerServiceTest {
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
                     "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"
+                    "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03",
+                    "_count" to 50
                 )
             )
         } returns pagingHttpResponse

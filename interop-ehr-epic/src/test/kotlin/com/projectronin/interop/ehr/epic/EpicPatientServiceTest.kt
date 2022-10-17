@@ -95,7 +95,10 @@ class EpicPatientServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Patient",
-                mapOf("identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14|202497")
+                mapOf(
+                    "identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14|202497",
+                    "_count" to 50
+                )
             )
         } returns httpResponse
 
@@ -127,7 +130,10 @@ class EpicPatientServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Patient",
-                mapOf("identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14|202497")
+                mapOf(
+                    "identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14|202497",
+                    "_count" to 50
+                )
             )
         } returns httpResponse
 
@@ -167,7 +173,10 @@ class EpicPatientServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Patient",
-                mapOf("identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14|202497")
+                mapOf(
+                    "identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14|202497",
+                    "_count" to 50
+                )
             )
         } returns httpResponse
 
@@ -204,7 +213,10 @@ class EpicPatientServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Patient",
-                mapOf("identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084|Z4572,urn:oid:1.2.840.114350.1.13.0.1.7.2.698084|Z5660")
+                mapOf(
+                    "identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084|Z4572,urn:oid:1.2.840.114350.1.13.0.1.7.2.698084|Z5660",
+                    "_count" to 50
+                )
             )
         } returns httpResponse
 
@@ -245,7 +257,10 @@ class EpicPatientServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Patient",
-                mapOf("identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084|Z4572,urn:oid:1.2.840.114350.1.13.0.1.7.2.698084|Z5660")
+                mapOf(
+                    "identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084|Z4572,urn:oid:1.2.840.114350.1.13.0.1.7.2.698084|Z5660",
+                    "_count" to 50
+                )
             )
         } returns httpResponse
 
@@ -257,7 +272,10 @@ class EpicPatientServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Patient",
-                mapOf("identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14|202497")
+                mapOf(
+                    "identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14|202497",
+                    "_count" to 50
+                )
             )
         } returns httpResponse2
 

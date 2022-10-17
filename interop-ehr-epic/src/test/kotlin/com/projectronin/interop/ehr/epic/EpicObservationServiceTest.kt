@@ -49,7 +49,8 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "em2zwhHegmZEu39N4dUEIYA3",
-                    "category" to "social-history"
+                    "category" to "social-history",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -84,7 +85,8 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "abc",
-                    "category" to "social-history"
+                    "category" to "social-history",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -94,7 +96,8 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "123",
-                    "category" to "social-history"
+                    "category" to "social-history",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -144,7 +147,8 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "loc1",
-                    "category" to "social-history"
+                    "category" to "social-history",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -154,7 +158,8 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "loc2",
-                    "category" to "social-history"
+                    "category" to "social-history",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -164,7 +169,8 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "loc3",
-                    "category" to "social-history"
+                    "category" to "social-history",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -203,7 +209,8 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "abc",
-                    "category" to categoryTokens
+                    "category" to categoryTokens,
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -240,7 +247,8 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "abc",
-                    "category" to "$categorySystem|social-history"
+                    "category" to "$categorySystem|social-history",
+                    "_count" to 50
                 )
             )
         } returns httpResponse
@@ -278,7 +286,8 @@ class EpicObservationServiceTest {
                 "/api/FHIR/R4/Observation",
                 mapOf(
                     "patient" to "em2zwhHegmZEu39N4dUEIYA3",
-                    "category" to "$categorySystem|social-history"
+                    "category" to "$categorySystem|social-history",
+                    "_count" to 50
                 )
             )
         } returns pagingHttpResponse
