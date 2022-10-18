@@ -12,6 +12,9 @@ import com.projectronin.interop.fhir.r4.datatype.ConditionEvidence
 import com.projectronin.interop.fhir.r4.datatype.ConditionStage
 import com.projectronin.interop.fhir.r4.datatype.Contact
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
+import com.projectronin.interop.fhir.r4.datatype.Dosage
+import com.projectronin.interop.fhir.r4.datatype.DoseAndRate
+import com.projectronin.interop.fhir.r4.datatype.Duration
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
@@ -27,9 +30,13 @@ import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Period
 import com.projectronin.interop.fhir.r4.datatype.PrimitiveData
 import com.projectronin.interop.fhir.r4.datatype.Qualification
+import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.Range
+import com.projectronin.interop.fhir.r4.datatype.Ratio
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.SimpleQuantity
+import com.projectronin.interop.fhir.r4.datatype.Timing
+import com.projectronin.interop.fhir.r4.datatype.TimingRepeat
 import com.projectronin.interop.fhir.r4.datatype.primitive.Base64Binary
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
@@ -58,6 +65,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
+import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
@@ -1173,11 +1181,768 @@ class LocalizersTest {
     }
 
     @Test
+    fun `returns current dosage if it has no localizable information`() {
+        val dosage = Dosage(
+            id = "12345",
+            extension = nonLocalizableExtensions,
+            modifierExtension = nonLocalizableExtensions
+        )
+
+        val localizedDosage = dosage.localize(tenant)
+        assertSame(localizedDosage, dosage)
+    }
+
+    @Test
+    fun `localizes dosage with localizable extension`() {
+        val dosage = Dosage(
+            id = "12345",
+            extension = localizableExtensions
+        )
+        val localizedDosage = dosage.localize(tenant)
+
+        val expectedDosage = Dosage(
+            id = "12345",
+            extension = localizedExtensions
+        )
+        assertEquals(expectedDosage, localizedDosage)
+    }
+
+    @Test
+    fun `localizes dosage with localizable modifier extension`() {
+        val dosage = Dosage(
+            id = "12345",
+            modifierExtension = localizableExtensions
+        )
+        val localizedDosage = dosage.localize(tenant)
+
+        val expectedDosage = Dosage(
+            id = "12345",
+            modifierExtension = localizedExtensions
+        )
+        assertEquals(expectedDosage, localizedDosage)
+    }
+
+    @Test
+    fun `localizes dosage with localizable additionalInstructions`() {
+        val dosage = Dosage(
+            id = "12345",
+            additionalInstruction = listOf(
+                CodeableConcept(extension = localizableExtensions)
+            )
+        )
+        val localizedDosage = dosage.localize(tenant)
+
+        val expectedDosage = Dosage(
+            id = "12345",
+            additionalInstruction = listOf(
+                CodeableConcept(extension = localizedExtensions)
+            )
+        )
+        assertEquals(expectedDosage, localizedDosage)
+    }
+
+    @Test
+    fun `localizes dosage with localizable timing`() {
+        val dosage = Dosage(
+            id = "12345",
+            timing = Timing(extension = localizableExtensions)
+        )
+        val localizedDosage = dosage.localize(tenant)
+
+        val expectedDosage = Dosage(
+            id = "12345",
+            timing = Timing(extension = localizedExtensions)
+        )
+        assertEquals(expectedDosage, localizedDosage)
+    }
+
+    @Test
+    fun `localizes dosage with localizable asNeeded`() {
+        val dosage = Dosage(
+            id = "12345",
+            asNeeded = DynamicValue(
+                type = DynamicValueType.CODEABLE_CONCEPT,
+                value = CodeableConcept(extension = localizableExtensions)
+            )
+        )
+        val localizedDosage = dosage.localize(tenant)
+
+        val expectedDosage = Dosage(
+            id = "12345",
+            asNeeded = DynamicValue(
+                type = DynamicValueType.CODEABLE_CONCEPT,
+                value = CodeableConcept(extension = localizedExtensions)
+            )
+        )
+        assertEquals(expectedDosage, localizedDosage)
+    }
+
+    @Test
+    fun `handles dosage with non-CodeableConcept asNeeded`() {
+        val dosage = Dosage(
+            id = "12345",
+            asNeeded = DynamicValue(
+                type = DynamicValueType.BOOLEAN,
+                value = true
+            )
+        )
+        val localizedDosage = dosage.localize(tenant)
+
+        val expectedDosage = Dosage(
+            id = "12345",
+            asNeeded = DynamicValue(
+                type = DynamicValueType.BOOLEAN,
+                value = true
+            )
+        )
+        assertEquals(expectedDosage, localizedDosage)
+    }
+
+    @Test
+    fun `localizes dosage with localizable site`() {
+        val dosage = Dosage(
+            id = "12345",
+            site = CodeableConcept(extension = localizableExtensions)
+        )
+        val localizedDosage = dosage.localize(tenant)
+
+        val expectedDosage = Dosage(
+            id = "12345",
+            site = CodeableConcept(extension = localizedExtensions)
+        )
+        assertEquals(expectedDosage, localizedDosage)
+    }
+
+    @Test
+    fun `localizes dosage with localizable route`() {
+        val dosage = Dosage(
+            id = "12345",
+            route = CodeableConcept(extension = localizableExtensions)
+        )
+        val localizedDosage = dosage.localize(tenant)
+
+        val expectedDosage = Dosage(
+            id = "12345",
+            route = CodeableConcept(extension = localizedExtensions)
+        )
+        assertEquals(expectedDosage, localizedDosage)
+    }
+
+    @Test
+    fun `localizes dosage with localizable method`() {
+        val dosage = Dosage(
+            id = "12345",
+            method = CodeableConcept(extension = localizableExtensions)
+        )
+        val localizedDosage = dosage.localize(tenant)
+
+        val expectedDosage = Dosage(
+            id = "12345",
+            method = CodeableConcept(extension = localizedExtensions)
+        )
+        assertEquals(expectedDosage, localizedDosage)
+    }
+
+    @Test
+    fun `localizes dosage with localizable doseAndRate`() {
+        val dosage = Dosage(
+            id = "12345",
+            doseAndRate = listOf(
+                DoseAndRate(extension = localizableExtensions)
+            )
+        )
+        val localizedDosage = dosage.localize(tenant)
+
+        val expectedDosage = Dosage(
+            id = "12345",
+            doseAndRate = listOf(
+                DoseAndRate(extension = localizedExtensions)
+            )
+        )
+        assertEquals(expectedDosage, localizedDosage)
+    }
+
+    @Test
+    fun `localizes dosage with localizable maxDosePerPeriod`() {
+        val dosage = Dosage(
+            id = "12345",
+            maxDosePerPeriod = Ratio(extension = localizableExtensions)
+        )
+        val localizedDosage = dosage.localize(tenant)
+
+        val expectedDosage = Dosage(
+            id = "12345",
+            maxDosePerPeriod = Ratio(extension = localizedExtensions)
+        )
+        assertEquals(expectedDosage, localizedDosage)
+    }
+
+    @Test
+    fun `localizes dosage with localizable maxDosePerAdministration`() {
+        val dosage = Dosage(
+            id = "12345",
+            maxDosePerAdministration = SimpleQuantity(extension = localizableExtensions)
+        )
+        val localizedDosage = dosage.localize(tenant)
+
+        val expectedDosage = Dosage(
+            id = "12345",
+            maxDosePerAdministration = SimpleQuantity(extension = localizedExtensions)
+        )
+        assertEquals(expectedDosage, localizedDosage)
+    }
+
+    @Test
+    fun `localizes dosage with localizable maxDosePerLifetime`() {
+        val dosage = Dosage(
+            id = "12345",
+            maxDosePerLifetime = SimpleQuantity(extension = localizableExtensions)
+        )
+        val localizedDosage = dosage.localize(tenant)
+
+        val expectedDosage = Dosage(
+            id = "12345",
+            maxDosePerLifetime = SimpleQuantity(extension = localizedExtensions)
+        )
+        assertEquals(expectedDosage, localizedDosage)
+    }
+
+    @Test
+    fun `returns current doseAndRate if it has no localizable information`() {
+        val doseAndRate = DoseAndRate(
+            id = "12345",
+            extension = nonLocalizableExtensions
+        )
+
+        val localizedDoseAndRate = doseAndRate.localizePair(tenant)
+        assertFalse(localizedDoseAndRate.second)
+        assertSame(doseAndRate, localizedDoseAndRate.first)
+    }
+
+    @Test
+    fun `localizes doseAndRate with localizable extensions`() {
+        val doseAndRate = DoseAndRate(
+            id = "12345",
+            extension = localizableExtensions
+        )
+        val localizedDoseAndRate = doseAndRate.localizePair(tenant)
+
+        val expectedDoseAndRate = DoseAndRate(
+            id = "12345",
+            extension = localizedExtensions
+        )
+        assertTrue(localizedDoseAndRate.second)
+        assertEquals(expectedDoseAndRate, localizedDoseAndRate.first)
+    }
+
+    @Test
+    fun `localizes doseAndRate with localizable type`() {
+        val doseAndRate = DoseAndRate(
+            id = "12345",
+            type = CodeableConcept(extension = localizableExtensions)
+        )
+        val localizedDoseAndRate = doseAndRate.localizePair(tenant)
+
+        val expectedDoseAndRate = DoseAndRate(
+            id = "12345",
+            type = CodeableConcept(extension = localizedExtensions)
+        )
+        assertTrue(localizedDoseAndRate.second)
+        assertEquals(expectedDoseAndRate, localizedDoseAndRate.first)
+    }
+
+    @Test
+    fun `localizes doseAndRate with localizable dose as range`() {
+        val doseAndRate = DoseAndRate(
+            id = "12345",
+            dose = DynamicValue(
+                type = DynamicValueType.RANGE,
+                value = Range(extension = localizableExtensions)
+            )
+        )
+        val localizedDoseAndRate = doseAndRate.localizePair(tenant)
+
+        val expectedDoseAndRate = DoseAndRate(
+            id = "12345",
+            dose = DynamicValue(
+                type = DynamicValueType.RANGE,
+                value = Range(extension = localizedExtensions)
+            )
+        )
+        assertTrue(localizedDoseAndRate.second)
+        assertEquals(expectedDoseAndRate, localizedDoseAndRate.first)
+    }
+
+    @Test
+    fun `localizes doseAndRate with localizable dose as quantity`() {
+        val doseAndRate = DoseAndRate(
+            id = "12345",
+            dose = DynamicValue(
+                type = DynamicValueType.QUANTITY,
+                value = Quantity(extension = localizableExtensions)
+            )
+        )
+        val localizedDoseAndRate = doseAndRate.localizePair(tenant)
+
+        val expectedDoseAndRate = DoseAndRate(
+            id = "12345",
+            dose = DynamicValue(
+                type = DynamicValueType.QUANTITY,
+                value = Quantity(extension = localizedExtensions)
+            )
+        )
+        assertTrue(localizedDoseAndRate.second)
+        assertEquals(expectedDoseAndRate, localizedDoseAndRate.first)
+    }
+
+    @Test
+    fun `handles doseAndRate with unexpected dose type`() {
+        val doseAndRate = DoseAndRate(
+            id = "12345",
+            dose = DynamicValue(
+                type = DynamicValueType.BOOLEAN,
+                value = true
+            )
+        )
+        val localizedDoseAndRate = doseAndRate.localizePair(tenant)
+
+        val expectedDoseAndRate = DoseAndRate(
+            id = "12345",
+            dose = DynamicValue(
+                type = DynamicValueType.BOOLEAN,
+                value = true
+            )
+        )
+        assertFalse(localizedDoseAndRate.second)
+        assertEquals(expectedDoseAndRate, localizedDoseAndRate.first)
+    }
+
+    @Test
+    fun `localizes doseAndRate with localizable rate as ratio`() {
+        val doseAndRate = DoseAndRate(
+            id = "12345",
+            rate = DynamicValue(
+                type = DynamicValueType.RATIO,
+                value = Ratio(extension = localizableExtensions)
+            )
+        )
+        val localizedDoseAndRate = doseAndRate.localizePair(tenant)
+
+        val expectedDoseAndRate = DoseAndRate(
+            id = "12345",
+            rate = DynamicValue(
+                type = DynamicValueType.RATIO,
+                value = Ratio(extension = localizedExtensions)
+            )
+        )
+        assertTrue(localizedDoseAndRate.second)
+        assertEquals(expectedDoseAndRate, localizedDoseAndRate.first)
+    }
+
+    @Test
+    fun `localizes doseAndRate with localizable rate as range`() {
+        val doseAndRate = DoseAndRate(
+            id = "12345",
+            rate = DynamicValue(
+                type = DynamicValueType.RANGE,
+                value = Range(extension = localizableExtensions)
+            )
+        )
+        val localizedDoseAndRate = doseAndRate.localizePair(tenant)
+
+        val expectedDoseAndRate = DoseAndRate(
+            id = "12345",
+            rate = DynamicValue(
+                type = DynamicValueType.RANGE,
+                value = Range(extension = localizedExtensions)
+            )
+        )
+        assertTrue(localizedDoseAndRate.second)
+        assertEquals(expectedDoseAndRate, localizedDoseAndRate.first)
+    }
+
+    @Test
+    fun `localizes doseAndRate with localizable rate as quantity`() {
+        val doseAndRate = DoseAndRate(
+            id = "12345",
+            rate = DynamicValue(
+                type = DynamicValueType.QUANTITY,
+                value = Quantity(extension = localizableExtensions)
+            )
+        )
+        val localizedDoseAndRate = doseAndRate.localizePair(tenant)
+
+        val expectedDoseAndRate = DoseAndRate(
+            id = "12345",
+            rate = DynamicValue(
+                type = DynamicValueType.QUANTITY,
+                value = Quantity(extension = localizedExtensions)
+            )
+        )
+        assertTrue(localizedDoseAndRate.second)
+        assertEquals(expectedDoseAndRate, localizedDoseAndRate.first)
+    }
+
+    @Test
+    fun `localizes doseAndRate with unexpected rate type`() {
+        val doseAndRate = DoseAndRate(
+            id = "12345",
+            rate = DynamicValue(
+                type = DynamicValueType.BOOLEAN,
+                value = true
+            )
+        )
+        val localizedDoseAndRate = doseAndRate.localizePair(tenant)
+
+        val expectedDoseAndRate = DoseAndRate(
+            id = "12345",
+            rate = DynamicValue(
+                type = DynamicValueType.BOOLEAN,
+                value = true
+            )
+        )
+        assertFalse(localizedDoseAndRate.second)
+        assertEquals(expectedDoseAndRate, localizedDoseAndRate.first)
+    }
+
+    @Test
+    fun `returns current duration if it has no localizable information`() {
+        val duration = Duration(
+            id = "12345",
+            extension = nonLocalizableExtensions
+        )
+
+        val localizedDuration = duration.localizePair(tenant)
+        assertFalse(localizedDuration.second)
+        assertSame(duration, localizedDuration.first)
+    }
+
+    @Test
+    fun `localizes duration with localizable extensions`() {
+        val duration = Duration(
+            id = "12345",
+            extension = localizableExtensions
+        )
+        val localizedDuration = duration.localizePair(tenant)
+
+        val expectedDuration = Duration(
+            id = "12345",
+            extension = localizedExtensions
+        )
+        assertTrue(localizedDuration.second)
+        assertEquals(expectedDuration, localizedDuration.first)
+    }
+
+    @Test
+    fun `returns current range if it has no localizable information`() {
+        val range = Range(
+            id = "12345",
+            extension = nonLocalizableExtensions
+        )
+
+        val localizedRange = range.localizePair(tenant)
+        assertFalse(localizedRange.second)
+        assertSame(range, localizedRange.first)
+    }
+
+    @Test
+    fun `localizes range if it has localizable extensions`() {
+        val range = Range(
+            id = "12345",
+            extension = localizableExtensions
+        )
+        val localizedRange = range.localizePair(tenant)
+
+        val expectedRange = Range(
+            id = "12345",
+            extension = localizedExtensions
+        )
+        assertTrue(localizedRange.second)
+        assertEquals(expectedRange, localizedRange.first)
+    }
+
+    @Test
+    fun `returns current quantity if it has no localizable information`() {
+        val quantity = Quantity(
+            id = "12345",
+            extension = nonLocalizableExtensions
+        )
+
+        val localizedQuantity = quantity.localizePair(tenant)
+        assertFalse(localizedQuantity.second)
+        assertSame(quantity, localizedQuantity.first)
+    }
+
+    @Test
+    fun `localizes quantity if it has localizable extensions`() {
+        val quantity = Quantity(
+            id = "12345",
+            extension = localizableExtensions
+        )
+        val localizedQuantity = quantity.localizePair(tenant)
+
+        val expectedQuantity = Quantity(
+            id = "12345",
+            extension = localizedExtensions
+        )
+        assertTrue(localizedQuantity.second)
+        assertEquals(expectedQuantity, localizedQuantity.first)
+    }
+
+    @Test
+    fun `returns current SimpleQuantity if it has no localizable information`() {
+        val simpleQuantity = SimpleQuantity(
+            id = "12345",
+            extension = nonLocalizableExtensions
+        )
+
+        val localizedSimpleQuantity = simpleQuantity.localizePair(tenant)
+        assertFalse(localizedSimpleQuantity.second)
+        assertSame(simpleQuantity, localizedSimpleQuantity.first)
+    }
+
+    @Test
+    fun `localizes SimpleQuantity if it has localizable extensions`() {
+        val simpleQuantity = SimpleQuantity(
+            id = "12345",
+            extension = localizableExtensions
+        )
+        val localizedSimpleQuantity = simpleQuantity.localizePair(tenant)
+
+        val expectedSimpleQuantity = SimpleQuantity(
+            id = "12345",
+            extension = localizedExtensions
+        )
+        assertTrue(localizedSimpleQuantity.second)
+        assertEquals(expectedSimpleQuantity, localizedSimpleQuantity.first)
+    }
+
+    @Test
+    fun `returns current Ratio if it has no localizable information`() {
+        val ratio = Ratio(
+            id = "12345",
+            extension = nonLocalizableExtensions
+        )
+
+        val localizedRatio = ratio.localizePair(tenant)
+        assertFalse(localizedRatio.second)
+        assertSame(ratio, localizedRatio.first)
+    }
+
+    @Test
+    fun `localizes Ratio if it has localizable extensions`() {
+        val ratio = Ratio(
+            id = "12345",
+            extension = localizableExtensions
+        )
+        val localizedRatio = ratio.localizePair(tenant)
+
+        val expectedRatio = Ratio(
+            id = "12345",
+            extension = localizedExtensions
+        )
+        assertTrue(localizedRatio.second)
+        assertEquals(expectedRatio, localizedRatio.first)
+    }
+
+    @Test
+    fun `localizes Ratio if it has a localizable numerator`() {
+        val ratio = Ratio(
+            id = "12345",
+            numerator = Quantity(extension = localizableExtensions)
+        )
+        val localizedRatio = ratio.localizePair(tenant)
+
+        val expectedRatio = Ratio(
+            id = "12345",
+            numerator = Quantity(extension = localizedExtensions)
+        )
+        assertTrue(localizedRatio.second)
+        assertEquals(expectedRatio, localizedRatio.first)
+    }
+
+    @Test
+    fun `localizes Ratio if it has a localizable denominator`() {
+        val ratio = Ratio(
+            id = "12345",
+            denominator = Quantity(extension = localizableExtensions)
+        )
+        val localizedRatio = ratio.localizePair(tenant)
+
+        val expectedRatio = Ratio(
+            id = "12345",
+            denominator = Quantity(extension = localizedExtensions)
+        )
+        assertTrue(localizedRatio.second)
+        assertEquals(expectedRatio, localizedRatio.first)
+    }
+
+    @Test
+    fun `returns current Timing if it has no localizable information`() {
+        val timing = Timing(
+            id = "12345",
+            extension = nonLocalizableExtensions
+        )
+
+        val localizedTiming = timing.localizePair(tenant)
+        assertFalse(localizedTiming.second)
+        assertSame(timing, localizedTiming.first)
+    }
+
+    @Test
+    fun `localizes Timing if it has localizable extensions`() {
+        val timing = Timing(
+            id = "12345",
+            extension = localizableExtensions
+        )
+        val localizedTiming = timing.localizePair(tenant)
+
+        val expectedTiming = Timing(
+            id = "12345",
+            extension = localizedExtensions
+        )
+        assertTrue(localizedTiming.second)
+        assertEquals(expectedTiming, localizedTiming.first)
+    }
+
+    @Test
+    fun `localizes Timing if it has localizable repeat`() {
+        val timing = Timing(
+            id = "12345",
+            repeat = TimingRepeat(extension = localizableExtensions)
+        )
+        val localizedTiming = timing.localizePair(tenant)
+
+        val expectedTiming = Timing(
+            id = "12345",
+            repeat = TimingRepeat(extension = localizedExtensions)
+        )
+        assertTrue(localizedTiming.second)
+        assertEquals(expectedTiming, localizedTiming.first)
+    }
+
+    @Test
+    fun `returns current TimingRepeat if it has no localizable information`() {
+        val timingRepeat = TimingRepeat(
+            id = "12345",
+            extension = nonLocalizableExtensions
+        )
+
+        val localizedTimingRepeat = timingRepeat.localizePair(tenant)
+        assertFalse(localizedTimingRepeat.second)
+        assertSame(timingRepeat, localizedTimingRepeat.first)
+    }
+
+    @Test
+    fun `localizes TimingRepeat if it has localizable extensions`() {
+        val timingRepeat = TimingRepeat(
+            id = "12345",
+            extension = localizableExtensions
+        )
+        val localizedTimingRepeat = timingRepeat.localizePair(tenant)
+
+        val expectedTimingRepeat = TimingRepeat(
+            id = "12345",
+            extension = localizedExtensions
+        )
+        assertTrue(localizedTimingRepeat.second)
+        assertEquals(expectedTimingRepeat, localizedTimingRepeat.first)
+    }
+
+    @Test
+    fun `localizes TimingRepeat if it has a localizable bounds as a duration`() {
+        val timingRepeat = TimingRepeat(
+            id = "12345",
+            bounds = DynamicValue(
+                type = DynamicValueType.DURATION,
+                value = Duration(extension = localizableExtensions)
+            )
+        )
+        val localizedTimingRepeat = timingRepeat.localizePair(tenant)
+
+        val expectedTimingRepeat = TimingRepeat(
+            id = "12345",
+            bounds = DynamicValue(
+                type = DynamicValueType.DURATION,
+                value = Duration(extension = localizedExtensions)
+            )
+        )
+        assertTrue(localizedTimingRepeat.second)
+        assertEquals(expectedTimingRepeat, localizedTimingRepeat.first)
+    }
+
+    @Test
+    fun `localizes TimingRepeat if it has a localizable bounds as a range`() {
+        val timingRepeat = TimingRepeat(
+            id = "12345",
+            bounds = DynamicValue(
+                type = DynamicValueType.RANGE,
+                value = Range(extension = localizableExtensions)
+            )
+        )
+        val localizedTimingRepeat = timingRepeat.localizePair(tenant)
+
+        val expectedTimingRepeat = TimingRepeat(
+            id = "12345",
+            bounds = DynamicValue(
+                type = DynamicValueType.RANGE,
+                value = Range(extension = localizedExtensions)
+            )
+        )
+        assertTrue(localizedTimingRepeat.second)
+        assertEquals(expectedTimingRepeat, localizedTimingRepeat.first)
+    }
+
+    @Test
+    fun `localizes TimingRepeat if it has a localizable bounds as a period`() {
+        val timingRepeat = TimingRepeat(
+            id = "12345",
+            bounds = DynamicValue(
+                type = DynamicValueType.PERIOD,
+                value = Period(extension = localizableExtensions)
+            )
+        )
+        val localizedTimingRepeat = timingRepeat.localizePair(tenant)
+
+        val expectedTimingRepeat = TimingRepeat(
+            id = "12345",
+            bounds = DynamicValue(
+                type = DynamicValueType.PERIOD,
+                value = Period(extension = localizedExtensions)
+            )
+        )
+        assertTrue(localizedTimingRepeat.second)
+        assertEquals(expectedTimingRepeat, localizedTimingRepeat.first)
+    }
+
+    @Test
+    fun `handles TimingRepeat if bounds has an unexpected dynamic value type`() {
+        val timingRepeat = TimingRepeat(
+            id = "12345",
+            bounds = DynamicValue(
+                type = DynamicValueType.BOOLEAN,
+                value = true
+            )
+        )
+        val localizedTimingRepeat = timingRepeat.localizePair(tenant)
+
+        val expectedTimingRepeat = TimingRepeat(
+            id = "12345",
+            bounds = DynamicValue(
+                type = DynamicValueType.BOOLEAN,
+                value = true
+            )
+        )
+        assertFalse(localizedTimingRepeat.second)
+        assertEquals(expectedTimingRepeat, localizedTimingRepeat.first)
+    }
+
+    @Test
     fun `does not localize an extension with non-localizable extension set`() {
         val extension = Extension(
             id = "12345",
             extension = nonLocalizableExtensions,
-            url = Uri("url"),
+            url = Uri("url")
         )
         val (localizedExtension, updated) = extension.localizePair(tenant)
         assertTrue(extension == localizedExtension)
@@ -1201,7 +1966,7 @@ class LocalizersTest {
         val extension = Extension(
             id = "12345",
             extension = localizableExtensions,
-            url = Uri("url"),
+            url = Uri("url")
         )
         val (localizedExtension, updated) = extension.localizePair(tenant)
         assertNotEquals(extension, localizedExtension)
@@ -1210,7 +1975,7 @@ class LocalizersTest {
         val expectedExtension = Extension(
             id = "12345",
             extension = localizedExtensions,
-            url = Uri("url"),
+            url = Uri("url")
         )
         assertEquals(expectedExtension, localizedExtension)
     }
@@ -1220,7 +1985,7 @@ class LocalizersTest {
         val extension = Extension(
             id = "12345",
             extension = someNonLocalizableExtensions,
-            url = Uri("url"),
+            url = Uri("url")
         )
         val (localizedExtension, updated) = extension.localizePair(tenant)
         assertNotEquals(extension, localizedExtension)
@@ -1229,7 +1994,7 @@ class LocalizersTest {
         val expectedExtension = Extension(
             id = "12345",
             extension = mixedLocalizedExtensions,
-            url = Uri("url"),
+            url = Uri("url")
         )
         assertEquals(expectedExtension, localizedExtension)
     }
@@ -2658,7 +3423,7 @@ class LocalizersTest {
                         code = Code("3C"),
                         display = "IIIC"
                     )
-                ),
+                )
             ),
             assessment = listOf(
                 Reference(
@@ -2691,7 +3456,7 @@ class LocalizersTest {
                         code = Code("3C"),
                         display = "IIIC"
                     )
-                ),
+                )
             ),
             assessment = listOf(
                 Reference(
@@ -2720,7 +3485,7 @@ class LocalizersTest {
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
             summary = CodeableConcept(
-                extension = nonLocalizableExtensions,
+                extension = nonLocalizableExtensions
             )
         )
         val localizedConditionStage = conditionStage.localize(tenant)
@@ -2973,7 +3738,7 @@ class LocalizersTest {
             type = localizableCodeableConcept,
             appliesTo = emptyList(),
             age = Range(),
-            text = "Text",
+            text = "Text"
         )
         val expectedObservationReferenceRange = ObservationReferenceRange(
             id = "12345",
@@ -2984,7 +3749,7 @@ class LocalizersTest {
             type = expectedCodeableConcept,
             appliesTo = emptyList(),
             age = Range(),
-            text = "Text",
+            text = "Text"
         )
 
         val (localizedObservationReferenceRange, updated) = observationReferenceRange.localizePair(tenant)
@@ -3016,7 +3781,7 @@ class LocalizersTest {
             type = null,
             appliesTo = listOf(localizableCodeableConcept),
             age = Range(),
-            text = "Text",
+            text = "Text"
         )
         val expectedObservationReferenceRange = ObservationReferenceRange(
             id = "12345",
@@ -3025,7 +3790,7 @@ class LocalizersTest {
             type = null,
             appliesTo = listOf(expectedCodeableConcept),
             age = Range(),
-            text = "Text",
+            text = "Text"
         )
 
         val (localizedObservationReferenceRange, updated) = observationReferenceRange.localizePair(tenant)

@@ -12,6 +12,9 @@ import com.projectronin.interop.fhir.r4.datatype.ConditionEvidence
 import com.projectronin.interop.fhir.r4.datatype.ConditionStage
 import com.projectronin.interop.fhir.r4.datatype.Contact
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
+import com.projectronin.interop.fhir.r4.datatype.Dosage
+import com.projectronin.interop.fhir.r4.datatype.DoseAndRate
+import com.projectronin.interop.fhir.r4.datatype.Duration
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Element
@@ -28,7 +31,13 @@ import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Period
 import com.projectronin.interop.fhir.r4.datatype.PrimitiveData
 import com.projectronin.interop.fhir.r4.datatype.Qualification
+import com.projectronin.interop.fhir.r4.datatype.Quantity
+import com.projectronin.interop.fhir.r4.datatype.Range
+import com.projectronin.interop.fhir.r4.datatype.Ratio
 import com.projectronin.interop.fhir.r4.datatype.Reference
+import com.projectronin.interop.fhir.r4.datatype.SimpleQuantity
+import com.projectronin.interop.fhir.r4.datatype.Timing
+import com.projectronin.interop.fhir.r4.datatype.TimingRepeat
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.ronin.code.normalizeCoding
 import com.projectronin.interop.fhir.ronin.code.normalizeIdentifier
@@ -110,6 +119,24 @@ fun Address.localize(tenant: Tenant): Address {
     }
 
     return this
+}
+
+/**
+ * Localizes this [Annotation] relative to the [tenant]. If this [Annotation] does not contain any localizable * information, the current [Annotation] will be returned.
+ */
+fun Annotation.localize(tenant: Tenant): Annotation = localizePair(tenant).first
+
+fun Annotation.localizePair(tenant: Tenant): Pair<Annotation, Boolean> {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updateAuthor = author?.type == DynamicValueType.REFERENCE
+    if (updatedExtensions.isNotEmpty() || updateAuthor) {
+        val extensions = updatedExtensions.ifEmpty { extension }
+        val updatedAuthor: DynamicValue<Any>? = if (updateAuthor) {
+            DynamicValue(author!!.type, (author!!.value as Reference).localize(tenant))
+        } else author
+        return Pair(Annotation(id, extensions, updatedAuthor, time, text), true)
+    }
+    return Pair(this, false)
 }
 
 /**
@@ -218,6 +245,53 @@ fun Communication.localize(tenant: Tenant): Communication {
 }
 
 /**
+ * Localizes this [ConditionEvidence] relative to the [tenant].  If this [ConditionEvidence] does not contain any
+ * localizable information, the current [ConditionEvidence] will be returned.
+ */
+fun ConditionEvidence.localize(tenant: Tenant): ConditionEvidence {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
+    val updatedCode = code.map { it.localizePair(tenant) }
+    val codeStatus = updatedCode.hasUpdates()
+    val updatedDetail = detail.map { it.localizePair(tenant) }
+    val detailStatus = updatedDetail.hasUpdates()
+    if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || codeStatus || detailStatus) {
+        return ConditionEvidence(
+            id,
+            updatedExtensions.ifEmpty { extension },
+            updatedModifierExtensions.ifEmpty { modifierExtension },
+            updatedCode.values(),
+            updatedDetail.values()
+        )
+    }
+    return this
+}
+
+/**
+ * Localizes this [ConditionStage] relative to the [tenant].  If this [ConditionStage] does not contain any
+ * localizable information, the current [ConditionStage] will be returned.
+ */
+fun ConditionStage.localize(tenant: Tenant): ConditionStage {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
+    val updatedSummary = summary?.localizePair(tenant) ?: Pair(null, false)
+    val updatedAssessment = assessment.map { it.localizePair(tenant) }
+    val assessmentStatus = updatedAssessment.hasUpdates()
+    val updatedType = type?.localizePair(tenant) ?: Pair(null, false)
+    if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || updatedSummary.second || assessmentStatus || updatedType.second) {
+        return ConditionStage(
+            id,
+            updatedExtensions.ifEmpty { extension },
+            updatedModifierExtensions.ifEmpty { modifierExtension },
+            updatedSummary.first,
+            updatedAssessment.values(),
+            updatedType.first
+        )
+    }
+    return this
+}
+
+/**
  * Localizes this [Contact] relative to the [tenant].  If this [Contact] does not contain any localizable information,
  * the current [Contact] will be returned.
  */
@@ -295,6 +369,138 @@ fun ContactPoint.localizePair(tenant: Tenant): Pair<ContactPoint, Boolean> {
 }
 
 /**
+ * Localizes this [Dosage] relative to the [tenant]. If this [Dosage] does not contain any localizable
+ * information, the current [Dosage] will be returned.
+ */
+fun Dosage.localize(tenant: Tenant): Dosage {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
+    val additionalInstructionLocalizations = additionalInstruction.map { it.localizePair(tenant) }
+    val timingPair = timing?.localizePair(tenant) ?: Pair(null, false)
+
+    val asNeededPair = if (asNeeded?.type == DynamicValueType.CODEABLE_CONCEPT) {
+        val codeableConceptPair = (asNeeded!!.value as CodeableConcept).localizePair(tenant)
+        Pair(DynamicValue<Any>(DynamicValueType.CODEABLE_CONCEPT, codeableConceptPair.first), codeableConceptPair.second)
+    } else Pair(asNeeded, false)
+
+    val sitePair = site?.localizePair(tenant) ?: Pair(null, false)
+    val routePair = route?.localizePair(tenant) ?: Pair(null, false)
+    val methodPair = method?.localizePair(tenant) ?: Pair(null, false)
+    val doseAndRateLocalizations = doseAndRate.map { it.localizePair(tenant) }
+    val maxDosePerPeriodPair = maxDosePerPeriod?.localizePair(tenant) ?: Pair(null, false)
+    val maxDosePerAdministrationPair = maxDosePerAdministration?.localizePair(tenant) ?: Pair(null, false)
+    val maxDosePerLifeTimePair = maxDosePerLifetime?.localizePair(tenant) ?: Pair(null, false)
+
+    if (
+        updatedExtensions.isNotEmpty() ||
+        updatedModifierExtensions.isNotEmpty() ||
+        doseAndRateLocalizations.hasUpdates() ||
+        additionalInstructionLocalizations.hasUpdates() ||
+        timingPair.second ||
+        asNeededPair.second ||
+        sitePair.second ||
+        routePair.second ||
+        methodPair.second ||
+        doseAndRateLocalizations.hasUpdates() ||
+        maxDosePerPeriodPair.second ||
+        maxDosePerAdministrationPair.second ||
+        maxDosePerLifeTimePair.second
+    ) {
+        return this.copy(
+            extension = updatedExtensions.ifEmpty { extension },
+            modifierExtension = updatedModifierExtensions.ifEmpty { modifierExtension },
+            additionalInstruction = additionalInstructionLocalizations.values(),
+            timing = timingPair.first,
+            asNeeded = asNeededPair.first,
+            site = sitePair.first,
+            route = routePair.first,
+            method = methodPair.first,
+            doseAndRate = doseAndRateLocalizations.values(),
+            maxDosePerPeriod = maxDosePerPeriodPair.first,
+            maxDosePerAdministration = maxDosePerAdministrationPair.first,
+            maxDosePerLifetime = maxDosePerLifeTimePair.first
+        )
+    }
+
+    return this
+}
+
+/**
+ * Localizes this [DoseAndRate] relative to the [tenant] and returns the localized [DoseAndRate] and its
+ * update status as a pair. If this [DoseAndRate] does not contain any localizable information, a Pair containing the
+ * current [Dosage] and false will be returned.
+ */
+fun DoseAndRate.localizePair(tenant: Tenant): Pair<DoseAndRate, Boolean> {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val typePair = type?.localizePair(tenant) ?: Pair(null, false)
+
+    val updateDose = when (dose?.type) {
+        DynamicValueType.RANGE -> {
+            val rangePair = (dose!!.value as Range).localizePair(tenant)
+            Pair(DynamicValue<Any>(DynamicValueType.RANGE, rangePair.first), rangePair.second)
+        }
+        DynamicValueType.QUANTITY -> {
+            val quantityPair = (dose!!.value as Quantity).localizePair(tenant)
+            Pair(DynamicValue<Any>(DynamicValueType.QUANTITY, quantityPair.first), quantityPair.second)
+        }
+        else -> Pair(dose, false)
+    }
+
+    val updateRate = when (rate?.type) {
+        DynamicValueType.RATIO -> {
+            val ratioPair = (rate!!.value as Ratio).localizePair(tenant)
+            Pair(DynamicValue<Any>(DynamicValueType.RATIO, ratioPair.first), ratioPair.second)
+        }
+        DynamicValueType.RANGE -> {
+            val rangePair = (rate!!.value as Range).localizePair(tenant)
+            Pair(DynamicValue<Any>(DynamicValueType.RANGE, rangePair.first), rangePair.second)
+        }
+        DynamicValueType.QUANTITY -> {
+            val ratePair = (rate!!.value as Quantity).localizePair(tenant)
+            Pair(DynamicValue<Any>(DynamicValueType.QUANTITY, ratePair.first), ratePair.second)
+        }
+        else -> Pair(rate, false)
+    }
+
+    if (
+        updatedExtensions.isNotEmpty() ||
+        typePair.second ||
+        updateDose.second ||
+        updateRate.second
+    ) {
+        return Pair(
+            this.copy(
+                extension = updatedExtensions.ifEmpty { extension },
+                type = typePair.first,
+                dose = updateDose.first,
+                rate = updateRate.first
+            ),
+            true
+        )
+    }
+
+    return Pair(this, false)
+}
+
+/**
+ * Localizes this [Duration] relative to the [tenant] and returns the localized [Duration] and its
+ * update status as a pair. If this [Duration] does not contain any localizable information, a Pair containing the
+ * current [Duration] and false will be returned.
+ */
+fun Duration.localizePair(tenant: Tenant): Pair<Duration, Boolean> {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    if (updatedExtensions.isNotEmpty()) {
+        return Pair(
+            this.copy(
+                extension = updatedExtensions.ifEmpty { extension }
+            ),
+            true
+        )
+    }
+    return Pair(this, false)
+}
+
+/**
  * Localizes this Extension relative to the [tenant]. If this Extension does not contain any localizable information,
  * the current Extension will be returned.
  */
@@ -311,8 +517,9 @@ fun Extension.localizePair(tenant: Tenant): Pair<Extension, Boolean> {
     val updateValue = value?.type == DynamicValueType.REFERENCE
     if (updatedExtensions.isNotEmpty() || updateValue) {
         val extensions = updatedExtensions.ifEmpty { extension }
-        val newValue: DynamicValue<Any>? = if (updateValue)
-            DynamicValue(value!!.type, (value!!.value as Reference).localize(tenant)) else value
+        val newValue: DynamicValue<Any>? = if (updateValue) {
+            DynamicValue(value!!.type, (value!!.value as Reference).localize(tenant))
+        } else value
 
         return Pair(Extension(id, extensions, url, newValue), true)
     }
@@ -440,6 +647,78 @@ fun NotAvailable.localize(tenant: Tenant): NotAvailable {
 }
 
 /**
+ * Localizes the [ObservationComponent] relative to the [tenant]
+ */
+fun ObservationComponent.localize(tenant: Tenant): ObservationComponent {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
+    val updatedDataAbsentReason = dataAbsentReason?.localizePair(tenant) ?: Pair(dataAbsentReason, false)
+    val updatedInterpretation = interpretation.map { it.localizePair(tenant) }
+    val updatedReferenceRange = referenceRange.map { it.localizePair(tenant) }
+    val updateValue = value?.type == DynamicValueType.REFERENCE
+    val updatedCode = code?.localizePair(tenant) ?: Pair(null, false)
+    if (updatedExtensions.isNotEmpty() ||
+        updatedModifierExtensions.isNotEmpty() ||
+        updatedDataAbsentReason.second ||
+        updatedInterpretation.hasUpdates() ||
+        updatedReferenceRange.hasUpdates() ||
+        updatedCode.second ||
+        updateValue
+    ) {
+        val updatedValue: DynamicValue<Any>? = if (updateValue) {
+            DynamicValue(value!!.type, (value!!.value as Reference).localize(tenant))
+        } else value
+        return ObservationComponent(
+            id = id,
+            extension = updatedExtensions.ifEmpty { extension },
+            modifierExtension = updatedModifierExtensions.ifEmpty { modifierExtension },
+            code = updatedCode.first,
+            value = updatedValue,
+            dataAbsentReason = updatedDataAbsentReason.first,
+            interpretation = updatedInterpretation.values(),
+            referenceRange = updatedReferenceRange.values()
+        )
+    }
+
+    return this
+}
+
+/**
+ * Localizes the [ObservationReferenceRange] relative to the [tenant]
+ */
+fun ObservationReferenceRange.localize(tenant: Tenant): ObservationReferenceRange {
+    return this.localizePair(tenant).first
+}
+
+/**
+ * Localizes the [ObservationReferenceRange] relative to the [tenant], used by ObservationComponent.localize
+ */
+fun ObservationReferenceRange.localizePair(tenant: Tenant): Pair<ObservationReferenceRange, Boolean> {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
+    val updatedType = type?.localizePair(tenant) ?: Pair(type, false)
+    val updatedAppliesTo = appliesTo.map { it.localizePair(tenant) }
+    if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || updatedAppliesTo.isNotEmpty() || updatedType.second) {
+        return Pair(
+            ObservationReferenceRange(
+                id = id,
+                extension = updatedExtensions.ifEmpty { extension },
+                modifierExtension = updatedModifierExtensions.ifEmpty { modifierExtension },
+                low = low,
+                high = high,
+                type = updatedType.first,
+                appliesTo = updatedAppliesTo.values(),
+                age = age,
+                text = text
+            ),
+            true
+        )
+    }
+
+    return Pair(this, false)
+}
+
+/**
  * Localizes this [Participant] relative to the [tenant].  If this [Participant] does not contain any localizable
  * information, the current [Participant] will be returned.
  */
@@ -562,6 +841,66 @@ fun Qualification.localize(tenant: Tenant): Qualification {
 }
 
 /**
+ * Localizes this [Quantity] relative to the [tenant] and returns the localized [Quantity] and its
+ * update status as a pair. If this [Quantity] does not contain any localizable information, a Pair containing the
+ * current [Quantity] and false will be returned.
+ */
+fun Quantity.localizePair(tenant: Tenant): Pair<Quantity, Boolean> {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    if (updatedExtensions.isNotEmpty()) {
+        return Pair(
+            this.copy(
+                extension = updatedExtensions.ifEmpty { extension }
+            ),
+            true
+        )
+    }
+
+    return Pair(this, false)
+}
+
+/**
+ * Localizes this [Range] relative to the [tenant] and returns the localized [Range] and its
+ * update status as a pair. If this [Range] does not contain any localizable information, a Pair containing the
+ * current [Range] and false will be returned.
+ */
+fun Range.localizePair(tenant: Tenant): Pair<Range, Boolean> {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    if (updatedExtensions.isNotEmpty()) {
+        return Pair(
+            this.copy(
+                extension = updatedExtensions.ifEmpty { extension }
+            ),
+            true
+        )
+    }
+    return Pair(this, false)
+}
+
+/**
+ * Localizes this [Ratio] relative to the [tenant] and returns the localized [Ratio] and its
+ * update status as a pair. If this [Ratio] does not contain any localizable information, a Pair containing the
+ * current [Ratio] and false will be returned.
+ */
+fun Ratio.localizePair(tenant: Tenant): Pair<Ratio, Boolean> {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val numeratorPair = numerator?.localizePair(tenant) ?: Pair(null, false)
+    val denominatorPair = denominator?.localizePair(tenant) ?: Pair(null, false)
+    if (updatedExtensions.isNotEmpty() || numeratorPair.second || denominatorPair.second) {
+        return Pair(
+            this.copy(
+                extension = updatedExtensions.ifEmpty { extension },
+                numerator = numeratorPair.first,
+                denominator = denominatorPair.first
+            ),
+            true
+        )
+    }
+
+    return Pair(this, false)
+}
+
+/**
  * Localizes this Reference relative to the [tenant]. If this Reference does not contain any localizable information,
  * the current Reference will be returned.
  */
@@ -592,79 +931,17 @@ fun Reference.localizePair(tenant: Tenant): Pair<Reference, Boolean> {
     return Pair(this, false)
 }
 
-fun ConditionStage.localize(tenant: Tenant): ConditionStage {
-    val updatedExtensions = getUpdatedExtensions(this, tenant)
-    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
-    val updatedSummary = summary?.localizePair(tenant) ?: Pair(null, false)
-    val updatedAssessment = assessment.map { it.localizePair(tenant) }
-    val assessmentStatus = updatedAssessment.hasUpdates()
-    val updatedType = type?.localizePair(tenant) ?: Pair(null, false)
-    if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || updatedSummary.second || assessmentStatus || updatedType.second) {
-        return ConditionStage(
-            id,
-            updatedExtensions.ifEmpty { extension },
-            updatedModifierExtensions.ifEmpty { modifierExtension },
-            updatedSummary.first,
-            updatedAssessment.values(),
-            updatedType.first
-        )
-    }
-    return this
-}
-
-fun ConditionEvidence.localize(tenant: Tenant): ConditionEvidence {
-    val updatedExtensions = getUpdatedExtensions(this, tenant)
-    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
-    val updatedCode = code.map { it.localizePair(tenant) }
-    val codeStatus = updatedCode.hasUpdates()
-    val updatedDetail = detail.map { it.localizePair(tenant) }
-    val detailStatus = updatedDetail.hasUpdates()
-    if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || codeStatus || detailStatus) {
-        return ConditionEvidence(
-            id,
-            updatedExtensions.ifEmpty { extension },
-            updatedModifierExtensions.ifEmpty { modifierExtension },
-            updatedCode.values(),
-            updatedDetail.values()
-        )
-    }
-    return this
-}
-
-fun Annotation.localize(tenant: Tenant): Annotation = localizePair(tenant).first
-
-fun Annotation.localizePair(tenant: Tenant): Pair<Annotation, Boolean> {
-    val updatedExtensions = getUpdatedExtensions(this, tenant)
-    val updateAuthor = author?.type == DynamicValueType.REFERENCE
-    if (updatedExtensions.isNotEmpty() || updateAuthor) {
-        val extensions = updatedExtensions.ifEmpty { extension }
-        val updatedAuthor: DynamicValue<Any>? = if (updateAuthor)
-            DynamicValue(author!!.type, (author!!.value as Reference).localize(tenant)) else author
-        return Pair(Annotation(id, extensions, updatedAuthor, time, text), true)
-    }
-    return Pair(this, false)
-}
-
 /**
- * Localizes the [ObservationReferenceRange] relative to the [tenant], used by ObservationComponent.localize
+ * Localizes this [SimpleQuantity] relative to the [tenant] and returns the localized [SimpleQuantity] and its
+ * update status as a pair. If this [SimpleQuantity] does not contain any localizable information, a Pair containing the
+ * current [SimpleQuantity] and false will be returned.
  */
-fun ObservationReferenceRange.localizePair(tenant: Tenant): Pair<ObservationReferenceRange, Boolean> {
+fun SimpleQuantity.localizePair(tenant: Tenant): Pair<SimpleQuantity, Boolean> {
     val updatedExtensions = getUpdatedExtensions(this, tenant)
-    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
-    val updatedType = type?.localizePair(tenant) ?: Pair(type, false)
-    val updatedAppliesTo = appliesTo.map { it.localizePair(tenant) }
-    if (updatedExtensions.isNotEmpty() || updatedModifierExtensions.isNotEmpty() || updatedAppliesTo.isNotEmpty() || updatedType.second) {
+    if (updatedExtensions.isNotEmpty()) {
         return Pair(
-            ObservationReferenceRange(
-                id = id,
-                extension = updatedExtensions.ifEmpty { extension },
-                modifierExtension = updatedModifierExtensions.ifEmpty { modifierExtension },
-                low = low,
-                high = high,
-                type = updatedType.first,
-                appliesTo = updatedAppliesTo.values(),
-                age = age,
-                text = text,
+            this.copy(
+                extension = updatedExtensions.ifEmpty { extension }
             ),
             true
         )
@@ -674,44 +951,58 @@ fun ObservationReferenceRange.localizePair(tenant: Tenant): Pair<ObservationRefe
 }
 
 /**
- * Localizes the [ObservationReferenceRange] relative to the [tenant]
+ * Localizes this [Timing] relative to the [tenant] and returns the localized [Timing] and its
+ * update status as a pair. If this [Timing] does not contain any localizable information, a Pair containing the
+ * current [Timing] and false will be returned.
  */
-fun ObservationReferenceRange.localize(tenant: Tenant): ObservationReferenceRange {
-    return this.localizePair(tenant).first
-}
-
-/**
- * Localizes the [ObservationComponent] relative to the [tenant]
- */
-fun ObservationComponent.localize(tenant: Tenant): ObservationComponent {
+fun Timing.localizePair(tenant: Tenant): Pair<Timing, Boolean> {
     val updatedExtensions = getUpdatedExtensions(this, tenant)
-    val updatedModifierExtensions = getUpdatedModifierExtensions(this, tenant)
-    val updatedDataAbsentReason = dataAbsentReason?.localizePair(tenant) ?: Pair(dataAbsentReason, false)
-    val updatedInterpretation = interpretation.map { it.localizePair(tenant) }
-    val updatedReferenceRange = referenceRange.map { it.localizePair(tenant) }
-    val updateValue = value?.type == DynamicValueType.REFERENCE
-    val updatedCode = code?.localizePair(tenant) ?: Pair(null, false)
-    if (updatedExtensions.isNotEmpty() ||
-        updatedModifierExtensions.isNotEmpty() ||
-        updatedDataAbsentReason.second ||
-        updatedInterpretation.hasUpdates() ||
-        updatedReferenceRange.hasUpdates() ||
-        updatedCode.second ||
-        updateValue
-    ) {
-        val updatedValue: DynamicValue<Any>? = if (updateValue)
-            DynamicValue(value!!.type, (value!!.value as Reference).localize(tenant)) else value
-        return ObservationComponent(
-            id = id,
-            extension = updatedExtensions.ifEmpty { extension },
-            modifierExtension = updatedModifierExtensions.ifEmpty { modifierExtension },
-            code = updatedCode.first,
-            value = updatedValue,
-            dataAbsentReason = updatedDataAbsentReason.first,
-            interpretation = updatedInterpretation.values(),
-            referenceRange = updatedReferenceRange.values(),
+    val updatedRepeat = repeat?.localizePair(tenant) ?: Pair(null, false)
+    if (updatedExtensions.isNotEmpty() || updatedRepeat.second) {
+        return Pair(
+            this.copy(
+                extension = updatedExtensions.ifEmpty { extension },
+                repeat = updatedRepeat.first
+            ),
+            true
         )
     }
 
-    return this
+    return Pair(this, false)
+}
+
+/**
+ * Localizes this [TimingRepeat] relative to the [tenant] and returns the localized [TimingRepeat] and its
+ * update status as a pair. If this [TimingRepeat] does not contain any localizable information, a Pair containing the
+ * current [TimingRepeat] and false will be returned.
+ */
+fun TimingRepeat.localizePair(tenant: Tenant): Pair<TimingRepeat, Boolean> {
+    val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updateBounds = when (bounds?.type) {
+        DynamicValueType.DURATION -> {
+            val durationPair = (bounds!!.value as Duration).localizePair(tenant)
+            Pair(DynamicValue<Any>(DynamicValueType.DURATION, durationPair.first), durationPair.second)
+        }
+        DynamicValueType.RANGE -> {
+            val rangePair = (bounds!!.value as Range).localizePair(tenant)
+            Pair(DynamicValue<Any>(DynamicValueType.RANGE, rangePair.first), rangePair.second)
+        }
+        DynamicValueType.PERIOD -> {
+            val periodPair = (bounds!!.value as Period).localizePair(tenant)
+            Pair(DynamicValue<Any>(DynamicValueType.PERIOD, periodPair.first), periodPair.second)
+        }
+        else -> Pair(bounds, false)
+    }
+
+    if (updatedExtensions.isNotEmpty() || updateBounds.second) {
+        return Pair(
+            this.copy(
+                extension = updatedExtensions.ifEmpty { extension },
+                bounds = updateBounds.first
+            ),
+            true
+        )
+    }
+
+    return Pair(this, false)
 }
