@@ -208,17 +208,19 @@ fun CodeableConcept.localizePair(tenant: Tenant): Pair<CodeableConcept, Boolean>
  */
 fun Coding.localizePair(tenant: Tenant): Pair<Coding, Boolean> {
     val updatedExtensions = getUpdatedExtensions(this, tenant)
+    val updatedSystem = system?.normalizeCoding()
+
     return Pair(
         Coding(
             id,
             updatedExtensions.ifEmpty { extension },
-            system?.normalizeCoding(),
+            updatedSystem,
             version,
             code,
             display,
             userSelected
         ),
-        updatedExtensions.isNotEmpty()
+        updatedExtensions.isNotEmpty() || (updatedSystem != system)
     )
 }
 
@@ -567,19 +569,28 @@ fun Identifier.localizePair(tenant: Tenant): Pair<Identifier, Boolean> {
     val periodPair = period?.localizePair(tenant) ?: Pair(null, false)
     val assignerPair = assigner?.localizePair(tenant) ?: Pair(null, false)
     val valueDataPair = valueData?.localizePair(tenant) ?: Pair(null, false)
+    val updatedSystem = system?.normalizeIdentifier()
+
     return Pair(
         Identifier(
             id,
             updatedExtensions.ifEmpty { extension },
             use,
             typePair.first,
-            system?.normalizeIdentifier(),
+            updatedSystem,
             value,
             periodPair.first,
             assignerPair.first,
             valueDataPair.first
         ),
-        (updatedExtensions.isNotEmpty() || typePair.second || periodPair.second || assignerPair.second || valueDataPair.second)
+        (
+            updatedExtensions.isNotEmpty() ||
+                typePair.second ||
+                periodPair.second ||
+                assignerPair.second ||
+                valueDataPair.second ||
+                (updatedSystem != system)
+            )
     )
 }
 

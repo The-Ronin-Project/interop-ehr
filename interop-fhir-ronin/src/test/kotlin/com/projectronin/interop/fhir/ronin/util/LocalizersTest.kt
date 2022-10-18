@@ -59,9 +59,13 @@ import com.projectronin.interop.fhir.r4.valueset.NameUse
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipantRequired
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
+import com.projectronin.interop.fhir.ronin.code.normalizeCoding
+import com.projectronin.interop.fhir.ronin.code.normalizeIdentifier
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.mockkStatic
+import io.mockk.unmockkStatic
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotEquals
@@ -3988,5 +3992,53 @@ class LocalizersTest {
         val localizedObservationComponent = observationComponent.localize(tenant)
 
         assertEquals(observationComponent, localizedObservationComponent)
+    }
+
+    @Test
+    fun `Coding - returns true when system is normalized and no extensions are localized`() {
+        val normalizedSystem = mockk<Uri> {
+            every { value } returns "url"
+        }
+        val system = mockk<Uri> {
+            every { value } returns "oid"
+        }
+        mockkStatic(Uri::normalizeCoding)
+        every { system.normalizeCoding() } returns normalizedSystem
+
+        val coding = Coding(
+            extension = nonLocalizableExtensions,
+            system = system
+        )
+        val localizedCodingPair = coding.localizePair(tenant)
+
+        assertTrue(localizedCodingPair.second)
+        val localizedCoding = localizedCodingPair.first
+        assertEquals(coding.extension, localizedCoding.extension)
+        assertEquals(normalizedSystem, localizedCoding.system)
+
+        unmockkStatic(Uri::normalizeCoding)
+    }
+
+    @Test
+    fun `Identifier - returns true when system is normalized and nothing else is localized`() {
+        val normalizedSystem = mockk<Uri> {
+            every { value } returns "url"
+        }
+        val system = mockk<Uri> {
+            every { value } returns "oid"
+        }
+        mockkStatic(Uri::normalizeIdentifier)
+        every { system.normalizeIdentifier() } returns normalizedSystem
+
+        val identifier = Identifier(
+            system = system
+        )
+        val localizedIdentifierPair = identifier.localizePair(tenant)
+
+        assertTrue(localizedIdentifierPair.second)
+        val localizedIdentifier = localizedIdentifierPair.first
+        assertEquals(normalizedSystem, localizedIdentifier.system)
+
+        unmockkStatic(Uri::normalizeIdentifier)
     }
 }
