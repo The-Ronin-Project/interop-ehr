@@ -24,9 +24,6 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
 
-const val RONIN_PATIENT_PROFILE =
-    "http://projectronin.io/fhir/ronin.common-fhir-model.uscore-r4/StructureDefinition/ronin-patient"
-
 /**
  * Validator and Transformer for the Ronin Patient profile.
  */

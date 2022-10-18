@@ -462,7 +462,7 @@ class RoninPatientTest {
         assertEquals("Patient", oncologyPatient.resourceType)
         assertEquals(Id("test-12345"), oncologyPatient.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RONIN_PATIENT_PROFILE))),
+            Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value))),
             oncologyPatient.meta
         )
         assertEquals(Uri("implicit-rules"), oncologyPatient.implicitRules)
@@ -555,7 +555,7 @@ class RoninPatientTest {
         assertEquals("Patient", oncologyPatient.resourceType)
         assertEquals(Id("test-12345"), oncologyPatient.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RONIN_PATIENT_PROFILE))),
+            Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value))),
             oncologyPatient.meta
         )
         assertNull(oncologyPatient.implicitRules)

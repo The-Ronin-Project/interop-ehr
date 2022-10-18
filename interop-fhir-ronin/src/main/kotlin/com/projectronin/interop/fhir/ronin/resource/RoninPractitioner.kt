@@ -14,9 +14,6 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
 
-const val RONIN_PRACTITIONER_PROFILE =
-    "http://projectronin.io/fhir/ronin.common-fhir-model.uscore-r4/StructureDefinition/ronin-practitioner"
-
 /**
  * Validator and Transformer for the Ronin Practitioner profile.
  */
