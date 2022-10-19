@@ -91,7 +91,7 @@ internal class ConceptMapCacheTest {
             )
         }
         mockkObject(JacksonUtil)
-        every { ociClient.getObjectBody("/DataNormalization/registry.json") } returns "registryJson"
+        every { ociClient.getObjectBody("DataNormalizationRegistry/v1/registry.json") } returns "registryJson"
         every { JacksonUtil.readJsonList("registryJson", ConceptMapRegistry::class) } returns testRegistry
         every { ociClient.getObjectBody("file1.json") } returns "mapJson1"
         every { JacksonUtil.readJsonObject("mapJson1", ConceptMap::class) } returns mockkMap1
@@ -237,5 +237,15 @@ internal class ConceptMapCacheTest {
         assertNull(cmClient.getConceptMapping(tenant, "Appointment", "status", sourceCoding))
 
         unmockkObject(ConceptMapCache)
+    }
+
+    @Test
+    fun `try catch works`() {
+        mockkObject(JacksonUtil)
+        every { JacksonUtil.readJsonObject(any(), ConceptMap::class) } throws Exception("bad")
+        assertEquals(emptyMap<SourceKey, TargetValue>(), cmClient.getConceptMap("name"))
+
+        every { JacksonUtil.readJsonList(any(), ConceptMapRegistry::class) } throws Exception("bad")
+        assertEquals(emptyList<ConceptMapRegistry>(), cmClient.getNewRegistry())
     }
 }

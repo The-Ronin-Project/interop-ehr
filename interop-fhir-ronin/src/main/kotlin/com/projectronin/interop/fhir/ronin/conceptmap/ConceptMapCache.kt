@@ -1,5 +1,10 @@
 package com.projectronin.interop.fhir.ronin.conceptmap
 
+import com.fasterxml.jackson.annotation.JsonIgnore
+import com.fasterxml.jackson.databind.DeserializationContext
+import com.fasterxml.jackson.databind.KeyDeserializer
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapCache.registry
 import com.projectronin.interop.tenant.config.model.Tenant
 import java.time.LocalDateTime
 
@@ -36,9 +41,18 @@ internal data class ConceptMapRegistry(
     val version: String,
     val source_extension_url: String,
     val resource_type: String, // i.e. 'Appointment'
-    val tenant_id: String?, // potentially null
+    val tenant_id: String? = null, // potentially null
+    @JsonDeserialize(keyUsing = NullKey::class)
+    @JsonIgnore
     var map: Map<SourceKey, TargetValue>? = null
 )
-
 internal data class SourceKey(val value: String, val system: String)
 internal data class TargetValue(val value: String, val system: String)
+
+// Because we added the 'map' field to ConceptMapRegistry (despite it not being in the original JSON from OCI),
+// Jackson needs to know 'how' to deserialize it, even though it's marked as JsonIgnore.
+private class NullKey : KeyDeserializer() {
+    override fun deserializeKey(p0: String?, p1: DeserializationContext?): Any {
+        return SourceKey("", "")
+    }
+}

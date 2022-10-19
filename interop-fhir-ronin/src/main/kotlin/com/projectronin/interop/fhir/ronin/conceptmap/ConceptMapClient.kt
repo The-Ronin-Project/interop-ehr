@@ -10,8 +10,13 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ConceptMap
 import com.projectronin.interop.tenant.config.model.Tenant
+import mu.KotlinLogging
+import org.springframework.beans.factory.annotation.Qualifier
+import org.springframework.stereotype.Component
 
-class ConceptMapClient(private val ociClient: OCIClient) {
+@Component
+class ConceptMapClient(@Qualifier("ConceptMap") private val ociClient: OCIClient) {
+    private val logger = KotlinLogging.logger { }
 
     /**
      * Returns a [Pair] with the transformed [Coding] as the first and an [Extension] as the second,
@@ -34,7 +39,7 @@ class ConceptMapClient(private val ociClient: OCIClient) {
         val sourceSystem = coding.system?.value ?: return null
         if (ConceptMapCache.reloadNeeded(tenant)) reload(tenant)
         val cache = ConceptMapCache.getCurrentRegistry()
-        val registry = cache.filter { it.tenant_id == tenant.mnemonic }
+        val registry = cache.filter { it.tenant_id in listOf(tenant.mnemonic, null) } // null tenant means universal map
             .filter { it.resource_type == resourceType }
             .find { it.data_element == elementName } ?: return null
         val target = registry.map?.get(SourceKey(sourceVal, sourceSystem)) ?: return null
@@ -47,12 +52,17 @@ class ConceptMapClient(private val ociClient: OCIClient) {
         )
     }
 
-    private fun getNewRegistry(): List<ConceptMapRegistry> {
-        return JacksonUtil.readJsonList(
-            // might want to swap hardcoded name for env config at some point
-            ociClient.getObjectBody("/DataNormalization/registry.json")!!,
-            ConceptMapRegistry::class
-        )
+    internal fun getNewRegistry(): List<ConceptMapRegistry> {
+        return try {
+            JacksonUtil.readJsonList(
+                // might want to swap hardcoded name for env config at some point
+                ociClient.getObjectBody("DataNormalizationRegistry/v1/registry.json")!!,
+                ConceptMapRegistry::class
+            )
+        } catch (e: Exception) {
+            logger.info { e.message }
+            listOf()
+        }
     }
 
     // internal for testing purposes.
@@ -77,9 +87,13 @@ class ConceptMapClient(private val ociClient: OCIClient) {
         ConceptMapCache.setNewRegistry(newRegistry, tenant)
     }
 
-    private fun getConceptMap(filename: String): Map<SourceKey, TargetValue> {
-        val conceptMap =
+    internal fun getConceptMap(filename: String): Map<SourceKey, TargetValue> {
+        val conceptMap = try {
             JacksonUtil.readJsonObject(ociClient.getObjectBody(filename)!!, ConceptMap::class)
+        } catch (e: Exception) {
+            logger.info { e.message }
+            return emptyMap()
+        }
         // squish ConceptMap into more usable form
         val mutableMap = mutableMapOf<SourceKey, TargetValue>()
         conceptMap.group.forEach forEachGroup@{ group ->

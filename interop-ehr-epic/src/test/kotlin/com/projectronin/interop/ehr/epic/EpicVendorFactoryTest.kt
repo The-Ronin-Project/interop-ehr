@@ -49,6 +49,7 @@ class EpicVendorFactoryTest {
             fun ehrDatabase(): Database = mockk()
 
             @Bean
+            @Qualifier("ConceptMap")
             fun ociClient(): OCIClient = mockk()
 
             @Bean
