@@ -23,7 +23,7 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4MedicationStatementV
 import com.projectronin.interop.fhir.r4.valueset.MedicationStatementStatus
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
-import com.projectronin.interop.fhir.ronin.util.asCode
+import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.validation
@@ -131,7 +131,10 @@ class RoninMedicationStatementTest {
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
-            text = Narrative(status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(), div = "div"),
+            text = Narrative(
+                status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(),
+                div = "div"
+            ),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             extension = listOf(
                 Extension(

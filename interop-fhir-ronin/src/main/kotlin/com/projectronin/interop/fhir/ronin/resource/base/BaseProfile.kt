@@ -3,6 +3,8 @@ package com.projectronin.interop.fhir.ronin.resource.base
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.ProfileQualifier
 import com.projectronin.interop.fhir.ronin.ProfileTransformer
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -21,10 +23,10 @@ abstract class BaseProfile<T : Resource<T>>(
     }
 
     /**
-     * Internal transformation from [original] based off the [tenant]. This is internal because validation will be handled commonly for all extending classes.
+     * Internal transformation from [normalized] element based off the [tenant]. This is internal because tenant-transformation and validation will be handled commonly for all extending classes.
      */
     abstract fun transformInternal(
-        original: T,
+        normalized: T,
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<T?, Validation>
@@ -51,16 +53,19 @@ abstract class BaseProfile<T : Resource<T>>(
             )
         }
 
-        val (transformed, transformValidation) = transformInternal(original, currentContext, tenant)
+        val normalized = Normalizer.normalize(original, tenant)
+
+        val (transformed, transformValidation) = transformInternal(normalized, currentContext, tenant)
         validation.merge(transformValidation)
 
         return try {
-            transformed?.let {
+            val localizedTransform = transformed?.let { Localizer.localize(transformed, tenant) }
+            localizedTransform?.let {
                 validateTransformation(it, currentContext, validation)
             }
 
             validation.alertIfErrors()
-            transformed
+            localizedTransform
         } catch (e: Exception) {
             logger.error(e) { "Unable to transform to profile" }
             null

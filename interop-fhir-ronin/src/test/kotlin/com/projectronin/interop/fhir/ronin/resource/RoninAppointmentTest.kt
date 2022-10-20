@@ -25,7 +25,7 @@ import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
-import com.projectronin.interop.fhir.ronin.util.asCode
+import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.validation

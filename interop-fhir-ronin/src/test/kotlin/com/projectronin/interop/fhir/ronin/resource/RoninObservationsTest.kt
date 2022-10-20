@@ -20,7 +20,7 @@ import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyHeight
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyWeight
 import com.projectronin.interop.fhir.ronin.resource.observation.USCoreVitalSignsValidator
-import com.projectronin.interop.fhir.ronin.util.asCode
+import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk

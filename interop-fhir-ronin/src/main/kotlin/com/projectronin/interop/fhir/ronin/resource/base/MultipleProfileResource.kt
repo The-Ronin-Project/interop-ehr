@@ -19,14 +19,14 @@ abstract class MultipleProfileResource<T : Resource<T>> : BaseProfile<T>() {
     }
 
     override fun transformInternal(
-        original: T,
+        normalized: T,
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<T?, Validation> {
         val validation = Validation()
 
-        val qualifiedProfile = getQualifiedProfile(original, parentContext, validation)
-        val transformed = qualifiedProfile?.transform(original, tenant)
+        val qualifiedProfile = getQualifiedProfile(normalized, parentContext, validation)
+        val transformed = qualifiedProfile?.transform(normalized, tenant)
 
         return Pair(transformed, validation)
     }

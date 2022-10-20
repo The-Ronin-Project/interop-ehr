@@ -14,7 +14,6 @@ import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.toFhirIdentifier
-import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -120,13 +119,13 @@ class RoninPatient private constructor(private val identifierService: Identifier
     }
 
     override fun transformInternal(
-        original: Patient,
+        normalized: Patient,
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<Patient?, Validation> {
         // TODO: RoninNormalizedTelecom extension
 
-        val maritalStatus = original.maritalStatus ?: CodeableConcept(
+        val maritalStatus = normalized.maritalStatus ?: CodeableConcept(
             coding = listOf(
                 Coding(
                     system = Uri("http://terminology.hl7.org/CodeSystem/v3-NullFlavor"),
@@ -136,24 +135,11 @@ class RoninPatient private constructor(private val identifierService: Identifier
             )
         )
 
-        val transformed = original.copy(
-            id = original.id?.localize(tenant),
-            meta = original.meta.transform(tenant),
-            text = original.text?.localize(tenant),
-            extension = original.extension.map { it.localize(tenant) },
-            modifierExtension = original.modifierExtension.map { it.localize(tenant) },
-            identifier = original.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier() +
-                getRoninIdentifiers(original, tenant),
-            name = original.name.map { it.localize(tenant) },
-            telecom = original.telecom.map { it.localize(tenant) },
-            address = original.address.map { it.localize(tenant) },
+        val transformed = normalized.copy(
+            meta = normalized.meta.transform(),
+            identifier = normalized.identifier + tenant.toFhirIdentifier() +
+                getRoninIdentifiers(normalized, tenant),
             maritalStatus = maritalStatus,
-            photo = original.photo.map { it.localize(tenant) },
-            contact = original.contact.map { it.localize(tenant) },
-            communication = original.communication.map { it.localize(tenant) },
-            generalPractitioner = original.generalPractitioner.map { it.localize(tenant) },
-            managingOrganization = original.managingOrganization?.localize(tenant),
-            link = original.link.map { it.localize(tenant) }
         )
         return Pair(transformed, Validation())
     }

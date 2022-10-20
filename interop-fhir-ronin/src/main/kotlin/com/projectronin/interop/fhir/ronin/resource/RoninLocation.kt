@@ -5,7 +5,6 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
-import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -42,32 +41,23 @@ object RoninLocation :
     )
 
     override fun transformInternal(
-        original: Location,
+        normalized: Location,
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<Location?, Validation> {
         val validation = Validation()
 
-        val name = if (original.name.isNullOrEmpty()) {
+        val name = if (normalized.name.isNullOrEmpty()) {
             validation.checkTrue(false, unnamedWarning, parentContext)
             DEFAULT_NAME
         } else {
-            original.name
+            normalized.name
         }
 
-        val transformed = original.copy(
-            id = original.id?.localize(tenant),
-            meta = original.meta.transform(tenant),
-            text = original.text?.localize(tenant),
-            extension = original.extension.map { it.localize(tenant) },
-            modifierExtension = original.modifierExtension.map { it.localize(tenant) },
-            identifier = original.identifier.map { it.localize(tenant) } + original.getFhirIdentifiers() + tenant.toFhirIdentifier(),
-            name = name,
-            telecom = original.telecom.map { it.localize(tenant) },
-            address = original.address?.localize(tenant),
-            managingOrganization = original.managingOrganization?.localize(tenant),
-            partOf = original.partOf?.localize(tenant),
-            endpoint = original.endpoint.map { it.localize(tenant) },
+        val transformed = normalized.copy(
+            meta = normalized.meta.transform(),
+            identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier(),
+            name = name
         )
         return Pair(transformed, validation)
     }

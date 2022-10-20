@@ -15,7 +15,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class MultipleProfileResourceTest {
-    private val tenant = mockk<Tenant>()
+    private val tenant = mockk<Tenant> {
+        every { mnemonic } returns "test"
+    }
 
     private lateinit var testProfile1: BaseProfile<Location>
     private lateinit var testProfile2: BaseProfile<Location>
@@ -79,9 +81,7 @@ class MultipleProfileResourceTest {
 
     @Test
     fun `transform with no qualifying profiles`() {
-        val location = mockk<Location> {
-            every { id } returns Id("1234")
-        }
+        val location = Location(id = Id("1234"))
 
         every { testProfile1.qualifies(location) } returns false
         every { testProfile2.qualifies(location) } returns false
@@ -93,9 +93,7 @@ class MultipleProfileResourceTest {
 
     @Test
     fun `transform with multiple qualifying profiles`() {
-        val location = mockk<Location> {
-            every { id } returns Id("1234")
-        }
+        val location = Location(id = Id("1234"))
 
         every { testProfile1.qualifies(location) } returns true
         every { testProfile2.qualifies(location) } returns true
@@ -107,15 +105,16 @@ class MultipleProfileResourceTest {
 
     @Test
     fun `transform with single qualifying profile`() {
-        val location = mockk<Location> {
-            every { id } returns Id("1234")
-        }
-        val transformedLocation = mockk<Location> {
-            every { id } returns Id("1234")
-        }
+        val location = Location(id = Id("1234"))
+        val transformedLocation = Location(id = Id("test-1234"))
 
         every { testProfile1.qualifies(location) } returns true
-        every { testProfile1.transform(location, tenant) } returns transformedLocation
+        every {
+            testProfile1.transform(
+                location,
+                tenant
+            )
+        } returns location // The "transformation" in this test actually occurs inside the base class.
 
         every { testProfile1.qualifies(transformedLocation) } returns true
         every { testProfile1.validate(transformedLocation, eq(LocationContext(Location::class))) } returns Validation()

@@ -44,11 +44,6 @@ class UnlocalizeTest {
     }
 
     @Test
-    fun `localize, unlocalize Id`() {
-        assertEquals(Id("id-value"), Id("id-value").localize(tenant).unlocalize(tenant))
-    }
-
-    @Test
     fun `removes tenant mnemonic from List of String`() {
         val localizedIdList = listOf("test-A", "test-B", "test-C", "test-D", "test-E")
         val idList = listOf("A", "B", "C", "D", "E")

@@ -140,29 +140,26 @@ class BaseRoninProfileTest {
     @Test
     fun `sets profile on meta transform for null meta`() {
         val profile = object : TestProfile() {
-            fun transformMeta(meta: Meta?, tenant: Tenant): Meta {
-                return meta.transform(tenant)
+            fun transformMeta(meta: Meta?): Meta {
+                return meta.transform()
             }
         }
 
-        val tenant = mockk<Tenant>()
-
-        val transformed = profile.transformMeta(null, tenant)
+        val transformed = profile.transformMeta(null)
         assertEquals(listOf(Canonical("profile")), transformed.profile)
     }
 
     @Test
     fun `sets profile on meta transform for non-null meta`() {
         val profile = object : TestProfile() {
-            fun transformMeta(meta: Meta?, tenant: Tenant): Meta {
-                return meta.transform(tenant)
+            fun transformMeta(meta: Meta?): Meta {
+                return meta.transform()
             }
         }
 
         val meta = Meta(id = "123", profile = listOf(Canonical("old-profile")))
-        val tenant = mockk<Tenant>()
 
-        val transformed = profile.transformMeta(meta, tenant)
+        val transformed = profile.transformMeta(meta)
         assertEquals("123", transformed.id)
         assertEquals(listOf(Canonical("profile")), transformed.profile)
     }

@@ -6,13 +6,11 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
-import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
-import com.projectronin.interop.tenant.config.model.Tenant
 
 /**
  * Base class capable of handling common tasks associated to Ronin profiles.
@@ -60,12 +58,12 @@ abstract class BaseRoninProfile<T : Resource<T>>(
     )
 
     /**
-     * Transforms the Meta relative to the [tenant] and current profile.
+     * Transforms the Meta relative to the current profile.
      */
-    fun Meta?.transform(tenant: Tenant): Meta {
+    fun Meta?.transform(): Meta {
         val roninProfile = listOf(Canonical(this@BaseRoninProfile.profile))
 
-        return this?.copy(profile = roninProfile)?.localize(tenant) ?: Meta(profile = roninProfile)
+        return this?.copy(profile = roninProfile) ?: Meta(profile = roninProfile)
     }
 
     /**

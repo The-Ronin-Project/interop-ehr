@@ -8,7 +8,6 @@ import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
-import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.InvalidValueSetError
@@ -96,40 +95,18 @@ object RoninBodyWeight :
     private val requiredIdError = RequiredFieldError(Observation::id)
 
     override fun transformInternal(
-        original: Observation,
+        normalized: Observation,
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<Observation?, Validation> {
         val validation = validation {
-            checkNotNull(original.id, requiredIdError, parentContext)
+            checkNotNull(normalized.id, requiredIdError, parentContext)
         }
 
-        val transformed = original.copy(
-            id = original.id?.localize(tenant),
-            meta = original.meta.transform(tenant),
-            text = original.text?.localize(tenant),
-            extension = original.extension.map { it.localize(tenant) },
-            modifierExtension = original.modifierExtension.map { it.localize(tenant) },
-            identifier = original.identifier.map { it.localize(tenant) } + original.getFhirIdentifiers() + tenant.toFhirIdentifier(),
-            basedOn = original.basedOn.map { it.localize(tenant) },
-            partOf = original.partOf.map { it.localize(tenant) },
-            category = original.category.map { it.localize(tenant) },
-            code = original.code?.localize(tenant),
-            subject = original.subject?.localize(tenant),
-            focus = original.focus.map { it.localize(tenant) },
-            encounter = original.encounter?.localize(tenant),
-            performer = original.performer.map { it.localize(tenant) },
-            dataAbsentReason = original.dataAbsentReason?.localize(tenant),
-            interpretation = original.interpretation.map { it.localize(tenant) },
-            bodySite = null, // bodySite should not be supplied for Body Weight
-            method = original.method?.localize(tenant),
-            specimen = original.specimen?.localize(tenant),
-            device = original.device?.localize(tenant),
-            referenceRange = original.referenceRange.map { it.localize(tenant) },
-            hasMember = original.hasMember.map { it.localize(tenant) },
-            derivedFrom = original.derivedFrom.map { it.localize(tenant) },
-            component = original.component.map { it.localize(tenant) },
-            note = original.note.map { it.localize(tenant) }
+        val transformed = normalized.copy(
+            meta = normalized.meta.transform(),
+            identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier(),
+            bodySite = null // bodySite should not be supplied for Body Weight
         )
         return Pair(transformed, validation)
     }

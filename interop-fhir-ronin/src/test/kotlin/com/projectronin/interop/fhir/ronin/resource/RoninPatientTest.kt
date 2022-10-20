@@ -37,7 +37,7 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
-import com.projectronin.interop.fhir.ronin.util.asCode
+import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.validation
@@ -658,10 +658,23 @@ class RoninPatientTest {
                 )
             )
         )
+        val normalizedIdentifierWithExtension = Identifier(
+            use = IdentifierUse.USUAL.asCode(),
+            system = Uri("http://hl7.org/fhir/sid/us-ssn"),
+            valueData = PrimitiveData(
+                extension = listOf(
+                    Extension(
+                        url = Uri("http://hl7.org/fhir/StructureDefinition/rendered-value"),
+                        value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234")
+                    )
+                )
+            )
+        )
 
         val identifiers = identifierList + identifierWithExtension
+        val normalizedIdentifiers = identifierList + normalizedIdentifierWithExtension
 
-        every { identifierService.getMRNIdentifier(tenant, identifiers) } returns identifiers[0]
+        every { identifierService.getMRNIdentifier(tenant, normalizedIdentifiers) } returns identifiers[0]
 
         val patient = Patient(
             id = Id("12345"),
@@ -694,18 +707,7 @@ class RoninPatientTest {
         assertEquals(
             listOf(
                 identifierList.first(),
-                Identifier(
-                    use = IdentifierUse.USUAL.asCode(),
-                    system = Uri("http://hl7.org/fhir/sid/us-ssn"),
-                    valueData = PrimitiveData(
-                        extension = listOf(
-                            Extension(
-                                url = Uri("http://hl7.org/fhir/StructureDefinition/rendered-value"),
-                                value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234")
-                            )
-                        )
-                    )
-                ),
+                normalizedIdentifierWithExtension,
                 Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
                 Identifier(
                     type = RoninCodeableConcepts.FHIR_ID,

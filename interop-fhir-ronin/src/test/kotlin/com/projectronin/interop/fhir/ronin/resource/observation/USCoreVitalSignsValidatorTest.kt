@@ -12,7 +12,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
-import com.projectronin.interop.fhir.ronin.util.asCode
+import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.validation

@@ -6,7 +6,6 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerValidato
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
-import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -45,25 +44,15 @@ object RoninPractitioner :
     }
 
     override fun transformInternal(
-        original: Practitioner,
+        normalized: Practitioner,
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<Practitioner?, Validation> {
         // TODO: RoninNormalizedTelecom extension
 
-        val transformed = original.copy(
-            id = original.id?.localize(tenant),
-            meta = original.meta.transform(tenant),
-            text = original.text?.localize(tenant),
-            extension = original.extension.map { it.localize(tenant) },
-            modifierExtension = original.modifierExtension.map { it.localize(tenant) },
-            identifier = original.identifier.map { it.localize(tenant) } + tenant.toFhirIdentifier() + original.getFhirIdentifiers(),
-            name = original.name.map { it.localize(tenant) },
-            telecom = original.telecom.map { it.localize(tenant) },
-            address = original.address.map { it.localize(tenant) },
-            photo = original.photo.map { it.localize(tenant) },
-            qualification = original.qualification.map { it.localize(tenant) },
-            communication = original.communication.map { it.localize(tenant) }
+        val transformed = normalized.copy(
+            meta = normalized.meta.transform(),
+            identifier = normalized.identifier + tenant.toFhirIdentifier() + normalized.getFhirIdentifiers()
         )
         return Pair(transformed, Validation())
     }

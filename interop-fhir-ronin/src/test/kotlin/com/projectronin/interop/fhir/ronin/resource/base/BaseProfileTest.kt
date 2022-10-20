@@ -15,17 +15,19 @@ import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
 
 class BaseProfileTest {
-    private val tenant = mockk<Tenant>()
+    private val tenant = mockk<Tenant> {
+        every { mnemonic } returns "test"
+    }
 
     @Test
     fun `handles a successful transformation with no validation errors for a resource with no ID`() {
         val profile = object : BaseProfile<Location>(null) {
             override fun transformInternal(
-                original: Location,
+                normalized: Location,
                 parentContext: LocationContext,
                 tenant: Tenant
             ): Pair<Location?, Validation> {
-                return Pair(original, Validation())
+                return Pair(normalized, Validation())
             }
 
             override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
@@ -33,9 +35,7 @@ class BaseProfileTest {
             }
         }
 
-        val original = mockk<Location> {
-            every { id } returns null
-        }
+        val original = Location()
         val transformed = profile.transform(original, tenant)
         assertNull(transformed)
     }
@@ -44,7 +44,7 @@ class BaseProfileTest {
     fun `handles a null transformation with no validation errors`() {
         val profile = object : BaseProfile<Location>(null) {
             override fun transformInternal(
-                original: Location,
+                normalized: Location,
                 parentContext: LocationContext,
                 tenant: Tenant
             ): Pair<Location?, Validation> {
@@ -56,9 +56,7 @@ class BaseProfileTest {
             }
         }
 
-        val original = mockk<Location> {
-            every { id } returns Id("1234")
-        }
+        val original = Location(id = Id("1234"))
         val transformed = profile.transform(original, tenant)
         assertNull(transformed)
     }
@@ -67,7 +65,7 @@ class BaseProfileTest {
     fun `handles a null transformation with validation errors`() {
         val profile = object : BaseProfile<Location>(null) {
             override fun transformInternal(
-                original: Location,
+                normalized: Location,
                 parentContext: LocationContext,
                 tenant: Tenant
             ): Pair<Location?, Validation> {
@@ -83,9 +81,7 @@ class BaseProfileTest {
             }
         }
 
-        val original = mockk<Location> {
-            every { id } returns Id("1234")
-        }
+        val original = Location(id = Id("1234"))
         val transformed = profile.transform(original, tenant)
         assertNull(transformed)
     }
@@ -94,11 +90,11 @@ class BaseProfileTest {
     fun `handles a successful transformation with no validation errors`() {
         val profile = object : BaseProfile<Location>(null) {
             override fun transformInternal(
-                original: Location,
+                normalized: Location,
                 parentContext: LocationContext,
                 tenant: Tenant
             ): Pair<Location?, Validation> {
-                return Pair(original, Validation())
+                return Pair(normalized, Validation())
             }
 
             override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
@@ -106,18 +102,16 @@ class BaseProfileTest {
             }
         }
 
-        val original = mockk<Location> {
-            every { id } returns Id("1234")
-        }
+        val original = Location(id = Id("1234"))
         val transformed = profile.transform(original, tenant)
-        assertEquals(original, transformed)
+        assertEquals(Id("test-1234"), transformed!!.id)
     }
 
     @Test
     fun `handles a successful transformation with validation errors`() {
         val profile = object : BaseProfile<Location>(null) {
             override fun transformInternal(
-                original: Location,
+                normalized: Location,
                 parentContext: LocationContext,
                 tenant: Tenant
             ): Pair<Location?, Validation> {
@@ -125,7 +119,7 @@ class BaseProfileTest {
                     checkNotNull(null, RequiredFieldError(Location::id), parentContext)
                 }
 
-                return Pair(original, validation)
+                return Pair(normalized, validation)
             }
 
             override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
@@ -133,9 +127,7 @@ class BaseProfileTest {
             }
         }
 
-        val original = mockk<Location> {
-            every { id } returns Id("1234")
-        }
+        val original = Location(id = Id("1234"))
         val transformed = profile.transform(original, tenant)
         assertNull(transformed)
     }
@@ -144,11 +136,11 @@ class BaseProfileTest {
     fun `handles a successful transformation that results in a failed validation`() {
         val profile = object : BaseProfile<Location>(null) {
             override fun transformInternal(
-                original: Location,
+                normalized: Location,
                 parentContext: LocationContext,
                 tenant: Tenant
             ): Pair<Location?, Validation> {
-                return Pair(original, Validation())
+                return Pair(normalized, Validation())
             }
 
             override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
@@ -156,9 +148,7 @@ class BaseProfileTest {
             }
         }
 
-        val original = mockk<Location> {
-            every { id } returns Id("1234")
-        }
+        val original = Location(id = Id("1234"))
         val transformed = profile.transform(original, tenant)
         assertNull(transformed)
     }
