@@ -1,7 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.common.vendor.VendorType
-import com.projectronin.interop.datalake.oci.auth.OCICredentials
 import com.projectronin.interop.datalake.oci.client.OCIClient
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -51,9 +50,6 @@ class EpicVendorFactoryTest {
             @Bean
             @Qualifier("ConceptMap")
             fun ociClient(): OCIClient = mockk()
-
-            @Bean
-            fun ociCred(): OCICredentials = mockk()
         }
 
         val applicationContext = AnnotationConfigApplicationContext(TestConfig::class.java)
