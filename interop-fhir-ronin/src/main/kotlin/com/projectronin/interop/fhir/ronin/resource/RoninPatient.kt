@@ -74,7 +74,8 @@ class RoninPatient private constructor(private val identifierService: Identifier
 
             checkNotNull(element.birthDate, requiredBirthDateError, parentContext)
 
-            // TODO: RoninNormalizedTelecom extension
+            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG re: requireCode() for telecom.system
+            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG re: requireCode() for telecom.use
         }
     }
 
@@ -123,7 +124,8 @@ class RoninPatient private constructor(private val identifierService: Identifier
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<Patient?, Validation> {
-        // TODO: RoninNormalizedTelecom extension
+        // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG re: extension, concept maps for telecom.status
+        // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG re: extension, concept maps for telecom.use
 
         val maritalStatus = normalized.maritalStatus ?: CodeableConcept(
             coding = listOf(

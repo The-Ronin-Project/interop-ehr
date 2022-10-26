@@ -23,6 +23,7 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4MedicationStatementV
 import com.projectronin.interop.fhir.r4.valueset.MedicationStatementStatus
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -178,7 +179,7 @@ class RoninMedicationStatementTest {
         roninMedicationStatement!!
         assertEquals(Id("test-12345"), roninMedicationStatement.id)
         assertEquals(
-            "http://projectronin.io/fhir/ronin.common-fhir-model.uscore-r4/StructureDefinition/ronin-medicationStatement",
+            RoninProfile.MEDICATION_STATEMENT.value,
             roninMedicationStatement.meta!!.profile[0].value
         )
         assertEquals(medicationStatement.implicitRules, roninMedicationStatement.implicitRules)

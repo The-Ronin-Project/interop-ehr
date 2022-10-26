@@ -23,7 +23,8 @@ object RoninPractitioner :
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
 
-            // TODO: RoninNormalizedTelecom extension
+            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG and consider requireCodeableConcept()
+            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG and consider requireCodeableConcept()
         }
     }
 
@@ -40,6 +41,9 @@ object RoninPractitioner :
             }
 
             // A practitioner identifier is also required, but Ronin has already checked for identifiers we provide.
+
+            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG re: requireCode() for telecom.system
+            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG re: requireCode() for telecom.use
         }
     }
 
@@ -48,7 +52,8 @@ object RoninPractitioner :
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<Practitioner?, Validation> {
-        // TODO: RoninNormalizedTelecom extension
+        // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG re: extension, concept maps for telecom.status
+        // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG re: extension, concept maps for telecom.use
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),

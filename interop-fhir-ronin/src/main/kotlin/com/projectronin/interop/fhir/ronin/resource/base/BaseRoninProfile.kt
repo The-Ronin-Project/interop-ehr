@@ -1,14 +1,23 @@
 package com.projectronin.interop.fhir.ronin.resource.base
 
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
+import com.projectronin.interop.fhir.r4.datatype.Coding
+import com.projectronin.interop.fhir.r4.datatype.DynamicValue
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
+import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.error.RoninNoValidCodingError
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
+import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 
@@ -121,5 +130,92 @@ abstract class BaseRoninProfile<T : Resource<T>>(
                 checkNotNull(fhirIdentifier.value, requiredFhirIdentifierValueError, parentContext)
             }
         }
+    }
+
+    /**
+     * Validates a [CodeableConcept] object and its child [Coding] against the Ronin profile. Specify the [fieldName]
+     * for the [CodeableConcept] (examples: "code" for Medication.code or "status" for Appointment.status)
+     */
+    protected fun requireCodeableConcept(
+        fieldName: String,
+        code: CodeableConcept?,
+        parentContext: LocationContext,
+        validation: Validation
+    ) {
+        val requiredCodeTextError = RequiredFieldError(LocationContext("", "$fieldName.text"))
+
+        validation.apply {
+            code?.let {
+                checkNotNull(
+                    code.text,
+                    requiredCodeTextError,
+                    parentContext
+                )
+                requireCoding(fieldName, code.coding, parentContext, validation)
+            }
+        }
+    }
+
+    /**
+     * Validates a [Coding] object against the Ronin profile. The [Coding] has a parent [CodeableConcept] field whose
+     * name is in [parentFieldName] (examples: "code" for Medication.code or "status" for Appointment.status)
+     */
+    private fun requireCoding(
+        parentFieldName: String,
+        coding: List<Coding>?,
+        parentContext: LocationContext,
+        validation: Validation
+    ) {
+        // TODO: also involve ConceptMaps, for ValueSets and other validation
+
+        validation.apply {
+            checkNotNull(
+                coding,
+                RequiredFieldError(LocationContext("", "$parentFieldName.coding")),
+                parentContext
+            )
+            ifNotNull(coding) {
+                checkTrue(
+                    coding.all {
+                        it.system?.value?.isNotEmpty() ?: false && it.code?.value?.isNotEmpty() ?: false
+                        // TODO: Ronin IG also requires non-empty display and version fields under Coding, discussing
+                    },
+                    RoninNoValidCodingError(LocationContext("", parentFieldName)),
+                    parentContext
+                )
+            }
+        }
+    }
+
+    /**
+     * Filters the [Coding] list in the input [CodeableConcept] so that the returned [CodeableConcept]
+     * contains only those [Coding] entry(ies) that conform to the Ronin profile.
+     */
+    protected fun filterCodeableConcept(codeableConcept: CodeableConcept? = null): CodeableConcept? {
+        // TODO: also involve ConceptMaps, for ValueSets and other validation
+
+        val coding = codeableConcept?.coding?.filter {
+            it.system?.value?.isNotEmpty() ?: false && it.code?.value?.isNotEmpty() ?: false
+            // TODO: Ronin IG also requires non-empty display and version fields under Coding, discussing
+        } ?: emptyList()
+        return codeableConcept?.copy(coding = coding)
+    }
+
+    /**
+     * Creates an [Extension] list using the supplied [url] and [CodeableConcept] object. Supports the calling transform
+     * by checking input for nulls and returning a list or emptyList. This supports simpler list arithmetic in the caller.
+     */
+    fun getExtensionOrEmptyList(url: RoninExtension, codeableConcept: CodeableConcept? = null): List<Extension> {
+        return codeableConcept?.let {
+            listOf(
+                Extension(
+                    url = Uri(url.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODEABLE_CONCEPT,
+                        value = codeableConcept
+                    )
+                )
+            )
+        } ?: emptyList()
     }
 }

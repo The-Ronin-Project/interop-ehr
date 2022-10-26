@@ -19,7 +19,7 @@ object RoninAppointment :
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
 
-            // TODO: RoninNormalizedAppointmentStatus extension
+            // TODO: RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS, check Ronin IG re: requireCode() for status
         }
     }
 
@@ -28,7 +28,7 @@ object RoninAppointment :
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<Appointment?, Validation> {
-        // TODO: RoninNormalizedAppointmentStatus extension
+        // TODO: RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS, check Ronin IG re: extension, concept maps for status
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),

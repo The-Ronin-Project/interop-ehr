@@ -166,11 +166,11 @@ class BaseRoninProfileTest {
 
     private open class TestProfile : BaseRoninProfile<Location>(R4LocationValidator, "profile") {
         override fun transformInternal(
-            original: Location,
+            normalized: Location,
             parentContext: LocationContext,
             tenant: Tenant
         ): Pair<Location?, Validation> {
-            return Pair(original, Validation())
+            return Pair(normalized, Validation())
         }
 
         override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {

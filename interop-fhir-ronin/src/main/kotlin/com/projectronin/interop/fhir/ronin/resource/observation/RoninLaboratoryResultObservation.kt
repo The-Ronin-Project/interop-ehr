@@ -29,6 +29,8 @@ object RoninLaboratoryResultObservation :
     override fun validateRonin(element: Observation, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
+
+            // TODO: RoninExtension.TENANT_SOURCE_OBSERVATION_CODE, check Ronin IG and consider requireCodeableConcept()
         }
     }
 
@@ -71,6 +73,8 @@ object RoninLaboratoryResultObservation :
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<Observation?, Validation> {
+        // TODO: RoninExtension.TENANT_SOURCE_OBSERVATION_CODE, filterCodeableConcept(), extensionCodeableConcept()
+
         val validation = validation {
             checkNotNull(normalized.id, requiredIdError, parentContext)
         }
