@@ -28,7 +28,9 @@ private val FHIR_CODING_OID_TO_URI = mapOf(
     "2.16.840.1.113883.6.24" to "urn:iso:std:iso:11073:10101",
     "1.2.840.10008.2.16.4" to "http://dicom.nema.org/resources/ontology/DCM",
     "2.16.840.1.113883.5.1105" to "http://hl7.org/fhir/NamingSystem/ca-hc-din",
-    "2.16.840.1.113883.6.101" to "http://nucc.org/provider-taxonomy"
+    "2.16.840.1.113883.6.101" to "http://nucc.org/provider-taxonomy",
+    "2.16.840.1.113883.6.14" to "https://www.cms.gov/Medicare/Coding/HCPCSReleaseCodeSets",
+    "2.16.840.1.113883.6.43.1" to "http://terminology.hl7.org/CodeSystem/icd-o-3"
 )
 
 private val FHIR_IDENTIFIER_OID_TO_URI = mapOf(
