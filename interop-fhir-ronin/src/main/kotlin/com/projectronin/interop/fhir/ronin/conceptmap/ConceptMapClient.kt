@@ -56,7 +56,7 @@ class ConceptMapClient(@Qualifier("ConceptMap") private val ociClient: OCIClient
         return try {
             JacksonUtil.readJsonList(
                 // might want to swap hardcoded name for env config at some point
-                ociClient.getObjectBody("DataNormalizationRegistry/v1/registry.json")!!,
+                ociClient.getObjectFromINFX("DataNormalizationRegistry/v1/registry.json")!!,
                 ConceptMapRegistry::class
             )
         } catch (e: Exception) {
@@ -89,7 +89,7 @@ class ConceptMapClient(@Qualifier("ConceptMap") private val ociClient: OCIClient
 
     internal fun getConceptMap(filename: String): Map<SourceKey, TargetValue> {
         val conceptMap = try {
-            JacksonUtil.readJsonObject(ociClient.getObjectBody(filename)!!, ConceptMap::class)
+            JacksonUtil.readJsonObject(ociClient.getObjectFromINFX(filename)!!, ConceptMap::class)
         } catch (e: Exception) {
             logger.info { e.message }
             return emptyMap()

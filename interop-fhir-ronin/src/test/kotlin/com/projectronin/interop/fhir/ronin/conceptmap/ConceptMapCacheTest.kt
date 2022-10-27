@@ -44,7 +44,6 @@ internal class ConceptMapCacheTest {
 
     @Test
     fun `reload works correctly`() {
-
         val mockkMap1 = mockk<ConceptMap> {
             every { group } returns listOf(
                 mockk {
@@ -91,11 +90,11 @@ internal class ConceptMapCacheTest {
             )
         }
         mockkObject(JacksonUtil)
-        every { ociClient.getObjectBody("DataNormalizationRegistry/v1/registry.json") } returns "registryJson"
+        every { ociClient.getObjectFromINFX("DataNormalizationRegistry/v1/registry.json") } returns "registryJson"
         every { JacksonUtil.readJsonList("registryJson", ConceptMapRegistry::class) } returns testRegistry
-        every { ociClient.getObjectBody("file1.json") } returns "mapJson1"
+        every { ociClient.getObjectFromINFX("file1.json") } returns "mapJson1"
         every { JacksonUtil.readJsonObject("mapJson1", ConceptMap::class) } returns mockkMap1
-        every { ociClient.getObjectBody("file2.json") } returns "mapJson2"
+        every { ociClient.getObjectFromINFX("file2.json") } returns "mapJson2"
         every { JacksonUtil.readJsonObject("mapJson2", ConceptMap::class) } returns mockkMap2
 
         mockkObject(ConceptMapCache)
@@ -116,7 +115,7 @@ internal class ConceptMapCacheTest {
             tenant_id = "tenant"
         )
         every { JacksonUtil.readJsonList("registryJson", ConceptMapRegistry::class) } returns testRegistry2
-        every { ociClient.getObjectBody("newFile") } returns "mapJson3"
+        every { ociClient.getObjectFromINFX("newFile") } returns "mapJson3"
         every { JacksonUtil.readJsonObject("mapJson3", ConceptMap::class) } returns mockkMap1
         cmClient.reload(tenant)
         actual = ConceptMapCache.getCurrentRegistry()
@@ -147,9 +146,9 @@ internal class ConceptMapCacheTest {
             )
         )
         every { JacksonUtil.readJsonList("registryJson", ConceptMapRegistry::class) } returns testRegistry3
-        every { ociClient.getObjectBody("file2.json") } returns "mapJson2"
+        every { ociClient.getObjectFromINFX("file2.json") } returns "mapJson2"
         every { JacksonUtil.readJsonObject("mapJson2", ConceptMap::class) } returns mockkMap2
-        every { ociClient.getObjectBody("universal.json") } returns "universalJson"
+        every { ociClient.getObjectFromINFX("universal.json") } returns "universalJson"
         every { JacksonUtil.readJsonObject("universalJson", ConceptMap::class) } returns mockkMap2
         cmClient.reload(tenant)
         actual = ConceptMapCache.getCurrentRegistry()
