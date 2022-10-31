@@ -4,14 +4,12 @@ import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
-import com.projectronin.interop.ehr.util.toListOfType
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
-import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
@@ -19,7 +17,6 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
-import com.projectronin.interop.fhir.r4.resource.Bundle as R4Bundle
 
 /**
  * Service providing access to patients within Epic.
@@ -30,8 +27,9 @@ class EpicPatientService(
     @Value("\${epic.fhir.batchSize:5}") private val batchSize: Int,
     private val aidboxPatientService: AidboxPatientService
 ) : PatientService,
-    EpicPagingService(epicClient) {
-    private val patientSearchUrlPart = "/api/FHIR/R4/Patient"
+    EpicFHIRService<Patient>(epicClient) {
+    override val fhirURLSearchPart = "/api/FHIR/R4/Patient"
+    override val fhirResourceType = Patient::class.java
     private val logger = KotlinLogging.logger { }
 
     override fun findPatient(
@@ -47,13 +45,10 @@ class EpicPatientService(
             "family" to familyName,
             "birthdate" to DateTimeFormatter.ofPattern("yyyy-MM-dd").format(birthDate)
         )
-        val bundle = runBlocking {
-            val httpResponse = epicClient.get(tenant, patientSearchUrlPart, parameters)
-            httpResponse.body<R4Bundle>()
-        }
+        val patientList = getResourceListFromSearch(tenant, parameters)
 
         logger.info { "Patient search completed for ${tenant.mnemonic}" }
-        return bundle.toListOfType()
+        return patientList
     }
 
     override fun <K> findPatientsById(tenant: Tenant, patientIdsByKey: Map<K, Identifier>): Map<K, Patient> {
@@ -67,19 +62,16 @@ class EpicPatientService(
         }.values.toSet()
 
         // Chunk the identifiers and run the search
-        val patientsFound = patientIdentifiers.chunked(batchSize) {
+        val patientList = patientIdentifiers.chunked(batchSize) {
             val identifierParam = it.joinToString(separator = ",") { patientIdentifier ->
                 "${patientIdentifier.system?.value}|${patientIdentifier.value}"
             }
-            getBundleWithPaging(
+            getResourceListFromSearch(
                 tenant,
-                patientSearchUrlPart,
                 mapOf("identifier" to identifierParam)
             )
-        }
+        }.flatten()
 
-        // Translate to Patients
-        val patientList = mergeResponses(patientsFound).toListOfType<Patient>()
         // Index patients found based on identifiers
         val foundPatientsByIdentifier = patientList.flatMap { patient ->
             patient.identifier.map { identifier ->
@@ -106,7 +98,7 @@ class EpicPatientService(
     }
 
     override fun getPatient(tenant: Tenant, patientFHIRID: String): Patient {
-        return runBlocking { epicClient.get(tenant, "$patientSearchUrlPart/$patientFHIRID").body() }
+        return runBlocking { getByID(tenant, patientFHIRID) }
     }
 
     override fun getPatientFHIRId(tenant: Tenant, patientIDValue: String): String {

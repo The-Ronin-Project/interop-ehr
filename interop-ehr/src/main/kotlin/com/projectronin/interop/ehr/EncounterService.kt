@@ -7,7 +7,7 @@ import java.time.LocalDate
 /**
  * Defines the functionality for an EHR's Encounter service.
  */
-interface EncounterService {
+interface EncounterService : FHIRService<Encounter> {
     /**
      * Finds a list of patient [Encounter]s for a date range.
      */

@@ -7,7 +7,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 /**
  * Defines the functionality of an EHR's practitioner service.
  */
-interface PractitionerService {
+interface PractitionerService : FHIRService<Practitioner> {
     /**
      * Retrieves the Practitioner associated to the requested [practitionerFHIRId] at [tenant].
      */

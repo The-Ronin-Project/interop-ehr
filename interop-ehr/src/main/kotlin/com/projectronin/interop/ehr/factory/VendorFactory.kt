@@ -10,6 +10,7 @@ import com.projectronin.interop.ehr.MedicationStatementService
 import com.projectronin.interop.ehr.MessageService
 import com.projectronin.interop.ehr.ObservationService
 import com.projectronin.interop.ehr.PatientService
+import com.projectronin.interop.ehr.PractitionerRoleService
 import com.projectronin.interop.ehr.PractitionerService
 
 /**
@@ -26,6 +27,7 @@ interface VendorFactory {
     val messageService: MessageService
     val patientService: PatientService
     val practitionerService: PractitionerService
+    val practitionerRoleService: PractitionerRoleService
     val conditionService: ConditionService
     val identifierService: IdentifierService
     val observationService: ObservationService

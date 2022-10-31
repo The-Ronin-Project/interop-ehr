@@ -3,7 +3,6 @@ package com.projectronin.interop.ehr.epic
 import com.projectronin.interop.ehr.ObservationService
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRSearchToken
-import com.projectronin.interop.ehr.util.toListOfType
 import com.projectronin.interop.ehr.util.toOrParams
 import com.projectronin.interop.ehr.util.toSearchTokens
 import com.projectronin.interop.fhir.r4.resource.Observation
@@ -19,8 +18,9 @@ class EpicObservationService(
     epicClient: EpicClient,
     @Value("\${epic.fhir.observation.batchSize:1}") private val batchSize: Int, // This is currently ignored.  See comment below.
 ) : ObservationService,
-    EpicPagingService(epicClient) {
-    private val observationSearchUrlPart = "/api/FHIR/R4/Observation"
+    EpicFHIRService<Observation>(epicClient) {
+    override val fhirURLSearchPart = "/api/FHIR/R4/Observation"
+    override val fhirResourceType = Observation::class.java
 
     /**
      * Service providing access to observations within Epic.
@@ -80,8 +80,8 @@ class EpicObservationService(
                 "patient" to it.joinToString(separator = ","),
                 "category" to observationCategoryCodes.toOrParams(),
             )
-            getBundleWithPaging(tenant, observationSearchUrlPart, parameters)
+            getResourceListFromSearch(tenant, parameters)
         }
-        return mergeResponses(observationResponses).toListOfType()
+        return observationResponses.flatten()
     }
 }

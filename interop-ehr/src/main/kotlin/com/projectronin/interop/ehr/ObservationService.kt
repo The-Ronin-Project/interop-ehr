@@ -7,7 +7,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 /**
  * Defines the functionality of an EHR's observation service.
  */
-interface ObservationService {
+interface ObservationService : FHIRService<Observation> {
     /**
      * Finds the [List] of [Observation]s associated with the requested [tenant], list of [patientFhirId]s,
      * and list of [conditionCategoryCodes].

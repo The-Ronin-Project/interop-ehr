@@ -55,7 +55,7 @@ class EpicMedicationStatementTest {
             epicClient.get(
                 tenant,
                 searchUrlPart,
-                mapOf("patient" to patientFhirId)
+                mapOf("patient" to patientFhirId, "_count" to 50)
             )
         } returns httpResponse
 
@@ -78,7 +78,7 @@ class EpicMedicationStatementTest {
             epicClient.get(
                 tenant,
                 searchUrlPart,
-                mapOf("patient" to patientFhirId)
+                mapOf("patient" to patientFhirId, "_count" to 50)
             )
         } returns httpResponse
 

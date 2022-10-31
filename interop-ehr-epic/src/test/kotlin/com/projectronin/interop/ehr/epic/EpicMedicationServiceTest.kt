@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class EpicMedicationServiceTest {
-    private val locationSearchUrlPart = "/api/FHIR/R4/Medication"
     private val epicClient = mockk<EpicClient>()
     private var medicationService = spyk(EpicMedicationService(epicClient, 5))
 
@@ -40,7 +39,7 @@ class EpicMedicationServiceTest {
             )
         }
 
-        every { medicationService.getBundleWithPaging(tenant, locationSearchUrlPart, parameters) } returns bundle
+        every { medicationService.getBundleWithPaging(tenant, parameters) } returns bundle
 
         val results = medicationService.getMedicationsByFhirId(tenant, listOf(med1Id))
 
@@ -59,7 +58,7 @@ class EpicMedicationServiceTest {
             )
         }
 
-        every { medicationService.getBundleWithPaging(tenant, locationSearchUrlPart, parameters) } returns bundle
+        every { medicationService.getBundleWithPaging(tenant, parameters) } returns bundle
 
         val results = medicationService.getMedicationsByFhirId(tenant, listOf(med1Id, med2Id))
 
@@ -76,7 +75,7 @@ class EpicMedicationServiceTest {
             every { entry } returns listOf()
         }
 
-        every { medicationService.getBundleWithPaging(tenant, locationSearchUrlPart, parameters) } returns bundle
+        every { medicationService.getBundleWithPaging(tenant, parameters) } returns bundle
 
         val results = medicationService.getMedicationsByFhirId(tenant, listOf())
 

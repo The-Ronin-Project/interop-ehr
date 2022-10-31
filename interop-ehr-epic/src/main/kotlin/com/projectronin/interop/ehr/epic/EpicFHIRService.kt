@@ -1,31 +1,50 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.ehr.FHIRService
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.mergeBundles
 import com.projectronin.interop.fhir.r4.resource.Bundle
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.stu3.resource.STU3Bundle
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
+import io.ktor.util.reflect.TypeInfo
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 
 /**
  * Abstract class to simplify Epic services that need to retrieve bundles using paging.
  */
-abstract class EpicPagingService(protected val epicClient: EpicClient) {
+abstract class EpicFHIRService<T : Resource<T>>(val epicClient: EpicClient) : FHIRService<T> {
     private val logger = KotlinLogging.logger { }
-
+    abstract val fhirURLSearchPart: String
     private val standardParameters: Map<String, Any> = mapOf("_count" to 50)
+
+    override fun getByID(tenant: Tenant, resourceFHIRId: String): T {
+        return runBlocking {
+            epicClient.get(tenant, "$fhirURLSearchPart/$resourceFHIRId")
+                .body(TypeInfo(fhirResourceType.kotlin, fhirResourceType))
+        }
+    }
+
+    internal fun getResourceListFromSearch(tenant: Tenant, parameters: Map<String, Any?>): List<T> {
+        return getBundleWithPaging(tenant, parameters).entry.mapNotNull { it.resource }
+            .filterIsInstance(fhirResourceType)
+    }
+
+    internal fun getResourceListFromSearchSTU3(tenant: Tenant, parameters: Map<String, Any?>): List<T> {
+        return getBundleWithPagingSTU3(tenant, parameters).entry.mapNotNull { it.resource }
+            .filterIsInstance(fhirResourceType)
+    }
 
     /**
      * When Epic returns a very large response, it limits the amount of resources returned in each request and provides a
-     * follow-up link to retrieve the rest of them.  This function performs a GET to the url provided by the [tenant] +
-     * [urlPart] and includes the query [parameters].  If there are more resources, it performs multiple GETs
+     * follow-up link to retrieve the rest of them.  This function performs a GET to the url provided by the [tenant]
+     * and includes the query [parameters].  If there are more resources, it performs multiple GETs
      * until they've all been retrieved, and then combines them into a single [Bundle].
      */
-    fun getBundleWithPaging(
+    internal fun getBundleWithPaging(
         tenant: Tenant,
-        urlPart: String,
         parameters: Map<String, Any?>,
     ): Bundle {
         logger.info { "Get started for ${tenant.mnemonic}" }
@@ -38,7 +57,7 @@ abstract class EpicPagingService(protected val epicClient: EpicClient) {
             val bundle = runBlocking {
                 val httpResponse =
                     if (nextURL == null) {
-                        epicClient.get(tenant, urlPart, standardizedParameters)
+                        epicClient.get(tenant, fhirURLSearchPart, standardizedParameters)
                     } else {
                         epicClient.get(tenant, nextURL!!)
                     }
@@ -57,9 +76,8 @@ abstract class EpicPagingService(protected val epicClient: EpicClient) {
      * transform function for STU3 to R4 provided by interop-fhir. There may be a way to make these functions less
      * redundant, but this is functional and simple.
      */
-    fun getBundleWithPagingSTU3(
+    internal fun getBundleWithPagingSTU3(
         tenant: Tenant,
-        urlPart: String,
         parameters: Map<String, Any?>,
     ): Bundle {
         logger.info { "Get started for ${tenant.mnemonic}" }
@@ -72,7 +90,7 @@ abstract class EpicPagingService(protected val epicClient: EpicClient) {
             val bundle = runBlocking {
                 val httpResponse =
                     if (nextURL == null) {
-                        epicClient.get(tenant, urlPart, standardizedParameters)
+                        epicClient.get(tenant, fhirURLSearchPart, standardizedParameters)
                     } else {
                         epicClient.get(tenant, nextURL!!)
                     }

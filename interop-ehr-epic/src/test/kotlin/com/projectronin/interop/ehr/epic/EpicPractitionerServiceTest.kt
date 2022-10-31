@@ -12,6 +12,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
+import io.ktor.util.reflect.TypeInfo
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.assertThrows
 class EpicPractitionerServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var practitionerService: EpicPractitionerService
+    private lateinit var practitionerRoleService: EpicPractitionerRoleService
     private lateinit var httpResponse: HttpResponse
     private lateinit var pagingHttpResponse: HttpResponse
     private val validPractitionerSearchBundle = readResource<Bundle>("/ExampleFindPractitionersResponse.json")
@@ -34,7 +36,8 @@ class EpicPractitionerServiceTest {
         epicClient = mockk()
         httpResponse = mockk()
         pagingHttpResponse = mockk()
-        practitionerService = EpicPractitionerService(epicClient, 1)
+        practitionerRoleService = EpicPractitionerRoleService(epicClient, 1)
+        practitionerService = EpicPractitionerService(epicClient, practitionerRoleService, 1)
     }
 
     @Test
@@ -124,7 +127,7 @@ class EpicPractitionerServiceTest {
 
     @Test
     fun `ensure multiple locations are supported with batching`() {
-        val batchingPractitionerService = EpicPractitionerService(epicClient, 2)
+        val batchingPractitionerService = EpicPractitionerService(epicClient, practitionerRoleService, 2)
 
         val tenant =
             createTestTenant(
@@ -253,7 +256,7 @@ class EpicPractitionerServiceTest {
         val tenant = mockk<Tenant>()
         val mockPractitioner = mockk<Practitioner>()
 
-        coEvery { httpResponse.body<Practitioner>() } returns mockPractitioner
+        coEvery { httpResponse.body<Practitioner>(TypeInfo(Practitioner::class, Practitioner::class.java)) } returns mockPractitioner
         coEvery { epicClient.get(tenant, "/api/FHIR/R4/Practitioner/PracFHIRID") } returns httpResponse
 
         val actual = practitionerService.getPractitioner(tenant, "PracFHIRID")
@@ -265,7 +268,7 @@ class EpicPractitionerServiceTest {
         val tenant = mockk<Tenant>()
 
         val thrownException = ClientFailureException(HttpStatusCode.NotFound, "Not Found")
-        coEvery { httpResponse.body<Practitioner>() } throws thrownException
+        coEvery { httpResponse.body<Practitioner>(TypeInfo(Practitioner::class, Practitioner::class.java)) } throws thrownException
         coEvery { epicClient.get(tenant, "/api/FHIR/R4/Practitioner/PracFHIRID") } returns httpResponse
 
         val exception =
@@ -284,7 +287,7 @@ class EpicPractitionerServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Practitioner",
-                mapOf("identifier" to "External|ProviderId")
+                mapOf("identifier" to "External|ProviderId", "_count" to 50)
             )
         } returns httpResponse
 
@@ -301,7 +304,7 @@ class EpicPractitionerServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Practitioner",
-                mapOf("identifier" to "External|ProviderId")
+                mapOf("identifier" to "External|ProviderId", "_count" to 50)
             )
         } returns httpResponse
 
@@ -324,7 +327,7 @@ class EpicPractitionerServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Practitioner",
-                mapOf("identifier" to "External|ProviderId")
+                mapOf("identifier" to "External|ProviderId", "_count" to 50)
             )
         } returns httpResponse
 
@@ -341,7 +344,7 @@ class EpicPractitionerServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Practitioner",
-                mapOf("identifier" to "External|ProviderId")
+                mapOf("identifier" to "External|ProviderId", "_count" to 50)
             )
         } returns httpResponse
 
@@ -360,6 +363,7 @@ class EpicPractitionerServiceTest {
 
         return mockk {
             every { entry } returns entries
+            every { link } returns emptyList()
         }
     }
 }

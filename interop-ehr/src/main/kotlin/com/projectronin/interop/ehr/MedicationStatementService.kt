@@ -6,7 +6,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 /**
  * Defines the functionality of an EHR's MedicationStatement service.
  */
-interface MedicationStatementService {
+interface MedicationStatementService : FHIRService<MedicationStatement> {
     /**
      * Finds the [MedicationStatement] associated with the requested [tenant] and [patientFHIRId].
      */

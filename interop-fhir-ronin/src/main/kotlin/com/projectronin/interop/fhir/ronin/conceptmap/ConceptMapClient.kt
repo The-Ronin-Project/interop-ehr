@@ -11,11 +11,10 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ConceptMap
 import com.projectronin.interop.tenant.config.model.Tenant
 import mu.KotlinLogging
-import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Component
 
 @Component
-class ConceptMapClient(@Qualifier("ConceptMap") private val ociClient: OCIClient) {
+class ConceptMapClient(private val ociClient: OCIClient) {
     private val logger = KotlinLogging.logger { }
 
     /**

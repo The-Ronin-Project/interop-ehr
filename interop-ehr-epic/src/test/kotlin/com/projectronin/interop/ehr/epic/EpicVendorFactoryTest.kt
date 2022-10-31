@@ -17,6 +17,7 @@ class EpicVendorFactoryTest {
     private val messageService = mockk<EpicMessageService>()
     private val patientService = mockk<EpicPatientService>()
     private val practitionerService = mockk<EpicPractitionerService>()
+    private val practitionerRoleService = mockk<EpicPractitionerRoleService>()
     private val conditionService = mockk<EpicConditionService>()
     private val identifierService = mockk<EpicIdentifierService>()
     private val observationService = mockk<EpicObservationService>()
@@ -30,6 +31,7 @@ class EpicVendorFactoryTest {
             appointmentService,
             messageService,
             practitionerService,
+            practitionerRoleService,
             conditionService,
             identifierService,
             observationService,

@@ -1,7 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.util.toListOfType
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -15,7 +14,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class EpicPagingServiceTest {
+class EpicFHIRServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var httpResponse: HttpResponse
     private val conditionBundle = readResource<Bundle>("/ExampleConditionBundle.json")
@@ -80,11 +79,15 @@ class EpicPagingServiceTest {
         assertEquals(7, conditions.size)
     }
 
-    private class TestService(epicClient: EpicClient, private val parameters: Map<String, Any?>) :
-        EpicPagingService(epicClient) {
+    private class TestService(
+        epicClient: EpicClient,
+        private val parameters: Map<String, Any?>,
+        override val fhirURLSearchPart: String = "url",
+        override val fhirResourceType: Class<Condition> = Condition::class.java
+    ) :
+        EpicFHIRService<Condition>(epicClient) {
         fun getConditions(tenant: Tenant): List<Condition> {
-            val bundle = getBundleWithPaging(tenant, "url", parameters)
-            return bundle.toListOfType()
+            return getResourceListFromSearch(tenant, parameters)
         }
     }
 }

@@ -15,7 +15,6 @@ import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturn
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
-import com.projectronin.interop.ehr.util.toListOfType
 import com.projectronin.interop.fhir.r4.datatype.BundleEntry
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
@@ -87,7 +86,6 @@ class EpicAppointmentServiceTest {
         id = Id("test2"),
         identifiers = listOf()
     )
-    private val patientFhirAppointmentSearchUrlPart = "/api/FHIR/STU3/Appointment"
     private val patientAppointmentSearchUrlPart =
         "/api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments"
     private val providerAppointmentSearchUrlPart =
@@ -320,7 +318,7 @@ class EpicAppointmentServiceTest {
                 LocalDate.of(2015, 1, 1),
                 LocalDate.of(2015, 11, 1)
             )
-        assertEquals(validPatientAppointmentSearchResponse.transformToR4().toListOfType<Appointment>(), response)
+        assertEquals(validPatientAppointmentSearchResponse.transformToR4().entry.map { it.resource }.filterIsInstance<Appointment>(), response)
     }
 
     @Test
@@ -389,7 +387,6 @@ class EpicAppointmentServiceTest {
         every {
             epicAppointmentService.getBundleWithPagingSTU3(
                 tenant,
-                patientFhirAppointmentSearchUrlPart,
                 mapOf(
                     "patient" to "fhirID1",
                     "identifier" to "csnSystem|38033,csnSystem|38035"
@@ -399,7 +396,6 @@ class EpicAppointmentServiceTest {
         every {
             epicAppointmentService.getBundleWithPagingSTU3(
                 tenant,
-                patientFhirAppointmentSearchUrlPart,
                 mapOf(
                     "patient" to "fhirID2",
                     "identifier" to "csnSystem|38034,csnSystem|38036"
@@ -409,7 +405,6 @@ class EpicAppointmentServiceTest {
         every {
             epicAppointmentService.getBundleWithPagingSTU3(
                 tenant,
-                patientFhirAppointmentSearchUrlPart,
                 mapOf(
                     "patient" to "fhirID3",
                     "identifier" to "csnSystem|38037"
@@ -419,7 +414,6 @@ class EpicAppointmentServiceTest {
         every {
             epicAppointmentService.getBundleWithPagingSTU3(
                 tenant,
-                patientFhirAppointmentSearchUrlPart,
                 mapOf(
                     "patient" to "fhirID4",
                     "identifier" to "csnSystem|38184"
@@ -511,7 +505,6 @@ class EpicAppointmentServiceTest {
         every {
             epicAppointmentService.getBundleWithPagingSTU3(
                 tenant,
-                patientFhirAppointmentSearchUrlPart,
                 mapOf(
                     "patient" to "fhirID1",
                     "identifier" to "csnSystem|38033,csnSystem|38035"
@@ -521,7 +514,6 @@ class EpicAppointmentServiceTest {
         every {
             epicAppointmentService.getBundleWithPagingSTU3(
                 tenant,
-                patientFhirAppointmentSearchUrlPart,
                 mapOf(
                     "patient" to "fhirID2",
                     "identifier" to "csnSystem|38034,csnSystem|38036"
@@ -531,7 +523,6 @@ class EpicAppointmentServiceTest {
         every {
             epicAppointmentService.getBundleWithPagingSTU3(
                 tenant,
-                patientFhirAppointmentSearchUrlPart,
                 mapOf(
                     "patient" to "fhirID3",
                     "identifier" to "csnSystem|38037"
@@ -541,7 +532,6 @@ class EpicAppointmentServiceTest {
         every {
             epicAppointmentService.getBundleWithPagingSTU3(
                 tenant,
-                patientFhirAppointmentSearchUrlPart,
                 mapOf(
                     "patient" to "fhirID4",
                     "identifier" to "csnSystem|38184"
@@ -726,7 +716,6 @@ class EpicAppointmentServiceTest {
         every {
             epicAppointmentService.getBundleWithPagingSTU3(
                 tenant,
-                patientFhirAppointmentSearchUrlPart,
                 mapOf(
                     "patient" to "fhirID1",
                     "identifier" to "csnSystem|38033,csnSystem|38035"
@@ -736,7 +725,6 @@ class EpicAppointmentServiceTest {
         every {
             epicAppointmentService.getBundleWithPagingSTU3(
                 tenant,
-                patientFhirAppointmentSearchUrlPart,
                 mapOf(
                     "patient" to "fhirID2",
                     "identifier" to "csnSystem|38034,csnSystem|38036"
@@ -746,7 +734,6 @@ class EpicAppointmentServiceTest {
         every {
             epicAppointmentService.getBundleWithPagingSTU3(
                 tenant,
-                patientFhirAppointmentSearchUrlPart,
                 mapOf(
                     "patient" to "fhirID3",
                     "identifier" to "csnSystem|38037"
@@ -756,7 +743,6 @@ class EpicAppointmentServiceTest {
         every {
             epicAppointmentService.getBundleWithPagingSTU3(
                 tenant,
-                patientFhirAppointmentSearchUrlPart,
                 mapOf(
                     "patient" to "fhirID4",
                     "identifier" to "csnSystem|38184"

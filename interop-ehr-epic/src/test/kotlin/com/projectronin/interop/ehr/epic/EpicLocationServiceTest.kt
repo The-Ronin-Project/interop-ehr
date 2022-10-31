@@ -33,10 +33,12 @@ internal class EpicLocationServiceTest {
         }
         val bundle = mockk<Bundle> {
             every { entry } returns listOf(location1, location2)
+            every { link } returns emptyList()
         }
 
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to "12345,67890")).body<Bundle>()
+            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to "12345,67890", "_count" to 50))
+                .body<Bundle>()
         } returns bundle
 
         val response =

@@ -7,7 +7,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 /**
  * Defines the functionality for an EHR's condition service.
  */
-interface ConditionService {
+interface ConditionService : FHIRService<Condition> {
     /**
      * Finds the [List] of [Condition]s associated with the requested [tenant], [patientFhirId],
      * [conditionCategoryCode] and [clinicalStatus].

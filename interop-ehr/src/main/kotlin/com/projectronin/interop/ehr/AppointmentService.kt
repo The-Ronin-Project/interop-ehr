@@ -9,7 +9,8 @@ import java.time.LocalDate
 /**
  * Defines the functionality for an EHR's appointment service.
  */
-interface AppointmentService {
+interface AppointmentService : FHIRService<Appointment> {
+
     /**
      * Finds the appointments at a given [tenant] for a patient identified by the [patientFHIRId] between
      * the [startDate] and [endDate] from an EHR tenant. Optionally takes a [patientMRN] if available,

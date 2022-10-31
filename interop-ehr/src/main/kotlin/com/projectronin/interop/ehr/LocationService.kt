@@ -6,7 +6,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 /**
  * Defines the functionality of an EHR's location service.
  */
-interface LocationService {
+interface LocationService : FHIRService<Location> {
     /**
      * Finds the [Location]s associated with the requested [tenant] and FHIR [locationIds].
      */

@@ -11,6 +11,7 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
+import io.ktor.util.reflect.TypeInfo
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
@@ -51,7 +52,7 @@ class EpicPatientServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Patient",
-                mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "2015-01-01")
+                mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "2015-01-01", "_count" to 50)
             )
         } returns httpResponse
 
@@ -74,7 +75,7 @@ class EpicPatientServiceTest {
         )
         val fakePat = mockk<Patient>()
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Patient>() } returns fakePat
+        coEvery { httpResponse.body<Patient>(TypeInfo(Patient::class, Patient::class.java)) } returns fakePat
         coEvery { epicClient.get(tenant, "/api/FHIR/R4/Patient/FHIRID") } returns httpResponse
         val actual = EpicPatientService(epicClient, 100, aidboxClient).getPatient(tenant, "FHIRID")
         assertEquals(fakePat, actual)

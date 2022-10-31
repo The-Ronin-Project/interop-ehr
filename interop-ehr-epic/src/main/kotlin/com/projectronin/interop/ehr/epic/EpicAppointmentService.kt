@@ -16,7 +16,6 @@ import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.epic.util.toIdentifier
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.outputs.FindPractitionerAppointmentsResponse
-import com.projectronin.interop.ehr.util.toListOfType
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Participant
@@ -55,9 +54,10 @@ class EpicAppointmentService(
     private val aidboxPatientService: PatientService,
     @Value("\${epic.fhir.batchSize:5}") private val batchSize: Int,
     @Value("\${epic.api.useFhirAPI:false}") private val useFhirAPI: Boolean
-) : AppointmentService, EpicPagingService(epicClient) {
+) : AppointmentService, EpicFHIRService<Appointment>(epicClient) {
     private val logger = KotlinLogging.logger { }
-    private val patientAppointmentFhirSearchUrlPart = "/api/FHIR/STU3/Appointment"
+    override val fhirURLSearchPart = "/api/FHIR/STU3/Appointment"
+    override val fhirResourceType = Appointment::class.java
     private val patientAppointmentSearchUrlPart =
         "/api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments"
     private val providerAppointmentSearchUrlPart =
@@ -79,7 +79,7 @@ class EpicAppointmentService(
             "date" to listOf("ge$startDate", "le$endDate")
         )
         return if (useFhirAPI) {
-            getBundleWithPagingSTU3(tenant, patientAppointmentFhirSearchUrlPart, parameters).toListOfType()
+            getResourceListFromSearchSTU3(tenant, parameters)
         } else {
             val mrnToUse = patientMRN ?: getPatientMRN(tenant, patientFHIRId)
             val appointments = mrnToUse?.let {
@@ -201,11 +201,7 @@ class EpicAppointmentService(
                     }
                 )
                 appointmentsToReturn.addAll(
-                    getBundleWithPagingSTU3(
-                        tenant,
-                        patientAppointmentFhirSearchUrlPart,
-                        parameters
-                    ).toListOfType()
+                    getResourceListFromSearchSTU3(tenant, parameters)
                 )
             }
         }

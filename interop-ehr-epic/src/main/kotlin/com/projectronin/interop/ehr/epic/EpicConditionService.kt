@@ -3,7 +3,6 @@ package com.projectronin.interop.ehr.epic
 import com.projectronin.interop.ehr.ConditionService
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRSearchToken
-import com.projectronin.interop.ehr.util.toListOfType
 import com.projectronin.interop.ehr.util.toOrParams
 import com.projectronin.interop.ehr.util.toSearchTokens
 import com.projectronin.interop.fhir.r4.resource.Condition
@@ -36,8 +35,9 @@ import org.springframework.stereotype.Component
  * from the system [http://hl7.org/fhir/ValueSet/condition-clinical](http://hl7.org/fhir/ValueSet/condition-clinical.html)
  */
 @Component
-class EpicConditionService(epicClient: EpicClient) : ConditionService, EpicPagingService(epicClient) {
-    private val conditionSearchUrlPart = "/api/FHIR/R4/Condition"
+class EpicConditionService(epicClient: EpicClient) : ConditionService, EpicFHIRService<Condition>(epicClient) {
+    override val fhirURLSearchPart = "/api/FHIR/R4/Condition"
+    override val fhirResourceType = Condition::class.java
 
     override fun findConditions(
         tenant: Tenant,
@@ -66,6 +66,6 @@ class EpicConditionService(epicClient: EpicClient) : ConditionService, EpicPagin
             "clinical-status" to clinicalStatusCodes.toOrParams(),
         )
 
-        return getBundleWithPaging(tenant, conditionSearchUrlPart, parameters).toListOfType()
+        return getResourceListFromSearch(tenant, parameters)
     }
 }
