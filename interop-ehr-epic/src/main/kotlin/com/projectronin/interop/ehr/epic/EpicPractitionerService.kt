@@ -5,6 +5,7 @@ import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.outputs.FindPractitionersResponse
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.tenant.config.model.Tenant
+import datadog.trace.api.Trace
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -18,9 +19,11 @@ class EpicPractitionerService(
     override val fhirURLSearchPart = "/api/FHIR/R4/Practitioner"
     override val fhirResourceType = Practitioner::class.java
 
+    @Trace
     override fun getPractitioner(tenant: Tenant, practitionerFHIRId: String): Practitioner =
         getByID(tenant, practitionerFHIRId)
 
+    @Trace
     override fun getPractitionerByProvider(tenant: Tenant, providerId: String): Practitioner {
         val parameters = mapOf("identifier" to "External|$providerId")
 

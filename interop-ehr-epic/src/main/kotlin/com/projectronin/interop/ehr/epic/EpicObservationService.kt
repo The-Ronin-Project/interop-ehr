@@ -7,6 +7,7 @@ import com.projectronin.interop.ehr.util.toOrParams
 import com.projectronin.interop.ehr.util.toSearchTokens
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.tenant.config.model.Tenant
+import datadog.trace.api.Trace
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
@@ -50,6 +51,7 @@ class EpicObservationService(
      * ```
      * You may mix tokens and codes in a comma-separated [observationCategoryCodes] list, but a token is always preferred.
      */
+    @Trace
     override fun findObservationsByPatient(
         tenant: Tenant,
         patientFhirIds: List<String>,
@@ -68,6 +70,7 @@ class EpicObservationService(
      * and list of [conditionCategoryCodes].
      * Supports lists of codes or system|value tokens for category.
      */
+    @Trace
     override fun findObservationsByPatientAndCategory(
         tenant: Tenant,
         patientFhirIds: List<String>,

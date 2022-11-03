@@ -7,6 +7,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
+import datadog.trace.api.Trace
 import org.springframework.stereotype.Service
 
 /**
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service
  */
 @Service
 class EpicIdentifierService : IdentifierService {
+    @Trace
     override fun getPractitionerIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
         val system = tenant.vendorAs<Epic>().practitionerProviderSystem
         return getIdentifierByType(
@@ -23,6 +25,7 @@ class EpicIdentifierService : IdentifierService {
         ) { "No practitioner identifier with system '$system' found" }
     }
 
+    @Trace
     override fun getPatientIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
         return getIdentifierByType(
             identifiers,
@@ -31,6 +34,7 @@ class EpicIdentifierService : IdentifierService {
         ) { "No matching identifier for the patient with system ${tenant.vendorAs<Epic>().patientInternalSystem}" }
     }
 
+    @Trace
     override fun getPractitionerProviderIdentifier(
         tenant: Tenant,
         identifiers: FHIRIdentifiers
@@ -41,6 +45,7 @@ class EpicIdentifierService : IdentifierService {
         ) { "No practitioner provider identifier with system '${tenant.vendorAs<Epic>().practitionerProviderSystem}' found for resource with FHIR id '${identifiers.id.value}'" }
     }
 
+    @Trace
     override fun getPractitionerUserIdentifier(
         tenant: Tenant,
         identifiers: FHIRIdentifiers
@@ -51,6 +56,7 @@ class EpicIdentifierService : IdentifierService {
         ) { "No practitioner user identifier with system '${tenant.vendorAs<Epic>().practitionerUserSystem}' found for resource with FHIR id '${identifiers.id.value}'" }
     }
 
+    @Trace
     override fun getMRNIdentifier(
         tenant: Tenant,
         identifiers: List<Identifier>
@@ -92,6 +98,7 @@ class EpicIdentifierService : IdentifierService {
             ?: throw VendorIdentifierNotFoundException(exceptionMessage.invoke())
     }
 
+    @Trace
     override fun getLocationIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
         val system = tenant.vendorAs<Epic>().departmentInternalSystem
         return getIdentifierByType(

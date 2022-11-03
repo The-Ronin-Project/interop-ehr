@@ -4,6 +4,7 @@ import com.projectronin.interop.ehr.EncounterService
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.tenant.config.model.Tenant
+import datadog.trace.api.Trace
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -15,6 +16,7 @@ class EpicEncounterService(epicClient: EpicClient) : EncounterService, EpicFHIRS
     override val fhirURLSearchPart = "/api/FHIR/R4/Encounter"
     override val fhirResourceType = Encounter::class.java
 
+    @Trace
     override fun findPatientEncounters(
         tenant: Tenant,
         patientFhirId: String,

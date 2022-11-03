@@ -12,6 +12,7 @@ import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.tenant.config.ProviderPoolService
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
+import datadog.trace.api.Trace
 import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
@@ -28,6 +29,7 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
     private val logger = KotlinLogging.logger { }
     private val sendMessageUrlPart = "/api/epic/2014/Common/Utility/SENDMESSAGE/Message"
 
+    @Trace
     override fun sendMessage(tenant: Tenant, messageInput: EHRMessageInput): String {
         val vendor = tenant.vendor
         if (vendor !is Epic) throw IllegalStateException("Tenant is not Epic vendor: ${tenant.mnemonic}")

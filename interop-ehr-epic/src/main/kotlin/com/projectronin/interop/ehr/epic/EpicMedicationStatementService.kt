@@ -4,6 +4,7 @@ import com.projectronin.interop.ehr.MedicationStatementService
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.resource.MedicationStatement
 import com.projectronin.interop.tenant.config.model.Tenant
+import datadog.trace.api.Trace
 import org.springframework.stereotype.Component
 
 /**
@@ -18,6 +19,7 @@ class EpicMedicationStatementService(epicClient: EpicClient) : MedicationStateme
     /**
      * Requires a Patient FHIR ID as input. Returns a List of R4 [MedicationStatement]s.
      */
+    @Trace
     override fun getMedicationStatementsByPatientFHIRId(
         tenant: Tenant,
         patientFHIRId: String

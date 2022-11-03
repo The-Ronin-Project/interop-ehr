@@ -31,6 +31,7 @@ import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
+import datadog.trace.api.Trace
 import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
@@ -64,6 +65,7 @@ class EpicAppointmentService(
         "/api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments"
     private val dateFormat = DateTimeFormatter.ofPattern("MM/dd/yyyy")
 
+    @Trace
     override fun findPatientAppointments(
         tenant: Tenant,
         patientFHIRId: String,
@@ -106,6 +108,7 @@ class EpicAppointmentService(
         return identifierService.getMRNIdentifier(tenant, patient.identifier).value
     }
 
+    @Trace
     override fun findProviderAppointments(
         tenant: Tenant,
         providerIDs: List<FHIRIdentifiers>,

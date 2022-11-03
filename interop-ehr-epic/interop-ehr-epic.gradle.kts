@@ -4,6 +4,8 @@ plugins {
 }
 
 dependencies {
+    implementation(libs.dd.trace.api)
+
     implementation(libs.interop.aidbox)
     implementation(libs.interop.common)
     implementation(libs.interop.commonHttp)

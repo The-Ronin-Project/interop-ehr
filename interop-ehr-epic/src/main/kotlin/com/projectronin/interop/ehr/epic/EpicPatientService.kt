@@ -10,6 +10,7 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
+import datadog.trace.api.Trace
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
@@ -32,6 +33,7 @@ class EpicPatientService(
     override val fhirResourceType = Patient::class.java
     private val logger = KotlinLogging.logger { }
 
+    @Trace
     override fun findPatient(
         tenant: Tenant,
         birthDate: LocalDate,
@@ -51,6 +53,7 @@ class EpicPatientService(
         return patientList
     }
 
+    @Trace
     override fun <K> findPatientsById(tenant: Tenant, patientIdsByKey: Map<K, Identifier>): Map<K, Patient> {
         logger.info { "Patient find by id started for ${tenant.mnemonic} with ${patientIdsByKey.size} patients requested" }
 
@@ -97,10 +100,12 @@ class EpicPatientService(
         return patientsFoundByKey
     }
 
+    @Trace
     override fun getPatient(tenant: Tenant, patientFHIRID: String): Patient {
         return runBlocking { getByID(tenant, patientFHIRID) }
     }
 
+    @Trace
     override fun getPatientFHIRId(tenant: Tenant, patientIDValue: String): String {
         return getPatientsFHIRIds(
             tenant,

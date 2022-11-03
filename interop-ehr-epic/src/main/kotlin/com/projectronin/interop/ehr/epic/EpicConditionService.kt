@@ -7,6 +7,7 @@ import com.projectronin.interop.ehr.util.toOrParams
 import com.projectronin.interop.ehr.util.toSearchTokens
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.tenant.config.model.Tenant
+import datadog.trace.api.Trace
 import org.springframework.stereotype.Component
 
 /**
@@ -39,6 +40,7 @@ class EpicConditionService(epicClient: EpicClient) : ConditionService, EpicFHIRS
     override val fhirURLSearchPart = "/api/FHIR/R4/Condition"
     override val fhirResourceType = Condition::class.java
 
+    @Trace
     override fun findConditions(
         tenant: Tenant,
         patientFhirId: String,
@@ -54,6 +56,7 @@ class EpicConditionService(epicClient: EpicClient) : ConditionService, EpicFHIRS
         )
     }
 
+    @Trace
     override fun findConditionsByCodes(
         tenant: Tenant,
         patientFhirId: String,
