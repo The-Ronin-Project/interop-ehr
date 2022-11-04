@@ -46,6 +46,8 @@ object RoninMedication :
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<Medication?, Validation> {
+        // TODO: RoninExtension.TENANT_SOURCE_MEDICATION_CODE, check Ronin IG re: extension, concept maps for code
+
         val tenantSourceCodeExtension = getExtensionOrEmptyList(
             RoninExtension.TENANT_SOURCE_MEDICATION_CODE,
             normalized.code
@@ -53,8 +55,7 @@ object RoninMedication :
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             extension = normalized.extension + tenantSourceCodeExtension,
-            identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier(),
-            code = filterCodeableConcept(normalized.code),
+            identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier()
         )
         return Pair(transformed, Validation())
     }

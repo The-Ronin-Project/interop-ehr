@@ -13,6 +13,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.r4.resource.Medication
 import com.projectronin.interop.fhir.r4.valueset.IdentifierUse
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.util.asCode
@@ -22,6 +23,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
 import org.junit.jupiter.api.Test
+import java.awt.SystemColor.text
 import kotlin.reflect.full.functions
 import kotlin.reflect.jvm.isAccessible
 
@@ -218,5 +220,97 @@ class NormalizerTest {
             assigner = Reference(display = "assigner")
         )
         assertEquals(expectedIdentifier, normalizedIdentifier)
+    }
+
+    @Test
+    fun `normalize codeable concept text - text already set - no normalization`() {
+        val codeableConcept = CodeableConcept(text = "Text Set")
+        // Using medication as a wrapper for the codeable concept.
+        val medication = Medication(code = codeableConcept)
+        val normalizeMedication = normalizer.normalize(medication, tenant)
+
+        val expectedCodeableConcept = CodeableConcept(text = "Text Set")
+        assertEquals(expectedCodeableConcept, normalizeMedication.code)
+    }
+
+    @Test
+    fun `normalize codeable concept text - no text - pull from single coding`() {
+        val codeableConcept = CodeableConcept(coding = listOf(Coding(display = "Coding Display")))
+        val medication = Medication(code = codeableConcept)
+        val normalizeMedication = normalizer.normalize(medication, tenant)
+
+        val expectedCodeableConcept =
+            CodeableConcept(text = "Coding Display", coding = listOf(Coding(display = "Coding Display")))
+        assertEquals(expectedCodeableConcept, normalizeMedication.code)
+    }
+
+    @Test
+    fun `normalize codeable concept text - no text - pull from single coding user selected`() {
+        val codeableConcept = CodeableConcept(
+            coding = listOf(
+                Coding(display = "Coding Display"),
+                Coding(display = "Coding Display 2"),
+                Coding(display = "User Selected Display", userSelected = true)
+            )
+        )
+        val medication = Medication(code = codeableConcept)
+        val normalizeMedication = normalizer.normalize(medication, tenant)
+
+        val expectedCodeableConcept =
+            CodeableConcept(
+                text = "User Selected Display",
+                coding = listOf(
+                    Coding(display = "Coding Display"),
+                    Coding(display = "Coding Display 2"),
+                    Coding(display = "User Selected Display", userSelected = true)
+                )
+            )
+        assertEquals(expectedCodeableConcept, normalizeMedication.code)
+    }
+
+    @Test
+    fun `normalize codeable concept text - no text, multiple codings - no normalization`() {
+        val codeableConcept = CodeableConcept(
+            coding = listOf(
+                Coding(display = "Coding Display"),
+                Coding(display = "Coding Display 2")
+            )
+        )
+        val medication = Medication(code = codeableConcept)
+        val normalizeMedication = normalizer.normalize(medication, tenant)
+
+        val expectedCodeableConcept =
+            CodeableConcept(
+                coding = listOf(
+                    Coding(display = "Coding Display"),
+                    Coding(display = "Coding Display 2")
+                )
+            )
+        assertEquals(expectedCodeableConcept, normalizeMedication.code)
+    }
+
+    @Test
+    fun `normalize codeable concept text - no text, multiple user selected codings - no normalization`() {
+        val codeableConcept = CodeableConcept(
+            coding = listOf(
+                Coding(display = "Coding Display"),
+                Coding(display = "Coding Display 2"),
+                Coding(display = "User Selected Display 1", userSelected = true),
+                Coding(display = "User Selected Display 2", userSelected = true)
+            )
+        )
+        val medication = Medication(code = codeableConcept)
+        val normalizeMedication = normalizer.normalize(medication, tenant)
+
+        val expectedCodeableConcept =
+            CodeableConcept(
+                coding = listOf(
+                    Coding(display = "Coding Display"),
+                    Coding(display = "Coding Display 2"),
+                    Coding(display = "User Selected Display 1", userSelected = true),
+                    Coding(display = "User Selected Display 2", userSelected = true)
+                )
+            )
+        assertEquals(expectedCodeableConcept, normalizeMedication.code)
     }
 }

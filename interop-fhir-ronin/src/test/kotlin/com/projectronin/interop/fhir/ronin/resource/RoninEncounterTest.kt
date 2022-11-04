@@ -549,6 +549,7 @@ class RoninEncounterTest {
         assertEquals(
             listOf(
                 CodeableConcept(
+                    text = "Patient-initiated encounter",
                     coding = listOf(
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
@@ -563,6 +564,7 @@ class RoninEncounterTest {
         assertNull(transformed.serviceType)
         assertEquals(
             CodeableConcept(
+                text = "Non-urgent ear, nose and throat admission",
                 coding = listOf(
                     Coding(
                         system = CodeSystem.SNOMED_CT.uri,
@@ -607,6 +609,7 @@ class RoninEncounterTest {
         assertEquals(
             listOf(
                 CodeableConcept(
+                    text = "Retropharyngeal abscess",
                     coding = listOf(
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
@@ -632,6 +635,7 @@ class RoninEncounterTest {
                 EncounterDiagnosis(
                     condition = Reference(reference = "Condition/test-stroke"),
                     use = CodeableConcept(
+                        text = "Admission diagnosis",
                         coding = listOf(
                             Coding(
                                 system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
@@ -645,6 +649,7 @@ class RoninEncounterTest {
                 EncounterDiagnosis(
                     condition = Reference(reference = "Condition/test-f201"),
                     use = CodeableConcept(
+                        text = "Discharge diagnosis",
                         coding = listOf(
                             Coding(
                                 system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
@@ -667,6 +672,7 @@ class RoninEncounterTest {
                 ),
                 origin = null,
                 admitSource = CodeableConcept(
+                    text = "Referral by physician",
                     coding = listOf(
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
@@ -678,6 +684,7 @@ class RoninEncounterTest {
                 reAdmission = null,
                 dietPreference = listOf(
                     CodeableConcept(
+                        text = "vegetarian",
                         coding = listOf(
                             Coding(
                                 system = Uri("https://www.hl7.org/fhir/R4/valueset-encounter-diet.html"),
@@ -687,6 +694,7 @@ class RoninEncounterTest {
                         )
                     ),
                     CodeableConcept(
+                        text = "kosher",
                         coding = listOf(
                             Coding(
                                 system = Uri("https://www.hl7.org/fhir/R4/valueset-encounter-diet.html"),
@@ -700,6 +708,7 @@ class RoninEncounterTest {
                 specialArrangement = emptyList(),
                 destination = Reference(reference = "Location/test-place"),
                 dischargeDisposition = CodeableConcept(
+                    text = "Discharge to home",
                     coding = listOf(
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
@@ -717,6 +726,7 @@ class RoninEncounterTest {
                     location = Reference(reference = "Location/test-f001"),
                     status = EncounterLocationStatus.RESERVED.asCode(),
                     physicalType = CodeableConcept(
+                        text = "Area",
                         coding = listOf(
                             Coding(
                                 system = Uri("http://terminology.hl7.org/CodeSystem/location-physical-type"),

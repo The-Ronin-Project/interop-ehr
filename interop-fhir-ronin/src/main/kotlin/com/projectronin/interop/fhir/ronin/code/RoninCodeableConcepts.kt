@@ -10,6 +10,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
  */
 object RoninCodeableConcepts {
     val TENANT = CodeableConcept(
+        text = "Ronin-specified Tenant Identifier",
         coding = listOf(
             Coding(
                 system = RoninCodeSystem.TENANT.uri,
@@ -20,6 +21,7 @@ object RoninCodeableConcepts {
     )
 
     val MRN = CodeableConcept(
+        text = "Medical Record Number",
         coding = listOf(
             Coding(
                 system = CodeSystem.HL7_IDENTIFIER_TYPE.uri,
@@ -30,6 +32,7 @@ object RoninCodeableConcepts {
     )
 
     val FHIR_ID = CodeableConcept(
+        text = "FHIR Identifier",
         coding = listOf(
             Coding(
                 system = RoninCodeSystem.FHIR_ID.uri,

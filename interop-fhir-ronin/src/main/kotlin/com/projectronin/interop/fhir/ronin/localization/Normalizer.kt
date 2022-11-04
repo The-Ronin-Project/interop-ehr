@@ -1,11 +1,13 @@
 package com.projectronin.interop.fhir.ronin.localization
 
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.ronin.code.normalizeCoding
 import com.projectronin.interop.fhir.ronin.code.normalizeIdentifier
 import com.projectronin.interop.fhir.validate.Validatable
 import com.projectronin.interop.tenant.config.model.Tenant
+import java.awt.SystemColor.text
 
 object Normalizer : BaseGenericTransformer() {
     /**
@@ -20,6 +22,7 @@ object Normalizer : BaseGenericTransformer() {
         return when (element) {
             is Coding -> normalizeCoding(element, parameterName, tenant)
             is Identifier -> normalizeIdentifier(element, parameterName, tenant)
+            is CodeableConcept -> normalizeCodeableConcept(element, parameterName, tenant)
             is Validatable<*> -> transformOrNull(element, parameterName, tenant)
             else -> null
         }
@@ -49,5 +52,31 @@ object Normalizer : BaseGenericTransformer() {
         } else {
             (nonNormalizedIdentifier ?: identifier).copy(system = normalizedSystem)
         }
+    }
+
+    /**
+     * Normalizes the [codeableConcept] for the [tenant].
+     */
+    private fun normalizeCodeableConcept(
+        codeableConcept: CodeableConcept,
+        parameterName: String,
+        tenant: Tenant
+    ): CodeableConcept? {
+        val nonNormalizedCodeableConcept = transformOrNull(codeableConcept, parameterName, tenant)
+
+        // If text is populated on the codeable concept already, return as is.
+        if (codeableConcept.text?.isNotEmpty() == true) {
+            return nonNormalizedCodeableConcept
+        }
+
+        // When text isn't populated, pull from the single coding, or the single user selected coding
+        val selectedCoding =
+            codeableConcept.coding.singleOrNull { it.userSelected == true } ?: codeableConcept.coding.singleOrNull()
+        if (selectedCoding != null && selectedCoding.display?.isNotEmpty() == true) {
+            return (nonNormalizedCodeableConcept ?: codeableConcept).copy(text = selectedCoding.display)
+        }
+
+        // Otherwise make no changes
+        return nonNormalizedCodeableConcept
     }
 }

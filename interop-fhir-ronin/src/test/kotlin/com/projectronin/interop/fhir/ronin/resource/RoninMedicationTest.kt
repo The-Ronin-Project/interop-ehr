@@ -76,7 +76,7 @@ class RoninMedicationTest {
     }
 
     @Test
-    fun `validate - fails if missing required code`() {
+    fun `validate - fails if missing required code attribute`() {
         val medication = Medication(
             identifier = listOf(
                 Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
@@ -96,7 +96,7 @@ class RoninMedicationTest {
     }
 
     @Test
-    fun `validate - fails if no code-coding has all required attributes`() {
+    fun `validate - fails if no code-coding has all required attributes - missing values`() {
         val medication = Medication(
             identifier = listOf(
                 Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
@@ -121,15 +121,343 @@ class RoninMedicationTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_NOV_CODING: No coding list entry provides all the required fields @ Medication.code",
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Medication.code",
             exception.message
         )
     }
 
     @Test
-    fun `validate - fails if code is missing the text attribute`() {
+    fun `transform and validate - succeeds - code is missing the text attribute - no userSelected coding - missing text`() {
         // except for the test case details,
-        // all the coding entries have all attributes
+        // all attributes are correct
+
+        val medication = Medication(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("b"),
+                        code = Code("b"),
+                        version = "1.0.0",
+                        display = "b"
+                    ),
+                    Coding(
+                        system = Uri("i"),
+                        code = Code("i"),
+                        version = "1.0.1",
+                        display = "i",
+                    ),
+                    Coding(
+                        system = CodeSystem.RXNORM.uri,
+                        code = Code("z"),
+                        version = "1.0.0",
+                        display = "z"
+                    )
+
+                )
+            )
+        )
+
+        // transformation
+        val roninMedication = RoninMedication.transform(medication, tenant)
+        roninMedication!!
+        assertEquals(
+            medication.extension + Extension(
+                url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+                value = DynamicValue(
+                    DynamicValueType.CODEABLE_CONCEPT,
+                    medication.code!!
+                )
+            ),
+            roninMedication.extension
+        )
+        assertEquals(
+            CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("b"),
+                        code = Code("b"),
+                        version = "1.0.0",
+                        display = "b"
+                    ),
+                    Coding(
+                        system = Uri("i"),
+                        code = Code("i"),
+                        version = "1.0.1",
+                        display = "i",
+                    ),
+                    Coding(
+                        system = CodeSystem.RXNORM.uri,
+                        code = Code("z"),
+                        version = "1.0.0",
+                        display = "z"
+                    )
+                )
+            ),
+            roninMedication.code
+        )
+
+        // validation
+        RoninMedication.validate(roninMedication, null).alertIfErrors()
+    }
+
+    @Test
+    fun `transform and validate - succeeds - code has an empty-valued text attribute - no userSelected coding - empty-valued text`() {
+        // except for the test case details,
+        // all attributes are correct
+
+        val medication = Medication(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+            ),
+            code = CodeableConcept(
+                text = "",
+                coding = listOf(
+                    Coding(
+                        system = Uri("b"),
+                        code = Code("b"),
+                        version = "1.0.0",
+                        display = "b"
+                    ),
+                    Coding(
+                        system = Uri("i"),
+                        code = Code("i"),
+                        version = "1.0.1",
+                        display = "i",
+                    ),
+                    Coding(
+                        system = CodeSystem.RXNORM.uri,
+                        code = Code("z"),
+                        version = "1.0.0",
+                        display = "z"
+                    )
+                )
+            )
+        )
+
+        // transformation
+        val roninMedication = RoninMedication.transform(medication, tenant)
+        roninMedication!!
+        assertEquals(
+            medication.extension + Extension(
+                url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+                value = DynamicValue(
+                    DynamicValueType.CODEABLE_CONCEPT,
+                    medication.code!!
+                )
+            ),
+            roninMedication.extension
+        )
+        assertEquals(
+            CodeableConcept(
+                text = "",
+                coding = listOf(
+                    Coding(
+                        system = Uri("b"),
+                        code = Code("b"),
+                        version = "1.0.0",
+                        display = "b"
+                    ),
+                    Coding(
+                        system = Uri("i"),
+                        code = Code("i"),
+                        version = "1.0.1",
+                        display = "i",
+                    ),
+                    Coding(
+                        system = CodeSystem.RXNORM.uri,
+                        code = Code("z"),
+                        version = "1.0.0",
+                        display = "z"
+                    )
+                )
+            ),
+            roninMedication.code
+        )
+
+        // validation
+        RoninMedication.validate(roninMedication, null).alertIfErrors()
+    }
+
+    @Test
+    fun `transform and validate - succeeds - text is assigned from single coding entry - no userSelected coding`() {
+        // except for the test case details,
+        // all attributes are correct
+
+        val medication = Medication(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("b"),
+                        code = Code("b"),
+                        version = "1.0.0",
+                        display = "b"
+                    )
+                )
+            )
+        )
+
+        // transformation
+        val roninMedication = RoninMedication.transform(medication, tenant)
+        roninMedication!!
+        assertEquals(
+            medication.extension + Extension(
+                url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+                value = DynamicValue(
+                    DynamicValueType.CODEABLE_CONCEPT,
+                    CodeableConcept(
+                        text = "b",
+                        coding = listOf(
+                            Coding(
+                                system = Uri("b"),
+                                code = Code("b"),
+                                version = "1.0.0",
+                                display = "b"
+                            )
+                        )
+                    )
+                )
+            ),
+            roninMedication.extension
+        )
+        assertEquals(
+            CodeableConcept(
+                text = "b",
+                coding = listOf(
+                    Coding(
+                        system = Uri("b"),
+                        code = Code("b"),
+                        version = "1.0.0",
+                        display = "b"
+                    )
+                )
+            ),
+            roninMedication.code
+        )
+
+        // validation
+        RoninMedication.validate(roninMedication, null).alertIfErrors()
+    }
+
+    @Test
+    fun `transform and validate - succeeds - text is assigned from userSelected entry - 1 userSelected coding`() {
+        // except for the test case details,
+        // all attributes are correct
+
+        val medication = Medication(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("b"),
+                        code = Code("b"),
+                        version = "1.0.0",
+                        display = "b"
+                    ),
+                    Coding(
+                        system = Uri("i"),
+                        code = Code("i"),
+                        version = "1.0.1",
+                        display = "i",
+                        userSelected = true,
+                    ),
+                    Coding(
+                        system = CodeSystem.RXNORM.uri,
+                        code = Code("z"),
+                        version = "1.0.0",
+                        display = "z"
+                    )
+                )
+            )
+        )
+
+        // transformation
+        val roninMedication = RoninMedication.transform(medication, tenant)
+        roninMedication!!
+        assertEquals(
+            medication.extension + Extension(
+                url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+                value = DynamicValue(
+                    DynamicValueType.CODEABLE_CONCEPT,
+                    CodeableConcept(
+                        text = "i",
+                        coding = listOf(
+                            Coding(
+                                system = Uri("b"),
+                                code = Code("b"),
+                                version = "1.0.0",
+                                display = "b"
+                            ),
+                            Coding(
+                                system = Uri("i"),
+                                code = Code("i"),
+                                version = "1.0.1",
+                                display = "i",
+                                userSelected = true,
+                            ),
+                            Coding(
+                                system = CodeSystem.RXNORM.uri,
+                                code = Code("z"),
+                                version = "1.0.0",
+                                display = "z"
+                            )
+                        )
+                    )
+                )
+            ),
+            roninMedication.extension
+        )
+        assertEquals(
+            CodeableConcept(
+                text = "i",
+                coding = listOf(
+                    Coding(
+                        system = Uri("b"),
+                        code = Code("b"),
+                        version = "1.0.0",
+                        display = "b"
+                    ),
+                    Coding(
+                        system = Uri("i"),
+                        code = Code("i"),
+                        version = "1.0.1",
+                        display = "i",
+                        userSelected = true,
+                    ),
+                    Coding(
+                        system = CodeSystem.RXNORM.uri,
+                        code = Code("z"),
+                        version = "1.0.0",
+                        display = "z"
+                    )
+                )
+            ),
+            roninMedication.code
+        )
+
+        // validation
+        RoninMedication.validate(roninMedication, null).alertIfErrors()
+    }
+
+    @Test
+    fun `validate - error - more than 1 userSelected entry`() {
+        // except for the test case details,
+        // all attributes are correct
 
         val medication = Medication(
             identifier = listOf(
@@ -148,13 +476,15 @@ class RoninMedicationTest {
                         system = CodeSystem.RXNORM.uri,
                         code = Code("e"),
                         version = "1.0.0",
-                        display = "e"
+                        display = "e",
+                        userSelected = true,
                     ),
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("i"),
                         version = "1.0.1",
-                        display = "i"
+                        display = "i",
+                        userSelected = true,
                     ),
                 )
             )
@@ -166,7 +496,7 @@ class RoninMedicationTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: code.text is a required element @ Medication.code.text",
+                "ERROR RONIN_INV_CODING_SEL_001: More than one coding entry has userSelected true @ Medication.code",
             exception.message
         )
     }
@@ -628,130 +958,6 @@ class RoninMedicationTest {
         assertEquals(medication.ingredient, roninMedication.ingredient)
         assertEquals(medication.ingredient, roninMedication.ingredient)
         assertEquals(medication.batch, roninMedication.batch)
-
-        // validation
-        RoninMedication.validate(roninMedication, null).alertIfErrors()
-    }
-
-    @Test
-    fun `transform and validate - succeeds with many code-coding - code and tenantSourceMedicationCode are correct`() {
-        // only some code.coding entries pass validation according to the Ronin IG (comment "good");
-        // others have issues; those that pass are filtered into RoninMedicatton.code.coding by the transform
-
-        val medication = Medication(
-            id = Id("12345"),
-            code = CodeableConcept(
-                text = "k",
-                coding = listOf(
-                    Coding(
-                        system = Uri("b"),
-                        code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
-                    ),
-                    Coding(
-                        system = Uri("e"),
-                        code = Code("e"),
-                        version = "1.0.0"
-                    ),
-                    Coding(
-                        system = Uri("i"),
-                        code = Code("i"),
-                        display = "i"
-                    ),
-                    Coding(
-                        code = Code("v"),
-                        version = "1.0.0",
-                        display = "v"
-                    ),
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("a")
-                    ),
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        version = "1.0.0",
-                        display = "f"
-                    ),
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("z"),
-                        version = "1.0.0",
-                        display = "z"
-                    ),
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        display = "q"
-                    ),
-                    Coding(
-                        code = Code("h"),
-                        version = "1.0.1",
-                    ),
-                )
-            )
-        )
-
-        // transformation
-        val roninMedication = RoninMedication.transform(medication, tenant)
-        roninMedication!!
-        assertEquals(Id("test-12345"), roninMedication.id)
-        assertEquals(
-            RoninProfile.MEDICATION.value,
-            roninMedication.meta!!.profile[0].value
-        )
-        assertEquals(
-            medication.extension + Extension(
-                url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
-                value = DynamicValue(
-                    DynamicValueType.CODEABLE_CONCEPT,
-                    medication.code!!
-                )
-            ),
-            roninMedication.extension
-        )
-        assertEquals(medication.modifierExtension, roninMedication.modifierExtension)
-        assertEquals(2, roninMedication.identifier.size)
-        assertEquals(
-            listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
-            ),
-            roninMedication.identifier
-        )
-        assertEquals(
-            CodeableConcept(
-                text = "k",
-                coding = listOf(
-                    Coding(
-                        system = Uri("b"),
-                        code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
-                    ),
-                    Coding(
-                        system = Uri("e"),
-                        code = Code("e"),
-                        version = "1.0.0"
-                    ),
-                    Coding(
-                        system = Uri("i"),
-                        code = Code("i"),
-                        display = "i"
-                    ),
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("a")
-                    ),
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("z"),
-                        version = "1.0.0",
-                        display = "z"
-                    )
-                )
-            ),
-            roninMedication.code
-        )
 
         // validation
         RoninMedication.validate(roninMedication, null).alertIfErrors()

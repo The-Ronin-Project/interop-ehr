@@ -12,7 +12,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
-import com.projectronin.interop.fhir.ronin.error.RoninNoValidCodingError
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -64,6 +63,26 @@ abstract class BaseRoninProfile<T : Resource<T>>(
         severity = ValidationIssueSeverity.ERROR,
         description = "FHIR identifier value is required",
         location = LocationContext("", "identifier")
+    )
+
+    /**
+     * When the [Coding] list for a [CodeableConcept] contains no [Coding] that passes validation for the Ronin profile.
+     */
+    private fun roninInvalidCodingError(field: String) = FHIRError(
+        code = "RONIN_NOV_CODING_001",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Coding list entry missing the required fields",
+        location = LocationContext("", field)
+    )
+
+    /**
+     * When the [Coding] list for a [CodeableConcept] has more than one entry with userSelected set, we cannot choose.
+     */
+    private fun roninInvalidUserSelectError(field: String) = FHIRError(
+        code = "RONIN_INV_CODING_SEL_001",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "More than one coding entry has userSelected true",
+        location = LocationContext("", field)
     )
 
     /**
@@ -142,15 +161,8 @@ abstract class BaseRoninProfile<T : Resource<T>>(
         parentContext: LocationContext,
         validation: Validation
     ) {
-        val requiredCodeTextError = RequiredFieldError(LocationContext("", "$fieldName.text"))
-
         validation.apply {
             code?.let {
-                checkNotNull(
-                    code.text,
-                    requiredCodeTextError,
-                    parentContext
-                )
                 requireCoding(fieldName, code.coding, parentContext, validation)
             }
         }
@@ -166,8 +178,6 @@ abstract class BaseRoninProfile<T : Resource<T>>(
         parentContext: LocationContext,
         validation: Validation
     ) {
-        // TODO: also involve ConceptMaps, for ValueSets and other validation
-
         validation.apply {
             checkNotNull(
                 coding,
@@ -177,10 +187,15 @@ abstract class BaseRoninProfile<T : Resource<T>>(
             ifNotNull(coding) {
                 checkTrue(
                     coding.all {
-                        it.system?.value?.isNotEmpty() ?: false && it.code?.value?.isNotEmpty() ?: false
-                        // TODO: Ronin IG also requires non-empty display and version fields under Coding, discussing
+                        // The FHIR spec indicates all strings should contain non-whitespace content, so checking for blank
+                        !it.system?.value.isNullOrBlank() && !it.code?.value.isNullOrBlank() && !it.display.isNullOrBlank()
                     },
-                    RoninNoValidCodingError(LocationContext("", parentFieldName)),
+                    roninInvalidCodingError(parentFieldName),
+                    parentContext
+                )
+                checkTrue(
+                    coding.filter { it.userSelected == true }.size <= 1,
+                    roninInvalidUserSelectError(parentFieldName),
                     parentContext
                 )
             }
@@ -188,24 +203,10 @@ abstract class BaseRoninProfile<T : Resource<T>>(
     }
 
     /**
-     * Filters the [Coding] list in the input [CodeableConcept] so that the returned [CodeableConcept]
-     * contains only those [Coding] entry(ies) that conform to the Ronin profile.
-     */
-    protected fun filterCodeableConcept(codeableConcept: CodeableConcept? = null): CodeableConcept? {
-        // TODO: also involve ConceptMaps, for ValueSets and other validation
-
-        val coding = codeableConcept?.coding?.filter {
-            it.system?.value?.isNotEmpty() ?: false && it.code?.value?.isNotEmpty() ?: false
-            // TODO: Ronin IG also requires non-empty display and version fields under Coding, discussing
-        } ?: emptyList()
-        return codeableConcept?.copy(coding = coding)
-    }
-
-    /**
      * Creates an [Extension] list using the supplied [url] and [CodeableConcept] object. Supports the calling transform
      * by checking input for nulls and returning a list or emptyList. This supports simpler list arithmetic in the caller.
      */
-    fun getExtensionOrEmptyList(url: RoninExtension, codeableConcept: CodeableConcept? = null): List<Extension> {
+    protected fun getExtensionOrEmptyList(url: RoninExtension, codeableConcept: CodeableConcept?): List<Extension> {
         return codeableConcept?.let {
             listOf(
                 Extension(

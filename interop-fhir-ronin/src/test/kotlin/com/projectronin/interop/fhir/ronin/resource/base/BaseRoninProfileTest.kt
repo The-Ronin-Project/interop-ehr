@@ -1,12 +1,22 @@
 package com.projectronin.interop.fhir.ronin.resource.base
 
+import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
+import com.projectronin.interop.fhir.r4.datatype.Coding
+import com.projectronin.interop.fhir.r4.datatype.DynamicValue
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
+import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
+import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -18,6 +28,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class BaseRoninProfileTest {
+    private val tenant = mockk<Tenant> {
+        every { mnemonic } returns "test"
+    }
+
     private val validTenantIdentifier =
         Identifier(
             system = RoninCodeSystem.TENANT.uri,
@@ -164,18 +178,281 @@ class BaseRoninProfileTest {
         assertEquals(listOf(Canonical("profile")), transformed.profile)
     }
 
+    @Test
+    fun `getExtensionOrEmptyList - null codeableConcept`() {
+        val locationTest = Location(id = Id("123"), identifier = listOf(validTenantIdentifier, validFhirIdentifier))
+
+        val transformedLocation = TestProfile().transform(locationTest, tenant)
+
+        assertEquals(emptyList<Extension>(), transformedLocation!!.extension)
+    }
+
+    @Test
+    fun `getExtensionOrEmptyList - not null codeableConcept`() {
+        val locationTest = Location(
+            id = Id("123"), identifier = listOf(validTenantIdentifier, validFhirIdentifier),
+            physicalType =
+            CodeableConcept(
+                text = "b",
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.RXNORM.uri,
+                        code = Code("b"),
+                        version = "1.0.0",
+                        display = "b"
+                    )
+                )
+            )
+        )
+
+        val transformedLocation = TestProfile().transform(locationTest, tenant)
+
+        assertEquals(
+            listOf(
+                Extension(
+                    url = Uri(RoninExtension.RONIN_CONCEPT_MAP_SCHEMA.value),
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "b",
+                            coding = listOf(
+                                Coding(
+                                    system = CodeSystem.RXNORM.uri,
+                                    code = Code("b"),
+                                    version = "1.0.0",
+                                    display = "b"
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            transformedLocation!!.extension
+        )
+    }
+
+    @Test
+    fun `codeable concept contains coding missing display - validation error`() {
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.physicalType } returns CodeableConcept(
+            coding = listOf(
+                Coding(
+                    system = CodeSystem.SNOMED_CT.uri,
+                    code = Code("code")
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            TestProfile().validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Location.physicalType",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `codeable concept contains coding missing code - validation error`() {
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.physicalType } returns CodeableConcept(
+            coding = listOf(
+                Coding(
+                    system = CodeSystem.SNOMED_CT.uri,
+                    display = "display"
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            TestProfile().validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Location.physicalType",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `codeable concept contains coding missing system - validation error`() {
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.physicalType } returns CodeableConcept(
+            coding = listOf(
+                Coding(
+                    code = Code("code"),
+                    display = "display"
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            TestProfile().validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Location.physicalType",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `codeable concept contains invalid and valid coding - validation error`() {
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.physicalType } returns CodeableConcept(
+            coding = listOf(
+                Coding(
+                    code = Code("code"),
+                    display = "display"
+                ),
+                Coding(
+                    system = CodeSystem.SNOMED_CT.uri,
+                    code = Code("code2"),
+                    display = "display2"
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            TestProfile().validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Location.physicalType",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `codeable concept blanks counted as error - validation error`() {
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.physicalType } returns CodeableConcept(
+            coding = listOf(
+                Coding(
+                    system = CodeSystem.SNOMED_CT.uri,
+                    code = Code(" "),
+                    display = "display"
+                ),
+                Coding(
+                    system = CodeSystem.SNOMED_CT.uri,
+                    code = Code("code2"),
+                    display = ""
+                ),
+                Coding(
+                    system = Uri("   "),
+                    code = Code("code3"),
+                    display = "display 3"
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            TestProfile().validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Location.physicalType",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `codeable concept contains all valid coding - no validation error`() {
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.physicalType } returns CodeableConcept(
+            coding = listOf(
+                Coding(
+                    system = CodeSystem.SNOMED_CT.uri,
+                    code = Code("code"),
+                    display = "display"
+                ),
+                Coding(
+                    system = CodeSystem.SNOMED_CT.uri,
+                    code = Code("code2"),
+                    display = "display2"
+                )
+            )
+        )
+
+        TestProfile().validate(location, null).alertIfErrors()
+    }
+
+    @Test
+    fun `codeable concept contains single user selected - no validation error`() {
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.physicalType } returns CodeableConcept(
+            coding = listOf(
+                Coding(
+                    system = CodeSystem.SNOMED_CT.uri,
+                    code = Code("code"),
+                    display = "display",
+                    userSelected = true
+                ),
+                Coding(
+                    system = CodeSystem.SNOMED_CT.uri,
+                    code = Code("code2"),
+                    display = "display2"
+                )
+            )
+        )
+
+        TestProfile().validate(location, null).alertIfErrors()
+    }
+
+    @Test
+    fun `codeable concept contains multiple user selected - validation error`() {
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.physicalType } returns CodeableConcept(
+            coding = listOf(
+                Coding(
+                    system = CodeSystem.SNOMED_CT.uri,
+                    code = Code("code"),
+                    display = "display",
+                    userSelected = true
+                ),
+                Coding(
+                    system = CodeSystem.SNOMED_CT.uri,
+                    code = Code("code2"),
+                    display = "display2",
+                    userSelected = true
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            TestProfile().validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_CODING_SEL_001: More than one coding entry has userSelected true @ Location.physicalType",
+            exception.message
+        )
+    }
+
     private open class TestProfile : BaseRoninProfile<Location>(R4LocationValidator, "profile") {
         override fun transformInternal(
             normalized: Location,
             parentContext: LocationContext,
             tenant: Tenant
         ): Pair<Location?, Validation> {
-            return Pair(normalized, Validation())
+            val tenantSourceCodeExtension = getExtensionOrEmptyList(
+                RoninExtension.RONIN_CONCEPT_MAP_SCHEMA,
+                normalized.physicalType
+            )
+            return Pair(normalized.copy(extension = tenantSourceCodeExtension), Validation())
         }
 
         override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
             validation.apply {
                 requireRoninIdentifiers(element.identifier, parentContext, validation)
+                requireCodeableConcept("physicalType", element.physicalType, parentContext, validation)
             }
         }
     }

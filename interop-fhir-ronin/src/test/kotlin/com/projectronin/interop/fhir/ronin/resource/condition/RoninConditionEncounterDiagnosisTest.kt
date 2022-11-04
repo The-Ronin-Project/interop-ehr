@@ -505,6 +505,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
         assertEquals(
             CodeableConcept(
+                text = "Inactive",
                 coding = listOf(
                     Coding(
                         system = Uri("http://terminology.hl7.org/CodeSystem/condition-clinical"),
@@ -517,6 +518,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
         assertEquals(
             CodeableConcept(
+                text = "Confirmed",
                 coding = listOf(
                     Coding(
                         system = Uri("http://terminology.hl7.org/CodeSystem/condition-ver-status"),
@@ -542,6 +544,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
         assertEquals(
             CodeableConcept(
+                text = "Moderate to severe",
                 coding = listOf(
                     Coding(
                         system = Uri("http://snomed.info/sct"),
@@ -554,6 +557,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
         assertEquals(
             CodeableConcept(
+                text = "Non-small cell lung cancer",
                 coding = listOf(
                     Coding(
                         system = Uri("http://snomed.info/sct"),
@@ -567,6 +571,7 @@ class RoninConditionEncounterDiagnosisTest {
         assertEquals(
             listOf(
                 CodeableConcept(
+                    text = "Lung structure (body structure)",
                     coding = listOf(
                         Coding(
                             system = Uri("http://snomed.info/sct"),
@@ -605,6 +610,7 @@ class RoninConditionEncounterDiagnosisTest {
             listOf(
                 ConditionStage(
                     summary = CodeableConcept(
+                        text = "IIIC",
                         coding = listOf(
                             Coding(
                                 system = Uri("http://cancerstaging.org"),
@@ -714,6 +720,7 @@ class RoninConditionEncounterDiagnosisTest {
         assertNull(transformed.severity)
         assertEquals(
             CodeableConcept(
+                text = "Non-small cell lung cancer",
                 coding = listOf(
                     Coding(
                         system = Uri("http://snomed.info/sct"),
