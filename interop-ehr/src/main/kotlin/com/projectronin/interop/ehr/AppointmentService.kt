@@ -33,4 +33,14 @@ interface AppointmentService : FHIRService<Appointment> {
         startDate: LocalDate,
         endDate: LocalDate,
     ): FindPractitionerAppointmentsResponse
+
+    /**
+     * Finds the appointments at a given [tenant] for the [locationFHIRIds] between the [startDate] and [endDate].
+     */
+    fun findLocationAppointments(
+        tenant: Tenant,
+        locationFHIRIds: List<String>,
+        startDate: LocalDate,
+        endDate: LocalDate,
+    ): FindPractitionerAppointmentsResponse
 }

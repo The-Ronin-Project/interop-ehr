@@ -10,6 +10,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.EpicAppointment
 import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
 import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
 import com.projectronin.interop.ehr.epic.apporchard.model.GetProviderAppointmentRequest
+import com.projectronin.interop.ehr.epic.apporchard.model.IDType
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProvider
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
 import com.projectronin.interop.ehr.epic.client.EpicClient
@@ -27,6 +28,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
+import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -108,6 +110,25 @@ class EpicAppointmentService(
         return identifierService.getMRNIdentifier(tenant, patient.identifier).value
     }
 
+    override fun findLocationAppointments(
+        tenant: Tenant,
+        locationFHIRIds: List<String>,
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): FindPractitionerAppointmentsResponse {
+        val searchMap = locationFHIRIds.map { SystemValue(value = it, system = RoninCodeSystem.FHIR_ID.uri.value) }
+        val limitedLocationList = aidboxLocationService.getAllLocationIdentifiers(tenant.mnemonic, searchMap)
+        val departmentList = limitedLocationList.flatMap { it.identifiers }
+            .filter { it.system?.value == tenant.vendorAs<Epic>().departmentInternalSystem }
+        val request = GetProviderAppointmentRequest(
+            userID = tenant.vendorAs<Epic>().ehrUserId,
+            departments = departmentList.map { IDType(id = it.value!!, type = "Internal") },
+            startDate = dateFormat.format(startDate),
+            endDate = dateFormat.format(endDate)
+        )
+        return appointmentsByProviderHelper(tenant, request)
+    }
+
     @Trace
     override fun findProviderAppointments(
         tenant: Tenant,
@@ -140,6 +161,13 @@ class EpicAppointmentService(
             startDate = dateFormat.format(startDate),
             endDate = dateFormat.format(endDate)
         )
+        return appointmentsByProviderHelper(tenant, request)
+    }
+
+    private fun appointmentsByProviderHelper(
+        tenant: Tenant,
+        request: GetProviderAppointmentRequest
+    ): FindPractitionerAppointmentsResponse {
         val getAppointmentsResponse = findAppointments(tenant, providerAppointmentSearchUrlPart, request)
 
         // Get list of patient FHIR IDs

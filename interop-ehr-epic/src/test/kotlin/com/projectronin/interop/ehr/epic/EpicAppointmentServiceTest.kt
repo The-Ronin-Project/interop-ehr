@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.aidbox.LimitedLocationFHIRIdentifiers
 import com.projectronin.interop.aidbox.LocationService
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
@@ -318,7 +319,11 @@ class EpicAppointmentServiceTest {
                 LocalDate.of(2015, 1, 1),
                 LocalDate.of(2015, 11, 1)
             )
-        assertEquals(validPatientAppointmentSearchResponse.transformToR4().entry.map { it.resource }.filterIsInstance<Appointment>(), response)
+        assertEquals(
+            validPatientAppointmentSearchResponse.transformToR4().entry.map { it.resource }
+                .filterIsInstance<Appointment>(),
+            response
+        )
     }
 
     @Test
@@ -1658,6 +1663,97 @@ class EpicAppointmentServiceTest {
             epicAppointmentService.findProviderAppointments(
                 tenant,
                 listOf(goodProviderFHIRIdentifier),
+                LocalDate.of(2015, 1, 1),
+                LocalDate.of(2015, 11, 1)
+            )
+
+        assertEquals(6, response.appointments.size)
+        assertEquals("38033", response.appointments[0].id!!.value)
+        assertEquals("38035", response.appointments[1].id!!.value)
+        assertEquals("38034", response.appointments[2].id!!.value)
+        assertEquals("38036", response.appointments[3].id!!.value)
+        assertEquals("38037", response.appointments[4].id!!.value)
+        assertEquals("38184", response.appointments[5].id!!.value)
+        assertTrue(response.newPatients!!.isEmpty())
+    }
+
+    @Test
+    fun `findLocationAppointments`() {
+        val tenant =
+            createTestTenant(
+                clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                serviceEndpoint = "https://example.org",
+                privateKey = testPrivateKey,
+                tenantMnemonic = "TEST_TENANT",
+                internalId = 1,
+                departmentInternalSystem = "internalDepartmentSystem"
+            )
+        val epicAppointmentService = spyk(
+            EpicAppointmentService(
+                epicClient,
+                patientService,
+                identifierService,
+                aidboxPractitionerService,
+                aidboxLocationService,
+                aidboxPatientService,
+                5,
+                false
+            )
+        )
+
+        // Identifier service
+        every {
+            aidboxLocationService.getAllLocationIdentifiers(
+                "TEST_TENANT",
+                any()
+            )
+        } returns listOf(
+            LimitedLocationFHIRIdentifiers(
+                "FHIRID1",
+                listOf(Identifier(value = "E100", system = Uri("internalDepartmentSystem")))
+            )
+        )
+
+        // GetAppointments request
+        mockkStatic(HttpResponse::throwExceptionFromHttpStatus)
+        justRun { httpResponse.throwExceptionFromHttpStatus("GetAppointments", providerAppointmentSearchUrlPart) }
+        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns validProviderAppointmentSearchResponse
+        coEvery {
+            epicClient.post(
+                tenant,
+                "/api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments",
+                GetProviderAppointmentRequest(
+                    userID = "ehrUserId",
+                    departments = listOf(IDType("E100", "Internal")),
+                    startDate = "01/01/2015",
+                    endDate = "11/01/2015"
+                )
+            )
+        } returns httpResponse
+
+        // Patient service request
+        every {
+            patientService.getPatientsFHIRIds(
+                tenant = tenant,
+                patientIDSystem = tenant.vendorAs<Epic>().patientInternalSystem,
+                patientIDValues = listOf("     Z6156", "     Z6740", "     Z6783", "     Z4575")
+            )
+        } returns mapOf(
+            "     Z6156" to GetFHIRIDResponse("fhirID1"),
+            "     Z6740" to GetFHIRIDResponse("fhirID2"),
+            "     Z6783" to GetFHIRIDResponse("fhirID3"),
+            "     Z4575" to GetFHIRIDResponse("fhirID4")
+        )
+
+        val allProviders = validProviderAppointmentSearchResponse.appointments.flatMap { it.providers }
+        assertEquals(6, allProviders.size)
+        mockEpicProvidersToFhirPractitioners(tenant, allProviders)
+        mockEpicDepartmentsToFhirLocations(tenant, allProviders)
+
+        val response =
+            epicAppointmentService.findLocationAppointments(
+                tenant,
+                listOf("FHIRID1"),
                 LocalDate.of(2015, 1, 1),
                 LocalDate.of(2015, 11, 1)
             )
