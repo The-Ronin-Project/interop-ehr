@@ -11,6 +11,7 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.hasDataAbsentReason
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.toFhirIdentifier
@@ -74,8 +75,10 @@ class RoninPatient private constructor(private val identifierService: Identifier
 
             checkNotNull(element.birthDate, requiredBirthDateError, parentContext)
 
-            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG re: requireCode() for telecom.system
-            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG re: requireCode() for telecom.use
+            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG re: extensions
+            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG re: extensions
+
+            // the gender required value set inherits validation from R4
         }
     }
 
@@ -87,6 +90,12 @@ class RoninPatient private constructor(private val identifierService: Identifier
         description = "At least one name must be provided",
         location = LocationContext(Patient::name)
     )
+    private val requiredFamilyOrGivenError = FHIRError(
+        code = "USCORE_PAT_002",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Either Patient.name.given and/or Patient.name.family SHALL be present or a Data Absent Reason Extension SHALL be present.",
+        location = LocationContext(Patient::name)
+    )
 
     private val requiredIdentifierSystemError = RequiredFieldError(Identifier::system)
     private val requiredIdentifierValueError = RequiredFieldError(Identifier::value)
@@ -96,7 +105,15 @@ class RoninPatient private constructor(private val identifierService: Identifier
 
     override fun validateUSCore(element: Patient, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+
             checkTrue(element.name.isNotEmpty(), requiredNameError, parentContext)
+            // Each human name should have a first or last name populated, otherwise a data absent reason.
+            element.name.forEachIndexed { index, humanName ->
+                checkTrue(
+                    ((humanName.family != null) or (humanName.given.isNotEmpty())) xor humanName.hasDataAbsentReason(),
+                    requiredFamilyOrGivenError, parentContext.append(LocationContext("Patient", "name[$index]"))
+                )
+            }
 
             checkNotNull(element.gender, requiredGenderError, parentContext)
 
@@ -116,6 +133,11 @@ class RoninPatient private constructor(private val identifierService: Identifier
                 checkNotNull(telecom.system, requiredTelecomSystemError, currentContext)
                 checkNotNull(telecom.value, requiredTelecomValueError, currentContext)
             }
+
+            // the Patient BackboneElements link and communication inherit validation from R4
+
+            // these required value sets inherit validation from R4:
+            // name.use, telecom.system, telecom.value, address.use, address.type, contact.gender, link.type
         }
     }
 
@@ -146,7 +168,7 @@ class RoninPatient private constructor(private val identifierService: Identifier
         return Pair(transformed, Validation())
     }
 
-    fun getRoninIdentifiers(patient: Patient, tenant: Tenant): List<Identifier> {
+    private fun getRoninIdentifiers(patient: Patient, tenant: Tenant): List<Identifier> {
         val roninIdentifiers = mutableListOf<Identifier>()
         patient.id?.toFhirIdentifier()?.let {
             roninIdentifiers.add(it)

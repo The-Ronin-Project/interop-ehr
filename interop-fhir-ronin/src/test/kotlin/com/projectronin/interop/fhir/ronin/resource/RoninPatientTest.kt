@@ -227,6 +227,143 @@ class RoninPatientTest {
     }
 
     @Test
+    fun `validate fails for null or empty name`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+            ),
+            name = listOf(HumanName(family = null, given = emptyList())),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05")
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPatient.validate(patient, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_PAT_002: Either Patient.name.given and/or Patient.name.family SHALL be present or a Data Absent Reason Extension SHALL be present. @ Patient.name[0].name",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate pass with only family name`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+            ),
+            name = listOf(HumanName(family = "Family Name")),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05")
+        )
+
+        roninPatient.validate(patient, null).alertIfErrors()
+    }
+
+    @Test
+    fun `validate pass with only given name`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+            ),
+            name = listOf(HumanName(given = listOf("Given Name"))),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05")
+        )
+
+        roninPatient.validate(patient, null).alertIfErrors()
+    }
+
+    @Test
+    fun `validate pass with only multiple given names`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+            ),
+            name = listOf(HumanName(given = listOf("Given Name", "Other Given Name"))),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05")
+        )
+
+        roninPatient.validate(patient, null).alertIfErrors()
+    }
+
+    @Test
+    fun `validate pass with no name and data absent reason`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+            ),
+            name = listOf(
+                HumanName(
+                    extension = listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason"),
+                            value = DynamicValue(DynamicValueType.CODE, Code(value = "unknown"))
+                        )
+                    )
+                )
+            ),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05"),
+        )
+
+        roninPatient.validate(patient, null).alertIfErrors()
+    }
+
+    @Test
+    fun `validate fails with name and data absent reason`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+            ),
+            name = listOf(
+                HumanName(
+                    family = "Family Name",
+                    extension = listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason"),
+                            value = DynamicValue(DynamicValueType.CODE, Code(value = "asked-declined"))
+                        )
+                    )
+                )
+            ),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05"),
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPatient.validate(patient, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_PAT_002: Either Patient.name.given and/or Patient.name.family SHALL be present or a Data Absent Reason Extension SHALL be present. @ Patient.name[0].name",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate fails for no gender`() {
         val patient = Patient(
             id = Id("12345"),
