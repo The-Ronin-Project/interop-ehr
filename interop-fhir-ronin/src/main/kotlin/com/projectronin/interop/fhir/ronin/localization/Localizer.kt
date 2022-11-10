@@ -47,7 +47,7 @@ object Localizer : BaseGenericTransformer() {
      * Localizes the [id] for the [tenant].
      */
     private fun localizeId(id: Id, parameterName: String, tenant: Tenant): Id? =
-        if (parameterName == "versionId") null else Id(id.value.localize(tenant))
+        if (parameterName == "versionId") null else Id(id.value?.localize(tenant), id.id, id.extension)
 
     /**
      * Localizes the [reference] for the [tenant].

@@ -116,7 +116,7 @@ class EpicAppointmentService(
         startDate: LocalDate,
         endDate: LocalDate
     ): FindPractitionerAppointmentsResponse {
-        val searchMap = locationFHIRIds.map { SystemValue(value = it, system = RoninCodeSystem.FHIR_ID.uri.value) }
+        val searchMap = locationFHIRIds.map { SystemValue(value = it, system = RoninCodeSystem.FHIR_ID.uri.value!!) }
         val limitedLocationList = aidboxLocationService.getAllLocationIdentifiers(tenant.mnemonic, searchMap)
         val departmentList = limitedLocationList.flatMap { it.identifiers }
             .filter { it.system?.value == tenant.vendorAs<Epic>().departmentInternalSystem }
@@ -270,9 +270,10 @@ class EpicAppointmentService(
             }
         }.filterNot { it.value == null }
         // associate Identifier with SystemValue for lookup
-        val provToSystem = provToIdentifier.keys.associateWith { provider ->
-            val provIdentifier = provToIdentifier[provider]
-            SystemValue(provIdentifier?.value!!, provIdentifier.system!!.value)
+        val provToSystem = provToIdentifier.filter { (_, identifier) ->
+            identifier?.value != null && identifier.system?.value != null
+        }.mapValues { (_, identifier) ->
+            SystemValue(identifier!!.value!!, identifier.system!!.value!!)
         }
         // aidbox lookup for Practitioner FHIR id
         val provSystemToFhirID = aidboxPractitionerService.getPractitionerFHIRIds(
@@ -309,9 +310,10 @@ class EpicAppointmentService(
             }
         }.filterNot { it.value == null }
         // associate Identifier with SystemValue for lookup in aidbox
-        val deptToSystem = deptToIdentifier.keys.associateWith { provider ->
-            val deptIdentifier = deptToIdentifier[provider]
-            SystemValue(deptIdentifier?.value!!, deptIdentifier.system!!.value)
+        val deptToSystem = deptToIdentifier.filter { (_, identifier) ->
+            identifier?.value != null && identifier.system?.value != null
+        }.mapValues { (_, identifier) ->
+            SystemValue(identifier!!.value!!, identifier.system!!.value!!)
         }
         // aidbox lookup for Location FHIR id
         val deptSystemToFhirID = aidboxLocationService.getLocationFHIRIds(

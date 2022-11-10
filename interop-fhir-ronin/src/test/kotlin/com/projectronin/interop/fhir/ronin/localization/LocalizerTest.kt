@@ -27,7 +27,6 @@ import com.projectronin.interop.fhir.r4.datatype.ObservationReferenceRange
 import com.projectronin.interop.fhir.r4.datatype.Participant
 import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Period
-import com.projectronin.interop.fhir.r4.datatype.PrimitiveData
 import com.projectronin.interop.fhir.r4.datatype.Qualification
 import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.Range
@@ -44,6 +43,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.PositiveInt
+import com.projectronin.interop.fhir.r4.datatype.primitive.PrimitiveData
 import com.projectronin.interop.fhir.r4.datatype.primitive.Time
 import com.projectronin.interop.fhir.r4.datatype.primitive.UnsignedInt
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri

@@ -44,7 +44,7 @@ object RoninConditionProblemsAndHealthConcerns :
         description = "One of the following condition categories required for US Core Condition Problem and Health Concerns profile: ${
         qualifyingCodes.joinToString(
             ", "
-        ) { it.value }
+        ) { it.value!! }
         }",
         location = LocationContext(Condition::category)
     )

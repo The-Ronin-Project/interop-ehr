@@ -19,6 +19,6 @@ class EpicLocationService(epicClient: EpicClient) : LocationService, EpicFHIRSer
     override fun getLocationsByFHIRId(tenant: Tenant, locationIds: List<String>): Map<String, Location> {
         // Epic allows multiple IDs to be searched at once
         val parameters = mapOf("_id" to locationIds.toSet().joinToString(separator = ","))
-        return getResourceListFromSearch(tenant, parameters).associateBy { it.id!!.value }
+        return getResourceListFromSearch(tenant, parameters).associateBy { it.id!!.value!! }
     }
 }

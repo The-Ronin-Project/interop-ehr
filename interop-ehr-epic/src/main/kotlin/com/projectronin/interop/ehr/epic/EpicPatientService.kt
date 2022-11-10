@@ -136,7 +136,7 @@ class EpicPatientService(
             ehrPatientIDValues.associateWith { Identifier(value = it, system = Uri(patientIDSystem)) }
         ).filterNot {
             it.value.id == null
-        }.mapValues { GetFHIRIDResponse(it.value.id!!.value.unlocalize(tenant), it.value) }
+        }.mapValues { GetFHIRIDResponse(it.value.id!!.value!!.unlocalize(tenant), it.value) }
 
         return aidboxResponse + ehrResponse
     }

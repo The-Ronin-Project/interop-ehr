@@ -41,7 +41,7 @@ private val FHIR_IDENTIFIER_OID_TO_URI = mapOf(
 fun Uri.normalizeCoding(): Uri {
     return Uri(
         FHIR_CODING_OID_TO_URI[this.value]
-            ?: FHIR_CODING_OID_TO_URI[this.value.removePrefix("urn:oid:")]
+            ?: FHIR_CODING_OID_TO_URI[this.value?.removePrefix("urn:oid:")]
             ?: this.value
     )
 }
@@ -49,7 +49,7 @@ fun Uri.normalizeCoding(): Uri {
 fun Uri.normalizeIdentifier(): Uri {
     return Uri(
         FHIR_IDENTIFIER_OID_TO_URI[this.value]
-            ?: FHIR_IDENTIFIER_OID_TO_URI[this.value.removePrefix("urn:oid:")]
+            ?: FHIR_IDENTIFIER_OID_TO_URI[this.value?.removePrefix("urn:oid:")]
             ?: this.value
     )
 }

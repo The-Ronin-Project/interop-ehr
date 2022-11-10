@@ -11,7 +11,7 @@ fun String.unlocalize(tenant: Tenant) = this.removePrefix("${tenant.mnemonic}-")
 /**
  * Un-localizes the Id relative to the [tenant]
  */
-fun Id.unlocalize(tenant: Tenant) = Id(value.unlocalize(tenant))
+fun Id.unlocalize(tenant: Tenant) = Id(value?.unlocalize(tenant), id, extension)
 
 /**
  * Un-localizes each String value in the list, relative to the [tenant]
