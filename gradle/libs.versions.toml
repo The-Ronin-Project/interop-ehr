@@ -1,5 +1,5 @@
 [libraries]
-dd-trace-api = "com.datadoghq:dd-trace-api:0.114.0"
+dd-trace-api = "com.datadoghq:dd-trace-api:0.115.0"
 
 commons-text = "org.apache.commons:commons-text:1.10.0"
 interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:4.2.5-SNAPSHOT"
