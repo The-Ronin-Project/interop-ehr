@@ -168,7 +168,7 @@ class RoninPatient private constructor(private val identifierService: Identifier
         return Pair(transformed, Validation())
     }
 
-    private fun getRoninIdentifiers(patient: Patient, tenant: Tenant): List<Identifier> {
+    fun getRoninIdentifiers(patient: Patient, tenant: Tenant): List<Identifier> {
         val roninIdentifiers = mutableListOf<Identifier>()
         patient.id?.toFhirIdentifier()?.let {
             roninIdentifiers.add(it)
