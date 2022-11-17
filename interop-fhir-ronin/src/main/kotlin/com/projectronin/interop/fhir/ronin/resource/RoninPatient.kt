@@ -3,7 +3,6 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.ehr.IdentifierService
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
-import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
@@ -11,6 +10,8 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
+import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.hasDataAbsentReason
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
@@ -27,15 +28,21 @@ import com.projectronin.interop.tenant.config.model.Tenant
 /**
  * Validator and Transformer for the Ronin Patient profile.
  */
-class RoninPatient private constructor(private val identifierService: IdentifierService) :
-    USCoreBasedProfile<Patient>(R4PatientValidator, RoninProfile.PATIENT.value) {
+class RoninPatient private constructor(
+    private val identifierService: IdentifierService,
+    private val conceptMapClient: ConceptMapClient,
+) : USCoreBasedProfile<Patient>(R4PatientValidator, RoninProfile.PATIENT.value) {
     companion object {
         /**
-         * Creates a RoninPatient with the supplied [identifierService].
+         * Creates a RoninPatient with the supplied [identifierService] and [conceptMapClient].
          */
-        fun create(identifierService: IdentifierService): RoninPatient =
-            RoninPatient(identifierService)
+        fun create(
+            identifierService: IdentifierService,
+            conceptMapClient: ConceptMapClient
+        ): RoninPatient = RoninPatient(identifierService, conceptMapClient)
     }
+
+    private val contactPoint = RoninContactPoint(conceptMapClient)
 
     private val requiredBirthDateError = RequiredFieldError(Patient::birthDate)
 
@@ -51,7 +58,7 @@ class RoninPatient private constructor(private val identifierService: Identifier
         description = "MRN identifier type defined without proper CodeableConcept",
         location = LocationContext(Patient::identifier)
     )
-    private val requiredTenantIdentifierValueError = FHIRError(
+    private val requiredMRNIdentifierValueError = FHIRError(
         code = "RONIN_PAT_003",
         severity = ValidationIssueSeverity.ERROR,
         description = "MRN identifier value is required",
@@ -70,15 +77,16 @@ class RoninPatient private constructor(private val identifierService: Identifier
                     checkTrue(type == RoninCodeableConcepts.MRN, wrongMrnIdentifierTypeError, parentContext)
                 }
 
-                checkNotNull(mrnIdentifier.value, requiredTenantIdentifierValueError, parentContext)
+                checkNotNull(mrnIdentifier.value, requiredMRNIdentifierValueError, parentContext)
             }
 
             checkNotNull(element.birthDate, requiredBirthDateError, parentContext)
 
-            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG re: extensions
-            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG re: extensions
-
             // the gender required value set inherits validation from R4
+
+            if (element.telecom.isNotEmpty()) {
+                contactPoint.validateRonin(element.telecom, parentContext, validation)
+            }
         }
     }
 
@@ -100,9 +108,6 @@ class RoninPatient private constructor(private val identifierService: Identifier
     private val requiredIdentifierSystemError = RequiredFieldError(Identifier::system)
     private val requiredIdentifierValueError = RequiredFieldError(Identifier::value)
 
-    private val requiredTelecomSystemError = RequiredFieldError(ContactPoint::system)
-    private val requiredTelecomValueError = RequiredFieldError(ContactPoint::value)
-
     override fun validateUSCore(element: Patient, parentContext: LocationContext, validation: Validation) {
         validation.apply {
 
@@ -111,7 +116,8 @@ class RoninPatient private constructor(private val identifierService: Identifier
             element.name.forEachIndexed { index, humanName ->
                 checkTrue(
                     ((humanName.family != null) or (humanName.given.isNotEmpty())) xor humanName.hasDataAbsentReason(),
-                    requiredFamilyOrGivenError, parentContext.append(LocationContext("Patient", "name[$index]"))
+                    requiredFamilyOrGivenError,
+                    parentContext.append(LocationContext("Patient", "name[$index]"))
                 )
             }
 
@@ -128,10 +134,8 @@ class RoninPatient private constructor(private val identifierService: Identifier
                 )
             }
 
-            element.telecom.forEachIndexed { index, telecom ->
-                val currentContext = parentContext.append(LocationContext("Patient", "telecom[$index]"))
-                checkNotNull(telecom.system, requiredTelecomSystemError, currentContext)
-                checkNotNull(telecom.value, requiredTelecomValueError, currentContext)
+            if (element.telecom.isNotEmpty()) {
+                contactPoint.validateUSCore(element.telecom, parentContext, validation)
             }
 
             // the Patient BackboneElements link and communication inherit validation from R4
@@ -146,8 +150,6 @@ class RoninPatient private constructor(private val identifierService: Identifier
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<Patient?, Validation> {
-        // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG re: extension, concept maps for telecom.status
-        // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG re: extension, concept maps for telecom.use
 
         val maritalStatus = normalized.maritalStatus ?: CodeableConcept(
             coding = listOf(
@@ -159,15 +161,24 @@ class RoninPatient private constructor(private val identifierService: Identifier
             )
         )
 
+        val validation = Validation()
+        val contactPointTransformed = if (normalized.telecom.isNotEmpty()) {
+            contactPoint.transform(normalized.telecom, tenant, LocationContext(Patient::class), validation)
+        } else Pair(normalized.telecom, validation)
+
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + tenant.toFhirIdentifier() +
-                getRoninIdentifiers(normalized, tenant),
+            identifier = normalized.identifier + tenant.toFhirIdentifier() + getRoninIdentifiers(normalized, tenant),
             maritalStatus = maritalStatus,
+            telecom = contactPointTransformed.first ?: emptyList(),
         )
-        return Pair(transformed, Validation())
+        return Pair(transformed, contactPointTransformed.second)
     }
 
+    /**
+     * Create a FHIR [Identfiier] from the FHIR Patient.id. Add that and the MRN [Identifier] to a List and return it.
+     * This function is NOT private in this class, because code in other repos besides interop-ehr use it.
+     */
     fun getRoninIdentifiers(patient: Patient, tenant: Tenant): List<Identifier> {
         val roninIdentifiers = mutableListOf<Identifier>()
         patient.id?.toFhirIdentifier()?.let {

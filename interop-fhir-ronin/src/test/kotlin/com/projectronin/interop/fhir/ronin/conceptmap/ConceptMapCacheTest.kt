@@ -23,7 +23,7 @@ internal class ConceptMapCacheTest {
     private val cmClient = ConceptMapClient(ociClient)
     private val testRegistry = listOf(
         ConceptMapRegistry(
-            data_element = "status",
+            data_element = "Appointment.status",
             registry_uuid = "12345",
             filename = "file1.json",
             version = "1",
@@ -32,7 +32,7 @@ internal class ConceptMapCacheTest {
             tenant_id = "tenant"
         ),
         ConceptMapRegistry(
-            data_element = "telecom.use",
+            data_element = "Patient.telecom.use",
             registry_uuid = "67890",
             filename = "file2.json",
             version = "1",
@@ -106,7 +106,7 @@ internal class ConceptMapCacheTest {
 
         // adding a new entry gets added to cache after reload
         val testRegistry2 = testRegistry + ConceptMapRegistry(
-            data_element = "status",
+            data_element = "Appointment.status",
             registry_uuid = "newUUID",
             filename = "newFile",
             version = "1",
@@ -127,7 +127,7 @@ internal class ConceptMapCacheTest {
         // reload if version changes, also make sure if entries are deleted we remove them from cache
         val testRegistry3 = listOf(
             ConceptMapRegistry(
-                data_element = "status",
+                data_element = "Appointment.status",
                 registry_uuid = "12345",
                 filename = "file2.json",
                 version = "2",
@@ -136,7 +136,7 @@ internal class ConceptMapCacheTest {
                 tenant_id = "tenant"
             ),
             ConceptMapRegistry(
-                data_element = "status",
+                data_element = "Appointment.status",
                 registry_uuid = "nullTenantUUID",
                 filename = "universal.json",
                 version = "1",
@@ -200,7 +200,7 @@ internal class ConceptMapCacheTest {
         val mapped = cmClient.getConceptMapping(
             tenant,
             "Appointment",
-            "status",
+            "Appointment.status",
             sourceCoding
         )
         assertEquals(Coding(code = Code("targetValue1"), system = Uri("targetSystem1")), mapped?.first)
@@ -221,19 +221,19 @@ internal class ConceptMapCacheTest {
         ConceptMapCache.setNewRegistry(testRegistry, badTenant) // avoid reloads
         val sourceCoding = Coding(code = Code("sourceValue1"), system = Uri("sourceSystem1"))
         // bad tenant
-        assertNull(cmClient.getConceptMapping(badTenant, "Appointment", "status", sourceCoding))
+        assertNull(cmClient.getConceptMapping(badTenant, "Appointment", "Appointment.status", sourceCoding))
         // bad resource type
-        assertNull(cmClient.getConceptMapping(tenant, "Location", "status", sourceCoding))
+        assertNull(cmClient.getConceptMapping(tenant, "Location", "Location.status", sourceCoding))
         // bad element type
-        assertNull(cmClient.getConceptMapping(tenant, "Appointment", "telecom.use", sourceCoding))
+        assertNull(cmClient.getConceptMapping(tenant, "Appointment", "Appointment.telecom.use", sourceCoding))
         // everything good but registry has no map
-        assertNull(cmClient.getConceptMapping(tenant, "Appointment", "status", sourceCoding))
+        assertNull(cmClient.getConceptMapping(tenant, "Appointment", "Appointment.status", sourceCoding))
         // everything good, map exists, but look up value isn't mapped
         testRegistry[0].map = mapOf(
             SourceKey("sourceValuebad", "sourceSystembad")
                 to TargetValue("targetValue1", "targetSystem1")
         )
-        assertNull(cmClient.getConceptMapping(tenant, "Appointment", "status", sourceCoding))
+        assertNull(cmClient.getConceptMapping(tenant, "Appointment", "Appointment.status", sourceCoding))
 
         unmockkObject(ConceptMapCache)
     }

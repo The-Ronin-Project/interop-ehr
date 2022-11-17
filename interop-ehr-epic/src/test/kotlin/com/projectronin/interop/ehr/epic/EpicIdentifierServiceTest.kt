@@ -9,7 +9,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -246,7 +245,6 @@ class EpicIdentifierServiceTest {
         )
     }
 
-    @Disabled
     @Test
     fun `getLocationIdentifier properly cascades`() {
         val externalIdentifier = mockk<Identifier> {

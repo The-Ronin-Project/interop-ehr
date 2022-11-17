@@ -17,12 +17,15 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
 import com.projectronin.interop.fhir.r4.datatype.PatientLink
+import com.projectronin.interop.fhir.r4.datatype.Period
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Base64Binary
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
+import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.r4.datatype.primitive.PositiveInt
 import com.projectronin.interop.fhir.r4.datatype.primitive.PrimitiveData
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
@@ -30,12 +33,14 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
-import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.r4.valueset.IdentifierUse
 import com.projectronin.interop.fhir.r4.valueset.LinkType
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
+import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
+import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -49,10 +54,14 @@ import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class RoninPatientTest {
+    private lateinit var conceptMapClient: ConceptMapClient
+    private lateinit var roninPatient: RoninPatient
+
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
@@ -70,7 +79,12 @@ class RoninPatientTest {
         every { getMRNIdentifier(tenant, identifierList) } returns identifierList[0]
         every { getMRNIdentifier(tenant, emptyList()) } throws VendorIdentifierNotFoundException()
     }
-    private val roninPatient: RoninPatient = RoninPatient.create(identifierService)
+
+    @BeforeEach
+    fun setup() {
+        conceptMapClient = mockk()
+        roninPatient = RoninPatient.create(identifierService, conceptMapClient)
+    }
 
     @Test
     fun `always qualifies`() {
@@ -246,7 +260,8 @@ class RoninPatientTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_PAT_002: Either Patient.name.given and/or Patient.name.family SHALL be present or a Data Absent Reason Extension SHALL be present. @ Patient.name[0].name",
+                "ERROR USCORE_PAT_002: Either Patient.name.given and/or Patient.name.family SHALL be present " +
+                "or a Data Absent Reason Extension SHALL be present. @ Patient.name[0].name",
             exception.message
         )
     }
@@ -358,7 +373,8 @@ class RoninPatientTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_PAT_002: Either Patient.name.given and/or Patient.name.family SHALL be present or a Data Absent Reason Extension SHALL be present. @ Patient.name[0].name",
+                "ERROR USCORE_PAT_002: Either Patient.name.given and/or Patient.name.family SHALL be present " +
+                "or a Data Absent Reason Extension SHALL be present. @ Patient.name[0].name",
             exception.message
         )
     }
@@ -456,7 +472,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient, LocationContext(Patient::class)).alertIfErrors()
         }
 
         assertEquals(
@@ -469,6 +485,18 @@ class RoninPatientTest {
 
     @Test
     fun `validate fails for missing telecom value`() {
+
+        val emailSystemValue = ContactPointSystem.EMAIL.code
+        val emailSystemExtensionUri = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri
+        val emailSystemExtensionValue = DynamicValue(
+            type = DynamicValueType.CODING,
+            value = RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.system", emailSystemValue)
+        )
+        val emailSystem = Code(
+            value = emailSystemValue,
+            extension = listOf(Extension(url = emailSystemExtensionUri, value = emailSystemExtensionValue))
+        )
+
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
@@ -479,7 +507,7 @@ class RoninPatientTest {
             name = listOf(HumanName(family = "Doe")),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05"),
-            telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode()))
+            telecom = listOf(ContactPoint(system = emailSystem))
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -530,7 +558,7 @@ class RoninPatientTest {
     }
 
     @Test
-    fun `validate succeeds`() {
+    fun `validates patient with minimum attributes`() {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
@@ -548,6 +576,31 @@ class RoninPatientTest {
 
     @Test
     fun `transforms patient with all attributes`() {
+        conceptMapClient = mockk {
+            every {
+                getConceptMapping(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.system",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        code = Code(value = "telephone")
+                    )
+                )
+            } returns Pair(systemCoding("phone"), systemExtension("telephone"))
+            every {
+                getConceptMapping(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.use",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                        code = Code(value = "cell")
+                    )
+                )
+            } returns Pair(useCoding("mobile"), useExtension("cell"))
+        }
+        roninPatient = RoninPatient.create(identifierService, conceptMapClient)
         val patient = Patient(
             id = Id("12345"),
             meta = Meta(
@@ -574,9 +627,25 @@ class RoninPatientTest {
             name = listOf(HumanName(family = "Doe")),
             telecom = listOf(
                 ContactPoint(
-                    system = ContactPointSystem.PHONE.asCode(),
-                    use = ContactPointUse.MOBILE.asCode(),
-                    value = "8675309"
+                    id = "12345",
+                    extension = listOf(
+                        Extension(
+                            url = Uri("http://localhost/extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value")
+                        )
+                    ),
+                    system = Code(value = "telephone"),
+                    use = Code(value = "cell"),
+                    value = "8675309",
+                    rank = PositiveInt(1),
+                    period = Period(
+                        start = DateTime("2021-11-18"),
+                        end = DateTime("2022-11-17")
+                    )
+                ),
+                ContactPoint(
+                    system = Code("telephone"),
+                    value = "1112223333"
                 )
             ),
             gender = AdministrativeGender.FEMALE.asCode(),
@@ -594,8 +663,7 @@ class RoninPatientTest {
         )
 
         val oncologyPatient = roninPatient.transform(patient, tenant)
-
-        oncologyPatient!! // Force it to be treated as non-null
+        oncologyPatient!!
         assertEquals("Patient", oncologyPatient.resourceType)
         assertEquals(Id("test-12345"), oncologyPatient.id)
         assertEquals(
@@ -645,9 +713,79 @@ class RoninPatientTest {
         assertEquals(
             listOf(
                 ContactPoint(
+                    id = "12345",
+                    extension = listOf(
+                        Extension(
+                            url = Uri("http://localhost/extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value")
+                        )
+                    ),
                     value = "8675309",
-                    system = ContactPointSystem.PHONE.asCode(),
-                    use = ContactPointUse.MOBILE.asCode()
+                    system = Code(
+                        value = "phone",
+                        extension = listOf(
+                            Extension(
+                                url = Uri(value = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value),
+                                value = DynamicValue(
+                                    type = DynamicValueType.CODING,
+                                    value = Coding(
+                                        system = Uri(
+                                            value = RoninConceptMap.CODE_SYSTEMS.toUriString(
+                                                tenant,
+                                                "ContactPoint.system"
+                                            )
+                                        ),
+                                        code = Code(value = "telephone")
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    use = Code(
+                        value = "mobile",
+                        extension = listOf(
+                            Extension(
+                                url = Uri(value = RoninExtension.TENANT_SOURCE_TELECOM_USE.value),
+                                value = DynamicValue(
+                                    type = DynamicValueType.CODING,
+                                    value = Coding(
+                                        system = Uri(
+                                            value = RoninConceptMap.CODE_SYSTEMS.toUriString(
+                                                tenant,
+                                                "ContactPoint.use"
+                                            )
+                                        ),
+                                        code = Code(value = "cell")
+                                    )
+                                )
+                            )
+                        )
+                    ),
+                    rank = PositiveInt(1),
+                    period = Period(start = DateTime(value = "2021-11-18"), end = DateTime(value = "2022-11-17"))
+                ),
+                ContactPoint(
+                    value = "1112223333",
+                    system = Code(
+                        value = "phone",
+                        extension = listOf(
+                            Extension(
+                                url = Uri(value = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value),
+                                value = DynamicValue(
+                                    type = DynamicValueType.CODING,
+                                    value = Coding(
+                                        system = Uri(
+                                            value = RoninConceptMap.CODE_SYSTEMS.toUriString(
+                                                tenant,
+                                                "ContactPoint.system"
+                                            )
+                                        ),
+                                        code = Code(value = "telephone")
+                                    )
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             oncologyPatient.telecom
@@ -672,7 +810,7 @@ class RoninPatientTest {
     }
 
     @Test
-    fun `transforms patient with only required attributes`() {
+    fun `transforms patient with minimum attributes`() {
         val patient = Patient(
             id = Id("12345"),
             identifier = identifierList,
@@ -688,7 +826,7 @@ class RoninPatientTest {
             code = Code("NI"),
             display = "NoInformation"
         )
-        oncologyPatient!! // Force it to be treated as non-null
+        oncologyPatient!!
         assertEquals("Patient", oncologyPatient.resourceType)
         assertEquals(Id("test-12345"), oncologyPatient.id)
         assertEquals(
@@ -735,13 +873,6 @@ class RoninPatientTest {
         val patient = Patient(
             identifier = identifierList,
             name = listOf(HumanName(family = "Doe")),
-            telecom = listOf(
-                ContactPoint(
-                    system = ContactPointSystem.PHONE.asCode(),
-                    use = ContactPointUse.MOBILE.asCode(),
-                    value = "8675309"
-                )
-            ),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05"),
             address = listOf(Address(country = "USA")),
@@ -828,7 +959,7 @@ class RoninPatientTest {
             code = Code("NI"),
             display = "NoInformation"
         )
-        oncologyPatient!! // Force it to be treated as non-null
+        oncologyPatient!!
         assertEquals("Patient", oncologyPatient.resourceType)
         assertEquals(Id("test-12345"), oncologyPatient.id)
         assertEquals(
@@ -870,4 +1001,36 @@ class RoninPatientTest {
         assertNull(oncologyPatient.managingOrganization)
         assertEquals(listOf<PatientLink>(), oncologyPatient.link)
     }
+
+    private fun systemCoding(value: String) = Coding(
+        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+        code = Code(value = value)
+    )
+
+    private fun systemExtension(value: String) = Extension(
+        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem"),
+        value = DynamicValue(
+            type = DynamicValueType.CODING,
+            value = Coding(
+                system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                code = Code(value = value)
+            )
+        )
+    )
+
+    private fun useCoding(value: String) = Coding(
+        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+        code = Code(value = value)
+    )
+
+    private fun useExtension(value: String) = Extension(
+        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomUse"),
+        value = DynamicValue(
+            type = DynamicValueType.CODING,
+            value = Coding(
+                system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                code = Code(value = value)
+            )
+        )
+    )
 }

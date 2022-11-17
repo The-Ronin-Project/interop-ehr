@@ -24,8 +24,8 @@ class ConceptMapClient(private val ociClient: OCIClient) {
      *
      * @param tenant the [Tenant] currently in use
      * @param resourceType the [String] representation of the type of resource, i.e. "Appointment"
-     * @param elementName the name of the element being mapped, i.e. "status" or "telecom.use". This must match
-     *      what INFX has decided is the name of the element.
+     * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
+     *      This must match what INFX has decided is the name of the element. Includes the resourceType as prefix.
      * @param coding a FHIR [Coding] to be mapped. value and system must not be null.
      */
     fun getConceptMapping(
