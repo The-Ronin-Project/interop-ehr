@@ -360,7 +360,8 @@ class EpicAppointmentService(
         "phoned patient" to AppointmentStatus.BOOKED,
         "present" to AppointmentStatus.ARRIVED,
         "proposed" to AppointmentStatus.PROPOSED,
-        "scheduled" to AppointmentStatus.BOOKED
+        "scheduled" to AppointmentStatus.BOOKED,
+        "hh/hsp incomplete" to AppointmentStatus.CANCELLED
     )
 
     /**

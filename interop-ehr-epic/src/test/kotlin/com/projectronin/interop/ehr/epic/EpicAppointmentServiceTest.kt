@@ -2481,7 +2481,8 @@ class EpicAppointmentServiceTest {
             "Phoned Patient" to AppointmentStatus.BOOKED,
             "Present" to AppointmentStatus.ARRIVED,
             "Proposed" to AppointmentStatus.PROPOSED,
-            "Scheduled" to AppointmentStatus.BOOKED
+            "Scheduled" to AppointmentStatus.BOOKED,
+            "HH/HSP Incomplete" to AppointmentStatus.CANCELLED
         )
 
         val epicAppointmentService = EpicAppointmentService(
