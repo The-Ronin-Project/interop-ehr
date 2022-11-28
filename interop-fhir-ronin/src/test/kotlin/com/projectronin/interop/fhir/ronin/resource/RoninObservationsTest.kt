@@ -20,6 +20,7 @@ import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyHeight
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyWeight
 import com.projectronin.interop.fhir.ronin.resource.observation.USCoreVitalSignsValidator
+import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -259,6 +260,7 @@ class RoninObservationsTest {
             Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_WEIGHT.value))),
             transformed.meta
         )
+        assertEquals(observation.id?.value, transformed.id?.unlocalize(tenant)?.value)
     }
 
     @Test
@@ -298,6 +300,7 @@ class RoninObservationsTest {
             Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value))),
             transformed.meta
         )
+        assertEquals(observation.id?.value, transformed.id?.unlocalize(tenant)?.value)
     }
 
     @Test
@@ -330,6 +333,7 @@ class RoninObservationsTest {
             Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_VITAL_SIGNS.value))),
             transformed.meta
         )
+        assertEquals(observation.id?.value, transformed.id?.unlocalize(tenant)?.value)
     }
 
     @Test
@@ -362,5 +366,6 @@ class RoninObservationsTest {
             Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_LABORATORY_RESULT.value))),
             transformed.meta
         )
+        assertEquals(observation.id?.value, transformed.id?.unlocalize(tenant)?.value)
     }
 }

@@ -110,11 +110,12 @@ class MultipleProfileResourceTest {
 
         every { testProfile1.qualifies(location) } returns true
         every {
-            testProfile1.transform(
+            testProfile1.transformInternal(
                 location,
+                any(),
                 tenant
             )
-        } returns location // The "transformation" in this test actually occurs inside the base class.
+        } returns Pair(location, Validation())
 
         every { testProfile1.qualifies(transformedLocation) } returns true
         every { testProfile1.validate(transformedLocation, eq(LocationContext(Location::class))) } returns Validation()

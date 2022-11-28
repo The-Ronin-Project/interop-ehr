@@ -14,6 +14,7 @@ import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -118,6 +119,7 @@ class RoninConditionsTest {
             Meta(profile = listOf(Canonical(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value))),
             transformed.meta
         )
+        assertEquals(condition.id?.value, transformed.id?.unlocalize(tenant)?.value)
     }
 
     @Test
@@ -157,5 +159,6 @@ class RoninConditionsTest {
             Meta(profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value))),
             transformed.meta
         )
+        assertEquals(condition.id?.value, transformed.id?.unlocalize(tenant)?.value)
     }
 }
