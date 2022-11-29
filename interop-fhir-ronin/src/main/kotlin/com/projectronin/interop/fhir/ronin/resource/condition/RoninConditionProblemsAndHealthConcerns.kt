@@ -34,6 +34,10 @@ object RoninConditionProblemsAndHealthConcerns :
     override fun validateRonin(element: Condition, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, validation)
+
+            requireCodeableConcept("code", element.code, parentContext, this)
+
+            requireCodeCoding("code", element.code?.coding, parentContext, this)
         }
     }
 

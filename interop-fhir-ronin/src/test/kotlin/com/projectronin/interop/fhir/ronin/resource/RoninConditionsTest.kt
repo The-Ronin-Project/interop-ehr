@@ -8,14 +8,13 @@ import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
-import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
-import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -30,7 +29,7 @@ class RoninConditionsTest {
 
     @Test
     fun `always qualifies`() {
-        assertTrue(RoninConditions.qualifies(Condition(subject = Reference(display = "reference".asFHIR()))))
+        assertTrue(RoninConditions.qualifies(Condition(subject = Reference(display = FHIRString("reference")))))
     }
 
     @Test
@@ -38,19 +37,11 @@ class RoninConditionsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                )
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = FHIRString("test")),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = FHIRString("12345"))
             ),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
+            code = CodeableConcept(text = FHIRString("code")),
+            subject = Reference(display = FHIRString("reference")),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -71,19 +62,19 @@ class RoninConditionsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = FHIRString("test")),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = FHIRString("12345"))
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = FHIRString("Non-small cell lung cancer")
+                    )
                 )
             ),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(display = FHIRString("reference")),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -104,7 +95,7 @@ class RoninConditionsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(value = "id".asFHIR())
+                Identifier(value = FHIRString("id"))
             ),
             category = listOf(
                 CodeableConcept(
@@ -121,12 +112,12 @@ class RoninConditionsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = "Non-small cell lung cancer".asFHIR()
+                        display = FHIRString("Non-small cell lung cancer")
                     )
                 )
             ),
             subject = Reference(
-                reference = "Patient/roninPatientExample01".asFHIR()
+                reference = FHIRString("Patient/roninPatientExample01")
             )
         )
 
@@ -136,7 +127,6 @@ class RoninConditionsTest {
             Meta(profile = listOf(Canonical(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value))),
             transformed.meta
         )
-        assertEquals(condition.id?.value, transformed.id?.unlocalize(tenant)?.value)
     }
 
     @Test
@@ -144,7 +134,7 @@ class RoninConditionsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(value = "id".asFHIR())
+                Identifier(value = FHIRString("id"))
             ),
             category = listOf(
                 CodeableConcept(
@@ -161,12 +151,12 @@ class RoninConditionsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = "Non-small cell lung cancer".asFHIR()
+                        display = FHIRString("Non-small cell lung cancer")
                     )
                 )
             ),
             subject = Reference(
-                reference = "Patient/roninPatientExample01".asFHIR()
+                reference = FHIRString("Patient/roninPatientExample01")
             )
         )
 
@@ -176,6 +166,5 @@ class RoninConditionsTest {
             Meta(profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value))),
             transformed.meta
         )
-        assertEquals(condition.id?.value, transformed.id?.unlocalize(tenant)?.value)
     }
 }

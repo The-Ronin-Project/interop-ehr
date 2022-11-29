@@ -13,6 +13,7 @@ import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
+import com.projectronin.interop.fhir.ronin.resource.condition.RoninConditionProblemsAndHealthConcerns
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
@@ -68,7 +69,7 @@ abstract class BaseRoninProfile<T : Resource<T>>(
     /**
      * When the [Coding] list for a [CodeableConcept] contains no [Coding] that passes validation for the Ronin profile.
      */
-    private fun roninInvalidCodingError(field: String) = FHIRError(
+    fun roninInvalidCodingError(field: String) = FHIRError(
         code = "RONIN_NOV_CODING_001",
         severity = ValidationIssueSeverity.ERROR,
         description = "Coding list entry missing the required fields",
@@ -196,6 +197,22 @@ abstract class BaseRoninProfile<T : Resource<T>>(
                 checkTrue(
                     coding.filter { it.userSelected?.value == true }.size <= 1,
                     roninInvalidUserSelectError(parentFieldName),
+                    parentContext
+                )
+            }
+        }
+    }
+
+    /**
+     * Validates that the [Coding] list for CNDPAHC & CNDEDX is not empty.  This is CNDPAHC & CNDEDX only requirement
+     */
+    protected fun requireCodeCoding(parentFieldName: String, coding: List<Coding>?, parentContext: LocationContext, validation: Validation) {
+        // CNDPAHC & CNDEDX only requirement, borrowing roninInvalidCodingError
+        validation.apply {
+            coding?.let {
+                checkTrue(
+                    it.isNotEmpty(),
+                    RoninConditionProblemsAndHealthConcerns.roninInvalidCodingError(parentFieldName),
                     parentContext
                 )
             }

@@ -17,6 +17,7 @@ import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
@@ -53,8 +54,16 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `does not qualify when no categories`() {
         val condition = Condition(
             id = Id("12345"),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR())
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = FHIRString("Non-small cell lung cancer")
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference"))
         )
 
         val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
@@ -65,9 +74,19 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `does not qualify when category with no codings`() {
         val condition = Condition(
             id = Id("12345"),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
-            category = listOf(CodeableConcept(text = "category".asFHIR()))
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = FHIRString("Non-small cell lung cancer")
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference")),
+            category = listOf(
+                CodeableConcept(text = FHIRString("category"))
+            )
         )
 
         val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
@@ -75,11 +94,19 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
-    fun `does not qualify when coding code is not for a qualifying value`() {
+    fun `does not qualify when category coding code is not for a qualifying value`() {
         val condition = Condition(
             id = Id("12345"),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = FHIRString("Non-small cell lung cancer")
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference")),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -97,11 +124,19 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
-    fun `does not qualify when coding code is for qualifying code and wrong system`() {
+    fun `does not qualify when category coding code is for qualifying code and wrong system`() {
         val condition = Condition(
             id = Id("12345"),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = FHIRString("Non-small cell lung cancer")
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference")),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -122,8 +157,16 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `qualifies for problem list item`() {
         val condition = Condition(
             id = Id("12345"),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = FHIRString("Non-small cell lung cancer")
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference")),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -144,8 +187,16 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `qualifies for health concern`() {
         val condition = Condition(
             id = Id("12345"),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = FHIRString("Non-small cell lung cancer")
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference")),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -166,8 +217,16 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate checks ronin identifiers`() {
         val condition = Condition(
             id = Id("12345"),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = FHIRString("Non-small cell lung cancer")
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference")),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -188,6 +247,41 @@ class RoninConditionProblemsAndHealthConcernsTest {
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ Condition.identifier\n" +
                 "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Condition.identifier",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if code coding is empty`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = FHIRString("test")),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = FHIRString("12345"))
+            ),
+            code = CodeableConcept(
+                coding = listOf()
+            ),
+            subject = Reference(display = FHIRString("reference")),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Condition.code",
             exception.message
         )
     }
@@ -234,7 +328,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
-    fun `validate fails if not a qualifying category`() {
+    fun `validate fails if not a qualifying category and no code coding`() {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
@@ -269,6 +363,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Condition.code\n" +
                 "ERROR USCORE_CNDPAHC_001: One of the following condition categories required for US Core Condition Problem and Health Concerns profile: problem-list-item, health-concern @ Condition.category",
             exception.message
         )
@@ -290,8 +385,16 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     value = "12345".asFHIR()
                 )
             ),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = FHIRString("Non-small cell lung cancer")
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference")),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -327,6 +430,123 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
+    fun `validate fails with missing code coding code`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = FHIRString("test")),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = FHIRString("12345"))
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        display = FHIRString("Non-small cell lung cancer")
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference")),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Condition.code",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with missing code coding system`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = FHIRString("test")),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = FHIRString("12345"))
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        code = Code("254637007"),
+                        display = FHIRString("Non-small cell lung cancer")
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference")),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Condition.code",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with missing code coding display`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = FHIRString("test")),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = FHIRString("12345"))
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        code = Code("254637007"),
+                        system = Uri("http://snomed.info/sct"),
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference")),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Condition.code",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate succeeds`() {
         val condition = Condition(
             id = Id("12345"),
@@ -342,8 +562,16 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     value = "12345".asFHIR()
                 )
             ),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = FHIRString("Non-small cell lung cancer")
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference")),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -362,8 +590,49 @@ class RoninConditionProblemsAndHealthConcernsTest {
     @Test
     fun `transform fails for condition with no ID`() {
         val condition = Condition(
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = FHIRString("Non-small cell lung cancer")
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference")),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        val transformed = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
+        assertNull(transformed)
+    }
+
+    @Test
+    fun `transform fails for condition with no code coding display`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = FHIRString("test")),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = FHIRString("12345"))
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                    )
+                )
+            ),
+            subject = Reference(display = FHIRString("reference")),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
