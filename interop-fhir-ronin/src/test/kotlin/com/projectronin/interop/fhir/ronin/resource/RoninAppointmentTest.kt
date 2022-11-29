@@ -16,6 +16,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.validate.resource.R4AppointmentValidator
@@ -53,7 +54,7 @@ class RoninAppointmentTest {
                     status = AppointmentStatus.CANCELLED.asCode(),
                     participant = listOf(
                         Participant(
-                            actor = Reference(display = "actor"),
+                            actor = Reference(display = "actor".asFHIR()),
                             status = ParticipationStatus.ACCEPTED.asCode()
                         )
                     )
@@ -69,7 +70,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor"),
+                    actor = Reference(display = "actor".asFHIR()),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -92,13 +93,21 @@ class RoninAppointmentTest {
         val appointment = Appointment(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor"),
+                    actor = Reference(display = "actor".asFHIR()),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -131,13 +140,21 @@ class RoninAppointmentTest {
         val appointment = Appointment(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor"),
+                    actor = Reference(display = "actor".asFHIR()),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -155,7 +172,7 @@ class RoninAppointmentTest {
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             extension = listOf(
                 Extension(
@@ -169,29 +186,29 @@ class RoninAppointmentTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value")
                 )
             ),
-            identifier = listOf(Identifier(value = "id")),
+            identifier = listOf(Identifier(value = "id".asFHIR())),
             status = AppointmentStatus.CANCELLED.asCode(),
-            cancelationReason = CodeableConcept(text = "cancel reason"),
-            serviceCategory = listOf(CodeableConcept(text = "service category")),
-            serviceType = listOf(CodeableConcept(text = "service type")),
-            specialty = listOf(CodeableConcept(text = "specialty")),
-            appointmentType = CodeableConcept(text = "appointment type"),
-            reasonCode = listOf(CodeableConcept(text = "reason code")),
-            reasonReference = listOf(Reference(display = "reason reference")),
-            priority = 1,
-            description = "appointment test",
-            supportingInformation = listOf(Reference(display = "supporting info")),
+            cancelationReason = CodeableConcept(text = "cancel reason".asFHIR()),
+            serviceCategory = listOf(CodeableConcept(text = "service category".asFHIR())),
+            serviceType = listOf(CodeableConcept(text = "service type".asFHIR())),
+            specialty = listOf(CodeableConcept(text = "specialty".asFHIR())),
+            appointmentType = CodeableConcept(text = "appointment type".asFHIR()),
+            reasonCode = listOf(CodeableConcept(text = "reason code".asFHIR())),
+            reasonReference = listOf(Reference(display = "reason reference".asFHIR())),
+            priority = 1.asFHIR(),
+            description = "appointment test".asFHIR(),
+            supportingInformation = listOf(Reference(display = "supporting info".asFHIR())),
             start = Instant("2017-01-01T00:00:00Z"),
             end = Instant("2017-01-01T01:00:00Z"),
-            minutesDuration = 15,
-            slot = listOf(Reference(display = "slot")),
+            minutesDuration = 15.asFHIR(),
+            slot = listOf(Reference(display = "slot".asFHIR())),
             created = DateTime("2021-11-16"),
-            comment = "comment",
-            patientInstruction = "patient instruction",
-            basedOn = listOf(Reference(display = "based on")),
+            comment = "comment".asFHIR(),
+            patientInstruction = "patient instruction".asFHIR(),
+            basedOn = listOf(Reference(display = "based on".asFHIR())),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor"),
+                    actor = Reference(display = "actor".asFHIR()),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
@@ -209,7 +226,7 @@ class RoninAppointmentTest {
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"), transformed.text)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             transformed.contained
@@ -234,34 +251,42 @@ class RoninAppointmentTest {
         )
         assertEquals(
             listOf(
-                Identifier(value = "id"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(value = "id".asFHIR()),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
         assertEquals(AppointmentStatus.CANCELLED.asCode(), transformed.status)
-        assertEquals(CodeableConcept(text = "cancel reason"), transformed.cancelationReason)
-        assertEquals((listOf(CodeableConcept(text = "service category"))), transformed.serviceCategory)
-        assertEquals((listOf(CodeableConcept(text = "service type"))), transformed.serviceType)
-        assertEquals((listOf(CodeableConcept(text = "specialty"))), transformed.specialty)
-        assertEquals(CodeableConcept(text = "appointment type"), transformed.appointmentType)
-        assertEquals(listOf(CodeableConcept(text = "reason code")), transformed.reasonCode)
-        assertEquals(listOf(Reference(display = "reason reference")), transformed.reasonReference)
-        assertEquals(1, transformed.priority)
-        assertEquals("appointment test", transformed.description)
-        assertEquals(listOf(Reference(display = "supporting info")), transformed.supportingInformation)
+        assertEquals(CodeableConcept(text = "cancel reason".asFHIR()), transformed.cancelationReason)
+        assertEquals((listOf(CodeableConcept(text = "service category".asFHIR()))), transformed.serviceCategory)
+        assertEquals((listOf(CodeableConcept(text = "service type".asFHIR()))), transformed.serviceType)
+        assertEquals((listOf(CodeableConcept(text = "specialty".asFHIR()))), transformed.specialty)
+        assertEquals(CodeableConcept(text = "appointment type".asFHIR()), transformed.appointmentType)
+        assertEquals(listOf(CodeableConcept(text = "reason code".asFHIR())), transformed.reasonCode)
+        assertEquals(listOf(Reference(display = "reason reference".asFHIR())), transformed.reasonReference)
+        assertEquals(1.asFHIR(), transformed.priority)
+        assertEquals("appointment test".asFHIR(), transformed.description)
+        assertEquals(listOf(Reference(display = "supporting info".asFHIR())), transformed.supportingInformation)
         assertEquals(Instant(value = "2017-01-01T00:00:00Z"), transformed.start)
         assertEquals(Instant(value = "2017-01-01T01:00:00Z"), transformed.end)
-        assertEquals(15, transformed.minutesDuration)
-        assertEquals(listOf(Reference(display = "slot")), transformed.slot)
+        assertEquals(15.asFHIR(), transformed.minutesDuration)
+        assertEquals(listOf(Reference(display = "slot".asFHIR())), transformed.slot)
         assertEquals(DateTime(value = "2021-11-16"), transformed.created)
-        assertEquals("patient instruction", transformed.patientInstruction)
-        assertEquals(listOf(Reference(display = "based on")), transformed.basedOn)
+        assertEquals("patient instruction".asFHIR(), transformed.patientInstruction)
+        assertEquals(listOf(Reference(display = "based on".asFHIR())), transformed.basedOn)
         assertEquals(
             listOf(
                 Participant(
-                    actor = Reference(display = "actor"),
+                    actor = Reference(display = "actor".asFHIR()),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
@@ -277,7 +302,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor"),
+                    actor = Reference(display = "actor".asFHIR()),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -299,8 +324,16 @@ class RoninAppointmentTest {
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
@@ -325,7 +358,7 @@ class RoninAppointmentTest {
         assertEquals(
             listOf(
                 Participant(
-                    actor = Reference(display = "actor"),
+                    actor = Reference(display = "actor".asFHIR()),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
@@ -340,7 +373,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor"),
+                    actor = Reference(display = "actor".asFHIR()),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )

@@ -15,8 +15,10 @@ import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.PractitionerRole
 import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerRoleValidator
@@ -56,8 +58,8 @@ class RoninPractitionerRoleTest {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
             identifier = listOf(),
-            practitioner = Reference(reference = "Practitioner/1234"),
-            organization = Reference(reference = "Organization/5678")
+            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+            organization = Reference(reference = "Organization/5678".asFHIR())
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -77,11 +79,19 @@ class RoninPractitionerRoleTest {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             practitioner = null,
-            organization = Reference(reference = "Organization/5678")
+            organization = Reference(reference = "Organization/5678".asFHIR())
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -100,11 +110,19 @@ class RoninPractitionerRoleTest {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
-            practitioner = Reference(reference = "Practitioner/1234"),
-            organization = Reference(reference = "Organization/5678"),
+            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+            organization = Reference(reference = "Organization/5678".asFHIR()),
             telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode()))
         )
 
@@ -124,14 +142,22 @@ class RoninPractitionerRoleTest {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
-            practitioner = Reference(reference = "Practitioner/1234"),
-            organization = Reference(reference = "Organization/5678"),
+            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+            organization = Reference(reference = "Organization/5678".asFHIR()),
             telecom = listOf(
                 ContactPoint(use = ContactPointUse.HOME.asCode()),
-                ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "josh@projectronin.com"),
+                ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "josh@projectronin.com".asFHIR()),
                 ContactPoint(system = ContactPointSystem.PHONE.asCode())
             )
         )
@@ -153,11 +179,19 @@ class RoninPractitionerRoleTest {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
-            practitioner = Reference(reference = "Practitioner/1234"),
-            organization = Reference(reference = "Organization/5678")
+            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+            organization = Reference(reference = "Organization/5678".asFHIR())
         )
 
         mockkObject(R4PractitionerRoleValidator)
@@ -192,11 +226,19 @@ class RoninPractitionerRoleTest {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
-            practitioner = Reference(reference = "Practitioner/1234"),
-            organization = Reference(reference = "Organization/5678")
+            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+            organization = Reference(reference = "Organization/5678".asFHIR())
         )
 
         RoninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
@@ -219,19 +261,19 @@ class RoninPractitionerRoleTest {
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
-            identifier = listOf(Identifier(value = "id")),
-            active = true,
+            identifier = listOf(Identifier(value = "id".asFHIR())),
+            active = FHIRBoolean.TRUE,
             period = Period(end = DateTime("2022")),
-            practitioner = Reference(reference = "Practitioner/1234"),
-            code = listOf(CodeableConcept(text = "code")),
-            specialty = listOf(CodeableConcept(text = "specialty")),
-            telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309")),
-            availableTime = listOf(AvailableTime(allDay = false)),
-            notAvailable = listOf(NotAvailable(description = "Not available now")),
-            availabilityExceptions = "exceptions",
-            endpoint = listOf(Reference(reference = "Endpoint/1357"))
+            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+            code = listOf(CodeableConcept(text = "code".asFHIR())),
+            specialty = listOf(CodeableConcept(text = "specialty".asFHIR())),
+            telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR())),
+            availableTime = listOf(AvailableTime(allDay = FHIRBoolean.FALSE)),
+            notAvailable = listOf(NotAvailable(description = "Not available now".asFHIR())),
+            availabilityExceptions = "exceptions".asFHIR(),
+            endpoint = listOf(Reference(reference = "Endpoint/1357".asFHIR()))
         )
 
         val transformed = RoninPractitionerRole.transform(practitionerRole, tenant)
@@ -245,7 +287,7 @@ class RoninPractitionerRoleTest {
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"), transformed.text)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             transformed.contained
@@ -254,28 +296,36 @@ class RoninPractitionerRoleTest {
         assertEquals(0, transformed.modifierExtension.size)
         assertEquals(
             listOf(
-                Identifier(value = "id"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(value = "id".asFHIR()),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
-        assertEquals(true, transformed.active)
+        assertEquals(FHIRBoolean.TRUE, transformed.active)
         assertEquals(Period(end = DateTime("2022")), transformed.period)
-        assertEquals(Reference(reference = "Practitioner/test-1234"), transformed.practitioner)
+        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.practitioner)
         assertNull(transformed.organization)
-        assertEquals(listOf(CodeableConcept(text = "code")), transformed.code)
-        assertEquals(listOf(CodeableConcept(text = "specialty")), transformed.specialty)
+        assertEquals(listOf(CodeableConcept(text = "code".asFHIR())), transformed.code)
+        assertEquals(listOf(CodeableConcept(text = "specialty".asFHIR())), transformed.specialty)
         assertEquals(0, transformed.location.size)
         assertEquals(0, transformed.healthcareService.size)
         assertEquals(
-            listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309")),
+            listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR())),
             transformed.telecom
         )
-        assertEquals(listOf(AvailableTime(allDay = false)), transformed.availableTime)
-        assertEquals(listOf(NotAvailable(description = "Not available now")), transformed.notAvailable)
-        assertEquals("exceptions", transformed.availabilityExceptions)
-        assertEquals(listOf(Reference(reference = "Endpoint/test-1357")), transformed.endpoint)
+        assertEquals(listOf(AvailableTime(allDay = FHIRBoolean.FALSE)), transformed.availableTime)
+        assertEquals(listOf(NotAvailable(description = "Not available now".asFHIR())), transformed.notAvailable)
+        assertEquals("exceptions".asFHIR(), transformed.availabilityExceptions)
+        assertEquals(listOf(Reference(reference = "Endpoint/test-1357".asFHIR())), transformed.endpoint)
     }
 
     @Test
@@ -287,7 +337,7 @@ class RoninPractitionerRoleTest {
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             extension = listOf(
                 Extension(
@@ -301,20 +351,20 @@ class RoninPractitionerRoleTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value")
                 )
             ),
-            identifier = listOf(Identifier(value = "id")),
-            active = true,
+            identifier = listOf(Identifier(value = "id".asFHIR())),
+            active = FHIRBoolean.TRUE,
             period = Period(end = DateTime("2022")),
-            practitioner = Reference(reference = "Practitioner/1234"),
-            organization = Reference(reference = "Organization/5678"),
-            code = listOf(CodeableConcept(text = "code")),
-            specialty = listOf(CodeableConcept(text = "specialty")),
-            location = listOf(Reference(reference = "Location/9012")),
-            healthcareService = listOf(Reference(reference = "HealthcareService/3456")),
-            telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309")),
-            availableTime = listOf(AvailableTime(allDay = false)),
-            notAvailable = listOf(NotAvailable(description = "Not available now")),
-            availabilityExceptions = "exceptions",
-            endpoint = listOf(Reference(reference = "Endpoint/1357"))
+            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+            organization = Reference(reference = "Organization/5678".asFHIR()),
+            code = listOf(CodeableConcept(text = "code".asFHIR())),
+            specialty = listOf(CodeableConcept(text = "specialty".asFHIR())),
+            location = listOf(Reference(reference = "Location/9012".asFHIR())),
+            healthcareService = listOf(Reference(reference = "HealthcareService/3456".asFHIR())),
+            telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR())),
+            availableTime = listOf(AvailableTime(allDay = FHIRBoolean.FALSE)),
+            notAvailable = listOf(NotAvailable(description = "Not available now".asFHIR())),
+            availabilityExceptions = "exceptions".asFHIR(),
+            endpoint = listOf(Reference(reference = "Endpoint/1357".asFHIR()))
         )
 
         val transformed = RoninPractitionerRole.transform(practitionerRole, tenant)
@@ -328,7 +378,7 @@ class RoninPractitionerRoleTest {
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"), transformed.text)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             transformed.contained
@@ -353,39 +403,47 @@ class RoninPractitionerRoleTest {
         )
         assertEquals(
             listOf(
-                Identifier(value = "id"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(value = "id".asFHIR()),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
-        assertEquals(true, transformed.active)
+        assertEquals(FHIRBoolean.TRUE, transformed.active)
         assertEquals(Period(end = DateTime("2022")), transformed.period)
-        assertEquals(Reference(reference = "Practitioner/test-1234"), transformed.practitioner)
-        assertEquals(Reference(reference = "Organization/test-5678"), transformed.organization)
-        assertEquals(listOf(CodeableConcept(text = "code")), transformed.code)
-        assertEquals(listOf(CodeableConcept(text = "specialty")), transformed.specialty)
-        assertEquals(listOf(Reference(reference = "Location/test-9012")), transformed.location)
+        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.practitioner)
+        assertEquals(Reference(reference = "Organization/test-5678".asFHIR()), transformed.organization)
+        assertEquals(listOf(CodeableConcept(text = "code".asFHIR())), transformed.code)
+        assertEquals(listOf(CodeableConcept(text = "specialty".asFHIR())), transformed.specialty)
+        assertEquals(listOf(Reference(reference = "Location/test-9012".asFHIR())), transformed.location)
         assertEquals(
-            listOf(Reference(reference = "HealthcareService/test-3456")),
+            listOf(Reference(reference = "HealthcareService/test-3456".asFHIR())),
             transformed.healthcareService
         )
         assertEquals(
-            listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309")),
+            listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR())),
             transformed.telecom
         )
-        assertEquals(listOf(AvailableTime(allDay = false)), transformed.availableTime)
-        assertEquals(listOf(NotAvailable(description = "Not available now")), transformed.notAvailable)
-        assertEquals("exceptions", transformed.availabilityExceptions)
-        assertEquals(listOf(Reference(reference = "Endpoint/test-1357")), transformed.endpoint)
+        assertEquals(listOf(AvailableTime(allDay = FHIRBoolean.FALSE)), transformed.availableTime)
+        assertEquals(listOf(NotAvailable(description = "Not available now".asFHIR())), transformed.notAvailable)
+        assertEquals("exceptions".asFHIR(), transformed.availabilityExceptions)
+        assertEquals(listOf(Reference(reference = "Endpoint/test-1357".asFHIR())), transformed.endpoint)
     }
 
     @Test
     fun `transforms practitioner role with only required attributes`() {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
-            practitioner = Reference(reference = "Practitioner/1234"),
-            organization = Reference(reference = "Organization/5678")
+            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+            organization = Reference(reference = "Organization/5678".asFHIR())
         )
 
         val transformed = RoninPractitionerRole.transform(practitionerRole, tenant)
@@ -405,15 +463,23 @@ class RoninPractitionerRoleTest {
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
         assertNull(transformed.active)
         assertNull(transformed.period)
-        assertEquals(Reference(reference = "Practitioner/test-1234"), transformed.practitioner)
-        assertEquals(Reference(reference = "Organization/test-5678"), transformed.organization)
+        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.practitioner)
+        assertEquals(Reference(reference = "Organization/test-5678".asFHIR()), transformed.organization)
         assertEquals(listOf<CodeableConcept>(), transformed.code)
         assertEquals(listOf<CodeableConcept>(), transformed.specialty)
         assertEquals(listOf<Reference>(), transformed.location)
@@ -429,9 +495,9 @@ class RoninPractitionerRoleTest {
     fun `transforms practitioner role with all telecoms filtered`() {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
-            practitioner = Reference(reference = "Practitioner/1234"),
-            organization = Reference(reference = "Organization/5678"),
-            telecom = listOf(ContactPoint(id = "first"), ContactPoint(id = "second"))
+            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+            organization = Reference(reference = "Organization/5678".asFHIR()),
+            telecom = listOf(ContactPoint(id = "first".asFHIR()), ContactPoint(id = "second".asFHIR()))
         )
 
         val transformed = RoninPractitionerRole.transform(practitionerRole, tenant)
@@ -451,15 +517,23 @@ class RoninPractitionerRoleTest {
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
         assertNull(transformed.active)
         assertNull(transformed.period)
-        assertEquals(Reference(reference = "Practitioner/test-1234"), transformed.practitioner)
-        assertEquals(Reference(reference = "Organization/test-5678"), transformed.organization)
+        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.practitioner)
+        assertEquals(Reference(reference = "Organization/test-5678".asFHIR()), transformed.organization)
         assertEquals(listOf<CodeableConcept>(), transformed.code)
         assertEquals(listOf<CodeableConcept>(), transformed.specialty)
         assertEquals(listOf<Reference>(), transformed.location)
@@ -475,13 +549,13 @@ class RoninPractitionerRoleTest {
     fun `transforms practitioner role with some telecoms filtered`() {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
-            practitioner = Reference(reference = "Practitioner/1234"),
-            organization = Reference(reference = "Organization/5678"),
+            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+            organization = Reference(reference = "Organization/5678".asFHIR()),
             telecom = listOf(
-                ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309"),
-                ContactPoint(id = "second"),
-                ContactPoint(id = "third"),
-                ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org")
+                ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
+                ContactPoint(id = "second".asFHIR()),
+                ContactPoint(id = "third".asFHIR()),
+                ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR())
             )
         )
 
@@ -502,23 +576,31 @@ class RoninPractitionerRoleTest {
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
         assertNull(transformed.active)
         assertNull(transformed.period)
-        assertEquals(Reference(reference = "Practitioner/test-1234"), transformed.practitioner)
-        assertEquals(Reference(reference = "Organization/test-5678"), transformed.organization)
+        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.practitioner)
+        assertEquals(Reference(reference = "Organization/test-5678".asFHIR()), transformed.organization)
         assertEquals(listOf<CodeableConcept>(), transformed.code)
         assertEquals(listOf<CodeableConcept>(), transformed.specialty)
         assertEquals(listOf<Reference>(), transformed.location)
         assertEquals(listOf<Reference>(), transformed.healthcareService)
         assertEquals(
             listOf(
-                ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309"),
-                ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org")
+                ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
+                ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR())
             ),
             transformed.telecom
         )

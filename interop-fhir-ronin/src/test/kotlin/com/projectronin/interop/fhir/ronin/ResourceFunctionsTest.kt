@@ -5,6 +5,7 @@ import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
@@ -47,7 +48,7 @@ class ResourceFunctionsTest {
         assertEquals(
             listOf(
                 Identifier(
-                    value = "1234",
+                    value = "1234".asFHIR(),
                     system = RoninCodeSystem.FHIR_ID.uri,
                     type = RoninCodeableConcepts.FHIR_ID
                 )
@@ -68,7 +69,20 @@ class ResourceFunctionsTest {
         val identifier = Id("1234").toFhirIdentifier()
         assertEquals(
             Identifier(
-                value = "1234",
+                value = "1234".asFHIR(),
+                system = RoninCodeSystem.FHIR_ID.uri,
+                type = RoninCodeableConcepts.FHIR_ID
+            ),
+            identifier
+        )
+    }
+
+    @Test
+    fun `id fhir identifier works on null value`() {
+        val identifier = Id(null).toFhirIdentifier()
+        assertEquals(
+            Identifier(
+                value = null,
                 system = RoninCodeSystem.FHIR_ID.uri,
                 type = RoninCodeableConcepts.FHIR_ID
             ),

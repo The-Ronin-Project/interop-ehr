@@ -7,7 +7,6 @@ import com.projectronin.interop.fhir.ronin.code.normalizeCoding
 import com.projectronin.interop.fhir.ronin.code.normalizeIdentifier
 import com.projectronin.interop.fhir.validate.Validatable
 import com.projectronin.interop.tenant.config.model.Tenant
-import java.awt.SystemColor.text
 
 object Normalizer : BaseGenericTransformer() {
     /**
@@ -62,17 +61,18 @@ object Normalizer : BaseGenericTransformer() {
         parameterName: String,
         tenant: Tenant
     ): CodeableConcept? {
-        val nonNormalizedCodeableConcept = transformOrNull(codeableConcept, parameterName, tenant)
+        val nonNormalizedCodeableConcept = transformOrNull(codeableConcept, parameterName, tenant) ?: codeableConcept
 
         // If text is populated on the codeable concept already, return as is.
-        if (codeableConcept.text?.isNotEmpty() == true) {
+        if (codeableConcept.text?.value?.isNotEmpty() == true) {
             return nonNormalizedCodeableConcept
         }
 
         // When text isn't populated, pull from the single coding, or the single user selected coding
         val selectedCoding =
-            codeableConcept.coding.singleOrNull { it.userSelected == true } ?: codeableConcept.coding.singleOrNull()
-        if (selectedCoding != null && selectedCoding.display?.isNotEmpty() == true) {
+            codeableConcept.coding.singleOrNull { it.userSelected?.value == true }
+                ?: codeableConcept.coding.singleOrNull()
+        if (selectedCoding != null && selectedCoding.display?.value?.isNotEmpty() == true) {
             return (nonNormalizedCodeableConcept ?: codeableConcept).copy(text = selectedCoding.display)
         }
 

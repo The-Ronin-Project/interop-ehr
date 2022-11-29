@@ -67,7 +67,7 @@ abstract class EpicFHIRService<T : Resource<T>>(val epicClient: EpicClient) : FH
             }
 
             responses.add(bundle)
-            nextURL = bundle.link.firstOrNull { it.relation == "next" }?.url?.value
+            nextURL = bundle.link.firstOrNull { it.relation?.value == "next" }?.url?.value
         } while (nextURL != null)
         logger.info { "Get completed for ${tenant.mnemonic}" }
         return mergeResponses(responses)
@@ -100,7 +100,7 @@ abstract class EpicFHIRService<T : Resource<T>>(val epicClient: EpicClient) : FH
             }
 
             responses.add(bundle.transformToR4())
-            nextURL = bundle.link.firstOrNull { it.relation == "next" }?.url?.value
+            nextURL = bundle.link.firstOrNull { it.relation?.value == "next" }?.url?.value
         } while (nextURL != null)
         logger.info { "Get completed for ${tenant.mnemonic}" }
         return mergeResponses(responses)

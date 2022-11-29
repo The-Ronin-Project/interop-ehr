@@ -4,8 +4,10 @@ import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.Patient
 import io.ktor.client.call.body
@@ -17,6 +19,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
@@ -107,13 +110,70 @@ class EpicPatientServiceTest {
             tenant,
             mapOf(
                 "patient#1" to Identifier(
-                    value = "202497",
+                    value = "202497".asFHIR(),
                     system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"),
-                    type = CodeableConcept(text = "MRN")
+                    type = CodeableConcept(text = "MRN".asFHIR())
                 )
             )
         )
         assertEquals(mapOf("patient#1" to validPatientBundle.entry.first().resource), resultPatientsByKey)
+    }
+
+    @Test
+    fun `find patient by identifier returns patient with an identifier missing a system and value`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+        )
+
+        val patient = mockk<Patient> {
+            every { identifier } returns listOf(
+                mockk {
+                    every { system } returns Uri("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14")
+                    every { value } returns FHIRString("202497")
+                },
+                mockk {
+                    every { system } returns Uri("value-less")
+                    every { value } returns null
+                }
+            )
+        }
+        val bundle = mockk<Bundle> {
+            every { link } returns listOf()
+            every { entry } returns listOf(
+                mockk {
+                    every { resource } returns patient
+                }
+            )
+        }
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns bundle
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Patient",
+                mapOf(
+                    "identifier" to "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14|202497",
+                    "_count" to 50
+                )
+            )
+        } returns httpResponse
+
+        val resultPatientsByKey = EpicPatientService(epicClient, 100, aidboxClient).findPatientsById(
+            tenant,
+            mapOf(
+                "patient#1" to Identifier(
+                    value = "202497".asFHIR(),
+                    system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"),
+                    type = CodeableConcept(text = "MRN".asFHIR())
+                )
+            )
+        )
+        assertEquals(1, resultPatientsByKey.size)
+        assertNotNull(resultPatientsByKey["patient#1"])
     }
 
     @Test
@@ -142,15 +202,15 @@ class EpicPatientServiceTest {
             tenant,
             mapOf(
                 "patient#1" to Identifier(
-                    value = "202497",
+                    value = "202497".asFHIR(),
                     system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"),
-                    type = CodeableConcept(text = "MRN")
+                    type = CodeableConcept(text = "MRN".asFHIR())
 
                 ),
                 "patient#2" to Identifier(
                     system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"),
-                    value = "202497",
-                    type = CodeableConcept(text = "MRN")
+                    value = "202497".asFHIR(),
+                    type = CodeableConcept(text = "MRN".asFHIR())
 
                 )
             )
@@ -185,11 +245,11 @@ class EpicPatientServiceTest {
             tenant,
             mapOf(
                 "goodIdentifier" to Identifier(
-                    value = "202497",
+                    value = "202497".asFHIR(),
                     system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"),
-                    type = CodeableConcept(text = "MRN")
+                    type = CodeableConcept(text = "MRN".asFHIR())
                 ),
-                "badIdentifier" to Identifier(value = "202497", system = null)
+                "badIdentifier" to Identifier(value = "202497".asFHIR(), system = null)
             )
         )
         assertEquals(
@@ -226,13 +286,13 @@ class EpicPatientServiceTest {
             mapOf(
                 "patient#1" to Identifier(
                     system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"),
-                    value = "Z4572",
-                    type = CodeableConcept(text = "EXTERNAL")
+                    value = "Z4572".asFHIR(),
+                    type = CodeableConcept(text = "EXTERNAL".asFHIR())
                 ),
                 "patient#2" to Identifier(
                     system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"),
-                    value = "Z5660",
-                    type = CodeableConcept(text = "EXTERNAL")
+                    value = "Z5660".asFHIR(),
+                    type = CodeableConcept(text = "EXTERNAL".asFHIR())
                 )
             )
         )
@@ -285,18 +345,18 @@ class EpicPatientServiceTest {
             mapOf(
                 "patient#1" to Identifier(
                     system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"),
-                    value = "Z4572",
-                    type = CodeableConcept(text = "EXTERNAL")
+                    value = "Z4572".asFHIR(),
+                    type = CodeableConcept(text = "EXTERNAL".asFHIR())
                 ),
                 "patient#2" to Identifier(
                     system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"),
-                    value = "Z5660",
-                    type = CodeableConcept(text = "EXTERNAL")
+                    value = "Z5660".asFHIR(),
+                    type = CodeableConcept(text = "EXTERNAL".asFHIR())
                 ),
                 "patient#3" to Identifier(
                     system = Uri("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"),
-                    value = "202497",
-                    type = CodeableConcept(text = "MRN")
+                    value = "202497".asFHIR(),
+                    type = CodeableConcept(text = "MRN".asFHIR())
                 )
             )
         )
@@ -392,7 +452,10 @@ class EpicPatientServiceTest {
         } returns mapOf()
 
         every {
-            epicPatientService.findPatientsById(tenant, mapOf(mrn to Identifier(value = mrn, system = Uri(mrnSystem))))
+            epicPatientService.findPatientsById(
+                tenant,
+                mapOf(mrn to Identifier(value = mrn.asFHIR(), system = Uri(mrnSystem)))
+            )
         } returns mapOf(mrn to Patient(id = Id(fhirID)))
 
         val response = epicPatientService.getPatientsFHIRIds(
@@ -446,8 +509,8 @@ class EpicPatientServiceTest {
             epicPatientService.findPatientsById(
                 tenant,
                 mapOf(
-                    ehrMRN1 to Identifier(value = ehrMRN1, system = Uri(mrnSystem)),
-                    ehrMRN2 to Identifier(value = ehrMRN2, system = Uri(mrnSystem))
+                    ehrMRN1 to Identifier(value = ehrMRN1.asFHIR(), system = Uri(mrnSystem)),
+                    ehrMRN2 to Identifier(value = ehrMRN2.asFHIR(), system = Uri(mrnSystem))
                 )
             )
         } returns mapOf(
@@ -494,7 +557,10 @@ class EpicPatientServiceTest {
         } returns mapOf()
 
         every {
-            epicPatientService.findPatientsById(tenant, mapOf(mrn to Identifier(value = mrn, system = Uri(mrnSystem))))
+            epicPatientService.findPatientsById(
+                tenant,
+                mapOf(mrn to Identifier(value = mrn.asFHIR(), system = Uri(mrnSystem)))
+            )
         } returns mapOf()
 
         val response = epicPatientService.getPatientsFHIRIds(

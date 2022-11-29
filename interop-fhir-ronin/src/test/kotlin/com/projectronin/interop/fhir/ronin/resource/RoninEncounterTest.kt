@@ -21,9 +21,11 @@ import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
+import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.PositiveInt
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.fhir.r4.valueset.EncounterLocationStatus
@@ -66,7 +68,7 @@ class RoninEncounterTest {
             status = EncounterStatus.CANCELLED.asCode(),
             `class` = Coding(code = Code("OBSENC")),
             type = listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))),
-            subject = Reference(reference = "Patient/example")
+            subject = Reference(reference = "Patient/example".asFHIR())
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -86,13 +88,21 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             status = null,
             `class` = null,
             type = listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))),
-            subject = Reference(reference = "Patient/example")
+            subject = Reference(reference = "Patient/example".asFHIR())
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -111,13 +121,21 @@ class RoninEncounterTest {
     fun `validate - checks R4 profile - fails if status does not use required valueset`() {
         val encounter = Encounter(
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             status = Code("x"),
             `class` = Coding(code = Code("OBSENC")),
             type = listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))),
-            subject = Reference(reference = "Patient/example")
+            subject = Reference(reference = "Patient/example".asFHIR())
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -136,8 +154,16 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             status = EncounterStatus.CANCELLED.asCode(),
             `class` = Coding(code = Code("OBSENC")),
@@ -160,12 +186,20 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             status = EncounterStatus.CANCELLED.asCode(),
             `class` = Coding(code = Code("OBSENC")),
-            subject = Reference(reference = "Patient/example"),
+            subject = Reference(reference = "Patient/example".asFHIR()),
             type = emptyList()
         )
 
@@ -185,15 +219,23 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
                 Identifier(system = Uri("http://system.without.value.org")),
-                Identifier(value = "identifierWithoutSystem")
+                Identifier(value = "identifierWithoutSystem".asFHIR())
             ),
             status = EncounterStatus.CANCELLED.asCode(),
             `class` = Coding(code = Code("OBSENC")),
             type = listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))),
-            subject = Reference(reference = "Patient/example")
+            subject = Reference(reference = "Patient/example".asFHIR())
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -213,13 +255,21 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             status = EncounterStatus.CANCELLED.asCode(),
             `class` = Coding(code = Code("OBSENC")),
             type = listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))),
-            subject = Reference(reference = "Patient/example")
+            subject = Reference(reference = "Patient/example".asFHIR())
         )
 
         RoninEncounter.validate(encounter, null).alertIfErrors()
@@ -234,7 +284,7 @@ class RoninEncounterTest {
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             extension = listOf(
                 Extension(
@@ -248,7 +298,7 @@ class RoninEncounterTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value")
                 )
             ),
-            identifier = listOf(Identifier(value = "id", system = Uri("urn:oid:1:2:3"))),
+            identifier = listOf(Identifier(value = "id".asFHIR(), system = Uri("urn:oid:1:2:3"))),
             status = EncounterStatus.CANCELLED.asCode(),
             statusHistory = listOf(
                 EncounterStatusHistory(
@@ -282,7 +332,7 @@ class RoninEncounterTest {
             `class` = Coding(
                 system = Uri("http://terminology.hl7.org/CodeSystem/v3-ActCode"),
                 code = Code("AMB"),
-                display = "ambulatory"
+                display = "ambulatory".asFHIR()
             ),
             classHistory = listOf(
                 EncounterClassHistory(
@@ -298,7 +348,7 @@ class RoninEncounterTest {
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
                             code = Code("270427003"),
-                            display = "Patient-initiated encounter"
+                            display = "Patient-initiated encounter".asFHIR()
                         )
                     )
                 )
@@ -309,29 +359,29 @@ class RoninEncounterTest {
                     Coding(
                         system = CodeSystem.SNOMED_CT.uri,
                         code = Code("103391001"),
-                        display = "Non-urgent ear, nose and throat admission"
+                        display = "Non-urgent ear, nose and throat admission".asFHIR()
                     )
                 )
             ),
             subject = Reference(
-                reference = "Patient/f001",
-                display = "P. van de Heuvel"
+                reference = "Patient/f001".asFHIR(),
+                display = "P. van de Heuvel".asFHIR()
             ),
             episodeOfCare = emptyList(),
             basedOn = emptyList(),
             participant = listOf(
                 EncounterParticipant(
                     individual = Reference(
-                        reference = "Practitioner/f001",
-                        display = "E.M. van den Broek"
+                        reference = "Practitioner/f001".asFHIR(),
+                        display = "E.M. van den Broek".asFHIR()
                     )
                 )
             ),
             appointment = emptyList(),
             period = null,
             length = Duration(
-                value = 90.0,
-                unit = "min",
+                value = Decimal(90.0),
+                unit = "min".asFHIR(),
                 system = CodeSystem.UCUM.uri,
                 code = Code("min")
             ),
@@ -341,50 +391,50 @@ class RoninEncounterTest {
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
                             code = Code("18099001"),
-                            display = "Retropharyngeal abscess"
+                            display = "Retropharyngeal abscess".asFHIR()
                         )
                     )
                 )
             ),
             reasonReference = listOf(
                 Reference(
-                    reference = "Condition/f001",
-                    display = "Test Condition"
+                    reference = "Condition/f001".asFHIR(),
+                    display = "Test Condition".asFHIR()
                 )
             ),
             diagnosis = listOf(
                 EncounterDiagnosis(
-                    condition = Reference(reference = "Condition/stroke"),
+                    condition = Reference(reference = "Condition/stroke".asFHIR()),
                     use = CodeableConcept(
                         coding = listOf(
                             Coding(
                                 system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
                                 code = Code("AD"),
-                                display = "Admission diagnosis"
+                                display = "Admission diagnosis".asFHIR()
                             )
                         )
                     ),
                     rank = PositiveInt(1)
                 ),
                 EncounterDiagnosis(
-                    condition = Reference(reference = "Condition/f201"),
+                    condition = Reference(reference = "Condition/f201".asFHIR()),
                     use = CodeableConcept(
                         coding = listOf(
                             Coding(
                                 system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
                                 code = Code("DD"),
-                                display = "Discharge diagnosis"
+                                display = "Discharge diagnosis".asFHIR()
                             )
                         )
                     )
                 )
             ),
-            account = listOf(Reference(reference = "Account/f001")),
+            account = listOf(Reference(reference = "Account/f001".asFHIR())),
             hospitalization = EncounterHospitalization(
                 preAdmissionIdentifier = Identifier(
                     use = Code("official"),
                     system = Uri("http://www.bmc.nl/zorgportal/identifiers/pre-admissions"),
-                    value = "93042"
+                    value = "93042".asFHIR()
                 ),
                 origin = null,
                 admitSource = CodeableConcept(
@@ -392,7 +442,7 @@ class RoninEncounterTest {
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
                             code = Code("305956004"),
-                            display = "Referral by physician"
+                            display = "Referral by physician".asFHIR()
                         )
                     )
                 ),
@@ -403,7 +453,7 @@ class RoninEncounterTest {
                             Coding(
                                 system = Uri("https://www.hl7.org/fhir/R4/valueset-encounter-diet.html"),
                                 code = Code("vegetarian"),
-                                display = "vegetarian"
+                                display = "vegetarian".asFHIR()
                             )
                         )
                     ),
@@ -412,44 +462,44 @@ class RoninEncounterTest {
                             Coding(
                                 system = Uri("https://www.hl7.org/fhir/R4/valueset-encounter-diet.html"),
                                 code = Code("kosher"),
-                                display = "kosher"
+                                display = "kosher".asFHIR()
                             )
                         )
                     )
                 ),
                 specialCourtesy = emptyList(),
                 specialArrangement = emptyList(),
-                destination = Reference(reference = "Location/place"),
+                destination = Reference(reference = "Location/place".asFHIR()),
                 dischargeDisposition = CodeableConcept(
                     coding = listOf(
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
                             code = Code("306689006"),
-                            display = "Discharge to home"
+                            display = "Discharge to home".asFHIR()
                         )
                     )
                 )
             ),
             location = listOf(
                 EncounterLocation(
-                    location = Reference(reference = "Location/f001"),
+                    location = Reference(reference = "Location/f001".asFHIR()),
                     status = EncounterLocationStatus.RESERVED.asCode(),
                     physicalType = CodeableConcept(
                         coding = listOf(
                             Coding(
                                 system = Uri("http://terminology.hl7.org/CodeSystem/location-physical-type"),
                                 code = Code("area"),
-                                display = "Area"
+                                display = "Area".asFHIR()
                             )
                         )
                     )
                 )
             ),
             serviceProvider = Reference(
-                reference = "Organization/f001",
-                display = "Community Hospital"
+                reference = "Organization/f001".asFHIR(),
+                display = "Community Hospital".asFHIR()
             ),
-            partOf = Reference(reference = "Encounter/super")
+            partOf = Reference(reference = "Encounter/super".asFHIR())
         )
 
         val transformed = RoninEncounter.transform(encounter, tenant)
@@ -463,7 +513,7 @@ class RoninEncounterTest {
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"), transformed.text)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             transformed.contained
@@ -488,9 +538,17 @@ class RoninEncounterTest {
         )
         assertEquals(
             listOf(
-                Identifier(system = Uri("urn:oid:1:2:3"), value = "id"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(system = Uri("urn:oid:1:2:3"), value = "id".asFHIR()),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
@@ -531,7 +589,7 @@ class RoninEncounterTest {
             Coding(
                 system = Uri("http://terminology.hl7.org/CodeSystem/v3-ActCode"),
                 code = Code("AMB"),
-                display = "ambulatory"
+                display = "ambulatory".asFHIR()
             ),
             transformed.`class`
         )
@@ -549,12 +607,12 @@ class RoninEncounterTest {
         assertEquals(
             listOf(
                 CodeableConcept(
-                    text = "Patient-initiated encounter",
+                    text = "Patient-initiated encounter".asFHIR(),
                     coding = listOf(
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
                             code = Code("270427003"),
-                            display = "Patient-initiated encounter"
+                            display = "Patient-initiated encounter".asFHIR()
                         )
                     )
                 )
@@ -564,12 +622,12 @@ class RoninEncounterTest {
         assertNull(transformed.serviceType)
         assertEquals(
             CodeableConcept(
-                text = "Non-urgent ear, nose and throat admission",
+                text = "Non-urgent ear, nose and throat admission".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = CodeSystem.SNOMED_CT.uri,
                         code = Code("103391001"),
-                        display = "Non-urgent ear, nose and throat admission"
+                        display = "Non-urgent ear, nose and throat admission".asFHIR()
                     )
                 )
             ),
@@ -577,8 +635,8 @@ class RoninEncounterTest {
         )
         assertEquals(
             Reference(
-                reference = "Patient/test-f001",
-                display = "P. van de Heuvel"
+                reference = "Patient/test-f001".asFHIR(),
+                display = "P. van de Heuvel".asFHIR()
             ),
             transformed.subject
         )
@@ -588,8 +646,8 @@ class RoninEncounterTest {
             listOf(
                 EncounterParticipant(
                     individual = Reference(
-                        reference = "Practitioner/test-f001",
-                        display = "E.M. van den Broek"
+                        reference = "Practitioner/test-f001".asFHIR(),
+                        display = "E.M. van den Broek".asFHIR()
                     )
                 )
             ),
@@ -599,8 +657,8 @@ class RoninEncounterTest {
         assertNull(transformed.period)
         assertEquals(
             Duration(
-                value = 90.0,
-                unit = "min",
+                value = Decimal(90.0),
+                unit = "min".asFHIR(),
                 system = CodeSystem.UCUM.uri,
                 code = Code("min")
             ),
@@ -609,12 +667,12 @@ class RoninEncounterTest {
         assertEquals(
             listOf(
                 CodeableConcept(
-                    text = "Retropharyngeal abscess",
+                    text = "Retropharyngeal abscess".asFHIR(),
                     coding = listOf(
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
                             code = Code("18099001"),
-                            display = "Retropharyngeal abscess"
+                            display = "Retropharyngeal abscess".asFHIR()
                         )
                     )
                 )
@@ -624,8 +682,8 @@ class RoninEncounterTest {
         assertEquals(
             listOf(
                 Reference(
-                    reference = "Condition/test-f001",
-                    display = "Test Condition"
+                    reference = "Condition/test-f001".asFHIR(),
+                    display = "Test Condition".asFHIR()
                 )
             ),
             transformed.reasonReference
@@ -633,28 +691,28 @@ class RoninEncounterTest {
         assertEquals(
             listOf(
                 EncounterDiagnosis(
-                    condition = Reference(reference = "Condition/test-stroke"),
+                    condition = Reference(reference = "Condition/test-stroke".asFHIR()),
                     use = CodeableConcept(
-                        text = "Admission diagnosis",
+                        text = "Admission diagnosis".asFHIR(),
                         coding = listOf(
                             Coding(
                                 system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
                                 code = Code("AD"),
-                                display = "Admission diagnosis"
+                                display = "Admission diagnosis".asFHIR()
                             )
                         )
                     ),
                     rank = PositiveInt(1)
                 ),
                 EncounterDiagnosis(
-                    condition = Reference(reference = "Condition/test-f201"),
+                    condition = Reference(reference = "Condition/test-f201".asFHIR()),
                     use = CodeableConcept(
-                        text = "Discharge diagnosis",
+                        text = "Discharge diagnosis".asFHIR(),
                         coding = listOf(
                             Coding(
                                 system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
                                 code = Code("DD"),
-                                display = "Discharge diagnosis"
+                                display = "Discharge diagnosis".asFHIR()
                             )
                         )
                     )
@@ -662,58 +720,58 @@ class RoninEncounterTest {
             ),
             transformed.diagnosis
         )
-        assertEquals(listOf(Reference(reference = "Account/test-f001")), transformed.account)
+        assertEquals(listOf(Reference(reference = "Account/test-f001".asFHIR())), transformed.account)
         assertEquals(
             EncounterHospitalization(
                 preAdmissionIdentifier = Identifier(
                     use = Code("official"),
                     system = Uri("http://www.bmc.nl/zorgportal/identifiers/pre-admissions"),
-                    value = "93042"
+                    value = "93042".asFHIR()
                 ),
                 origin = null,
                 admitSource = CodeableConcept(
-                    text = "Referral by physician",
+                    text = "Referral by physician".asFHIR(),
                     coding = listOf(
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
                             code = Code("305956004"),
-                            display = "Referral by physician"
+                            display = "Referral by physician".asFHIR()
                         )
                     )
                 ),
                 reAdmission = null,
                 dietPreference = listOf(
                     CodeableConcept(
-                        text = "vegetarian",
+                        text = "vegetarian".asFHIR(),
                         coding = listOf(
                             Coding(
                                 system = Uri("https://www.hl7.org/fhir/R4/valueset-encounter-diet.html"),
                                 code = Code("vegetarian"),
-                                display = "vegetarian"
+                                display = "vegetarian".asFHIR()
                             )
                         )
                     ),
                     CodeableConcept(
-                        text = "kosher",
+                        text = "kosher".asFHIR(),
                         coding = listOf(
                             Coding(
                                 system = Uri("https://www.hl7.org/fhir/R4/valueset-encounter-diet.html"),
                                 code = Code("kosher"),
-                                display = "kosher"
+                                display = "kosher".asFHIR()
                             )
                         )
                     )
                 ),
                 specialCourtesy = emptyList(),
                 specialArrangement = emptyList(),
-                destination = Reference(reference = "Location/test-place"),
+                destination = Reference(reference = "Location/test-place".asFHIR()),
                 dischargeDisposition = CodeableConcept(
-                    text = "Discharge to home",
+                    text = "Discharge to home".asFHIR(),
                     coding = listOf(
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
                             code = Code("306689006"),
-                            display = "Discharge to home"
+                            display = "Discharge to home".asFHIR()
                         )
                     )
                 )
@@ -723,15 +781,15 @@ class RoninEncounterTest {
         assertEquals(
             listOf(
                 EncounterLocation(
-                    location = Reference(reference = "Location/test-f001"),
+                    location = Reference(reference = "Location/test-f001".asFHIR()),
                     status = EncounterLocationStatus.RESERVED.asCode(),
                     physicalType = CodeableConcept(
-                        text = "Area",
+                        text = "Area".asFHIR(),
                         coding = listOf(
                             Coding(
                                 system = Uri("http://terminology.hl7.org/CodeSystem/location-physical-type"),
                                 code = Code("area"),
-                                display = "Area"
+                                display = "Area".asFHIR()
                             )
                         )
                     )
@@ -741,12 +799,12 @@ class RoninEncounterTest {
         )
         assertEquals(
             Reference(
-                reference = "Organization/test-f001",
-                display = "Community Hospital"
+                reference = "Organization/test-f001".asFHIR(),
+                display = "Community Hospital".asFHIR()
             ),
             transformed.serviceProvider
         )
-        assertEquals(Reference(reference = "Encounter/test-super"), transformed.partOf)
+        assertEquals(Reference(reference = "Encounter/test-super".asFHIR()), transformed.partOf)
     }
 
     @Test
@@ -756,7 +814,7 @@ class RoninEncounterTest {
             status = EncounterStatus.CANCELLED.asCode(),
             `class` = Coding(code = Code("OBSENC")),
             type = listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))),
-            subject = Reference(reference = "Patient/example")
+            subject = Reference(reference = "Patient/example".asFHIR())
         )
 
         val transformed = RoninEncounter.transform(encounter, tenant)
@@ -775,8 +833,16 @@ class RoninEncounterTest {
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
@@ -787,7 +853,7 @@ class RoninEncounterTest {
         assertEquals(listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))), transformed.type)
         assertNull(transformed.serviceType)
         assertNull(transformed.priority)
-        assertEquals(Reference(reference = "Patient/test-example"), transformed.subject)
+        assertEquals(Reference(reference = "Patient/test-example".asFHIR()), transformed.subject)
         assertEquals(listOf<Reference>(), transformed.episodeOfCare)
         assertEquals(listOf<Reference>(), transformed.basedOn)
         assertEquals(listOf<EncounterParticipant>(), transformed.participant)

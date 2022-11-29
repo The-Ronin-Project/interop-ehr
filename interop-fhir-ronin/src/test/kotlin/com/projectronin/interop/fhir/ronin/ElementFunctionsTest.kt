@@ -5,6 +5,7 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Element
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -64,5 +65,5 @@ class ElementFunctionsTest {
 
 private data class SampleElement(
     override val extension: List<Extension> = emptyList(),
-    override val id: String? = null
+    override val id: FHIRString? = null
 ) : Element<SampleElement>

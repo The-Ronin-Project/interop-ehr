@@ -22,6 +22,8 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Participant
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRInteger
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
@@ -107,7 +109,7 @@ class EpicAppointmentService(
         val patient = runCatching { aidboxPatientService.getPatient(tenant.mnemonic, patientFHIRId.localize(tenant)) }
             // try EHR next
             .getOrElse { patientService.getPatient(tenant, patientFHIRId) }
-        return identifierService.getMRNIdentifier(tenant, patient.identifier).value
+        return identifierService.getMRNIdentifier(tenant, patient.identifier).value?.value
     }
 
     override fun findLocationAppointments(
@@ -119,10 +121,10 @@ class EpicAppointmentService(
         val searchMap = locationFHIRIds.map { SystemValue(value = it, system = RoninCodeSystem.FHIR_ID.uri.value!!) }
         val limitedLocationList = aidboxLocationService.getAllLocationIdentifiers(tenant.mnemonic, searchMap)
         val departmentList = limitedLocationList.flatMap { it.identifiers }
-            .filter { it.system?.value == tenant.vendorAs<Epic>().departmentInternalSystem }
+            .filter { it.system?.value == tenant.vendorAs<Epic>().departmentInternalSystem && it.value?.value != null }
         val request = GetProviderAppointmentRequest(
             userID = tenant.vendorAs<Epic>().ehrUserId,
-            departments = departmentList.map { IDType(id = it.value!!, type = "Internal") },
+            departments = departmentList.map { IDType(id = it.value!!.value!!, type = "Internal") },
             startDate = dateFormat.format(startDate),
             endDate = dateFormat.format(endDate)
         )
@@ -146,7 +148,7 @@ class EpicAppointmentService(
                 logger.warn { "Unable to find a value on identifier: $selectedIdentifier" }
                 null
             } else {
-                selectedIdentifier.value
+                selectedIdentifier.value?.value
             }
         }
 
@@ -259,7 +261,7 @@ class EpicAppointmentService(
         val provToIdentifier = allProviders.associateWith { provider ->
             val provIdentifier =
                 identifierService.getPractitionerIdentifier(tenant, provider.providerIDs.map { it.toIdentifier() })
-            if (provIdentifier.system != null && provIdentifier.value != null) {
+            if (provIdentifier.system?.value != null && provIdentifier.value?.value != null) {
                 provIdentifier
             } else {
                 logger.info {
@@ -273,7 +275,7 @@ class EpicAppointmentService(
         val provToSystem = provToIdentifier.filter { (_, identifier) ->
             identifier?.value != null && identifier.system?.value != null
         }.mapValues { (_, identifier) ->
-            SystemValue(identifier!!.value!!, identifier.system!!.value!!)
+            SystemValue(identifier!!.value!!.value!!, identifier.system!!.value!!)
         }
         // aidbox lookup for Practitioner FHIR id
         val provSystemToFhirID = aidboxPractitionerService.getPractitionerFHIRIds(
@@ -299,7 +301,7 @@ class EpicAppointmentService(
         val deptToIdentifier = allProviders.associateWith { provider ->
             val deptIdentifier =
                 identifierService.getLocationIdentifier(tenant, provider.departmentIDs.map { it.toIdentifier() })
-            if (deptIdentifier.system != null && deptIdentifier.value != null) {
+            if (deptIdentifier.system?.value != null && deptIdentifier.value?.value != null) {
                 deptIdentifier
             } else {
                 logger.info {
@@ -313,7 +315,7 @@ class EpicAppointmentService(
         val deptToSystem = deptToIdentifier.filter { (_, identifier) ->
             identifier?.value != null && identifier.system?.value != null
         }.mapValues { (_, identifier) ->
-            SystemValue(identifier!!.value!!, identifier.system!!.value!!)
+            SystemValue(identifier!!.value!!.value!!, identifier.system!!.value!!)
         }
         // aidbox lookup for Location FHIR id
         val deptSystemToFhirID = aidboxLocationService.getLocationFHIRIds(
@@ -410,8 +412,8 @@ class EpicAppointmentService(
 
         val patientParticipant = Participant(
             actor = Reference(
-                reference = "Patient/$patientFHIRId",
-                display = this.patientName,
+                reference = FHIRString("Patient/$patientFHIRId"),
+                display = FHIRString(patientName),
                 type = Uri("Patient")
             ),
             status = Code(ParticipationStatus.ACCEPTED.code)
@@ -423,7 +425,7 @@ class EpicAppointmentService(
                     Participant(
                         actor = Reference(
                             identifier = id,
-                            display = provider.providerName,
+                            display = FHIRString(provider.providerName),
                             type = Uri("Practitioner")
                         ),
                         status = Code(ParticipationStatus.ACCEPTED.code)
@@ -432,8 +434,8 @@ class EpicAppointmentService(
                 is String -> {
                     Participant(
                         actor = Reference(
-                            reference = "Practitioner/$id",
-                            display = provider.providerName,
+                            reference = FHIRString("Practitioner/$id"),
+                            display = FHIRString(provider.providerName),
                             type = Uri("Practitioner")
                         ),
                         status = Code(ParticipationStatus.ACCEPTED.code)
@@ -453,8 +455,8 @@ class EpicAppointmentService(
                 else -> {
                     Participant(
                         actor = Reference(
-                            reference = "Location/$id",
-                            display = provider.departmentName,
+                            reference = FHIRString("Location/$id"),
+                            display = FHIRString(provider.departmentName),
                             type = Uri("Location")
                         ),
                         status = Code(ParticipationStatus.ACCEPTED.code)
@@ -466,7 +468,7 @@ class EpicAppointmentService(
         // even tho some of these nulls are automatically injected upon creation, the whole FHIR object is here,
         // so you can clearly see the logic we are and aren't running
         return Appointment(
-            id = Id(this.id), // this is actually the CSN
+            id = Id(id), // this is actually the CSN
             meta = null,
             implicitRules = null,
             language = null,
@@ -474,21 +476,21 @@ class EpicAppointmentService(
             contained = emptyList(),
             extension = emptyList(),
             modifierExtension = emptyList(),
-            identifier = this.contactIDs.map { it.toIdentifier() } +
+            identifier = contactIDs.map { it.toIdentifier() } +
                 // this is just so when we need to eventually convert these to FHIR-based, we have a reliable way
                 // to find the old non-FHIR object
                 Identifier(
-                    value = this.id,
+                    value = FHIRString(id),
                     system = Uri(tenant.vendorAs<Epic>().encounterCSNSystem),
-                    type = CodeableConcept(text = "CSN")
+                    type = CodeableConcept(text = FHIRString("CSN"))
                 ),
             status = Code(transformedStatus),
             cancelationReason = null,
             serviceCategory = emptyList(),
             serviceType = emptyList(),
             specialty = emptyList(),
-            appointmentType = if (this.visitTypeName.isNotEmpty()) {
-                CodeableConcept(text = this.visitTypeName)
+            appointmentType = if (visitTypeName.isNotEmpty()) {
+                CodeableConcept(text = FHIRString(visitTypeName))
             } else {
                 null
             },
@@ -499,10 +501,11 @@ class EpicAppointmentService(
             supportingInformation = emptyList(),
             start = Instant(transformedStartInstant.toString()),
             end = Instant(transformedEndInstant.toString()),
-            minutesDuration = this.appointmentDuration.toInt(),
+            minutesDuration = FHIRInteger(appointmentDuration.toInt()),
             slot = emptyList(),
             created = null,
-            comment = this.appointmentNotes.joinToString(separator = "/n").let { if (it == "") null else it },
+            comment = appointmentNotes.joinToString(separator = "/n")
+                .let { if (it == "") null else FHIRString(it) },
             patientInstruction = null,
             basedOn = emptyList(),
             participant = listOf(patientParticipant) + practitionerParticipants + locationParticipants,

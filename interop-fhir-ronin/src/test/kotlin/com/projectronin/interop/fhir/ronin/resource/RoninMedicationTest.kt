@@ -17,8 +17,11 @@ import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
+import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Medication
 import com.projectronin.interop.fhir.r4.valueset.MedicationStatus
@@ -51,13 +54,13 @@ class RoninMedicationTest {
     fun `validate - fails if missing identifiers`() {
         val medication = Medication(
             code = CodeableConcept(
-                text = "b",
+                text = "b".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     )
                 )
             )
@@ -79,8 +82,16 @@ class RoninMedicationTest {
     fun `validate - fails if missing required code attribute`() {
         val medication = Medication(
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             )
         )
 
@@ -99,11 +110,19 @@ class RoninMedicationTest {
     fun `validate - fails if no code-coding has all required attributes - missing values`() {
         val medication = Medication(
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             code = CodeableConcept(
-                text = "k",
+                text = "k".asFHIR(),
                 coding = listOf(
                     Coding(
                         code = Code("b")
@@ -134,28 +153,36 @@ class RoninMedicationTest {
         val medication = Medication(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
                         system = Uri("b"),
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     ),
                     Coding(
                         system = Uri("i"),
                         code = Code("i"),
-                        version = "1.0.1",
-                        display = "i",
+                        version = "1.0.1".asFHIR(),
+                        display = "i".asFHIR()
                     ),
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("z"),
-                        version = "1.0.0",
-                        display = "z"
+                        version = "1.0.0".asFHIR(),
+                        display = "z".asFHIR()
                     )
 
                 )
@@ -181,20 +208,20 @@ class RoninMedicationTest {
                     Coding(
                         system = Uri("b"),
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     ),
                     Coding(
                         system = Uri("i"),
                         code = Code("i"),
-                        version = "1.0.1",
-                        display = "i",
+                        version = "1.0.1".asFHIR(),
+                        display = "i".asFHIR()
                     ),
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("z"),
-                        version = "1.0.0",
-                        display = "z"
+                        version = "1.0.0".asFHIR(),
+                        display = "z".asFHIR()
                     )
                 )
             ),
@@ -213,29 +240,37 @@ class RoninMedicationTest {
         val medication = Medication(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             code = CodeableConcept(
-                text = "",
+                text = "".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = Uri("b"),
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     ),
                     Coding(
                         system = Uri("i"),
                         code = Code("i"),
-                        version = "1.0.1",
-                        display = "i",
+                        version = "1.0.1".asFHIR(),
+                        display = "i".asFHIR()
                     ),
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("z"),
-                        version = "1.0.0",
-                        display = "z"
+                        version = "1.0.0".asFHIR(),
+                        display = "z".asFHIR()
                     )
                 )
             )
@@ -256,25 +291,25 @@ class RoninMedicationTest {
         )
         assertEquals(
             CodeableConcept(
-                text = "",
+                text = "".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = Uri("b"),
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     ),
                     Coding(
                         system = Uri("i"),
                         code = Code("i"),
-                        version = "1.0.1",
-                        display = "i",
+                        version = "1.0.1".asFHIR(),
+                        display = "i".asFHIR()
                     ),
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("z"),
-                        version = "1.0.0",
-                        display = "z"
+                        version = "1.0.0".asFHIR(),
+                        display = "z".asFHIR()
                     )
                 )
             ),
@@ -293,16 +328,24 @@ class RoninMedicationTest {
         val medication = Medication(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
                         system = Uri("b"),
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     )
                 )
             )
@@ -317,13 +360,13 @@ class RoninMedicationTest {
                 value = DynamicValue(
                     DynamicValueType.CODEABLE_CONCEPT,
                     CodeableConcept(
-                        text = "b",
+                        text = "b".asFHIR(),
                         coding = listOf(
                             Coding(
                                 system = Uri("b"),
                                 code = Code("b"),
-                                version = "1.0.0",
-                                display = "b"
+                                version = "1.0.0".asFHIR(),
+                                display = "b".asFHIR()
                             )
                         )
                     )
@@ -333,13 +376,13 @@ class RoninMedicationTest {
         )
         assertEquals(
             CodeableConcept(
-                text = "b",
+                text = "b".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = Uri("b"),
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     )
                 )
             ),
@@ -358,29 +401,37 @@ class RoninMedicationTest {
         val medication = Medication(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
                         system = Uri("b"),
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     ),
                     Coding(
                         system = Uri("i"),
                         code = Code("i"),
-                        version = "1.0.1",
-                        display = "i",
-                        userSelected = true,
+                        version = "1.0.1".asFHIR(),
+                        display = "i".asFHIR(),
+                        userSelected = FHIRBoolean.TRUE
                     ),
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("z"),
-                        version = "1.0.0",
-                        display = "z"
+                        version = "1.0.0".asFHIR(),
+                        display = "z".asFHIR()
                     )
                 )
             )
@@ -395,26 +446,26 @@ class RoninMedicationTest {
                 value = DynamicValue(
                     DynamicValueType.CODEABLE_CONCEPT,
                     CodeableConcept(
-                        text = "i",
+                        text = "i".asFHIR(),
                         coding = listOf(
                             Coding(
                                 system = Uri("b"),
                                 code = Code("b"),
-                                version = "1.0.0",
-                                display = "b"
+                                version = "1.0.0".asFHIR(),
+                                display = "b".asFHIR()
                             ),
                             Coding(
                                 system = Uri("i"),
                                 code = Code("i"),
-                                version = "1.0.1",
-                                display = "i",
-                                userSelected = true,
+                                version = "1.0.1".asFHIR(),
+                                display = "i".asFHIR(),
+                                userSelected = FHIRBoolean.TRUE
                             ),
                             Coding(
                                 system = CodeSystem.RXNORM.uri,
                                 code = Code("z"),
-                                version = "1.0.0",
-                                display = "z"
+                                version = "1.0.0".asFHIR(),
+                                display = "z".asFHIR()
                             )
                         )
                     )
@@ -424,26 +475,26 @@ class RoninMedicationTest {
         )
         assertEquals(
             CodeableConcept(
-                text = "i",
+                text = "i".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = Uri("b"),
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     ),
                     Coding(
                         system = Uri("i"),
                         code = Code("i"),
-                        version = "1.0.1",
-                        display = "i",
-                        userSelected = true,
+                        version = "1.0.1".asFHIR(),
+                        display = "i".asFHIR(),
+                        userSelected = FHIRBoolean.TRUE
                     ),
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("z"),
-                        version = "1.0.0",
-                        display = "z"
+                        version = "1.0.0".asFHIR(),
+                        display = "z".asFHIR()
                     )
                 )
             ),
@@ -461,30 +512,38 @@ class RoninMedicationTest {
 
         val medication = Medication(
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     ),
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("e"),
-                        version = "1.0.0",
-                        display = "e",
-                        userSelected = true,
+                        version = "1.0.0".asFHIR(),
+                        display = "e".asFHIR(),
+                        userSelected = FHIRBoolean.TRUE
                     ),
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("i"),
-                        version = "1.0.1",
-                        display = "i",
-                        userSelected = true,
+                        version = "1.0.1".asFHIR(),
+                        display = "i".asFHIR(),
+                        userSelected = FHIRBoolean.TRUE
                     ),
                 )
             )
@@ -505,17 +564,25 @@ class RoninMedicationTest {
     fun `validate - fails if status does not use required valueset`() {
         val medication = Medication(
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             code = CodeableConcept(
-                text = "b",
+                text = "b".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     )
                 )
             ),
@@ -537,30 +604,38 @@ class RoninMedicationTest {
     fun `validate - fails for any ingredient missing an item`() {
         val medication = Medication(
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             code = CodeableConcept(
-                text = "b",
+                text = "b".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     )
                 )
             ),
             ingredient = listOf(
-                Ingredient(isActive = true),
+                Ingredient(isActive = FHIRBoolean.TRUE),
                 Ingredient(
                     item = DynamicValue(
                         type = DynamicValueType.REFERENCE,
-                        value = Reference(reference = "Organization/item"),
+                        value = Reference(reference = "Organization/item".asFHIR()),
                     ),
-                    isActive = true
+                    isActive = FHIRBoolean.TRUE
                 ),
-                Ingredient(isActive = false),
+                Ingredient(isActive = FHIRBoolean.FALSE),
             )
         )
 
@@ -580,17 +655,25 @@ class RoninMedicationTest {
     fun `validate - succeeds with empty ingredient list`() {
         val medication = Medication(
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             code = CodeableConcept(
-                text = "b",
+                text = "b".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     )
                 )
             ),
@@ -604,17 +687,25 @@ class RoninMedicationTest {
     fun `validate - succeeds with just required attributes`() {
         val medication = Medication(
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             code = CodeableConcept(
-                text = "b",
+                text = "b".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     )
                 )
             )
@@ -628,13 +719,13 @@ class RoninMedicationTest {
         val medication = Medication(
             id = Id("12345"),
             code = CodeableConcept(
-                text = "b",
+                text = "b".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     )
                 )
             )
@@ -647,8 +738,16 @@ class RoninMedicationTest {
         assertEquals(2, roninMedication.identifier.size)
         assertEquals(
             listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             roninMedication.identifier
         )
@@ -664,7 +763,7 @@ class RoninMedicationTest {
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             extension = listOf(
                 Extension(
@@ -678,41 +777,41 @@ class RoninMedicationTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value")
                 )
             ),
-            identifier = listOf(Identifier(value = "67890")),
+            identifier = listOf(Identifier(value = "67890".asFHIR())),
             code = CodeableConcept(
-                text = "b",
+                text = "b".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     )
                 )
             ),
             status = MedicationStatus.ACTIVE.asCode(),
-            manufacturer = Reference(reference = "Organization/c"),
+            manufacturer = Reference(reference = "Organization/c".asFHIR()),
             form = CodeableConcept(
-                text = "d",
+                text = "d".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = Uri("d"),
                         code = Code("d"),
-                        version = "1.0.0",
-                        display = "d"
+                        version = "1.0.0".asFHIR(),
+                        display = "d".asFHIR()
                     )
                 )
             ),
             amount = Ratio(
                 numerator = Quantity(
-                    value = 1.5,
-                    unit = "mg",
+                    value = Decimal(1.5),
+                    unit = "mg".asFHIR(),
                     system = CodeSystem.UCUM.uri,
                     code = Code("mg")
                 ),
                 denominator = Quantity(
-                    value = 1.0,
-                    unit = "mg",
+                    value = Decimal(1.0),
+                    unit = "mg".asFHIR(),
                     system = CodeSystem.UCUM.uri,
                     code = Code("mg")
                 )
@@ -721,19 +820,19 @@ class RoninMedicationTest {
                 Ingredient(
                     item = DynamicValue(
                         type = DynamicValueType.REFERENCE,
-                        value = Reference(reference = "Organization/item"),
+                        value = Reference(reference = "Organization/item".asFHIR()),
                     ),
-                    isActive = true,
+                    isActive = FHIRBoolean.TRUE,
                     strength = Ratio(
                         numerator = Quantity(
-                            value = 0.5,
-                            unit = "mg",
+                            value = Decimal(0.5),
+                            unit = "mg".asFHIR(),
                             system = CodeSystem.UCUM.uri,
                             code = Code("mg")
                         ),
                         denominator = Quantity(
-                            value = 1.0,
-                            unit = "mg",
+                            value = Decimal(1.0),
+                            unit = "mg".asFHIR(),
                             system = CodeSystem.UCUM.uri,
                             code = Code("mg")
                         )
@@ -741,7 +840,7 @@ class RoninMedicationTest {
                 )
             ),
             batch = Batch(
-                lotNumber = "e",
+                lotNumber = "e".asFHIR(),
                 expirationDate = DateTime("2022-10-14")
             ),
         )
@@ -766,13 +865,13 @@ class RoninMedicationTest {
                         value = DynamicValue(
                             DynamicValueType.CODEABLE_CONCEPT,
                             CodeableConcept(
-                                text = "b",
+                                text = "b".asFHIR(),
                                 coding = listOf(
                                     Coding(
                                         system = CodeSystem.RXNORM.uri,
                                         code = Code("b"),
-                                        version = "1.0.0",
-                                        display = "b"
+                                        version = "1.0.0".asFHIR(),
+                                        display = "b".asFHIR()
                                     )
                                 )
                             )
@@ -785,19 +884,30 @@ class RoninMedicationTest {
         assertEquals(3, roninMedication.identifier.size)
         assertEquals(
             listOf(
-                Identifier(value = "67890"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(value = "67890".asFHIR()),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             roninMedication.identifier
         )
         assertEquals(medication.code, roninMedication.code)
         assertEquals(Code(value = "active"), roninMedication.status)
-        assertEquals(Reference(reference = "Organization/test-c"), roninMedication.manufacturer)
+        assertEquals(Reference(reference = "Organization/test-c".asFHIR()), roninMedication.manufacturer)
         assertEquals(medication.form, roninMedication.form)
         assertEquals(medication.amount, roninMedication.amount)
         assertEquals(DynamicValueType.REFERENCE, roninMedication.ingredient[0].item?.type)
-        assertEquals(Reference(reference = "Organization/test-item"), roninMedication.ingredient[0].item?.value)
+        assertEquals(
+            Reference(reference = "Organization/test-item".asFHIR()),
+            roninMedication.ingredient[0].item?.value
+        )
         assertEquals(medication.batch, roninMedication.batch)
 
         // validation
@@ -813,7 +923,7 @@ class RoninMedicationTest {
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             extension = listOf(
                 Extension(
@@ -827,41 +937,41 @@ class RoninMedicationTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value")
                 )
             ),
-            identifier = listOf(Identifier(value = "67890")),
+            identifier = listOf(Identifier(value = "67890".asFHIR())),
             code = CodeableConcept(
-                text = "b",
+                text = "b".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     )
                 )
             ),
             status = MedicationStatus.ACTIVE.asCode(),
-            manufacturer = Reference(reference = "Organization/c"),
+            manufacturer = Reference(reference = "Organization/c".asFHIR()),
             form = CodeableConcept(
-                text = "d",
+                text = "d".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = Uri("d"),
                         code = Code("d"),
-                        version = "1.0.0",
-                        display = "d"
+                        version = "1.0.0".asFHIR(),
+                        display = "d".asFHIR()
                     )
                 )
             ),
             amount = Ratio(
                 numerator = Quantity(
-                    value = 1.5,
-                    unit = "mg",
+                    value = Decimal(1.5),
+                    unit = "mg".asFHIR(),
                     system = CodeSystem.UCUM.uri,
                     code = Code("mg")
                 ),
                 denominator = Quantity(
-                    value = 1.0,
-                    unit = "mg",
+                    value = Decimal(1.0),
+                    unit = "mg".asFHIR(),
                     system = CodeSystem.UCUM.uri,
                     code = Code("mg")
                 )
@@ -871,28 +981,28 @@ class RoninMedicationTest {
                     item = DynamicValue(
                         DynamicValueType.CODEABLE_CONCEPT,
                         CodeableConcept(
-                            text = "f",
+                            text = "f".asFHIR(),
                             coding = listOf(
                                 Coding(
                                     system = Uri("f"),
                                     code = Code("f"),
-                                    version = "1.0.0",
-                                    display = "f"
+                                    version = "1.0.0".asFHIR(),
+                                    display = "f".asFHIR()
                                 )
                             )
                         )
                     ),
-                    isActive = true,
+                    isActive = FHIRBoolean.TRUE,
                     strength = Ratio(
                         numerator = Quantity(
-                            value = 0.5,
-                            unit = "mg",
+                            value = Decimal(0.5),
+                            unit = "mg".asFHIR(),
                             system = CodeSystem.UCUM.uri,
                             code = Code("mg")
                         ),
                         denominator = Quantity(
-                            value = 1.0,
-                            unit = "mg",
+                            value = Decimal(1.0),
+                            unit = "mg".asFHIR(),
                             system = CodeSystem.UCUM.uri,
                             code = Code("mg")
                         )
@@ -900,7 +1010,7 @@ class RoninMedicationTest {
                 )
             ),
             batch = Batch(
-                lotNumber = "e",
+                lotNumber = "e".asFHIR(),
                 expirationDate = DateTime("2022-10-14")
             ),
         )
@@ -925,13 +1035,13 @@ class RoninMedicationTest {
                         value = DynamicValue(
                             DynamicValueType.CODEABLE_CONCEPT,
                             CodeableConcept(
-                                text = "b",
+                                text = "b".asFHIR(),
                                 coding = listOf(
                                     Coding(
                                         system = CodeSystem.RXNORM.uri,
                                         code = Code("b"),
-                                        version = "1.0.0",
-                                        display = "b"
+                                        version = "1.0.0".asFHIR(),
+                                        display = "b".asFHIR()
                                     )
                                 )
                             )
@@ -944,15 +1054,23 @@ class RoninMedicationTest {
         assertEquals(3, roninMedication.identifier.size)
         assertEquals(
             listOf(
-                Identifier(value = "67890"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(value = "67890".asFHIR()),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             roninMedication.identifier
         )
         assertEquals(medication.code, roninMedication.code)
         assertEquals(Code(value = "active"), roninMedication.status)
-        assertEquals(Reference(reference = "Organization/test-c"), roninMedication.manufacturer)
+        assertEquals(Reference(reference = "Organization/test-c".asFHIR()), roninMedication.manufacturer)
         assertEquals(medication.form, roninMedication.form)
         assertEquals(medication.amount, roninMedication.amount)
         assertEquals(medication.ingredient, roninMedication.ingredient)
@@ -967,8 +1085,16 @@ class RoninMedicationTest {
     fun `transform - returns null if validation fails - for example a required attribute is missing`() {
         val medication = Medication(
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             // required code attribute is missing
         )

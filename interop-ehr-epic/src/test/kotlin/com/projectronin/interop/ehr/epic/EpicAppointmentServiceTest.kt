@@ -22,6 +22,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.Patient
@@ -67,16 +68,16 @@ class EpicAppointmentServiceTest {
     private val testPrivateKey = this::class.java.getResource("/TestPrivateKey.txt")!!.readText()
     private val epicProviderSystem = "providerSystem"
     private val goodProviderIdentifier1 = Identifier(
-        value = "E1000",
+        value = "E1000".asFHIR(),
         system = Uri(epicProviderSystem),
         type = CodeableConcept(
-            text = "internal"
+            text = "internal".asFHIR()
         )
     )
     private val goodProviderIdentifier2 = Identifier(
-        value = "E1000",
+        value = "E1000".asFHIR(),
         type = CodeableConcept(
-            text = "CID"
+            text = "CID".asFHIR()
         )
     )
     private val goodProviderFHIRIdentifier = FHIRIdentifiers(
@@ -928,7 +929,7 @@ class EpicAppointmentServiceTest {
         }
 
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
-            every { value } returns "MRN"
+            every { value } returns "MRN".asFHIR()
         }
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -988,7 +989,7 @@ class EpicAppointmentServiceTest {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
-            every { value } returns "MRN"
+            every { value } returns "MRN".asFHIR()
         }
         every { httpResponse.status } returns HttpStatusCode.OK
         mockkStatic(HttpResponse::throwExceptionFromHttpStatus)
@@ -1013,7 +1014,7 @@ class EpicAppointmentServiceTest {
 
         // mock Epic providers with no identifiers
         val mockProvIDs = allProviders.associateWith { prov ->
-            prov.providerIDs.map { Identifier(value = it.id, type = CodeableConcept(text = it.type)) }
+            prov.providerIDs.map { Identifier(value = it.id.asFHIR(), type = CodeableConcept(text = it.type.asFHIR())) }
         }
         mockProvIDs.entries.forEach {
             it.value
@@ -1055,9 +1056,9 @@ class EpicAppointmentServiceTest {
 
         // no provider identifiers were found, while location identifiers were found
         response.forEach { appt ->
-            assertFalse(appt.participant.none { it.actor!!.reference!!.contains("Patient/") })
-            assertTrue(appt.participant.none { it.actor!!.reference!!.contains("Practitioner/") })
-            assertFalse(appt.participant.none { it.actor!!.reference!!.contains("Location/") })
+            assertFalse(appt.participant.none { it.actor!!.reference!!.value!!.contains("Patient/") })
+            assertTrue(appt.participant.none { it.actor!!.reference!!.value!!.contains("Practitioner/") })
+            assertFalse(appt.participant.none { it.actor!!.reference!!.value!!.contains("Location/") })
         }
     }
 
@@ -1076,7 +1077,7 @@ class EpicAppointmentServiceTest {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
-            every { value } returns "MRN"
+            every { value } returns "MRN".asFHIR()
         }
         every { httpResponse.status } returns HttpStatusCode.OK
         mockkStatic(HttpResponse::throwExceptionFromHttpStatus)
@@ -1100,7 +1101,12 @@ class EpicAppointmentServiceTest {
         assertEquals(4, allProviders.size)
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         val mockLocationIDs = allProviders.associateWith { prov ->
-            prov.departmentIDs.map { Identifier(value = it.id, type = CodeableConcept(text = it.type)) }
+            prov.departmentIDs.map {
+                Identifier(
+                    value = it.id.asFHIR(),
+                    type = CodeableConcept(text = it.type.asFHIR())
+                )
+            }
         }
         mockLocationIDs.entries.forEach {
             it.value
@@ -1141,9 +1147,9 @@ class EpicAppointmentServiceTest {
 
         // no provider identifiers were found, while location identifiers were found
         response.forEach { appt ->
-            assertFalse(appt.participant.none { it.actor!!.reference!!.contains("Patient/") })
-            assertFalse(appt.participant.none { it.actor!!.reference!!.contains("Practitioner/") })
-            assertTrue(appt.participant.none { it.actor!!.reference!!.contains("Location/") })
+            assertFalse(appt.participant.none { it.actor!!.reference!!.value!!.contains("Patient/") })
+            assertFalse(appt.participant.none { it.actor!!.reference!!.value!!.contains("Practitioner/") })
+            assertTrue(appt.participant.none { it.actor!!.reference!!.value!!.contains("Location/") })
         }
     }
 
@@ -1162,10 +1168,10 @@ class EpicAppointmentServiceTest {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
-            every { value } returns "MRN"
+            every { value } returns "MRN".asFHIR()
         }
         every { identifierService.getLocationIdentifier(tenant, existingIdentifiers) } returns mockk {
-            every { value } returns "1402684"
+            every { value } returns "1402684".asFHIR()
         }
         every { httpResponse.status } returns HttpStatusCode.OK
         mockkStatic(HttpResponse::throwExceptionFromHttpStatus)
@@ -1217,22 +1223,22 @@ class EpicAppointmentServiceTest {
         assertEquals(3, appt0.identifier.size)
         assertFalse(appt0.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("noshow"), appt0.status)
-        assertEquals(CodeableConcept(text = "TRANSPLANT EVALUATION"), appt0.appointmentType)
+        assertEquals(CodeableConcept(text = "TRANSPLANT EVALUATION".asFHIR()), appt0.appointmentType)
         assertEquals(3, appt0.participant.size)
-        assertEquals("Patient/E5597", appt0.participant[0].actor?.reference)
-        assertEquals("Practitioner/CoordinatorPhoenixRN-fhir-id", appt0.participant[1].actor?.reference)
-        assertEquals("Location/EMHPHXCTHDEPT-fhir-id", appt0.participant[2].actor?.reference)
+        assertEquals("Patient/E5597".asFHIR(), appt0.participant[0].actor?.reference)
+        assertEquals("Practitioner/CoordinatorPhoenixRN-fhir-id".asFHIR(), appt0.participant[1].actor?.reference)
+        assertEquals("Location/EMHPHXCTHDEPT-fhir-id".asFHIR(), appt0.participant[2].actor?.reference)
         val appt1 = appointments[1]
         assertEquals("22787", appt1.id?.value)
         assertNull(appt1.meta)
         assertEquals(3, appt1.identifier.size)
         assertFalse(appt1.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("fulfilled"), appt1.status)
-        assertEquals(CodeableConcept(text = "INFUSION 120"), appt1.appointmentType)
+        assertEquals(CodeableConcept(text = "INFUSION 120".asFHIR()), appt1.appointmentType)
         assertEquals(3, appt1.participant.size)
-        assertEquals("Patient/E5597", appt1.participant[0].actor?.reference)
-        assertEquals("Practitioner/INFUSIONSTATION1-fhir-id", appt1.participant[1].actor?.reference)
-        assertEquals("Location/EMHINFUSIONTHERAPY-fhir-id", appt1.participant[2].actor?.reference)
+        assertEquals("Patient/E5597".asFHIR(), appt1.participant[0].actor?.reference)
+        assertEquals("Practitioner/INFUSIONSTATION1-fhir-id".asFHIR(), appt1.participant[1].actor?.reference)
+        assertEquals("Location/EMHINFUSIONTHERAPY-fhir-id".asFHIR(), appt1.participant[2].actor?.reference)
         val appt2 = appointments[2]
         assertEquals("22784", appt2.id?.value)
         assertNull(appt2.meta)
@@ -1241,20 +1247,20 @@ class EpicAppointmentServiceTest {
         assertEquals(Code("booked"), appt2.status)
         assertNull(appt2.appointmentType)
         assertEquals(3, appt2.participant.size)
-        assertEquals("Patient/E5597", appt2.participant[0].actor?.reference)
-        assertEquals("Practitioner/PEDCHEMOINFUSIONCHAIRA-fhir-id", appt2.participant[1].actor?.reference)
-        assertEquals("Location/EMHPEDCHEMOINFUSION-fhir-id", appt2.participant[2].actor?.reference)
+        assertEquals("Patient/E5597".asFHIR(), appt2.participant[0].actor?.reference)
+        assertEquals("Practitioner/PEDCHEMOINFUSIONCHAIRA-fhir-id".asFHIR(), appt2.participant[1].actor?.reference)
+        assertEquals("Location/EMHPEDCHEMOINFUSION-fhir-id".asFHIR(), appt2.participant[2].actor?.reference)
         val appt3 = appointments[3]
         assertEquals("22783", appt3.id?.value)
         assertNull(appt3.meta)
         assertEquals(3, appt3.identifier.size)
         assertFalse(appt3.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("arrived"), appt3.status)
-        assertEquals(CodeableConcept(text = "OFFICE VISIT"), appt3.appointmentType)
+        assertEquals(CodeableConcept(text = "OFFICE VISIT".asFHIR()), appt3.appointmentType)
         assertEquals(3, appt3.participant.size)
-        assertEquals("Patient/E5597", appt3.participant[0].actor?.reference)
-        assertEquals("Practitioner/PhysicianFamilyMedicineMD-fhir-id", appt3.participant[1].actor?.reference)
-        assertEquals("Location/EMCFAMILYMEDICINE-fhir-id", appt3.participant[2].actor?.reference)
+        assertEquals("Patient/E5597".asFHIR(), appt3.participant[0].actor?.reference)
+        assertEquals("Practitioner/PhysicianFamilyMedicineMD-fhir-id".asFHIR(), appt3.participant[1].actor?.reference)
+        assertEquals("Location/EMCFAMILYMEDICINE-fhir-id".asFHIR(), appt3.participant[2].actor?.reference)
     }
 
     @Test
@@ -1272,10 +1278,10 @@ class EpicAppointmentServiceTest {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
-            every { value } returns "MRN"
+            every { value } returns "MRN".asFHIR()
         }
         every { identifierService.getLocationIdentifier(tenant, existingIdentifiers) } returns mockk {
-            every { value } returns "1402684"
+            every { value } returns "1402684".asFHIR()
         }
         every { httpResponse.status } returns HttpStatusCode.OK
         mockkStatic(HttpResponse::throwExceptionFromHttpStatus)
@@ -1327,22 +1333,22 @@ class EpicAppointmentServiceTest {
         assertEquals(3, appt0.identifier.size)
         assertFalse(appt0.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("noshow"), appt0.status)
-        assertEquals(CodeableConcept(text = "TRANSPLANT EVALUATION"), appt0.appointmentType)
+        assertEquals(CodeableConcept(text = "TRANSPLANT EVALUATION".asFHIR()), appt0.appointmentType)
         assertEquals(3, appt0.participant.size)
-        assertEquals("Patient/E5597", appt0.participant[0].actor?.reference)
+        assertEquals("Patient/E5597".asFHIR(), appt0.participant[0].actor?.reference)
         assertTrue(appt0.participant[1].actor?.identifier is Identifier)
-        assertEquals("Location/EMHPHXCTHDEPT-fhir-id", appt0.participant[2].actor?.reference)
+        assertEquals("Location/EMHPHXCTHDEPT-fhir-id".asFHIR(), appt0.participant[2].actor?.reference)
         val appt1 = appointments[1]
         assertEquals("22787", appt1.id?.value)
         assertNull(appt1.meta)
         assertEquals(3, appt1.identifier.size)
         assertFalse(appt1.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("fulfilled"), appt1.status)
-        assertEquals(CodeableConcept(text = "INFUSION 120"), appt1.appointmentType)
+        assertEquals(CodeableConcept(text = "INFUSION 120".asFHIR()), appt1.appointmentType)
         assertEquals(3, appt1.participant.size)
-        assertEquals("Patient/E5597", appt1.participant[0].actor?.reference)
+        assertEquals("Patient/E5597".asFHIR(), appt1.participant[0].actor?.reference)
         assertTrue(appt1.participant[1].actor?.identifier is Identifier)
-        assertEquals("Location/EMHINFUSIONTHERAPY-fhir-id", appt1.participant[2].actor?.reference)
+        assertEquals("Location/EMHINFUSIONTHERAPY-fhir-id".asFHIR(), appt1.participant[2].actor?.reference)
         val appt2 = appointments[2]
         assertEquals("22784", appt2.id?.value)
         assertNull(appt2.meta)
@@ -1351,20 +1357,20 @@ class EpicAppointmentServiceTest {
         assertEquals(Code("booked"), appt2.status)
         assertNull(appt2.appointmentType)
         assertEquals(3, appt2.participant.size)
-        assertEquals("Patient/E5597", appt2.participant[0].actor?.reference)
+        assertEquals("Patient/E5597".asFHIR(), appt2.participant[0].actor?.reference)
         assertTrue(appt2.participant[1].actor?.identifier is Identifier)
-        assertEquals("Location/EMHPEDCHEMOINFUSION-fhir-id", appt2.participant[2].actor?.reference)
+        assertEquals("Location/EMHPEDCHEMOINFUSION-fhir-id".asFHIR(), appt2.participant[2].actor?.reference)
         val appt3 = appointments[3]
         assertEquals("22783", appt3.id?.value)
         assertNull(appt3.meta)
         assertEquals(3, appt3.identifier.size)
         assertFalse(appt3.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("arrived"), appt3.status)
-        assertEquals(CodeableConcept(text = "OFFICE VISIT"), appt3.appointmentType)
+        assertEquals(CodeableConcept(text = "OFFICE VISIT".asFHIR()), appt3.appointmentType)
         assertEquals(3, appt3.participant.size)
-        assertEquals("Patient/E5597", appt3.participant[0].actor?.reference)
+        assertEquals("Patient/E5597".asFHIR(), appt3.participant[0].actor?.reference)
         assertTrue(appt3.participant[1].actor?.identifier is Identifier)
-        assertEquals("Location/EMCFAMILYMEDICINE-fhir-id", appt3.participant[2].actor?.reference)
+        assertEquals("Location/EMCFAMILYMEDICINE-fhir-id".asFHIR(), appt3.participant[2].actor?.reference)
     }
 
     @Test
@@ -1382,10 +1388,10 @@ class EpicAppointmentServiceTest {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
-            every { value } returns "MRN"
+            every { value } returns "MRN".asFHIR()
         }
         every { identifierService.getLocationIdentifier(tenant, existingIdentifiers) } returns mockk {
-            every { value } returns "1402684"
+            every { value } returns "1402684".asFHIR()
         }
         every { httpResponse.status } returns HttpStatusCode.OK
         mockkStatic(HttpResponse::throwExceptionFromHttpStatus)
@@ -1432,35 +1438,44 @@ class EpicAppointmentServiceTest {
 
         // no location identifiers were found, while provider identifiers were found
         appointments.forEach { appt ->
-            assertFalse(appt.participant.none { it.actor!!.reference!!.contains("Patient/") })
-            assertFalse(appt.participant.none { it.actor!!.reference!!.contains("Practitioner/") })
-            assertTrue(appt.participant.none { it.actor!!.reference!!.contains("Location/") })
+            assertFalse(appt.participant.none { it.actor!!.reference!!.value!!.contains("Patient/") })
+            assertFalse(appt.participant.none { it.actor!!.reference!!.value!!.contains("Practitioner/") })
+            assertTrue(appt.participant.none { it.actor!!.reference!!.value!!.contains("Location/") })
         }
 
         // patient and providers are correct per appointment
         assertEquals("22792", appointments[0].id?.value)
         assertEquals(2, appointments[0].participant.size)
-        assertEquals("Patient/E5597", appointments[0].participant[0].actor?.reference)
-        assertEquals("Practitioner/CoordinatorPhoenixRN-fhir-id", appointments[0].participant[1].actor?.reference)
-        assertEquals("Coordinator Phoenix, RN", appointments[0].participant[1].actor?.display)
+        assertEquals("Patient/E5597".asFHIR(), appointments[0].participant[0].actor?.reference)
+        assertEquals(
+            "Practitioner/CoordinatorPhoenixRN-fhir-id".asFHIR(),
+            appointments[0].participant[1].actor?.reference
+        )
+        assertEquals("Coordinator Phoenix, RN".asFHIR(), appointments[0].participant[1].actor?.display)
 
         assertEquals("22787", appointments[1].id?.value)
         assertEquals(2, appointments[1].participant.size)
-        assertEquals("Patient/E5597", appointments[1].participant[0].actor?.reference)
-        assertEquals("Practitioner/INFUSIONSTATION1-fhir-id", appointments[1].participant[1].actor?.reference)
-        assertEquals("INFUSION STATION 1", appointments[1].participant[1].actor?.display)
+        assertEquals("Patient/E5597".asFHIR(), appointments[1].participant[0].actor?.reference)
+        assertEquals("Practitioner/INFUSIONSTATION1-fhir-id".asFHIR(), appointments[1].participant[1].actor?.reference)
+        assertEquals("INFUSION STATION 1".asFHIR(), appointments[1].participant[1].actor?.display)
 
         assertEquals("22784", appointments[2].id?.value)
         assertEquals(2, appointments[2].participant.size)
-        assertEquals("Patient/E5597", appointments[2].participant[0].actor?.reference)
-        assertEquals("Practitioner/PEDCHEMOINFUSIONCHAIRA-fhir-id", appointments[2].participant[1].actor?.reference)
-        assertEquals("PED CHEMO INFUSION, CHAIR A", appointments[2].participant[1].actor?.display)
+        assertEquals("Patient/E5597".asFHIR(), appointments[2].participant[0].actor?.reference)
+        assertEquals(
+            "Practitioner/PEDCHEMOINFUSIONCHAIRA-fhir-id".asFHIR(),
+            appointments[2].participant[1].actor?.reference
+        )
+        assertEquals("PED CHEMO INFUSION, CHAIR A".asFHIR(), appointments[2].participant[1].actor?.display)
 
         assertEquals("22783", appointments[3].id?.value)
         assertEquals(2, appointments[3].participant.size)
-        assertEquals("Patient/E5597", appointments[2].participant[0].actor?.reference)
-        assertEquals("Practitioner/PhysicianFamilyMedicineMD-fhir-id", appointments[3].participant[1].actor?.reference)
-        assertEquals("Physician Family Medicine, MD", appointments[3].participant[1].actor?.display)
+        assertEquals("Patient/E5597".asFHIR(), appointments[2].participant[0].actor?.reference)
+        assertEquals(
+            "Practitioner/PhysicianFamilyMedicineMD-fhir-id".asFHIR(),
+            appointments[3].participant[1].actor?.reference
+        )
+        assertEquals("Physician Family Medicine, MD".asFHIR(), appointments[3].participant[1].actor?.display)
     }
 
     @Test
@@ -1710,7 +1725,7 @@ class EpicAppointmentServiceTest {
         } returns listOf(
             LimitedLocationFHIRIdentifiers(
                 "FHIRID1",
-                listOf(Identifier(value = "E100", system = Uri("internalDepartmentSystem")))
+                listOf(Identifier(value = "E100".asFHIR(), system = Uri("internalDepartmentSystem")))
             )
         )
 
@@ -1854,22 +1869,22 @@ class EpicAppointmentServiceTest {
         assertEquals(2, appt.identifier.size)
         assertFalse(appt.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("Deliberately new"), appt.status)
-        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName), appt.appointmentType)
+        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName.asFHIR()), appt.appointmentType)
         assertEquals(7, appt.participant.size) // 5 would be the size if we listed only distinct providers
-        assertEquals("Patient/PatientFhirID1", appt.participant[0].actor?.reference)
-        assertEquals("Test Name", appt.participant[0].actor?.display)
-        assertEquals("Practitioner/TestDoc1-fhir-id", appt.participant[1].actor?.reference)
-        assertEquals("Test Doc 1", appt.participant[1].actor?.display)
-        assertEquals("Practitioner/TestDoc1-fhir-id", appt.participant[2].actor?.reference)
-        assertEquals("Test Doc 1", appt.participant[2].actor?.display)
-        assertEquals("Practitioner/TestDoc2-fhir-id", appt.participant[3].actor?.reference)
-        assertEquals("Test Doc 2", appt.participant[3].actor?.display)
-        assertEquals("Location/TestDepartmentA-fhir-id", appt.participant[4].actor?.reference)
-        assertEquals("Test Department A", appt.participant[4].actor?.display)
-        assertEquals("Location/TestDepartmentB-fhir-id", appt.participant[5].actor?.reference)
-        assertEquals("Test Department B", appt.participant[5].actor?.display)
-        assertEquals("Location/TestDepartmentA-fhir-id", appt.participant[6].actor?.reference)
-        assertEquals("Test Department A", appt.participant[6].actor?.display)
+        assertEquals("Patient/PatientFhirID1".asFHIR(), appt.participant[0].actor?.reference)
+        assertEquals("Test Name".asFHIR(), appt.participant[0].actor?.display)
+        assertEquals("Practitioner/TestDoc1-fhir-id".asFHIR(), appt.participant[1].actor?.reference)
+        assertEquals("Test Doc 1".asFHIR(), appt.participant[1].actor?.display)
+        assertEquals("Practitioner/TestDoc1-fhir-id".asFHIR(), appt.participant[2].actor?.reference)
+        assertEquals("Test Doc 1".asFHIR(), appt.participant[2].actor?.display)
+        assertEquals("Practitioner/TestDoc2-fhir-id".asFHIR(), appt.participant[3].actor?.reference)
+        assertEquals("Test Doc 2".asFHIR(), appt.participant[3].actor?.display)
+        assertEquals("Location/TestDepartmentA-fhir-id".asFHIR(), appt.participant[4].actor?.reference)
+        assertEquals("Test Department A".asFHIR(), appt.participant[4].actor?.display)
+        assertEquals("Location/TestDepartmentB-fhir-id".asFHIR(), appt.participant[5].actor?.reference)
+        assertEquals("Test Department B".asFHIR(), appt.participant[5].actor?.display)
+        assertEquals("Location/TestDepartmentA-fhir-id".asFHIR(), appt.participant[6].actor?.reference)
+        assertEquals("Test Department A".asFHIR(), appt.participant[6].actor?.display)
     }
 
     @Test
@@ -1965,22 +1980,22 @@ class EpicAppointmentServiceTest {
                 .isEmpty()
         )
         assertEquals(Code("Deliberately new"), appt0.status)
-        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName), appt0.appointmentType)
+        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName.asFHIR()), appt0.appointmentType)
         assertEquals(7, appt0.participant.size) // 5 would be the size if we listed only distinct providers
-        assertEquals("Patient/PatientFhirID1", appt0.participant[0].actor?.reference)
-        assertEquals("Test Name", appt0.participant[0].actor?.display)
-        assertEquals("Practitioner/TestDoc1-fhir-id", appt0.participant[1].actor?.reference)
-        assertEquals("Test Doc 1", appt0.participant[1].actor?.display)
-        assertEquals("Practitioner/TestDoc1-fhir-id", appt0.participant[2].actor?.reference)
-        assertEquals("Test Doc 1", appt0.participant[2].actor?.display)
-        assertEquals("Practitioner/TestDoc2-fhir-id", appt0.participant[3].actor?.reference)
-        assertEquals("Test Doc 2", appt0.participant[3].actor?.display)
-        assertEquals("Location/TestDepartmentA-fhir-id", appt0.participant[4].actor?.reference)
-        assertEquals("Test Department A", appt0.participant[4].actor?.display)
-        assertEquals("Location/TestDepartmentB-fhir-id", appt0.participant[5].actor?.reference)
-        assertEquals("Test Department B", appt0.participant[5].actor?.display)
-        assertEquals("Location/TestDepartmentA-fhir-id", appt0.participant[6].actor?.reference)
-        assertEquals("Test Department A", appt0.participant[6].actor?.display)
+        assertEquals("Patient/PatientFhirID1".asFHIR(), appt0.participant[0].actor?.reference)
+        assertEquals("Test Name".asFHIR(), appt0.participant[0].actor?.display)
+        assertEquals("Practitioner/TestDoc1-fhir-id".asFHIR(), appt0.participant[1].actor?.reference)
+        assertEquals("Test Doc 1".asFHIR(), appt0.participant[1].actor?.display)
+        assertEquals("Practitioner/TestDoc1-fhir-id".asFHIR(), appt0.participant[2].actor?.reference)
+        assertEquals("Test Doc 1".asFHIR(), appt0.participant[2].actor?.display)
+        assertEquals("Practitioner/TestDoc2-fhir-id".asFHIR(), appt0.participant[3].actor?.reference)
+        assertEquals("Test Doc 2".asFHIR(), appt0.participant[3].actor?.display)
+        assertEquals("Location/TestDepartmentA-fhir-id".asFHIR(), appt0.participant[4].actor?.reference)
+        assertEquals("Test Department A".asFHIR(), appt0.participant[4].actor?.display)
+        assertEquals("Location/TestDepartmentB-fhir-id".asFHIR(), appt0.participant[5].actor?.reference)
+        assertEquals("Test Department B".asFHIR(), appt0.participant[5].actor?.display)
+        assertEquals("Location/TestDepartmentA-fhir-id".asFHIR(), appt0.participant[6].actor?.reference)
+        assertEquals("Test Department A".asFHIR(), appt0.participant[6].actor?.display)
 
         val appt1 = response.appointments[1]
         assertEquals(epicAppointment2.id, appt1.id?.value)
@@ -1988,34 +2003,34 @@ class EpicAppointmentServiceTest {
         assertEquals(2, appt1.identifier.size)
         assertFalse(appt1.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("Deliberately unknown"), appt1.status)
-        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName), appt1.appointmentType)
+        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName.asFHIR()), appt1.appointmentType)
         assertEquals(13, appt1.participant.size) // 9 would be the size if we listed only distinct providers
-        assertEquals("Patient/PatientFhirID2", appt1.participant[0].actor?.reference)
-        assertEquals("Test Name 2", appt1.participant[0].actor?.display)
-        assertEquals("Practitioner/TestDoc1-fhir-id", appt1.participant[1].actor?.reference)
-        assertEquals("Test Doc 1", appt1.participant[1].actor?.display)
-        assertEquals("Practitioner/TestDoc3-fhir-id", appt1.participant[2].actor?.reference)
-        assertEquals("Test Doc 3", appt1.participant[2].actor?.display)
-        assertEquals("Practitioner/TestDoc5-fhir-id", appt1.participant[3].actor?.reference)
-        assertEquals("Test Doc 5", appt1.participant[3].actor?.display)
-        assertEquals("Practitioner/TestDoc2-fhir-id", appt1.participant[4].actor?.reference)
-        assertEquals("Test Doc 2", appt1.participant[4].actor?.display)
-        assertEquals("Practitioner/TestDoc7-fhir-id", appt1.participant[5].actor?.reference)
-        assertEquals("Test Doc 7", appt1.participant[5].actor?.display)
-        assertEquals("Practitioner/TestDoc3-fhir-id", appt1.participant[6].actor?.reference)
-        assertEquals("Test Doc 3", appt1.participant[6].actor?.display)
-        assertEquals("Location/TestDepartmentA-fhir-id", appt1.participant[7].actor?.reference)
-        assertEquals("Test Department A", appt1.participant[7].actor?.display)
-        assertEquals("Location/TestDepartmentB-fhir-id", appt1.participant[8].actor?.reference)
-        assertEquals("Test Department B", appt1.participant[8].actor?.display)
-        assertEquals("Location/TestDepartmentD-fhir-id", appt1.participant[9].actor?.reference)
-        assertEquals("Test Department D", appt1.participant[9].actor?.display)
-        assertEquals("Location/TestDepartmentE-fhir-id", appt1.participant[10].actor?.reference)
-        assertEquals("Test Department E", appt1.participant[10].actor?.display)
-        assertEquals("Location/TestDepartmentE-fhir-id", appt1.participant[11].actor?.reference)
-        assertEquals("Test Department E", appt1.participant[11].actor?.display)
-        assertEquals("Location/TestDepartmentB-fhir-id", appt1.participant[12].actor?.reference)
-        assertEquals("Test Department B", appt1.participant[12].actor?.display)
+        assertEquals("Patient/PatientFhirID2".asFHIR(), appt1.participant[0].actor?.reference)
+        assertEquals("Test Name 2".asFHIR(), appt1.participant[0].actor?.display)
+        assertEquals("Practitioner/TestDoc1-fhir-id".asFHIR(), appt1.participant[1].actor?.reference)
+        assertEquals("Test Doc 1".asFHIR(), appt1.participant[1].actor?.display)
+        assertEquals("Practitioner/TestDoc3-fhir-id".asFHIR(), appt1.participant[2].actor?.reference)
+        assertEquals("Test Doc 3".asFHIR(), appt1.participant[2].actor?.display)
+        assertEquals("Practitioner/TestDoc5-fhir-id".asFHIR(), appt1.participant[3].actor?.reference)
+        assertEquals("Test Doc 5".asFHIR(), appt1.participant[3].actor?.display)
+        assertEquals("Practitioner/TestDoc2-fhir-id".asFHIR(), appt1.participant[4].actor?.reference)
+        assertEquals("Test Doc 2".asFHIR(), appt1.participant[4].actor?.display)
+        assertEquals("Practitioner/TestDoc7-fhir-id".asFHIR(), appt1.participant[5].actor?.reference)
+        assertEquals("Test Doc 7".asFHIR(), appt1.participant[5].actor?.display)
+        assertEquals("Practitioner/TestDoc3-fhir-id".asFHIR(), appt1.participant[6].actor?.reference)
+        assertEquals("Test Doc 3".asFHIR(), appt1.participant[6].actor?.display)
+        assertEquals("Location/TestDepartmentA-fhir-id".asFHIR(), appt1.participant[7].actor?.reference)
+        assertEquals("Test Department A".asFHIR(), appt1.participant[7].actor?.display)
+        assertEquals("Location/TestDepartmentB-fhir-id".asFHIR(), appt1.participant[8].actor?.reference)
+        assertEquals("Test Department B".asFHIR(), appt1.participant[8].actor?.display)
+        assertEquals("Location/TestDepartmentD-fhir-id".asFHIR(), appt1.participant[9].actor?.reference)
+        assertEquals("Test Department D".asFHIR(), appt1.participant[9].actor?.display)
+        assertEquals("Location/TestDepartmentE-fhir-id".asFHIR(), appt1.participant[10].actor?.reference)
+        assertEquals("Test Department E".asFHIR(), appt1.participant[10].actor?.display)
+        assertEquals("Location/TestDepartmentE-fhir-id".asFHIR(), appt1.participant[11].actor?.reference)
+        assertEquals("Test Department E".asFHIR(), appt1.participant[11].actor?.display)
+        assertEquals("Location/TestDepartmentB-fhir-id".asFHIR(), appt1.participant[12].actor?.reference)
+        assertEquals("Test Department B".asFHIR(), appt1.participant[12].actor?.display)
     }
 
     @Test
@@ -2201,14 +2216,14 @@ class EpicAppointmentServiceTest {
         assertEquals(2, appt0.identifier.size)
         assertFalse(appt0.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("booked"), appt0.status)
-        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName), appt0.appointmentType)
+        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName.asFHIR()), appt0.appointmentType)
         assertEquals(3, appt0.participant.size)
-        assertEquals("Patient/PatientFhirID1", appt0.participant[0].actor?.reference)
-        assertEquals("Test Name", appt0.participant[0].actor?.display)
-        assertEquals("Practitioner/TestDoc1-fhir-id", appt0.participant[1].actor?.reference)
-        assertEquals("Test Doc 1", appt0.participant[1].actor?.display)
-        assertEquals("Location/TestDepartmentA-fhir-id", appt0.participant[2].actor?.reference)
-        assertEquals("Test Department A", appt0.participant[2].actor?.display)
+        assertEquals("Patient/PatientFhirID1".asFHIR(), appt0.participant[0].actor?.reference)
+        assertEquals("Test Name".asFHIR(), appt0.participant[0].actor?.display)
+        assertEquals("Practitioner/TestDoc1-fhir-id".asFHIR(), appt0.participant[1].actor?.reference)
+        assertEquals("Test Doc 1".asFHIR(), appt0.participant[1].actor?.display)
+        assertEquals("Location/TestDepartmentA-fhir-id".asFHIR(), appt0.participant[2].actor?.reference)
+        assertEquals("Test Department A".asFHIR(), appt0.participant[2].actor?.display)
 
         // unique Location B (not A or C)
         val appt1 = response.appointments[1]
@@ -2217,14 +2232,14 @@ class EpicAppointmentServiceTest {
         assertEquals(2, appt1.identifier.size)
         assertFalse(appt1.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("arrived"), appt1.status)
-        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName), appt1.appointmentType)
+        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName.asFHIR()), appt1.appointmentType)
         assertEquals(3, appt1.participant.size)
-        assertEquals("Patient/PatientFhirID2", appt1.participant[0].actor?.reference)
-        assertEquals("Test Name 2", appt1.participant[0].actor?.display)
-        assertEquals("Practitioner/TestDoc1-fhir-id", appt1.participant[1].actor?.reference)
-        assertEquals("Test Doc 1", appt1.participant[1].actor?.display)
-        assertEquals("Location/TestDepartmentB-fhir-id", appt1.participant[2].actor?.reference)
-        assertEquals("Test Department B", appt1.participant[2].actor?.display)
+        assertEquals("Patient/PatientFhirID2".asFHIR(), appt1.participant[0].actor?.reference)
+        assertEquals("Test Name 2".asFHIR(), appt1.participant[0].actor?.display)
+        assertEquals("Practitioner/TestDoc1-fhir-id".asFHIR(), appt1.participant[1].actor?.reference)
+        assertEquals("Test Doc 1".asFHIR(), appt1.participant[1].actor?.display)
+        assertEquals("Location/TestDepartmentB-fhir-id".asFHIR(), appt1.participant[2].actor?.reference)
+        assertEquals("Test Department B".asFHIR(), appt1.participant[2].actor?.display)
 
         // unique Location C (not A or B)
         val appt2 = response.appointments[2]
@@ -2233,14 +2248,14 @@ class EpicAppointmentServiceTest {
         assertEquals(2, appt2.identifier.size)
         assertFalse(appt2.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("booked"), appt2.status)
-        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName), appt2.appointmentType)
+        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName.asFHIR()), appt2.appointmentType)
         assertEquals(3, appt2.participant.size)
-        assertEquals("Patient/PatientFhirID3", appt2.participant[0].actor?.reference)
-        assertEquals("Test Name 3", appt2.participant[0].actor?.display)
-        assertEquals("Practitioner/TestDoc1-fhir-id", appt2.participant[1].actor?.reference)
-        assertEquals("Test Doc 1", appt2.participant[1].actor?.display)
-        assertEquals("Location/TestDepartmentC-fhir-id", appt2.participant[2].actor?.reference)
-        assertEquals("Test Department C", appt2.participant[2].actor?.display)
+        assertEquals("Patient/PatientFhirID3".asFHIR(), appt2.participant[0].actor?.reference)
+        assertEquals("Test Name 3".asFHIR(), appt2.participant[0].actor?.display)
+        assertEquals("Practitioner/TestDoc1-fhir-id".asFHIR(), appt2.participant[1].actor?.reference)
+        assertEquals("Test Doc 1".asFHIR(), appt2.participant[1].actor?.display)
+        assertEquals("Location/TestDepartmentC-fhir-id".asFHIR(), appt2.participant[2].actor?.reference)
+        assertEquals("Test Department C".asFHIR(), appt2.participant[2].actor?.display)
     }
 
     @Test
@@ -2426,14 +2441,14 @@ class EpicAppointmentServiceTest {
         assertEquals(2, appt0.identifier.size)
         assertFalse(appt0.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("booked"), appt0.status)
-        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName), appt0.appointmentType)
+        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName.asFHIR()), appt0.appointmentType)
         assertEquals(3, appt0.participant.size)
-        assertEquals("Patient/PatientFhirID1", appt0.participant[0].actor?.reference)
-        assertEquals("Test Name", appt0.participant[0].actor?.display)
-        assertEquals("Practitioner/TestDoc2-fhir-id", appt0.participant[1].actor?.reference)
-        assertEquals("Test Doc 2", appt0.participant[1].actor?.display)
-        assertEquals("Location/TestDepartmentA-fhir-id", appt0.participant[2].actor?.reference)
-        assertEquals("Test Department A", appt0.participant[2].actor?.display)
+        assertEquals("Patient/PatientFhirID1".asFHIR(), appt0.participant[0].actor?.reference)
+        assertEquals("Test Name".asFHIR(), appt0.participant[0].actor?.display)
+        assertEquals("Practitioner/TestDoc2-fhir-id".asFHIR(), appt0.participant[1].actor?.reference)
+        assertEquals("Test Doc 2".asFHIR(), appt0.participant[1].actor?.display)
+        assertEquals("Location/TestDepartmentA-fhir-id".asFHIR(), appt0.participant[2].actor?.reference)
+        assertEquals("Test Department A".asFHIR(), appt0.participant[2].actor?.display)
 
         // unique Practitioner 1 (not 2 or 3)
         val appt1 = response.appointments[1]
@@ -2442,14 +2457,14 @@ class EpicAppointmentServiceTest {
         assertEquals(2, appt1.identifier.size)
         assertFalse(appt1.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("arrived"), appt1.status)
-        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName), appt1.appointmentType)
+        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName.asFHIR()), appt1.appointmentType)
         assertEquals(3, appt1.participant.size)
-        assertEquals("Patient/PatientFhirID2", appt1.participant[0].actor?.reference)
-        assertEquals("Test Name 2", appt1.participant[0].actor?.display)
-        assertEquals("Practitioner/TestDoc1-fhir-id", appt1.participant[1].actor?.reference)
-        assertEquals("Test Doc 1", appt1.participant[1].actor?.display)
-        assertEquals("Location/TestDepartmentA-fhir-id", appt0.participant[2].actor?.reference)
-        assertEquals("Test Department A", appt0.participant[2].actor?.display)
+        assertEquals("Patient/PatientFhirID2".asFHIR(), appt1.participant[0].actor?.reference)
+        assertEquals("Test Name 2".asFHIR(), appt1.participant[0].actor?.display)
+        assertEquals("Practitioner/TestDoc1-fhir-id".asFHIR(), appt1.participant[1].actor?.reference)
+        assertEquals("Test Doc 1".asFHIR(), appt1.participant[1].actor?.display)
+        assertEquals("Location/TestDepartmentA-fhir-id".asFHIR(), appt0.participant[2].actor?.reference)
+        assertEquals("Test Department A".asFHIR(), appt0.participant[2].actor?.display)
 
         // unique Practitioner 3 (not 1 or 2)
         val appt2 = response.appointments[2]
@@ -2458,14 +2473,14 @@ class EpicAppointmentServiceTest {
         assertEquals(2, appt2.identifier.size)
         assertFalse(appt2.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("booked"), appt2.status)
-        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName), appt2.appointmentType)
+        assertEquals(CodeableConcept(text = epicAppointment1.visitTypeName.asFHIR()), appt2.appointmentType)
         assertEquals(3, appt2.participant.size)
-        assertEquals("Patient/PatientFhirID3", appt2.participant[0].actor?.reference)
-        assertEquals("Test Name 3", appt2.participant[0].actor?.display)
-        assertEquals("Practitioner/TestDoc3-fhir-id", appt2.participant[1].actor?.reference)
-        assertEquals("Test Doc 3", appt2.participant[1].actor?.display)
-        assertEquals("Location/TestDepartmentA-fhir-id", appt0.participant[2].actor?.reference)
-        assertEquals("Test Department A", appt0.participant[2].actor?.display)
+        assertEquals("Patient/PatientFhirID3".asFHIR(), appt2.participant[0].actor?.reference)
+        assertEquals("Test Name 3".asFHIR(), appt2.participant[0].actor?.display)
+        assertEquals("Practitioner/TestDoc3-fhir-id".asFHIR(), appt2.participant[1].actor?.reference)
+        assertEquals("Test Doc 3".asFHIR(), appt2.participant[1].actor?.display)
+        assertEquals("Location/TestDepartmentA-fhir-id".asFHIR(), appt0.participant[2].actor?.reference)
+        assertEquals("Test Department A".asFHIR(), appt0.participant[2].actor?.display)
     }
 
     @Test
@@ -2529,7 +2544,12 @@ class EpicAppointmentServiceTest {
     ): Map<ScheduleProviderReturnWithTime, String> {
         val epicVendor = tenant.vendorAs<Epic>()
         val mockProviderIDs = allProviders.associateWith { participant ->
-            participant.providerIDs.map { Identifier(value = it.id, type = CodeableConcept(text = it.type)) }
+            participant.providerIDs.map {
+                Identifier(
+                    value = it.id.asFHIR(),
+                    type = CodeableConcept(text = it.type.asFHIR())
+                )
+            }
         }
         val mockProviderQuery = mutableMapOf<SystemValue, SystemValue>()
         val mockPractitionerFhirIDsResult = mutableMapOf<SystemValue, String>()
@@ -2539,7 +2559,8 @@ class EpicAppointmentServiceTest {
                 every { value } returns mapEntry.value.first().value
                 every { system } returns Uri(epicVendor.practitionerProviderSystem)
             }
-            val mockSystemValue = SystemValue(mapEntry.value.first().value!!, epicVendor.practitionerProviderSystem)
+            val mockSystemValue =
+                SystemValue(mapEntry.value.first().value!!.value!!, epicVendor.practitionerProviderSystem)
             if (!mockProviderQuery.keys.contains(mockSystemValue)) {
                 mockProviderQuery[mockSystemValue] = mockSystemValue
             }
@@ -2571,7 +2592,12 @@ class EpicAppointmentServiceTest {
     ): Map<ScheduleProviderReturnWithTime, String> {
         val epicVendor = tenant.vendorAs<Epic>()
         val mockDepartmentIDs = allProviders.associateWith { participant ->
-            participant.departmentIDs.map { Identifier(value = it.id, type = CodeableConcept(text = it.type)) }
+            participant.departmentIDs.map {
+                Identifier(
+                    value = it.id.asFHIR(),
+                    type = CodeableConcept(text = it.type.asFHIR())
+                )
+            }
         }
         val mockLocationQuery = mutableMapOf<SystemValue, SystemValue>()
         val mockLocationFhirIDsResult = mutableMapOf<SystemValue, String>()
@@ -2581,7 +2607,8 @@ class EpicAppointmentServiceTest {
                 every { value } returns mapEntry.value.first().value
                 every { system } returns Uri(epicVendor.departmentInternalSystem)
             }
-            val mockSystemValue = SystemValue(mapEntry.value.first().value!!, epicVendor.departmentInternalSystem)
+            val mockSystemValue =
+                SystemValue(mapEntry.value.first().value!!.value!!, epicVendor.departmentInternalSystem)
             if (!mockLocationQuery.keys.contains(mockSystemValue)) {
                 mockLocationQuery[mockSystemValue] = mockSystemValue
                 if (fhirIDsMockResult == null) {

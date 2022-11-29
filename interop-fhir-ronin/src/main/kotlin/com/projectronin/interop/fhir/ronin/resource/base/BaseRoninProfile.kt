@@ -188,13 +188,13 @@ abstract class BaseRoninProfile<T : Resource<T>>(
                 checkTrue(
                     coding.all {
                         // The FHIR spec indicates all strings should contain non-whitespace content, so checking for blank
-                        !it.system?.value.isNullOrBlank() && !it.code?.value.isNullOrBlank() && !it.display.isNullOrBlank()
+                        !it.system?.value.isNullOrBlank() && !it.code?.value.isNullOrBlank() && !it.display?.value.isNullOrBlank()
                     },
                     roninInvalidCodingError(parentFieldName),
                     parentContext
                 )
                 checkTrue(
-                    coding.filter { it.userSelected == true }.size <= 1,
+                    coding.filter { it.userSelected?.value == true }.size <= 1,
                     roninInvalidUserSelectError(parentFieldName),
                     parentContext
                 )

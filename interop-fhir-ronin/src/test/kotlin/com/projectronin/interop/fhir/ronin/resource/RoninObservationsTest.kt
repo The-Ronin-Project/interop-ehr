@@ -11,7 +11,9 @@ import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
@@ -59,8 +61,16 @@ class RoninObservationsTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "123"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             code = CodeableConcept(
                 coding = listOf(
@@ -80,7 +90,7 @@ class RoninObservationsTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -88,8 +98,8 @@ class RoninObservationsTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = 182.88,
-                    unit = "cm",
+                    value = Decimal(182.88),
+                    unit = "cm".asFHIR(),
                     system = CodeSystem.UCUM.uri,
                     code = Code("cm")
                 )
@@ -105,8 +115,16 @@ class RoninObservationsTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "123"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             code = CodeableConcept(
                 coding = listOf(
@@ -126,7 +144,7 @@ class RoninObservationsTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -134,8 +152,8 @@ class RoninObservationsTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = 68.04,
-                    unit = "kg",
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
                     system = CodeSystem.UCUM.uri,
                     code = Code("kg")
                 )
@@ -151,10 +169,18 @@ class RoninObservationsTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "123"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
-            code = CodeableConcept(text = "vital sign"),
+            code = CodeableConcept(text = "vital sign".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -165,7 +191,7 @@ class RoninObservationsTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -173,8 +199,8 @@ class RoninObservationsTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = 68.04,
-                    unit = "kg",
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
                     system = CodeSystem.UCUM.uri,
                     code = Code("kg")
                 )
@@ -190,10 +216,18 @@ class RoninObservationsTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "123"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
-            code = CodeableConcept(text = "laboratory"),
+            code = CodeableConcept(text = "laboratory".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -204,7 +238,7 @@ class RoninObservationsTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -212,8 +246,8 @@ class RoninObservationsTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = 68.04,
-                    unit = "kg",
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
                     system = CodeSystem.UCUM.uri,
                     code = Code("kg")
                 )
@@ -246,8 +280,8 @@ class RoninObservationsTest {
                     )
                 )
             ),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent"),
-            subject = Reference(reference = "Patient/1234"),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -286,8 +320,8 @@ class RoninObservationsTest {
                     )
                 )
             ),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent"),
-            subject = Reference(reference = "Patient/1234"),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -308,7 +342,7 @@ class RoninObservationsTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "vital sign"),
+            code = CodeableConcept(text = "vital sign".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -319,8 +353,8 @@ class RoninObservationsTest {
                     )
                 )
             ),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent"),
-            subject = Reference(reference = "Patient/1234"),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -341,7 +375,7 @@ class RoninObservationsTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "laboratory"),
+            code = CodeableConcept(text = "laboratory".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -352,8 +386,8 @@ class RoninObservationsTest {
                     )
                 )
             ),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent"),
-            subject = Reference(reference = "Patient/1234"),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"

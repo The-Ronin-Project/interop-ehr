@@ -3,15 +3,17 @@ package com.projectronin.interop.ehr.inputs
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class FHIRIdentifiersTest {
     @Test
     fun `can be created`() {
-        val identifiers = FHIRIdentifiers(Id("1234"), listOf(Identifier(system = Uri("system"), value = "value")))
+        val identifiers =
+            FHIRIdentifiers(Id("1234"), listOf(Identifier(system = Uri("system"), value = "value".asFHIR())))
 
         assertEquals(Id("1234"), identifiers.id)
-        assertEquals(listOf(Identifier(system = Uri("system"), value = "value")), identifiers.identifiers)
+        assertEquals(listOf(Identifier(system = Uri("system"), value = "value".asFHIR())), identifiers.identifiers)
     }
 }

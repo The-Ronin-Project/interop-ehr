@@ -1,5 +1,6 @@
 package com.projectronin.interop.fhir.ronin.resource
 
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
@@ -47,9 +48,13 @@ object RoninLocation :
     ): Pair<Location?, Validation> {
         val validation = Validation()
 
-        val name = if (normalized.name.isNullOrEmpty()) {
+        val normalizedName = normalized.name
+        val name = if (normalizedName == null) {
             validation.checkTrue(false, unnamedWarning, parentContext)
-            DEFAULT_NAME
+            FHIRString(DEFAULT_NAME)
+        } else if (normalizedName.value.isNullOrEmpty()) {
+            validation.checkTrue(false, unnamedWarning, parentContext)
+            FHIRString(DEFAULT_NAME, normalizedName.id, normalizedName.extension)
         } else {
             normalized.name
         }

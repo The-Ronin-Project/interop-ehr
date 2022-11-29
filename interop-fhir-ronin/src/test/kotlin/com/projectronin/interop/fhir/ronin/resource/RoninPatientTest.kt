@@ -24,10 +24,13 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRInteger
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.PositiveInt
-import com.projectronin.interop.fhir.r4.datatype.primitive.PrimitiveData
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
@@ -69,10 +72,10 @@ class RoninPatientTest {
     private val identifierList = listOf(
         Identifier(
             type = CodeableConcept(
-                text = "MRN"
+                text = "MRN".asFHIR()
             ),
             system = Uri("mrnSystem"),
-            value = "An MRN"
+            value = "An MRN".asFHIR()
         )
     )
     private val identifierService = mockk<IdentifierService> {
@@ -96,9 +99,13 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -120,10 +127,18 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
             ),
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -144,11 +159,23 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -169,11 +196,19 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
                 Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = null)
             ),
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -195,11 +230,23 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = null
         )
@@ -220,9 +267,21 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
             name = listOf(),
             gender = AdministrativeGender.FEMALE.asCode(),
@@ -245,9 +304,21 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
             name = listOf(HumanName(family = null, given = emptyList())),
             gender = AdministrativeGender.FEMALE.asCode(),
@@ -271,11 +342,23 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
-            name = listOf(HumanName(family = "Family Name")),
+            name = listOf(HumanName(family = "Family Name".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -288,11 +371,23 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
-            name = listOf(HumanName(given = listOf("Given Name"))),
+            name = listOf(HumanName(given = listOf("Given Name").asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -305,11 +400,23 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
-            name = listOf(HumanName(given = listOf("Given Name", "Other Given Name"))),
+            name = listOf(HumanName(given = listOf("Given Name", "Other Given Name").asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -322,9 +429,21 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
             name = listOf(
                 HumanName(
@@ -348,13 +467,25 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
             name = listOf(
                 HumanName(
-                    family = "Family Name",
+                    family = "Family Name".asFHIR(),
                     extension = listOf(
                         Extension(
                             url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason"),
@@ -384,11 +515,23 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = null,
             birthDate = Date("1975-07-05")
         )
@@ -409,12 +552,24 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = null, value = "missing system")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                ),
+                Identifier(type = RoninCodeableConcepts.MRN, system = null, value = "missing system".asFHIR())
             ),
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -435,12 +590,24 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN"),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                ),
                 Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri)
             ),
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -461,14 +628,26 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05"),
-            telecom = listOf(ContactPoint(value = "1234567890"))
+            telecom = listOf(ContactPoint(value = "1234567890".asFHIR()))
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -500,11 +679,23 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05"),
             telecom = listOf(ContactPoint(system = emailSystem))
@@ -526,11 +717,23 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -562,11 +765,23 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -608,35 +823,35 @@ class RoninPatientTest {
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             extension = listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                    value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
                 )
             ),
             modifierExtension = listOf(
                 Extension(
                     url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                    value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
                 )
             ),
             identifier = identifierList,
-            active = true,
-            name = listOf(HumanName(family = "Doe")),
+            active = FHIRBoolean.TRUE,
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             telecom = listOf(
                 ContactPoint(
-                    id = "12345",
+                    id = "12345".asFHIR(),
                     extension = listOf(
                         Extension(
                             url = Uri("http://localhost/extension"),
-                            value = DynamicValue(DynamicValueType.STRING, "Value")
+                            value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
                         )
                     ),
                     system = Code(value = "telephone"),
                     use = Code(value = "cell"),
-                    value = "8675309",
+                    value = "8675309".asFHIR(),
                     rank = PositiveInt(1),
                     period = Period(
                         start = DateTime("2021-11-18"),
@@ -645,21 +860,26 @@ class RoninPatientTest {
                 ),
                 ContactPoint(
                     system = Code("telephone"),
-                    value = "1112223333"
+                    value = "1112223333".asFHIR()
                 )
             ),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05"),
-            deceased = DynamicValue(DynamicValueType.BOOLEAN, false),
-            address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M"),
-            multipleBirth = DynamicValue(DynamicValueType.INTEGER, 2),
+            deceased = DynamicValue(DynamicValueType.BOOLEAN, FHIRBoolean.FALSE),
+            address = listOf(Address(country = "USA".asFHIR())),
+            maritalStatus = CodeableConcept(text = "M".asFHIR()),
+            multipleBirth = DynamicValue(DynamicValueType.INTEGER, FHIRInteger(2)),
             photo = listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
-            contact = listOf(Contact(name = HumanName(text = "Jane Doe"))),
-            communication = listOf(Communication(language = CodeableConcept(text = "English"))),
-            generalPractitioner = listOf(Reference(display = "GP")),
-            managingOrganization = Reference(display = "organization"),
-            link = listOf(PatientLink(other = Reference(display = "other patient"), type = LinkType.REPLACES.asCode()))
+            contact = listOf(Contact(name = HumanName(text = "Jane Doe".asFHIR()))),
+            communication = listOf(Communication(language = CodeableConcept(text = "English".asFHIR()))),
+            generalPractitioner = listOf(Reference(display = "GP".asFHIR())),
+            managingOrganization = Reference(display = "organization".asFHIR()),
+            link = listOf(
+                PatientLink(
+                    other = Reference(display = "other patient".asFHIR()),
+                    type = LinkType.REPLACES.asCode()
+                )
+            )
         )
 
         val oncologyPatient = roninPatient.transform(patient, tenant)
@@ -672,7 +892,7 @@ class RoninPatientTest {
         )
         assertEquals(Uri("implicit-rules"), oncologyPatient.implicitRules)
         assertEquals(Code("en-US"), oncologyPatient.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"), oncologyPatient.text)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), oncologyPatient.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             oncologyPatient.contained
@@ -681,7 +901,7 @@ class RoninPatientTest {
             listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                    value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
                 )
             ),
             oncologyPatient.extension
@@ -690,7 +910,7 @@ class RoninPatientTest {
             listOf(
                 Extension(
                     url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                    value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
                 )
             ),
             oncologyPatient.modifierExtension
@@ -698,29 +918,37 @@ class RoninPatientTest {
         assertEquals(
             listOf(
                 identifierList.first(),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
                 Identifier(
                     type = RoninCodeableConcepts.FHIR_ID,
                     system = RoninCodeSystem.FHIR_ID.uri,
-                    value = "12345"
+                    value = "12345".asFHIR()
                 ),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
             oncologyPatient.identifier
         )
-        assertEquals(true, oncologyPatient.active)
-        assertEquals(listOf(HumanName(family = "Doe")), oncologyPatient.name)
+        assertEquals(FHIRBoolean.TRUE, oncologyPatient.active)
+        assertEquals(listOf(HumanName(family = "Doe".asFHIR())), oncologyPatient.name)
         assertEquals(
             listOf(
                 ContactPoint(
-                    id = "12345",
+                    id = "12345".asFHIR(),
                     extension = listOf(
                         Extension(
                             url = Uri("http://localhost/extension"),
-                            value = DynamicValue(DynamicValueType.STRING, "Value")
+                            value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
                         )
                     ),
-                    value = "8675309",
+                    value = "8675309".asFHIR(),
                     system = Code(
                         value = "phone",
                         extension = listOf(
@@ -765,7 +993,7 @@ class RoninPatientTest {
                     period = Period(start = DateTime(value = "2021-11-18"), end = DateTime(value = "2022-11-17"))
                 ),
                 ContactPoint(
-                    value = "1112223333",
+                    value = "1112223333".asFHIR(),
                     system = Code(
                         value = "phone",
                         extension = listOf(
@@ -792,19 +1020,30 @@ class RoninPatientTest {
         )
         assertEquals(AdministrativeGender.FEMALE.asCode(), oncologyPatient.gender)
         assertEquals(Date("1975-07-05"), oncologyPatient.birthDate)
-        assertEquals(DynamicValue(type = DynamicValueType.BOOLEAN, value = false), oncologyPatient.deceased)
-        assertEquals(listOf(Address(country = "USA")), oncologyPatient.address)
-        assertEquals(CodeableConcept(text = "M"), oncologyPatient.maritalStatus)
-        assertEquals(DynamicValue(type = DynamicValueType.INTEGER, value = 2), oncologyPatient.multipleBirth)
+        assertEquals(DynamicValue(type = DynamicValueType.BOOLEAN, value = FHIRBoolean.FALSE), oncologyPatient.deceased)
+        assertEquals(listOf(Address(country = "USA".asFHIR())), oncologyPatient.address)
+        assertEquals(CodeableConcept(text = "M".asFHIR()), oncologyPatient.maritalStatus)
+        assertEquals(
+            DynamicValue(type = DynamicValueType.INTEGER, value = FHIRInteger(2)),
+            oncologyPatient.multipleBirth
+        )
         assertEquals(
             listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
             oncologyPatient.photo
         )
-        assertEquals(listOf(Communication(language = CodeableConcept(text = "English"))), oncologyPatient.communication)
-        assertEquals(listOf(Reference(display = "GP")), oncologyPatient.generalPractitioner)
-        assertEquals(Reference(display = "organization"), oncologyPatient.managingOrganization)
         assertEquals(
-            listOf(PatientLink(other = Reference(display = "other patient"), type = LinkType.REPLACES.asCode())),
+            listOf(Communication(language = CodeableConcept(text = "English".asFHIR()))),
+            oncologyPatient.communication
+        )
+        assertEquals(listOf(Reference(display = "GP".asFHIR())), oncologyPatient.generalPractitioner)
+        assertEquals(Reference(display = "organization".asFHIR()), oncologyPatient.managingOrganization)
+        assertEquals(
+            listOf(
+                PatientLink(
+                    other = Reference(display = "other patient".asFHIR()),
+                    type = LinkType.REPLACES.asCode()
+                )
+            ),
             oncologyPatient.link
         )
     }
@@ -814,7 +1053,7 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = identifierList,
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -824,7 +1063,7 @@ class RoninPatientTest {
         val defaultCoding = Coding(
             system = Uri("http://terminology.hl7.org/CodeSystem/v3-NullFlavor"),
             code = Code("NI"),
-            display = "NoInformation"
+            display = "NoInformation".asFHIR()
         )
         oncologyPatient!!
         assertEquals("Patient", oncologyPatient.resourceType)
@@ -842,18 +1081,26 @@ class RoninPatientTest {
         assertEquals(
             listOf(
                 identifierList.first(),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
                 Identifier(
                     type = RoninCodeableConcepts.FHIR_ID,
                     system = RoninCodeSystem.FHIR_ID.uri,
-                    value = "12345"
+                    value = "12345".asFHIR()
                 ),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
             oncologyPatient.identifier
         )
         assertNull(oncologyPatient.active)
-        assertEquals(listOf(HumanName(family = "Doe")), oncologyPatient.name)
+        assertEquals(listOf(HumanName(family = "Doe".asFHIR())), oncologyPatient.name)
         assertEquals(emptyList<ContactPoint>(), oncologyPatient.telecom)
         assertEquals(AdministrativeGender.FEMALE.asCode(), oncologyPatient.gender)
         assertEquals(Date("1975-07-05"), oncologyPatient.birthDate)
@@ -872,11 +1119,11 @@ class RoninPatientTest {
     fun `transform fails for patient with missing id`() {
         val patient = Patient(
             identifier = identifierList,
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05"),
-            address = listOf(Address(country = "USA")),
-            maritalStatus = CodeableConcept(text = "M")
+            address = listOf(Address(country = "USA".asFHIR())),
+            maritalStatus = CodeableConcept(text = "M".asFHIR())
         )
 
         val oncologyPatient = roninPatient.transform(patient, tenant)
@@ -888,23 +1135,36 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN"),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                ),
                 Identifier(
                     use = IdentifierUse.USUAL.asCode(),
                     system = Uri("urn:oid:2.16.840.1.113883.4.1"),
-                    valueData = PrimitiveData(
+                    value = FHIRString(
+                        value = null,
                         extension = listOf(
                             Extension(
                                 url = Uri("http://hl7.org/fhir/StructureDefinition/rendered-value"),
-                                value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234")
+                                value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234".asFHIR())
                             )
                         )
                     )
                 )
             ),
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -917,11 +1177,12 @@ class RoninPatientTest {
         val identifierWithExtension = Identifier(
             use = IdentifierUse.USUAL.asCode(),
             system = Uri("urn:oid:2.16.840.1.113883.4.1"),
-            valueData = PrimitiveData(
+            value = FHIRString(
+                value = null,
                 extension = listOf(
                     Extension(
                         url = Uri("http://hl7.org/fhir/StructureDefinition/rendered-value"),
-                        value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234")
+                        value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234".asFHIR())
                     )
                 )
             )
@@ -929,11 +1190,12 @@ class RoninPatientTest {
         val normalizedIdentifierWithExtension = Identifier(
             use = IdentifierUse.USUAL.asCode(),
             system = Uri("http://hl7.org/fhir/sid/us-ssn"),
-            valueData = PrimitiveData(
+            value = FHIRString(
+                value = null,
                 extension = listOf(
                     Extension(
                         url = Uri("http://hl7.org/fhir/StructureDefinition/rendered-value"),
-                        value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234")
+                        value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234".asFHIR())
                     )
                 )
             )
@@ -947,7 +1209,7 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = identifiers,
-            name = listOf(HumanName(family = "Doe")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -957,7 +1219,7 @@ class RoninPatientTest {
         val defaultCoding = Coding(
             system = Uri("http://terminology.hl7.org/CodeSystem/v3-NullFlavor"),
             code = Code("NI"),
-            display = "NoInformation"
+            display = "NoInformation".asFHIR()
         )
         oncologyPatient!!
         assertEquals("Patient", oncologyPatient.resourceType)
@@ -976,18 +1238,26 @@ class RoninPatientTest {
             listOf(
                 identifierList.first(),
                 normalizedIdentifierWithExtension,
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
                 Identifier(
                     type = RoninCodeableConcepts.FHIR_ID,
                     system = RoninCodeSystem.FHIR_ID.uri,
-                    value = "12345"
+                    value = "12345".asFHIR()
                 ),
-                Identifier(type = RoninCodeableConcepts.MRN, system = RoninCodeSystem.MRN.uri, value = "An MRN")
+                Identifier(
+                    type = RoninCodeableConcepts.MRN,
+                    system = RoninCodeSystem.MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
             ),
             oncologyPatient.identifier
         )
         assertNull(oncologyPatient.active)
-        assertEquals(listOf(HumanName(family = "Doe")), oncologyPatient.name)
+        assertEquals(listOf(HumanName(family = "Doe".asFHIR())), oncologyPatient.name)
         assertEquals(emptyList<ContactPoint>(), oncologyPatient.telecom)
         assertEquals(AdministrativeGender.FEMALE.asCode(), oncologyPatient.gender)
         assertEquals(Date("1975-07-05"), oncologyPatient.birthDate)

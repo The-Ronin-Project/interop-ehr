@@ -5,6 +5,7 @@ import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
@@ -127,11 +128,7 @@ class RoninPatient private constructor(
             element.identifier.forEachIndexed { index, identifier ->
                 val currentContext = parentContext.append(LocationContext("Patient", "identifier[$index]"))
                 checkNotNull(identifier.system, requiredIdentifierSystemError, currentContext)
-                checkTrue(
-                    identifier.value != null || identifier.valueData?.extension?.isNotEmpty() == true,
-                    requiredIdentifierValueError,
-                    currentContext
-                )
+                checkNotNull(identifier.value, requiredIdentifierValueError, currentContext)
             }
 
             if (element.telecom.isNotEmpty()) {
@@ -156,7 +153,7 @@ class RoninPatient private constructor(
                 Coding(
                     system = Uri("http://terminology.hl7.org/CodeSystem/v3-NullFlavor"),
                     code = Code("NI"),
-                    display = "NoInformation"
+                    display = FHIRString("NoInformation")
                 )
             )
         )

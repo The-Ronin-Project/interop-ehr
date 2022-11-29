@@ -1,6 +1,7 @@
 package com.projectronin.interop.fhir.ronin
 
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
@@ -18,7 +19,7 @@ fun <T : Resource<T>> T.getFhirIdentifiers(): List<Identifier> =
 
 fun Id?.toFhirIdentifier(): Identifier? = this?.let {
     Identifier(
-        value = value,
+        value = value?.let { FHIRString(it) },
         system = RoninCodeSystem.FHIR_ID.uri,
         type = RoninCodeableConcepts.FHIR_ID
     )

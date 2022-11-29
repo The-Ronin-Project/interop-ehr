@@ -17,6 +17,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.MedicationStatement
 import com.projectronin.interop.fhir.r4.validate.resource.R4MedicationStatementValidator
@@ -76,8 +77,16 @@ class RoninMedicationStatementTest {
     fun `validates R4 profile`() {
         val medicationStatement = MedicationStatement(
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             )
         )
 
@@ -109,15 +118,23 @@ class RoninMedicationStatementTest {
     fun `validate succeeds`() {
         val medicationStatement = MedicationStatement(
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             status = MedicationStatementStatus.ACTIVE.asCode(),
             medication = DynamicValue(
                 type = DynamicValueType.CODEABLE_CONCEPT,
                 value = CodeableConcept()
             ),
-            subject = Reference(display = "display")
+            subject = Reference(display = "display".asFHIR())
         )
 
         RoninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
@@ -134,7 +151,7 @@ class RoninMedicationStatementTest {
             language = Code("en-US"),
             text = Narrative(
                 status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(),
-                div = "div"
+                div = "div".asFHIR()
             ),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             extension = listOf(
@@ -149,29 +166,29 @@ class RoninMedicationStatementTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value")
                 )
             ),
-            identifier = listOf(Identifier(value = "id")),
-            basedOn = listOf(Reference(display = "reference")),
-            partOf = listOf(Reference(display = "partOf")),
+            identifier = listOf(Identifier(value = "id".asFHIR())),
+            basedOn = listOf(Reference(display = "reference".asFHIR())),
+            partOf = listOf(Reference(display = "partOf".asFHIR())),
             status = MedicationStatementStatus.ACTIVE.asCode(),
-            statusReason = listOf(CodeableConcept(text = "statusReason")),
-            category = CodeableConcept(text = "category"),
+            statusReason = listOf(CodeableConcept(text = "statusReason".asFHIR())),
+            category = CodeableConcept(text = "category".asFHIR()),
             medication = DynamicValue(
                 type = DynamicValueType.CODEABLE_CONCEPT,
-                value = CodeableConcept(text = "medication")
+                value = CodeableConcept(text = "medication".asFHIR())
             ),
-            subject = Reference(display = "subject"),
-            context = Reference(display = "context"),
+            subject = Reference(display = "subject".asFHIR()),
+            context = Reference(display = "context".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 value = DateTime("1905-08-23")
             ),
             dateAsserted = DateTime("1905-08-23"),
-            informationSource = Reference(display = "informationSource"),
-            derivedFrom = listOf(Reference(display = "derivedFrom")),
-            reasonCode = listOf(CodeableConcept(text = "reasonCode")),
-            reasonReference = listOf(Reference(display = "reasonReference")),
+            informationSource = Reference(display = "informationSource".asFHIR()),
+            derivedFrom = listOf(Reference(display = "derivedFrom".asFHIR())),
+            reasonCode = listOf(CodeableConcept(text = "reasonCode".asFHIR())),
+            reasonReference = listOf(Reference(display = "reasonReference".asFHIR())),
             note = listOf(Annotation(text = Markdown("annotation"))),
-            dosage = listOf(Dosage(text = "dosage"))
+            dosage = listOf(Dosage(text = "dosage".asFHIR()))
         )
 
         val roninMedicationStatement = RoninMedicationStatement.transform(medicationStatement, tenant)
@@ -191,9 +208,17 @@ class RoninMedicationStatementTest {
         assertEquals(3, roninMedicationStatement.identifier.size)
         assertEquals(
             listOf(
-                Identifier(value = "id"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(value = "id".asFHIR()),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             roninMedicationStatement.identifier
         )
@@ -221,9 +246,9 @@ class RoninMedicationStatementTest {
             status = MedicationStatementStatus.ACTIVE.asCode(),
             medication = DynamicValue(
                 type = DynamicValueType.CODEABLE_CONCEPT,
-                value = CodeableConcept(text = "medication")
+                value = CodeableConcept(text = "medication".asFHIR())
             ),
-            subject = Reference(display = "subject"),
+            subject = Reference(display = "subject".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 value = DateTime("1905-08-23")
@@ -236,8 +261,16 @@ class RoninMedicationStatementTest {
         assertEquals(2, roninMedicationStatement.identifier.size)
         assertEquals(
             listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             roninMedicationStatement.identifier
         )
@@ -257,7 +290,7 @@ class RoninMedicationStatementTest {
                     type = type,
                     value = value
                 ),
-                subject = Reference(display = "subject"),
+                subject = Reference(display = "subject".asFHIR()),
                 effective = DynamicValue(
                     type = DynamicValueType.DATE_TIME,
                     value = DateTime("1905-08-23")
@@ -267,8 +300,8 @@ class RoninMedicationStatementTest {
             assertEquals(medicationStatement.medication, roninMedicationStatement!!.medication)
         }
 
-        testMedication(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication"))
-        testMedication(DynamicValueType.REFERENCE, Reference(display = "reference"))
+        testMedication(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR()))
+        testMedication(DynamicValueType.REFERENCE, Reference(display = "reference".asFHIR()))
     }
 
     @Test
@@ -279,9 +312,9 @@ class RoninMedicationStatementTest {
                 status = MedicationStatementStatus.ACTIVE.asCode(),
                 medication = DynamicValue(
                     type = DynamicValueType.CODEABLE_CONCEPT,
-                    value = CodeableConcept(text = "codeableConcep")
+                    value = CodeableConcept(text = "codeableConcep".asFHIR())
                 ),
-                subject = Reference(display = "subject"),
+                subject = Reference(display = "subject".asFHIR()),
                 effective = DynamicValue(
                     type = type,
                     value = value

@@ -5,6 +5,7 @@ import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.ronin.util.unlocalize
@@ -67,7 +68,7 @@ class EpicPatientService(
         // Chunk the identifiers and run the search
         val patientList = patientIdentifiers.chunked(batchSize) {
             val identifierParam = it.joinToString(separator = ",") { patientIdentifier ->
-                "${patientIdentifier.system?.value}|${patientIdentifier.value}"
+                "${patientIdentifier.system?.value}|${patientIdentifier.value!!.value}"
             }
             getResourceListFromSearch(
                 tenant,
@@ -80,7 +81,7 @@ class EpicPatientService(
             patient.identifier.map { identifier ->
                 SystemValueIdentifier(
                     systemText = identifier.system?.value?.uppercase(),
-                    value = identifier.value
+                    value = identifier.value?.value
                 ) to patient
             }
         }.toMap()
@@ -90,7 +91,7 @@ class EpicPatientService(
             val foundPatient = foundPatientsByIdentifier[
                 SystemValueIdentifier(
                     systemText = requestEntry.value.system?.value?.uppercase(),
-                    value = requestEntry.value.value
+                    value = requestEntry.value.value?.value
                 )
             ]
             if (foundPatient != null) requestEntry.key to foundPatient else null
@@ -133,7 +134,7 @@ class EpicPatientService(
 
         val ehrResponse = findPatientsById(
             tenant = tenant,
-            ehrPatientIDValues.associateWith { Identifier(value = it, system = Uri(patientIDSystem)) }
+            ehrPatientIDValues.associateWith { Identifier(value = FHIRString(it), system = Uri(patientIDSystem)) }
         ).filterNot {
             it.value.id == null
         }.mapValues { GetFHIRIDResponse(it.value.id!!.value!!.unlocalize(tenant), it.value) }

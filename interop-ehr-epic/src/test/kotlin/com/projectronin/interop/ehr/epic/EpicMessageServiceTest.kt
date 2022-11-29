@@ -11,8 +11,10 @@ import com.projectronin.interop.ehr.inputs.EHRRecipient
 import com.projectronin.interop.ehr.inputs.IdVendorIdentifier
 import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.tenant.config.ProviderPoolService
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
@@ -74,7 +76,7 @@ class EpicMessageServiceTest {
         val recipientsList = listOf(
             EHRRecipient(
                 "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
             )
         )
 
@@ -126,7 +128,7 @@ class EpicMessageServiceTest {
         val recipientsList = listOf(
             EHRRecipient(
                 "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
             )
         )
 
@@ -178,7 +180,7 @@ class EpicMessageServiceTest {
         val recipientsList = listOf(
             EHRRecipient(
                 "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
             )
         )
 
@@ -230,7 +232,7 @@ class EpicMessageServiceTest {
         val recipientsList = listOf(
             EHRRecipient(
                 "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
             )
         )
 
@@ -294,7 +296,7 @@ class EpicMessageServiceTest {
         val recipientsList = listOf(
             EHRRecipient(
                 "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
             )
         )
 
@@ -356,7 +358,7 @@ class EpicMessageServiceTest {
         val recipientsList = listOf(
             EHRRecipient(
                 "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
             )
         )
 
@@ -418,7 +420,7 @@ class EpicMessageServiceTest {
         val recipientsList = listOf(
             EHRRecipient(
                 "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
             )
         )
 
@@ -468,7 +470,7 @@ class EpicMessageServiceTest {
         val recipientsList = listOf(
             EHRRecipient(
                 "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
             )
         )
 
@@ -585,6 +587,55 @@ class EpicMessageServiceTest {
     }
 
     @Test
+    fun `ensure identifier with value with null value fails`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            "USER#1",
+            "Symptom Alert"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
+            listOf(
+                IDType(
+                    "130375", "Type"
+                )
+            )
+        )
+        coEvery {
+            epicClient.post(
+                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                SendMessageRequest(
+                    patientID = "MRN#1",
+                    recipients = listOf(), // this is an implied assertion
+                    messageText = listOf("Message Text"),
+                    senderID = "USER#1",
+                    messageType = "Symptom Alert"
+                )
+            )
+        } returns httpResponse
+
+        val recipientsList = listOf(
+            EHRRecipient(
+                "PROV#1",
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = FHIRString(null)))
+            )
+        )
+
+        assertThrows<VendorIdentifierNotFoundException> {
+            EpicMessageService(epicClient, providerPoolService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text", "MRN#1", recipientsList
+                )
+            )
+        }
+    }
+
+    @Test
     fun `ensure other error handled`() {
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
@@ -612,7 +663,7 @@ class EpicMessageServiceTest {
         val recipientsList = listOf(
             EHRRecipient(
                 "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID"))
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
             )
         )
 

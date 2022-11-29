@@ -16,10 +16,12 @@ import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
@@ -53,14 +55,14 @@ class RoninVitalSignsTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent"),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             category = listOf(),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
             ),
-            code = CodeableConcept(text = "vital sign")
+            code = CodeableConcept(text = "vital sign".asFHIR())
         )
 
         val qualified = RoninVitalSigns.qualifies(observation)
@@ -72,14 +74,14 @@ class RoninVitalSignsTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent"),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             category = listOf(CodeableConcept(coding = listOf())),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
             ),
-            code = CodeableConcept(text = "vital sign")
+            code = CodeableConcept(text = "vital sign".asFHIR())
         )
 
         val qualified = RoninVitalSigns.qualifies(observation)
@@ -91,7 +93,7 @@ class RoninVitalSignsTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent"),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -102,12 +104,12 @@ class RoninVitalSignsTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
             ),
-            code = CodeableConcept(text = "vital sign")
+            code = CodeableConcept(text = "vital sign".asFHIR())
         )
 
         val qualified = RoninVitalSigns.qualifies(observation)
@@ -119,7 +121,7 @@ class RoninVitalSignsTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent"),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -130,12 +132,12 @@ class RoninVitalSignsTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
             ),
-            code = CodeableConcept(text = "vital sign")
+            code = CodeableConcept(text = "vital sign".asFHIR())
         )
 
         val qualified = RoninVitalSigns.qualifies(observation)
@@ -147,7 +149,7 @@ class RoninVitalSignsTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent"),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -158,12 +160,12 @@ class RoninVitalSignsTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
             ),
-            code = CodeableConcept(text = "vital sign")
+            code = CodeableConcept(text = "vital sign".asFHIR())
         )
 
         val qualified = RoninVitalSigns.qualifies(observation)
@@ -175,7 +177,7 @@ class RoninVitalSignsTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent"),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -186,7 +188,7 @@ class RoninVitalSignsTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -210,7 +212,7 @@ class RoninVitalSignsTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent"),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -221,7 +223,7 @@ class RoninVitalSignsTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -245,8 +247,8 @@ class RoninVitalSignsTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent"),
-            code = CodeableConcept(text = "vital sign"),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            code = CodeableConcept(text = "vital sign".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -257,7 +259,7 @@ class RoninVitalSignsTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -282,10 +284,18 @@ class RoninVitalSignsTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "123"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
-            code = CodeableConcept(text = "vital sign"),
+            code = CodeableConcept(text = "vital sign".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -296,7 +306,7 @@ class RoninVitalSignsTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -304,8 +314,8 @@ class RoninVitalSignsTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = 68.04,
-                    unit = "kg",
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
                     system = CodeSystem.UCUM.uri,
                     code = Code("kg")
                 )
@@ -345,10 +355,18 @@ class RoninVitalSignsTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "123"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
-            code = CodeableConcept(text = "vital sign"),
+            code = CodeableConcept(text = "vital sign".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -359,7 +377,7 @@ class RoninVitalSignsTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -367,8 +385,8 @@ class RoninVitalSignsTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = 68.04,
-                    unit = "kg",
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
                     system = CodeSystem.UCUM.uri,
                     code = Code("kg")
                 )
@@ -383,10 +401,18 @@ class RoninVitalSignsTest {
         val observation = Observation(
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "123"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
-            code = CodeableConcept(text = "vital sign"),
+            code = CodeableConcept(text = "vital sign".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -397,7 +423,7 @@ class RoninVitalSignsTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -405,8 +431,8 @@ class RoninVitalSignsTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = 68.04,
-                    unit = "kg",
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
                     system = CodeSystem.UCUM.uri,
                     code = Code("kg")
                 )
@@ -426,7 +452,7 @@ class RoninVitalSignsTest {
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             extension = listOf(
                 Extension(
@@ -440,9 +466,9 @@ class RoninVitalSignsTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value")
                 )
             ),
-            identifier = listOf(Identifier(value = "id")),
-            basedOn = listOf(Reference(display = "Based")),
-            partOf = listOf(Reference(display = "Part")),
+            identifier = listOf(Identifier(value = "id".asFHIR())),
+            basedOn = listOf(Reference(display = "Based".asFHIR())),
+            partOf = listOf(Reference(display = "Part".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
             category = listOf(
                 CodeableConcept(
@@ -454,31 +480,31 @@ class RoninVitalSignsTest {
                     )
                 )
             ),
-            code = CodeableConcept(text = "vital sign"),
-            subject = Reference(reference = "Patient/1234"),
-            focus = listOf(Reference(display = "focus")),
-            encounter = Reference(display = "encounter"),
+            code = CodeableConcept(text = "vital sign".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            focus = listOf(Reference(display = "focus".asFHIR())),
+            encounter = Reference(display = "encounter".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
             ),
             issued = Instant("2022-01-01T00:00:00Z"),
-            performer = listOf(Reference(display = "performer")),
+            performer = listOf(Reference(display = "performer".asFHIR())),
             value = DynamicValue(
                 type = DynamicValueType.STRING,
                 "string"
             ),
-            interpretation = listOf(CodeableConcept(text = "interpretation")),
-            bodySite = CodeableConcept(text = "bodySite"),
-            method = CodeableConcept(text = "method"),
-            specimen = Reference(display = "specimen"),
-            device = Reference(display = "device"),
-            referenceRange = listOf(ObservationReferenceRange(text = "referenceRange")),
-            hasMember = listOf(Reference(display = "member")),
-            derivedFrom = listOf(Reference(display = "derivedFrom")),
+            interpretation = listOf(CodeableConcept(text = "interpretation".asFHIR())),
+            bodySite = CodeableConcept(text = "bodySite".asFHIR()),
+            method = CodeableConcept(text = "method".asFHIR()),
+            specimen = Reference(display = "specimen".asFHIR()),
+            device = Reference(display = "device".asFHIR()),
+            referenceRange = listOf(ObservationReferenceRange(text = "referenceRange".asFHIR())),
+            hasMember = listOf(Reference(display = "member".asFHIR())),
+            derivedFrom = listOf(Reference(display = "derivedFrom".asFHIR())),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(text = "code2"),
+                    code = CodeableConcept(text = "code2".asFHIR()),
                     value = DynamicValue(
                         type = DynamicValueType.STRING,
                         "string"
@@ -496,7 +522,7 @@ class RoninVitalSignsTest {
         assertEquals(Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_VITAL_SIGNS.value))), transformed.meta)
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"), transformed.text)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             transformed.contained
@@ -521,14 +547,22 @@ class RoninVitalSignsTest {
         )
         assertEquals(
             listOf(
-                Identifier(value = "id"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "123"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(value = "id".asFHIR()),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
-        assertEquals(listOf(Reference(display = "Based")), transformed.basedOn)
-        assertEquals(listOf(Reference(display = "Part")), transformed.partOf)
+        assertEquals(listOf(Reference(display = "Based".asFHIR())), transformed.basedOn)
+        assertEquals(listOf(Reference(display = "Part".asFHIR())), transformed.partOf)
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
             listOf(
@@ -543,10 +577,10 @@ class RoninVitalSignsTest {
             ),
             transformed.category
         )
-        assertEquals(CodeableConcept(text = "vital sign"), transformed.code)
-        assertEquals(Reference(reference = "Patient/test-1234"), transformed.subject)
-        assertEquals(listOf(Reference(display = "focus")), transformed.focus)
-        assertEquals(Reference(display = "encounter"), transformed.encounter)
+        assertEquals(CodeableConcept(text = "vital sign".asFHIR()), transformed.code)
+        assertEquals(Reference(reference = "Patient/test-1234".asFHIR()), transformed.subject)
+        assertEquals(listOf(Reference(display = "focus".asFHIR())), transformed.focus)
+        assertEquals(Reference(display = "encounter".asFHIR()), transformed.encounter)
         assertEquals(
             DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -555,7 +589,7 @@ class RoninVitalSignsTest {
             transformed.effective
         )
         assertEquals(Instant("2022-01-01T00:00:00Z"), transformed.issued)
-        assertEquals(listOf(Reference(display = "performer")), transformed.performer)
+        assertEquals(listOf(Reference(display = "performer".asFHIR())), transformed.performer)
         assertEquals(
             DynamicValue(
                 type = DynamicValueType.STRING,
@@ -564,18 +598,18 @@ class RoninVitalSignsTest {
             transformed.value
         )
         assertNull(transformed.dataAbsentReason)
-        assertEquals(listOf(CodeableConcept(text = "interpretation")), transformed.interpretation)
-        assertEquals(CodeableConcept(text = "bodySite"), transformed.bodySite)
-        assertEquals(CodeableConcept(text = "method"), transformed.method)
-        assertEquals(Reference(display = "specimen"), transformed.specimen)
-        assertEquals(Reference(display = "device"), transformed.device)
-        assertEquals(listOf(ObservationReferenceRange(text = "referenceRange")), transformed.referenceRange)
-        assertEquals(listOf(Reference(display = "member")), transformed.hasMember)
-        assertEquals(listOf(Reference(display = "derivedFrom")), transformed.derivedFrom)
+        assertEquals(listOf(CodeableConcept(text = "interpretation".asFHIR())), transformed.interpretation)
+        assertEquals(CodeableConcept(text = "bodySite".asFHIR()), transformed.bodySite)
+        assertEquals(CodeableConcept(text = "method".asFHIR()), transformed.method)
+        assertEquals(Reference(display = "specimen".asFHIR()), transformed.specimen)
+        assertEquals(Reference(display = "device".asFHIR()), transformed.device)
+        assertEquals(listOf(ObservationReferenceRange(text = "referenceRange".asFHIR())), transformed.referenceRange)
+        assertEquals(listOf(Reference(display = "member".asFHIR())), transformed.hasMember)
+        assertEquals(listOf(Reference(display = "derivedFrom".asFHIR())), transformed.derivedFrom)
         assertEquals(
             listOf(
                 ObservationComponent(
-                    code = CodeableConcept(text = "code2"),
+                    code = CodeableConcept(text = "code2".asFHIR()),
                     value = DynamicValue(
                         type = DynamicValueType.STRING,
                         "string"
@@ -592,7 +626,7 @@ class RoninVitalSignsTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "vital sign"),
+            code = CodeableConcept(text = "vital sign".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -603,8 +637,8 @@ class RoninVitalSignsTest {
                     )
                 )
             ),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent"),
-            subject = Reference(reference = "Patient/1234"),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -625,8 +659,16 @@ class RoninVitalSignsTest {
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "123"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
@@ -646,8 +688,8 @@ class RoninVitalSignsTest {
             ),
             transformed.category
         )
-        assertEquals(CodeableConcept(text = "vital sign"), transformed.code)
-        assertEquals(Reference(reference = "Patient/test-1234"), transformed.subject)
+        assertEquals(CodeableConcept(text = "vital sign".asFHIR()), transformed.code)
+        assertEquals(Reference(reference = "Patient/test-1234".asFHIR()), transformed.subject)
         assertEquals(listOf<Reference>(), transformed.focus)
         assertNull(transformed.encounter)
         assertEquals(
@@ -660,7 +702,7 @@ class RoninVitalSignsTest {
         assertNull(transformed.issued)
         assertEquals(listOf<Reference>(), transformed.performer)
         assertNull(transformed.value)
-        assertEquals(CodeableConcept(text = "dataAbsent"), transformed.dataAbsentReason)
+        assertEquals(CodeableConcept(text = "dataAbsent".asFHIR()), transformed.dataAbsentReason)
         assertEquals(listOf<CodeableConcept>(), transformed.interpretation)
         assertNull(transformed.bodySite)
         assertNull(transformed.method)

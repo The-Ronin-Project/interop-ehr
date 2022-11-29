@@ -9,6 +9,7 @@ import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
@@ -35,7 +36,7 @@ class USCoreVitalSignsValidatorTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "laboratory"),
+            code = CodeableConcept(text = "laboratory".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -46,7 +47,7 @@ class USCoreVitalSignsValidatorTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -69,7 +70,7 @@ class USCoreVitalSignsValidatorTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "laboratory"),
+            code = CodeableConcept(text = "laboratory".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -103,7 +104,7 @@ class USCoreVitalSignsValidatorTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "laboratory"),
+            code = CodeableConcept(text = "laboratory".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -114,7 +115,7 @@ class USCoreVitalSignsValidatorTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Organization/123"),
+            subject = Reference(reference = "Organization/123".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -137,7 +138,7 @@ class USCoreVitalSignsValidatorTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "laboratory"),
+            code = CodeableConcept(text = "laboratory".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -148,7 +149,7 @@ class USCoreVitalSignsValidatorTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/123"),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             effective = null
         )
 
@@ -168,7 +169,7 @@ class USCoreVitalSignsValidatorTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "laboratory"),
+            code = CodeableConcept(text = "laboratory".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -179,7 +180,7 @@ class USCoreVitalSignsValidatorTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/123"),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.INSTANT,
                 value = Instant("2017-01-01T00:00:00Z")
@@ -202,7 +203,7 @@ class USCoreVitalSignsValidatorTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "laboratory"),
+            code = CodeableConcept(text = "laboratory".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -213,7 +214,7 @@ class USCoreVitalSignsValidatorTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -247,7 +248,7 @@ class USCoreVitalSignsValidatorTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "laboratory"),
+            code = CodeableConcept(text = "laboratory".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -258,7 +259,7 @@ class USCoreVitalSignsValidatorTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234"),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"

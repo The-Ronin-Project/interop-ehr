@@ -16,8 +16,11 @@ import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
@@ -59,7 +62,7 @@ class RoninLocationTest {
     fun `validate checks ronin identifiers`() {
         val location = Location(
             id = Id("12345"),
-            name = "Name"
+            name = "Name".asFHIR()
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -79,8 +82,16 @@ class RoninLocationTest {
         val location = Location(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             )
         )
 
@@ -100,10 +111,18 @@ class RoninLocationTest {
         val location = Location(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
-            name = "My Office"
+            name = "My Office".asFHIR()
         )
 
         mockkObject(R4LocationValidator)
@@ -133,10 +152,18 @@ class RoninLocationTest {
         val location = Location(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
-            name = "My Office"
+            name = "My Office".asFHIR()
         )
 
         RoninLocation.validate(location, null).alertIfErrors()
@@ -156,7 +183,7 @@ class RoninLocationTest {
             Coding(code = Code("O"), system = Uri(value = "http://terminology.hl7.org/CodeSystem/v2-0116"))
         val type = listOf(
             CodeableConcept(
-                text = "Diagnostic",
+                text = "Diagnostic".asFHIR(),
                 coding = listOf(
                     Coding(
                         code = Code("DX"),
@@ -166,7 +193,7 @@ class RoninLocationTest {
             )
         )
         val physicalType = CodeableConcept(
-            text = "Room",
+            text = "Room".asFHIR(),
             coding = listOf(
                 Coding(
                     code = Code("ro"),
@@ -178,11 +205,11 @@ class RoninLocationTest {
             listOf(
                 LocationHoursOfOperation(
                     daysOfWeek = listOf(DayOfWeek.SATURDAY.asCode(), DayOfWeek.SUNDAY.asCode()),
-                    allDay = true
+                    allDay = FHIRBoolean.TRUE
                 )
             )
         val position = LocationPosition(longitude = Decimal(13.81531), latitude = Decimal(66.077132))
-        val endpoint = listOf(Reference(reference = "Endpoint/4321"))
+        val endpoint = listOf(Reference(reference = "Endpoint/4321".asFHIR()))
         val location = Location(
             id = Id("12345"),
             meta = Meta(
@@ -190,7 +217,7 @@ class RoninLocationTest {
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             extension = listOf(
                 Extension(
@@ -204,22 +231,22 @@ class RoninLocationTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value")
                 )
             ),
-            identifier = listOf(Identifier(value = "id")),
+            identifier = listOf(Identifier(value = "id".asFHIR())),
             status = LocationStatus.ACTIVE.asCode(),
             operationalStatus = operationalStatus,
-            name = "My Office",
-            alias = listOf("Guest Room"),
-            description = "Sun Room",
+            name = "My Office".asFHIR(),
+            alias = listOf("Guest Room").asFHIR(),
+            description = "Sun Room".asFHIR(),
             mode = LocationMode.INSTANCE.asCode(),
             type = type,
-            telecom = listOf(ContactPoint(value = "123-456-7890", system = ContactPointSystem.PHONE.asCode())),
-            address = Address(country = "USA"),
+            telecom = listOf(ContactPoint(value = "123-456-7890".asFHIR(), system = ContactPointSystem.PHONE.asCode())),
+            address = Address(country = "USA".asFHIR()),
             physicalType = physicalType,
             position = position,
-            managingOrganization = Reference(reference = "Organization/1234"),
-            partOf = Reference(reference = "Location/1234"),
+            managingOrganization = Reference(reference = "Organization/1234".asFHIR()),
+            partOf = Reference(reference = "Location/1234".asFHIR()),
             hoursOfOperation = hoursOfOperation,
-            availabilityExceptions = "Call for details",
+            availabilityExceptions = "Call for details".asFHIR(),
             endpoint = endpoint
         )
 
@@ -234,7 +261,7 @@ class RoninLocationTest {
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"), transformed.text)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
             transformed.contained
@@ -259,38 +286,46 @@ class RoninLocationTest {
         )
         assertEquals(
             listOf(
-                Identifier(value = "id"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(value = "id".asFHIR()),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
         assertEquals(LocationStatus.ACTIVE.asCode(), transformed.status)
         assertEquals(operationalStatus, transformed.operationalStatus)
-        assertEquals("My Office", transformed.name)
-        assertEquals("Guest Room", transformed.alias.first())
-        assertEquals("Sun Room", transformed.description)
+        assertEquals("My Office".asFHIR(), transformed.name)
+        assertEquals("Guest Room".asFHIR(), transformed.alias.first())
+        assertEquals("Sun Room".asFHIR(), transformed.description)
         assertEquals(LocationMode.INSTANCE.asCode(), transformed.mode)
         assertEquals(type, transformed.type)
         assertEquals(
-            listOf(ContactPoint(value = "123-456-7890", system = ContactPointSystem.PHONE.asCode())),
+            listOf(ContactPoint(value = "123-456-7890".asFHIR(), system = ContactPointSystem.PHONE.asCode())),
             transformed.telecom
         )
-        assertEquals(Address(country = "USA"), transformed.address)
+        assertEquals(Address(country = "USA".asFHIR()), transformed.address)
         assertEquals(physicalType, transformed.physicalType)
         assertEquals(position, transformed.position)
-        assertEquals(Reference(reference = "Organization/test-1234"), transformed.managingOrganization)
-        assertEquals(Reference(reference = "Location/test-1234"), transformed.partOf)
+        assertEquals(Reference(reference = "Organization/test-1234".asFHIR()), transformed.managingOrganization)
+        assertEquals(Reference(reference = "Location/test-1234".asFHIR()), transformed.partOf)
         assertEquals(hoursOfOperation, transformed.hoursOfOperation)
-        assertEquals("Call for details", transformed.availabilityExceptions)
-        assertEquals(listOf(Reference(reference = "Endpoint/test-4321")), transformed.endpoint)
+        assertEquals("Call for details".asFHIR(), transformed.availabilityExceptions)
+        assertEquals(listOf(Reference(reference = "Endpoint/test-4321".asFHIR())), transformed.endpoint)
     }
 
     @Test
     fun `transforms location with only required attributes`() {
         val location = Location(
             id = Id("12345"),
-            name = "Name"
+            name = "Name".asFHIR()
         )
 
         val transformed = RoninLocation.transform(location, tenant)
@@ -310,14 +345,22 @@ class RoninLocationTest {
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
         assertNull(transformed.status)
         assertNull(transformed.operationalStatus)
-        assertEquals("Name", transformed.name)
+        assertEquals("Name".asFHIR(), transformed.name)
         assertEquals(listOf<String>(), transformed.alias)
         assertNull(transformed.description)
         assertNull(transformed.mode)
@@ -338,8 +381,16 @@ class RoninLocationTest {
         val location = Location(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             )
         )
 
@@ -347,7 +398,7 @@ class RoninLocationTest {
         val roninLocation = locationPair.first
         assertNotNull(roninLocation)
         assertEquals(
-            "Unnamed Location",
+            "Unnamed Location".asFHIR(),
             roninLocation!!.name
         )
         RoninLocation.validate(roninLocation, null).alertIfErrors()
@@ -358,17 +409,162 @@ class RoninLocationTest {
         val location = Location(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
-            name = ""
+            name = "".asFHIR()
         )
 
         val locationPair = RoninLocation.transformInternal(location, LocationContext(Location::class), tenant)
         val roninLocation = locationPair.first
         assertNotNull(roninLocation)
         assertEquals(
-            "Unnamed Location",
+            "Unnamed Location".asFHIR(),
+            roninLocation!!.name
+        )
+        RoninLocation.validate(roninLocation, null).alertIfErrors()
+    }
+
+    @Test
+    fun `transforms location with name containing id and extensions`() {
+        val name = FHIRString(
+            value = "Name",
+            id = FHIRString("id"),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://localhost/extension"),
+                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                )
+            )
+        )
+        val location = Location(
+            id = Id("12345"),
+            name = name
+        )
+
+        val transformed = RoninLocation.transform(location, tenant)
+
+        transformed!! // Force it to be treated as non-null
+        assertEquals("Location", transformed.resourceType)
+        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(
+            Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value))),
+            transformed.meta
+        )
+        assertNull(transformed.implicitRules)
+        assertNull(transformed.language)
+        assertNull(transformed.text)
+        assertEquals(listOf<ContainedResource>(), transformed.contained)
+        assertEquals(listOf<Extension>(), transformed.extension)
+        assertEquals(listOf<Extension>(), transformed.modifierExtension)
+        assertEquals(
+            listOf(
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            transformed.identifier
+        )
+        assertNull(transformed.status)
+        assertNull(transformed.operationalStatus)
+        assertEquals(name, transformed.name)
+        assertEquals(listOf<String>(), transformed.alias)
+        assertNull(transformed.description)
+        assertNull(transformed.mode)
+        assertEquals(listOf<CodeableConcept>(), transformed.type)
+        assertEquals(listOf<ContactPoint>(), transformed.telecom)
+        assertNull(transformed.address)
+        assertNull(transformed.physicalType)
+        assertNull(transformed.position)
+        assertNull(transformed.managingOrganization)
+        assertNull(transformed.partOf)
+        assertEquals(listOf<LocationHoursOfOperation>(), transformed.hoursOfOperation)
+        assertNull(transformed.availabilityExceptions)
+        assertEquals(listOf<Reference>(), transformed.endpoint)
+    }
+
+    @Test
+    fun `transforms location when empty name with id and extensions is provided`() {
+        val nameId = FHIRString("id")
+        val nameExtensions = listOf(
+            Extension(
+                url = Uri("http://localhost/extension"),
+                value = DynamicValue(DynamicValueType.STRING, "Value")
+            )
+        )
+        val location = Location(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            name = FHIRString(value = "", id = nameId, extension = nameExtensions)
+        )
+
+        val locationPair = RoninLocation.transformInternal(location, LocationContext(Location::class), tenant)
+        val roninLocation = locationPair.first
+        assertNotNull(roninLocation)
+        assertEquals(
+            FHIRString("Unnamed Location", nameId, nameExtensions),
+            roninLocation!!.name
+        )
+        RoninLocation.validate(roninLocation, null).alertIfErrors()
+    }
+
+    @Test
+    fun `transforms location when name has null value with id and extensions is provided`() {
+        val nameId = FHIRString("id")
+        val nameExtensions = listOf(
+            Extension(
+                url = Uri("http://localhost/extension"),
+                value = DynamicValue(DynamicValueType.STRING, "Value")
+            )
+        )
+        val location = Location(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            name = FHIRString(value = null, id = nameId, extension = nameExtensions)
+        )
+
+        val locationPair = RoninLocation.transformInternal(location, LocationContext(Location::class), tenant)
+        val roninLocation = locationPair.first
+        assertNotNull(roninLocation)
+        assertEquals(
+            FHIRString("Unnamed Location", nameId, nameExtensions),
             roninLocation!!.name
         )
         RoninLocation.validate(roninLocation, null).alertIfErrors()

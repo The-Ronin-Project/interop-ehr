@@ -74,7 +74,7 @@ class EpicIdentifierService : IdentifierService {
     ): Identifier {
         val identifier = typeString.firstNotNullOfOrNull { type ->
             identifiers.firstOrNull {
-                it.type?.text.equals(
+                it.type?.text?.value.equals(
                     type,
                     true
                 )
@@ -94,7 +94,7 @@ class EpicIdentifierService : IdentifierService {
         exceptionMessage: () -> String
     ): Identifier {
         val systemUri = Uri(system)
-        return identifiers.firstOrNull { it.system == systemUri && it.type?.text.equals("external", true) }
+        return identifiers.firstOrNull { it.system == systemUri && it.type?.text?.value.equals("external", true) }
             ?: throw VendorIdentifierNotFoundException(exceptionMessage.invoke())
     }
 

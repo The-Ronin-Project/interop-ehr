@@ -10,8 +10,10 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
@@ -36,13 +38,13 @@ class BaseRoninProfileTest {
         Identifier(
             system = RoninCodeSystem.TENANT.uri,
             type = RoninCodeableConcepts.TENANT,
-            value = "tenant"
+            value = "tenant".asFHIR()
         )
     private val validFhirIdentifier =
         Identifier(
             system = RoninCodeSystem.FHIR_ID.uri,
             type = RoninCodeableConcepts.FHIR_ID,
-            value = "fhir"
+            value = "fhir".asFHIR()
         )
 
     private lateinit var location: Location
@@ -171,10 +173,10 @@ class BaseRoninProfileTest {
             }
         }
 
-        val meta = Meta(id = "123", profile = listOf(Canonical("old-profile")))
+        val meta = Meta(id = "123".asFHIR(), profile = listOf(Canonical("old-profile")))
 
         val transformed = profile.transformMeta(meta)
-        assertEquals("123", transformed.id)
+        assertEquals("123".asFHIR(), transformed.id)
         assertEquals(listOf(Canonical("profile")), transformed.profile)
     }
 
@@ -193,13 +195,13 @@ class BaseRoninProfileTest {
             id = Id("123"), identifier = listOf(validTenantIdentifier, validFhirIdentifier),
             physicalType =
             CodeableConcept(
-                text = "b",
+                text = "b".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = CodeSystem.RXNORM.uri,
                         code = Code("b"),
-                        version = "1.0.0",
-                        display = "b"
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
                     )
                 )
             )
@@ -214,13 +216,13 @@ class BaseRoninProfileTest {
                     value = DynamicValue(
                         DynamicValueType.CODEABLE_CONCEPT,
                         CodeableConcept(
-                            text = "b",
+                            text = "b".asFHIR(),
                             coding = listOf(
                                 Coding(
                                     system = CodeSystem.RXNORM.uri,
                                     code = Code("b"),
-                                    version = "1.0.0",
-                                    display = "b"
+                                    version = "1.0.0".asFHIR(),
+                                    display = "b".asFHIR()
                                 )
                             )
                         )
@@ -261,7 +263,7 @@ class BaseRoninProfileTest {
             coding = listOf(
                 Coding(
                     system = CodeSystem.SNOMED_CT.uri,
-                    display = "display"
+                    display = "display".asFHIR()
                 )
             )
         )
@@ -284,7 +286,7 @@ class BaseRoninProfileTest {
             coding = listOf(
                 Coding(
                     code = Code("code"),
-                    display = "display"
+                    display = "display".asFHIR()
                 )
             )
         )
@@ -307,12 +309,12 @@ class BaseRoninProfileTest {
             coding = listOf(
                 Coding(
                     code = Code("code"),
-                    display = "display"
+                    display = "display".asFHIR()
                 ),
                 Coding(
                     system = CodeSystem.SNOMED_CT.uri,
                     code = Code("code2"),
-                    display = "display2"
+                    display = "display2".asFHIR()
                 )
             )
         )
@@ -336,17 +338,17 @@ class BaseRoninProfileTest {
                 Coding(
                     system = CodeSystem.SNOMED_CT.uri,
                     code = Code(" "),
-                    display = "display"
+                    display = "display".asFHIR()
                 ),
                 Coding(
                     system = CodeSystem.SNOMED_CT.uri,
                     code = Code("code2"),
-                    display = ""
+                    display = "".asFHIR()
                 ),
                 Coding(
                     system = Uri("   "),
                     code = Code("code3"),
-                    display = "display 3"
+                    display = "display 3".asFHIR()
                 )
             )
         )
@@ -370,12 +372,12 @@ class BaseRoninProfileTest {
                 Coding(
                     system = CodeSystem.SNOMED_CT.uri,
                     code = Code("code"),
-                    display = "display"
+                    display = "display".asFHIR()
                 ),
                 Coding(
                     system = CodeSystem.SNOMED_CT.uri,
                     code = Code("code2"),
-                    display = "display2"
+                    display = "display2".asFHIR()
                 )
             )
         )
@@ -391,13 +393,13 @@ class BaseRoninProfileTest {
                 Coding(
                     system = CodeSystem.SNOMED_CT.uri,
                     code = Code("code"),
-                    display = "display",
-                    userSelected = true
+                    display = "display".asFHIR(),
+                    userSelected = FHIRBoolean.TRUE
                 ),
                 Coding(
                     system = CodeSystem.SNOMED_CT.uri,
                     code = Code("code2"),
-                    display = "display2"
+                    display = "display2".asFHIR()
                 )
             )
         )
@@ -413,14 +415,14 @@ class BaseRoninProfileTest {
                 Coding(
                     system = CodeSystem.SNOMED_CT.uri,
                     code = Code("code"),
-                    display = "display",
-                    userSelected = true
+                    display = "display".asFHIR(),
+                    userSelected = FHIRBoolean.TRUE
                 ),
                 Coding(
                     system = CodeSystem.SNOMED_CT.uri,
                     code = Code("code2"),
-                    display = "display2",
-                    userSelected = true
+                    display = "display2".asFHIR(),
+                    userSelected = FHIRBoolean.TRUE
                 )
             )
         )

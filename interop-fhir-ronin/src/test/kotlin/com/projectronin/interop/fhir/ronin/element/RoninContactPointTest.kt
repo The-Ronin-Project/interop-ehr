@@ -9,6 +9,7 @@ import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
@@ -45,10 +46,10 @@ class RoninContactPointTest {
     private val identifierList = listOf(
         Identifier(
             type = CodeableConcept(
-                text = "MRN"
+                text = "MRN".asFHIR()
             ),
             system = Uri("mrnSystem"),
-            value = "An MRN"
+            value = "An MRN".asFHIR()
         )
     )
 
@@ -83,7 +84,8 @@ class RoninContactPointTest {
 
     @Test
     fun `validate fails for telecom system missing source extension`() {
-        val telecom = listOf(ContactPoint(system = Code(value = emailSystemValue), use = emailUse, value = emailValue))
+        val telecom =
+            listOf(ContactPoint(system = Code(value = emailSystemValue), use = emailUse, value = emailValue.asFHIR()))
 
         val exception = assertThrows<IllegalArgumentException> {
             roninContactPoint.validateRonin(telecom, LocationContext("CareTeam", ""), Validation()).alertIfErrors()
@@ -110,7 +112,7 @@ class RoninContactPointTest {
                     )
                 ),
                 use = emailUse,
-                value = emailValue
+                value = emailValue.asFHIR()
             )
         )
 
@@ -141,13 +143,14 @@ class RoninContactPointTest {
             } returns Pair(systemCoding("phone"), systemExtension("abc"))
         }
         roninContactPoint = RoninContactPoint(conceptMapClient)
-        val telecom = listOf(ContactPoint(system = Code("abc"), value = "8675309"))
+        val telecom = listOf(ContactPoint(system = Code("abc"), value = "8675309".asFHIR()))
 
-        val transformResult = roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
         assertEquals(
             listOf(
                 ContactPoint(
-                    value = "8675309",
+                    value = "8675309".asFHIR(),
                     system = Code(
                         value = "phone",
                         extension = listOf(
@@ -191,9 +194,10 @@ class RoninContactPointTest {
             } returns null
         }
         roninContactPoint = RoninContactPoint(conceptMapClient)
-        val telecom = listOf(ContactPoint(system = Code("xyz"), value = "8675309"))
+        val telecom = listOf(ContactPoint(system = Code("xyz"), value = "8675309".asFHIR()))
 
-        val transformResult = roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
         val exception = assertThrows<IllegalArgumentException> {
             transformResult.second.alertIfErrors()
         }
@@ -221,12 +225,13 @@ class RoninContactPointTest {
             } returns Pair(systemCoding("phone"), systemExtension(""))
         }
         roninContactPoint = RoninContactPoint(conceptMapClient)
-        val telecom = listOf(ContactPoint(system = Code(""), value = "8675309"))
-        val transformResult = roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        val telecom = listOf(ContactPoint(system = Code(""), value = "8675309".asFHIR()))
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
         assertEquals(
             listOf(
                 ContactPoint(
-                    value = "8675309",
+                    value = "8675309".asFHIR(),
                     system = Code(
                         value = "phone",
                         extension = listOf(
@@ -304,13 +309,14 @@ class RoninContactPointTest {
         }
         roninContactPoint = RoninContactPoint(conceptMapClient)
         val telecom = listOf(
-            ContactPoint(system = Code("email"), value = "8675309"),
-            ContactPoint(system = Code("abc"), value = "8675308"),
-            ContactPoint(system = Code(""), value = "8675307"),
-            ContactPoint(system = Code("email"), value = "8675306"),
-            ContactPoint(system = Code("xyz"), value = "8675305")
+            ContactPoint(system = Code("email"), value = "8675309".asFHIR()),
+            ContactPoint(system = Code("abc"), value = "8675308".asFHIR()),
+            ContactPoint(system = Code(""), value = "8675307".asFHIR()),
+            ContactPoint(system = Code("email"), value = "8675306".asFHIR()),
+            ContactPoint(system = Code("xyz"), value = "8675305".asFHIR())
         )
-        val transformResult = roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
         val exception = assertThrows<IllegalArgumentException> {
             transformResult.second.alertIfErrors()
         }
@@ -362,20 +368,31 @@ class RoninContactPointTest {
         }
         roninContactPoint = RoninContactPoint(conceptMapClient)
         val telecom = listOf(
-            ContactPoint(system = Code("telephone"), value = "8675309"),
-            ContactPoint(system = Code("phone"), value = "8675302"),
-            ContactPoint(system = Code("email"), value = "8675301"),
+            ContactPoint(system = Code("telephone"), value = "8675309".asFHIR()),
+            ContactPoint(system = Code("phone"), value = "8675302".asFHIR()),
+            ContactPoint(system = Code("email"), value = "8675301".asFHIR()),
         )
-        val transformResult = roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
         assertTrue(transformResult.first!!.size == 3)
-        assertEquals(Code(value = "phone", extension = listOf(systemExtension("telephone"))), transformResult.first!![0].system)
-        assertEquals(Code(value = "phone", extension = listOf(systemExtension("phone"))), transformResult.first!![1].system)
-        assertEquals(Code(value = "email", extension = listOf(systemExtension("email"))), transformResult.first!![2].system)
+        assertEquals(
+            Code(value = "phone", extension = listOf(systemExtension("telephone"))),
+            transformResult.first!![0].system
+        )
+        assertEquals(
+            Code(value = "phone", extension = listOf(systemExtension("phone"))),
+            transformResult.first!![1].system
+        )
+        assertEquals(
+            Code(value = "email", extension = listOf(systemExtension("email"))),
+            transformResult.first!![2].system
+        )
     }
 
     @Test
     fun `validate fails for telecom use missing source extension`() {
-        val telecom = listOf(ContactPoint(system = emailSystem, use = Code(value = emailUseValue), value = emailValue))
+        val telecom =
+            listOf(ContactPoint(system = emailSystem, use = Code(value = emailUseValue), value = emailValue.asFHIR()))
 
         val exception = assertThrows<IllegalArgumentException> {
             roninContactPoint.validateRonin(telecom, LocationContext("CareTeam", ""), Validation()).alertIfErrors()
@@ -402,7 +419,7 @@ class RoninContactPointTest {
                         )
                     )
                 ),
-                value = emailValue
+                value = emailValue.asFHIR()
             )
         )
 
@@ -444,14 +461,14 @@ class RoninContactPointTest {
             } returns Pair(useCoding("home"), useExtension("def"))
         }
         roninContactPoint = RoninContactPoint(conceptMapClient)
-        val telecom = listOf(ContactPoint(system = Code("phone"), value = "8675309", use = Code("def")))
+        val telecom = listOf(ContactPoint(system = Code("phone"), value = "8675309".asFHIR(), use = Code("def")))
 
         val currentContext = LocationContext(Patient::class)
         val transformResult = roninContactPoint.transform(telecom, tenant, currentContext, Validation())
         assertEquals(
             listOf(
                 ContactPoint(
-                    value = "8675309",
+                    value = "8675309".asFHIR(),
                     system = Code(
                         value = "phone",
                         extension = listOf(
@@ -526,9 +543,10 @@ class RoninContactPointTest {
             } returns null
         }
         roninContactPoint = RoninContactPoint(conceptMapClient)
-        val telecom = listOf(ContactPoint(system = Code("email"), value = "8675309", use = Code("xyz")))
+        val telecom = listOf(ContactPoint(system = Code("email"), value = "8675309".asFHIR(), use = Code("xyz")))
 
-        val transformResult = roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
         val exception = assertThrows<IllegalArgumentException> {
             transformResult.second.alertIfErrors()
         }
@@ -567,13 +585,14 @@ class RoninContactPointTest {
             } returns Pair(useCoding("home"), useExtension(""))
         }
         roninContactPoint = RoninContactPoint(conceptMapClient)
-        val telecom = listOf(ContactPoint(system = Code("email"), value = "8675309", use = Code("")))
+        val telecom = listOf(ContactPoint(system = Code("email"), value = "8675309".asFHIR(), use = Code("")))
 
-        val transformResult = roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
         assertEquals(
             listOf(
                 ContactPoint(
-                    value = "8675309",
+                    value = "8675309".asFHIR(),
                     system = Code(
                         value = "email",
                         extension = listOf(
@@ -682,14 +701,15 @@ class RoninContactPointTest {
         }
         roninContactPoint = RoninContactPoint(conceptMapClient)
         val telecom = listOf(
-            ContactPoint(system = Code("email"), value = "8675310", use = Code("planet")),
-            ContactPoint(system = Code("email"), value = "8675311", use = Code("uvw")),
-            ContactPoint(system = Code("email"), value = "8675312", use = Code("def")),
-            ContactPoint(system = Code("email"), value = "8675313", use = Code("planet")),
-            ContactPoint(system = Code("email"), value = "8675314", use = Code("")),
+            ContactPoint(system = Code("email"), value = "8675310".asFHIR(), use = Code("planet")),
+            ContactPoint(system = Code("email"), value = "8675311".asFHIR(), use = Code("uvw")),
+            ContactPoint(system = Code("email"), value = "8675312".asFHIR(), use = Code("def")),
+            ContactPoint(system = Code("email"), value = "8675313".asFHIR(), use = Code("planet")),
+            ContactPoint(system = Code("email"), value = "8675314".asFHIR(), use = Code("")),
         )
 
-        val transformResult = roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
         val exception = assertThrows<IllegalArgumentException> {
             transformResult.second.alertIfErrors()
         }
@@ -741,11 +761,12 @@ class RoninContactPointTest {
         }
         roninContactPoint = RoninContactPoint(conceptMapClient)
         val telecom = listOf(
-            ContactPoint(system = Code("email"), value = "8675309", use = Code("planet")),
-            ContactPoint(system = Code("email"), value = "8675302", use = Code("city")),
-            ContactPoint(system = Code("email"), value = "8675301", use = Code("planet")),
+            ContactPoint(system = Code("email"), value = "8675309".asFHIR(), use = Code("planet")),
+            ContactPoint(system = Code("email"), value = "8675302".asFHIR(), use = Code("city")),
+            ContactPoint(system = Code("email"), value = "8675301".asFHIR(), use = Code("planet")),
         )
-        val transformResult = roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
         assertTrue(transformResult.first!!.size == 3)
         assertEquals(Code(value = "home", extension = listOf(useExtension("planet"))), transformResult.first!![0].use)
         assertEquals(Code(value = "home", extension = listOf(useExtension("city"))), transformResult.first!![1].use)

@@ -79,7 +79,7 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
         val idList =
             recipients.map {
                 val identifierVendorIdentifier = it.identifier as IdentifierVendorIdentifier
-                identifierVendorIdentifier.identifier.value ?: throw VendorIdentifierNotFoundException()
+                identifierVendorIdentifier.identifier.value?.value ?: throw VendorIdentifierNotFoundException()
             }
         val poolList = providerPoolService.getPoolsForProviders(tenant, idList)
 

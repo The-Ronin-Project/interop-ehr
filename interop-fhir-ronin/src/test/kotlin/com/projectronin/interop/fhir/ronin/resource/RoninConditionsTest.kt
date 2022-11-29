@@ -10,6 +10,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
@@ -29,7 +30,7 @@ class RoninConditionsTest {
 
     @Test
     fun `always qualifies`() {
-        assertTrue(RoninConditions.qualifies(Condition(subject = Reference(display = "reference"))))
+        assertTrue(RoninConditions.qualifies(Condition(subject = Reference(display = "reference".asFHIR()))))
     }
 
     @Test
@@ -37,11 +38,19 @@ class RoninConditionsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
             ),
-            code = CodeableConcept(text = "code"),
-            subject = Reference(display = "reference"),
+            code = CodeableConcept(text = "code".asFHIR()),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -62,11 +71,19 @@ class RoninConditionsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345")
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
             ),
-            code = CodeableConcept(text = "code"),
-            subject = Reference(display = "reference"),
+            code = CodeableConcept(text = "code".asFHIR()),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -87,7 +104,7 @@ class RoninConditionsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(value = "id")
+                Identifier(value = "id".asFHIR())
             ),
             category = listOf(
                 CodeableConcept(
@@ -104,12 +121,12 @@ class RoninConditionsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = "Non-small cell lung cancer"
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
             subject = Reference(
-                reference = "Patient/roninPatientExample01"
+                reference = "Patient/roninPatientExample01".asFHIR()
             )
         )
 
@@ -127,7 +144,7 @@ class RoninConditionsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(value = "id")
+                Identifier(value = "id".asFHIR())
             ),
             category = listOf(
                 CodeableConcept(
@@ -144,12 +161,12 @@ class RoninConditionsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = "Non-small cell lung cancer"
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
             subject = Reference(
-                reference = "Patient/roninPatientExample01"
+                reference = "Patient/roninPatientExample01".asFHIR()
             )
         )
 

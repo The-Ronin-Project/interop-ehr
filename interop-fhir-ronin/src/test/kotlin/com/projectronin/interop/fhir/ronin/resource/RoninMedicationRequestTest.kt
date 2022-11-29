@@ -15,10 +15,12 @@ import com.projectronin.interop.fhir.r4.datatype.medication.Substitution
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.UnsignedInt
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.MedicationRequest
 import com.projectronin.interop.fhir.r4.validate.resource.R4MedicationRequestValidator
@@ -56,9 +58,12 @@ class RoninMedicationRequestTest {
                 MedicationRequest(
                     status = MedicationRequestStatus.COMPLETED.asCode(),
                     intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-                    medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication")),
-                    subject = Reference(reference = "Patient/1234"),
-                    requester = Reference(reference = "Practitioner/1234")
+                    medication = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(text = "medication".asFHIR())
+                    ),
+                    subject = Reference(reference = "Patient/1234".asFHIR()),
+                    requester = Reference(reference = "Practitioner/1234".asFHIR())
                 )
             )
         )
@@ -70,9 +75,9 @@ class RoninMedicationRequestTest {
             id = Id("12345"),
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication")),
-            subject = Reference(reference = "Patient/1234"),
-            requester = Reference(reference = "Practitioner/1234")
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            requester = Reference(reference = "Practitioner/1234".asFHIR())
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -92,13 +97,21 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication")),
-            subject = Reference(reference = "Patient/1234")
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = Reference(reference = "Patient/1234".asFHIR())
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -117,14 +130,22 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication")),
-            subject = Reference(reference = "Patient/1234"),
-            requester = Reference(reference = "Practitioner/1234")
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            requester = Reference(reference = "Practitioner/1234".asFHIR())
         )
 
         mockkObject(R4MedicationRequestValidator)
@@ -159,14 +180,22 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication")),
-            subject = Reference(reference = "Patient/1234"),
-            requester = Reference(reference = "Practitioner/1234")
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            requester = Reference(reference = "Practitioner/1234".asFHIR())
         )
 
         RoninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
@@ -183,7 +212,7 @@ class RoninMedicationRequestTest {
             language = Code("en-US"),
             text = Narrative(
                 status = NarrativeStatus.GENERATED.asCode(),
-                div = "div"
+                div = "div".asFHIR()
             ),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","field":"24680"}""")),
             extension = listOf(
@@ -198,38 +227,38 @@ class RoninMedicationRequestTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value")
                 )
             ),
-            identifier = listOf(Identifier(value = "id")),
+            identifier = listOf(Identifier(value = "id".asFHIR())),
             status = MedicationRequestStatus.CANCELLED.asCode(),
-            statusReason = CodeableConcept(text = "statusReason"),
+            statusReason = CodeableConcept(text = "statusReason".asFHIR()),
             intent = MedicationRequestIntent.PROPOSAL.asCode(),
-            category = listOf(CodeableConcept(text = "category")),
+            category = listOf(CodeableConcept(text = "category".asFHIR())),
             priority = RequestPriority.ASAP.asCode(),
-            doNotPerform = false,
+            doNotPerform = FHIRBoolean.FALSE,
             reported = DynamicValue(DynamicValueType.BOOLEAN, true),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication")),
-            subject = Reference(reference = "Patient/1234"),
-            encounter = Reference(reference = "Encounter/1234"),
-            supportingInformation = listOf(Reference(reference = "Condition/1234")),
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            encounter = Reference(reference = "Encounter/1234".asFHIR()),
+            supportingInformation = listOf(Reference(reference = "Condition/1234".asFHIR())),
             authoredOn = DateTime("2022-11-03"),
-            requester = Reference(reference = "Practitioner/1234"),
-            performer = Reference(reference = "Practitioner/5678"),
-            performerType = CodeableConcept(text = "performer type"),
-            recorder = Reference(reference = "Practitioner/3456"),
-            reasonCode = listOf(CodeableConcept(text = "reason")),
-            reasonReference = listOf(Reference(reference = "Condition/5678")),
+            requester = Reference(reference = "Practitioner/1234".asFHIR()),
+            performer = Reference(reference = "Practitioner/5678".asFHIR()),
+            performerType = CodeableConcept(text = "performer type".asFHIR()),
+            recorder = Reference(reference = "Practitioner/3456".asFHIR()),
+            reasonCode = listOf(CodeableConcept(text = "reason".asFHIR())),
+            reasonReference = listOf(Reference(reference = "Condition/5678".asFHIR())),
             instantiatesCanonical = listOf(Canonical("canonical")),
             instantiatesUri = listOf(Uri("uri")),
-            basedOn = listOf(Reference(reference = "CarePlan/1234")),
-            groupIdentifier = Identifier(value = "group"),
-            courseOfTherapyType = CodeableConcept(text = "therapy"),
-            insurance = listOf(Reference(reference = "Coverage/1234")),
+            basedOn = listOf(Reference(reference = "CarePlan/1234".asFHIR())),
+            groupIdentifier = Identifier(value = "group".asFHIR()),
+            courseOfTherapyType = CodeableConcept(text = "therapy".asFHIR()),
+            insurance = listOf(Reference(reference = "Coverage/1234".asFHIR())),
             note = listOf(Annotation(text = Markdown("note"))),
-            dosageInformation = listOf(Dosage(text = "dosage")),
+            dosageInformation = listOf(Dosage(text = "dosage".asFHIR())),
             dispenseRequest = DispenseRequest(numberOfRepeatsAllowed = UnsignedInt(2)),
             substitution = Substitution(allowed = DynamicValue(DynamicValueType.BOOLEAN, true)),
-            priorPrescription = Reference(reference = "MedicationRequest/1234"),
-            detectedIssue = listOf(Reference(reference = "DetectedIssue/1234")),
-            eventHistory = listOf(Reference(reference = "Provenance/1234"))
+            priorPrescription = Reference(reference = "MedicationRequest/1234".asFHIR()),
+            detectedIssue = listOf(Reference(reference = "DetectedIssue/1234".asFHIR())),
+            eventHistory = listOf(Reference(reference = "Provenance/1234".asFHIR()))
         )
 
         val transformed = RoninMedicationRequest.transform(medicationRequest, tenant)
@@ -243,7 +272,7 @@ class RoninMedicationRequestTest {
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div"), transformed.text)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","field":"24680"}""")),
             transformed.contained
@@ -268,46 +297,54 @@ class RoninMedicationRequestTest {
         )
         assertEquals(
             listOf(
-                Identifier(value = "id"),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(value = "id".asFHIR()),
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
         assertEquals(MedicationRequestStatus.CANCELLED.asCode(), transformed.status)
-        assertEquals(CodeableConcept(text = "statusReason"), transformed.statusReason)
+        assertEquals(CodeableConcept(text = "statusReason".asFHIR()), transformed.statusReason)
         assertEquals(MedicationRequestIntent.PROPOSAL.asCode(), transformed.intent)
-        assertEquals(listOf(CodeableConcept(text = "category")), transformed.category)
+        assertEquals(listOf(CodeableConcept(text = "category".asFHIR())), transformed.category)
         assertEquals(RequestPriority.ASAP.asCode(), transformed.priority)
-        assertEquals(false, transformed.doNotPerform)
+        assertEquals(FHIRBoolean.FALSE, transformed.doNotPerform)
         assertEquals(DynamicValue(DynamicValueType.BOOLEAN, true), transformed.reported)
         assertEquals(
-            DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication")),
+            DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
             transformed.medication
         )
-        assertEquals(Reference(reference = "Patient/test-1234"), transformed.subject)
-        assertEquals(Reference(reference = "Encounter/test-1234"), transformed.encounter)
-        assertEquals(listOf(Reference(reference = "Condition/test-1234")), transformed.supportingInformation)
+        assertEquals(Reference(reference = "Patient/test-1234".asFHIR()), transformed.subject)
+        assertEquals(Reference(reference = "Encounter/test-1234".asFHIR()), transformed.encounter)
+        assertEquals(listOf(Reference(reference = "Condition/test-1234".asFHIR())), transformed.supportingInformation)
         assertEquals(DateTime("2022-11-03"), transformed.authoredOn)
-        assertEquals(Reference(reference = "Practitioner/test-1234"), transformed.requester)
-        assertEquals(Reference(reference = "Practitioner/test-5678"), transformed.performer)
-        assertEquals(CodeableConcept(text = "performer type"), transformed.performerType)
-        assertEquals(Reference(reference = "Practitioner/test-3456"), transformed.recorder)
-        assertEquals(listOf(CodeableConcept(text = "reason")), transformed.reasonCode)
-        assertEquals(listOf(Reference(reference = "Condition/test-5678")), transformed.reasonReference)
+        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.requester)
+        assertEquals(Reference(reference = "Practitioner/test-5678".asFHIR()), transformed.performer)
+        assertEquals(CodeableConcept(text = "performer type".asFHIR()), transformed.performerType)
+        assertEquals(Reference(reference = "Practitioner/test-3456".asFHIR()), transformed.recorder)
+        assertEquals(listOf(CodeableConcept(text = "reason".asFHIR())), transformed.reasonCode)
+        assertEquals(listOf(Reference(reference = "Condition/test-5678".asFHIR())), transformed.reasonReference)
         assertEquals(listOf(Canonical("canonical")), transformed.instantiatesCanonical)
         assertEquals(listOf(Uri("uri")), transformed.instantiatesUri)
-        assertEquals(listOf(Reference(reference = "CarePlan/test-1234")), transformed.basedOn)
-        assertEquals(Identifier(value = "group"), transformed.groupIdentifier)
-        assertEquals(CodeableConcept(text = "therapy"), transformed.courseOfTherapyType)
-        assertEquals(listOf(Reference(reference = "Coverage/test-1234")), transformed.insurance)
+        assertEquals(listOf(Reference(reference = "CarePlan/test-1234".asFHIR())), transformed.basedOn)
+        assertEquals(Identifier(value = "group".asFHIR()), transformed.groupIdentifier)
+        assertEquals(CodeableConcept(text = "therapy".asFHIR()), transformed.courseOfTherapyType)
+        assertEquals(listOf(Reference(reference = "Coverage/test-1234".asFHIR())), transformed.insurance)
         assertEquals(listOf(Annotation(text = Markdown("note"))), transformed.note)
-        assertEquals(listOf(Dosage(text = "dosage")), transformed.dosageInformation)
+        assertEquals(listOf(Dosage(text = "dosage".asFHIR())), transformed.dosageInformation)
         assertEquals(DispenseRequest(numberOfRepeatsAllowed = UnsignedInt(2)), transformed.dispenseRequest)
         assertEquals(Substitution(allowed = DynamicValue(DynamicValueType.BOOLEAN, true)), transformed.substitution)
-        assertEquals(Reference(reference = "MedicationRequest/test-1234"), transformed.priorPrescription)
-        assertEquals(listOf(Reference(reference = "DetectedIssue/test-1234")), transformed.detectedIssue)
-        assertEquals(listOf(Reference(reference = "Provenance/test-1234")), transformed.eventHistory)
+        assertEquals(Reference(reference = "MedicationRequest/test-1234".asFHIR()), transformed.priorPrescription)
+        assertEquals(listOf(Reference(reference = "DetectedIssue/test-1234".asFHIR())), transformed.detectedIssue)
+        assertEquals(listOf(Reference(reference = "Provenance/test-1234".asFHIR())), transformed.eventHistory)
     }
 
     @Test
@@ -316,9 +353,9 @@ class RoninMedicationRequestTest {
             id = Id("12345"),
             status = MedicationRequestStatus.CANCELLED.asCode(),
             intent = MedicationRequestIntent.PROPOSAL.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication")),
-            subject = Reference(reference = "Patient/1234"),
-            requester = Reference(reference = "Practitioner/1234"),
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            requester = Reference(reference = "Practitioner/1234".asFHIR()),
         )
 
         val transformed = RoninMedicationRequest.transform(medicationRequest, tenant)
@@ -338,8 +375,16 @@ class RoninMedicationRequestTest {
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345"),
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test")
+                Identifier(
+                    type = RoninCodeableConcepts.FHIR_ID,
+                    system = RoninCodeSystem.FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = RoninCodeableConcepts.TENANT,
+                    system = RoninCodeSystem.TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
@@ -351,14 +396,14 @@ class RoninMedicationRequestTest {
         assertNull(transformed.doNotPerform)
         assertNull(transformed.reported)
         assertEquals(
-            DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication")),
+            DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
             transformed.medication
         )
-        assertEquals(Reference(reference = "Patient/test-1234"), transformed.subject)
+        assertEquals(Reference(reference = "Patient/test-1234".asFHIR()), transformed.subject)
         assertNull(transformed.encounter)
         assertEquals(listOf<Reference>(), transformed.supportingInformation)
         assertNull(transformed.authoredOn)
-        assertEquals(Reference(reference = "Practitioner/test-1234"), transformed.requester)
+        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.requester)
         assertNull(transformed.performer)
         assertNull(transformed.performerType)
         assertNull(transformed.recorder)
@@ -384,9 +429,9 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             status = MedicationRequestStatus.CANCELLED.asCode(),
             intent = MedicationRequestIntent.PROPOSAL.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication")),
-            subject = Reference(reference = "Patient/1234"),
-            requester = Reference(reference = "Practitioner/1234"),
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            requester = Reference(reference = "Practitioner/1234".asFHIR()),
         )
 
         val transformed = RoninMedicationRequest.transform(medicationRequest, tenant)
