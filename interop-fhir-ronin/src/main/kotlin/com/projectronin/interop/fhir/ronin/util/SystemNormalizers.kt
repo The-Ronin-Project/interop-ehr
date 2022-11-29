@@ -35,7 +35,8 @@ private val FHIR_CODING_OID_TO_URI = mapOf(
 
 private val FHIR_IDENTIFIER_OID_TO_URI = mapOf(
     "2.16.840.1.113883.4.1" to "http://hl7.org/fhir/sid/us-ssn",
-    "2.16.840.1.113883.4.6" to "http://hl7.org/fhir/sid/us-npi"
+    "2.16.840.1.113883.4.6" to "http://hl7.org/fhir/sid/us-npi",
+    "2.16.840.1.113883.4.7" to "http://hl7.org/fhir"
 )
 
 fun Uri.normalizeCoding(): Uri {
