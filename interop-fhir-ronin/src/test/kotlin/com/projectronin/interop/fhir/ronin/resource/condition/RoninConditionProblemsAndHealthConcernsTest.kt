@@ -17,7 +17,6 @@ import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
-import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
@@ -59,11 +58,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = FHIRString("Non-small cell lung cancer")
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference"))
+            subject = Reference(display = "reference".asFHIR())
         )
 
         val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
@@ -79,13 +78,13 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = FHIRString("Non-small cell lung cancer")
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
-                CodeableConcept(text = FHIRString("category"))
+                CodeableConcept(text = "category".asFHIR())
             )
         )
 
@@ -102,11 +101,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = FHIRString("Non-small cell lung cancer")
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -132,11 +131,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = FHIRString("Non-small cell lung cancer")
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -162,11 +161,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = FHIRString("Non-small cell lung cancer")
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -192,11 +191,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = FHIRString("Non-small cell lung cancer")
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -222,11 +221,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = FHIRString("Non-small cell lung cancer")
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -256,13 +255,13 @@ class RoninConditionProblemsAndHealthConcernsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = FHIRString("test")),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = FHIRString("12345"))
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR())
             ),
             code = CodeableConcept(
                 coding = listOf()
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -390,11 +389,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = FHIRString("Non-small cell lung cancer")
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -434,18 +433,18 @@ class RoninConditionProblemsAndHealthConcernsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = FHIRString("test")),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = FHIRString("12345"))
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR())
             ),
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
                         system = Uri("http://snomed.info/sct"),
-                        display = FHIRString("Non-small cell lung cancer")
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -473,18 +472,18 @@ class RoninConditionProblemsAndHealthConcernsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = FHIRString("test")),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = FHIRString("12345"))
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR())
             ),
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
                         code = Code("254637007"),
-                        display = FHIRString("Non-small cell lung cancer")
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -512,8 +511,8 @@ class RoninConditionProblemsAndHealthConcernsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = FHIRString("test")),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = FHIRString("12345"))
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR())
             ),
             code = CodeableConcept(
                 coding = listOf(
@@ -523,7 +522,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -567,11 +566,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = FHIRString("Non-small cell lung cancer")
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -595,11 +594,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     Coding(
                         system = Uri("http://snomed.info/sct"),
                         code = Code("254637007"),
-                        display = FHIRString("Non-small cell lung cancer")
+                        display = "Non-small cell lung cancer".asFHIR()
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -621,8 +620,8 @@ class RoninConditionProblemsAndHealthConcernsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = FHIRString("test")),
-                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = FHIRString("12345"))
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR())
             ),
             code = CodeableConcept(
                 coding = listOf(
@@ -632,7 +631,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     )
                 )
             ),
-            subject = Reference(display = FHIRString("reference")),
+            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(

@@ -13,7 +13,6 @@ import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
-import com.projectronin.interop.fhir.ronin.resource.condition.RoninConditionProblemsAndHealthConcerns
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
@@ -212,7 +211,7 @@ abstract class BaseRoninProfile<T : Resource<T>>(
             coding?.let {
                 checkTrue(
                     it.isNotEmpty(),
-                    RoninConditionProblemsAndHealthConcerns.roninInvalidCodingError(parentFieldName),
+                    roninInvalidCodingError(parentFieldName),
                     parentContext
                 )
             }

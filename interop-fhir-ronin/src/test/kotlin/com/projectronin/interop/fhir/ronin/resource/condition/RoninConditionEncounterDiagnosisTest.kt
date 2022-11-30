@@ -17,6 +17,7 @@ import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
@@ -53,7 +54,16 @@ class RoninConditionEncounterDiagnosisTest {
     fun `does not qualify when no categories`() {
         val condition = Condition(
             id = Id("12345"),
-            code = CodeableConcept(text = "code".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        code = Code("C64.9"),
+                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                    )
+                ),
+                text = "code".asFHIR(),
+            ),
             subject = Reference(display = "reference".asFHIR())
         )
 
@@ -65,9 +75,18 @@ class RoninConditionEncounterDiagnosisTest {
     fun `does not qualify when category with no codings`() {
         val condition = Condition(
             id = Id("12345"),
-            code = CodeableConcept(text = "code".asFHIR()),
+            category = listOf(CodeableConcept(text = "category".asFHIR())),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        code = Code("C64.9"),
+                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                    )
+                ),
+                text = "code".asFHIR(),
+            ),
             subject = Reference(display = "reference".asFHIR()),
-            category = listOf(CodeableConcept(text = "category".asFHIR()))
         )
 
         val qualified = RoninConditionEncounterDiagnosis.qualifies(condition)
@@ -75,11 +94,9 @@ class RoninConditionEncounterDiagnosisTest {
     }
 
     @Test
-    fun `does not qualify when coding code is not for encounter diagnosis`() {
+    fun `does not qualify when category coding code is not for encounter diagnosis`() {
         val condition = Condition(
             id = Id("12345"),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -89,7 +106,18 @@ class RoninConditionEncounterDiagnosisTest {
                         )
                     )
                 )
-            )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        code = Code("C64.9"),
+                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                    )
+                ),
+                text = "code".asFHIR(),
+            ),
+            subject = Reference(display = "reference".asFHIR()),
         )
 
         val qualified = RoninConditionEncounterDiagnosis.qualifies(condition)
@@ -97,11 +125,9 @@ class RoninConditionEncounterDiagnosisTest {
     }
 
     @Test
-    fun `does not qualify when coding code is for encounter diagnosis and wrong system`() {
+    fun `does not qualify when category coding code is for encounter diagnosis and wrong system`() {
         val condition = Condition(
             id = Id("12345"),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -111,7 +137,18 @@ class RoninConditionEncounterDiagnosisTest {
                         )
                     )
                 )
-            )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        code = Code("C64.9"),
+                        display = FHIRString("Malignant neoplasm of unspecified kidney except renal pelvis")
+                    )
+                ),
+                text = "code".asFHIR(),
+            ),
+            subject = Reference(display = "reference".asFHIR())
         )
 
         val qualified = RoninConditionEncounterDiagnosis.qualifies(condition)
@@ -122,8 +159,6 @@ class RoninConditionEncounterDiagnosisTest {
     fun `qualifies for profile`() {
         val condition = Condition(
             id = Id("12345"),
-            code = CodeableConcept(text = "code".asFHIR()),
-            subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -133,7 +168,18 @@ class RoninConditionEncounterDiagnosisTest {
                         )
                     )
                 )
-            )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        code = Code("C64.9"),
+                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                    )
+                ),
+                text = "code".asFHIR(),
+            ),
+            subject = Reference(display = "reference".asFHIR()),
         )
 
         val qualified = RoninConditionEncounterDiagnosis.qualifies(condition)
@@ -144,7 +190,16 @@ class RoninConditionEncounterDiagnosisTest {
     fun `validate checks ronin identifiers`() {
         val condition = Condition(
             id = Id("12345"),
-            code = CodeableConcept(text = "code".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        code = Code("C64.9"),
+                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                    )
+                ),
+                text = "code".asFHIR(),
+            ),
             subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
@@ -175,16 +230,8 @@ class RoninConditionEncounterDiagnosisTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                )
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR())
             ),
             code = null,
             subject = Reference(display = "reference".asFHIR()),
@@ -212,22 +259,182 @@ class RoninConditionEncounterDiagnosisTest {
     }
 
     @Test
+    fun `validate fails if code coding is empty`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR())
+            ),
+            code = CodeableConcept(
+                coding = listOf(),
+                text = "code".asFHIR(),
+            ),
+            subject = Reference(display = "reference".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninConditionEncounterDiagnosis.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Condition.code",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if code coding system is missing`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR())
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        code = Code("C64.9"),
+                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                    )
+                ),
+                text = "code".asFHIR(),
+            ),
+            subject = Reference(display = "reference".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninConditionEncounterDiagnosis.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Condition.code",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if code coding display is missing`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR())
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        code = Code("C64.9"),
+                    )
+                ),
+                text = "code".asFHIR(),
+            ),
+            subject = Reference(display = "reference".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninConditionEncounterDiagnosis.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Condition.code",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if code coding code is missing`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR())
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                    )
+                ),
+                text = "code".asFHIR(),
+            ),
+            subject = Reference(display = "reference".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninConditionEncounterDiagnosis.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Condition.code",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate fails if not an encounter diagnosis`() {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                )
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR())
             ),
-            code = CodeableConcept(text = "code".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        code = Code("C64.9"),
+                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                    )
+                ),
+                text = "code".asFHIR(),
+            ),
             subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
@@ -257,18 +464,9 @@ class RoninConditionEncounterDiagnosisTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                )
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR())
             ),
-            code = CodeableConcept(text = "code".asFHIR()),
             subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
@@ -279,7 +477,17 @@ class RoninConditionEncounterDiagnosisTest {
                         )
                     )
                 )
-            )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        code = Code("C64.9"),
+                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                    )
+                ),
+                text = "code".asFHIR(),
+            ),
         )
 
         mockkObject(R4ConditionValidator)
@@ -309,18 +517,9 @@ class RoninConditionEncounterDiagnosisTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                )
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR())
             ),
-            code = CodeableConcept(text = "code".asFHIR()),
             subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
@@ -331,7 +530,17 @@ class RoninConditionEncounterDiagnosisTest {
                         )
                     )
                 )
-            )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        code = Code("C64.9"),
+                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                    )
+                ),
+                text = "code".asFHIR(),
+            ),
         )
 
         RoninConditionEncounterDiagnosis.validate(condition, null).alertIfErrors()
@@ -340,7 +549,6 @@ class RoninConditionEncounterDiagnosisTest {
     @Test
     fun `transform fails for condition with no ID`() {
         val condition = Condition(
-            code = CodeableConcept(text = "code".asFHIR()),
             subject = Reference(display = "reference".asFHIR()),
             category = listOf(
                 CodeableConcept(
@@ -351,7 +559,17 @@ class RoninConditionEncounterDiagnosisTest {
                         )
                     )
                 )
-            )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        code = Code("C64.9"),
+                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                    )
+                ),
+                text = "code".asFHIR(),
+            ),
         )
 
         val transformed = RoninConditionEncounterDiagnosis.transform(condition, tenant)
@@ -385,7 +603,7 @@ class RoninConditionEncounterDiagnosisTest {
                 )
             ),
             identifier = listOf(
-                Identifier(value = "id".asFHIR())
+                Identifier(value = FHIRString("id"))
             ),
             clinicalStatus = CodeableConcept(
                 coding = listOf(
@@ -505,7 +723,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = FHIRString("div")), transformed.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","id":"13579"}""")),
             transformed.contained
@@ -530,17 +748,9 @@ class RoninConditionEncounterDiagnosisTest {
         )
         assertEquals(
             listOf(
-                Identifier(value = "id".asFHIR()),
-                Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
-                    value = "test".asFHIR()
-                )
+                Identifier(value = FHIRString("id")),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR())
             ),
             transformed.identifier
         )
@@ -598,7 +808,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
         assertEquals(
             CodeableConcept(
-                text = "Non-small cell lung cancer".asFHIR(),
+                text = FHIRString("Non-small cell lung cancer"),
                 coding = listOf(
                     Coding(
                         system = Uri("http://snomed.info/sct"),
@@ -612,7 +822,7 @@ class RoninConditionEncounterDiagnosisTest {
         assertEquals(
             listOf(
                 CodeableConcept(
-                    text = "Lung structure (body structure)".asFHIR(),
+                    text = FHIRString("Lung structure (body structure)"),
                     coding = listOf(
                         Coding(
                             system = Uri("http://snomed.info/sct"),
@@ -645,14 +855,8 @@ class RoninConditionEncounterDiagnosisTest {
             transformed.abatement
         )
         assertEquals(DateTime("2022-01-01"), transformed.recordedDate)
-        assertEquals(
-            Reference(reference = "Practitioner/test-roninPractitionerExample01".asFHIR()),
-            transformed.recorder
-        )
-        assertEquals(
-            Reference(reference = "Practitioner/test-roninPractitionerExample01".asFHIR()),
-            transformed.asserter
-        )
+        assertEquals(Reference(reference = FHIRString("Practitioner/test-roninPractitionerExample01")), transformed.recorder)
+        assertEquals(Reference(reference = FHIRString("Practitioner/test-roninPractitionerExample01")), transformed.asserter)
         assertEquals(
             listOf(
                 ConditionStage(
@@ -743,17 +947,9 @@ class RoninConditionEncounterDiagnosisTest {
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(value = "id".asFHIR()),
-                Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
-                    value = "test".asFHIR()
-                )
+                Identifier(value = FHIRString("id")),
+                Identifier(type = RoninCodeableConcepts.FHIR_ID, system = RoninCodeSystem.FHIR_ID.uri, value = "12345".asFHIR()),
+                Identifier(type = RoninCodeableConcepts.TENANT, system = RoninCodeSystem.TENANT.uri, value = "test".asFHIR())
             ),
             transformed.identifier
         )
