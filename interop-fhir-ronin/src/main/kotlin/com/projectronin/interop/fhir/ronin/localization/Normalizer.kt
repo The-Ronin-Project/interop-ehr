@@ -60,7 +60,7 @@ object Normalizer : BaseGenericTransformer() {
         codeableConcept: CodeableConcept,
         parameterName: String,
         tenant: Tenant
-    ): CodeableConcept? {
+    ): CodeableConcept {
         val nonNormalizedCodeableConcept = transformOrNull(codeableConcept, parameterName, tenant) ?: codeableConcept
 
         // If text is populated on the codeable concept already, return as is.
@@ -73,7 +73,7 @@ object Normalizer : BaseGenericTransformer() {
             codeableConcept.coding.singleOrNull { it.userSelected?.value == true }
                 ?: codeableConcept.coding.singleOrNull()
         if (selectedCoding != null && selectedCoding.display?.value?.isNotEmpty() == true) {
-            return (nonNormalizedCodeableConcept ?: codeableConcept).copy(text = selectedCoding.display)
+            return nonNormalizedCodeableConcept.copy(text = selectedCoding.display)
         }
 
         // Otherwise make no changes

@@ -173,7 +173,7 @@ class RoninPatient private constructor(
     }
 
     /**
-     * Create a FHIR [Identfiier] from the FHIR Patient.id. Add that and the MRN [Identifier] to a List and return it.
+     * Create a FHIR [Identifier] from the FHIR Patient.id. Add that and the MRN [Identifier] to a List and return it.
      * This function is NOT private in this class, because code in other repos besides interop-ehr use it.
      */
     fun getRoninIdentifiers(patient: Patient, tenant: Tenant): List<Identifier> {
