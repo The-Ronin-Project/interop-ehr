@@ -201,13 +201,13 @@ class RoninLocationTest {
                     "Location",
                     "Location.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "telephone")
                     )
                 )
             } returns Pair(
                 Coding(
-                    system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                     code = Code(value = "phone")
                 ),
                 Extension(
@@ -215,7 +215,7 @@ class RoninLocationTest {
                     value = DynamicValue(
                         type = DynamicValueType.CODING,
                         value = Coding(
-                            system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                             code = Code(value = "telephone")
                         )
                     )
@@ -227,13 +227,13 @@ class RoninLocationTest {
                     "Location",
                     "Location.telecom.use",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "cell")
                     )
                 )
             } returns Pair(
                 Coding(
-                    system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                     code = Code(value = "mobile")
                 ),
                 Extension(
@@ -241,7 +241,7 @@ class RoninLocationTest {
                     value = DynamicValue(
                         type = DynamicValueType.CODING,
                         value = Coding(
-                            system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                             code = Code(value = "cell")
                         )
                     )

@@ -6,6 +6,7 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ConceptMap
+import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -246,5 +247,36 @@ internal class ConceptMapCacheTest {
 
         every { JacksonUtil.readJsonList(any(), ConceptMapRegistry::class) } throws Exception("bad")
         assertEquals(emptyList<ConceptMapRegistry>(), cmClient.getNewRegistry())
+    }
+
+    @Test
+    fun `getConceptMap works correctly with tenant-specific CodeSystems`() {
+        mockkObject(ConceptMapCache)
+        testRegistry[0].map = mapOf(
+            SourceKey("sourceValue1", "http://projectronin.io/fhir/CodeSystem/AppointmentStatus")
+                to TargetValue("targetValue1", "targetSystem1")
+        )
+        testRegistry[1].map = mapOf(
+            SourceKey("sourceValue2", "sourceSystem2")
+                to TargetValue("targetValue2", "targetSystem2")
+        )
+        val sourceCoding = Coding(
+            code = Code("sourceValue1"),
+            system = RoninConceptMap.CODE_SYSTEMS.toUri(tenant, "AppointmentStatus")
+        )
+        ConceptMapCache.setNewRegistry(testRegistry, tenant)
+        // calling the client here tests the 'reload' line of code
+        val mapped = cmClient.getConceptMapping(
+            tenant,
+            "Appointment",
+            "Appointment.status",
+            sourceCoding
+        )
+        assertEquals(Coding(code = Code("targetValue1"), system = Uri("targetSystem1")), mapped?.first)
+        assertEquals("ext1", mapped?.second?.url?.value)
+        assertEquals(sourceCoding, mapped?.second?.value?.value)
+
+        testRegistry.forEach { it.map = null } // reset
+        unmockkObject(ConceptMapCache)
     }
 }
