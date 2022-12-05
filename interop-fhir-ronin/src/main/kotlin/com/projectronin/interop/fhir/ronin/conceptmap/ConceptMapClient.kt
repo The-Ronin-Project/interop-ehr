@@ -1,5 +1,6 @@
 package com.projectronin.interop.fhir.ronin.conceptmap
 
+import com.projectronin.interop.common.enums.CodedEnum
 import com.projectronin.interop.common.jackson.JacksonUtil
 import com.projectronin.interop.datalake.oci.client.OCIClient
 import com.projectronin.interop.fhir.r4.datatype.Coding
@@ -13,6 +14,7 @@ import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.tenant.config.model.Tenant
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
+import kotlin.reflect.KClass
 
 @Component
 class ConceptMapClient(private val ociClient: OCIClient) {
@@ -35,23 +37,64 @@ class ConceptMapClient(private val ociClient: OCIClient) {
         elementName: String,
         coding: Coding
     ): Pair<Coding, Extension>? {
+        val registry = getRegistry(tenant, resourceType, elementName) ?: return null
+
+        return getConceptMapping(registry, coding)
+    }
+
+    /**
+     * Returns a [Pair] with the transformed [Coding] as the first and an [Extension] as the second,
+     * or null if no such mapping could be found. The [Extension] represents the original value before mapping.
+     * Calling this will reload the [ConceptMapCache] if necessary.
+     *
+     * @param tenant the [Tenant] currently in use
+     * @param resourceType the [String] representation of the type of resource, i.e. "Appointment"
+     * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
+     *      This must match what INFX has decided is the name of the element. Includes the resourceType as prefix.
+     * @param coding a FHIR [Coding] to be mapped. value and system must not be null.
+     * @param enumClass The CodedEnum that should be returned by this concept mapping.
+     */
+    fun <T : CodedEnum<T>> getConceptMappingForEnum(
+        tenant: Tenant,
+        resourceType: String,
+        elementName: String,
+        coding: Coding,
+        enumClass: KClass<T>
+    ): Pair<Coding, Extension>? {
+        val registry = getRegistry(tenant, resourceType, elementName) ?: return null
+        val codedEnum = enumClass.java.enumConstants.find { it.code == coding.code?.value }
+
+        return codedEnum?.let { Pair(coding, createExtension(registry, coding)) } ?: getConceptMapping(registry, coding)
+    }
+
+    private fun getConceptMapping(registry: ConceptMapRegistry, coding: Coding): Pair<Coding, Extension>? {
         val sourceVal = coding.code?.value ?: return null
         val sourceSystem = coding.system?.value ?: return null
         val tenantAgnosticSourceSystem = getTenantAgnositcCodeSystem(sourceSystem)
-        if (ConceptMapCache.reloadNeeded(tenant)) reload(tenant)
-        val cache = ConceptMapCache.getCurrentRegistry()
-        val registry = cache.filter { it.tenant_id in listOf(tenant.mnemonic, null) } // null tenant means universal map
-            .filter { it.resource_type == resourceType }
-            .find { it.data_element == elementName } ?: return null
         val target = registry.map?.get(SourceKey(sourceVal, tenantAgnosticSourceSystem)) ?: return null
         return Pair(
             coding.copy(system = Uri(target.system), code = Code(target.value)),
-            Extension(
-                url = Uri(registry.source_extension_url),
-                value = DynamicValue(type = DynamicValueType.CODING, value = coding)
-            )
+            createExtension(registry, coding)
         )
     }
+
+    private fun getRegistry(
+        tenant: Tenant,
+        resourceType: String,
+        elementName: String
+    ): ConceptMapRegistry? {
+        if (ConceptMapCache.reloadNeeded(tenant)) reload(tenant)
+        val cache = ConceptMapCache.getCurrentRegistry()
+        return cache.filter { it.tenant_id in listOf(tenant.mnemonic, null) } // null tenant means universal map
+            .filter { it.resource_type == resourceType }
+            .find { it.data_element == elementName }
+    }
+
+    private fun createExtension(registry: ConceptMapRegistry, coding: Coding) =
+        Extension(
+            url = Uri(registry.source_extension_url),
+            value = DynamicValue(type = DynamicValueType.CODING, value = coding)
+        )
 
     internal fun getNewRegistry(): List<ConceptMapRegistry> {
         return try {

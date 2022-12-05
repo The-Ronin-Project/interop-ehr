@@ -2,6 +2,8 @@ package com.projectronin.interop.fhir.ronin.element
 
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
+import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
 import com.projectronin.interop.fhir.ronin.error.FailedConceptMapLookupError
 import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
@@ -85,7 +87,11 @@ class RoninContactPoint(
     private val requiredTelecomSystemError = RequiredFieldError(ContactPoint::system)
     private val requiredTelecomValueError = RequiredFieldError(ContactPoint::value)
 
-    fun validateUSCore(element: List<ContactPoint>, parentContext: LocationContext, validation: Validation): Validation {
+    fun validateUSCore(
+        element: List<ContactPoint>,
+        parentContext: LocationContext,
+        validation: Validation
+    ): Validation {
         validation.apply {
             element.forEachIndexed { index, telecom ->
                 val currentContext = parentContext.append(LocationContext("", "telecom[$index]"))
@@ -107,11 +113,12 @@ class RoninContactPoint(
         val transformed = element.mapIndexed { index, telecom ->
             val systemContext = LocationContext(parentContext.element, "telecom[$index].system")
             val mappedSystem = telecom.system?.value?.let { systemValue ->
-                val systemPair = conceptMapClient.getConceptMapping(
+                val systemPair = conceptMapClient.getConceptMappingForEnum(
                     tenant,
                     parentContext.element,
                     "${parentContext.element}.telecom.system",
-                    RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.system", systemValue)
+                    RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.system", systemValue),
+                    ContactPointSystem::class
                 )
                 validation.apply {
                     checkNotNull(
@@ -126,11 +133,12 @@ class RoninContactPoint(
             }
             val useContext = LocationContext(parentContext.element, "telecom[$index].use")
             val mappedUse = telecom.use?.value?.let { useValue ->
-                val usePair = conceptMapClient.getConceptMapping(
+                val usePair = conceptMapClient.getConceptMappingForEnum(
                     tenant,
                     parentContext.element,
                     "${parentContext.element}.telecom.use",
-                    RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.use", useValue)
+                    RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.use", useValue),
+                    ContactPointUse::class
                 )
                 validation.apply {
                     checkNotNull(

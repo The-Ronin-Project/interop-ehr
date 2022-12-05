@@ -28,6 +28,7 @@ import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
+import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.r4.valueset.DayOfWeek
 import com.projectronin.interop.fhir.r4.valueset.LocationMode
 import com.projectronin.interop.fhir.r4.valueset.LocationStatus
@@ -196,14 +197,15 @@ class RoninLocationTest {
     fun `transforms location with all attributes`() {
         conceptMapClient = mockk {
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Location",
                     "Location.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "telephone")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns Pair(
                 Coding(
@@ -222,14 +224,15 @@ class RoninLocationTest {
                 )
             )
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Location",
                     "Location.telecom.use",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "cell")
-                    )
+                    ),
+                    ContactPointUse::class
                 )
             } returns Pair(
                 Coding(

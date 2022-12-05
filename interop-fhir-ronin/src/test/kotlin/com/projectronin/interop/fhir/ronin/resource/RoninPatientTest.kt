@@ -36,6 +36,7 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
+import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.r4.valueset.IdentifierUse
 import com.projectronin.interop.fhir.r4.valueset.LinkType
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
@@ -793,25 +794,27 @@ class RoninPatientTest {
     fun `transforms patient with all attributes`() {
         conceptMapClient = mockk {
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "telephone")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns Pair(systemCoding("phone"), systemExtension("telephone"))
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "cell")
-                    )
+                    ),
+                    ContactPointUse::class
                 )
             } returns Pair(useCoding("mobile"), useExtension("cell"))
         }
