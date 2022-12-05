@@ -136,7 +136,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "abc")
                     )
                 )
@@ -187,7 +187,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "xyz")
                     )
                 )
@@ -204,7 +204,7 @@ class RoninContactPointTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'xyz' has no target defined in " +
-                "http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem @ Patient.telecom[0].system",
+                "http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem @ Patient.telecom[0].system",
             exception.message
         )
     }
@@ -218,7 +218,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "")
                     )
                 )
@@ -268,7 +268,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     )
                 )
@@ -279,7 +279,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "abc")
                     )
                 )
@@ -290,7 +290,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "")
                     )
                 )
@@ -301,7 +301,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "xyz")
                     )
                 )
@@ -322,9 +322,9 @@ class RoninContactPointTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'abc' has no target defined in http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem @ Patient.telecom[1].system\n" +
-                "ERROR NOV_CONMAP_LOOKUP: Tenant source value '' has no target defined in http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem @ Patient.telecom[2].system\n" +
-                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'xyz' has no target defined in http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem @ Patient.telecom[4].system",
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'abc' has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem @ Patient.telecom[1].system\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value '' has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem @ Patient.telecom[2].system\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'xyz' has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem @ Patient.telecom[4].system",
             exception.message
         )
     }
@@ -338,7 +338,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     )
                 )
@@ -349,7 +349,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "telephone")
                     )
                 )
@@ -360,7 +360,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "phone")
                     )
                 )
@@ -443,7 +443,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "phone")
                     )
                 )
@@ -454,7 +454,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "def")
                     )
                 )
@@ -525,7 +525,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     )
                 )
@@ -536,7 +536,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "xyz")
                     )
                 )
@@ -553,7 +553,7 @@ class RoninContactPointTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'xyz' has no target defined in " +
-                "http://projectronin.io/fhir/CodeSystems/test/ContactPointUse @ Patient.telecom[0].use",
+                "http://projectronin.io/fhir/CodeSystem/test/ContactPointUse @ Patient.telecom[0].use",
             exception.message
         )
     }
@@ -567,7 +567,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     )
                 )
@@ -578,7 +578,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "")
                     )
                 )
@@ -649,7 +649,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     )
                 )
@@ -660,7 +660,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "planet")
                     )
                 )
@@ -671,7 +671,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "uvw")
                     )
                 )
@@ -682,7 +682,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "def")
                     )
                 )
@@ -693,7 +693,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "")
                     )
                 )
@@ -715,9 +715,9 @@ class RoninContactPointTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'uvw' has no target defined in http://projectronin.io/fhir/CodeSystems/test/ContactPointUse @ Patient.telecom[1].use\n" +
-                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'def' has no target defined in http://projectronin.io/fhir/CodeSystems/test/ContactPointUse @ Patient.telecom[2].use\n" +
-                "ERROR NOV_CONMAP_LOOKUP: Tenant source value '' has no target defined in http://projectronin.io/fhir/CodeSystems/test/ContactPointUse @ Patient.telecom[4].use",
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'uvw' has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointUse @ Patient.telecom[1].use\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'def' has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointUse @ Patient.telecom[2].use\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value '' has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointUse @ Patient.telecom[4].use",
             exception.message
         )
     }
@@ -731,7 +731,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     )
                 )
@@ -742,7 +742,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "planet")
                     )
                 )
@@ -753,7 +753,7 @@ class RoninContactPointTest {
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "city")
                     )
                 )
@@ -774,7 +774,7 @@ class RoninContactPointTest {
     }
 
     private fun systemCoding(value: String) = Coding(
-        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
         code = Code(value = value)
     )
 
@@ -783,14 +783,14 @@ class RoninContactPointTest {
         value = DynamicValue(
             type = DynamicValueType.CODING,
             value = Coding(
-                system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                 code = Code(value = value)
             )
         )
     )
 
     private fun useCoding(value: String) = Coding(
-        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
         code = Code(value = value)
     )
 
@@ -799,7 +799,7 @@ class RoninContactPointTest {
         value = DynamicValue(
             type = DynamicValueType.CODING,
             value = Coding(
-                system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                 code = Code(value = value)
             )
         )

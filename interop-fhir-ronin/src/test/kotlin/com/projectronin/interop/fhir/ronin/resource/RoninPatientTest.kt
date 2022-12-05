@@ -798,7 +798,7 @@ class RoninPatientTest {
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "telephone")
                     )
                 )
@@ -809,7 +809,7 @@ class RoninPatientTest {
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "cell")
                     )
                 )
@@ -1273,7 +1273,7 @@ class RoninPatientTest {
     }
 
     private fun systemCoding(value: String) = Coding(
-        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
         code = Code(value = value)
     )
 
@@ -1282,14 +1282,14 @@ class RoninPatientTest {
         value = DynamicValue(
             type = DynamicValueType.CODING,
             value = Coding(
-                system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointSystem"),
+                system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                 code = Code(value = value)
             )
         )
     )
 
     private fun useCoding(value: String) = Coding(
-        system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
         code = Code(value = value)
     )
 
@@ -1298,7 +1298,7 @@ class RoninPatientTest {
         value = DynamicValue(
             type = DynamicValueType.CODING,
             value = Coding(
-                system = Uri("http://projectronin.io/fhir/CodeSystems/test/ContactPointUse"),
+                system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                 code = Code(value = value)
             )
         )

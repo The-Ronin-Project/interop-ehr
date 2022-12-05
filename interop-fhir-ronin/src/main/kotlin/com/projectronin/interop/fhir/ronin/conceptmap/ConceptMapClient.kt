@@ -9,6 +9,7 @@ import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ConceptMap
+import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.tenant.config.model.Tenant
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -36,12 +37,13 @@ class ConceptMapClient(private val ociClient: OCIClient) {
     ): Pair<Coding, Extension>? {
         val sourceVal = coding.code?.value ?: return null
         val sourceSystem = coding.system?.value ?: return null
+        val tenantAgnosticSourceSystem = getTenantAgnositcCodeSystem(sourceSystem)
         if (ConceptMapCache.reloadNeeded(tenant)) reload(tenant)
         val cache = ConceptMapCache.getCurrentRegistry()
         val registry = cache.filter { it.tenant_id in listOf(tenant.mnemonic, null) } // null tenant means universal map
             .filter { it.resource_type == resourceType }
             .find { it.data_element == elementName } ?: return null
-        val target = registry.map?.get(SourceKey(sourceVal, sourceSystem)) ?: return null
+        val target = registry.map?.get(SourceKey(sourceVal, tenantAgnosticSourceSystem)) ?: return null
         return Pair(
             coding.copy(system = Uri(target.system), code = Code(target.value)),
             Extension(
@@ -98,13 +100,21 @@ class ConceptMapClient(private val ociClient: OCIClient) {
         conceptMap.group.forEach forEachGroup@{ group ->
             val targetSystem = group.target?.value ?: return@forEachGroup
             val sourceSystem = group.source?.value ?: return@forEachGroup
+            val agnosticSourceSystem = getTenantAgnositcCodeSystem(sourceSystem)
             group.element?.forEach forEachElement@{ element ->
                 val sourceCode = element.code?.value ?: return@forEachElement
                 // pray that informatics never has multiple target values
                 val targetCode = element.target.first().code?.value ?: return@forEachElement
-                mutableMap[SourceKey(sourceCode, sourceSystem)] = TargetValue(targetCode, targetSystem)
+                mutableMap[SourceKey(sourceCode, agnosticSourceSystem)] = TargetValue(targetCode, targetSystem)
             }
         }
         return mutableMap
     }
+
+    private fun getTenantAgnositcCodeSystem(system: String): String =
+        if (RoninConceptMap.CODE_SYSTEMS.isMappedUri(system)) {
+            RoninConceptMap.CODE_SYSTEMS.toTenantAgnosticUri(system)
+        } else {
+            system
+        }
 }

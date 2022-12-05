@@ -4,12 +4,13 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.tenant.config.model.Tenant
+import kotlin.text.Regex.Companion.escape
 
 /**
  * Access to common Ronin-specific code systems
  */
 enum class RoninConceptMap(uriString: String) {
-    CODE_SYSTEMS("http://projectronin.io/fhir/CodeSystems");
+    CODE_SYSTEMS("http://projectronin.io/fhir/CodeSystem");
 
     val uri = Uri(uriString)
 
@@ -34,6 +35,23 @@ enum class RoninConceptMap(uriString: String) {
      */
     fun toUriString(tenant: Tenant, fhirPath: String) =
         "${this.uri.value}/${tenant.mnemonic}/${fhirPath.toUriName()}"
+
+    private val uriRegex = Regex("${escape(uri.value!!)}/(\\w+)/([A-Za-z]+)")
+
+    /**
+     * Determines if the supplied URI could be considered a valid URI for this concept map.
+     */
+    fun isMappedUri(uri: String): Boolean = uriRegex.matches(uri)
+
+    /**
+     * Determines the tenant-agnostic version of the supplied URI for this concept map. If the supplied URI is not valid
+     * for this concept map, it will be returned as-is.
+     */
+    fun toTenantAgnosticUri(uri: String): String {
+        val result = uriRegex.matchEntire(uri) ?: return uri
+        val (_, path) = result.destructured
+        return "${this.uri.value}/$path"
+    }
 }
 
 /**
