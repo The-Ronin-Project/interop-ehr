@@ -131,14 +131,15 @@ class RoninContactPointTest {
     fun `transform succeeds for telecom system - when concept map returns a good value`() {
         conceptMapClient = mockk {
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "abc")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns Pair(systemCoding("phone"), systemExtension("abc"))
         }
@@ -182,14 +183,15 @@ class RoninContactPointTest {
     fun `transform fails for telecom system - when concept map has no match`() {
         conceptMapClient = mockk {
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "xyz")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns null
         }
@@ -213,14 +215,15 @@ class RoninContactPointTest {
     fun `transform succeeds for telecom system with empty source value - if empty source value is in concept map`() {
         conceptMapClient = mockk {
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns Pair(systemCoding("phone"), systemExtension(""))
         }
@@ -263,47 +266,51 @@ class RoninContactPointTest {
     fun `transform issues logged and fails for multiple telecoms - system has various issues`() {
         conceptMapClient = mockk {
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "abc")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns null
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns null
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "xyz")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns null
         }
@@ -333,36 +340,39 @@ class RoninContactPointTest {
     fun `transform succeeds for multiple telecoms - no system has issues`() {
         conceptMapClient = mockk {
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "telephone")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns Pair(systemCoding("phone"), systemExtension("telephone"))
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "phone")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns Pair(systemCoding("phone"), systemExtension("phone"))
         }
@@ -438,25 +448,27 @@ class RoninContactPointTest {
     fun `transform succeeds for telecom use - when concept map returns a good value`() {
         conceptMapClient = mockk {
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "phone")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns Pair(systemCoding("phone"), systemExtension("phone"))
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "def")
-                    )
+                    ),
+                    ContactPointUse::class
                 )
             } returns Pair(useCoding("home"), useExtension("def"))
         }
@@ -520,25 +532,27 @@ class RoninContactPointTest {
     fun `transform fails for telecom use - when concept map has no match`() {
         conceptMapClient = mockk {
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "xyz")
-                    )
+                    ),
+                    ContactPointUse::class
                 )
             } returns null
         }
@@ -562,25 +576,27 @@ class RoninContactPointTest {
     fun `transform succeeds for telecom use with empty source value - if empty source value is in concept map`() {
         conceptMapClient = mockk {
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "")
-                    )
+                    ),
+                    ContactPointUse::class
                 )
             } returns Pair(useCoding("home"), useExtension(""))
         }
@@ -644,58 +660,63 @@ class RoninContactPointTest {
     fun `transform issues logged and fails for multiple telecoms - use has concept map lookup failure`() {
         conceptMapClient = mockk {
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "planet")
-                    )
+                    ),
+                    ContactPointUse::class
                 )
             } returns Pair(useCoding("home"), useExtension("planet"))
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "uvw")
-                    )
+                    ),
+                    ContactPointUse::class
                 )
             } returns null
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "def")
-                    )
+                    ),
+                    ContactPointUse::class
                 )
             } returns null
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "")
-                    )
+                    ),
+                    ContactPointUse::class
                 )
             } returns null
         }
@@ -726,36 +747,39 @@ class RoninContactPointTest {
     fun `transform succeeds for multiple telecoms - no use has issues`() {
         conceptMapClient = mockk {
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.system",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
-                    )
+                    ),
+                    ContactPointSystem::class
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "planet")
-                    )
+                    ),
+                    ContactPointUse::class
                 )
             } returns Pair(useCoding("home"), useExtension("planet"))
             every {
-                getConceptMapping(
+                getConceptMappingForEnum(
                     tenant,
                     "Patient",
                     "Patient.telecom.use",
                     Coding(
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "city")
-                    )
+                    ),
+                    ContactPointUse::class
                 )
             } returns Pair(useCoding("home"), useExtension("city"))
         }
