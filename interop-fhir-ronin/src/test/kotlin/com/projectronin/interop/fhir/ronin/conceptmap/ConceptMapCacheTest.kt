@@ -6,6 +6,9 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ConceptMap
+import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
+import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
+import com.projectronin.interop.fhir.r4.valueset.LocationStatus
 import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -185,7 +188,7 @@ internal class ConceptMapCacheTest {
     }
 
     @Test
-    fun `getConceptMap works correctly`() {
+    fun `getConceptMappingForEnum works correctly`() {
         mockkObject(ConceptMapCache)
         testRegistry[0].map = mapOf(
             SourceKey("sourceValue1", "sourceSystem1")
@@ -198,11 +201,12 @@ internal class ConceptMapCacheTest {
         val sourceCoding = Coding(code = Code("sourceValue1"), system = Uri("sourceSystem1"))
         ConceptMapCache.setNewRegistry(testRegistry, tenant)
         // calling the client here tests the 'reload' line of code
-        val mapped = cmClient.getConceptMapping(
+        val mapped = cmClient.getConceptMappingForEnum(
             tenant,
             "Appointment",
             "Appointment.status",
-            sourceCoding
+            sourceCoding,
+            AppointmentStatus::class
         )
         assertEquals(Coding(code = Code("targetValue1"), system = Uri("targetSystem1")), mapped?.first)
         assertEquals("ext1", mapped?.second?.url?.value)
@@ -222,19 +226,59 @@ internal class ConceptMapCacheTest {
         ConceptMapCache.setNewRegistry(testRegistry, badTenant) // avoid reloads
         val sourceCoding = Coding(code = Code("sourceValue1"), system = Uri("sourceSystem1"))
         // bad tenant
-        assertNull(cmClient.getConceptMapping(badTenant, "Appointment", "Appointment.status", sourceCoding))
+        assertNull(
+            cmClient.getConceptMappingForEnum(
+                badTenant,
+                "Appointment",
+                "Appointment.status",
+                sourceCoding,
+                AppointmentStatus::class
+            )
+        )
         // bad resource type
-        assertNull(cmClient.getConceptMapping(tenant, "Location", "Location.status", sourceCoding))
+        assertNull(
+            cmClient.getConceptMappingForEnum(
+                tenant,
+                "Location",
+                "Location.status",
+                sourceCoding,
+                LocationStatus::class
+            )
+        )
         // bad element type
-        assertNull(cmClient.getConceptMapping(tenant, "Appointment", "Appointment.telecom.use", sourceCoding))
+        assertNull(
+            cmClient.getConceptMappingForEnum(
+                tenant,
+                "Patient",
+                "Patient.telecom.use",
+                sourceCoding,
+                ContactPointUse::class
+            )
+        )
         // everything good but registry has no map
-        assertNull(cmClient.getConceptMapping(tenant, "Appointment", "Appointment.status", sourceCoding))
+        assertNull(
+            cmClient.getConceptMappingForEnum(
+                tenant,
+                "Appointment",
+                "Appointment.status",
+                sourceCoding,
+                AppointmentStatus::class
+            )
+        )
         // everything good, map exists, but look up value isn't mapped
         testRegistry[0].map = mapOf(
             SourceKey("sourceValuebad", "sourceSystembad")
                 to TargetValue("targetValue1", "targetSystem1")
         )
-        assertNull(cmClient.getConceptMapping(tenant, "Appointment", "Appointment.status", sourceCoding))
+        assertNull(
+            cmClient.getConceptMappingForEnum(
+                tenant,
+                "Appointment",
+                "Appointment.status",
+                sourceCoding,
+                AppointmentStatus::class
+            )
+        )
 
         unmockkObject(ConceptMapCache)
     }
@@ -266,11 +310,12 @@ internal class ConceptMapCacheTest {
         )
         ConceptMapCache.setNewRegistry(testRegistry, tenant)
         // calling the client here tests the 'reload' line of code
-        val mapped = cmClient.getConceptMapping(
+        val mapped = cmClient.getConceptMappingForEnum(
             tenant,
             "Appointment",
             "Appointment.status",
-            sourceCoding
+            sourceCoding,
+            AppointmentStatus::class
         )
         assertEquals(Coding(code = Code("targetValue1"), system = Uri("targetSystem1")), mapped?.first)
         assertEquals("ext1", mapped?.second?.url?.value)

@@ -5,9 +5,11 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
+import com.projectronin.interop.fhir.ronin.error.ConceptMapInvalidValueSetError
 import com.projectronin.interop.fhir.ronin.error.FailedConceptMapLookupError
 import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
+import com.projectronin.interop.fhir.ronin.util.getCodedEnumOrNull
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -52,7 +54,8 @@ class RoninContactPoint(
             element.forEachIndexed { index, telecom ->
                 val currentContext = parentContext.append(LocationContext("", "telecom[$index]"))
 
-                // a null system error is logged by R4; validate below system if present
+                // null system is checked by R4ContactPointValidator
+
                 ifNotNull(telecom.system) {
                     val extension = telecom.system?.extension
                     checkNotNull(extension, requiredTelecomSystemExtensionError, currentContext)
@@ -66,7 +69,8 @@ class RoninContactPoint(
                     }
                 }
 
-                // use is allowed to be null; validate below use if present
+                // use is allowed to be null
+
                 ifNotNull(telecom.use) {
                     val extension = telecom.use?.extension
                     checkNotNull(extension, requiredTelecomUseExtensionError, currentContext)
@@ -128,7 +132,15 @@ class RoninContactPoint(
                     )
                 }
                 if (systemPair == null) null else {
-                    Code(value = systemPair.first.code?.value, extension = listOf(systemPair.second))
+                    val systemTarget = systemPair.first.code?.value
+                    validation.apply {
+                        checkNotNull(
+                            getCodedEnumOrNull<ContactPointSystem>(systemTarget),
+                            ConceptMapInvalidValueSetError(systemContext, systemMapName, systemValue, systemTarget),
+                            parentContext
+                        )
+                    }
+                    Code(value = systemTarget, extension = listOf(systemPair.second))
                 }
             }
             val useContext = LocationContext(parentContext.element, "telecom[$index].use")
@@ -148,7 +160,15 @@ class RoninContactPoint(
                     )
                 }
                 if (usePair == null) null else {
-                    Code(value = usePair.first.code?.value, extension = listOf(usePair.second))
+                    val useTarget = usePair.first.code?.value
+                    validation.apply {
+                        checkNotNull(
+                            getCodedEnumOrNull<ContactPointUse>(useTarget),
+                            ConceptMapInvalidValueSetError(useContext, useMapName, useValue, useTarget),
+                            parentContext
+                        )
+                    }
+                    Code(value = useTarget, extension = listOf(usePair.second))
                 }
             }
             ContactPoint(

@@ -35,9 +35,9 @@ object RoninMedication :
         validation.apply {
             checkNotNull(element.code, requiredCodeError, parentContext)
 
-            // validation of status value set is inherited from R4
+            // status value set is checked by R4MedicationValidator
 
-            // validation of ingredient.item is inherited from R4
+            // ingredient.item is checked by R4MedicationValidator
         }
     }
 

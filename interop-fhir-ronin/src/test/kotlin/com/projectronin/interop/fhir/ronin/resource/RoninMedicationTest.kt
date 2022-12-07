@@ -594,7 +594,7 @@ class RoninMedicationTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR INV_VALUE_SET: status is outside of required value set @ Medication.status",
+                "ERROR INV_VALUE_SET: 'x' is outside of required value set @ Medication.status",
             exception.message
         )
     }

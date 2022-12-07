@@ -59,8 +59,10 @@ object RoninBodyHeight :
         location = LocationContext("Observation", "valueQuantity.system")
     )
 
+    /**
+     * [USCore Body Length Units](http://hl7.org/fhir/R4/valueset-ucum-bodylength.html)
+     */
     private val validQuantityCodes = listOf("cm", "[in_i]")
-    private val invalidQuantityCodeError = InvalidValueSetError(LocationContext("Observation", "valueQuantity.code"))
 
     override fun validateUSCore(element: Observation, parentContext: LocationContext, validation: Validation) {
         validation.apply {
@@ -86,7 +88,11 @@ object RoninBodyHeight :
                 val quantityCode = quantity.code
                 checkNotNull(quantityCode, requiredQuantityCodeError, parentContext)
                 ifNotNull(quantityCode) {
-                    checkTrue(validQuantityCodes.contains(quantityCode.value), invalidQuantityCodeError, parentContext)
+                    checkTrue(
+                        validQuantityCodes.contains(quantityCode.value),
+                        InvalidValueSetError(LocationContext("Observation", "valueQuantity.code"), quantityCode.value ?: ""),
+                        parentContext
+                    )
                 }
             }
         }

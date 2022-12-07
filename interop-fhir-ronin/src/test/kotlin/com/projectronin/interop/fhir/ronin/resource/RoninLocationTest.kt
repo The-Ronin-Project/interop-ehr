@@ -207,22 +207,7 @@ class RoninLocationTest {
                     ),
                     ContactPointSystem::class
                 )
-            } returns Pair(
-                Coding(
-                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
-                    code = Code(value = "phone")
-                ),
-                Extension(
-                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem"),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = Coding(
-                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
-                            code = Code(value = "telephone")
-                        )
-                    )
-                )
-            )
+            } returns Pair(systemCoding("phone"), systemExtension("telephone"))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -234,22 +219,7 @@ class RoninLocationTest {
                     ),
                     ContactPointUse::class
                 )
-            } returns Pair(
-                Coding(
-                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
-                    code = Code(value = "mobile")
-                ),
-                Extension(
-                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomUse"),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODING,
-                        value = Coding(
-                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
-                            code = Code(value = "cell")
-                        )
-                    )
-                )
-            )
+            } returns Pair(useCoding("mobile"), useExtension("cell"))
         }
         val operationalStatus =
             Coding(code = Code("O"), system = Uri(value = "http://terminology.hl7.org/CodeSystem/v2-0116"))
@@ -343,11 +313,10 @@ class RoninLocationTest {
             availabilityExceptions = "Call for details".asFHIR(),
             endpoint = endpoint
         )
-
         roninLocation = RoninLocation.create(conceptMapClient)
         val transformed = roninLocation.transform(location, tenant)
 
-        transformed!! // Force it to be treated as non-null
+        transformed!!
         assertEquals("Location", transformed.resourceType)
         assertEquals(Id("test-12345"), transformed.id)
         assertEquals(
@@ -815,4 +784,36 @@ class RoninLocationTest {
             exception.message
         )
     }
+
+    private fun systemCoding(value: String) = Coding(
+        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
+        code = Code(value = value)
+    )
+
+    private fun systemExtension(value: String) = Extension(
+        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem"),
+        value = DynamicValue(
+            type = DynamicValueType.CODING,
+            value = Coding(
+                system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
+                code = Code(value = value)
+            )
+        )
+    )
+
+    private fun useCoding(value: String) = Coding(
+        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+        code = Code(value = value)
+    )
+
+    private fun useExtension(value: String) = Extension(
+        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomUse"),
+        value = DynamicValue(
+            type = DynamicValueType.CODING,
+            value = Coding(
+                system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                code = Code(value = value)
+            )
+        )
+    )
 }

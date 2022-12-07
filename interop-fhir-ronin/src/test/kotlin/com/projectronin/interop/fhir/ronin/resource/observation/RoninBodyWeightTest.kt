@@ -657,7 +657,7 @@ class RoninBodyWeightTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR INV_VALUE_SET: valueQuantity.code is outside of required value set @ Observation.valueQuantity.code",
+                "ERROR INV_VALUE_SET: 'invalid-code' is outside of required value set @ Observation.valueQuantity.code",
             exception.message
         )
     }

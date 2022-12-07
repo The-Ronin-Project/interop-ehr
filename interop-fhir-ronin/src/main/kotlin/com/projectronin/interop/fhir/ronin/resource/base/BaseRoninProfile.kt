@@ -153,7 +153,7 @@ abstract class BaseRoninProfile<T : Resource<T>>(
 
     /**
      * Validates a [CodeableConcept] object and its child [Coding] against the Ronin profile. Specify the [fieldName]
-     * for the [CodeableConcept] (examples: "code" for Medication.code or "status" for Appointment.status)
+     * for the [CodeableConcept] (example: "code" for Medication.code
      */
     protected fun requireCodeableConcept(
         fieldName: String,
@@ -170,7 +170,7 @@ abstract class BaseRoninProfile<T : Resource<T>>(
 
     /**
      * Validates a [Coding] object against the Ronin profile. The [Coding] has a parent [CodeableConcept] field whose
-     * name is in [parentFieldName] (examples: "code" for Medication.code or "status" for Appointment.status)
+     * name is in [parentFieldName] (example: "code" for Medication.code)
      */
     private fun requireCoding(
         parentFieldName: String,
@@ -203,10 +203,9 @@ abstract class BaseRoninProfile<T : Resource<T>>(
     }
 
     /**
-     * Validates that the [Coding] list for CNDPAHC & CNDEDX is not empty.  This is CNDPAHC & CNDEDX only requirement
+     * Validates that the [Coding] list is not empty. (examples: Condition CNDPAHC & CNDEDX)
      */
     protected fun requireCodeCoding(parentFieldName: String, coding: List<Coding>?, parentContext: LocationContext, validation: Validation) {
-        // CNDPAHC & CNDEDX only requirement, borrowing roninInvalidCodingError
         validation.apply {
             coding?.let {
                 checkTrue(

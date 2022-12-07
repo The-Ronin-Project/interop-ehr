@@ -46,9 +46,9 @@ object RoninEncounter :
                 checkNotNull(identifier.value, requiredIdentifierValueError, identifierContext)
             }
 
-            // validation of required status, required status value set, and required class is inherited from R4
+            // required status, required status value set, and required class errors are checked by R4EncounterValidator
 
-            // validation of the BackboneElement required fields is inherited from R4
+            // BackboneElement required fields errors are checked by R4EncounterValidator
         }
     }
 

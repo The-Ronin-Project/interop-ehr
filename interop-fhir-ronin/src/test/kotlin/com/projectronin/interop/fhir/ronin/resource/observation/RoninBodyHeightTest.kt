@@ -601,7 +601,7 @@ class RoninBodyHeightTest {
     }
 
     @Test
-    fun `validate fails if quantity code is of an invalid type`() {
+    fun `validate fails if quantity code is outside the required value set`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
@@ -657,7 +657,7 @@ class RoninBodyHeightTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR INV_VALUE_SET: valueQuantity.code is outside of required value set @ Observation.valueQuantity.code",
+                "ERROR INV_VALUE_SET: 'invalid-code' is outside of required value set @ Observation.valueQuantity.code",
             exception.message
         )
     }

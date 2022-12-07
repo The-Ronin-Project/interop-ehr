@@ -33,7 +33,7 @@ object RoninOrganization :
 
             checkNotNull(element.name, requiredNameFieldError, parentContext)
 
-            // validation of address.use and telecom.use not being of type 'home' inherited from R4
+            // address.use and telecom.use not being type 'home' is checked by R4OrganizationValidator
         }
     }
 

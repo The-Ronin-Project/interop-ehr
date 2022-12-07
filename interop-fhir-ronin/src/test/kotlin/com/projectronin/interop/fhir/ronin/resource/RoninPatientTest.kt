@@ -956,15 +956,14 @@ class RoninPatientTest {
                         value = "phone",
                         extension = listOf(
                             Extension(
-                                url = Uri(value = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value),
+                                url = Uri(
+                                    value = "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem"
+                                ),
                                 value = DynamicValue(
                                     type = DynamicValueType.CODING,
                                     value = Coding(
                                         system = Uri(
-                                            value = RoninConceptMap.CODE_SYSTEMS.toUriString(
-                                                tenant,
-                                                "ContactPoint.system"
-                                            )
+                                            value = "http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"
                                         ),
                                         code = Code(value = "telephone")
                                     )
@@ -976,15 +975,14 @@ class RoninPatientTest {
                         value = "mobile",
                         extension = listOf(
                             Extension(
-                                url = Uri(value = RoninExtension.TENANT_SOURCE_TELECOM_USE.value),
+                                url = Uri(
+                                    value = "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomUse"
+                                ),
                                 value = DynamicValue(
                                     type = DynamicValueType.CODING,
                                     value = Coding(
                                         system = Uri(
-                                            value = RoninConceptMap.CODE_SYSTEMS.toUriString(
-                                                tenant,
-                                                "ContactPoint.use"
-                                            )
+                                            value = "http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"
                                         ),
                                         code = Code(value = "cell")
                                     )
@@ -1001,15 +999,14 @@ class RoninPatientTest {
                         value = "phone",
                         extension = listOf(
                             Extension(
-                                url = Uri(value = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value),
+                                url = Uri(
+                                    value = "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem"
+                                ),
                                 value = DynamicValue(
                                     type = DynamicValueType.CODING,
                                     value = Coding(
                                         system = Uri(
-                                            value = RoninConceptMap.CODE_SYSTEMS.toUriString(
-                                                tenant,
-                                                "ContactPoint.system"
-                                            )
+                                            value = "http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"
                                         ),
                                         code = Code(value = "telephone")
                                     )

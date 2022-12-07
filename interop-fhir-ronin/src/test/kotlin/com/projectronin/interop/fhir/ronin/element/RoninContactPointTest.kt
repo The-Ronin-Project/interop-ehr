@@ -1,15 +1,15 @@
 package com.projectronin.interop.fhir.ronin.element
 
-import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
-import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.fhir.r4.resource.CareTeam
+import com.projectronin.interop.fhir.r4.resource.Organization
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
@@ -43,18 +43,8 @@ class RoninContactPointTest {
         every { mnemonic } returns "test"
     }
 
-    private val identifierList = listOf(
-        Identifier(
-            type = CodeableConcept(
-                text = "MRN".asFHIR()
-            ),
-            system = Uri("mrnSystem"),
-            value = "An MRN".asFHIR()
-        )
-    )
-
     // contact point attributes to mix to set up validation test cases
-    private val emailValue = "name@site.com"
+    private val emailValue = "name@site.com".asFHIR()
     private val emailSystemValue = ContactPointSystem.EMAIL.code
     private val emailSystemExtensionUri = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri
     private val emailSystemExtensionValue = DynamicValue(
@@ -85,10 +75,10 @@ class RoninContactPointTest {
     @Test
     fun `validate fails for telecom system missing source extension`() {
         val telecom =
-            listOf(ContactPoint(system = Code(value = emailSystemValue), use = emailUse, value = emailValue.asFHIR()))
+            listOf(ContactPoint(system = Code(value = emailSystemValue), use = emailUse, value = emailValue))
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninContactPoint.validateRonin(telecom, LocationContext("CareTeam", ""), Validation()).alertIfErrors()
+            roninContactPoint.validateRonin(telecom, LocationContext(CareTeam::class), Validation()).alertIfErrors()
         }
 
         assertEquals(
@@ -112,12 +102,12 @@ class RoninContactPointTest {
                     )
                 ),
                 use = emailUse,
-                value = emailValue.asFHIR()
+                value = emailValue
             )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninContactPoint.validateRonin(telecom, LocationContext("Organization", ""), Validation()).alertIfErrors()
+            roninContactPoint.validateRonin(telecom, LocationContext(Organization::class), Validation()).alertIfErrors()
         }
 
         assertEquals(
@@ -212,6 +202,38 @@ class RoninContactPointTest {
     }
 
     @Test
+    fun `transform fails for telecom system - when concept map gives a result not in required value set`() {
+        conceptMapClient = mockk {
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.system",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
+                        code = Code(value = "xyz")
+                    ),
+                    ContactPointSystem::class
+                )
+            } returns Pair(useCoding("postal"), useExtension("xyz"))
+        }
+        roninContactPoint = RoninContactPoint(conceptMapClient)
+        val telecom = listOf(ContactPoint(system = Code("xyz"), value = "8675309".asFHIR()))
+
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        val exception = assertThrows<IllegalArgumentException> {
+            transformResult.second.alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR INV_CONMAP_VALUE_SET: http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem " +
+                "mapped 'xyz' to 'postal' which is outside of required value set @ Patient.telecom[0].system",
+            exception.message
+        )
+    }
+
+    @Test
     fun `transform succeeds for telecom system with empty source value - if empty source value is in concept map`() {
         conceptMapClient = mockk {
             every {
@@ -260,6 +282,93 @@ class RoninContactPointTest {
             transformResult.first
         )
         transformResult.second.alertIfErrors()
+    }
+
+    @Test
+    fun `transform issues logged and fails for multiple telecoms - system has concept map lookup failure`() {
+        conceptMapClient = mockk {
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.system",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
+                        code = Code(value = "email")
+                    ),
+                    ContactPointSystem::class
+                )
+            } returns Pair(systemCoding("email"), systemExtension("email"))
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.use",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                        code = Code(value = "planet")
+                    ),
+                    ContactPointUse::class
+                )
+            } returns Pair(useCoding("home"), useExtension("planet"))
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.use",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                        code = Code(value = "uvw")
+                    ),
+                    ContactPointUse::class
+                )
+            } returns null
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.use",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                        code = Code(value = "def")
+                    ),
+                    ContactPointUse::class
+                )
+            } returns null
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.use",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                        code = Code(value = "")
+                    ),
+                    ContactPointUse::class
+                )
+            } returns null
+        }
+        roninContactPoint = RoninContactPoint(conceptMapClient)
+        val telecom = listOf(
+            ContactPoint(system = Code("email"), value = "8675310".asFHIR(), use = Code("planet")),
+            ContactPoint(system = Code("email"), value = "8675311".asFHIR(), use = Code("uvw")),
+            ContactPoint(system = Code("email"), value = "8675312".asFHIR(), use = Code("def")),
+            ContactPoint(system = Code("email"), value = "8675313".asFHIR(), use = Code("planet")),
+            ContactPoint(system = Code("email"), value = "8675314".asFHIR(), use = Code("")),
+        )
+
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        val exception = assertThrows<IllegalArgumentException> {
+            transformResult.second.alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'uvw' has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointUse @ Patient.telecom[1].use\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'def' has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointUse @ Patient.telecom[2].use\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value '' has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointUse @ Patient.telecom[4].use",
+            exception.message
+        )
     }
 
     @Test
@@ -402,10 +511,10 @@ class RoninContactPointTest {
     @Test
     fun `validate fails for telecom use missing source extension`() {
         val telecom =
-            listOf(ContactPoint(system = emailSystem, use = Code(value = emailUseValue), value = emailValue.asFHIR()))
+            listOf(ContactPoint(system = emailSystem, use = Code(value = emailUseValue), value = emailValue))
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninContactPoint.validateRonin(telecom, LocationContext("CareTeam", ""), Validation()).alertIfErrors()
+            roninContactPoint.validateRonin(telecom, LocationContext(CareTeam::class), Validation()).alertIfErrors()
         }
 
         assertEquals(
@@ -429,12 +538,12 @@ class RoninContactPointTest {
                         )
                     )
                 ),
-                value = emailValue.asFHIR()
+                value = emailValue
             )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninContactPoint.validateRonin(telecom, LocationContext("Organization", ""), Validation()).alertIfErrors()
+            roninContactPoint.validateRonin(telecom, LocationContext(Organization::class), Validation()).alertIfErrors()
         }
 
         assertEquals(
@@ -568,6 +677,50 @@ class RoninContactPointTest {
             "Encountered validation error(s):\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'xyz' has no target defined in " +
                 "http://projectronin.io/fhir/CodeSystem/test/ContactPointUse @ Patient.telecom[0].use",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `transform fails for telecom use - when concept map gives a result not in required value set`() {
+        conceptMapClient = mockk {
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.system",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
+                        code = Code(value = "email")
+                    ),
+                    ContactPointSystem::class
+                )
+            } returns Pair(systemCoding("email"), systemExtension("email"))
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.use",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                        code = Code(value = "xyz")
+                    ),
+                    ContactPointUse::class
+                )
+            } returns Pair(useCoding("postal"), useExtension("xyz"))
+        }
+        roninContactPoint = RoninContactPoint(conceptMapClient)
+        val telecom = listOf(ContactPoint(system = Code("email"), value = "8675309".asFHIR(), use = Code("xyz")))
+
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        val exception = assertThrows<IllegalArgumentException> {
+            transformResult.second.alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR INV_CONMAP_VALUE_SET: http://projectronin.io/fhir/CodeSystem/test/ContactPointUse " +
+                "mapped 'xyz' to 'postal' which is outside of required value set @ Patient.telecom[0].use",
             exception.message
         )
     }
@@ -739,6 +892,110 @@ class RoninContactPointTest {
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'uvw' has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointUse @ Patient.telecom[1].use\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'def' has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointUse @ Patient.telecom[2].use\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value '' has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointUse @ Patient.telecom[4].use",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `transform issues logged and fails for multiple telecoms - use has various issues`() {
+        conceptMapClient = mockk {
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.system",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
+                        code = Code(value = "email")
+                    ),
+                    ContactPointSystem::class
+                )
+            } returns Pair(systemCoding("email"), systemExtension("email"))
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.use",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                        code = Code(value = "planet")
+                    ),
+                    ContactPointUse::class
+                )
+            } returns Pair(useCoding("abc"), useExtension("planet"))
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.use",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                        code = Code(value = "city")
+                    ),
+                    ContactPointUse::class
+                )
+            } returns Pair(useCoding("def"), useExtension("city"))
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.use",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                        code = Code(value = "villa")
+                    ),
+                    ContactPointUse::class
+                )
+            } returns null
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.use",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                        code = Code(value = "home")
+                    ),
+                    ContactPointUse::class
+                )
+            } returns Pair(useCoding("home"), useExtension("home"))
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient",
+                    "Patient.telecom.use",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                        code = Code(value = "work")
+                    ),
+                    ContactPointUse::class
+                )
+            } returns Pair(useCoding("work"), useExtension("work"))
+        }
+
+        roninContactPoint = RoninContactPoint(conceptMapClient)
+
+        val telecom = listOf(
+            ContactPoint(system = Code("email"), value = emailValue, use = Code("city")),
+            ContactPoint(system = Code("email"), value = emailValue, use = Code("home")),
+            ContactPoint(system = Code("email"), value = emailValue, use = Code("planet")),
+            ContactPoint(system = Code("email"), value = emailValue, use = Code("villa")),
+            ContactPoint(system = Code("email"), value = emailValue, use = Code("work"))
+        )
+
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        val exception = assertThrows<IllegalArgumentException> {
+            transformResult.second.alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR INV_CONMAP_VALUE_SET: http://projectronin.io/fhir/CodeSystem/test/ContactPointUse " +
+                "mapped 'city' to 'def' which is outside of required value set @ Patient.telecom[0].use\n" +
+                "ERROR INV_CONMAP_VALUE_SET: http://projectronin.io/fhir/CodeSystem/test/ContactPointUse " +
+                "mapped 'planet' to 'abc' which is outside of required value set @ Patient.telecom[2].use\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'villa' has no target defined in " +
+                "http://projectronin.io/fhir/CodeSystem/test/ContactPointUse @ Patient.telecom[3].use",
             exception.message
         )
     }

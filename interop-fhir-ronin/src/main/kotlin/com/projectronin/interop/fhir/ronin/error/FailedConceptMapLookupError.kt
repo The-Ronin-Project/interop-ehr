@@ -22,7 +22,7 @@ class FailedConceptMapLookupError(
         actualLocation
     ) {
     /**
-     * Creates an InvalidDynamicValueError based off an explicit property.
+     * Creates an FailedConceptMapLookupError based off an explicit property.
      */
     constructor(actualLocation: KProperty1<*, *>, sourceValue: String, conceptMapName: String) : this(
         LocationContext(actualLocation),
