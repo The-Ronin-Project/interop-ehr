@@ -1,6 +1,6 @@
 package com.projectronin.interop.ehr.epic.client
 
-import com.projectronin.interop.common.http.throwExceptionFromHttpStatus
+import com.projectronin.interop.common.http.request
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.HttpClient
@@ -39,19 +39,19 @@ class EpicClient(
             ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
 
         // Make the call
-        val response: HttpResponse = client.post(tenant.vendor.serviceEndpoint + urlPart) {
-            headers {
-                append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+        val response: HttpResponse =
+            client.request("Epic Organization: ${tenant.name}", tenant.vendor.serviceEndpoint + urlPart) { url ->
+                post(url) {
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+                    }
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                    setBody(requestBody)
+                }
             }
-            accept(ContentType.Application.Json)
-            contentType(ContentType.Application.Json)
-            setBody(requestBody)
-        }
 
         logger.debug { "HTTP status, ${response.status}, returned for POST call to tenant: ${tenant.mnemonic}" }
-
-        // If we didn't get an OK back, throw the correct exception
-        response.throwExceptionFromHttpStatus("Epic Organization: ${tenant.name}", urlPart)
 
         return response
     }
@@ -68,33 +68,32 @@ class EpicClient(
         val authentication = authenticationBroker.getAuthentication(tenant)
             ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
 
-        val url =
+        val requestUrl =
             if (urlPart.first() == '/') {
                 tenant.vendor.serviceEndpoint + urlPart
             } else {
                 urlPart
             }
 
-        val response: HttpResponse = client.get(url) {
-            headers {
-                append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
-            }
-            accept(ContentType.Application.Json)
-            parameters.map {
-                val key = it.key
-                val value = it.value
-                if (value is List<*>) {
-                    value.forEach { repetition ->
-                        parameter(key, repetition)
-                    }
-                } else value?.let { parameter(key, value) }
+        val response: HttpResponse = client.request("Epic Organization: ${tenant.name}", requestUrl) { url ->
+            get(url) {
+                headers {
+                    append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+                }
+                accept(ContentType.Application.Json)
+                parameters.map {
+                    val key = it.key
+                    val value = it.value
+                    if (value is List<*>) {
+                        value.forEach { repetition ->
+                            parameter(key, repetition)
+                        }
+                    } else value?.let { parameter(key, value) }
+                }
             }
         }
 
         logger.debug { "HTTP status, ${response.status}, returned for GET call to tenant: ${tenant.mnemonic}" }
-
-        // If we didn't get an OK back, throw the correct exception
-        response.throwExceptionFromHttpStatus("Epic Organization: ${tenant.name}", urlPart)
 
         return response
     }

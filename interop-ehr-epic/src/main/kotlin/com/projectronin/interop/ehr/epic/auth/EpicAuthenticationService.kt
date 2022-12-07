@@ -3,7 +3,7 @@ package com.projectronin.interop.ehr.epic.auth
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.projectronin.interop.common.auth.Authentication
-import com.projectronin.interop.common.http.throwExceptionFromHttpStatus
+import com.projectronin.interop.common.http.request
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.auth.AuthenticationService
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -64,17 +64,17 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
         logger.debug { "Calling authentication for $authURL, JTI $jti" }
         val response = runBlocking {
             try {
-                val httpResponse: HttpResponse = client.submitForm(
-                    url = authURL,
-                    formParameters = Parameters.build {
-                        append("grant_type", "client_credentials")
-                        append("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-                        append("client_assertion", token)
-                    },
-                    encodeInQuery = false
-                )
-
-                httpResponse.throwExceptionFromHttpStatus("Epic Authentication: ${tenant.name}", authURL)
+                val httpResponse: HttpResponse = client.request("Epic Authentication: ${tenant.name}", authURL) { url ->
+                    submitForm(
+                        url = url,
+                        formParameters = Parameters.build {
+                            append("grant_type", "client_credentials")
+                            append("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                            append("client_assertion", token)
+                        },
+                        encodeInQuery = false
+                    )
+                }
                 httpResponse.body<EpicAuthentication>()
             } catch (e: Exception) {
                 logger.error(e) { "Authentication for $authURL, JTI $jti, failed with exception $e" }

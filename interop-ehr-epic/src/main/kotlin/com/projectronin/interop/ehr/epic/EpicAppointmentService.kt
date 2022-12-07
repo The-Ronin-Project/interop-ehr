@@ -4,7 +4,6 @@ import com.projectronin.interop.aidbox.LocationService
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
 import com.projectronin.interop.aidbox.model.SystemValue
-import com.projectronin.interop.common.http.throwExceptionFromHttpStatus
 import com.projectronin.interop.ehr.AppointmentService
 import com.projectronin.interop.ehr.epic.apporchard.model.EpicAppointment
 import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
@@ -213,7 +212,6 @@ class EpicAppointmentService(
 
         return runBlocking {
             val httpResponse = epicClient.post(tenant, urlPart, request)
-            httpResponse.throwExceptionFromHttpStatus("GetAppointments", urlPart)
             httpResponse.body()
         }
     }
