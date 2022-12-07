@@ -1,6 +1,7 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
 import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Annotation
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
@@ -26,8 +27,6 @@ import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
-import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
-import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -255,13 +254,13 @@ class RoninBodyHeightTest {
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "123".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -310,13 +309,13 @@ class RoninBodyHeightTest {
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "123".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -363,13 +362,13 @@ class RoninBodyHeightTest {
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "123".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -424,13 +423,13 @@ class RoninBodyHeightTest {
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "123".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -485,13 +484,13 @@ class RoninBodyHeightTest {
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "123".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -547,13 +546,13 @@ class RoninBodyHeightTest {
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "123".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -608,13 +607,13 @@ class RoninBodyHeightTest {
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "123".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -670,13 +669,13 @@ class RoninBodyHeightTest {
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "123".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -748,13 +747,13 @@ class RoninBodyHeightTest {
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "123".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -801,13 +800,13 @@ class RoninBodyHeightTest {
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "123".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -962,13 +961,13 @@ class RoninBodyHeightTest {
             listOf(
                 Identifier(value = "id".asFHIR()),
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "123".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -1090,13 +1089,13 @@ class RoninBodyHeightTest {
         assertEquals(
             listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "123".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),

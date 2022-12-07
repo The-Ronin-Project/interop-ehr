@@ -16,6 +16,7 @@ import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.epic.util.toIdentifier
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.outputs.FindPractitionerAppointmentsResponse
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Participant
@@ -29,7 +30,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
-import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
 import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -117,7 +117,7 @@ class EpicAppointmentService(
         startDate: LocalDate,
         endDate: LocalDate
     ): FindPractitionerAppointmentsResponse {
-        val searchMap = locationFHIRIds.map { SystemValue(value = it, system = RoninCodeSystem.FHIR_ID.uri.value!!) }
+        val searchMap = locationFHIRIds.map { SystemValue(value = it, system = CodeSystem.RONIN_FHIR_ID.uri.value!!) }
         val limitedLocationList = aidboxLocationService.getAllLocationIdentifiers(tenant.mnemonic, searchMap)
         val departmentList = limitedLocationList.flatMap { it.identifiers }
             .filter { it.system?.value == tenant.vendorAs<Epic>().departmentInternalSystem && it.value?.value != null }

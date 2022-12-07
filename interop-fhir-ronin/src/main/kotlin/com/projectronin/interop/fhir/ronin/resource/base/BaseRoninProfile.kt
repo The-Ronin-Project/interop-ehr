@@ -1,5 +1,7 @@
 package com.projectronin.interop.fhir.ronin.resource.base
 
+import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
@@ -10,8 +12,6 @@ import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Resource
-import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
-import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -114,12 +114,12 @@ abstract class BaseRoninProfile<T : Resource<T>>(
         parentContext: LocationContext,
         validation: Validation
     ) {
-        val tenantIdentifier = identifier.find { it.system == RoninCodeSystem.TENANT.uri }
+        val tenantIdentifier = identifier.find { it.system == CodeSystem.RONIN_TENANT.uri }
         validation.apply {
             checkNotNull(tenantIdentifier, requiredTenantIdentifierError, parentContext)
             ifNotNull(tenantIdentifier) {
                 checkTrue(
-                    tenantIdentifier.type == RoninCodeableConcepts.TENANT,
+                    tenantIdentifier.type == CodeableConcepts.RONIN_TENANT,
                     wrongTenantIdentifierTypeError,
                     parentContext
                 )
@@ -136,13 +136,13 @@ abstract class BaseRoninProfile<T : Resource<T>>(
         parentContext: LocationContext,
         validation: Validation
     ) {
-        val fhirIdentifier = identifier.find { it.system == RoninCodeSystem.FHIR_ID.uri }
+        val fhirIdentifier = identifier.find { it.system == CodeSystem.RONIN_FHIR_ID.uri }
         validation.apply {
             checkNotNull(fhirIdentifier, requiredFhirIdentifierError, parentContext)
             ifNotNull(fhirIdentifier) {
                 // tenantIdentifier.use is constrained by the IdentifierUse enum type, so it needs no validation.
                 checkTrue(
-                    fhirIdentifier.type == RoninCodeableConcepts.FHIR_ID,
+                    fhirIdentifier.type == CodeableConcepts.RONIN_FHIR_ID,
                     wrongFhirIdentifierTypeError,
                     parentContext
                 )

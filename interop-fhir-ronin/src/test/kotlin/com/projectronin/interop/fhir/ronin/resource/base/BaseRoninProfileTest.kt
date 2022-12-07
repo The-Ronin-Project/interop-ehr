@@ -1,6 +1,7 @@
 package com.projectronin.interop.fhir.ronin.resource.base
 
 import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
@@ -16,8 +17,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
-import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
-import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -36,14 +35,14 @@ class BaseRoninProfileTest {
 
     private val validTenantIdentifier =
         Identifier(
-            system = RoninCodeSystem.TENANT.uri,
-            type = RoninCodeableConcepts.TENANT,
+            system = CodeSystem.RONIN_TENANT.uri,
+            type = CodeableConcepts.RONIN_TENANT,
             value = "tenant".asFHIR()
         )
     private val validFhirIdentifier =
         Identifier(
-            system = RoninCodeSystem.FHIR_ID.uri,
-            type = RoninCodeableConcepts.FHIR_ID,
+            system = CodeSystem.RONIN_FHIR_ID.uri,
+            type = CodeableConcepts.RONIN_FHIR_ID,
             value = "fhir".asFHIR()
         )
 

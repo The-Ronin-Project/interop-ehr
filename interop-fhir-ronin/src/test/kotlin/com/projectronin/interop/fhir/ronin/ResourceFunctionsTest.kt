@@ -1,5 +1,7 @@
 package com.projectronin.interop.fhir.ronin
 
+import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
@@ -7,8 +9,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Resource
-import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
-import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -49,8 +49,8 @@ class ResourceFunctionsTest {
             listOf(
                 Identifier(
                     value = "1234".asFHIR(),
-                    system = RoninCodeSystem.FHIR_ID.uri,
-                    type = RoninCodeableConcepts.FHIR_ID
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID
                 )
             ),
             identifiers
@@ -70,8 +70,8 @@ class ResourceFunctionsTest {
         assertEquals(
             Identifier(
                 value = "1234".asFHIR(),
-                system = RoninCodeSystem.FHIR_ID.uri,
-                type = RoninCodeableConcepts.FHIR_ID
+                system = CodeSystem.RONIN_FHIR_ID.uri,
+                type = CodeableConcepts.RONIN_FHIR_ID
             ),
             identifier
         )
@@ -83,8 +83,8 @@ class ResourceFunctionsTest {
         assertEquals(
             Identifier(
                 value = null,
-                system = RoninCodeSystem.FHIR_ID.uri,
-                type = RoninCodeableConcepts.FHIR_ID
+                system = CodeSystem.RONIN_FHIR_ID.uri,
+                type = CodeableConcepts.RONIN_FHIR_ID
             ),
             identifier
         )

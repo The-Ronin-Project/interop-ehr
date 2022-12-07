@@ -1,9 +1,9 @@
 package com.projectronin.interop.fhir.ronin.util
 
+import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
-import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
-import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.tenant.config.model.Tenant
 
 /**
@@ -11,7 +11,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
  */
 fun Tenant.toFhirIdentifier() =
     Identifier(
-        type = RoninCodeableConcepts.TENANT,
-        system = RoninCodeSystem.TENANT.uri,
+        type = CodeableConcepts.RONIN_TENANT,
+        system = CodeSystem.RONIN_TENANT.uri,
         value = FHIRString(mnemonic)
     )

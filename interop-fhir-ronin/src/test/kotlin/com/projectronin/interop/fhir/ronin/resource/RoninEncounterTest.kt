@@ -1,6 +1,7 @@
 package com.projectronin.interop.fhir.ronin.resource
 
 import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Duration
@@ -31,8 +32,6 @@ import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.fhir.r4.valueset.EncounterLocationStatus
 import com.projectronin.interop.fhir.r4.valueset.EncounterStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
-import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
-import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -89,13 +88,13 @@ class RoninEncounterTest {
             id = Id("12345"),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -122,13 +121,13 @@ class RoninEncounterTest {
         val encounter = Encounter(
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -155,13 +154,13 @@ class RoninEncounterTest {
             id = Id("12345"),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -187,13 +186,13 @@ class RoninEncounterTest {
             id = Id("12345"),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -220,13 +219,13 @@ class RoninEncounterTest {
             id = Id("12345"),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 ),
                 Identifier(system = Uri("http://system.without.value.org")),
@@ -256,13 +255,13 @@ class RoninEncounterTest {
             id = Id("12345"),
             identifier = listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -540,13 +539,13 @@ class RoninEncounterTest {
             listOf(
                 Identifier(system = Uri("urn:oid:1:2:3"), value = "id".asFHIR()),
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),
@@ -834,13 +833,13 @@ class RoninEncounterTest {
         assertEquals(
             listOf(
                 Identifier(
-                    type = RoninCodeableConcepts.FHIR_ID,
-                    system = RoninCodeSystem.FHIR_ID.uri,
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
                 ),
                 Identifier(
-                    type = RoninCodeableConcepts.TENANT,
-                    system = RoninCodeSystem.TENANT.uri,
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
             ),

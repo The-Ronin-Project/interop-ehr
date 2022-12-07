@@ -1,6 +1,8 @@
 package com.projectronin.interop.fhir.ronin.resource
 
 import com.projectronin.interop.ehr.IdentifierService
+import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Identifier
@@ -9,8 +11,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
-import com.projectronin.interop.fhir.ronin.code.RoninCodeSystem
-import com.projectronin.interop.fhir.ronin.code.RoninCodeableConcepts
 import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
 import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.hasDataAbsentReason
@@ -70,12 +70,12 @@ class RoninPatient private constructor(
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
 
-            val mrnIdentifier = element.identifier.find { it.system == RoninCodeSystem.MRN.uri }
+            val mrnIdentifier = element.identifier.find { it.system == CodeSystem.RONIN_MRN.uri }
             checkNotNull(mrnIdentifier, requiredMrnIdentifierError, parentContext)
 
             ifNotNull(mrnIdentifier) {
                 mrnIdentifier.type?.let { type ->
-                    checkTrue(type == RoninCodeableConcepts.MRN, wrongMrnIdentifierTypeError, parentContext)
+                    checkTrue(type == CodeableConcepts.RONIN_MRN, wrongMrnIdentifierTypeError, parentContext)
                 }
 
                 checkNotNull(mrnIdentifier.value, requiredMRNIdentifierValueError, parentContext)
@@ -187,8 +187,8 @@ class RoninPatient private constructor(
             roninIdentifiers.add(
                 Identifier(
                     value = existingMRN.value,
-                    system = RoninCodeSystem.MRN.uri,
-                    type = RoninCodeableConcepts.MRN
+                    system = CodeSystem.RONIN_MRN.uri,
+                    type = CodeableConcepts.RONIN_MRN
                 )
             )
         } catch (e: Exception) {
