@@ -14,6 +14,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import datadog.trace.api.Trace
 import io.ktor.client.call.body
+import io.opentracing.util.GlobalTracer
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -38,6 +39,14 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
         val sendMessageRequest =
             translateMessageInput(messageInput, vendor.ehrUserId, vendor.messageType, tenant)
 
+        val span = GlobalTracer.get().activeSpan()
+        span?.let {
+            it.setTag(
+                "message.recipients",
+                sendMessageRequest.recipients?.joinToString { r -> "${if (r.isPool) "pool" else "user"}:${r.iD}" }
+            )
+        }
+
         val response = try {
             runBlocking {
                 val httpResponse = epicClient.post(tenant, sendMessageUrlPart, sendMessageRequest)
@@ -49,8 +58,14 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
         }
         logger.info { "SendMessage completed for ${tenant.mnemonic}" }
 
+        val resultId = response.idTypes[0].id
+
+        span?.let {
+            it.setTag("message.responseId", "${response.idTypes[0].type}:$resultId")
+        }
+
         // Return the id of the message
-        return response.idTypes[0].id
+        return resultId
     }
 
     private fun translateMessageInput(

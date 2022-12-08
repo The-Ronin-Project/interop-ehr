@@ -19,6 +19,8 @@ dependencies {
         exclude(group = "junit")
     }
     implementation(libs.swagger.annotations)
+    implementation(libs.opentracing.api)
+    implementation(libs.opentracing.util)
 
     testImplementation(libs.mockk)
     testImplementation(libs.interop.datalake)
