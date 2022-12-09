@@ -26,8 +26,13 @@ abstract class MultipleProfileResource<T : Resource<T>> : BaseProfile<T>() {
         val validation = Validation()
 
         val qualifiedProfile = getQualifiedProfile(normalized, parentContext, validation)
-        val transformed = qualifiedProfile?.transformInternal(normalized, parentContext, tenant)
-        return transformed ?: Pair(null, validation)
+        val response = qualifiedProfile?.transformInternal(normalized, parentContext, tenant)
+
+        val transformed = response?.let {
+            validation.merge(it.second)
+            it.first
+        }
+        return Pair(transformed, validation)
     }
 
     private val noProfilesError = FHIRError(

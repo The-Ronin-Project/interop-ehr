@@ -36,7 +36,7 @@ class BaseProfileTest {
         }
 
         val original = Location()
-        val transformed = profile.transform(original, tenant)
+        val (transformed, _) = profile.transform(original, tenant)
         assertNull(transformed)
     }
 
@@ -57,7 +57,7 @@ class BaseProfileTest {
         }
 
         val original = Location(id = Id("1234"))
-        val transformed = profile.transform(original, tenant)
+        val (transformed, _) = profile.transform(original, tenant)
         assertNull(transformed)
     }
 
@@ -82,7 +82,7 @@ class BaseProfileTest {
         }
 
         val original = Location(id = Id("1234"))
-        val transformed = profile.transform(original, tenant)
+        val (transformed, _) = profile.transform(original, tenant)
         assertNull(transformed)
     }
 
@@ -103,7 +103,7 @@ class BaseProfileTest {
         }
 
         val original = Location(id = Id("1234"))
-        val transformed = profile.transform(original, tenant)
+        val (transformed, _) = profile.transform(original, tenant)
         assertEquals(Id("test-1234"), transformed!!.id)
     }
 
@@ -128,7 +128,7 @@ class BaseProfileTest {
         }
 
         val original = Location(id = Id("1234"))
-        val transformed = profile.transform(original, tenant)
+        val (transformed, _) = profile.transform(original, tenant)
         assertNull(transformed)
     }
 
@@ -149,7 +149,7 @@ class BaseProfileTest {
         }
 
         val original = Location(id = Id("1234"))
-        val transformed = profile.transform(original, tenant)
+        val (transformed, _) = profile.transform(original, tenant)
         assertNull(transformed)
     }
 }

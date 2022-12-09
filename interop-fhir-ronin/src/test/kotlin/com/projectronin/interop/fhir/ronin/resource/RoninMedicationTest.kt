@@ -189,8 +189,10 @@ class RoninMedicationTest {
         )
 
         // transformation
-        val roninMedication = RoninMedication.transform(medication, tenant)
-        roninMedication!!
+        val (transformed, validation) = RoninMedication.transform(medication, tenant)
+        validation.alertIfErrors()
+
+        transformed!!
         assertEquals(
             medication.extension + Extension(
                 url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
@@ -199,7 +201,7 @@ class RoninMedicationTest {
                     medication.code!!
                 )
             ),
-            roninMedication.extension
+            transformed.extension
         )
         assertEquals(
             CodeableConcept(
@@ -224,11 +226,11 @@ class RoninMedicationTest {
                     )
                 )
             ),
-            roninMedication.code
+            transformed.code
         )
 
         // validation
-        RoninMedication.validate(roninMedication, null).alertIfErrors()
+        RoninMedication.validate(transformed, null).alertIfErrors()
     }
 
     @Test
@@ -276,8 +278,10 @@ class RoninMedicationTest {
         )
 
         // transformation
-        val roninMedication = RoninMedication.transform(medication, tenant)
-        roninMedication!!
+        val (transformed, validation) = RoninMedication.transform(medication, tenant)
+        validation.alertIfErrors()
+
+        transformed!!
         assertEquals(
             medication.extension + Extension(
                 url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
@@ -286,7 +290,7 @@ class RoninMedicationTest {
                     medication.code!!
                 )
             ),
-            roninMedication.extension
+            transformed.extension
         )
         assertEquals(
             CodeableConcept(
@@ -312,11 +316,11 @@ class RoninMedicationTest {
                     )
                 )
             ),
-            roninMedication.code
+            transformed.code
         )
 
         // validation
-        RoninMedication.validate(roninMedication, null).alertIfErrors()
+        RoninMedication.validate(transformed, null).alertIfErrors()
     }
 
     @Test
@@ -351,8 +355,10 @@ class RoninMedicationTest {
         )
 
         // transformation
-        val roninMedication = RoninMedication.transform(medication, tenant)
-        roninMedication!!
+        val (transformed, validation) = RoninMedication.transform(medication, tenant)
+        validation.alertIfErrors()
+
+        transformed!!
         assertEquals(
             medication.extension + Extension(
                 url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
@@ -371,7 +377,7 @@ class RoninMedicationTest {
                     )
                 )
             ),
-            roninMedication.extension
+            transformed.extension
         )
         assertEquals(
             CodeableConcept(
@@ -385,11 +391,11 @@ class RoninMedicationTest {
                     )
                 )
             ),
-            roninMedication.code
+            transformed.code
         )
 
         // validation
-        RoninMedication.validate(roninMedication, null).alertIfErrors()
+        RoninMedication.validate(transformed, null).alertIfErrors()
     }
 
     @Test
@@ -437,8 +443,10 @@ class RoninMedicationTest {
         )
 
         // transformation
-        val roninMedication = RoninMedication.transform(medication, tenant)
-        roninMedication!!
+        val (transformed, validation) = RoninMedication.transform(medication, tenant)
+        validation.alertIfErrors()
+
+        transformed!!
         assertEquals(
             medication.extension + Extension(
                 url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
@@ -470,7 +478,7 @@ class RoninMedicationTest {
                     )
                 )
             ),
-            roninMedication.extension
+            transformed.extension
         )
         assertEquals(
             CodeableConcept(
@@ -497,11 +505,11 @@ class RoninMedicationTest {
                     )
                 )
             ),
-            roninMedication.code
+            transformed.code
         )
 
         // validation
-        RoninMedication.validate(roninMedication, null).alertIfErrors()
+        RoninMedication.validate(transformed, null).alertIfErrors()
     }
 
     @Test
@@ -730,11 +738,12 @@ class RoninMedicationTest {
             )
         )
 
-        val roninMedication = RoninMedication.transform(medication, tenant)
+        val (transformed, validation) = RoninMedication.transform(medication, tenant)
+        validation.alertIfErrors()
 
-        roninMedication!!
-        assertEquals(Id("${tenant.mnemonic}-12345"), roninMedication.id)
-        assertEquals(2, roninMedication.identifier.size)
+        transformed!!
+        assertEquals(Id("${tenant.mnemonic}-12345"), transformed.id)
+        assertEquals(2, transformed.identifier.size)
         assertEquals(
             listOf(
                 Identifier(
@@ -748,9 +757,9 @@ class RoninMedicationTest {
                     value = "test".asFHIR()
                 )
             ),
-            roninMedication.identifier
+            transformed.identifier
         )
-        assertEquals(medication.code, roninMedication.code)
+        assertEquals(medication.code, transformed.code)
     }
 
     @Test
@@ -845,17 +854,19 @@ class RoninMedicationTest {
         )
 
         // transformation
-        val roninMedication = RoninMedication.transform(medication, tenant)
-        roninMedication!!
-        assertEquals(Id("test-12345"), roninMedication.id)
+        val (transformed, validation) = RoninMedication.transform(medication, tenant)
+        validation.alertIfErrors()
+
+        transformed!!
+        assertEquals(Id("test-12345"), transformed.id)
         assertEquals(
             RoninProfile.MEDICATION.value,
-            roninMedication.meta!!.profile[0].value
+            transformed.meta!!.profile[0].value
         )
-        assertEquals(medication.implicitRules, roninMedication.implicitRules)
-        assertEquals(medication.language, roninMedication.language)
-        assertEquals(medication.text, roninMedication.text)
-        assertEquals(medication.contained, roninMedication.contained)
+        assertEquals(medication.implicitRules, transformed.implicitRules)
+        assertEquals(medication.language, transformed.language)
+        assertEquals(medication.text, transformed.text)
+        assertEquals(medication.contained, transformed.contained)
         assertEquals(
             (
                 medication.extension +
@@ -877,10 +888,10 @@ class RoninMedicationTest {
                         )
                     )
                 ),
-            roninMedication.extension
+            transformed.extension
         )
-        assertEquals(medication.modifierExtension, roninMedication.modifierExtension)
-        assertEquals(3, roninMedication.identifier.size)
+        assertEquals(medication.modifierExtension, transformed.modifierExtension)
+        assertEquals(3, transformed.identifier.size)
         assertEquals(
             listOf(
                 Identifier(value = "67890".asFHIR()),
@@ -895,22 +906,22 @@ class RoninMedicationTest {
                     value = "test".asFHIR()
                 )
             ),
-            roninMedication.identifier
+            transformed.identifier
         )
-        assertEquals(medication.code, roninMedication.code)
-        assertEquals(Code(value = "active"), roninMedication.status)
-        assertEquals(Reference(reference = "Organization/test-c".asFHIR()), roninMedication.manufacturer)
-        assertEquals(medication.form, roninMedication.form)
-        assertEquals(medication.amount, roninMedication.amount)
-        assertEquals(DynamicValueType.REFERENCE, roninMedication.ingredient[0].item?.type)
+        assertEquals(medication.code, transformed.code)
+        assertEquals(Code(value = "active"), transformed.status)
+        assertEquals(Reference(reference = "Organization/test-c".asFHIR()), transformed.manufacturer)
+        assertEquals(medication.form, transformed.form)
+        assertEquals(medication.amount, transformed.amount)
+        assertEquals(DynamicValueType.REFERENCE, transformed.ingredient[0].item?.type)
         assertEquals(
             Reference(reference = "Organization/test-item".asFHIR()),
-            roninMedication.ingredient[0].item?.value
+            transformed.ingredient[0].item?.value
         )
-        assertEquals(medication.batch, roninMedication.batch)
+        assertEquals(medication.batch, transformed.batch)
 
         // validation
-        RoninMedication.validate(roninMedication, null).alertIfErrors()
+        RoninMedication.validate(transformed, null).alertIfErrors()
     }
 
     @Test
@@ -1015,17 +1026,19 @@ class RoninMedicationTest {
         )
 
         // transformation
-        val roninMedication = RoninMedication.transform(medication, tenant)
-        roninMedication!!
-        assertEquals(Id("test-12345"), roninMedication.id)
+        val (transformed, validation) = RoninMedication.transform(medication, tenant)
+        validation.alertIfErrors()
+
+        transformed!!
+        assertEquals(Id("test-12345"), transformed.id)
         assertEquals(
             RoninProfile.MEDICATION.value,
-            roninMedication.meta!!.profile[0].value
+            transformed.meta!!.profile[0].value
         )
-        assertEquals(medication.implicitRules, roninMedication.implicitRules)
-        assertEquals(medication.language, roninMedication.language)
-        assertEquals(medication.text, roninMedication.text)
-        assertEquals(medication.contained, roninMedication.contained)
+        assertEquals(medication.implicitRules, transformed.implicitRules)
+        assertEquals(medication.language, transformed.language)
+        assertEquals(medication.text, transformed.text)
+        assertEquals(medication.contained, transformed.contained)
         assertEquals(
             (
                 medication.extension +
@@ -1047,10 +1060,10 @@ class RoninMedicationTest {
                         )
                     )
                 ),
-            roninMedication.extension
+            transformed.extension
         )
-        assertEquals(medication.modifierExtension, roninMedication.modifierExtension)
-        assertEquals(3, roninMedication.identifier.size)
+        assertEquals(medication.modifierExtension, transformed.modifierExtension)
+        assertEquals(3, transformed.identifier.size)
         assertEquals(
             listOf(
                 Identifier(value = "67890".asFHIR()),
@@ -1065,19 +1078,19 @@ class RoninMedicationTest {
                     value = "test".asFHIR()
                 )
             ),
-            roninMedication.identifier
+            transformed.identifier
         )
-        assertEquals(medication.code, roninMedication.code)
-        assertEquals(Code(value = "active"), roninMedication.status)
-        assertEquals(Reference(reference = "Organization/test-c".asFHIR()), roninMedication.manufacturer)
-        assertEquals(medication.form, roninMedication.form)
-        assertEquals(medication.amount, roninMedication.amount)
-        assertEquals(medication.ingredient, roninMedication.ingredient)
-        assertEquals(medication.ingredient, roninMedication.ingredient)
-        assertEquals(medication.batch, roninMedication.batch)
+        assertEquals(medication.code, transformed.code)
+        assertEquals(Code(value = "active"), transformed.status)
+        assertEquals(Reference(reference = "Organization/test-c".asFHIR()), transformed.manufacturer)
+        assertEquals(medication.form, transformed.form)
+        assertEquals(medication.amount, transformed.amount)
+        assertEquals(medication.ingredient, transformed.ingredient)
+        assertEquals(medication.ingredient, transformed.ingredient)
+        assertEquals(medication.batch, transformed.batch)
 
         // validation
-        RoninMedication.validate(roninMedication, null).alertIfErrors()
+        RoninMedication.validate(transformed, null).alertIfErrors()
     }
 
     @Test
@@ -1097,7 +1110,7 @@ class RoninMedicationTest {
             ),
             // required code attribute is missing
         )
-        val roninMedication = RoninMedication.transform(medication, tenant)
-        assertNull(roninMedication)
+        val (transformed, _) = RoninMedication.transform(medication, tenant)
+        assertNull(transformed)
     }
 }

@@ -42,7 +42,7 @@ abstract class BaseProfile<T : Resource<T>>(
         validation.merge(validate(resource, parentContext))
     }
 
-    override fun transform(original: T, tenant: Tenant): T? {
+    override fun transform(original: T, tenant: Tenant): Pair<T?, Validation> {
         val currentContext = LocationContext(original::class)
 
         val validation = validation {
@@ -58,17 +58,12 @@ abstract class BaseProfile<T : Resource<T>>(
         val (transformed, transformValidation) = transformInternal(normalized, currentContext, tenant)
         validation.merge(transformValidation)
 
-        return try {
-            val localizedTransform = transformed?.let { Localizer.localize(transformed, tenant) }
-            localizedTransform?.let {
-                validateTransformation(it, currentContext, validation)
-            }
-
-            validation.alertIfErrors()
-            localizedTransform
-        } catch (e: Exception) {
-            logger.error(e) { "Unable to transform to profile" }
-            null
+        val localizedTransform = transformed?.let { Localizer.localize(transformed, tenant) }
+        localizedTransform?.let {
+            validateTransformation(it, currentContext, validation)
         }
+
+        val successfullyTransformed = if (validation.hasErrors()) null else localizedTransform
+        return Pair(successfullyTransformed, validation)
     }
 }

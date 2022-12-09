@@ -287,7 +287,9 @@ class RoninObservationsTest {
             )
         )
 
-        val transformed = RoninObservations.transform(observation, tenant)
+        val (transformed, validation) = RoninObservations.transform(observation, tenant)
+        validation.alertIfErrors()
+
         transformed!!
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_WEIGHT.value))),
@@ -327,7 +329,9 @@ class RoninObservationsTest {
             )
         )
 
-        val transformed = RoninObservations.transform(observation, tenant)
+        val (transformed, validation) = RoninObservations.transform(observation, tenant)
+        validation.alertIfErrors()
+
         transformed!!
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value))),
@@ -360,7 +364,9 @@ class RoninObservationsTest {
             )
         )
 
-        val transformed = RoninObservations.transform(observation, tenant)
+        val (transformed, validation) = RoninObservations.transform(observation, tenant)
+        validation.alertIfErrors()
+
         transformed!!
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_VITAL_SIGNS.value))),
@@ -393,7 +399,9 @@ class RoninObservationsTest {
             )
         )
 
-        val transformed = RoninObservations.transform(observation, tenant)
+        val (transformed, validation) = RoninObservations.transform(observation, tenant)
+        validation.alertIfErrors()
+
         transformed!!
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_LABORATORY_RESULT.value))),

@@ -248,7 +248,7 @@ class RoninPractitionerRoleTest {
     fun `transform fails for practitioner role with no ID`() {
         val practitionerRole = PractitionerRole()
 
-        val transformed = RoninPractitionerRole.transform(practitionerRole, tenant)
+        val (transformed, _) = RoninPractitionerRole.transform(practitionerRole, tenant)
         assertNull(transformed)
     }
 
@@ -276,7 +276,8 @@ class RoninPractitionerRoleTest {
             endpoint = listOf(Reference(reference = "Endpoint/1357".asFHIR()))
         )
 
-        val transformed = RoninPractitionerRole.transform(practitionerRole, tenant)
+        val (transformed, validation) = RoninPractitionerRole.transform(practitionerRole, tenant)
+        validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("PractitionerRole", transformed.resourceType)
@@ -367,7 +368,8 @@ class RoninPractitionerRoleTest {
             endpoint = listOf(Reference(reference = "Endpoint/1357".asFHIR()))
         )
 
-        val transformed = RoninPractitionerRole.transform(practitionerRole, tenant)
+        val (transformed, validation) = RoninPractitionerRole.transform(practitionerRole, tenant)
+        validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("PractitionerRole", transformed.resourceType)
@@ -446,7 +448,8 @@ class RoninPractitionerRoleTest {
             organization = Reference(reference = "Organization/5678".asFHIR())
         )
 
-        val transformed = RoninPractitionerRole.transform(practitionerRole, tenant)
+        val (transformed, validation) = RoninPractitionerRole.transform(practitionerRole, tenant)
+        validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("PractitionerRole", transformed.resourceType)
@@ -500,7 +503,8 @@ class RoninPractitionerRoleTest {
             telecom = listOf(ContactPoint(id = "first".asFHIR()), ContactPoint(id = "second".asFHIR()))
         )
 
-        val transformed = RoninPractitionerRole.transform(practitionerRole, tenant)
+        val (transformed, validation) = RoninPractitionerRole.transform(practitionerRole, tenant)
+        validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("PractitionerRole", transformed.resourceType)
@@ -559,7 +563,8 @@ class RoninPractitionerRoleTest {
             )
         )
 
-        val transformed = RoninPractitionerRole.transform(practitionerRole, tenant)
+        val (transformed, validation) = RoninPractitionerRole.transform(practitionerRole, tenant)
+        validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("PractitionerRole", transformed.resourceType)

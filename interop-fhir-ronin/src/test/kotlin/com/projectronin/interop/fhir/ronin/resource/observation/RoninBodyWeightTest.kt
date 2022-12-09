@@ -844,7 +844,7 @@ class RoninBodyWeightTest {
             )
         )
 
-        val transformed = RoninBodyWeight.transform(observation, tenant)
+        val (transformed, _) = RoninBodyWeight.transform(observation, tenant)
         assertNull(transformed)
     }
 
@@ -926,7 +926,8 @@ class RoninBodyWeightTest {
             note = listOf(Annotation(text = Markdown("text")))
         )
 
-        val transformed = RoninBodyWeight.transform(observation, tenant)
+        val (transformed, validation) = RoninBodyWeight.transform(observation, tenant)
+        validation.alertIfErrors()
 
         transformed!!
         assertEquals("Observation", transformed.resourceType)
@@ -1074,7 +1075,8 @@ class RoninBodyWeightTest {
             )
         )
 
-        val transformed = RoninBodyWeight.transform(observation, tenant)
+        val (transformed, validation) = RoninBodyWeight.transform(observation, tenant)
+        validation.alertIfErrors()
 
         transformed!!
         assertEquals("Observation", transformed.resourceType)

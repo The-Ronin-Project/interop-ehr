@@ -261,7 +261,8 @@ class RoninMedicationRequestTest {
             eventHistory = listOf(Reference(reference = "Provenance/1234".asFHIR()))
         )
 
-        val transformed = RoninMedicationRequest.transform(medicationRequest, tenant)
+        val (transformed, validation) = RoninMedicationRequest.transform(medicationRequest, tenant)
+        validation.alertIfErrors()
 
         transformed!!
         assertEquals("MedicationRequest", transformed.resourceType)
@@ -358,7 +359,8 @@ class RoninMedicationRequestTest {
             requester = Reference(reference = "Practitioner/1234".asFHIR()),
         )
 
-        val transformed = RoninMedicationRequest.transform(medicationRequest, tenant)
+        val (transformed, validation) = RoninMedicationRequest.transform(medicationRequest, tenant)
+        validation.alertIfErrors()
 
         transformed!!
         assertEquals("MedicationRequest", transformed.resourceType)
@@ -434,7 +436,7 @@ class RoninMedicationRequestTest {
             requester = Reference(reference = "Practitioner/1234".asFHIR()),
         )
 
-        val transformed = RoninMedicationRequest.transform(medicationRequest, tenant)
+        val (transformed, _) = RoninMedicationRequest.transform(medicationRequest, tenant)
         assertNull(transformed)
     }
 }

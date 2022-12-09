@@ -189,7 +189,7 @@ class RoninLocationTest {
     fun `transform fails for location with no ID`() {
         val location = Location()
 
-        val transformed = roninLocation.transform(location, tenant)
+        val (transformed, _) = roninLocation.transform(location, tenant)
         assertNull(transformed)
     }
 
@@ -314,7 +314,8 @@ class RoninLocationTest {
             endpoint = endpoint
         )
         roninLocation = RoninLocation.create(conceptMapClient)
-        val transformed = roninLocation.transform(location, tenant)
+        val (transformed, validation) = roninLocation.transform(location, tenant)
+        validation.alertIfErrors()
 
         transformed!!
         assertEquals("Location", transformed.resourceType)
@@ -468,7 +469,8 @@ class RoninLocationTest {
             name = "Name".asFHIR()
         )
 
-        val transformed = roninLocation.transform(location, tenant)
+        val (transformed, validation) = roninLocation.transform(location, tenant)
+        validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Location", transformed.resourceType)
@@ -590,7 +592,8 @@ class RoninLocationTest {
             name = name
         )
 
-        val transformed = roninLocation.transform(location, tenant)
+        val (transformed, validation) = roninLocation.transform(location, tenant)
+        validation.alertIfErrors()
 
         transformed!!
         assertEquals("Location", transformed.resourceType)

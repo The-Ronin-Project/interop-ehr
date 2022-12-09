@@ -254,8 +254,16 @@ class RoninConditionProblemsAndHealthConcernsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_FHIR_ID, system = CodeSystem.RONIN_FHIR_ID.uri, value = "12345".asFHIR())
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
             ),
             code = CodeableConcept(
                 coding = listOf()
@@ -432,8 +440,16 @@ class RoninConditionProblemsAndHealthConcernsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_FHIR_ID, system = CodeSystem.RONIN_FHIR_ID.uri, value = "12345".asFHIR())
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
             ),
             code = CodeableConcept(
                 coding = listOf(
@@ -471,8 +487,16 @@ class RoninConditionProblemsAndHealthConcernsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_FHIR_ID, system = CodeSystem.RONIN_FHIR_ID.uri, value = "12345".asFHIR())
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
             ),
             code = CodeableConcept(
                 coding = listOf(
@@ -510,8 +534,16 @@ class RoninConditionProblemsAndHealthConcernsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_FHIR_ID, system = CodeSystem.RONIN_FHIR_ID.uri, value = "12345".asFHIR())
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
             ),
             code = CodeableConcept(
                 coding = listOf(
@@ -610,7 +642,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        val transformed = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
+        val (transformed, _) = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
         assertNull(transformed)
     }
 
@@ -619,8 +651,16 @@ class RoninConditionProblemsAndHealthConcernsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_FHIR_ID, system = CodeSystem.RONIN_FHIR_ID.uri, value = "12345".asFHIR())
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
             ),
             code = CodeableConcept(
                 coding = listOf(
@@ -643,7 +683,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        val transformed = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
+        val (transformed, _) = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
         assertNull(transformed)
     }
 
@@ -784,7 +824,9 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        val transformed = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
+        val (transformed, validation) = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
+        validation.alertIfErrors()
+
         transformed!!
         assertEquals("Condition", transformed.resourceType)
         assertEquals(Id("test-12345"), transformed.id)
@@ -1016,7 +1058,9 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        val transformed = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
+        val (transformed, validation) = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
+        validation.alertIfErrors()
+
         transformed!!
         assertEquals("Condition", transformed.resourceType)
         assertEquals(Id("test-12345"), transformed.id)

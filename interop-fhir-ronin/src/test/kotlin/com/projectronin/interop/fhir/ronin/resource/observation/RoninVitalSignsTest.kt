@@ -438,7 +438,7 @@ class RoninVitalSignsTest {
             )
         )
 
-        val transformed = RoninVitalSigns.transform(observation, tenant)
+        val (transformed, _) = RoninVitalSigns.transform(observation, tenant)
         assertNull(transformed)
     }
 
@@ -513,7 +513,8 @@ class RoninVitalSignsTest {
             note = listOf(Annotation(text = Markdown("text")))
         )
 
-        val transformed = RoninVitalSigns.transform(observation, tenant)
+        val (transformed, validation) = RoninVitalSigns.transform(observation, tenant)
+        validation.alertIfErrors()
 
         transformed!!
         assertEquals("Observation", transformed.resourceType)
@@ -644,7 +645,8 @@ class RoninVitalSignsTest {
             )
         )
 
-        val transformed = RoninVitalSigns.transform(observation, tenant)
+        val (transformed, validation) = RoninVitalSigns.transform(observation, tenant)
+        validation.alertIfErrors()
 
         transformed!!
         assertEquals("Observation", transformed.resourceType)

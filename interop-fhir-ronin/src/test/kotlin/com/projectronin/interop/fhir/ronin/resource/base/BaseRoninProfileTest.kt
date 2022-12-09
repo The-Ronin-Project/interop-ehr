@@ -183,7 +183,7 @@ class BaseRoninProfileTest {
     fun `getExtensionOrEmptyList - null codeableConcept`() {
         val locationTest = Location(id = Id("123"), identifier = listOf(validTenantIdentifier, validFhirIdentifier))
 
-        val transformedLocation = TestProfile().transform(locationTest, tenant)
+        val (transformedLocation, _) = TestProfile().transform(locationTest, tenant)
 
         assertEquals(emptyList<Extension>(), transformedLocation!!.extension)
     }
@@ -206,7 +206,7 @@ class BaseRoninProfileTest {
             )
         )
 
-        val transformedLocation = TestProfile().transform(locationTest, tenant)
+        val (transformedLocation, _) = TestProfile().transform(locationTest, tenant)
 
         assertEquals(
             listOf(

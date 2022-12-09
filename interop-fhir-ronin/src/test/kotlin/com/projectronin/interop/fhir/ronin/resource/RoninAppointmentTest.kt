@@ -250,7 +250,8 @@ class RoninAppointmentTest {
         }
 
         roninAppointment = RoninAppointment.create(conceptMapClient)
-        val transformed = roninAppointment.transform(appointment, tenant)
+        val (transformed, validation) = roninAppointment.transform(appointment, tenant)
+        validation.alertIfErrors()
 
         transformed!!
         assertEquals("Appointment", transformed.resourceType)
@@ -373,7 +374,8 @@ class RoninAppointmentTest {
         }
 
         roninAppointment = RoninAppointment.create(conceptMapClient)
-        val transformed = roninAppointment.transform(appointment, tenant)
+        val (transformed, validation) = roninAppointment.transform(appointment, tenant)
+        validation.alertIfErrors()
 
         transformed!!
         assertEquals("Appointment", transformed.resourceType)
@@ -478,7 +480,7 @@ class RoninAppointmentTest {
 
         roninAppointment = RoninAppointment.create(conceptMapClient)
 
-        val transformed = roninAppointment.transform(appointment, tenant)
+        val (transformed, _) = roninAppointment.transform(appointment, tenant)
         assertNull(transformed)
     }
 
@@ -799,7 +801,9 @@ class RoninAppointmentTest {
 
         roninAppointment = RoninAppointment.create(conceptMapClient)
 
-        val transformed = roninAppointment.transform(appointment, tenant)
+        val (transformed, validation) = roninAppointment.transform(appointment, tenant)
+        validation.alertIfErrors()
+
         transformed!!
         assertEquals(
             listOf(
@@ -972,8 +976,8 @@ class RoninAppointmentTest {
 
         roninAppointment = RoninAppointment.create(conceptMapClient)
 
-        val transformedBad = roninAppointment.transform(appointment, tenant)
-        assertNull(transformedBad)
+        val (transformed, _) = roninAppointment.transform(appointment, tenant)
+        assertNull(transformed)
     }
 
     @Test
@@ -1019,8 +1023,8 @@ class RoninAppointmentTest {
 
         roninAppointment = RoninAppointment.create(conceptMapClient)
 
-        val transformedBad = roninAppointment.transform(appointment, tenant)
-        assertNull(transformedBad)
+        val (transformed, _) = roninAppointment.transform(appointment, tenant)
+        assertNull(transformed)
     }
 
     @Test
@@ -1069,8 +1073,8 @@ class RoninAppointmentTest {
 
         roninAppointment = RoninAppointment.create(conceptMapClient)
 
-        val transformedBad = roninAppointment.transform(appointment, tenant)
-        assertNull(transformedBad)
+        val (transformed, _) = roninAppointment.transform(appointment, tenant)
+        assertNull(transformed)
     }
 
     private fun statusCoding(value: String) = Coding(

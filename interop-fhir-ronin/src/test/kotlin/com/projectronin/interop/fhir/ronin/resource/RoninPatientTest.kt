@@ -885,20 +885,22 @@ class RoninPatientTest {
             )
         )
 
-        val oncologyPatient = roninPatient.transform(patient, tenant)
-        oncologyPatient!!
-        assertEquals("Patient", oncologyPatient.resourceType)
-        assertEquals(Id("test-12345"), oncologyPatient.id)
+        val (transformed, validation) = roninPatient.transform(patient, tenant)
+        validation.alertIfErrors()
+
+        transformed!!
+        assertEquals("Patient", transformed.resourceType)
+        assertEquals(Id("test-12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value))),
-            oncologyPatient.meta
+            transformed.meta
         )
-        assertEquals(Uri("implicit-rules"), oncologyPatient.implicitRules)
-        assertEquals(Code("en-US"), oncologyPatient.language)
-        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), oncologyPatient.text)
+        assertEquals(Uri("implicit-rules"), transformed.implicitRules)
+        assertEquals(Code("en-US"), transformed.language)
+        assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
-            oncologyPatient.contained
+            transformed.contained
         )
         assertEquals(
             listOf(
@@ -907,7 +909,7 @@ class RoninPatientTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
                 )
             ),
-            oncologyPatient.extension
+            transformed.extension
         )
         assertEquals(
             listOf(
@@ -916,7 +918,7 @@ class RoninPatientTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
                 )
             ),
-            oncologyPatient.modifierExtension
+            transformed.modifierExtension
         )
         assertEquals(
             listOf(
@@ -937,10 +939,10 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            oncologyPatient.identifier
+            transformed.identifier
         )
-        assertEquals(FHIRBoolean.TRUE, oncologyPatient.active)
-        assertEquals(listOf(HumanName(family = "Doe".asFHIR())), oncologyPatient.name)
+        assertEquals(FHIRBoolean.TRUE, transformed.active)
+        assertEquals(listOf(HumanName(family = "Doe".asFHIR())), transformed.name)
         assertEquals(
             listOf(
                 ContactPoint(
@@ -1016,27 +1018,27 @@ class RoninPatientTest {
                     )
                 )
             ),
-            oncologyPatient.telecom
+            transformed.telecom
         )
-        assertEquals(AdministrativeGender.FEMALE.asCode(), oncologyPatient.gender)
-        assertEquals(Date("1975-07-05"), oncologyPatient.birthDate)
-        assertEquals(DynamicValue(type = DynamicValueType.BOOLEAN, value = FHIRBoolean.FALSE), oncologyPatient.deceased)
-        assertEquals(listOf(Address(country = "USA".asFHIR())), oncologyPatient.address)
-        assertEquals(CodeableConcept(text = "M".asFHIR()), oncologyPatient.maritalStatus)
+        assertEquals(AdministrativeGender.FEMALE.asCode(), transformed.gender)
+        assertEquals(Date("1975-07-05"), transformed.birthDate)
+        assertEquals(DynamicValue(type = DynamicValueType.BOOLEAN, value = FHIRBoolean.FALSE), transformed.deceased)
+        assertEquals(listOf(Address(country = "USA".asFHIR())), transformed.address)
+        assertEquals(CodeableConcept(text = "M".asFHIR()), transformed.maritalStatus)
         assertEquals(
             DynamicValue(type = DynamicValueType.INTEGER, value = FHIRInteger(2)),
-            oncologyPatient.multipleBirth
+            transformed.multipleBirth
         )
         assertEquals(
             listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
-            oncologyPatient.photo
+            transformed.photo
         )
         assertEquals(
             listOf(Communication(language = CodeableConcept(text = "English".asFHIR()))),
-            oncologyPatient.communication
+            transformed.communication
         )
-        assertEquals(listOf(Reference(display = "GP".asFHIR())), oncologyPatient.generalPractitioner)
-        assertEquals(Reference(display = "organization".asFHIR()), oncologyPatient.managingOrganization)
+        assertEquals(listOf(Reference(display = "GP".asFHIR())), transformed.generalPractitioner)
+        assertEquals(Reference(display = "organization".asFHIR()), transformed.managingOrganization)
         assertEquals(
             listOf(
                 PatientLink(
@@ -1044,7 +1046,7 @@ class RoninPatientTest {
                     type = LinkType.REPLACES.asCode()
                 )
             ),
-            oncologyPatient.link
+            transformed.link
         )
     }
 
@@ -1058,26 +1060,27 @@ class RoninPatientTest {
             birthDate = Date("1975-07-05")
         )
 
-        val oncologyPatient = roninPatient.transform(patient, tenant)
+        val (transformed, validation) = roninPatient.transform(patient, tenant)
+        validation.alertIfErrors()
 
         val defaultCoding = Coding(
             system = Uri("http://terminology.hl7.org/CodeSystem/v3-NullFlavor"),
             code = Code("NI"),
             display = "NoInformation".asFHIR()
         )
-        oncologyPatient!!
-        assertEquals("Patient", oncologyPatient.resourceType)
-        assertEquals(Id("test-12345"), oncologyPatient.id)
+        transformed!!
+        assertEquals("Patient", transformed.resourceType)
+        assertEquals(Id("test-12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value))),
-            oncologyPatient.meta
+            transformed.meta
         )
-        assertNull(oncologyPatient.implicitRules)
-        assertNull(oncologyPatient.language)
-        assertNull(oncologyPatient.text)
-        assertEquals(listOf<ContainedResource>(), oncologyPatient.contained)
-        assertEquals(listOf<Extension>(), oncologyPatient.extension)
-        assertEquals(listOf<Extension>(), oncologyPatient.modifierExtension)
+        assertNull(transformed.implicitRules)
+        assertNull(transformed.language)
+        assertNull(transformed.text)
+        assertEquals(listOf<ContainedResource>(), transformed.contained)
+        assertEquals(listOf<Extension>(), transformed.extension)
+        assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
                 identifierList.first(),
@@ -1097,22 +1100,22 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            oncologyPatient.identifier
+            transformed.identifier
         )
-        assertNull(oncologyPatient.active)
-        assertEquals(listOf(HumanName(family = "Doe".asFHIR())), oncologyPatient.name)
-        assertEquals(emptyList<ContactPoint>(), oncologyPatient.telecom)
-        assertEquals(AdministrativeGender.FEMALE.asCode(), oncologyPatient.gender)
-        assertEquals(Date("1975-07-05"), oncologyPatient.birthDate)
-        assertNull(oncologyPatient.deceased)
-        assertEquals(emptyList<Address>(), oncologyPatient.address)
-        assertEquals(listOf(defaultCoding), oncologyPatient.maritalStatus?.coding)
-        assertNull(oncologyPatient.multipleBirth)
-        assertEquals(listOf<Attachment>(), oncologyPatient.photo)
-        assertEquals(listOf<Communication>(), oncologyPatient.communication)
-        assertEquals(listOf<Reference>(), oncologyPatient.generalPractitioner)
-        assertNull(oncologyPatient.managingOrganization)
-        assertEquals(listOf<PatientLink>(), oncologyPatient.link)
+        assertNull(transformed.active)
+        assertEquals(listOf(HumanName(family = "Doe".asFHIR())), transformed.name)
+        assertEquals(emptyList<ContactPoint>(), transformed.telecom)
+        assertEquals(AdministrativeGender.FEMALE.asCode(), transformed.gender)
+        assertEquals(Date("1975-07-05"), transformed.birthDate)
+        assertNull(transformed.deceased)
+        assertEquals(emptyList<Address>(), transformed.address)
+        assertEquals(listOf(defaultCoding), transformed.maritalStatus?.coding)
+        assertNull(transformed.multipleBirth)
+        assertEquals(listOf<Attachment>(), transformed.photo)
+        assertEquals(listOf<Communication>(), transformed.communication)
+        assertEquals(listOf<Reference>(), transformed.generalPractitioner)
+        assertNull(transformed.managingOrganization)
+        assertEquals(listOf<PatientLink>(), transformed.link)
     }
 
     @Test
@@ -1126,8 +1129,8 @@ class RoninPatientTest {
             maritalStatus = CodeableConcept(text = "M".asFHIR())
         )
 
-        val oncologyPatient = roninPatient.transform(patient, tenant)
-        assertNull(oncologyPatient)
+        val (transformed, _) = roninPatient.transform(patient, tenant)
+        assertNull(transformed)
     }
 
     @Test
@@ -1214,26 +1217,27 @@ class RoninPatientTest {
             birthDate = Date("1975-07-05")
         )
 
-        val oncologyPatient = roninPatient.transform(patient, tenant)
+        val (transformed, validation) = roninPatient.transform(patient, tenant)
+        validation.alertIfErrors()
 
         val defaultCoding = Coding(
             system = Uri("http://terminology.hl7.org/CodeSystem/v3-NullFlavor"),
             code = Code("NI"),
             display = "NoInformation".asFHIR()
         )
-        oncologyPatient!!
-        assertEquals("Patient", oncologyPatient.resourceType)
-        assertEquals(Id("test-12345"), oncologyPatient.id)
+        transformed!!
+        assertEquals("Patient", transformed.resourceType)
+        assertEquals(Id("test-12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value))),
-            oncologyPatient.meta
+            transformed.meta
         )
-        assertNull(oncologyPatient.implicitRules)
-        assertNull(oncologyPatient.language)
-        assertNull(oncologyPatient.text)
-        assertEquals(listOf<ContainedResource>(), oncologyPatient.contained)
-        assertEquals(listOf<Extension>(), oncologyPatient.extension)
-        assertEquals(listOf<Extension>(), oncologyPatient.modifierExtension)
+        assertNull(transformed.implicitRules)
+        assertNull(transformed.language)
+        assertNull(transformed.text)
+        assertEquals(listOf<ContainedResource>(), transformed.contained)
+        assertEquals(listOf<Extension>(), transformed.extension)
+        assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
                 identifierList.first(),
@@ -1254,22 +1258,22 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            oncologyPatient.identifier
+            transformed.identifier
         )
-        assertNull(oncologyPatient.active)
-        assertEquals(listOf(HumanName(family = "Doe".asFHIR())), oncologyPatient.name)
-        assertEquals(emptyList<ContactPoint>(), oncologyPatient.telecom)
-        assertEquals(AdministrativeGender.FEMALE.asCode(), oncologyPatient.gender)
-        assertEquals(Date("1975-07-05"), oncologyPatient.birthDate)
-        assertNull(oncologyPatient.deceased)
-        assertEquals(emptyList<Address>(), oncologyPatient.address)
-        assertEquals(listOf(defaultCoding), oncologyPatient.maritalStatus?.coding)
-        assertNull(oncologyPatient.multipleBirth)
-        assertEquals(listOf<Attachment>(), oncologyPatient.photo)
-        assertEquals(listOf<Communication>(), oncologyPatient.communication)
-        assertEquals(listOf<Reference>(), oncologyPatient.generalPractitioner)
-        assertNull(oncologyPatient.managingOrganization)
-        assertEquals(listOf<PatientLink>(), oncologyPatient.link)
+        assertNull(transformed.active)
+        assertEquals(listOf(HumanName(family = "Doe".asFHIR())), transformed.name)
+        assertEquals(emptyList<ContactPoint>(), transformed.telecom)
+        assertEquals(AdministrativeGender.FEMALE.asCode(), transformed.gender)
+        assertEquals(Date("1975-07-05"), transformed.birthDate)
+        assertNull(transformed.deceased)
+        assertEquals(emptyList<Address>(), transformed.address)
+        assertEquals(listOf(defaultCoding), transformed.maritalStatus?.coding)
+        assertNull(transformed.multipleBirth)
+        assertEquals(listOf<Attachment>(), transformed.photo)
+        assertEquals(listOf<Communication>(), transformed.communication)
+        assertEquals(listOf<Reference>(), transformed.generalPractitioner)
+        assertNull(transformed.managingOrganization)
+        assertEquals(listOf<PatientLink>(), transformed.link)
     }
 
     private fun systemCoding(value: String) = Coding(

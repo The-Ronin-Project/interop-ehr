@@ -501,7 +501,8 @@ class RoninEncounterTest {
             partOf = Reference(reference = "Encounter/super".asFHIR())
         )
 
-        val transformed = RoninEncounter.transform(encounter, tenant)
+        val (transformed, validation) = RoninEncounter.transform(encounter, tenant)
+        validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Encounter", transformed.resourceType)
@@ -816,7 +817,8 @@ class RoninEncounterTest {
             subject = Reference(reference = "Patient/example".asFHIR())
         )
 
-        val transformed = RoninEncounter.transform(encounter, tenant)
+        val (transformed, validation) = RoninEncounter.transform(encounter, tenant)
+        validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Encounter", transformed.resourceType)
@@ -876,7 +878,7 @@ class RoninEncounterTest {
             `class` = Coding(code = Code("OBSENC")),
         )
 
-        val transformed = RoninEncounter.transform(encounter, tenant)
+        val (transformed, _) = RoninEncounter.transform(encounter, tenant)
 
         assertNull(transformed)
     }

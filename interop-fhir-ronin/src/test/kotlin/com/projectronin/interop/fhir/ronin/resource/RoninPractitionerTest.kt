@@ -240,7 +240,7 @@ class RoninPractitionerTest {
     fun `transform fails for practitioner with no ID`() {
         val practitioner = Practitioner()
 
-        val transformed = RoninPractitioner.transform(practitioner, tenant)
+        val (transformed, _) = RoninPractitioner.transform(practitioner, tenant)
         assertNull(transformed)
     }
 
@@ -279,7 +279,8 @@ class RoninPractitionerTest {
             communication = listOf(CodeableConcept(text = "communication".asFHIR()))
         )
 
-        val transformed = RoninPractitioner.transform(practitioner, tenant)
+        val (transformed, validation) = RoninPractitioner.transform(practitioner, tenant)
+        validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Practitioner", transformed.resourceType)
@@ -353,7 +354,8 @@ class RoninPractitionerTest {
             name = listOf(HumanName(family = "Doe".asFHIR()))
         )
 
-        val transformed = RoninPractitioner.transform(practitioner, tenant)
+        val (transformed, validation) = RoninPractitioner.transform(practitioner, tenant)
+        validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Practitioner", transformed.resourceType)

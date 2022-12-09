@@ -76,8 +76,16 @@ class RoninOrganizationTest {
         val organization = Organization(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = CodeableConcepts.RONIN_FHIR_ID, system = CodeSystem.RONIN_FHIR_ID.uri, value = "12345".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test".asFHIR())
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             active = true.asFHIR()
         )
@@ -97,8 +105,16 @@ class RoninOrganizationTest {
         val organization = Organization(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = CodeableConcepts.RONIN_FHIR_ID, system = CodeSystem.RONIN_FHIR_ID.uri, value = "12345".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test".asFHIR())
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             name = "Organization name".asFHIR()
         )
@@ -118,15 +134,28 @@ class RoninOrganizationTest {
         val organization = Organization(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = CodeableConcepts.RONIN_FHIR_ID, system = CodeSystem.RONIN_FHIR_ID.uri, value = "12345".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test".asFHIR())
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             name = "Organization name".asFHIR(),
             active = true.asFHIR()
         )
 
         mockkObject(R4OrganizationValidator)
-        every { R4OrganizationValidator.validate(organization, LocationContext(Organization::class)) } returns validation {
+        every {
+            R4OrganizationValidator.validate(
+                organization,
+                LocationContext(Organization::class)
+            )
+        } returns validation {
             checkNotNull(
                 null,
                 RequiredFieldError(Organization::name),
@@ -158,8 +187,16 @@ class RoninOrganizationTest {
         val organization = Organization(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = CodeableConcepts.RONIN_FHIR_ID, system = CodeSystem.RONIN_FHIR_ID.uri, value = "12345".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test".asFHIR())
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             name = "Organization name".asFHIR(),
             active = true.asFHIR()
@@ -255,7 +292,9 @@ class RoninOrganizationTest {
             )
         )
 
-        val transformed = RoninOrganization.transform(organization, tenant)
+        val (transformed, validation) = RoninOrganization.transform(organization, tenant)
+        validation.alertIfErrors()
+
         transformed!!
 
         assertEquals("Organization", transformed.resourceType)
@@ -292,8 +331,16 @@ class RoninOrganizationTest {
         assertEquals(
             listOf(
                 Identifier(value = "id".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_FHIR_ID, system = CodeSystem.RONIN_FHIR_ID.uri, value = "12345".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test".asFHIR())
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )
@@ -387,7 +434,9 @@ class RoninOrganizationTest {
             active = true.asFHIR()
         )
 
-        val transformed = RoninOrganization.transform(organization, tenant)
+        val (transformed, validation) = RoninOrganization.transform(organization, tenant)
+        validation.alertIfErrors()
+
         transformed!!
 
         assertEquals("Organization", transformed.resourceType)
@@ -403,8 +452,16 @@ class RoninOrganizationTest {
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
-                Identifier(type = CodeableConcepts.RONIN_FHIR_ID, system = CodeSystem.RONIN_FHIR_ID.uri, value = "12345".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test".asFHIR())
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
             ),
             transformed.identifier
         )

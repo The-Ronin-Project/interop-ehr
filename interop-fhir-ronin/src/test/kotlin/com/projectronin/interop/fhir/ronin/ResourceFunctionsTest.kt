@@ -9,31 +9,11 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Resource
-import com.projectronin.interop.tenant.config.model.Tenant
-import io.mockk.every
-import io.mockk.mockk
-import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 
 class ResourceFunctionsTest {
-    @Test
-    fun transforms() {
-        val resource = SampleResource()
-        val transformedResource = SampleResource(id = Id("1234"))
-
-        val tenant = mockk<Tenant>()
-        val transformer = mockk<ProfileTransformer<SampleResource>> {
-            every { transform(resource, tenant) } returns transformedResource
-        }
-
-        val response = resource.transformTo(transformer, tenant)
-        assertEquals(transformedResource, response)
-
-        verify { transformer.transform(resource, tenant) }
-    }
-
     @Test
     fun `resource fhir identifiers handles no id`() {
         val resource = SampleResource()

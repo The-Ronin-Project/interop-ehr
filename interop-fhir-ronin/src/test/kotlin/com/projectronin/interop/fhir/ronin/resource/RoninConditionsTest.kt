@@ -36,8 +36,16 @@ class RoninConditionsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_FHIR_ID, system = CodeSystem.RONIN_FHIR_ID.uri, value = "12345".asFHIR())
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
             ),
             code = CodeableConcept(
                 coding = listOf(
@@ -69,8 +77,16 @@ class RoninConditionsTest {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
-                Identifier(type = CodeableConcepts.RONIN_TENANT, system = CodeSystem.RONIN_TENANT.uri, value = "test".asFHIR()),
-                Identifier(type = CodeableConcepts.RONIN_FHIR_ID, system = CodeSystem.RONIN_FHIR_ID.uri, value = "12345".asFHIR())
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
             ),
             code = CodeableConcept(
                 coding = listOf(
@@ -128,7 +144,9 @@ class RoninConditionsTest {
             )
         )
 
-        val transformed = RoninConditions.transform(condition, tenant)
+        val (transformed, validation) = RoninConditions.transform(condition, tenant)
+        validation.alertIfErrors()
+
         transformed!!
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value))),
@@ -167,7 +185,9 @@ class RoninConditionsTest {
             )
         )
 
-        val transformed = RoninConditions.transform(condition, tenant)
+        val (transformed, validation) = RoninConditions.transform(condition, tenant)
+        validation.alertIfErrors()
+
         transformed!!
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value))),

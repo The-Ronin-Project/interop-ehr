@@ -480,7 +480,7 @@ class RoninLaboratoryResultObservationTest {
             )
         )
 
-        val transformed = RoninLaboratoryResultObservation.transform(observation, tenant)
+        val (transformed, _) = RoninLaboratoryResultObservation.transform(observation, tenant)
         assertNull(transformed)
     }
 
@@ -555,7 +555,8 @@ class RoninLaboratoryResultObservationTest {
             note = listOf(Annotation(text = Markdown("text")))
         )
 
-        val transformed = RoninLaboratoryResultObservation.transform(observation, tenant)
+        val (transformed, validation) = RoninLaboratoryResultObservation.transform(observation, tenant)
+        validation.alertIfErrors()
 
         transformed!!
         assertEquals("Observation", transformed.resourceType)
@@ -689,7 +690,8 @@ class RoninLaboratoryResultObservationTest {
             )
         )
 
-        val transformed = RoninLaboratoryResultObservation.transform(observation, tenant)
+        val (transformed, validation) = RoninLaboratoryResultObservation.transform(observation, tenant)
+        validation.alertIfErrors()
 
         transformed!!
         assertEquals("Observation", transformed.resourceType)

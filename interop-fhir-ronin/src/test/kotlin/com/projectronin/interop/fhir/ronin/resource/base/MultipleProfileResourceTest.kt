@@ -87,7 +87,7 @@ class MultipleProfileResourceTest {
         every { testProfile2.qualifies(location) } returns false
         every { testProfile3.qualifies(location) } returns false
 
-        val transformed = profile.transform(location, tenant)
+        val (transformed, _) = profile.transform(location, tenant)
         assertNull(transformed)
     }
 
@@ -99,7 +99,7 @@ class MultipleProfileResourceTest {
         every { testProfile2.qualifies(location) } returns true
         every { testProfile3.qualifies(location) } returns true
 
-        val transformed = profile.transform(location, tenant)
+        val (transformed, _) = profile.transform(location, tenant)
         assertNull(transformed)
     }
 
@@ -126,7 +126,7 @@ class MultipleProfileResourceTest {
         every { testProfile3.qualifies(location) } returns false
         every { testProfile3.qualifies(transformedLocation) } returns false
 
-        val transformed = profile.transform(location, tenant)
+        val (transformed, _) = profile.transform(location, tenant)
         assertEquals(transformedLocation, transformed)
     }
 
