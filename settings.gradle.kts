@@ -6,6 +6,7 @@ include("interop-ehr")
 include("interop-fhir-ronin")
 
 include("interop-ehr-epic")
+include("interop-ehr-cerner")
 
 for (project in rootProject.children) {
     project.buildFileName = "${project.name}.gradle.kts"

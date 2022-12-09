@@ -46,10 +46,10 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
         val privateKeySpec = PKCS8EncodedKeySpec(
             Base64.getDecoder().decode(
                 // Remove any Key formatting before decoding
-                tenant.vendor.authenticationConfig.privateKey.replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replace(" ", "")
-                    .replace(System.lineSeparator(), "")
+                tenant.vendor.authenticationConfig.privateKey?.replace("-----BEGIN PRIVATE KEY-----", "")
+                    ?.replace("-----END PRIVATE KEY-----", "")
+                    ?.replace(" ", "")
+                    ?.replace(System.lineSeparator(), "")
             )
         )
         val privateKeyInstance = KeyFactory.getInstance("RSA").generatePrivate(privateKeySpec)

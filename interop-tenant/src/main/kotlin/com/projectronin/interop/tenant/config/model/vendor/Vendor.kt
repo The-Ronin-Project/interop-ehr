@@ -14,7 +14,8 @@ import com.projectronin.interop.tenant.config.model.AuthenticationConfig
     property = "type"
 )
 @JsonSubTypes(
-    JsonSubTypes.Type(value = Epic::class, name = "EPIC")
+    JsonSubTypes.Type(value = Epic::class, name = "EPIC"),
+    JsonSubTypes.Type(value = Cerner::class, name = "CERNER")
 )
 sealed interface Vendor {
     /**
