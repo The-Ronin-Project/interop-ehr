@@ -365,7 +365,8 @@ class RoninCarePlanTest {
             )
         )
 
-        val transformed = RoninCarePlan.transform(carePlan, tenant)
+        val (transformed, validation) = RoninCarePlan.transform(carePlan, tenant)
+        validation.alertIfErrors()
         transformed!!
 
         assertEquals("CarePlan", transformed.resourceType)
@@ -610,7 +611,8 @@ class RoninCarePlanTest {
             subject = Reference(reference = "Patient/1234".asFHIR()),
         )
 
-        val transformed = RoninCarePlan.transform(carePlan, tenant)
+        val (transformed, validation) = RoninCarePlan.transform(carePlan, tenant)
+        validation.alertIfErrors()
         transformed!!
 
         assertEquals("CarePlan", transformed.resourceType)
@@ -679,7 +681,7 @@ class RoninCarePlanTest {
             subject = Reference(reference = "Patient/1234".asFHIR()),
         )
 
-        val transformed = RoninCarePlan.transform(carePlan, tenant)
+        val (transformed, _) = RoninCarePlan.transform(carePlan, tenant)
         assertNull(transformed)
     }
 
@@ -701,7 +703,7 @@ class RoninCarePlanTest {
             subject = Reference(reference = "Patient/1234".asFHIR()),
         )
 
-        val transformed = RoninCarePlan.transform(carePlan, tenant)
+        val (transformed, _) = RoninCarePlan.transform(carePlan, tenant)
         assertNull(transformed)
     }
 
@@ -724,7 +726,7 @@ class RoninCarePlanTest {
             subject = null,
         )
 
-        val transformed = RoninCarePlan.transform(carePlan, tenant)
+        val (transformed, _) = RoninCarePlan.transform(carePlan, tenant)
         assertNull(transformed)
     }
 }

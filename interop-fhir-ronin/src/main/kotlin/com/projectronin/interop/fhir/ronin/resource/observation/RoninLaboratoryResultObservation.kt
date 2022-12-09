@@ -5,6 +5,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -29,11 +30,14 @@ object RoninLaboratoryResultObservation :
     override fun validateRonin(element: Observation, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
-
-            // TODO: RoninExtension.TENANT_SOURCE_OBSERVATION_CODE, check Ronin IG and consider requireCodeableConcept()
+            requireCodeableConcept("code", element.code, parentContext, this) // covers coding reqs
+            requireCodeCoding("code", element.code?.coding, parentContext, this)
         }
+
+        // status and code validation in R4
     }
 
+    private val requiredCategoryError = RequiredFieldError(Observation::category)
     private val requiredLaboratoryCodeError = FHIRError(
         code = "USCORE_LABOBS_001",
         severity = ValidationIssueSeverity.ERROR,
@@ -58,6 +62,8 @@ object RoninLaboratoryResultObservation :
                 parentContext
             )
 
+            checkTrue(element.category.isNotEmpty(), requiredCategoryError, parentContext)
+
             val subject = element.subject
             checkNotNull(subject, requiredSubjectError, parentContext)
             ifNotNull(subject) {
@@ -73,14 +79,18 @@ object RoninLaboratoryResultObservation :
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<Observation?, Validation> {
-        // TODO: RoninExtension.TENANT_SOURCE_OBSERVATION_CODE, filterCodeableConcept(), extensionCodeableConcept()
-
         val validation = validation {
             checkNotNull(normalized.id, requiredIdError, parentContext)
         }
 
+        val tenantSourceCodeExtension = getExtensionOrEmptyList(
+            RoninExtension.TENANT_SOURCE_OBSERVATION_CODE,
+            normalized.code
+        )
+
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
+            extension = normalized.extension + tenantSourceCodeExtension,
             identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier()
         )
         return Pair(transformed, validation)
