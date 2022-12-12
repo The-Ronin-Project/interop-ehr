@@ -51,8 +51,8 @@ class CernerClientTest {
             runBlocking {
                 cernerClient.get(
                     tenant,
-                    "/Patient/",
-                    "12724066"
+                    "/Patient/12724066",
+
                 )
             }
         }
@@ -75,8 +75,7 @@ class CernerClientTest {
         val response = runBlocking {
             val httpResponse = cernerClient.get(
                 tenant,
-                "/Patient/",
-                "12724066"
+                "/Patient/12724066"
             )
             httpResponse.bodyAsText()
         }
