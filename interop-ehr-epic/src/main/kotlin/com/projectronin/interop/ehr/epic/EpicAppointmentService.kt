@@ -31,7 +31,6 @@ import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
 import com.projectronin.interop.fhir.ronin.util.localize
-import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import datadog.trace.api.Trace
@@ -105,7 +104,7 @@ class EpicAppointmentService(
 
     private fun getPatientMRN(tenant: Tenant, patientFHIRId: String): String? {
         // try aidbox first
-        val patient = runCatching { aidboxPatientService.getPatient(tenant.mnemonic, patientFHIRId.localize(tenant)) }
+        val patient = runCatching { aidboxPatientService.getPatientByUDPId(tenant.mnemonic, patientFHIRId.localize(tenant)) }
             // try EHR next
             .getOrElse { patientService.getPatient(tenant, patientFHIRId) }
         return identifierService.getMRNIdentifier(tenant, patient.identifier).value?.value
@@ -279,8 +278,7 @@ class EpicAppointmentService(
         val provSystemToFhirID = aidboxPractitionerService.getPractitionerFHIRIds(
             tenant.mnemonic,
             provToSystem.values.distinct().associateWith { it }
-        ) // strip off the tenant prefix found in aidbox
-            .entries.associate { it.key to it.value.unlocalize(tenant) }
+        )
         // use FHIR id (if found), otherwise Identifier
         val provToParticipant = provToSystem.keys.associateWith { provider ->
             val system = provToSystem[provider]
@@ -319,8 +317,7 @@ class EpicAppointmentService(
         val deptSystemToFhirID = aidboxLocationService.getLocationFHIRIds(
             tenant.mnemonic,
             deptToSystem.values.distinct().associateWith { it }
-        ) // strip off the tenant prefix found in aidbox
-            .entries.associate { it.key to it.value.unlocalize(tenant) }
+        )
         // use FHIR id (if found), otherwise null to omit that Location
         val deptToParticipant = deptToSystem.keys.associateWith { provider ->
             val system = deptToSystem[provider]

@@ -1,9 +1,9 @@
 package com.projectronin.interop.ehr.epic
 
-import com.projectronin.interop.aidbox.LimitedLocationFHIRIdentifiers
 import com.projectronin.interop.aidbox.LocationService
 import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.PractitionerService
+import com.projectronin.interop.aidbox.model.AidboxIdentifiers
 import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.common.http.throwExceptionFromHttpStatus
 import com.projectronin.interop.ehr.epic.apporchard.model.EpicAppointment
@@ -920,7 +920,7 @@ class EpicAppointmentServiceTest {
         val existingIdentifiers = mockk<List<Identifier>> {}
 
         every {
-            aidboxPatientService.getPatient(
+            aidboxPatientService.getPatientByUDPId(
                 tenantMnemonic = tenant.mnemonic,
                 "TEST_TENANT-E5597"
             )
@@ -985,7 +985,7 @@ class EpicAppointmentServiceTest {
             )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every { aidboxPatientService.getPatient(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
+        every { aidboxPatientService.getPatientByUDPId(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1073,7 +1073,7 @@ class EpicAppointmentServiceTest {
             )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every { aidboxPatientService.getPatient(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
+        every { aidboxPatientService.getPatientByUDPId(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1164,7 +1164,7 @@ class EpicAppointmentServiceTest {
             )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every { aidboxPatientService.getPatient(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
+        every { aidboxPatientService.getPatientByUDPId(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1274,7 +1274,7 @@ class EpicAppointmentServiceTest {
             )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every { aidboxPatientService.getPatient(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
+        every { aidboxPatientService.getPatientByUDPId(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1384,7 +1384,7 @@ class EpicAppointmentServiceTest {
             )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every { aidboxPatientService.getPatient(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
+        every { aidboxPatientService.getPatientByUDPId(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1543,7 +1543,7 @@ class EpicAppointmentServiceTest {
         val mockPat = mockk<Patient> {
             every { identifier } returns listOf(mockID)
         }
-        every { aidboxPatientService.getPatient("TEST_TENANT", "TEST_TENANT-FHIRID") } returns mockPat
+        every { aidboxPatientService.getPatientByUDPId("TEST_TENANT", "TEST_TENANT-FHIRID") } returns mockPat
         every { identifierService.getMRNIdentifier(tenant, listOf(mockID)).value } returns null
         val response =
             EpicAppointmentService(
@@ -1578,7 +1578,7 @@ class EpicAppointmentServiceTest {
         val mockPat = mockk<Patient> {
             every { identifier } returns listOf(mockID)
         }
-        every { aidboxPatientService.getPatient("TEST_TENANT", "TEST_TENANT-FHIRID") } throws Exception()
+        every { aidboxPatientService.getPatientByUDPId("TEST_TENANT", "TEST_TENANT-FHIRID") } throws Exception()
         every { patientService.getPatient(tenant, "FHIRID") } returns mockPat
         every { identifierService.getMRNIdentifier(tenant, listOf(mockID)).value } returns null
         val response =
@@ -1723,7 +1723,7 @@ class EpicAppointmentServiceTest {
                 any()
             )
         } returns listOf(
-            LimitedLocationFHIRIdentifiers(
+            AidboxIdentifiers(
                 "FHIRID1",
                 listOf(Identifier(value = "E100".asFHIR(), system = Uri("internalDepartmentSystem")))
             )

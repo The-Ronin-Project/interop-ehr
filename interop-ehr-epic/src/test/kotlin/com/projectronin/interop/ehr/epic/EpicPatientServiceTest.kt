@@ -386,7 +386,7 @@ class EpicPatientServiceTest {
                 tenant.mnemonic,
                 mapOf(mrn to SystemValue(mrn, mrnSystem))
             )
-        } returns mapOf(mrn to "${tenant.mnemonic}-$fhirID")
+        } returns mapOf(mrn to fhirID)
 
         val response = EpicPatientService(epicClient, 100, aidboxClient).getPatientsFHIRIds(
             tenant,
@@ -417,7 +417,7 @@ class EpicPatientServiceTest {
                 tenant.mnemonic,
                 mapOf(mrn to SystemValue(mrn, mrnSystem))
             )
-        } returns mapOf(mrn to "${tenant.mnemonic}-$fhirID")
+        } returns mapOf(mrn to fhirID)
 
         val response = EpicPatientService(epicClient, 100, aidboxClient).getPatientFHIRId(
             tenant,
@@ -501,8 +501,8 @@ class EpicPatientServiceTest {
                 )
             )
         } returns mapOf(
-            aidBoxMRN1 to "${tenant.mnemonic}-$aidBoxFhirId1",
-            aidBoxMRN2 to "${tenant.mnemonic}-$aidBoxFhirId2"
+            aidBoxMRN1 to aidBoxFhirId1,
+            aidBoxMRN2 to aidBoxFhirId2
         )
 
         every {

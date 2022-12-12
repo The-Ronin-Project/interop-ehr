@@ -124,7 +124,7 @@ class EpicPatientService(
         val aidboxResponse = aidboxPatientService.getPatientFHIRIds(
             tenantMnemonic = tenant.mnemonic,
             patientIDValues.associateWith { SystemValue(it, patientIDSystem) }
-        ).mapValues { GetFHIRIDResponse(it.value.unlocalize(tenant)) }
+        ).mapValues { GetFHIRIDResponse(it.value) }
 
         // Search for any patients that weren't in Aidbox in the EHR.  If there aren't any, return the Aidbox patients.
         val ehrPatientIDValues = patientIDValues.filterNot { patientID ->
