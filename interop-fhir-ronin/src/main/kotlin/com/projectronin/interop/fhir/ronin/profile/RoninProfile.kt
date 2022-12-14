@@ -27,10 +27,12 @@ enum class RoninProfile(val value: String) {
     OBSERVATION_IMAGING_RESULT("http://projectronin.io/fhir/StructureDefinition/ronin-observationImagingResult"),
     OBSERVATION_PULSE_OXIMETRY("http://projectronin.io/fhir/StructureDefinition/ronin-pulseOximetry"),
     OBSERVATION_RESPIRATORY_RATE("http://projectronin.io/fhir/StructureDefinition/ronin-respiratoryRate"),
+    @Deprecated("ronin-vitalSigns is a retired profile", ReplaceWith(""), DeprecationLevel.WARNING)
     OBSERVATION_VITAL_SIGNS("http://projectronin.io/fhir/StructureDefinition/ronin-vitalSigns"),
     ORGANIZATION("http://projectronin.io/fhir/StructureDefinition/ronin-organization"),
     PATIENT("http://projectronin.io/fhir/StructureDefinition/ronin-patient"),
     PRACTITIONER("http://projectronin.io/fhir/StructureDefinition/ronin-practitioner"),
     PRACTITIONER_ROLE("http://projectronin.io/fhir/StructureDefinition/ronin-practitionerRole"),
-    PROCEDURE("http://projectronin.io/fhir/StructureDefinition/ronin-procedure");
+    PROCEDURE("http://projectronin.io/fhir/StructureDefinition/ronin-procedure"),
+    OBSERVATION("http://projectronin.io/fhir/StructureDefinition/ronin-observation");
 }

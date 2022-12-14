@@ -23,6 +23,9 @@ abstract class USCoreBasedProfile<T : Resource<T>>(
      */
     abstract fun validateUSCore(element: T, parentContext: LocationContext, validation: Validation)
 
+    /**
+     * Validates both Ronin and USCore against their respective rules.
+     */
     override fun validate(element: T, parentContext: LocationContext, validation: Validation) {
         validateRonin(element, parentContext, validation)
         validateUSCore(element, parentContext, validation)

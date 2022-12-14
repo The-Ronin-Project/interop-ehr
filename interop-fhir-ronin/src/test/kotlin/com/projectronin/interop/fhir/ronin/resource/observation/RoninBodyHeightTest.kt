@@ -28,15 +28,12 @@ import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyHeight.vitalSignsCode
 import com.projectronin.interop.fhir.util.asCode
-import com.projectronin.interop.fhir.validate.LocationContext
-import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -50,6 +47,24 @@ class RoninBodyHeightTest {
     }
 
     @Test
+    fun `does not qualify when no category`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            category = listOf(),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            code = CodeableConcept(text = "vital sign".asFHIR())
+        )
+
+        assertFalse(RoninBodyHeight.qualifies(observation))
+    }
+
+    @Test
     fun `does not qualify when no code`() {
         val observation = Observation(
             id = Id("123"),
@@ -60,7 +75,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -73,8 +88,7 @@ class RoninBodyHeightTest {
             code = null
         )
 
-        val qualified = RoninBodyHeight.qualifies(observation)
-        assertFalse(qualified)
+        assertFalse(RoninBodyHeight.qualifies(observation))
     }
 
     @Test
@@ -88,7 +102,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -101,8 +115,7 @@ class RoninBodyHeightTest {
             code = CodeableConcept(text = "code".asFHIR())
         )
 
-        val qualified = RoninBodyHeight.qualifies(observation)
-        assertFalse(qualified)
+        assertFalse(RoninBodyHeight.qualifies(observation))
     }
 
     @Test
@@ -116,7 +129,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -129,8 +142,7 @@ class RoninBodyHeightTest {
             code = CodeableConcept(coding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("1234"))))
         )
 
-        val qualified = RoninBodyHeight.qualifies(observation)
-        assertFalse(qualified)
+        assertFalse(RoninBodyHeight.qualifies(observation))
     }
 
     @Test
@@ -144,7 +156,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -164,8 +176,7 @@ class RoninBodyHeightTest {
             )
         )
 
-        val qualified = RoninBodyHeight.qualifies(observation)
-        assertFalse(qualified)
+        assertFalse(RoninBodyHeight.qualifies(observation))
     }
 
     @Test
@@ -179,7 +190,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -199,8 +210,7 @@ class RoninBodyHeightTest {
             )
         )
 
-        val qualified = RoninBodyHeight.qualifies(observation)
-        assertTrue(qualified)
+        assertTrue(RoninBodyHeight.qualifies(observation))
     }
 
     @Test
@@ -222,7 +232,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -277,7 +287,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -332,7 +342,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -385,7 +395,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -446,7 +456,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -507,7 +517,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -569,7 +579,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -630,7 +640,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -692,7 +702,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = Code("bad-code")
                         )
                     )
                 )
@@ -713,31 +723,15 @@ class RoninBodyHeightTest {
             )
         )
 
-        mockkObject(USCoreVitalSignsValidator)
-        every {
-            USCoreVitalSignsValidator.validate(
-                observation,
-                LocationContext(Observation::class)
-            )
-        } returns validation {
-            checkNotNull(
-                null,
-                RequiredFieldError(Observation::basedOn),
-                LocationContext(Observation::class)
-            )
-        }
-
         val exception = assertThrows<IllegalArgumentException> {
             RoninBodyHeight.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: basedOn is a required element @ Observation.basedOn",
+                "ERROR USCORE_VSOBS_001: A category code of \"vital-signs\" is required @ Observation.category",
             exception.message
         )
-
-        unmockkObject(USCoreVitalSignsValidator)
     }
 
     @Test
@@ -770,7 +764,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -823,7 +817,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -872,15 +866,15 @@ class RoninBodyHeightTest {
                 )
             ),
             identifier = listOf(Identifier(value = "id".asFHIR())),
-            basedOn = listOf(Reference(display = "Based".asFHIR())),
-            partOf = listOf(Reference(display = "Part".asFHIR())),
+            basedOn = listOf(Reference(reference = "CarePlan/1234".asFHIR())),
+            partOf = listOf(Reference(reference = "MedicationStatement/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -895,13 +889,13 @@ class RoninBodyHeightTest {
             ),
             subject = Reference(reference = "Patient/1234".asFHIR()),
             focus = listOf(Reference(display = "focus".asFHIR())),
-            encounter = Reference(display = "encounter".asFHIR()),
+            encounter = Reference(reference = "Encounter/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
             ),
             issued = Instant("2022-01-01T00:00:00Z"),
-            performer = listOf(Reference(display = "performer".asFHIR())),
+            performer = listOf(Reference(reference = "Organization/1234".asFHIR())),
             value = DynamicValue(
                 type = DynamicValueType.STRING,
                 "string"
@@ -909,11 +903,11 @@ class RoninBodyHeightTest {
             interpretation = listOf(CodeableConcept(text = "interpretation".asFHIR())),
             bodySite = CodeableConcept(text = "bodySite".asFHIR()),
             method = CodeableConcept(text = "method".asFHIR()),
-            specimen = Reference(display = "specimen".asFHIR()),
-            device = Reference(display = "device".asFHIR()),
+            specimen = Reference(reference = "Specimen/1234".asFHIR()),
+            device = Reference(reference = "DeviceMetric/1234".asFHIR()),
             referenceRange = listOf(ObservationReferenceRange(text = "referenceRange".asFHIR())),
-            hasMember = listOf(Reference(display = "member".asFHIR())),
-            derivedFrom = listOf(Reference(display = "derivedFrom".asFHIR())),
+            hasMember = listOf(Reference(reference = "Observation/5678".asFHIR())),
+            derivedFrom = listOf(Reference(reference = "DocumentReference/1234".asFHIR())),
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(text = "code2".asFHIR()),
@@ -923,7 +917,12 @@ class RoninBodyHeightTest {
                     )
                 )
             ),
-            note = listOf(Annotation(text = Markdown("text")))
+            note = listOf(
+                Annotation(
+                    text = Markdown("text"),
+                    author = DynamicValue(type = DynamicValueType.REFERENCE, value = "Practitioner/0001")
+                )
+            )
         )
 
         val (transformed, validation) = RoninBodyHeight.transform(observation, tenant)
@@ -974,8 +973,8 @@ class RoninBodyHeightTest {
             ),
             transformed.identifier
         )
-        assertEquals(listOf(Reference(display = "Based".asFHIR())), transformed.basedOn)
-        assertEquals(listOf(Reference(display = "Part".asFHIR())), transformed.partOf)
+        assertEquals(listOf(Reference(reference = "CarePlan/test-1234".asFHIR())), transformed.basedOn)
+        assertEquals(listOf(Reference(reference = "MedicationStatement/test-1234".asFHIR())), transformed.partOf)
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
             listOf(
@@ -983,7 +982,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -1003,7 +1002,7 @@ class RoninBodyHeightTest {
         )
         assertEquals(Reference(reference = "Patient/test-1234".asFHIR()), transformed.subject)
         assertEquals(listOf(Reference(display = "focus".asFHIR())), transformed.focus)
-        assertEquals(Reference(display = "encounter".asFHIR()), transformed.encounter)
+        assertEquals(Reference(reference = "Encounter/test-1234".asFHIR()), transformed.encounter)
         assertEquals(
             DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -1012,7 +1011,7 @@ class RoninBodyHeightTest {
             transformed.effective
         )
         assertEquals(Instant("2022-01-01T00:00:00Z"), transformed.issued)
-        assertEquals(listOf(Reference(display = "performer".asFHIR())), transformed.performer)
+        assertEquals(listOf(Reference(reference = "Organization/test-1234".asFHIR())), transformed.performer)
         assertEquals(
             DynamicValue(
                 type = DynamicValueType.STRING,
@@ -1024,11 +1023,11 @@ class RoninBodyHeightTest {
         assertEquals(listOf(CodeableConcept(text = "interpretation".asFHIR())), transformed.interpretation)
         assertNull(transformed.bodySite)
         assertEquals(CodeableConcept(text = "method".asFHIR()), transformed.method)
-        assertEquals(Reference(display = "specimen".asFHIR()), transformed.specimen)
-        assertEquals(Reference(display = "device".asFHIR()), transformed.device)
+        assertEquals(Reference(reference = "Specimen/test-1234".asFHIR()), transformed.specimen)
+        assertEquals(Reference(reference = "DeviceMetric/test-1234".asFHIR()), transformed.device)
         assertEquals(listOf(ObservationReferenceRange(text = "referenceRange".asFHIR())), transformed.referenceRange)
-        assertEquals(listOf(Reference(display = "member".asFHIR())), transformed.hasMember)
-        assertEquals(listOf(Reference(display = "derivedFrom".asFHIR())), transformed.derivedFrom)
+        assertEquals(listOf(Reference(reference = "Observation/test-5678".asFHIR())), transformed.hasMember)
+        assertEquals(listOf(Reference(reference = "DocumentReference/test-1234".asFHIR())), transformed.derivedFrom)
         assertEquals(
             listOf(
                 ObservationComponent(
@@ -1041,11 +1040,19 @@ class RoninBodyHeightTest {
             ),
             transformed.component
         )
-        assertEquals(listOf(Annotation(text = Markdown("text"))), transformed.note)
+        assertEquals(
+            listOf(
+                Annotation(
+                    text = Markdown("text"),
+                    author = DynamicValue(type = DynamicValueType.REFERENCE, value = "Practitioner/0001")
+                )
+            ),
+            transformed.note
+        )
     }
 
     @Test
-    fun `transforms condition with only required attributes`() {
+    fun `transforms observation with only required attributes`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
@@ -1062,7 +1069,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -1112,7 +1119,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = RoninBodyHeight.vitalSignsCode
                         )
                     )
                 )
@@ -1154,5 +1161,48 @@ class RoninBodyHeightTest {
         assertEquals(listOf<Reference>(), transformed.derivedFrom)
         assertEquals(listOf<ObservationComponent>(), transformed.component)
         assertEquals(listOf<Annotation>(), transformed.note)
+    }
+
+    @Test
+    fun `transform inherits R4 validation`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = Code("bad-status"),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        code = RoninBodyHeight.bodyHeightCode
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = RoninBodyHeight.vitalSignsCode
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            )
+        )
+
+        val exception = assertThrows<java.lang.IllegalArgumentException> {
+            val (transformed, validation) = RoninBodyHeight.transform(observation, tenant)
+            assertNull(transformed)
+            validation.alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR INV_VALUE_SET: 'bad-status' is outside of required value set @ Observation.status",
+            exception.message
+        )
     }
 }

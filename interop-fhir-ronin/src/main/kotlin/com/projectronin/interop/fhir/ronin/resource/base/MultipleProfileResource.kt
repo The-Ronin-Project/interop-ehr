@@ -8,10 +8,19 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.tenant.config.model.Tenant
 
 /**
- * Base class for supporting resources with multiple profiles.
+ * Base class for supporting resources with multiple profiles. Ex: [RoninObservations], [RoninConditions].
+ *
+ * When determining the correct profile to use with a resource, the full list of [potentialProfiles] is evaluated
+ * to see which of the profiles fits the attributes of the resource. Ex: Observation body weight vs. lab results.
+ * If a fit is not found, this class may specify a [defaultProfile] which does not overlap with the [potentialProfiles]
+ * and this [defaultProfile] will be applied to any resource that does not qualify for the [potentialProfiles].
+ *
+ * A [defaultProfile] is not required. If not supplied, or if the resource does not qualify for either the
+ * [potentialProfiles] or the [defaultProfile], the resource does not qualify for any profile, and simply errors.
  */
 abstract class MultipleProfileResource<T : Resource<T>> : BaseProfile<T>() {
     protected abstract val potentialProfiles: List<BaseProfile<T>>
+    protected open val defaultProfile: BaseProfile<T>? = null
 
     override fun validate(element: T, parentContext: LocationContext, validation: Validation) {
         val qualifiedProfile = getQualifiedProfile(element, parentContext, validation)
@@ -47,6 +56,12 @@ abstract class MultipleProfileResource<T : Resource<T>> : BaseProfile<T>() {
         description = "Multiple profiles qualified",
         location = null
     )
+    private val noProfilesDefaultWarning = FHIRError(
+        code = "RONIN_PROFILE_003",
+        severity = ValidationIssueSeverity.WARNING,
+        description = "No profiles qualified, the default profile was used",
+        location = null
+    )
 
     /**
      * Retrieves the qualified profile for the [resource]. If no profiles or multiple profiles qualify, an error will be added to the [validation].
@@ -60,8 +75,12 @@ abstract class MultipleProfileResource<T : Resource<T>> : BaseProfile<T>() {
         return when (qualifiedProfiles.size) {
             1 -> qualifiedProfiles[0]
             0 -> {
-                validation.checkTrue(false, noProfilesError, parentContext)
-                null
+                validation.checkTrue(
+                    false,
+                    defaultProfile?.let { noProfilesDefaultWarning } ?: noProfilesError,
+                    parentContext
+                )
+                defaultProfile
             }
             else -> {
                 validation.checkTrue(

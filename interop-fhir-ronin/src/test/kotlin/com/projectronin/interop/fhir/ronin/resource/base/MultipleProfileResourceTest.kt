@@ -2,12 +2,15 @@ package com.projectronin.interop.fhir.ronin.resource.base
 
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.r4.resource.Observation
+import com.projectronin.interop.fhir.ronin.resource.observation.RoninObservation
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -40,7 +43,7 @@ class MultipleProfileResourceTest {
         every { testProfile2.qualifies(location) } returns false
         every { testProfile3.qualifies(location) } returns false
 
-        val exception = assertThrows<java.lang.IllegalArgumentException> {
+        val exception = assertThrows<IllegalArgumentException> {
             profile.validate(location).alertIfErrors()
         }
 
@@ -52,6 +55,30 @@ class MultipleProfileResourceTest {
     }
 
     @Test
+    fun `validate with no qualifying profiles and default profile`() {
+        val observation = mockk<Observation>(relaxed = true)
+        val profile1 = mockk<BaseProfile<Observation>>()
+        val profile2 = mockk<BaseProfile<Observation>>()
+        val profile3 = mockk<RoninObservation>(relaxed = true)
+        every { profile1.qualifies(observation) } returns false
+        every { profile2.qualifies(observation) } returns false
+        every { profile3.validate(observation, any()) } returns Validation()
+        val profiles = TestProfileWithDefault(listOf(profile1, profile2), profile3)
+
+        val validation = profiles.validate(observation)
+        assertTrue(validation.hasIssues())
+        assertFalse(validation.hasErrors())
+        val issueList = validation.issues().map {
+            "${it.severity} ${it.code}: ${it.description}"
+        }.joinToString()
+
+        assertEquals(
+            "WARNING RONIN_PROFILE_003: No profiles qualified, the default profile was used",
+            issueList
+        )
+    }
+
+    @Test
     fun `validate with multiple qualifying profiles`() {
         val location = mockk<Location>()
 
@@ -59,11 +86,16 @@ class MultipleProfileResourceTest {
         every { testProfile2.qualifies(location) } returns true
         every { testProfile3.qualifies(location) } returns true
 
-        val exception = assertThrows<java.lang.IllegalArgumentException> {
+        val exception = assertThrows<IllegalArgumentException> {
             profile.validate(location).alertIfErrors()
         }
 
-        assertTrue(exception.message?.startsWith("Encountered validation error(s):\nERROR RONIN_PROFILE_002: Multiple profiles qualified: ") == true)
+        assertTrue(
+            exception.message?.startsWith(
+                "Encountered validation error(s):\n" +
+                    "ERROR RONIN_PROFILE_002: Multiple profiles qualified: "
+            ) == true
+        )
     }
 
     @Test
@@ -131,6 +163,12 @@ class MultipleProfileResourceTest {
     }
 
     private class TestMultipleProfileResource(
-        override val potentialProfiles: List<BaseProfile<Location>>
+        override val potentialProfiles: List<BaseProfile<Location>>,
+        override val defaultProfile: BaseProfile<Location>? = null
     ) : MultipleProfileResource<Location>()
+
+    private class TestProfileWithDefault(
+        override val potentialProfiles: List<BaseProfile<Observation>>,
+        override val defaultProfile: BaseProfile<Observation>?
+    ) : MultipleProfileResource<Observation>()
 }

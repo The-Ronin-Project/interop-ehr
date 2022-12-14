@@ -21,7 +21,8 @@ import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyHeight
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyWeight
-import com.projectronin.interop.fhir.ronin.resource.observation.USCoreVitalSignsValidator
+import com.projectronin.interop.fhir.ronin.resource.observation.RoninLaboratoryResult
+import com.projectronin.interop.fhir.ronin.resource.observation.RoninObservation
 import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -85,7 +86,7 @@ class RoninObservationsTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = Code("vital-signs")
                         )
                     )
                 )
@@ -139,7 +140,7 @@ class RoninObservationsTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = Code("vital-signs")
                         )
                     )
                 )
@@ -164,7 +165,91 @@ class RoninObservationsTest {
     }
 
     @Test
-    fun `can validate vital signs`() {
+    fun `can transform body weight`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        code = RoninBodyWeight.bodyWeightCode
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("vital-signs")
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            )
+        )
+
+        val (transformed, validation) = RoninObservations.transform(observation, tenant)
+        validation.alertIfErrors()
+
+        transformed!!
+        assertEquals(
+            Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_WEIGHT.value))),
+            transformed.meta
+        )
+        assertEquals(observation.id?.value, transformed.id?.unlocalize(tenant)?.value)
+    }
+
+    @Test
+    fun `can transform body height`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        code = RoninBodyHeight.bodyHeightCode
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("vital-signs")
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            )
+        )
+
+        val (transformed, validation) = RoninObservations.transform(observation, tenant)
+        validation.alertIfErrors()
+
+        transformed!!
+        assertEquals(
+            Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value))),
+            transformed.meta
+        )
+        assertEquals(observation.id?.value, transformed.id?.unlocalize(tenant)?.value)
+    }
+
+    @Test
+    fun `validates a not-yet-implemented vital-signs Observation as a non-specific Observation`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
@@ -186,7 +271,7 @@ class RoninObservationsTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = Code("vital-signs")
                         )
                     )
                 )
@@ -207,6 +292,64 @@ class RoninObservationsTest {
             )
         )
 
+        assertTrue(RoninObservation.qualifies(observation))
+        RoninObservations.validate(observation, null).alertIfErrors()
+    }
+
+    @Test
+    fun `validates not-yet-implemented NOT-vital-signs Observation as a non-specific Observation`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.SNOMED_CT.uri,
+                        code = Code("160695008"),
+                        display = "Transport too expensive".asFHIR()
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("social-history"),
+                            display = "Social History".asFHIR()
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            value = DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
+                    system = CodeSystem.UCUM.uri,
+                    code = Code("kg")
+                )
+            )
+        )
+
+        assertTrue(RoninObservation.qualifies(observation))
         RoninObservations.validate(observation, null).alertIfErrors()
     }
 
@@ -263,95 +406,12 @@ class RoninObservationsTest {
             )
         )
 
+        assertTrue(RoninLaboratoryResult.qualifies(observation))
         RoninObservations.validate(observation, null).alertIfErrors()
     }
 
     @Test
-    fun `can transform body weight`() {
-        val observation = Observation(
-            id = Id("123"),
-            status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = RoninBodyWeight.bodyWeightCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
-                        )
-                    )
-                )
-            ),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
-            effective = DynamicValue(
-                type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
-            )
-        )
-
-        val (transformed, validation) = RoninObservations.transform(observation, tenant)
-        validation.alertIfErrors()
-
-        transformed!!
-        assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_WEIGHT.value))),
-            transformed.meta
-        )
-        assertEquals(observation.id?.value, transformed.id?.unlocalize(tenant)?.value)
-    }
-
-    @Test
-    fun `can transform body height`() {
-        val observation = Observation(
-            id = Id("123"),
-            status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = RoninBodyHeight.bodyHeightCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
-                        )
-                    )
-                )
-            ),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
-            effective = DynamicValue(
-                type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
-            )
-        )
-
-        val (transformed, validation) = RoninObservations.transform(observation, tenant)
-        validation.alertIfErrors()
-
-        transformed!!
-        assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value))),
-            transformed.meta
-        )
-        assertEquals(observation.id?.value, transformed.id?.unlocalize(tenant)?.value)
-    }
-
-    @Test
-    fun `can transform vital signs`() {
+    fun `transforms not-yet-implemented, vital-signs Observation to a non-specific Observation`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
@@ -361,7 +421,7 @@ class RoninObservationsTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = USCoreVitalSignsValidator.vitalSignsCode
+                            code = Code("vital-signs")
                         )
                     )
                 )
@@ -379,7 +439,51 @@ class RoninObservationsTest {
 
         transformed!!
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_VITAL_SIGNS.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value))),
+            transformed.meta
+        )
+        assertEquals(observation.id?.value, transformed.id?.unlocalize(tenant)?.value)
+    }
+
+    @Test
+    fun `transforms not-yet-implemented, NOT-vital-signs Observation to a non-specific Observation`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.SNOMED_CT.uri,
+                        code = Code("160695008"),
+                        display = "Transport too expensive".asFHIR()
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("social-history"),
+                            display = "Social History".asFHIR()
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            )
+        )
+
+        val (transformed, validation) = RoninObservations.transform(observation, tenant)
+        validation.alertIfErrors()
+
+        transformed!!
+        assertEquals(
+            Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value))),
             transformed.meta
         )
         assertEquals(observation.id?.value, transformed.id?.unlocalize(tenant)?.value)

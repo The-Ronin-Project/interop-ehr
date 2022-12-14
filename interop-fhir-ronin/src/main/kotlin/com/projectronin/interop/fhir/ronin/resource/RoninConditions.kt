@@ -7,9 +7,11 @@ import com.projectronin.interop.fhir.ronin.resource.condition.RoninConditionEnco
 import com.projectronin.interop.fhir.ronin.resource.condition.RoninConditionProblemsAndHealthConcerns
 
 /**
- * Validator and Transformer for the group of Ronin Condition profiles.
+ * Validator and Transformer for the group of active Ronin Condition profiles.
  */
 object RoninConditions : MultipleProfileResource<Condition>() {
     override val potentialProfiles: List<BaseProfile<Condition>>
         get() = listOf(RoninConditionEncounterDiagnosis, RoninConditionProblemsAndHealthConcerns)
+    override val defaultProfile: BaseProfile<Condition>?
+        get() = null
 }

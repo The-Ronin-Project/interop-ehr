@@ -5,9 +5,9 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
+import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
-import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.InvalidValueSetError
@@ -18,8 +18,7 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 
-object RoninBodyWeight :
-    USCoreBasedProfile<Observation>(USCoreVitalSignsValidator, RoninProfile.OBSERVATION_BODY_WEIGHT.value) {
+object RoninBodyWeight : BaseRoninVitalSign(R4ObservationValidator, RoninProfile.OBSERVATION_BODY_WEIGHT.value) {
     internal val bodyWeightCode = Code("29463-7")
 
     override fun qualifies(resource: Observation): Boolean {
@@ -33,10 +32,8 @@ object RoninBodyWeight :
         location = LocationContext(Observation::bodySite)
     )
 
-    override fun validateRonin(element: Observation, parentContext: LocationContext, validation: Validation) {
+    override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
         validation.apply {
-            requireRoninIdentifiers(element.identifier, parentContext, this)
-
             checkTrue(element.bodySite == null, noBodySiteError, parentContext)
         }
     }
@@ -65,6 +62,7 @@ object RoninBodyWeight :
     private val validQuantityCodes = listOf("kg", "[lb_av]", "g")
 
     override fun validateUSCore(element: Observation, parentContext: LocationContext, validation: Validation) {
+        super.validateUSCore(element, parentContext, validation)
         validation.apply {
             val code = element.code
             if (code != null) {

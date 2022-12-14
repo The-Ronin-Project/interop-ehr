@@ -46,7 +46,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class RoninLaboratoryResultObservationTest {
+class RoninLaboratoryResultTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
@@ -66,7 +66,7 @@ class RoninLaboratoryResultObservationTest {
             code = CodeableConcept(text = "lab".asFHIR())
         )
 
-        val qualified = RoninLaboratoryResultObservation.qualifies(observation)
+        val qualified = RoninLaboratoryResult.qualifies(observation)
         assertFalse(qualified)
     }
 
@@ -85,8 +85,7 @@ class RoninLaboratoryResultObservationTest {
             code = CodeableConcept(text = "lab".asFHIR())
         )
 
-        val qualified = RoninLaboratoryResultObservation.qualifies(observation)
-        assertFalse(qualified)
+        assertFalse(RoninLaboratoryResult.qualifies(observation))
     }
 
     @Test
@@ -113,8 +112,7 @@ class RoninLaboratoryResultObservationTest {
             code = CodeableConcept(text = "lab".asFHIR())
         )
 
-        val qualified = RoninLaboratoryResultObservation.qualifies(observation)
-        assertFalse(qualified)
+        assertFalse(RoninLaboratoryResult.qualifies(observation))
     }
 
     @Test
@@ -141,8 +139,7 @@ class RoninLaboratoryResultObservationTest {
             code = CodeableConcept(text = "lab".asFHIR())
         )
 
-        val qualified = RoninLaboratoryResultObservation.qualifies(observation)
-        assertFalse(qualified)
+        assertFalse(RoninLaboratoryResult.qualifies(observation))
     }
 
     @Test
@@ -169,8 +166,7 @@ class RoninLaboratoryResultObservationTest {
             code = CodeableConcept(text = "lab".asFHIR())
         )
 
-        val qualified = RoninLaboratoryResultObservation.qualifies(observation)
-        assertTrue(qualified)
+        assertTrue(RoninLaboratoryResult.qualifies(observation))
     }
 
     @Test
@@ -203,7 +199,7 @@ class RoninLaboratoryResultObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResultObservation.validate(observation, null).alertIfErrors()
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -247,19 +243,20 @@ class RoninLaboratoryResultObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResultObservation.validate(observation, null).alertIfErrors()
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_LABOBS_001: A category code of \"laboratory\" is required @ Observation.category\n" +
-                "ERROR REQ_FIELD: category is a required element @ Observation.category",
+                "ERROR REQ_FIELD: category is a required element @ Observation.category\n" +
+                "ERROR USCORE_LABOBS_001: Coding list for laboratory result category must have code \"laboratory\" " +
+                "with system \"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
             exception.message
         )
     }
 
     @Test
-    fun `validate fails if no laboratory category`() {
+    fun `validate fails if bad laboratory category code`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
@@ -300,12 +297,13 @@ class RoninLaboratoryResultObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResultObservation.validate(observation, null).alertIfErrors()
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_LABOBS_001: A category code of \"laboratory\" is required @ Observation.category",
+                "ERROR USCORE_LABOBS_001: Coding list for laboratory result category must have code \"laboratory\" " +
+                "with system \"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
             exception.message
         )
     }
@@ -351,12 +349,129 @@ class RoninLaboratoryResultObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResultObservation.validate(observation, null).alertIfErrors()
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_LABOBS_001: A category code of \"laboratory\" is required @ Observation.category",
+                "ERROR USCORE_LABOBS_001: Coding list for laboratory result category must have code \"laboratory\" " +
+                "with system \"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if bad category system`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = Uri("some-system")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = Uri("http://bad.system"),
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_LABOBS_001: Coding list for laboratory result category must have code \"laboratory\" " +
+                "with system \"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if more than 1 entry in coding list for laboratory code`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code-1"),
+                        display = "some-display-1".asFHIR(),
+                        system = Uri("some-system-1")
+                    ),
+                    Coding(
+                        code = Code("some-code-2"),
+                        display = "some-display-2".asFHIR(),
+                        system = Uri("some-system-2")
+                    ),
+                    Coding(
+                        code = Code("some-code-3"),
+                        display = "some-display-3".asFHIR(),
+                        system = Uri("some-system-3")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_LABOBS_001: Coding list for laboratory result category must have code \"laboratory\" " +
+                "with system \"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category\n" +
+                "ERROR RONIN_LABOBS_001: Coding list for laboratory result code is restricted to 1 entry @ Observation.code",
             exception.message
         )
     }
@@ -403,7 +518,7 @@ class RoninLaboratoryResultObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResultObservation.validate(observation, null).alertIfErrors()
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -448,7 +563,7 @@ class RoninLaboratoryResultObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResultObservation.validate(observation, null).alertIfErrors()
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -499,7 +614,7 @@ class RoninLaboratoryResultObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResultObservation.validate(observation, null).alertIfErrors()
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -551,7 +666,7 @@ class RoninLaboratoryResultObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResultObservation.validate(observation, null).alertIfErrors()
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -603,7 +718,7 @@ class RoninLaboratoryResultObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResultObservation.validate(observation, null).alertIfErrors()
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -655,12 +770,12 @@ class RoninLaboratoryResultObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResultObservation.validate(observation, null).alertIfErrors()
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_LABOBS_002: Subject must represent a patient @ Observation.subject",
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Observation.subject",
             exception.message
         )
     }
@@ -719,7 +834,7 @@ class RoninLaboratoryResultObservationTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResultObservation.validate(observation, null).alertIfErrors()
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -784,7 +899,7 @@ class RoninLaboratoryResultObservationTest {
             )
         )
 
-        RoninLaboratoryResultObservation.validate(observation, null).alertIfErrors()
+        RoninLaboratoryResult.validate(observation, null).alertIfErrors()
     }
 
     @Test
@@ -839,7 +954,7 @@ class RoninLaboratoryResultObservationTest {
             )
         )
 
-        val (transformed, _) = RoninLaboratoryResultObservation.transform(observation, tenant)
+        val (transformed, _) = RoninLaboratoryResult.transform(observation, tenant)
         assertNull(transformed)
     }
 
@@ -890,7 +1005,7 @@ class RoninLaboratoryResultObservationTest {
             )
         )
 
-        val (transformed, _) = RoninLaboratoryResultObservation.transform(observation, tenant)
+        val (transformed, _) = RoninLaboratoryResult.transform(observation, tenant)
         assertNull(transformed)
     }
 
@@ -938,7 +1053,7 @@ class RoninLaboratoryResultObservationTest {
             )
         )
 
-        val (transformed, _) = RoninLaboratoryResultObservation.transform(observation, tenant)
+        val (transformed, _) = RoninLaboratoryResult.transform(observation, tenant)
         assertNull(transformed)
     }
 
@@ -960,8 +1075,8 @@ class RoninLaboratoryResultObservationTest {
                 )
             ),
             identifier = listOf(Identifier(value = "id".asFHIR())),
-            basedOn = listOf(Reference(display = "Based".asFHIR())),
-            partOf = listOf(Reference(display = "Part".asFHIR())),
+            basedOn = listOf(Reference(reference = "ServiceRequest/1234".asFHIR())),
+            partOf = listOf(Reference(reference = "Immunization/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
             category = listOf(
                 CodeableConcept(
@@ -985,13 +1100,13 @@ class RoninLaboratoryResultObservationTest {
             ),
             subject = Reference(reference = "Patient/1234".asFHIR()),
             focus = listOf(Reference(display = "focus".asFHIR())),
-            encounter = Reference(display = "encounter".asFHIR()),
+            encounter = Reference(reference = "Encounter/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
             ),
             issued = Instant("2022-01-01T00:00:00Z"),
-            performer = listOf(Reference(display = "performer".asFHIR())),
+            performer = listOf(Reference(reference = "Patient/1234".asFHIR())),
             value = DynamicValue(
                 type = DynamicValueType.STRING,
                 "string"
@@ -999,11 +1114,11 @@ class RoninLaboratoryResultObservationTest {
             interpretation = listOf(CodeableConcept(text = "interpretation".asFHIR())),
             bodySite = CodeableConcept(text = "bodySite".asFHIR()),
             method = CodeableConcept(text = "method".asFHIR()),
-            specimen = Reference(display = "specimen".asFHIR()),
-            device = Reference(display = "device".asFHIR()),
+            specimen = Reference(reference = "Specimen/1234".asFHIR()),
+            device = Reference(reference = "Device/1234".asFHIR()),
             referenceRange = listOf(ObservationReferenceRange(text = "referenceRange".asFHIR())),
-            hasMember = listOf(Reference(display = "member".asFHIR())),
-            derivedFrom = listOf(Reference(display = "derivedFrom".asFHIR())),
+            hasMember = listOf(Reference(reference = "Observation/2345".asFHIR())),
+            derivedFrom = listOf(Reference(reference = "Observation/3456".asFHIR())),
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(text = "code2".asFHIR()),
@@ -1013,10 +1128,15 @@ class RoninLaboratoryResultObservationTest {
                     )
                 )
             ),
-            note = listOf(Annotation(text = Markdown("text")))
+            note = listOf(
+                Annotation(
+                    text = Markdown("text"),
+                    author = DynamicValue(type = DynamicValueType.STRING, value = "Dr Adams")
+                )
+            )
         )
 
-        val (transformed, validation) = RoninLaboratoryResultObservation.transform(observation, tenant)
+        val (transformed, validation) = RoninLaboratoryResult.transform(observation, tenant)
         validation.alertIfErrors()
 
         transformed!!
@@ -1079,8 +1199,8 @@ class RoninLaboratoryResultObservationTest {
             ),
             transformed.identifier
         )
-        assertEquals(listOf(Reference(display = "Based".asFHIR())), transformed.basedOn)
-        assertEquals(listOf(Reference(display = "Part".asFHIR())), transformed.partOf)
+        assertEquals(listOf(Reference(reference = "ServiceRequest/test-1234".asFHIR())), transformed.basedOn)
+        assertEquals(listOf(Reference(reference = "Immunization/test-1234".asFHIR())), transformed.partOf)
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
             listOf(
@@ -1110,7 +1230,7 @@ class RoninLaboratoryResultObservationTest {
         )
         assertEquals(Reference(reference = "Patient/test-1234".asFHIR()), transformed.subject)
         assertEquals(listOf(Reference(display = "focus".asFHIR())), transformed.focus)
-        assertEquals(Reference(display = "encounter".asFHIR()), transformed.encounter)
+        assertEquals(Reference(reference = "Encounter/test-1234".asFHIR()), transformed.encounter)
         assertEquals(
             DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -1119,7 +1239,7 @@ class RoninLaboratoryResultObservationTest {
             transformed.effective
         )
         assertEquals(Instant("2022-01-01T00:00:00Z"), transformed.issued)
-        assertEquals(listOf(Reference(display = "performer".asFHIR())), transformed.performer)
+        assertEquals(listOf(Reference(reference = "Patient/test-1234".asFHIR())), transformed.performer)
         assertEquals(
             DynamicValue(
                 type = DynamicValueType.STRING,
@@ -1131,11 +1251,11 @@ class RoninLaboratoryResultObservationTest {
         assertEquals(listOf(CodeableConcept(text = "interpretation".asFHIR())), transformed.interpretation)
         assertEquals(CodeableConcept(text = "bodySite".asFHIR()), transformed.bodySite)
         assertEquals(CodeableConcept(text = "method".asFHIR()), transformed.method)
-        assertEquals(Reference(display = "specimen".asFHIR()), transformed.specimen)
-        assertEquals(Reference(display = "device".asFHIR()), transformed.device)
+        assertEquals(Reference(reference = "Specimen/test-1234".asFHIR()), transformed.specimen)
+        assertEquals(Reference(reference = "Device/test-1234".asFHIR()), transformed.device)
         assertEquals(listOf(ObservationReferenceRange(text = "referenceRange".asFHIR())), transformed.referenceRange)
-        assertEquals(listOf(Reference(display = "member".asFHIR())), transformed.hasMember)
-        assertEquals(listOf(Reference(display = "derivedFrom".asFHIR())), transformed.derivedFrom)
+        assertEquals(listOf(Reference(reference = "Observation/test-2345".asFHIR())), transformed.hasMember)
+        assertEquals(listOf(Reference(reference = "Observation/test-3456".asFHIR())), transformed.derivedFrom)
         assertEquals(
             listOf(
                 ObservationComponent(
@@ -1148,7 +1268,15 @@ class RoninLaboratoryResultObservationTest {
             ),
             transformed.component
         )
-        assertEquals(listOf(Annotation(text = Markdown("text"))), transformed.note)
+        assertEquals(
+            listOf(
+                Annotation(
+                    text = Markdown("text"),
+                    author = DynamicValue(type = DynamicValueType.STRING, value = "Dr Adams")
+                )
+            ),
+            transformed.note
+        )
     }
 
     @Test
@@ -1184,7 +1312,7 @@ class RoninLaboratoryResultObservationTest {
             )
         )
 
-        val (transformed, validation) = RoninLaboratoryResultObservation.transform(observation, tenant)
+        val (transformed, validation) = RoninLaboratoryResult.transform(observation, tenant)
         validation.alertIfErrors()
 
         transformed!!
@@ -1275,5 +1403,50 @@ class RoninLaboratoryResultObservationTest {
         assertEquals(listOf<Reference>(), transformed.derivedFrom)
         assertEquals(listOf<ObservationComponent>(), transformed.component)
         assertEquals(listOf<Annotation>(), transformed.note)
+    }
+
+    @Test
+    fun `transform inherits R4 validation`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = Code("bad-status"),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = Uri("some-system")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            )
+        )
+
+        val exception = assertThrows<java.lang.IllegalArgumentException> {
+            val (transformed, validation) = RoninLaboratoryResult.transform(observation, tenant)
+            assertNull(transformed)
+            validation.alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR INV_VALUE_SET: 'bad-status' is outside of required value set @ Observation.status",
+            exception.message
+        )
     }
 }
