@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
@@ -22,6 +23,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
 import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
 
@@ -30,7 +32,6 @@ class EpicPatientServiceTest {
     private lateinit var aidboxClient: AidboxPatientService
     private lateinit var httpResponse: HttpResponse
     private val validPatientBundle = readResource<Bundle>("/ExamplePatientBundle.json")
-    private val validMultiPatientBundle = readResource<Bundle>("/ExampleMultiPatientBundle.json")
     private val testPrivateKey = this::class.java.getResource("/TestPrivateKey.txt")!!.readText()
 
     @BeforeEach
@@ -570,5 +571,41 @@ class EpicPatientServiceTest {
         )
 
         assertEquals(0, response.size)
+    }
+
+    @Test
+    fun `getPatientsFHIRId handles no patients found`() {
+        val mrn = "MRN"
+        val mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
+
+        val epicPatientService = spyk(EpicPatientService(epicClient, 100, aidboxClient))
+
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            mrnSystem = mrnSystem,
+            internalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
+        )
+
+        every {
+            aidboxClient.getPatientFHIRIds(
+                tenant.mnemonic,
+                mapOf(mrn to SystemValue(mrn, mrnSystem))
+            )
+        } returns mapOf()
+
+        every {
+            epicPatientService.findPatientsById(
+                tenant,
+                mapOf(mrn to Identifier(value = mrn.asFHIR(), system = Uri(mrnSystem)))
+            )
+        } returns mapOf()
+
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> { epicPatientService.getPatientFHIRId(tenant, mrn) }
+
+        assertEquals("No FHIR ID found for patient", exception.message)
     }
 }

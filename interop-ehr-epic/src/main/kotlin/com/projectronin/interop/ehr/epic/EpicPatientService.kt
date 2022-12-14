@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
@@ -108,11 +109,15 @@ class EpicPatientService(
 
     @Trace
     override fun getPatientFHIRId(tenant: Tenant, patientIDValue: String): String {
-        return getPatientsFHIRIds(
-            tenant,
-            tenant.vendorAs<Epic>().patientMRNSystem,
-            listOf(patientIDValue)
-        )[patientIDValue]!!.fhirID
+        val patientFhirId =
+            getPatientsFHIRIds(tenant, tenant.vendorAs<Epic>().patientMRNSystem, listOf(patientIDValue))[patientIDValue]
+
+        if (patientFhirId == null) {
+            logger.error { "No patient FHIR ID found for patient with ID $patientIDValue in tenant ${tenant.mnemonic}" }
+            throw VendorIdentifierNotFoundException("No FHIR ID found for patient")
+        }
+
+        return patientFhirId.fhirID
     }
 
     fun getPatientsFHIRIds(
