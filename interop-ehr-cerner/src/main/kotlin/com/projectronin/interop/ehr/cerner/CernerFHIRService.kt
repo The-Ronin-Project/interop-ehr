@@ -15,6 +15,7 @@ import mu.KotlinLogging
 abstract class CernerFHIRService<T : Resource<T>>(val cernerClient: CernerClient) : FHIRService<T> {
     private val logger = KotlinLogging.logger { }
     abstract val fhirURLSearchPart: String
+    private val standardParameters: Map<String, Any> = mapOf("_count" to 20)
 
     @Trace
     override fun getByID(tenant: Tenant, resourceFHIRId: String): T {
@@ -35,13 +36,15 @@ abstract class CernerFHIRService<T : Resource<T>>(val cernerClient: CernerClient
     ): Bundle {
         logger.info { "Get started for ${tenant.mnemonic}" }
 
+        val standardizedParameters = standardizeParameters(parameters)
+
         val responses: MutableList<Bundle> = mutableListOf()
         var nextURL: String? = null
         do {
             val bundle = runBlocking {
                 val httpResponse =
                     if (nextURL == null) {
-                        cernerClient.get(tenant, fhirURLSearchPart, parameters)
+                        cernerClient.get(tenant, fhirURLSearchPart, standardizedParameters)
                     } else {
                         cernerClient.get(tenant, nextURL!!)
                     }
@@ -61,5 +64,19 @@ abstract class CernerFHIRService<T : Resource<T>>(val cernerClient: CernerClient
         var bundle = responses.first()
         responses.subList(1, responses.size).forEach { bundle = mergeBundles(bundle, it) }
         return bundle
+    }
+
+    /**
+     * Standardizes the [parameters], including any standard parameters that have not already been included and returning the combined map.
+     */
+    private fun standardizeParameters(parameters: Map<String, Any?>): Map<String, Any?> {
+        val parametersToAdd = standardParameters.mapNotNull {
+            if (parameters.containsKey(it.key)) {
+                null
+            } else {
+                it.toPair()
+            }
+        }
+        return parameters + parametersToAdd
     }
 }

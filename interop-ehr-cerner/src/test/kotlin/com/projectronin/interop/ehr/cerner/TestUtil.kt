@@ -2,6 +2,8 @@ package com.projectronin.interop.ehr.cerner
 
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
+import com.fasterxml.jackson.module.kotlin.readValue
+import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.tenant.config.model.AuthenticationConfig
 import com.projectronin.interop.tenant.config.model.BatchConfig
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -21,7 +23,8 @@ fun createTestTenant(
     authEndpoint: String = "https://auth.endpoint.com/smart-v1/token",
     clientId: String = "client-id",
     secret: String = "secretsecretsecret",
-    serviceEndpoint: String = "https://serviceendpoint.cerner.com/r4/"
+    serviceEndpoint: String = "https://serviceendpoint.cerner.com/r4/",
+    mrnSystem: String = "mrnSystem"
 ): Tenant {
     return Tenant(
         internalId,
@@ -33,7 +36,8 @@ fun createTestTenant(
             "instanceName",
             "clientId",
             AuthenticationConfig(authEndpoint, "", "", clientId, secret),
-            serviceEndpoint
+            serviceEndpoint,
+            mrnSystem
         )
     )
 }
@@ -48,3 +52,6 @@ fun getClient(): HttpClient {
         }
     }
 }
+
+inline fun <reified T> readResource(resource: String): T =
+    JacksonManager.objectMapper.readValue(T::class.java.getResource(resource)!!.readText())

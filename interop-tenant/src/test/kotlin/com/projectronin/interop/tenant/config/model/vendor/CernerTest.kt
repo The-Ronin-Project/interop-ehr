@@ -13,7 +13,8 @@ class CernerTest {
             "instanceName",
             "clientId",
             authenticationConfig,
-            "https://localhost:8080/serviceEndpoint"
+            "https://localhost:8080/serviceEndpoint",
+            "mrn"
         )
         assertEquals(VendorType.CERNER, cerner.type)
         assertEquals("clientId", cerner.clientId)

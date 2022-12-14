@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test
 class CernerFHIRServiceTest {
     private lateinit var cernerClient: CernerClient
     private lateinit var httpResponse: HttpResponse
+    private val patientBundle = readResource<Bundle>("/ExamplePatientBundle.json")
 
     @BeforeEach
     fun setup() {
@@ -32,8 +33,8 @@ class CernerFHIRServiceTest {
         override val fhirResourceType: Class<Patient> = Patient::class.java
     ) :
         CernerFHIRService<Patient>(cernerClient) {
-        fun getPatients(tenant: Tenant): List<Patient> {
-            return getResourceListFromSearch(tenant, emptyMap())
+        fun getPatients(tenant: Tenant, overrideParameters: Map<String, Any?> = emptyMap()): List<Patient> {
+            return getResourceListFromSearch(tenant, overrideParameters)
         }
     }
 
@@ -62,36 +63,55 @@ class CernerFHIRServiceTest {
     }
 
     @Test
-    fun `ensure bundle handles no links`() {
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-        )
-
-        val patient = mockk<Patient>()
-        val bundle = mockk<Bundle> {
-            every { link } returns listOf()
-            every { entry } returns listOf(
-                mockk {
-                    every { resource } returns patient
-                }
+    fun `ensure standard parameters are added when missing`() {
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
             )
-        }
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns bundle
+        coEvery { httpResponse.body<Bundle>() } returns patientBundle
         coEvery {
             cernerClient.get(
                 tenant,
                 "url",
-                emptyMap()
+                mapOf(
+                    "_count" to 250
+                )
+            )
+        } returns httpResponse
+
+        val service = TestService(cernerClient)
+        val patients = service.getPatients(tenant, mapOf("_count" to 250))
+        assertEquals(2, patients.size)
+    }
+
+    @Test
+    fun `ensure standard parameters are not included when already provided`() {
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns patientBundle
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "url",
+                mapOf(
+                    "_count" to 20
+                )
             )
         } returns httpResponse
 
         val service = TestService(cernerClient)
         val patients = service.getPatients(tenant)
-        assertEquals(1, patients.size)
+        assertEquals(2, patients.size)
     }
 
     @Test
@@ -130,7 +150,10 @@ class CernerFHIRServiceTest {
         coEvery {
             cernerClient.get(
                 tenant,
-                "url"
+                "url",
+                mapOf(
+                    "_count" to 20
+                )
             )
         } returns httpResponse
 
@@ -142,7 +165,205 @@ class CernerFHIRServiceTest {
         coEvery { cernerClient.get(tenant, "http://test/1234") } returns httpResponse2
 
         val service = TestService(cernerClient)
-        val conditions = service.getPatients(tenant)
-        assertEquals(2, conditions.size)
+        val patients = service.getPatients(tenant)
+        assertEquals(2, patients.size)
+    }
+
+    @Test
+    fun `ensure bundle handles no links`() {
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+
+        val patient = mockk<Patient>()
+        val bundle = mockk<Bundle> {
+            every { link } returns listOf()
+            every { entry } returns listOf(
+                mockk {
+                    every { resource } returns patient
+                }
+            )
+        }
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns bundle
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "url",
+                mapOf(
+                    "_count" to 20
+                )
+            )
+        } returns httpResponse
+
+        val service = TestService(cernerClient)
+        val patients = service.getPatients(tenant)
+        assertEquals(1, patients.size)
+    }
+
+    @Test
+    fun `ensure bundle handles no next links`() {
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+
+        val patient = mockk<Patient>()
+        val bundle = mockk<Bundle> {
+            every { link } returns listOf(
+                mockk {
+                    every { relation } returns FHIRString("self")
+                }
+            )
+            every { entry } returns listOf(
+                mockk {
+                    every { resource } returns patient
+                }
+            )
+        }
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns bundle
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "url",
+                mapOf(
+                    "_count" to 20
+                )
+            )
+        } returns httpResponse
+
+        val service = TestService(cernerClient)
+        val patients = service.getPatients(tenant)
+        assertEquals(1, patients.size)
+    }
+
+    @Test
+    fun `ensure bundle handles links with no relations`() {
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+
+        val patient = mockk<Patient>()
+        val bundle = mockk<Bundle> {
+            every { link } returns listOf(
+                mockk {
+                    every { relation } returns null
+                }
+            )
+            every { entry } returns listOf(
+                mockk {
+                    every { resource } returns patient
+                }
+            )
+        }
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns bundle
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "url",
+                mapOf(
+                    "_count" to 20
+                )
+            )
+        } returns httpResponse
+
+        val service = TestService(cernerClient)
+        val patients = service.getPatients(tenant)
+        assertEquals(1, patients.size)
+    }
+
+    @Test
+    fun `ensure bundle handles next link with no URL`() {
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+
+        val patient = mockk<Patient>()
+        val bundle = mockk<Bundle> {
+            every { link } returns listOf(
+                mockk {
+                    every { relation } returns FHIRString("next")
+                    every { url } returns null
+                }
+            )
+            every { entry } returns listOf(
+                mockk {
+                    every { resource } returns patient
+                }
+            )
+        }
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns bundle
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "url",
+                mapOf(
+                    "_count" to 20
+                )
+            )
+        } returns httpResponse
+
+        val service = TestService(cernerClient)
+        val patients = service.getPatients(tenant)
+        assertEquals(1, patients.size)
+    }
+
+    @Test
+    fun `ensure bundle handles next link with URL with no value`() {
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+
+        val patient = mockk<Patient>()
+        val bundle = mockk<Bundle> {
+            every { link } returns listOf(
+                mockk {
+                    every { relation } returns FHIRString("next")
+                    every { url } returns Uri(null)
+                }
+            )
+            every { entry } returns listOf(
+                mockk {
+                    every { resource } returns patient
+                }
+            )
+        }
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns bundle
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "url",
+                mapOf(
+                    "_count" to 20
+                )
+            )
+        } returns httpResponse
+
+        val service = TestService(cernerClient)
+        val patients = service.getPatients(tenant)
+        assertEquals(1, patients.size)
     }
 }
