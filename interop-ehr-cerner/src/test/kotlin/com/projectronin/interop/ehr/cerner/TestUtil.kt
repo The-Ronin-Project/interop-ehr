@@ -3,7 +3,7 @@ package com.projectronin.interop.ehr.cerner
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.readValue
-import com.projectronin.interop.common.jackson.JacksonManager
+import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
 import com.projectronin.interop.tenant.config.model.AuthenticationConfig
 import com.projectronin.interop.tenant.config.model.BatchConfig
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -54,4 +54,4 @@ fun getClient(): HttpClient {
 }
 
 inline fun <reified T> readResource(resource: String): T =
-    JacksonManager.objectMapper.readValue(T::class.java.getResource(resource)!!.readText())
+    objectMapper.readValue(T::class.java.getResource(resource)!!.readText())

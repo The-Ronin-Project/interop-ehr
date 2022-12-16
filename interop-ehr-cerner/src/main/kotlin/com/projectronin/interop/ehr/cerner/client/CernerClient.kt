@@ -13,10 +13,15 @@ import io.ktor.http.HttpHeaders
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 
-class CernerClient(private val client: HttpClient, private val cernerAuthenticationService: CernerAuthenticationService) {
+class CernerClient(
+    private val client: HttpClient,
+    private val cernerAuthenticationService: CernerAuthenticationService
+) {
     private val logger = KotlinLogging.logger { }
 
     suspend fun get(tenant: Tenant, urlPart: String, parameters: Map<String, Any?> = mapOf()): HttpResponse {
+        logger.debug { "Started GET call to tenant: ${tenant.mnemonic}" }
+
         val authentication = cernerAuthenticationService.getAuthentication(tenant) ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
         val url = tenant.vendor.serviceEndpoint + urlPart
         val response = runBlocking {
