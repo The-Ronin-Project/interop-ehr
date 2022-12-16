@@ -8,10 +8,12 @@ import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.ronin.util.validateReferenceList
+import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
+import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 
@@ -33,7 +35,7 @@ abstract class BaseRoninObservation(
     open val validSpecimenValues = listOf("Specimen")
     open val validSubjectValues = listOf("Patient", "Location")
     open val validPartOfValues = listOf("Immunization", "MedicationStatement", "Procedure")
-    open val validPerformerValues = listOf("CareTeam", "Patient", "Practitioner", "PractitionerRole", "Organization")
+    open val validPerformerValues = listOf("CareTeam", "Organization", "Patient", "Practitioner", "PractitionerRole")
 
     // Dynamic value checks - same for all subclasses
     private val acceptedAuthorTypes = listOf(
@@ -45,6 +47,13 @@ abstract class BaseRoninObservation(
 
     private val requiredCodeError = RequiredFieldError(Observation::code)
 
+    private val singleObservationCodeError = FHIRError(
+        code = "RONIN_OBS_001",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Coding list is restricted to 1 entry",
+        location = LocationContext(Observation::code)
+    )
+
     /**
      * Validates the [element] against RoninObservation rules. Validation logic for reference attributes may vary by
      * Observation type. This logic is controlled by overriding the open val variables like [validSubjectValues].
@@ -54,6 +63,9 @@ abstract class BaseRoninObservation(
             requireRoninIdentifiers(element.identifier, parentContext, validation)
 
             checkNotNull(element.code, requiredCodeError, parentContext)
+
+            requireCodeableConcept("code", element.code, parentContext, validation)
+            requireCodeCoding("code", element.code?.coding, parentContext, validation)
 
             checkNotNull(element.subject, requiredSubjectError, parentContext)
             validateReference(element.subject, validSubjectValues, LocationContext(Observation::subject), validation)
@@ -94,7 +106,14 @@ abstract class BaseRoninObservation(
      * Validates the [element] against Ronin rules for a specific Observation type.
      * Type is defined by the Ronin Common Data Model based on Observation.category and Observation.code.
      */
-    abstract fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation)
+    open fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
+        validation.apply {
+            val codingList = element.code?.coding
+            ifNotNull(codingList) {
+                checkTrue((codingList!!.size <= 1), singleObservationCodeError, parentContext)
+            }
+        }
+    }
 
     /**
      * Validates the Observation against rules from Ronin, USCore, and specific Observation type profiles.

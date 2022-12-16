@@ -1,8 +1,6 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
 import com.projectronin.interop.fhir.r4.CodeSystem
-import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
-import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
@@ -10,7 +8,6 @@ import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.FHIRError
-import com.projectronin.interop.fhir.validate.InvalidValueSetError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
@@ -20,6 +17,15 @@ import com.projectronin.interop.tenant.config.model.Tenant
 
 object RoninBodyWeight : BaseRoninVitalSign(R4ObservationValidator, RoninProfile.OBSERVATION_BODY_WEIGHT.value) {
     internal val bodyWeightCode = Code("29463-7")
+
+    // Quantity unit codes - [USCore Body Weight Units](http://hl7.org/fhir/R4/valueset-ucum-bodyweight.html)
+    override val validQuantityCodes = listOf("kg", "[lb_av]", "g")
+
+    // Reference checks - override BaseRoninObservation value lists as needed for RoninBodyWeight
+    override val validBasedOnValues = listOf("CarePlan", "MedicationRequest")
+    override val validDerivedFromValues = listOf("DocumentReference")
+    override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
+    override val validPartOfValues = listOf("ImagingStudy", "Immunization", "MedicationAdministration", "MedicationDispense", "MedicationStatement", "Procedure")
 
     override fun qualifies(resource: Observation): Boolean {
         return resource.code?.coding?.any { it.system == CodeSystem.LOINC.uri && it.code == bodyWeightCode } ?: false
@@ -33,6 +39,7 @@ object RoninBodyWeight : BaseRoninVitalSign(R4ObservationValidator, RoninProfile
     )
 
     override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
+        super.validateObservation(element, parentContext, validation)
         validation.apply {
             checkTrue(element.bodySite == null, noBodySiteError, parentContext)
         }
@@ -45,22 +52,6 @@ object RoninBodyWeight : BaseRoninVitalSign(R4ObservationValidator, RoninProfile
         location = LocationContext(Observation::code)
     )
 
-    private val requiredQuantityValueError = RequiredFieldError(LocationContext("Observation", "valueQuantity.value"))
-    private val requiredQuantityUnitError = RequiredFieldError(LocationContext("Observation", "valueQuantity.unit"))
-    private val requiredQuantityCodeError = RequiredFieldError(LocationContext("Observation", "valueQuantity.code"))
-
-    private val invalidQuantitySystemError = FHIRError(
-        code = "USCORE_WTOBS_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Quantity system must be UCUM",
-        location = LocationContext("Observation", "valueQuantity.system")
-    )
-
-    /**
-     * [USCore Body Weight Units](http://hl7.org/fhir/R4/valueset-ucum-bodyweight.html)
-     */
-    private val validQuantityCodes = listOf("kg", "[lb_av]", "g")
-
     override fun validateUSCore(element: Observation, parentContext: LocationContext, validation: Validation) {
         super.validateUSCore(element, parentContext, validation)
         validation.apply {
@@ -72,28 +63,8 @@ object RoninBodyWeight : BaseRoninVitalSign(R4ObservationValidator, RoninProfile
                     parentContext
                 )
             }
-
-            if (element.value?.type == DynamicValueType.QUANTITY) {
-                val quantity = element.value!!.value as Quantity
-                checkNotNull(quantity.value, requiredQuantityValueError, parentContext)
-                checkNotNull(quantity.unit, requiredQuantityUnitError, parentContext)
-
-                // The presence of a code requires a system, so we're bypassing the check here.
-                ifNotNull(quantity.system) {
-                    checkTrue(quantity.system == CodeSystem.UCUM.uri, invalidQuantitySystemError, parentContext)
-                }
-
-                val quantityCode = quantity.code
-                checkNotNull(quantityCode, requiredQuantityCodeError, parentContext)
-                ifNotNull(quantityCode) {
-                    checkTrue(
-                        validQuantityCodes.contains(quantityCode.value),
-                        InvalidValueSetError(LocationContext("Observation", "valueQuantity.code"), quantityCode.value ?: ""),
-                        parentContext
-                    )
-                }
-            }
         }
+        validateVitalSignValue(element.value, validQuantityCodes, parentContext, validation)
     }
 
     private val requiredIdError = RequiredFieldError(Observation::id)

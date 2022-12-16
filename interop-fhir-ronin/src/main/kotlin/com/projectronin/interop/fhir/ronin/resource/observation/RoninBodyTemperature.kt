@@ -15,40 +15,25 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 
-object RoninBodyHeight : BaseRoninVitalSign(R4ObservationValidator, RoninProfile.OBSERVATION_BODY_HEIGHT.value) {
-    internal val bodyHeightCode = Code("8302-2")
+object RoninBodyTemperature : BaseRoninVitalSign(R4ObservationValidator, RoninProfile.OBSERVATION_BODY_TEMPERATURE.value) {
+    internal val bodyTemperatureCode = Code("8310-5")
 
-    // Quantity unit codes - [USCore Body Length Units](http://hl7.org/fhir/R4/valueset-ucum-bodylength.html)
-    override val validQuantityCodes = listOf("cm", "[in_i]")
+    // Quantity unit codes - [USCore Body Temperature Units](http://hl7.org/fhir/R4/valueset-ucum-bodytemp.html)
+    override val validQuantityCodes = listOf("Cel", "[degF]")
 
-    // Reference checks - override BaseRoninObservation value lists as needed for RoninBodyHeight
-    override val validBasedOnValues = listOf("CarePlan", "MedicationRequest")
-    override val validDerivedFromValues = listOf("DocumentReference")
+    // Reference checks - override BaseRoninObservation value lists as needed for RoninBodyTemperature
+    override val validDerivedFromValues = listOf("DocumentReference", "ImagingStudy", "Media", "MolecularSequence", "Observation", "QuestionnaireResponse")
     override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
-    override val validPartOfValues = listOf("MedicationStatement", "Procedure")
+    override val validPartOfValues = listOf("ImagingStudy", "Immunization", "MedicationAdministration", "MedicationDispense", "MedicationStatement", "Procedure")
 
     override fun qualifies(resource: Observation): Boolean {
-        return resource.code?.coding?.any { it.system == CodeSystem.LOINC.uri && it.code == bodyHeightCode } ?: false
+        return resource.code?.coding?.any { it.system == CodeSystem.LOINC.uri && it.code == bodyTemperatureCode } ?: false
     }
 
-    private val noBodySiteError = FHIRError(
-        code = "RONIN_HTOBS_001",
+    private val noBodyTemperatureCodeError = FHIRError(
+        code = "USCORE_TMPOBS_001",
         severity = ValidationIssueSeverity.ERROR,
-        description = "bodySite not allowed for Body Height observation",
-        location = LocationContext(Observation::bodySite)
-    )
-
-    override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validateObservation(element, parentContext, validation)
-        validation.apply {
-            checkTrue(element.bodySite == null, noBodySiteError, parentContext)
-        }
-    }
-
-    private val noBodyHeightCodeError = FHIRError(
-        code = "USCORE_HTOBS_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "LOINC code ${bodyHeightCode.value} required for US Core Body Height profile",
+        description = "LOINC code ${bodyTemperatureCode.value} required for US Core Body Temperature profile",
         location = LocationContext(Observation::code)
     )
 
@@ -58,8 +43,8 @@ object RoninBodyHeight : BaseRoninVitalSign(R4ObservationValidator, RoninProfile
             val code = element.code
             if (code != null) {
                 checkTrue(
-                    code.coding.any { it.system == CodeSystem.LOINC.uri && it.code == bodyHeightCode },
-                    noBodyHeightCodeError,
+                    code.coding.any { it.system == CodeSystem.LOINC.uri && it.code == bodyTemperatureCode },
+                    noBodyTemperatureCodeError,
                     parentContext
                 )
             }
@@ -81,7 +66,6 @@ object RoninBodyHeight : BaseRoninVitalSign(R4ObservationValidator, RoninProfile
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier(),
-            bodySite = null // bodySite should not be supplied for Body Height
         )
         return Pair(transformed, validation)
     }

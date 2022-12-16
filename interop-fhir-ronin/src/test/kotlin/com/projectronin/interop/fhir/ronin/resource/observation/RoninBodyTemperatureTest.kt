@@ -28,6 +28,7 @@ import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyTemperature.vitalSignsCode
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -40,7 +41,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class RoninBodyWeightTest {
+class RoninBodyTemperatureTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
@@ -60,7 +61,7 @@ class RoninBodyWeightTest {
             code = CodeableConcept(text = "vital sign".asFHIR())
         )
 
-        assertFalse(RoninBodyWeight.qualifies(observation))
+        assertFalse(RoninBodyTemperature.qualifies(observation))
     }
 
     @Test
@@ -74,7 +75,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -87,7 +88,7 @@ class RoninBodyWeightTest {
             code = null
         )
 
-        assertFalse(RoninBodyWeight.qualifies(observation))
+        assertFalse(RoninBodyTemperature.qualifies(observation))
     }
 
     @Test
@@ -101,7 +102,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -114,11 +115,11 @@ class RoninBodyWeightTest {
             code = CodeableConcept(text = "code".asFHIR())
         )
 
-        assertFalse(RoninBodyWeight.qualifies(observation))
+        assertFalse(RoninBodyTemperature.qualifies(observation))
     }
 
     @Test
-    fun `does not qualify when coding code not for body weight`() {
+    fun `does not qualify when coding code not for body temperature`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
@@ -128,7 +129,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -141,11 +142,11 @@ class RoninBodyWeightTest {
             code = CodeableConcept(coding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("1234"))))
         )
 
-        assertFalse(RoninBodyWeight.qualifies(observation))
+        assertFalse(RoninBodyTemperature.qualifies(observation))
     }
 
     @Test
-    fun `does not qualify when coding code is for body weight but wrong system`() {
+    fun `does not qualify when coding code is for body temperature but wrong system`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
@@ -155,7 +156,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -169,13 +170,13 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.UCUM.uri,
-                        code = RoninBodyWeight.bodyWeightCode
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 )
             )
         )
 
-        assertFalse(RoninBodyWeight.qualifies(observation))
+        assertFalse(RoninBodyTemperature.qualifies(observation))
     }
 
     @Test
@@ -189,7 +190,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -203,13 +204,13 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        code = RoninBodyWeight.bodyWeightCode
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 )
             )
         )
 
-        assertTrue(RoninBodyWeight.qualifies(observation))
+        assertTrue(RoninBodyTemperature.qualifies(observation))
     }
 
     @Test
@@ -222,8 +223,8 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 )
             ),
@@ -232,7 +233,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -245,7 +246,7 @@ class RoninBodyWeightTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyWeight.validate(observation, null).alertIfErrors()
+            RoninBodyTemperature.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -257,7 +258,7 @@ class RoninBodyWeightTest {
     }
 
     @Test
-    fun `validate fails if bodySite set`() {
+    fun `validate fails if non-body temperature code`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
@@ -278,63 +279,7 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
-                        )
-                    )
-                )
-            ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
-            effective = DynamicValue(
-                type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
-            ),
-            bodySite = CodeableConcept(text = "knee".asFHIR())
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyWeight.validate(observation, null).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_WTOBS_001: bodySite not allowed for Body Weight observation @ Observation.bodySite",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails if non-body weight code`() {
-        val observation = Observation(
-            id = Id("123"),
-            status = ObservationStatus.AMENDED.asCode(),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                )
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
+                        display = "Body Temp".asFHIR(),
                         code = Code("wrong-code")
                     )
                 )
@@ -344,7 +289,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -357,12 +302,13 @@ class RoninBodyWeightTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyWeight.validate(observation, null).alertIfErrors()
+            RoninBodyTemperature.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_WTOBS_001: LOINC code ${RoninBodyWeight.bodyWeightCode.value} required for US Core Body Weight profile @ Observation.code",
+                "ERROR USCORE_TMPOBS_001: LOINC code 8310-5 required for " +
+                "US Core Body Temperature profile @ Observation.code",
             exception.message
         )
     }
@@ -388,8 +334,8 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 )
             ),
@@ -398,7 +344,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -411,15 +357,15 @@ class RoninBodyWeightTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    unit = "kg".asFHIR(),
+                    unit = "Cel".asFHIR(),
                     system = CodeSystem.UCUM.uri,
-                    code = Code("kg")
+                    code = Code("Cel")
                 )
             )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyWeight.validate(observation, null).alertIfErrors()
+            RoninBodyTemperature.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -450,8 +396,8 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 )
             ),
@@ -460,7 +406,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -473,15 +419,15 @@ class RoninBodyWeightTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = Decimal(68.04),
+                    value = Decimal(98.4),
                     system = CodeSystem.UCUM.uri,
-                    code = Code("kg")
+                    code = Code("[degF]")
                 )
             )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyWeight.validate(observation, null).alertIfErrors()
+            RoninBodyTemperature.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -512,8 +458,8 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 )
             ),
@@ -522,7 +468,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -535,16 +481,16 @@ class RoninBodyWeightTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = Decimal(68.04),
-                    unit = "kg".asFHIR(),
+                    value = Decimal(37.0),
+                    unit = "Cel".asFHIR(),
                     system = CodeSystem.LOINC.uri,
-                    code = Code("kg")
+                    code = Code("Cel")
                 )
             )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyWeight.validate(observation, null).alertIfErrors()
+            RoninBodyTemperature.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -575,8 +521,8 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 )
             ),
@@ -585,7 +531,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -598,15 +544,15 @@ class RoninBodyWeightTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = Decimal(68.04),
-                    unit = "kg".asFHIR(),
+                    value = Decimal(98.4),
+                    unit = "[degF]".asFHIR(),
                     system = CodeSystem.UCUM.uri
                 )
             )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyWeight.validate(observation, null).alertIfErrors()
+            RoninBodyTemperature.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -617,7 +563,7 @@ class RoninBodyWeightTest {
     }
 
     @Test
-    fun `validate fails if quantity code is of an invalid type`() {
+    fun `validate fails if quantity code is outside the required value set`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
@@ -637,8 +583,8 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 )
             ),
@@ -647,7 +593,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -660,8 +606,8 @@ class RoninBodyWeightTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = Decimal(68.04),
-                    unit = "kg".asFHIR(),
+                    value = Decimal(182.88),
+                    unit = "cm".asFHIR(),
                     system = CodeSystem.UCUM.uri,
                     code = Code("invalid-code")
                 )
@@ -669,7 +615,7 @@ class RoninBodyWeightTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyWeight.validate(observation, null).alertIfErrors()
+            RoninBodyTemperature.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -700,8 +646,8 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 )
             ),
@@ -710,7 +656,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = Code("not-a-vital-sign")
+                            code = Code("bad-code")
                         )
                     )
                 )
@@ -723,16 +669,16 @@ class RoninBodyWeightTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = Decimal(68.04),
-                    unit = "kg".asFHIR(),
+                    value = Decimal(98.4),
+                    unit = "degF".asFHIR(),
                     system = CodeSystem.UCUM.uri,
-                    code = Code("kg")
+                    code = Code("[degF]")
                 )
             )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyWeight.validate(observation, null).alertIfErrors()
+            RoninBodyTemperature.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -764,8 +710,8 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 )
             ),
@@ -774,7 +720,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -787,15 +733,15 @@ class RoninBodyWeightTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = Decimal(68.04),
-                    unit = "kg".asFHIR(),
+                    value = Decimal(37.0),
+                    unit = "Cel".asFHIR(),
                     system = CodeSystem.UCUM.uri,
-                    code = Code("kg")
+                    code = Code("Cel")
                 )
             )
         )
 
-        RoninBodyWeight.validate(observation, null).alertIfErrors()
+        RoninBodyTemperature.validate(observation, null).alertIfErrors()
     }
 
     @Test
@@ -818,7 +764,7 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        code = RoninBodyWeight.bodyWeightCode
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 )
             ),
@@ -827,7 +773,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -840,15 +786,15 @@ class RoninBodyWeightTest {
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
                 Quantity(
-                    value = Decimal(68.04),
-                    unit = "kg".asFHIR(),
+                    value = Decimal(182.88),
+                    unit = "cm".asFHIR(),
                     system = CodeSystem.UCUM.uri,
-                    code = Code("kg")
+                    code = Code("cm")
                 )
             )
         )
 
-        val (transformed, _) = RoninBodyWeight.transform(observation, tenant)
+        val (transformed, _) = RoninBodyTemperature.transform(observation, tenant)
         assertNull(transformed)
     }
 
@@ -876,7 +822,7 @@ class RoninBodyWeightTest {
                 )
             ),
             identifier = listOf(Identifier(value = "id".asFHIR())),
-            basedOn = listOf(Reference(reference = "MedicationRequest/1234".asFHIR())),
+            basedOn = listOf(Reference(reference = "CarePlan/1234".asFHIR())),
             partOf = listOf(Reference(reference = "MedicationStatement/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
             category = listOf(
@@ -884,7 +830,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -893,11 +839,11 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 ),
-                text = "Body Weight".asFHIR()
+                text = "Body Temp".asFHIR()
             ),
             subject = Reference(reference = "Patient/1234".asFHIR()),
             focus = listOf(Reference(display = "focus".asFHIR())),
@@ -907,7 +853,7 @@ class RoninBodyWeightTest {
                 "2022-01-01T00:00:00Z"
             ),
             issued = Instant("2022-01-01T00:00:00Z"),
-            performer = listOf(Reference(reference = "Practitioner/1234".asFHIR())),
+            performer = listOf(Reference(reference = "Organization/1234".asFHIR())),
             value = DynamicValue(
                 type = DynamicValueType.STRING,
                 "string"
@@ -918,8 +864,8 @@ class RoninBodyWeightTest {
             specimen = Reference(reference = "Specimen/1234".asFHIR()),
             device = Reference(reference = "DeviceMetric/1234".asFHIR()),
             referenceRange = listOf(ObservationReferenceRange(text = "referenceRange".asFHIR())),
-            hasMember = listOf(Reference(reference = "Observation/3456".asFHIR())),
-            derivedFrom = listOf(Reference(reference = "DocumentReference/2345".asFHIR())),
+            hasMember = listOf(Reference(reference = "Observation/5678".asFHIR())),
+            derivedFrom = listOf(Reference(reference = "DocumentReference/1234".asFHIR())),
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(text = "code2".asFHIR()),
@@ -937,13 +883,13 @@ class RoninBodyWeightTest {
             )
         )
 
-        val (transformed, validation) = RoninBodyWeight.transform(observation, tenant)
+        val (transformed, validation) = RoninBodyTemperature.transform(observation, tenant)
         validation.alertIfErrors()
 
         transformed!!
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("test-123"), transformed.id)
-        assertEquals(Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_WEIGHT.value))), transformed.meta)
+        assertEquals(Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_TEMPERATURE.value))), transformed.meta)
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
@@ -985,7 +931,7 @@ class RoninBodyWeightTest {
             ),
             transformed.identifier
         )
-        assertEquals(listOf(Reference(reference = "MedicationRequest/test-1234".asFHIR())), transformed.basedOn)
+        assertEquals(listOf(Reference(reference = "CarePlan/test-1234".asFHIR())), transformed.basedOn)
         assertEquals(listOf(Reference(reference = "MedicationStatement/test-1234".asFHIR())), transformed.partOf)
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
@@ -994,7 +940,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -1006,11 +952,11 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 ),
-                text = "Body Weight".asFHIR()
+                text = "Body Temp".asFHIR()
             ),
             transformed.code
         )
@@ -1025,7 +971,7 @@ class RoninBodyWeightTest {
             transformed.effective
         )
         assertEquals(Instant("2022-01-01T00:00:00Z"), transformed.issued)
-        assertEquals(listOf(Reference(reference = "Practitioner/test-1234".asFHIR())), transformed.performer)
+        assertEquals(listOf(Reference(reference = "Organization/test-1234".asFHIR())), transformed.performer)
         assertEquals(
             DynamicValue(
                 type = DynamicValueType.STRING,
@@ -1035,13 +981,13 @@ class RoninBodyWeightTest {
         )
         assertNull(transformed.dataAbsentReason)
         assertEquals(listOf(CodeableConcept(text = "interpretation".asFHIR())), transformed.interpretation)
-        assertNull(transformed.bodySite)
+        assertEquals(CodeableConcept(text = "bodySite".asFHIR()), transformed.bodySite)
         assertEquals(CodeableConcept(text = "method".asFHIR()), transformed.method)
         assertEquals(Reference(reference = "Specimen/test-1234".asFHIR()), transformed.specimen)
         assertEquals(Reference(reference = "DeviceMetric/test-1234".asFHIR()), transformed.device)
         assertEquals(listOf(ObservationReferenceRange(text = "referenceRange".asFHIR())), transformed.referenceRange)
-        assertEquals(listOf(Reference(reference = "Observation/test-3456".asFHIR())), transformed.hasMember)
-        assertEquals(listOf(Reference(reference = "DocumentReference/test-2345".asFHIR())), transformed.derivedFrom)
+        assertEquals(listOf(Reference(reference = "Observation/test-5678".asFHIR())), transformed.hasMember)
+        assertEquals(listOf(Reference(reference = "DocumentReference/test-1234".asFHIR())), transformed.derivedFrom)
         assertEquals(
             listOf(
                 ObservationComponent(
@@ -1074,18 +1020,18 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 ),
-                text = "Body Weight".asFHIR()
+                text = "Body Temp".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -1098,13 +1044,13 @@ class RoninBodyWeightTest {
             )
         )
 
-        val (transformed, validation) = RoninBodyWeight.transform(observation, tenant)
+        val (transformed, validation) = RoninBodyTemperature.transform(observation, tenant)
         validation.alertIfErrors()
 
         transformed!!
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("test-123"), transformed.id)
-        assertEquals(Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_WEIGHT.value))), transformed.meta)
+        assertEquals(Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_TEMPERATURE.value))), transformed.meta)
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
         assertNull(transformed.text)
@@ -1135,7 +1081,7 @@ class RoninBodyWeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -1147,11 +1093,11 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 ),
-                text = "Body Weight".asFHIR()
+                text = "Body Temp".asFHIR()
             ),
             transformed.code
         )
@@ -1190,18 +1136,17 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
-                ),
-                text = "Body Weight".asFHIR(),
+                )
             ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -1215,7 +1160,7 @@ class RoninBodyWeightTest {
         )
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
-            val (transformed, validation) = RoninBodyWeight.transform(observation, tenant)
+            val (transformed, validation) = RoninBodyTemperature.transform(observation, tenant)
             assertNull(transformed)
             validation.alertIfErrors()
         }
@@ -1247,18 +1192,18 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 ),
-                text = "Body Weight".asFHIR(),
+                text = "Body Temp".asFHIR(),
             ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -1273,13 +1218,13 @@ class RoninBodyWeightTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyWeight.validate(observation, null).alertIfErrors()
+            RoninBodyTemperature.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of " +
-                "CarePlan, MedicationRequest @ Observation.basedOn[0]",
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of CarePlan, DeviceRequest, " +
+                "ImmunizationRecommendation, MedicationRequest, NutritionOrder, ServiceRequest @ Observation.basedOn[0]",
             exception.message
         )
     }
@@ -1305,18 +1250,18 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 ),
-                text = "Body Weight".asFHIR(),
+                text = "Body Temp".asFHIR(),
             ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -1331,13 +1276,13 @@ class RoninBodyWeightTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyWeight.validate(observation, null).alertIfErrors()
+            RoninBodyTemperature.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not " +
-                "DocumentReference @ Observation.derivedFrom[0]",
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of DocumentReference, " +
+                "ImagingStudy, Media, MolecularSequence, Observation, QuestionnaireResponse @ Observation.derivedFrom[0]",
             exception.message
         )
     }
@@ -1363,18 +1308,18 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 ),
-                text = "Body Weight".asFHIR(),
+                text = "Body Temp".asFHIR(),
             ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -1389,7 +1334,7 @@ class RoninBodyWeightTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyWeight.validate(observation, null).alertIfErrors()
+            RoninBodyTemperature.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -1421,18 +1366,18 @@ class RoninBodyWeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Weight".asFHIR(),
-                        code = RoninBodyWeight.bodyWeightCode
+                        display = "Body Temp".asFHIR(),
+                        code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 ),
-                text = "Body Weight".asFHIR(),
+                text = "Body Temp".asFHIR(),
             ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyWeight.vitalSignsCode
+                            code = RoninBodyTemperature.vitalSignsCode
                         )
                     )
                 )
@@ -1447,7 +1392,7 @@ class RoninBodyWeightTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyWeight.validate(observation, null).alertIfErrors()
+            RoninBodyTemperature.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(

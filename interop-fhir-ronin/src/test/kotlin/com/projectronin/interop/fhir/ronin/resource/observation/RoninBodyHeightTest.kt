@@ -223,6 +223,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 )
@@ -278,6 +279,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 )
@@ -333,6 +335,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = Code("wrong-code")
                     )
                 )
@@ -386,6 +389,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 )
@@ -447,6 +451,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 )
@@ -508,6 +513,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 )
@@ -544,7 +550,7 @@ class RoninBodyHeightTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_HTOBS_002: Quantity system must be UCUM @ Observation.valueQuantity.system",
+                "ERROR USCORE_VSOBS_002: Quantity system must be UCUM @ Observation.valueQuantity.system",
             exception.message
         )
     }
@@ -570,6 +576,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 )
@@ -631,6 +638,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 )
@@ -693,6 +701,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 )
@@ -729,7 +738,8 @@ class RoninBodyHeightTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_VSOBS_001: A category code of \"vital-signs\" is required @ Observation.category",
+                "ERROR USCORE_VSOBS_001: Vital signs must use code \"vital-signs\" in system " +
+                "\"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
             exception.message
         )
     }
@@ -755,6 +765,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 )
@@ -883,9 +894,11 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
-                )
+                ),
+                text = "Body Height".asFHIR()
             ),
             subject = Reference(reference = "Patient/1234".asFHIR()),
             focus = listOf(Reference(display = "focus".asFHIR())),
@@ -994,9 +1007,11 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
-                )
+                ),
+                text = "Body Height".asFHIR()
             ),
             transformed.code
         )
@@ -1060,9 +1075,11 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
-                )
+                ),
+                text = "Body Height".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -1131,9 +1148,11 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
-                )
+                ),
+                text = "Body Height".asFHIR()
             ),
             transformed.code
         )
@@ -1172,6 +1191,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 )
@@ -1202,6 +1222,238 @@ class RoninBodyHeightTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR INV_VALUE_SET: 'bad-status' is outside of required value set @ Observation.status",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if invalid basedOn reference resource type`() {
+        val observation = Observation(
+            id = Id("123"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
+                        code = RoninBodyHeight.bodyHeightCode
+                    )
+                ),
+                text = "Body Height".asFHIR(),
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = RoninBodyHeight.vitalSignsCode
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            basedOn = listOf(Reference(reference = "".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninBodyHeight.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of " +
+                "CarePlan, MedicationRequest @ Observation.basedOn[0]",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if invalid derivedFrom reference resource type`() {
+        val observation = Observation(
+            id = Id("123"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
+                        code = RoninBodyHeight.bodyHeightCode
+                    )
+                ),
+                text = "Body Height".asFHIR(),
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = RoninBodyHeight.vitalSignsCode
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            derivedFrom = listOf(Reference(reference = "".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninBodyHeight.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not " +
+                "DocumentReference @ Observation.derivedFrom[0]",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if invalid hasMember reference resource type`() {
+        val observation = Observation(
+            id = Id("123"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
+                        code = RoninBodyHeight.bodyHeightCode
+                    )
+                ),
+                text = "Body Height".asFHIR(),
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = RoninBodyHeight.vitalSignsCode
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            hasMember = listOf(Reference(reference = "".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninBodyHeight.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of " +
+                "MolecularSequence, Observation, QuestionnaireResponse @ Observation.hasMember[0]",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if invalid partOf reference resource type`() {
+        val observation = Observation(
+            id = Id("123"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        display = "Body Height".asFHIR(),
+                        code = RoninBodyHeight.bodyHeightCode
+                    )
+                ),
+                text = "Body Height".asFHIR(),
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = RoninBodyHeight.vitalSignsCode
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            partOf = listOf(Reference(reference = "".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninBodyHeight.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of " +
+                "MedicationStatement, Procedure @ Observation.partOf[0]",
             exception.message
         )
     }

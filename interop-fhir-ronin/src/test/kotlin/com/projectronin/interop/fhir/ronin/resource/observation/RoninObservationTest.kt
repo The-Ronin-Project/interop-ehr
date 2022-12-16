@@ -127,6 +127,267 @@ class RoninObservationTest {
     }
 
     @Test
+    fun `validate fails with code coding being empty`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf()
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninObservation.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Observation.code",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with code coding display missing`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        system = Uri("some-system")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninObservation.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Observation.code",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with code coding system missing`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        system = Uri("some-system")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            display = "some-display".asFHIR(),
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninObservation.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Observation.code",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with code coding code missing`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        display = "some-display".asFHIR(),
+                        system = Uri("some-system")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            display = "some-display".asFHIR(),
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninObservation.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Observation.code",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if more than 1 entry in coding list for code`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code-1"),
+                        display = "some-display-1".asFHIR(),
+                        system = Uri("some-system-1")
+                    ),
+                    Coding(
+                        code = Code("some-code-2"),
+                        display = "some-display-2".asFHIR(),
+                        system = Uri("some-system-2")
+                    ),
+                    Coding(
+                        code = Code("some-code-3"),
+                        display = "some-display-3".asFHIR(),
+                        system = Uri("some-system-3")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninObservation.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_OBS_001: Coding list is restricted to 1 entry @ Observation.code",
+            exception.message
+        )
+    }
+
+    @Test
     fun `qualifies when Observation category has the wrong system`() {
         val observation = Observation(
             id = Id("123"),
@@ -397,7 +658,15 @@ class RoninObservationTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "laboratory".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        display = "Laboratory Result".asFHIR(),
+                        code = RoninLaboratoryResult.laboratoryCode
+                    )
+                )
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -443,7 +712,15 @@ class RoninObservationTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "laboratory".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        display = "Laboratory Result".asFHIR(),
+                        code = RoninLaboratoryResult.laboratoryCode
+                    )
+                )
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -505,7 +782,15 @@ class RoninObservationTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "laboratory".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        display = "Laboratory Result".asFHIR(),
+                        code = RoninLaboratoryResult.laboratoryCode
+                    )
+                )
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -542,6 +827,363 @@ class RoninObservationTest {
     }
 
     @Test
+    fun `validate fails if invalid basedOn reference resource type`() {
+        val observation = Observation(
+            id = Id("123"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                text = "any-text".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = Uri("some-system")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    text = "any-text".asFHIR(),
+                    coding = listOf(
+                        Coding(
+                            code = Code("some-code"),
+                            display = "some-display".asFHIR(),
+                            system = Uri("some-system")
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            basedOn = listOf(Reference(reference = "".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninObservation.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of " +
+                "CarePlan, DeviceRequest, ImmunizationRecommendation, MedicationRequest, " +
+                "NutritionOrder, ServiceRequest @ Observation.basedOn[0]",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if invalid derivedFrom reference resource type`() {
+        val observation = Observation(
+            id = Id("123"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                text = "any-text".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = Uri("some-system")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    text = "any-text".asFHIR(),
+                    coding = listOf(
+                        Coding(
+                            code = Code("some-code"),
+                            display = "some-display".asFHIR(),
+                            system = Uri("some-system")
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            derivedFrom = listOf(Reference(reference = "".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninObservation.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of " +
+                "DocumentReference, Observation @ Observation.derivedFrom[0]",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if invalid hasMember reference resource type`() {
+        val observation = Observation(
+            id = Id("123"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                text = "any-text".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = Uri("some-system")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    text = "any-text".asFHIR(),
+                    coding = listOf(
+                        Coding(
+                            code = Code("some-code"),
+                            display = "some-display".asFHIR(),
+                            system = Uri("some-system")
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            hasMember = listOf(Reference(reference = "".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninObservation.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Observation @ Observation.hasMember[0]",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if invalid partOf reference resource type`() {
+        val observation = Observation(
+            id = Id("123"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                text = "any-text".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = Uri("some-system")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    text = "any-text".asFHIR(),
+                    coding = listOf(
+                        Coding(
+                            code = Code("some-code"),
+                            display = "some-display".asFHIR(),
+                            system = Uri("some-system")
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            partOf = listOf(Reference(reference = "".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninObservation.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of " +
+                "Immunization, MedicationStatement, Procedure @ Observation.partOf[0]",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if invalid performer reference resource type`() {
+        val observation = Observation(
+            id = Id("123"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                text = "any-text".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = Uri("some-system")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    text = "any-text".asFHIR(),
+                    coding = listOf(
+                        Coding(
+                            code = Code("some-code"),
+                            display = "some-display".asFHIR(),
+                            system = Uri("some-system")
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            performer = listOf(Reference(reference = "".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninObservation.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of CareTeam, Organization, " +
+                "Patient, Practitioner, PractitionerRole @ Observation.performer[0]",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate succeeds in RoninObservation with the same data that fails validation in subclass RoninLaboratoryResult`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01"
+            )
+        )
+
+        RoninObservation.validate(observation, null).alertIfErrors()
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_LABOBS_003: If there is no component or hasMember element then either a " +
+                "value[x] or a data absent reason must be present @ Observation",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate checks R4 profile`() {
         val observation = Observation(
             id = Id("123"),
@@ -558,7 +1200,15 @@ class RoninObservationTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(text = "laboratory".asFHIR()),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        display = "Laboratory Result".asFHIR(),
+                        code = RoninLaboratoryResult.laboratoryCode
+                    )
+                )
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(

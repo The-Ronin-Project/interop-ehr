@@ -47,3 +47,12 @@ fun Reference?.isInTypeList(resourceTypeList: List<String>): Boolean {
     }
     return false
 }
+
+/**
+ * Lazy check for yyyy-mm-dd DateTime.value format. Examples: "2023" fails, "2023-01" fails, "2023-01-17" succeeds. Per
+ * [US Core](http://hl7.org/fhir/us/core/STU5.0.1/StructureDefinition-us-core-observation-lab.html), check string length
+ */
+fun String?.hasDayFormat(): Boolean {
+    this?.length?.let { if (it < 10) return false }
+    return true
+}

@@ -3,8 +3,6 @@ package com.projectronin.interop.fhir.ronin.resource.observation
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
-import com.projectronin.interop.fhir.validate.LocationContext
-import com.projectronin.interop.fhir.validate.Validation
 
 /**
  * A broad capture of observations that do not fit in a more granular/specific Observation profile. As additional
@@ -19,6 +17,4 @@ object RoninObservation : BaseRoninObservation(R4ObservationValidator, RoninProf
     override fun qualifies(resource: Observation): Boolean {
         return true
     }
-
-    override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {}
 }

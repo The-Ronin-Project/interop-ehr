@@ -18,6 +18,7 @@ import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
@@ -181,7 +182,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = Uri("some-system")
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -234,7 +235,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = Uri("some-system")
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -249,8 +250,8 @@ class RoninLaboratoryResultTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: category is a required element @ Observation.category\n" +
-                "ERROR USCORE_LABOBS_001: Coding list for laboratory result category must have code \"laboratory\" " +
-                "with system \"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
+                "ERROR USCORE_LABOBS_001: Laboratory result must use code \"laboratory\" in system " +
+                "\"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
             exception.message
         )
     }
@@ -279,7 +280,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = Uri("some-system")
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -302,8 +303,8 @@ class RoninLaboratoryResultTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_LABOBS_001: Coding list for laboratory result category must have code \"laboratory\" " +
-                "with system \"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
+                "ERROR USCORE_LABOBS_001: Laboratory result must use code \"laboratory\" in system " +
+                "\"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
             exception.message
         )
     }
@@ -332,7 +333,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = Uri("some-system")
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -354,8 +355,8 @@ class RoninLaboratoryResultTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_LABOBS_001: Coding list for laboratory result category must have code \"laboratory\" " +
-                "with system \"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
+                "ERROR USCORE_LABOBS_001: Laboratory result must use code \"laboratory\" in system " +
+                "\"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
             exception.message
         )
     }
@@ -384,7 +385,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = Uri("some-system")
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -407,71 +408,8 @@ class RoninLaboratoryResultTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_LABOBS_001: Coding list for laboratory result category must have code \"laboratory\" " +
-                "with system \"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails if more than 1 entry in coding list for laboratory code`() {
-        val observation = Observation(
-            id = Id("123"),
-            status = ObservationStatus.AMENDED.asCode(),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                )
-            ),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            code = CodeableConcept(
-                text = "laboratory".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code-1"),
-                        display = "some-display-1".asFHIR(),
-                        system = Uri("some-system-1")
-                    ),
-                    Coding(
-                        code = Code("some-code-2"),
-                        display = "some-display-2".asFHIR(),
-                        system = Uri("some-system-2")
-                    ),
-                    Coding(
-                        code = Code("some-code-3"),
-                        display = "some-display-3".asFHIR(),
-                        system = Uri("some-system-3")
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            code = Code("laboratory")
-                        )
-                    )
-                )
-            ),
-            subject = Reference(reference = "Patient/1234".asFHIR())
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR USCORE_LABOBS_001: Coding list for laboratory result category must have code \"laboratory\" " +
-                "with system \"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category\n" +
-                "ERROR RONIN_LABOBS_001: Coding list for laboratory result code is restricted to 1 entry @ Observation.code",
+                "ERROR USCORE_LABOBS_001: Laboratory result must use code \"laboratory\" in system " +
+                "\"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
             exception.message
         )
     }
@@ -500,7 +438,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = Uri("some-system")
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -529,206 +467,6 @@ class RoninLaboratoryResultTest {
     }
 
     @Test
-    fun `validate fails with code coding being empty`() {
-        val observation = Observation(
-            id = Id("123"),
-            status = ObservationStatus.AMENDED.asCode(),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                )
-            ),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            code = CodeableConcept(
-                coding = listOf()
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = Code("laboratory")
-                        )
-                    )
-                )
-            ),
-            subject = Reference(reference = "Patient/1234".asFHIR())
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Observation.code",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails with code coding display missing`() {
-        val observation = Observation(
-            id = Id("123"),
-            status = ObservationStatus.AMENDED.asCode(),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                )
-            ),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            code = CodeableConcept(
-                text = "laboratory".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        system = Uri("some-system")
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = Code("laboratory")
-                        )
-                    )
-                )
-            ),
-            subject = Reference(reference = "Patient/1234".asFHIR())
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Observation.code",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails with code coding system missing`() {
-        val observation = Observation(
-            id = Id("123"),
-            status = ObservationStatus.AMENDED.asCode(),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                )
-            ),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            code = CodeableConcept(
-                text = "laboratory".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        system = Uri("some-system")
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            display = "some-display".asFHIR(),
-                            code = Code("laboratory")
-                        )
-                    )
-                )
-            ),
-            subject = Reference(reference = "Patient/1234".asFHIR())
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Observation.code",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails with code coding code missing`() {
-        val observation = Observation(
-            id = Id("123"),
-            status = ObservationStatus.AMENDED.asCode(),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                )
-            ),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            code = CodeableConcept(
-                text = "laboratory".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system")
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            display = "some-display".asFHIR(),
-                            code = Code("laboratory")
-                        )
-                    )
-                )
-            ),
-            subject = Reference(reference = "Patient/1234".asFHIR())
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Observation.code",
-            exception.message
-        )
-    }
-
-    @Test
     fun `validate fails if subject is not a Patient`() {
         val observation = Observation(
             id = Id("123"),
@@ -752,7 +490,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = Uri("some-system")
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -803,7 +541,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = Uri("some-system")
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -821,6 +559,15 @@ class RoninLaboratoryResultTest {
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
+            ),
+            value = DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
+                    system = CodeSystem.UCUM.uri,
+                    code = Code("kg")
+                )
             )
         )
 
@@ -869,7 +616,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = Uri("some-system")
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -886,7 +633,7 @@ class RoninLaboratoryResultTest {
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
+                "2022-01-01"
             ),
             value = DynamicValue(
                 DynamicValueType.QUANTITY,
@@ -1094,7 +841,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = Uri("some-system")
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -1165,7 +912,7 @@ class RoninLaboratoryResultTest {
                                 Coding(
                                     code = Code("some-code"),
                                     display = "some-display".asFHIR(),
-                                    system = Uri("some-system")
+                                    system = CodeSystem.LOINC.uri
                                 )
                             )
                         )
@@ -1222,7 +969,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = Uri("some-system")
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -1290,7 +1037,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = Uri("some-system")
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -1329,7 +1076,7 @@ class RoninLaboratoryResultTest {
                                 Coding(
                                     code = Code("some-code"),
                                     display = "some-display".asFHIR(),
-                                    system = Uri("some-system")
+                                    system = CodeSystem.LOINC.uri
                                 )
                             )
                         )
@@ -1416,7 +1163,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = Uri("some-system")
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -1448,5 +1195,425 @@ class RoninLaboratoryResultTest {
                 "ERROR INV_VALUE_SET: 'bad-status' is outside of required value set @ Observation.status",
             exception.message
         )
+    }
+
+    @Test
+    fun `transform lab result with missing LOINC system fails`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = Uri("some-system")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            value = DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
+                    system = CodeSystem.UCUM.uri,
+                    code = Code("kg")
+                )
+            )
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_LABOBS_001: Code system must be LOINC @ Observation.code",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `transform lab result with day missing from effective fails`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri,
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01"
+            ),
+            value = DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
+                    system = CodeSystem.UCUM.uri,
+                    code = Code("kg")
+                )
+            )
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_LABOBS_004: Datetime must be at least to day @ Observation.effective",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `transform lab result with month and day missing from effective fails`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri,
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022"
+            ),
+            value = DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
+                    system = CodeSystem.UCUM.uri,
+                    code = Code("kg")
+                )
+            )
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_LABOBS_004: Datetime must be at least to day @ Observation.effective",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if quantity system is not UCUM`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01"
+            ),
+            value = DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
+                    system = Uri("some-system"),
+                    code = Code("kg")
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_LABOBS_002: Quantity system must be UCUM @ Observation.valueQuantity.system",
+            exception.message
+        )
+    }
+    @Test
+    fun `validate fails if there is no child, value, or dataAbsentReason`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01"
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_LABOBS_003: If there is no component or hasMember element then either a " +
+                "value[x] or a data absent reason must be present @ Observation",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate succeeds if there is no value or dataAbsentReason, there is a hasMember and there are no components`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01"
+            ),
+            hasMember = listOf(Reference(reference = "MolecularSequence/4321".asFHIR()))
+        )
+
+        RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+    }
+
+    @Test
+    fun `validate succeeds if there is no value or dataAbsentReason, there are components and there is no hasMember`() {
+        val quantity = Quantity(
+            value = Decimal(60.0),
+            unit = FHIRString("mL/min/1.73m2"),
+            system = Uri("http://unitsofmeasure.org"),
+            code = Code("mL/min/{1.73_m2}")
+        )
+        val component1 = ObservationComponent(
+            code = CodeableConcept(coding = listOf(Coding(code = Code("code1")))),
+            value = DynamicValue(DynamicValueType.QUANTITY, quantity)
+        )
+        val component2 = ObservationComponent(
+            code = CodeableConcept(coding = listOf(Coding(code = Code("code2")))),
+            value = DynamicValue(DynamicValueType.QUANTITY, quantity)
+        )
+        val componentList = listOf(component1, component2)
+
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01"
+            ),
+            component = componentList
+        )
+
+        RoninLaboratoryResult.validate(observation, null).alertIfErrors()
     }
 }
