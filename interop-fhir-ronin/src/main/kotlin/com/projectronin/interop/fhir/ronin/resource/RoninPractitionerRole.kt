@@ -4,6 +4,8 @@ import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.resource.PractitionerRole
 import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerRoleValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -14,13 +16,15 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
 /**
  * Validator and Transformer for the Ronin [OncologyPractitionerRole](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-practitionerrole.html) profile.
  */
-object RoninPractitionerRole : USCoreBasedProfile<PractitionerRole>(
+@Component
+class RoninPractitionerRole(normalizer: Normalizer, localizer: Localizer) : USCoreBasedProfile<PractitionerRole>(
     R4PractitionerRoleValidator,
-    RoninProfile.PRACTITIONER_ROLE.value
+    RoninProfile.PRACTITIONER_ROLE.value, normalizer, localizer
 ) {
     private val requiredPractitionerError = RequiredFieldError(PractitionerRole::practitioner)
 

@@ -3,6 +3,8 @@ package com.projectronin.interop.fhir.ronin.resource.base
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.resource.Observation
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninObservation
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -22,6 +24,8 @@ class MultipleProfileResourceTest {
         every { mnemonic } returns "test"
     }
 
+    private lateinit var normalizer: Normalizer
+    private lateinit var localizer: Localizer
     private lateinit var testProfile1: BaseProfile<Location>
     private lateinit var testProfile2: BaseProfile<Location>
     private lateinit var testProfile3: BaseProfile<Location>
@@ -29,10 +33,16 @@ class MultipleProfileResourceTest {
 
     @BeforeEach
     fun setup() {
+        normalizer = mockk {
+            every { normalize(any(), tenant) } answers { firstArg() }
+        }
+        localizer = mockk {
+            every { localize(any(), tenant) } answers { firstArg() }
+        }
         testProfile1 = mockk()
         testProfile2 = mockk()
         testProfile3 = mockk()
-        profile = TestMultipleProfileResource(listOf(testProfile1, testProfile2, testProfile3))
+        profile = TestMultipleProfileResource(normalizer, localizer, listOf(testProfile1, testProfile2, testProfile3))
     }
 
     @Test
@@ -63,7 +73,7 @@ class MultipleProfileResourceTest {
         every { profile1.qualifies(observation) } returns false
         every { profile2.qualifies(observation) } returns false
         every { profile3.validate(observation, any()) } returns Validation()
-        val profiles = TestProfileWithDefault(listOf(profile1, profile2), profile3)
+        val profiles = TestProfileWithDefault(normalizer, localizer, listOf(profile1, profile2), profile3)
 
         val validation = profiles.validate(observation)
         assertTrue(validation.hasIssues())
@@ -147,7 +157,7 @@ class MultipleProfileResourceTest {
                 any(),
                 tenant
             )
-        } returns Pair(location, Validation())
+        } returns Pair(transformedLocation, Validation())
 
         every { testProfile1.qualifies(transformedLocation) } returns true
         every { testProfile1.validate(transformedLocation, eq(LocationContext(Location::class))) } returns Validation()
@@ -163,12 +173,15 @@ class MultipleProfileResourceTest {
     }
 
     private class TestMultipleProfileResource(
-        override val potentialProfiles: List<BaseProfile<Location>>,
-        override val defaultProfile: BaseProfile<Location>? = null
-    ) : MultipleProfileResource<Location>()
+        normalizer: Normalizer,
+        localizer: Localizer,
+        override val potentialProfiles: List<BaseProfile<Location>>
+    ) : MultipleProfileResource<Location>(normalizer, localizer)
 
     private class TestProfileWithDefault(
+        normalizer: Normalizer,
+        localizer: Localizer,
         override val potentialProfiles: List<BaseProfile<Observation>>,
         override val defaultProfile: BaseProfile<Observation>?
-    ) : MultipleProfileResource<Observation>()
+    ) : MultipleProfileResource<Observation>(normalizer, localizer)
 }

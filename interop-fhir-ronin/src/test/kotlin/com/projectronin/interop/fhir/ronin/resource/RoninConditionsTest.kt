@@ -1,19 +1,15 @@
 package com.projectronin.interop.fhir.ronin.resource
 
-import com.projectronin.interop.fhir.r4.CodeSystem
-import com.projectronin.interop.fhir.r4.CodeableConcepts
-import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
-import com.projectronin.interop.fhir.r4.datatype.Coding
-import com.projectronin.interop.fhir.r4.datatype.Identifier
-import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Reference
-import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
-import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
-import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Condition
-import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.resource.condition.RoninConditionEncounterDiagnosis
+import com.projectronin.interop.fhir.ronin.resource.condition.RoninConditionProblemsAndHealthConcerns
+import com.projectronin.interop.fhir.validate.LocationContext
+import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -25,173 +21,54 @@ class RoninConditionsTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
+    private val normalizer = mockk<Normalizer>()
+    private val localizer = mockk<Localizer>()
+    private val profile1 = mockk<RoninConditionEncounterDiagnosis>()
+    private val profile2 = mockk<RoninConditionProblemsAndHealthConcerns>()
+    private val roninConditions = RoninConditions(normalizer, localizer, profile1, profile2)
 
     @Test
     fun `always qualifies`() {
-        assertTrue(RoninConditions.qualifies(Condition(subject = Reference(display = "reference".asFHIR()))))
+        assertTrue(roninConditions.qualifies(Condition(subject = Reference(display = "reference".asFHIR()))))
     }
 
     @Test
-    fun `can validate encounter diagnosis`() {
-        val condition = Condition(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                )
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer".asFHIR()
-                    )
-                )
-            ),
-            subject = Reference(display = "reference".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("encounter-diagnosis")
-                        )
-                    )
-                )
-            )
-        )
+    fun `can validate against a profile`() {
+        val condition = mockk<Condition>()
 
-        RoninConditions.validate(condition, null).alertIfErrors()
+        every { profile1.qualifies(condition) } returns true
+        every { profile1.validate(condition, LocationContext(Condition::class)) } returns Validation()
+        every { profile2.qualifies(condition) } returns false
+
+        roninConditions.validate(condition, null).alertIfErrors()
     }
 
     @Test
-    fun `can validate problem and health concern`() {
-        val condition = Condition(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                )
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer".asFHIR()
-                    )
-                )
-            ),
-            subject = Reference(display = "reference".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("problem-list-item")
-                        )
-                    )
-                )
-            )
+    fun `can transform to profile`() {
+        val original = mockk<Condition> {
+            every { id } returns Id("1234")
+        }
+        every { normalizer.normalize(original, tenant) } returns original
+
+        val roninCondition = mockk<Condition> {
+            every { id } returns Id("1234")
+        }
+        every { localizer.localize(roninCondition, tenant) } returns roninCondition
+
+        every { profile1.qualifies(original) } returns false
+        every { profile2.qualifies(original) } returns true
+        every { profile2.transformInternal(original, LocationContext(Condition::class), tenant) } returns Pair(
+            roninCondition,
+            Validation()
         )
+        every { profile1.qualifies(roninCondition) } returns false
+        every { profile2.qualifies(roninCondition) } returns true
+        every { profile2.validate(roninCondition, LocationContext(Condition::class)) } returns Validation()
 
-        RoninConditions.validate(condition, null).alertIfErrors()
-    }
-
-    @Test
-    fun `can transform encounter diagnosis`() {
-        val condition = Condition(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(value = "id".asFHIR())
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("encounter-diagnosis")
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer".asFHIR()
-                    )
-                )
-            ),
-            subject = Reference(
-                reference = "Patient/roninPatientExample01".asFHIR()
-            )
-        )
-
-        val (transformed, validation) = RoninConditions.transform(condition, tenant)
+        val (transformed, validation) = roninConditions.transform(original, tenant)
         validation.alertIfErrors()
 
         transformed!!
-        assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value))),
-            transformed.meta
-        )
-    }
-
-    @Test
-    fun `can transform problem and health concern`() {
-        val condition = Condition(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(value = "id".asFHIR())
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("problem-list-item")
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer".asFHIR()
-                    )
-                )
-            ),
-            subject = Reference(
-                reference = "Patient/roninPatientExample01".asFHIR()
-            )
-        )
-
-        val (transformed, validation) = RoninConditions.transform(condition, tenant)
-        validation.alertIfErrors()
-
-        transformed!!
-        assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value))),
-            transformed.meta
-        )
+        assertEquals(roninCondition, transformed)
     }
 }

@@ -16,11 +16,16 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
+import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.validation
+import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -28,6 +33,24 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class BaseRoninVitalSignTest {
+    private val tenant = mockk<Tenant> {
+        every { mnemonic } returns "test"
+    }
+    private val normalizer = mockk<Normalizer> {
+        every { normalize(any(), tenant) } answers { firstArg() }
+    }
+    private val localizer = mockk<Localizer> {
+        every { localize(any(), tenant) } answers { firstArg() }
+    }
+    private val roninVitalSign =
+        object : BaseRoninVitalSign(R4ObservationValidator, "profile", normalizer, localizer) {
+            override fun validateObservation(
+                element: Observation,
+                parentContext: LocationContext,
+                validation: Validation
+            ) {
+            }
+        }
 
     @Test
     fun `validate fails if no vital signs category`() {
@@ -82,7 +105,7 @@ class BaseRoninVitalSignTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyHeight.validate(observation, LocationContext(Observation::class)).alertIfErrors()
+            roninVitalSign.validate(observation, LocationContext(Observation::class)).alertIfErrors()
         }
 
         assertEquals(
@@ -146,7 +169,7 @@ class BaseRoninVitalSignTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyHeight.validate(observation, null).alertIfErrors()
+            roninVitalSign.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -219,7 +242,7 @@ class BaseRoninVitalSignTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyHeight.validate(observation, null).alertIfErrors()
+            roninVitalSign.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -284,7 +307,7 @@ class BaseRoninVitalSignTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninBodyHeight.validate(observation, null).alertIfErrors()
+            roninVitalSign.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -346,6 +369,6 @@ class BaseRoninVitalSignTest {
             )
         )
 
-        RoninBodyHeight.validate(observation, null).alertIfErrors()
+        roninVitalSign.validate(observation, null).alertIfErrors()
     }
 }

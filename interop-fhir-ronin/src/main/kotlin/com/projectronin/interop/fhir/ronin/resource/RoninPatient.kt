@@ -1,6 +1,6 @@
 package com.projectronin.interop.fhir.ronin.resource
 
-import com.projectronin.interop.ehr.IdentifierService
+import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
@@ -11,9 +11,10 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
-import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
 import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.hasDataAbsentReason
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.toFhirIdentifier
@@ -25,25 +26,18 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
 /**
  * Validator and Transformer for the Ronin Patient profile.
  */
-class RoninPatient private constructor(
-    private val identifierService: IdentifierService,
-    private val conceptMapClient: ConceptMapClient,
-) : USCoreBasedProfile<Patient>(R4PatientValidator, RoninProfile.PATIENT.value) {
-    companion object {
-        /**
-         * Creates a RoninPatient with the supplied [identifierService] and [conceptMapClient].
-         */
-        fun create(
-            identifierService: IdentifierService,
-            conceptMapClient: ConceptMapClient
-        ): RoninPatient = RoninPatient(identifierService, conceptMapClient)
-    }
-
-    private val contactPoint = RoninContactPoint(conceptMapClient)
+@Component
+class RoninPatient(
+    private val ehrFactory: EHRFactory,
+    private val contactPoint: RoninContactPoint,
+    normalizer: Normalizer,
+    localizer: Localizer
+) : USCoreBasedProfile<Patient>(R4PatientValidator, RoninProfile.PATIENT.value, normalizer, localizer) {
 
     private val requiredBirthDateError = RequiredFieldError(Patient::birthDate)
 
@@ -183,7 +177,8 @@ class RoninPatient private constructor(
         }
 
         try {
-            val existingMRN = identifierService.getMRNIdentifier(tenant, patient.identifier)
+            val existingMRN =
+                ehrFactory.getVendorFactory(tenant).identifierService.getMRNIdentifier(tenant, patient.identifier)
             roninIdentifiers.add(
                 Identifier(
                     value = existingMRN.value,

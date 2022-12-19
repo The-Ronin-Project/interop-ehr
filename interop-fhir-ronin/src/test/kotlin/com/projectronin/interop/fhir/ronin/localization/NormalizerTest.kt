@@ -41,7 +41,7 @@ class NormalizerTest {
         )
     )
 
-    val normalizer = Normalizer::class.objectInstance!!
+    private val normalizer = Normalizer()
 
     private fun normalizeCoding(coding: Coding, parameterName: String = "coding"): Coding? {
         val normalizeCodingMethod = Normalizer::class.functions.find { it.name == "normalizeCoding" }!!

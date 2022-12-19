@@ -3,6 +3,8 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.fhir.r4.resource.MedicationRequest
 import com.projectronin.interop.fhir.r4.validate.resource.R4MedicationRequestValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -10,12 +12,19 @@ import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
 /**
  * Validator and transformer for the Ronin Medication Request profile
  */
-object RoninMedicationRequest :
-    USCoreBasedProfile<MedicationRequest>(R4MedicationRequestValidator, RoninProfile.MEDICATION_REQUEST.value) {
+@Component
+class RoninMedicationRequest(normalizer: Normalizer, localizer: Localizer) :
+    USCoreBasedProfile<MedicationRequest>(
+        R4MedicationRequestValidator,
+        RoninProfile.MEDICATION_REQUEST.value,
+        normalizer,
+        localizer
+    ) {
     override fun validateRonin(element: MedicationRequest, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)

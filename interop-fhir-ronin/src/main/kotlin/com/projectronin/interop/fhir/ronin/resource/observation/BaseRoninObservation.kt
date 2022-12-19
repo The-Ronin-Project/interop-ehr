@@ -4,6 +4,8 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.ronin.util.validateReference
@@ -22,11 +24,20 @@ import com.projectronin.interop.tenant.config.model.Tenant
  */
 abstract class BaseRoninObservation(
     extendedProfile: ProfileValidator<Observation>,
-    profile: String
-) : USCoreBasedProfile<Observation>(extendedProfile, profile) {
+    profile: String,
+    normalizer: Normalizer,
+    localizer: Localizer
+) : USCoreBasedProfile<Observation>(extendedProfile, profile, normalizer, localizer) {
 
     // Reference checks - subclasses may override lists to modify validation logic for reference attributes
-    open val validBasedOnValues = listOf("CarePlan", "DeviceRequest", "ImmunizationRecommendation", "MedicationRequest", "NutritionOrder", "ServiceRequest")
+    open val validBasedOnValues = listOf(
+        "CarePlan",
+        "DeviceRequest",
+        "ImmunizationRecommendation",
+        "MedicationRequest",
+        "NutritionOrder",
+        "ServiceRequest"
+    )
     open val validDerivedFromValues = listOf("DocumentReference", "Observation")
     open val validDeviceValues = listOf("Device", "DeviceMetric")
     open val validEncounterValues = listOf("Encounter")
@@ -70,13 +81,38 @@ abstract class BaseRoninObservation(
             checkNotNull(element.subject, requiredSubjectError, parentContext)
             validateReference(element.subject, validSubjectValues, LocationContext(Observation::subject), validation)
 
-            validateReferenceList(element.basedOn, validBasedOnValues, LocationContext(Observation::basedOn), validation)
-            validateReferenceList(element.derivedFrom, validDerivedFromValues, LocationContext(Observation::derivedFrom), validation)
+            validateReferenceList(
+                element.basedOn,
+                validBasedOnValues,
+                LocationContext(Observation::basedOn),
+                validation
+            )
+            validateReferenceList(
+                element.derivedFrom,
+                validDerivedFromValues,
+                LocationContext(Observation::derivedFrom),
+                validation
+            )
             validateReference(element.device, validDeviceValues, LocationContext(Observation::device), validation)
-            validateReference(element.encounter, validEncounterValues, LocationContext(Observation::encounter), validation)
-            validateReferenceList(element.hasMember, validHasMemberValues, LocationContext(Observation::hasMember), validation)
+            validateReference(
+                element.encounter,
+                validEncounterValues,
+                LocationContext(Observation::encounter),
+                validation
+            )
+            validateReferenceList(
+                element.hasMember,
+                validHasMemberValues,
+                LocationContext(Observation::hasMember),
+                validation
+            )
             validateReferenceList(element.partOf, validPartOfValues, LocationContext(Observation::partOf), validation)
-            validateReferenceList(element.performer, validPerformerValues, LocationContext(Observation::performer), validation)
+            validateReferenceList(
+                element.performer,
+                validPerformerValues,
+                LocationContext(Observation::performer),
+                validation
+            )
             validateReference(element.specimen, validSpecimenValues, LocationContext(Observation::specimen), validation)
 
             element.note.forEachIndexed { index, note ->

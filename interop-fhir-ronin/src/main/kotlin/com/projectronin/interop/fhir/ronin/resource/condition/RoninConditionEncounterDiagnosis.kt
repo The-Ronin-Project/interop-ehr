@@ -5,6 +5,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.r4.validate.resource.R4ConditionValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -15,11 +17,15 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
-object RoninConditionEncounterDiagnosis :
+@Component
+class RoninConditionEncounterDiagnosis(normalizer: Normalizer, localizer: Localizer) :
     USCoreBasedProfile<Condition>(
         R4ConditionValidator,
-        RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value
+        RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value,
+        normalizer,
+        localizer
     ) {
     private val qualifyingCode = Code("encounter-diagnosis")
 

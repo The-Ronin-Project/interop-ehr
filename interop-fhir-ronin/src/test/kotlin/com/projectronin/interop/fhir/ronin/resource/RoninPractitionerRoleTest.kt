@@ -27,6 +27,8 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerRoleVali
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -48,9 +50,17 @@ class RoninPractitionerRoleTest {
         every { mnemonic } returns "test"
     }
 
+    private val normalizer = mockk<Normalizer> {
+        every { normalize(any(), tenant) } answers { firstArg() }
+    }
+    private val localizer = mockk<Localizer> {
+        every { localize(any(), tenant) } answers { firstArg() }
+    }
+    private val roninPractitionerRole = RoninPractitionerRole(normalizer, localizer)
+
     @Test
     fun `always qualifies`() {
-        assertTrue(RoninPractitionerRole.qualifies(PractitionerRole()))
+        assertTrue(roninPractitionerRole.qualifies(PractitionerRole()))
     }
 
     @Test
@@ -63,7 +73,7 @@ class RoninPractitionerRoleTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+            roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
         }
 
         assertEquals(
@@ -95,7 +105,7 @@ class RoninPractitionerRoleTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+            roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
         }
 
         assertEquals(
@@ -127,7 +137,7 @@ class RoninPractitionerRoleTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+            roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
         }
 
         assertEquals(
@@ -163,7 +173,7 @@ class RoninPractitionerRoleTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+            roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
         }
 
         assertEquals(
@@ -209,7 +219,7 @@ class RoninPractitionerRoleTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+            roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
         }
 
         assertEquals(
@@ -241,14 +251,14 @@ class RoninPractitionerRoleTest {
             organization = Reference(reference = "Organization/5678".asFHIR())
         )
 
-        RoninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+        roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
     }
 
     @Test
     fun `transform fails for practitioner role with no ID`() {
         val practitionerRole = PractitionerRole()
 
-        val (transformed, _) = RoninPractitionerRole.transform(practitionerRole, tenant)
+        val (transformed, _) = roninPractitionerRole.transform(practitionerRole, tenant)
         assertNull(transformed)
     }
 
@@ -276,12 +286,12 @@ class RoninPractitionerRoleTest {
             endpoint = listOf(Reference(reference = "Endpoint/1357".asFHIR()))
         )
 
-        val (transformed, validation) = RoninPractitionerRole.transform(practitionerRole, tenant)
+        val (transformed, validation) = roninPractitionerRole.transform(practitionerRole, tenant)
         validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("PractitionerRole", transformed.resourceType)
-        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value))),
             transformed.meta
@@ -313,7 +323,7 @@ class RoninPractitionerRoleTest {
         )
         assertEquals(FHIRBoolean.TRUE, transformed.active)
         assertEquals(Period(end = DateTime("2022")), transformed.period)
-        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.practitioner)
+        assertEquals(Reference(reference = "Practitioner/1234".asFHIR()), transformed.practitioner)
         assertNull(transformed.organization)
         assertEquals(listOf(CodeableConcept(text = "code".asFHIR())), transformed.code)
         assertEquals(listOf(CodeableConcept(text = "specialty".asFHIR())), transformed.specialty)
@@ -326,7 +336,7 @@ class RoninPractitionerRoleTest {
         assertEquals(listOf(AvailableTime(allDay = FHIRBoolean.FALSE)), transformed.availableTime)
         assertEquals(listOf(NotAvailable(description = "Not available now".asFHIR())), transformed.notAvailable)
         assertEquals("exceptions".asFHIR(), transformed.availabilityExceptions)
-        assertEquals(listOf(Reference(reference = "Endpoint/test-1357".asFHIR())), transformed.endpoint)
+        assertEquals(listOf(Reference(reference = "Endpoint/1357".asFHIR())), transformed.endpoint)
     }
 
     @Test
@@ -368,12 +378,12 @@ class RoninPractitionerRoleTest {
             endpoint = listOf(Reference(reference = "Endpoint/1357".asFHIR()))
         )
 
-        val (transformed, validation) = RoninPractitionerRole.transform(practitionerRole, tenant)
+        val (transformed, validation) = roninPractitionerRole.transform(practitionerRole, tenant)
         validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("PractitionerRole", transformed.resourceType)
-        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value))),
             transformed.meta
@@ -421,13 +431,13 @@ class RoninPractitionerRoleTest {
         )
         assertEquals(FHIRBoolean.TRUE, transformed.active)
         assertEquals(Period(end = DateTime("2022")), transformed.period)
-        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.practitioner)
-        assertEquals(Reference(reference = "Organization/test-5678".asFHIR()), transformed.organization)
+        assertEquals(Reference(reference = "Practitioner/1234".asFHIR()), transformed.practitioner)
+        assertEquals(Reference(reference = "Organization/5678".asFHIR()), transformed.organization)
         assertEquals(listOf(CodeableConcept(text = "code".asFHIR())), transformed.code)
         assertEquals(listOf(CodeableConcept(text = "specialty".asFHIR())), transformed.specialty)
-        assertEquals(listOf(Reference(reference = "Location/test-9012".asFHIR())), transformed.location)
+        assertEquals(listOf(Reference(reference = "Location/9012".asFHIR())), transformed.location)
         assertEquals(
-            listOf(Reference(reference = "HealthcareService/test-3456".asFHIR())),
+            listOf(Reference(reference = "HealthcareService/3456".asFHIR())),
             transformed.healthcareService
         )
         assertEquals(
@@ -437,7 +447,7 @@ class RoninPractitionerRoleTest {
         assertEquals(listOf(AvailableTime(allDay = FHIRBoolean.FALSE)), transformed.availableTime)
         assertEquals(listOf(NotAvailable(description = "Not available now".asFHIR())), transformed.notAvailable)
         assertEquals("exceptions".asFHIR(), transformed.availabilityExceptions)
-        assertEquals(listOf(Reference(reference = "Endpoint/test-1357".asFHIR())), transformed.endpoint)
+        assertEquals(listOf(Reference(reference = "Endpoint/1357".asFHIR())), transformed.endpoint)
     }
 
     @Test
@@ -448,12 +458,12 @@ class RoninPractitionerRoleTest {
             organization = Reference(reference = "Organization/5678".asFHIR())
         )
 
-        val (transformed, validation) = RoninPractitionerRole.transform(practitionerRole, tenant)
+        val (transformed, validation) = roninPractitionerRole.transform(practitionerRole, tenant)
         validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("PractitionerRole", transformed.resourceType)
-        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value))),
             transformed.meta
@@ -481,8 +491,8 @@ class RoninPractitionerRoleTest {
         )
         assertNull(transformed.active)
         assertNull(transformed.period)
-        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.practitioner)
-        assertEquals(Reference(reference = "Organization/test-5678".asFHIR()), transformed.organization)
+        assertEquals(Reference(reference = "Practitioner/1234".asFHIR()), transformed.practitioner)
+        assertEquals(Reference(reference = "Organization/5678".asFHIR()), transformed.organization)
         assertEquals(listOf<CodeableConcept>(), transformed.code)
         assertEquals(listOf<CodeableConcept>(), transformed.specialty)
         assertEquals(listOf<Reference>(), transformed.location)
@@ -503,12 +513,12 @@ class RoninPractitionerRoleTest {
             telecom = listOf(ContactPoint(id = "first".asFHIR()), ContactPoint(id = "second".asFHIR()))
         )
 
-        val (transformed, validation) = RoninPractitionerRole.transform(practitionerRole, tenant)
+        val (transformed, validation) = roninPractitionerRole.transform(practitionerRole, tenant)
         validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("PractitionerRole", transformed.resourceType)
-        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value))),
             transformed.meta
@@ -536,8 +546,8 @@ class RoninPractitionerRoleTest {
         )
         assertNull(transformed.active)
         assertNull(transformed.period)
-        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.practitioner)
-        assertEquals(Reference(reference = "Organization/test-5678".asFHIR()), transformed.organization)
+        assertEquals(Reference(reference = "Practitioner/1234".asFHIR()), transformed.practitioner)
+        assertEquals(Reference(reference = "Organization/5678".asFHIR()), transformed.organization)
         assertEquals(listOf<CodeableConcept>(), transformed.code)
         assertEquals(listOf<CodeableConcept>(), transformed.specialty)
         assertEquals(listOf<Reference>(), transformed.location)
@@ -563,12 +573,12 @@ class RoninPractitionerRoleTest {
             )
         )
 
-        val (transformed, validation) = RoninPractitionerRole.transform(practitionerRole, tenant)
+        val (transformed, validation) = roninPractitionerRole.transform(practitionerRole, tenant)
         validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("PractitionerRole", transformed.resourceType)
-        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value))),
             transformed.meta
@@ -596,8 +606,8 @@ class RoninPractitionerRoleTest {
         )
         assertNull(transformed.active)
         assertNull(transformed.period)
-        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.practitioner)
-        assertEquals(Reference(reference = "Organization/test-5678".asFHIR()), transformed.organization)
+        assertEquals(Reference(reference = "Practitioner/1234".asFHIR()), transformed.practitioner)
+        assertEquals(Reference(reference = "Organization/5678".asFHIR()), transformed.organization)
         assertEquals(listOf<CodeableConcept>(), transformed.code)
         assertEquals(listOf<CodeableConcept>(), transformed.specialty)
         assertEquals(listOf<Reference>(), transformed.location)

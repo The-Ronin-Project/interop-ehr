@@ -126,7 +126,7 @@ class LocalizerTest {
         )
     )
 
-    val localizer = Localizer::class.objectInstance!!
+    private val localizer = Localizer()
 
     private fun localizeId(id: Id, parameterName: String = "id"): Id? {
         val localizeIdMethod = Localizer::class.functions.find { it.name == "localizeId" }!!

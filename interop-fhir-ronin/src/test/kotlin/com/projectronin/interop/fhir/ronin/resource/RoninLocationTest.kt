@@ -30,18 +30,20 @@ import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
-import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.r4.valueset.DayOfWeek
 import com.projectronin.interop.fhir.r4.valueset.LocationMode
 import com.projectronin.interop.fhir.r4.valueset.LocationStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
-import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
+import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
+import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -56,7 +58,9 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class RoninLocationTest {
-    private lateinit var conceptMapClient: ConceptMapClient
+    private lateinit var roninContactPoint: RoninContactPoint
+    private lateinit var normalizer: Normalizer
+    private lateinit var localizer: Localizer
     private lateinit var roninLocation: RoninLocation
 
     private val tenant = mockk<Tenant> {
@@ -65,8 +69,17 @@ class RoninLocationTest {
 
     @BeforeEach
     fun setup() {
-        conceptMapClient = mockk()
-        roninLocation = RoninLocation.create(conceptMapClient)
+        roninContactPoint = mockk {
+            every { validateRonin(any(), LocationContext(Location::class), any()) } answers { thirdArg() }
+            every { validateUSCore(any(), LocationContext(Location::class), any()) } answers { thirdArg() }
+        }
+        normalizer = mockk {
+            every { normalize(any(), tenant) } answers { firstArg() }
+        }
+        localizer = mockk {
+            every { localize(any(), tenant) } answers { firstArg() }
+        }
+        roninLocation = RoninLocation(normalizer, localizer, roninContactPoint)
     }
 
     @Test
@@ -195,32 +208,59 @@ class RoninLocationTest {
 
     @Test
     fun `transforms location with all attributes`() {
-        conceptMapClient = mockk {
-            every {
-                getConceptMappingForEnum(
-                    tenant,
-                    "Location",
-                    "Location.telecom.system",
-                    Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
-                        code = Code(value = "telephone")
-                    ),
-                    ContactPointSystem::class
+        val telecom = listOf(
+            ContactPoint(
+                id = "12345".asFHIR(),
+                extension = listOf(
+                    Extension(
+                        url = Uri("http://localhost/extension"),
+                        value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
+                    )
+                ),
+                system = Code(value = "telephone"),
+                use = Code(value = "cell"),
+                value = "8675309".asFHIR(),
+                rank = PositiveInt(1),
+                period = Period(
+                    start = DateTime("2021-11-18"),
+                    end = DateTime("2022-11-17")
                 )
-            } returns Pair(systemCoding("phone"), systemExtension("telephone"))
-            every {
-                getConceptMappingForEnum(
-                    tenant,
-                    "Location",
-                    "Location.telecom.use",
-                    Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
-                        code = Code(value = "cell")
-                    ),
-                    ContactPointUse::class
+            ),
+            ContactPoint(
+                system = Code("telephone"),
+                value = "1112223333".asFHIR()
+            )
+        )
+
+        val transformedTelecom = listOf(
+            ContactPoint(
+                id = "12345".asFHIR(),
+                extension = listOf(
+                    Extension(
+                        url = Uri("http://localhost/extension"),
+                        value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
+                    )
+                ),
+                system = Code(value = "phone", extension = listOf(systemExtension("telephone"))),
+                use = Code(value = "mobile", extension = listOf(useExtension("cell"))),
+                value = "8675309".asFHIR(),
+                rank = PositiveInt(1),
+                period = Period(
+                    start = DateTime("2021-11-18"),
+                    end = DateTime("2022-11-17")
                 )
-            } returns Pair(useCoding("mobile"), useExtension("cell"))
-        }
+            ),
+            ContactPoint(
+                system = Code("phone", extension = listOf(systemExtension("telephone"))),
+                value = "1112223333".asFHIR()
+            )
+        )
+
+        every { roninContactPoint.transform(telecom, tenant, LocationContext(Location::class), any()) } returns Pair(
+            transformedTelecom,
+            Validation()
+        )
+
         val operationalStatus =
             Coding(code = Code("O"), system = Uri(value = "http://terminology.hl7.org/CodeSystem/v2-0116"))
         val type = listOf(
@@ -281,29 +321,7 @@ class RoninLocationTest {
             description = "Sun Room".asFHIR(),
             mode = LocationMode.INSTANCE.asCode(),
             type = type,
-            telecom = listOf(
-                ContactPoint(
-                    id = "12345".asFHIR(),
-                    extension = listOf(
-                        Extension(
-                            url = Uri("http://localhost/extension"),
-                            value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
-                        )
-                    ),
-                    system = Code(value = "telephone"),
-                    use = Code(value = "cell"),
-                    value = "8675309".asFHIR(),
-                    rank = PositiveInt(1),
-                    period = Period(
-                        start = DateTime("2021-11-18"),
-                        end = DateTime("2022-11-17")
-                    )
-                ),
-                ContactPoint(
-                    system = Code("telephone"),
-                    value = "1112223333".asFHIR()
-                )
-            ),
+            telecom = telecom,
             address = Address(country = "USA".asFHIR()),
             physicalType = physicalType,
             position = position,
@@ -313,13 +331,13 @@ class RoninLocationTest {
             availabilityExceptions = "Call for details".asFHIR(),
             endpoint = endpoint
         )
-        roninLocation = RoninLocation.create(conceptMapClient)
+
         val (transformed, validation) = roninLocation.transform(location, tenant)
         validation.alertIfErrors()
 
         transformed!!
         assertEquals("Location", transformed.resourceType)
-        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value))),
             transformed.meta
@@ -372,94 +390,15 @@ class RoninLocationTest {
         assertEquals("Sun Room".asFHIR(), transformed.description)
         assertEquals(LocationMode.INSTANCE.asCode(), transformed.mode)
         assertEquals(type, transformed.type)
-        assertEquals(
-            listOf(
-                ContactPoint(
-                    id = "12345".asFHIR(),
-                    extension = listOf(
-                        Extension(
-                            url = Uri("http://localhost/extension"),
-                            value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
-                        )
-                    ),
-                    value = "8675309".asFHIR(),
-                    system = Code(
-                        value = "phone",
-                        extension = listOf(
-                            Extension(
-                                url = Uri(value = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value),
-                                value = DynamicValue(
-                                    type = DynamicValueType.CODING,
-                                    value = Coding(
-                                        system = Uri(
-                                            value = RoninConceptMap.CODE_SYSTEMS.toUriString(
-                                                tenant,
-                                                "ContactPoint.system"
-                                            )
-                                        ),
-                                        code = Code(value = "telephone")
-                                    )
-                                )
-                            )
-                        )
-                    ),
-                    use = Code(
-                        value = "mobile",
-                        extension = listOf(
-                            Extension(
-                                url = Uri(value = RoninExtension.TENANT_SOURCE_TELECOM_USE.value),
-                                value = DynamicValue(
-                                    type = DynamicValueType.CODING,
-                                    value = Coding(
-                                        system = Uri(
-                                            value = RoninConceptMap.CODE_SYSTEMS.toUriString(
-                                                tenant,
-                                                "ContactPoint.use"
-                                            )
-                                        ),
-                                        code = Code(value = "cell")
-                                    )
-                                )
-                            )
-                        )
-                    ),
-                    rank = PositiveInt(1),
-                    period = Period(start = DateTime(value = "2021-11-18"), end = DateTime(value = "2022-11-17"))
-                ),
-                ContactPoint(
-                    value = "1112223333".asFHIR(),
-                    system = Code(
-                        value = "phone",
-                        extension = listOf(
-                            Extension(
-                                url = Uri(value = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value),
-                                value = DynamicValue(
-                                    type = DynamicValueType.CODING,
-                                    value = Coding(
-                                        system = Uri(
-                                            value = RoninConceptMap.CODE_SYSTEMS.toUriString(
-                                                tenant,
-                                                "ContactPoint.system"
-                                            )
-                                        ),
-                                        code = Code(value = "telephone")
-                                    )
-                                )
-                            )
-                        )
-                    )
-                )
-            ),
-            transformed.telecom
-        )
+        assertEquals(transformedTelecom, transformed.telecom)
         assertEquals(Address(country = "USA".asFHIR()), transformed.address)
         assertEquals(physicalType, transformed.physicalType)
         assertEquals(position, transformed.position)
-        assertEquals(Reference(reference = "Organization/test-1234".asFHIR()), transformed.managingOrganization)
-        assertEquals(Reference(reference = "Location/test-1234".asFHIR()), transformed.partOf)
+        assertEquals(Reference(reference = "Organization/1234".asFHIR()), transformed.managingOrganization)
+        assertEquals(Reference(reference = "Location/1234".asFHIR()), transformed.partOf)
         assertEquals(hoursOfOperation, transformed.hoursOfOperation)
         assertEquals("Call for details".asFHIR(), transformed.availabilityExceptions)
-        assertEquals(listOf(Reference(reference = "Endpoint/test-4321".asFHIR())), transformed.endpoint)
+        assertEquals(listOf(Reference(reference = "Endpoint/4321".asFHIR())), transformed.endpoint)
     }
 
     @Test
@@ -474,7 +413,7 @@ class RoninLocationTest {
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Location", transformed.resourceType)
-        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value))),
             transformed.meta
@@ -597,7 +536,7 @@ class RoninLocationTest {
 
         transformed!!
         assertEquals("Location", transformed.resourceType)
-        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value))),
             transformed.meta
@@ -714,40 +653,7 @@ class RoninLocationTest {
     }
 
     @Test
-    fun `validate fails for missing telecom system`() {
-        val location = Location(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                )
-            ),
-            name = "Location A".asFHIR(),
-            telecom = listOf(ContactPoint(value = "1234567890".asFHIR()))
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninLocation.validate(location, LocationContext(Location::class)).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: system is a required element @ Location.telecom[0].system\n" +
-                "ERROR R4_CNTCTPT_001: A system is required if a value is provided @ Location.telecom[0]",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails for missing telecom value`() {
-
+    fun `validate fails for invalid telecom`() {
         val emailSystemValue = ContactPointSystem.EMAIL.code
         val emailSystemExtensionUri = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri
         val emailSystemExtensionValue = DynamicValue(
@@ -758,6 +664,22 @@ class RoninLocationTest {
             value = emailSystemValue,
             extension = listOf(Extension(url = emailSystemExtensionUri, value = emailSystemExtensionValue))
         )
+        val telecom = listOf(ContactPoint(system = emailSystem))
+        every {
+            roninContactPoint.validateRonin(
+                telecom,
+                LocationContext(Location::class),
+                any()
+            )
+        } answers {
+            val validation = thirdArg<Validation>()
+            validation.checkNotNull(
+                null,
+                RequiredFieldError(ContactPoint::value),
+                LocationContext("Location", "telecom[0]")
+            )
+            validation
+        }
 
         val location = Location(
             id = Id("12345"),
@@ -774,7 +696,7 @@ class RoninLocationTest {
                 )
             ),
             name = "Location A".asFHIR(),
-            telecom = listOf(ContactPoint(system = emailSystem))
+            telecom = telecom
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -788,11 +710,6 @@ class RoninLocationTest {
         )
     }
 
-    private fun systemCoding(value: String) = Coding(
-        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
-        code = Code(value = value)
-    )
-
     private fun systemExtension(value: String) = Extension(
         url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem"),
         value = DynamicValue(
@@ -802,11 +719,6 @@ class RoninLocationTest {
                 code = Code(value = value)
             )
         )
-    )
-
-    private fun useCoding(value: String) = Coding(
-        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
-        code = Code(value = value)
     )
 
     private fun useExtension(value: String) = Extension(

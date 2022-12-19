@@ -7,6 +7,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.hasDayFormat
@@ -18,17 +20,41 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
-object RoninLaboratoryResult :
-    BaseRoninObservation(R4ObservationValidator, RoninProfile.OBSERVATION_LABORATORY_RESULT.value) {
-    internal val laboratoryCode = Code("laboratory")
+@Component
+class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
+    BaseRoninObservation(
+        R4ObservationValidator,
+        RoninProfile.OBSERVATION_LABORATORY_RESULT.value,
+        normalizer,
+        localizer
+    ) {
+    companion object {
+        internal val laboratoryCode = Code("laboratory")
+    }
 
     // Reference checks - override BaseRoninObservation value lists as needed for RoninLaboratoryResult
-    override val validDerivedFromValues = listOf("DocumentReference", "ImagingStudy", "Media", "MolecularSequence", "Observation", "QuestionnaireResponse")
+    override val validDerivedFromValues = listOf(
+        "DocumentReference",
+        "ImagingStudy",
+        "Media",
+        "MolecularSequence",
+        "Observation",
+        "QuestionnaireResponse"
+    )
     override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
     override val validSubjectValues = listOf("Patient")
-    override val validPartOfValues = listOf("ImagingStudy", "Immunization", "MedicationAdministration", "MedicationDispense", "MedicationStatement", "Procedure")
-    override val validPerformerValues = listOf("Patient", "Practitioner", "PractitionerRole", "RelatedPerson", "Organization")
+    override val validPartOfValues = listOf(
+        "ImagingStudy",
+        "Immunization",
+        "MedicationAdministration",
+        "MedicationDispense",
+        "MedicationStatement",
+        "Procedure"
+    )
+    override val validPerformerValues =
+        listOf("Patient", "Practitioner", "PractitionerRole", "RelatedPerson", "Organization")
 
     override fun qualifies(resource: Observation): Boolean {
         return resource.category.any { category ->

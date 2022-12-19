@@ -4,6 +4,8 @@ import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -12,12 +14,14 @@ import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
 /**
  * Validator and Transformer for the Ronin Practitioner profile.
  */
-object RoninPractitioner :
-    USCoreBasedProfile<Practitioner>(R4PractitionerValidator, RoninProfile.PRACTITIONER.value) {
+@Component
+class RoninPractitioner(normalizer: Normalizer, localizer: Localizer) :
+    USCoreBasedProfile<Practitioner>(R4PractitionerValidator, RoninProfile.PRACTITIONER.value, normalizer, localizer) {
 
     override fun validateRonin(element: Practitioner, parentContext: LocationContext, validation: Validation) {
         validation.apply {

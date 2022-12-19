@@ -7,8 +7,10 @@ import com.projectronin.interop.fhir.ronin.code.normalizeCoding
 import com.projectronin.interop.fhir.ronin.code.normalizeIdentifier
 import com.projectronin.interop.fhir.validate.Validatable
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
-object Normalizer : BaseGenericTransformer() {
+@Component
+class Normalizer : BaseGenericTransformer() {
     /**
      * Normalizes the [element] for the [tenant]
      */

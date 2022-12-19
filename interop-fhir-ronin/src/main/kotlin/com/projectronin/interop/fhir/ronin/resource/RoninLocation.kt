@@ -3,9 +3,10 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
-import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
 import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -15,23 +16,17 @@ import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
 /**
  * Validator and Transformer for the Ronin Location profile.
  */
-class RoninLocation private constructor(
-    private val conceptMapClient: ConceptMapClient,
-) : USCoreBasedProfile<Location>(R4LocationValidator, RoninProfile.LOCATION.value) {
-    companion object {
-        /**
-         * Creates a RoninLocation with the supplied [conceptMapClient].
-         */
-        fun create(
-            conceptMapClient: ConceptMapClient
-        ): RoninLocation = RoninLocation(conceptMapClient)
-    }
-
-    private val contactPoint = RoninContactPoint(conceptMapClient)
+@Component
+class RoninLocation(
+    normalizer: Normalizer,
+    localizer: Localizer,
+    private val contactPoint: RoninContactPoint
+) : USCoreBasedProfile<Location>(R4LocationValidator, RoninProfile.LOCATION.value, normalizer, localizer) {
 
     override fun validateRonin(element: Location, parentContext: LocationContext, validation: Validation) {
         validation.apply {

@@ -29,6 +29,8 @@ import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
@@ -52,6 +54,14 @@ class RoninLaboratoryResultTest {
         every { mnemonic } returns "test"
     }
 
+    private val normalizer = mockk<Normalizer> {
+        every { normalize(any(), tenant) } answers { firstArg() }
+    }
+    private val localizer = mockk<Localizer> {
+        every { localize(any(), tenant) } answers { firstArg() }
+    }
+    private val roninLaboratoryResult = RoninLaboratoryResult(normalizer, localizer)
+
     @Test
     fun `does not qualify when no category`() {
         val observation = Observation(
@@ -67,7 +77,7 @@ class RoninLaboratoryResultTest {
             code = CodeableConcept(text = "lab".asFHIR())
         )
 
-        val qualified = RoninLaboratoryResult.qualifies(observation)
+        val qualified = roninLaboratoryResult.qualifies(observation)
         assertFalse(qualified)
     }
 
@@ -86,7 +96,8 @@ class RoninLaboratoryResultTest {
             code = CodeableConcept(text = "lab".asFHIR())
         )
 
-        assertFalse(RoninLaboratoryResult.qualifies(observation))
+        val qualified = roninLaboratoryResult.qualifies(observation)
+        assertFalse(qualified)
     }
 
     @Test
@@ -113,7 +124,8 @@ class RoninLaboratoryResultTest {
             code = CodeableConcept(text = "lab".asFHIR())
         )
 
-        assertFalse(RoninLaboratoryResult.qualifies(observation))
+        val qualified = roninLaboratoryResult.qualifies(observation)
+        assertFalse(qualified)
     }
 
     @Test
@@ -140,7 +152,8 @@ class RoninLaboratoryResultTest {
             code = CodeableConcept(text = "lab".asFHIR())
         )
 
-        assertFalse(RoninLaboratoryResult.qualifies(observation))
+        val qualified = roninLaboratoryResult.qualifies(observation)
+        assertFalse(qualified)
     }
 
     @Test
@@ -167,7 +180,8 @@ class RoninLaboratoryResultTest {
             code = CodeableConcept(text = "lab".asFHIR())
         )
 
-        assertTrue(RoninLaboratoryResult.qualifies(observation))
+        val qualified = roninLaboratoryResult.qualifies(observation)
+        assertTrue(qualified)
     }
 
     @Test
@@ -200,7 +214,7 @@ class RoninLaboratoryResultTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -244,7 +258,7 @@ class RoninLaboratoryResultTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -298,7 +312,7 @@ class RoninLaboratoryResultTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -350,7 +364,7 @@ class RoninLaboratoryResultTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -403,7 +417,7 @@ class RoninLaboratoryResultTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -456,7 +470,7 @@ class RoninLaboratoryResultTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -508,7 +522,7 @@ class RoninLaboratoryResultTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -581,7 +595,7 @@ class RoninLaboratoryResultTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -646,7 +660,7 @@ class RoninLaboratoryResultTest {
             )
         )
 
-        RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+        roninLaboratoryResult.validate(observation, null).alertIfErrors()
     }
 
     @Test
@@ -701,7 +715,7 @@ class RoninLaboratoryResultTest {
             )
         )
 
-        val (transformed, _) = RoninLaboratoryResult.transform(observation, tenant)
+        val (transformed, _) = roninLaboratoryResult.transform(observation, tenant)
         assertNull(transformed)
     }
 
@@ -752,7 +766,7 @@ class RoninLaboratoryResultTest {
             )
         )
 
-        val (transformed, _) = RoninLaboratoryResult.transform(observation, tenant)
+        val (transformed, _) = roninLaboratoryResult.transform(observation, tenant)
         assertNull(transformed)
     }
 
@@ -800,7 +814,7 @@ class RoninLaboratoryResultTest {
             )
         )
 
-        val (transformed, _) = RoninLaboratoryResult.transform(observation, tenant)
+        val (transformed, _) = roninLaboratoryResult.transform(observation, tenant)
         assertNull(transformed)
     }
 
@@ -883,12 +897,12 @@ class RoninLaboratoryResultTest {
             )
         )
 
-        val (transformed, validation) = RoninLaboratoryResult.transform(observation, tenant)
+        val (transformed, validation) = roninLaboratoryResult.transform(observation, tenant)
         validation.alertIfErrors()
 
         transformed!!
         assertEquals("Observation", transformed.resourceType)
-        assertEquals(Id("test-123"), transformed.id)
+        assertEquals(Id("123"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_LABORATORY_RESULT.value))),
             transformed.meta
@@ -946,8 +960,8 @@ class RoninLaboratoryResultTest {
             ),
             transformed.identifier
         )
-        assertEquals(listOf(Reference(reference = "ServiceRequest/test-1234".asFHIR())), transformed.basedOn)
-        assertEquals(listOf(Reference(reference = "Immunization/test-1234".asFHIR())), transformed.partOf)
+        assertEquals(listOf(Reference(reference = "ServiceRequest/1234".asFHIR())), transformed.basedOn)
+        assertEquals(listOf(Reference(reference = "Immunization/1234".asFHIR())), transformed.partOf)
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
             listOf(
@@ -975,9 +989,9 @@ class RoninLaboratoryResultTest {
             ),
             transformed.code
         )
-        assertEquals(Reference(reference = "Patient/test-1234".asFHIR()), transformed.subject)
+        assertEquals(Reference(reference = "Patient/1234".asFHIR()), transformed.subject)
         assertEquals(listOf(Reference(display = "focus".asFHIR())), transformed.focus)
-        assertEquals(Reference(reference = "Encounter/test-1234".asFHIR()), transformed.encounter)
+        assertEquals(Reference(reference = "Encounter/1234".asFHIR()), transformed.encounter)
         assertEquals(
             DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -986,7 +1000,7 @@ class RoninLaboratoryResultTest {
             transformed.effective
         )
         assertEquals(Instant("2022-01-01T00:00:00Z"), transformed.issued)
-        assertEquals(listOf(Reference(reference = "Patient/test-1234".asFHIR())), transformed.performer)
+        assertEquals(listOf(Reference(reference = "Patient/1234".asFHIR())), transformed.performer)
         assertEquals(
             DynamicValue(
                 type = DynamicValueType.STRING,
@@ -998,11 +1012,11 @@ class RoninLaboratoryResultTest {
         assertEquals(listOf(CodeableConcept(text = "interpretation".asFHIR())), transformed.interpretation)
         assertEquals(CodeableConcept(text = "bodySite".asFHIR()), transformed.bodySite)
         assertEquals(CodeableConcept(text = "method".asFHIR()), transformed.method)
-        assertEquals(Reference(reference = "Specimen/test-1234".asFHIR()), transformed.specimen)
-        assertEquals(Reference(reference = "Device/test-1234".asFHIR()), transformed.device)
+        assertEquals(Reference(reference = "Specimen/1234".asFHIR()), transformed.specimen)
+        assertEquals(Reference(reference = "Device/1234".asFHIR()), transformed.device)
         assertEquals(listOf(ObservationReferenceRange(text = "referenceRange".asFHIR())), transformed.referenceRange)
-        assertEquals(listOf(Reference(reference = "Observation/test-2345".asFHIR())), transformed.hasMember)
-        assertEquals(listOf(Reference(reference = "Observation/test-3456".asFHIR())), transformed.derivedFrom)
+        assertEquals(listOf(Reference(reference = "Observation/2345".asFHIR())), transformed.hasMember)
+        assertEquals(listOf(Reference(reference = "Observation/3456".asFHIR())), transformed.derivedFrom)
         assertEquals(
             listOf(
                 ObservationComponent(
@@ -1059,7 +1073,7 @@ class RoninLaboratoryResultTest {
             )
         )
 
-        val (transformed, validation) = RoninLaboratoryResult.transform(observation, tenant)
+        val (transformed, validation) = roninLaboratoryResult.transform(observation, tenant)
         validation.alertIfErrors()
 
         transformed!!
@@ -1085,7 +1099,7 @@ class RoninLaboratoryResultTest {
             ),
             transformed.extension
         )
-        assertEquals(Id("test-123"), transformed.id)
+        assertEquals(Id("123"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_LABORATORY_RESULT.value))),
             transformed.meta
@@ -1126,7 +1140,20 @@ class RoninLaboratoryResultTest {
             ),
             transformed.category
         )
-        assertEquals(Reference(reference = "Patient/test-1234".asFHIR()), transformed.subject)
+        assertEquals(
+            CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            transformed.code
+        )
+        assertEquals(Reference(reference = "Patient/1234".asFHIR()), transformed.subject)
         assertEquals(listOf<Reference>(), transformed.focus)
         assertNull(transformed.encounter)
         assertEquals(
@@ -1186,7 +1213,7 @@ class RoninLaboratoryResultTest {
         )
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
-            val (transformed, validation) = RoninLaboratoryResult.transform(observation, tenant)
+            val (transformed, validation) = roninLaboratoryResult.transform(observation, tenant)
             assertNull(transformed)
             validation.alertIfErrors()
         }
@@ -1250,7 +1277,7 @@ class RoninLaboratoryResultTest {
             )
         )
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -1313,7 +1340,7 @@ class RoninLaboratoryResultTest {
             )
         )
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -1376,7 +1403,7 @@ class RoninLaboratoryResultTest {
             )
         )
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -1440,7 +1467,7 @@ class RoninLaboratoryResultTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -1449,6 +1476,7 @@ class RoninLaboratoryResultTest {
             exception.message
         )
     }
+
     @Test
     fun `validate fails if there is no child, value, or dataAbsentReason`() {
         val observation = Observation(
@@ -1494,7 +1522,7 @@ class RoninLaboratoryResultTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -1550,7 +1578,7 @@ class RoninLaboratoryResultTest {
             hasMember = listOf(Reference(reference = "MolecularSequence/4321".asFHIR()))
         )
 
-        RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+        roninLaboratoryResult.validate(observation, null).alertIfErrors()
     }
 
     @Test
@@ -1614,6 +1642,6 @@ class RoninLaboratoryResultTest {
             component = componentList
         )
 
-        RoninLaboratoryResult.validate(observation, null).alertIfErrors()
+        roninLaboratoryResult.validate(observation, null).alertIfErrors()
     }
 }

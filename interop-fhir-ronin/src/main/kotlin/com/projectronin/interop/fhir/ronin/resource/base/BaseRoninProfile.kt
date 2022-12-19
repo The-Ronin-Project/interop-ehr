@@ -12,6 +12,8 @@ import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Resource
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -25,8 +27,10 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
  */
 abstract class BaseRoninProfile<T : Resource<T>>(
     extendedProfile: ProfileValidator<T>,
-    private val profile: String
-) : BaseProfile<T>(extendedProfile) {
+    private val profile: String,
+    normalizer: Normalizer,
+    localizer: Localizer
+) : BaseProfile<T>(extendedProfile, normalizer, localizer) {
     private val requiredTenantIdentifierError = FHIRError(
         code = "RONIN_TNNT_ID_001",
         severity = ValidationIssueSeverity.ERROR,
@@ -205,7 +209,12 @@ abstract class BaseRoninProfile<T : Resource<T>>(
     /**
      * Validates that the [Coding] list is not empty. (examples: Condition CNDPAHC & CNDEDX)
      */
-    protected fun requireCodeCoding(parentFieldName: String, coding: List<Coding>?, parentContext: LocationContext, validation: Validation) {
+    protected fun requireCodeCoding(
+        parentFieldName: String,
+        coding: List<Coding>?,
+        parentContext: LocationContext,
+        validation: Validation
+    ) {
         validation.apply {
             coding?.let {
                 checkTrue(

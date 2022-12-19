@@ -7,12 +7,14 @@ import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.localizeReference
 import com.projectronin.interop.fhir.validate.Validatable
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
 /**
  * Localizer is capable of localizing an element. This localization may include system normalization or tenant-level
  * data segregation.
  */
-object Localizer : BaseGenericTransformer() {
+@Component
+class Localizer : BaseGenericTransformer() {
     /**
      * Localizes the [element] for the [tenant]
      */

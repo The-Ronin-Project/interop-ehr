@@ -4,8 +4,9 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.fhir.r4.validate.resource.R4EncounterValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
-import com.projectronin.interop.fhir.ronin.resource.RoninMedication.transform
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -13,14 +14,18 @@ import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
 /**
  * Validator and Transformer for the Ronin Encounter profile.
  */
-object RoninEncounter :
+@Component
+class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
     USCoreBasedProfile<Encounter>(
         R4EncounterValidator,
-        RoninProfile.ENCOUNTER.value
+        RoninProfile.ENCOUNTER.value,
+        normalizer,
+        localizer
     ) {
     private val requiredTypeError = RequiredFieldError(Encounter::type)
     private val requiredSubjectError = RequiredFieldError(Encounter::subject)

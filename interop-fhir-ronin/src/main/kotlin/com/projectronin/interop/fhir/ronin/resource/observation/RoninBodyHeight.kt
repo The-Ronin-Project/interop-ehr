@@ -5,6 +5,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.FHIRError
@@ -14,9 +16,19 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
-object RoninBodyHeight : BaseRoninVitalSign(R4ObservationValidator, RoninProfile.OBSERVATION_BODY_HEIGHT.value) {
-    internal val bodyHeightCode = Code("8302-2")
+@Component
+class RoninBodyHeight(normalizer: Normalizer, localizer: Localizer) :
+    BaseRoninVitalSign(
+        R4ObservationValidator,
+        RoninProfile.OBSERVATION_BODY_HEIGHT.value,
+        normalizer,
+        localizer
+    ) {
+    companion object {
+        internal val bodyHeightCode = Code("8302-2")
+    }
 
     // Quantity unit codes - [USCore Body Length Units](http://hl7.org/fhir/R4/valueset-ucum-bodylength.html)
     override val validQuantityCodes = listOf("cm", "[in_i]")

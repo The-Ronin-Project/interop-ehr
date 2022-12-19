@@ -14,7 +14,9 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import mu.KotlinLogging
 
 abstract class BaseProfile<T : Resource<T>>(
-    extendedProfile: ProfileValidator<T>? = null
+    extendedProfile: ProfileValidator<T>? = null,
+    private val normalizer: Normalizer,
+    private val localizer: Localizer
 ) : BaseValidator<T>(extendedProfile), ProfileTransformer<T>, ProfileQualifier<T> {
     protected val logger = KotlinLogging.logger(this::class.java.name)
 
@@ -53,12 +55,12 @@ abstract class BaseProfile<T : Resource<T>>(
             )
         }
 
-        val normalized = Normalizer.normalize(original, tenant)
+        val normalized = normalizer.normalize(original, tenant)
 
         val (transformed, transformValidation) = transformInternal(normalized, currentContext, tenant)
         validation.merge(transformValidation)
 
-        val localizedTransform = transformed?.let { Localizer.localize(transformed, tenant) }
+        val localizedTransform = transformed?.let { localizer.localize(transformed, tenant) }
         localizedTransform?.let {
             validateTransformation(it, currentContext, validation)
         }

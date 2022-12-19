@@ -3,6 +3,8 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.fhir.r4.resource.Organization
 import com.projectronin.interop.fhir.r4.validate.resource.R4OrganizationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -10,13 +12,14 @@ import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
 /**
  * Validator and Transformer for the Ronin Organization profile.
  */
-
-object RoninOrganization :
-    USCoreBasedProfile<Organization>(R4OrganizationValidator, RoninProfile.ORGANIZATION.value) {
+@Component
+class RoninOrganization(normalizer: Normalizer, localizer: Localizer) :
+    USCoreBasedProfile<Organization>(R4OrganizationValidator, RoninProfile.ORGANIZATION.value, normalizer, localizer) {
 
     private val requiredActiveFieldError = RequiredFieldError(Organization::active)
     private val requiredNameFieldError = RequiredFieldError(Organization::name)

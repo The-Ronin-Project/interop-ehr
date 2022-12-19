@@ -17,6 +17,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -31,6 +33,12 @@ import org.junit.jupiter.api.assertThrows
 class BaseRoninProfileTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
+    }
+    private val normalizer = mockk<Normalizer> {
+        every { normalize(any(), tenant) } answers { firstArg() }
+    }
+    private val localizer = mockk<Localizer> {
+        every { localize(any(), tenant) } answers { firstArg() }
     }
 
     private val validTenantIdentifier =
@@ -60,7 +68,7 @@ class BaseRoninProfileTest {
         every { location.identifier } returns listOf(validFhirIdentifier)
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile().validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
         }
 
         assertEquals(
@@ -75,7 +83,7 @@ class BaseRoninProfileTest {
         every { location.identifier } returns listOf(validFhirIdentifier, validTenantIdentifier.copy(type = null))
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile().validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
         }
 
         assertEquals(
@@ -90,7 +98,7 @@ class BaseRoninProfileTest {
         every { location.identifier } returns listOf(validFhirIdentifier, validTenantIdentifier.copy(value = null))
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile().validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
         }
 
         assertEquals(
@@ -105,7 +113,7 @@ class BaseRoninProfileTest {
         every { location.identifier } returns listOf(validTenantIdentifier)
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile().validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
         }
 
         assertEquals(
@@ -120,7 +128,7 @@ class BaseRoninProfileTest {
         every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier.copy(type = null))
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile().validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
         }
 
         assertEquals(
@@ -135,7 +143,7 @@ class BaseRoninProfileTest {
         every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier.copy(value = null))
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile().validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
         }
 
         assertEquals(
@@ -149,12 +157,12 @@ class BaseRoninProfileTest {
     fun `all ronin identifiers are valid`() {
         every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
 
-        TestProfile().validate(location, null).alertIfErrors()
+        TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
     }
 
     @Test
     fun `sets profile on meta transform for null meta`() {
-        val profile = object : TestProfile() {
+        val profile = object : TestProfile(normalizer, localizer) {
             fun transformMeta(meta: Meta?): Meta {
                 return meta.transform()
             }
@@ -166,7 +174,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `sets profile on meta transform for non-null meta`() {
-        val profile = object : TestProfile() {
+        val profile = object : TestProfile(normalizer, localizer) {
             fun transformMeta(meta: Meta?): Meta {
                 return meta.transform()
             }
@@ -183,7 +191,7 @@ class BaseRoninProfileTest {
     fun `getExtensionOrEmptyList - null codeableConcept`() {
         val locationTest = Location(id = Id("123"), identifier = listOf(validTenantIdentifier, validFhirIdentifier))
 
-        val (transformedLocation, _) = TestProfile().transform(locationTest, tenant)
+        val (transformedLocation, _) = TestProfile(normalizer, localizer).transform(locationTest, tenant)
 
         assertEquals(emptyList<Extension>(), transformedLocation!!.extension)
     }
@@ -206,7 +214,7 @@ class BaseRoninProfileTest {
             )
         )
 
-        val (transformedLocation, _) = TestProfile().transform(locationTest, tenant)
+        val (transformedLocation, _) = TestProfile(normalizer, localizer).transform(locationTest, tenant)
 
         assertEquals(
             listOf(
@@ -245,7 +253,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile().validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
         }
 
         assertEquals(
@@ -268,7 +276,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile().validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
         }
 
         assertEquals(
@@ -291,7 +299,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile().validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
         }
 
         assertEquals(
@@ -319,7 +327,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile().validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
         }
 
         assertEquals(
@@ -353,7 +361,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile().validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
         }
 
         assertEquals(
@@ -381,7 +389,7 @@ class BaseRoninProfileTest {
             )
         )
 
-        TestProfile().validate(location, null).alertIfErrors()
+        TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
     }
 
     @Test
@@ -403,7 +411,7 @@ class BaseRoninProfileTest {
             )
         )
 
-        TestProfile().validate(location, null).alertIfErrors()
+        TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
     }
 
     @Test
@@ -427,7 +435,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile().validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
         }
 
         assertEquals(
@@ -437,7 +445,8 @@ class BaseRoninProfileTest {
         )
     }
 
-    private open class TestProfile : BaseRoninProfile<Location>(R4LocationValidator, "profile") {
+    private open class TestProfile(normalizer: Normalizer, localizer: Localizer) :
+        BaseRoninProfile<Location>(R4LocationValidator, "profile", normalizer, localizer) {
         override fun transformInternal(
             normalized: Location,
             parentContext: LocationContext,

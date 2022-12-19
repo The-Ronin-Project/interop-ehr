@@ -17,13 +17,13 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
 /**
  * Validator and Transformer for a list of ContactPoint elements in Patient, Practitioner, or Organization.
  */
-class RoninContactPoint(
-    private val conceptMapClient: ConceptMapClient,
-) {
+@Component
+class RoninContactPoint(private val conceptMapClient: ConceptMapClient) {
     private val requiredTelecomSystemExtensionError = FHIRError(
         code = "RONIN_CNTCTPT_001",
         severity = ValidationIssueSeverity.ERROR,

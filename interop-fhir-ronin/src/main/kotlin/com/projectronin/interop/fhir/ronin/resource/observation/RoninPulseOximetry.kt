@@ -5,6 +5,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.FHIRError
@@ -14,25 +16,46 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
-object RoninPulseOximetry : BaseRoninVitalSign(R4ObservationValidator, RoninProfile.OBSERVATION_PULSE_OXIMETRY.value) {
-    internal val pulseOxCode = Code("59408-5")
-    internal val O2SatCode = Code("2708-6")
-    internal val flowRateCode = Code("3151-8")
-    internal val concentrationCode = Code("3150-0")
+@Component
+class RoninPulseOximetry(normalizer: Normalizer, localizer: Localizer) :
+    BaseRoninVitalSign(R4ObservationValidator, RoninProfile.OBSERVATION_PULSE_OXIMETRY.value, normalizer, localizer) {
+    companion object {
+        internal val pulseOxCode = Code("59408-5")
+        internal val O2SatCode = Code("2708-6")
+        internal val flowRateCode = Code("3151-8")
+        internal val concentrationCode = Code("3150-0")
+    }
 
     // Quantity unit codes - [US Core Pulse Oximetry](http://hl7.org/fhir/us/core/STU5.0.1/StructureDefinition-us-core-pulse-oximetry.html)
     private val validFlowRateCodes = listOf("L/min")
     private val validConcentrationCodes = listOf("%")
 
     // Reference checks - override BaseRoninObservation value lists as needed for RoninPulseOximetry
-    override val validDerivedFromValues = listOf("DocumentReference", "ImagingStudy", "Media", "MolecularSequence", "Observation", "QuestionnaireResponse")
+    override val validDerivedFromValues = listOf(
+        "DocumentReference",
+        "ImagingStudy",
+        "Media",
+        "MolecularSequence",
+        "Observation",
+        "QuestionnaireResponse"
+    )
     override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
-    override val validPartOfValues = listOf("ImagingStudy", "Immunization", "MedicationAdministration", "MedicationDispense", "MedicationStatement", "Procedure")
+    override val validPartOfValues = listOf(
+        "ImagingStudy",
+        "Immunization",
+        "MedicationAdministration",
+        "MedicationDispense",
+        "MedicationStatement",
+        "Procedure"
+    )
 
     override fun qualifies(resource: Observation): Boolean {
-        val hasPulseOx = resource.code?.coding?.any { it.system == CodeSystem.LOINC.uri && it.code == pulseOxCode } ?: false
-        val hasO2SatCode = resource.code?.coding?.any { it.system == CodeSystem.LOINC.uri && it.code == O2SatCode } ?: false
+        val hasPulseOx =
+            resource.code?.coding?.any { it.system == CodeSystem.LOINC.uri && it.code == pulseOxCode } ?: false
+        val hasO2SatCode =
+            resource.code?.coding?.any { it.system == CodeSystem.LOINC.uri && it.code == O2SatCode } ?: false
         return (hasPulseOx && hasO2SatCode)
     }
 

@@ -1,6 +1,8 @@
 package com.projectronin.interop.fhir.ronin.resource.base
 
 import com.projectronin.interop.fhir.r4.resource.Resource
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -18,7 +20,8 @@ import com.projectronin.interop.tenant.config.model.Tenant
  * A [defaultProfile] is not required. If not supplied, or if the resource does not qualify for either the
  * [potentialProfiles] or the [defaultProfile], the resource does not qualify for any profile, and simply errors.
  */
-abstract class MultipleProfileResource<T : Resource<T>> : BaseProfile<T>() {
+abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, localizer: Localizer) :
+    BaseProfile<T>(normalizer = normalizer, localizer = localizer) {
     protected abstract val potentialProfiles: List<BaseProfile<T>>
     protected open val defaultProfile: BaseProfile<T>? = null
 

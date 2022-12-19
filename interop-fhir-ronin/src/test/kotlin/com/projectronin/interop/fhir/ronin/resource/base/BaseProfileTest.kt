@@ -2,6 +2,8 @@ package com.projectronin.interop.fhir.ronin.resource.base
 
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
@@ -19,9 +21,16 @@ class BaseProfileTest {
         every { mnemonic } returns "test"
     }
 
+    private val normalizer = mockk<Normalizer> {
+        every { normalize(any(), tenant) } answers { firstArg() }
+    }
+    private val localizer = mockk<Localizer> {
+        every { localize(any(), tenant) } answers { firstArg() }
+    }
+
     @Test
     fun `handles a successful transformation with no validation errors for a resource with no ID`() {
-        val profile = object : BaseProfile<Location>(null) {
+        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
             override fun transformInternal(
                 normalized: Location,
                 parentContext: LocationContext,
@@ -42,7 +51,7 @@ class BaseProfileTest {
 
     @Test
     fun `handles a null transformation with no validation errors`() {
-        val profile = object : BaseProfile<Location>(null) {
+        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
             override fun transformInternal(
                 normalized: Location,
                 parentContext: LocationContext,
@@ -63,7 +72,7 @@ class BaseProfileTest {
 
     @Test
     fun `handles a null transformation with validation errors`() {
-        val profile = object : BaseProfile<Location>(null) {
+        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
             override fun transformInternal(
                 normalized: Location,
                 parentContext: LocationContext,
@@ -88,7 +97,7 @@ class BaseProfileTest {
 
     @Test
     fun `handles a successful transformation with no validation errors`() {
-        val profile = object : BaseProfile<Location>(null) {
+        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
             override fun transformInternal(
                 normalized: Location,
                 parentContext: LocationContext,
@@ -104,12 +113,12 @@ class BaseProfileTest {
 
         val original = Location(id = Id("1234"))
         val (transformed, _) = profile.transform(original, tenant)
-        assertEquals(Id("test-1234"), transformed!!.id)
+        assertEquals(Id("1234"), transformed!!.id)
     }
 
     @Test
     fun `handles a successful transformation with validation errors`() {
-        val profile = object : BaseProfile<Location>(null) {
+        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
             override fun transformInternal(
                 normalized: Location,
                 parentContext: LocationContext,
@@ -134,7 +143,7 @@ class BaseProfileTest {
 
     @Test
     fun `handles a successful transformation that results in a failed validation`() {
-        val profile = object : BaseProfile<Location>(null) {
+        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
             override fun transformInternal(
                 normalized: Location,
                 parentContext: LocationContext,

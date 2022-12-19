@@ -7,6 +7,8 @@ import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.ronin.error.RoninInvalidDynamicValueError
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.InvalidValueSetError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -20,9 +22,13 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
  */
 abstract class BaseRoninVitalSign(
     extendedProfile: ProfileValidator<Observation>,
-    profile: String
-) : BaseRoninObservation(extendedProfile, profile) {
-    internal val vitalSignsCode = Code("vital-signs")
+    profile: String,
+    normalizer: Normalizer,
+    localizer: Localizer
+) : BaseRoninObservation(extendedProfile, profile, normalizer, localizer) {
+    companion object {
+        internal val vitalSignsCode = Code("vital-signs")
+    }
 
     // Quantity unit codes - subclasses may override to modify validation logic for quantity units like "cm" "kg"
     open val validQuantityCodes: List<String> = emptyList()

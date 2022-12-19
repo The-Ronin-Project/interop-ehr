@@ -32,6 +32,8 @@ import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.fhir.r4.valueset.EncounterLocationStatus
 import com.projectronin.interop.fhir.r4.valueset.EncounterStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -48,10 +50,18 @@ class RoninEncounterTest {
         every { mnemonic } returns "test"
     }
 
+    private val normalizer = mockk<Normalizer> {
+        every { normalize(any(), tenant) } answers { firstArg() }
+    }
+    private val localizer = mockk<Localizer> {
+        every { localize(any(), tenant) } answers { firstArg() }
+    }
+    private val roninEncounter = RoninEncounter(normalizer, localizer)
+
     @Test
     fun `always qualifies`() {
         assertTrue(
-            RoninEncounter.qualifies(
+            roninEncounter.qualifies(
                 Encounter(
                     status = EncounterStatus.CANCELLED.asCode(),
                     `class` = Coding(code = Code("OBSENC")),
@@ -71,7 +81,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter, null).alertIfErrors()
         }
 
         assertEquals(
@@ -105,7 +115,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter, null).alertIfErrors()
         }
 
         assertEquals(
@@ -138,7 +148,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter, null).alertIfErrors()
         }
 
         assertEquals(
@@ -169,7 +179,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter, null).alertIfErrors()
         }
 
         assertEquals(
@@ -203,7 +213,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter, null).alertIfErrors()
         }
 
         assertEquals(
@@ -238,7 +248,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter, null).alertIfErrors()
         }
 
         assertEquals(
@@ -271,7 +281,7 @@ class RoninEncounterTest {
             subject = Reference(reference = "Patient/example".asFHIR())
         )
 
-        RoninEncounter.validate(encounter, null).alertIfErrors()
+        roninEncounter.validate(encounter, null).alertIfErrors()
     }
 
     @Test
@@ -501,12 +511,12 @@ class RoninEncounterTest {
             partOf = Reference(reference = "Encounter/super".asFHIR())
         )
 
-        val (transformed, validation) = RoninEncounter.transform(encounter, tenant)
+        val (transformed, validation) = roninEncounter.transform(encounter, tenant)
         validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Encounter", transformed.resourceType)
-        assertEquals(Id(value = "test-12345"), transformed.id)
+        assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value))),
             transformed.meta
@@ -607,7 +617,6 @@ class RoninEncounterTest {
         assertEquals(
             listOf(
                 CodeableConcept(
-                    text = "Patient-initiated encounter".asFHIR(),
                     coding = listOf(
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
@@ -622,7 +631,6 @@ class RoninEncounterTest {
         assertNull(transformed.serviceType)
         assertEquals(
             CodeableConcept(
-                text = "Non-urgent ear, nose and throat admission".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = CodeSystem.SNOMED_CT.uri,
@@ -635,7 +643,7 @@ class RoninEncounterTest {
         )
         assertEquals(
             Reference(
-                reference = "Patient/test-f001".asFHIR(),
+                reference = "Patient/f001".asFHIR(),
                 display = "P. van de Heuvel".asFHIR()
             ),
             transformed.subject
@@ -646,7 +654,7 @@ class RoninEncounterTest {
             listOf(
                 EncounterParticipant(
                     individual = Reference(
-                        reference = "Practitioner/test-f001".asFHIR(),
+                        reference = "Practitioner/f001".asFHIR(),
                         display = "E.M. van den Broek".asFHIR()
                     )
                 )
@@ -667,7 +675,6 @@ class RoninEncounterTest {
         assertEquals(
             listOf(
                 CodeableConcept(
-                    text = "Retropharyngeal abscess".asFHIR(),
                     coding = listOf(
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
@@ -682,7 +689,7 @@ class RoninEncounterTest {
         assertEquals(
             listOf(
                 Reference(
-                    reference = "Condition/test-f001".asFHIR(),
+                    reference = "Condition/f001".asFHIR(),
                     display = "Test Condition".asFHIR()
                 )
             ),
@@ -691,9 +698,8 @@ class RoninEncounterTest {
         assertEquals(
             listOf(
                 EncounterDiagnosis(
-                    condition = Reference(reference = "Condition/test-stroke".asFHIR()),
+                    condition = Reference(reference = "Condition/stroke".asFHIR()),
                     use = CodeableConcept(
-                        text = "Admission diagnosis".asFHIR(),
                         coding = listOf(
                             Coding(
                                 system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
@@ -705,9 +711,8 @@ class RoninEncounterTest {
                     rank = PositiveInt(1)
                 ),
                 EncounterDiagnosis(
-                    condition = Reference(reference = "Condition/test-f201".asFHIR()),
+                    condition = Reference(reference = "Condition/f201".asFHIR()),
                     use = CodeableConcept(
-                        text = "Discharge diagnosis".asFHIR(),
                         coding = listOf(
                             Coding(
                                 system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
@@ -720,7 +725,7 @@ class RoninEncounterTest {
             ),
             transformed.diagnosis
         )
-        assertEquals(listOf(Reference(reference = "Account/test-f001".asFHIR())), transformed.account)
+        assertEquals(listOf(Reference(reference = "Account/f001".asFHIR())), transformed.account)
         assertEquals(
             EncounterHospitalization(
                 preAdmissionIdentifier = Identifier(
@@ -730,7 +735,6 @@ class RoninEncounterTest {
                 ),
                 origin = null,
                 admitSource = CodeableConcept(
-                    text = "Referral by physician".asFHIR(),
                     coding = listOf(
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
@@ -742,7 +746,6 @@ class RoninEncounterTest {
                 reAdmission = null,
                 dietPreference = listOf(
                     CodeableConcept(
-                        text = "vegetarian".asFHIR(),
                         coding = listOf(
                             Coding(
                                 system = Uri("https://www.hl7.org/fhir/R4/valueset-encounter-diet.html"),
@@ -752,7 +755,6 @@ class RoninEncounterTest {
                         )
                     ),
                     CodeableConcept(
-                        text = "kosher".asFHIR(),
                         coding = listOf(
                             Coding(
                                 system = Uri("https://www.hl7.org/fhir/R4/valueset-encounter-diet.html"),
@@ -764,9 +766,8 @@ class RoninEncounterTest {
                 ),
                 specialCourtesy = emptyList(),
                 specialArrangement = emptyList(),
-                destination = Reference(reference = "Location/test-place".asFHIR()),
+                destination = Reference(reference = "Location/place".asFHIR()),
                 dischargeDisposition = CodeableConcept(
-                    text = "Discharge to home".asFHIR(),
                     coding = listOf(
                         Coding(
                             system = CodeSystem.SNOMED_CT.uri,
@@ -781,10 +782,9 @@ class RoninEncounterTest {
         assertEquals(
             listOf(
                 EncounterLocation(
-                    location = Reference(reference = "Location/test-f001".asFHIR()),
+                    location = Reference(reference = "Location/f001".asFHIR()),
                     status = EncounterLocationStatus.RESERVED.asCode(),
                     physicalType = CodeableConcept(
-                        text = "Area".asFHIR(),
                         coding = listOf(
                             Coding(
                                 system = Uri("http://terminology.hl7.org/CodeSystem/location-physical-type"),
@@ -799,12 +799,12 @@ class RoninEncounterTest {
         )
         assertEquals(
             Reference(
-                reference = "Organization/test-f001".asFHIR(),
+                reference = "Organization/f001".asFHIR(),
                 display = "Community Hospital".asFHIR()
             ),
             transformed.serviceProvider
         )
-        assertEquals(Reference(reference = "Encounter/test-super".asFHIR()), transformed.partOf)
+        assertEquals(Reference(reference = "Encounter/super".asFHIR()), transformed.partOf)
     }
 
     @Test
@@ -817,12 +817,12 @@ class RoninEncounterTest {
             subject = Reference(reference = "Patient/example".asFHIR())
         )
 
-        val (transformed, validation) = RoninEncounter.transform(encounter, tenant)
+        val (transformed, validation) = roninEncounter.transform(encounter, tenant)
         validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Encounter", transformed.resourceType)
-        assertEquals(Id(value = "test-12345"), transformed.id)
+        assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value))),
             transformed.meta
@@ -854,7 +854,7 @@ class RoninEncounterTest {
         assertEquals(listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))), transformed.type)
         assertNull(transformed.serviceType)
         assertNull(transformed.priority)
-        assertEquals(Reference(reference = "Patient/test-example".asFHIR()), transformed.subject)
+        assertEquals(Reference(reference = "Patient/example".asFHIR()), transformed.subject)
         assertEquals(listOf<Reference>(), transformed.episodeOfCare)
         assertEquals(listOf<Reference>(), transformed.basedOn)
         assertEquals(listOf<EncounterParticipant>(), transformed.participant)
@@ -878,7 +878,7 @@ class RoninEncounterTest {
             `class` = Coding(code = Code("OBSENC")),
         )
 
-        val (transformed, _) = RoninEncounter.transform(encounter, tenant)
+        val (transformed, _) = roninEncounter.transform(encounter, tenant)
 
         assertNull(transformed)
     }

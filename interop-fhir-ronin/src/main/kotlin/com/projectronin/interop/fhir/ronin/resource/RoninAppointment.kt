@@ -8,6 +8,8 @@ import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
 import com.projectronin.interop.fhir.ronin.error.ConceptMapInvalidValueSetError
 import com.projectronin.interop.fhir.ronin.error.FailedConceptMapLookupError
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
@@ -20,21 +22,14 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
 /**
  * Validator and Transformer for the Ronin Appointment profile.
  */
-class RoninAppointment private constructor(
-    private val conceptMapClient: ConceptMapClient,
-) : USCoreBasedProfile<Appointment>(R4AppointmentValidator, RoninProfile.APPOINTMENT.value) {
-    companion object {
-        /**
-         * Creates a RoninAppointment with the supplied [conceptMapClient].
-         */
-        fun create(
-            conceptMapClient: ConceptMapClient
-        ): RoninAppointment = RoninAppointment(conceptMapClient)
-    }
+@Component
+class RoninAppointment(private val conceptMapClient: ConceptMapClient, normalizer: Normalizer, localizer: Localizer) :
+    USCoreBasedProfile<Appointment>(R4AppointmentValidator, RoninProfile.APPOINTMENT.value, normalizer, localizer) {
 
     private val requiredAppointmentExtensionError = FHIRError(
         code = "RONIN_APPT_001",
@@ -104,7 +99,7 @@ class RoninAppointment private constructor(
                     parentContext
                 )
                 ifNotNull(statusPair) {
-                    statusPair.first?.let { coding ->
+                    statusPair.first.let { coding ->
                         val statusCode = coding.code
                         val statusTarget = statusCode?.value
                         val statusMapName = RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "Appointment.status")

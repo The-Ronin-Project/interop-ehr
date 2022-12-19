@@ -27,6 +27,8 @@ import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
 import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -46,6 +48,8 @@ import org.junit.jupiter.api.assertThrows
 
 class RoninAppointmentTest {
     private lateinit var conceptMapClient: ConceptMapClient
+    private lateinit var normalizer: Normalizer
+    private lateinit var localizer: Localizer
     private lateinit var roninAppointment: RoninAppointment
 
     private val tenant = mockk<Tenant> {
@@ -55,7 +59,13 @@ class RoninAppointmentTest {
     @BeforeEach
     fun setup() {
         conceptMapClient = mockk()
-        roninAppointment = RoninAppointment.create(conceptMapClient)
+        normalizer = mockk {
+            every { normalize(any(), tenant) } answers { firstArg() }
+        }
+        localizer = mockk {
+            every { localize(any(), tenant) } answers { firstArg() }
+        }
+        roninAppointment = RoninAppointment(conceptMapClient, normalizer, localizer)
     }
 
     @Test
@@ -234,28 +244,25 @@ class RoninAppointmentTest {
             requestedPeriod = listOf(Period(start = DateTime("2021-11-16")))
         )
 
-        conceptMapClient = mockk {
-            every {
-                getConceptMappingForEnum(
-                    tenant,
-                    "Appointment",
-                    "Appointment.status",
-                    Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                        code = Code(value = "cancelled")
-                    ),
-                    AppointmentStatus::class
-                )
-            } returns Pair(statusCoding("cancelled"), statusExtension("cancelled"))
-        }
+        every {
+            conceptMapClient.getConceptMappingForEnum(
+                tenant,
+                "Appointment",
+                "Appointment.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                    code = Code(value = "cancelled")
+                ),
+                AppointmentStatus::class
+            )
+        } returns Pair(statusCoding("cancelled"), statusExtension("cancelled"))
 
-        roninAppointment = RoninAppointment.create(conceptMapClient)
         val (transformed, validation) = roninAppointment.transform(appointment, tenant)
         validation.alertIfErrors()
 
         transformed!!
         assertEquals("Appointment", transformed.resourceType)
-        assertEquals(Id(value = "test-12345"), transformed.id)
+        assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value))),
             transformed.meta
@@ -358,28 +365,25 @@ class RoninAppointmentTest {
             )
         )
 
-        conceptMapClient = mockk {
-            every {
-                getConceptMappingForEnum(
-                    tenant,
-                    "Appointment",
-                    "Appointment.status",
-                    Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                        code = Code(value = "cancelled")
-                    ),
-                    AppointmentStatus::class
-                )
-            } returns Pair(statusCoding("cancelled"), statusExtension("cancelled"))
-        }
+        every {
+            conceptMapClient.getConceptMappingForEnum(
+                tenant,
+                "Appointment",
+                "Appointment.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                    code = Code(value = "cancelled")
+                ),
+                AppointmentStatus::class
+            )
+        } returns Pair(statusCoding("cancelled"), statusExtension("cancelled"))
 
-        roninAppointment = RoninAppointment.create(conceptMapClient)
         val (transformed, validation) = roninAppointment.transform(appointment, tenant)
         validation.alertIfErrors()
 
         transformed!!
         assertEquals("Appointment", transformed.resourceType)
-        assertEquals(Id(value = "test-12345"), transformed.id)
+        assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value))),
             transformed.meta
@@ -463,22 +467,18 @@ class RoninAppointmentTest {
             )
         )
 
-        conceptMapClient = mockk {
-            every {
-                getConceptMappingForEnum(
-                    tenant,
-                    "Appointment",
-                    "Appointment.status",
-                    Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                        code = Code(value = "cancelled")
-                    ),
-                    AppointmentStatus::class
-                )
-            } returns Pair(statusCoding("cancelled"), statusExtension("cancelled"))
-        }
-
-        roninAppointment = RoninAppointment.create(conceptMapClient)
+        every {
+            conceptMapClient.getConceptMappingForEnum(
+                tenant,
+                "Appointment",
+                "Appointment.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                    code = Code(value = "cancelled")
+                ),
+                AppointmentStatus::class
+            )
+        } returns Pair(statusCoding("cancelled"), statusExtension("cancelled"))
 
         val (transformed, _) = roninAppointment.transform(appointment, tenant)
         assertNull(transformed)
@@ -784,22 +784,18 @@ class RoninAppointmentTest {
             )
         )
 
-        conceptMapClient = mockk {
-            every {
-                getConceptMappingForEnum(
-                    tenant,
-                    "Appointment",
-                    "Appointment.status",
-                    Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                        code = Code(value = "abc")
-                    ),
-                    AppointmentStatus::class
-                )
-            } returns Pair(statusCoding("cancelled"), statusExtension("abc"))
-        }
-
-        roninAppointment = RoninAppointment.create(conceptMapClient)
+        every {
+            conceptMapClient.getConceptMappingForEnum(
+                tenant,
+                "Appointment",
+                "Appointment.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                    code = Code(value = "abc")
+                ),
+                AppointmentStatus::class
+            )
+        } returns Pair(statusCoding("cancelled"), statusExtension("abc"))
 
         val (transformed, validation) = roninAppointment.transform(appointment, tenant)
         validation.alertIfErrors()
@@ -851,22 +847,18 @@ class RoninAppointmentTest {
             )
         )
 
-        conceptMapClient = mockk {
-            every {
-                getConceptMappingForEnum(
-                    tenant,
-                    "Appointment",
-                    "Appointment.status",
-                    Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                        code = Code(value = "xyz")
-                    ),
-                    AppointmentStatus::class
-                )
-            } returns null
-        }
-
-        roninAppointment = RoninAppointment.create(conceptMapClient)
+        every {
+            conceptMapClient.getConceptMappingForEnum(
+                tenant,
+                "Appointment",
+                "Appointment.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                    code = Code(value = "xyz")
+                ),
+                AppointmentStatus::class
+            )
+        } returns null
 
         val pair = roninAppointment.transformInternal(appointment, LocationContext(Appointment::class), tenant)
         val exception = assertThrows<IllegalArgumentException> {
@@ -904,21 +896,18 @@ class RoninAppointmentTest {
                 )
             )
         )
-        conceptMapClient = mockk {
-            every {
-                getConceptMappingForEnum(
-                    tenant,
-                    "Appointment",
-                    "Appointment.status",
-                    Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                        code = Code(value = "xyz")
-                    ),
-                    AppointmentStatus::class
-                )
-            } returns Pair(statusCoding("waiting"), statusExtension("xyz"))
-        }
-        roninAppointment = RoninAppointment.create(conceptMapClient)
+        every {
+            conceptMapClient.getConceptMappingForEnum(
+                tenant,
+                "Appointment",
+                "Appointment.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                    code = Code(value = "xyz")
+                ),
+                AppointmentStatus::class
+            )
+        } returns Pair(statusCoding("waiting"), statusExtension("xyz"))
 
         val transformResult =
             roninAppointment.transformInternal(appointment, LocationContext(Appointment::class), tenant)
@@ -959,22 +948,18 @@ class RoninAppointmentTest {
             )
         )
 
-        conceptMapClient = mockk {
-            every {
-                getConceptMappingForEnum(
-                    tenant,
-                    "Appointment",
-                    "Appointment.status",
-                    Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                        code = Code(value = "")
-                    ),
-                    AppointmentStatus::class
-                )
-            } returns Pair(statusCoding("booked"), statusExtension(""))
-        }
-
-        roninAppointment = RoninAppointment.create(conceptMapClient)
+        every {
+            conceptMapClient.getConceptMappingForEnum(
+                tenant,
+                "Appointment",
+                "Appointment.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                    code = Code(value = "")
+                ),
+                AppointmentStatus::class
+            )
+        } returns Pair(statusCoding("booked"), statusExtension(""))
 
         val (transformed, _) = roninAppointment.transform(appointment, tenant)
         assertNull(transformed)
@@ -1006,22 +991,18 @@ class RoninAppointmentTest {
             )
         )
 
-        conceptMapClient = mockk {
-            every {
-                getConceptMappingForEnum(
-                    tenant,
-                    "Appointment",
-                    "Appointment.status",
-                    Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                        code = Code(value = "cancelled")
-                    ),
-                    AppointmentStatus::class
-                )
-            } returns Pair(statusCoding("booked"), statusExtension("cancelled"))
-        }
-
-        roninAppointment = RoninAppointment.create(conceptMapClient)
+        every {
+            conceptMapClient.getConceptMappingForEnum(
+                tenant,
+                "Appointment",
+                "Appointment.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                    code = Code(value = "cancelled")
+                ),
+                AppointmentStatus::class
+            )
+        } returns Pair(statusCoding("booked"), statusExtension("cancelled"))
 
         val (transformed, _) = roninAppointment.transform(appointment, tenant)
         assertNull(transformed)
@@ -1056,22 +1037,18 @@ class RoninAppointmentTest {
             )
         )
 
-        conceptMapClient = mockk {
-            every {
-                getConceptMappingForEnum(
-                    tenant,
-                    "Appointment",
-                    "Appointment.status",
-                    Coding(
-                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                        code = Code(value = "proposed")
-                    ),
-                    AppointmentStatus::class
-                )
-            } returns Pair(statusCoding("waitlist"), statusExtension("proposed"))
-        }
-
-        roninAppointment = RoninAppointment.create(conceptMapClient)
+        every {
+            conceptMapClient.getConceptMappingForEnum(
+                tenant,
+                "Appointment",
+                "Appointment.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                    code = Code(value = "proposed")
+                ),
+                AppointmentStatus::class
+            )
+        } returns Pair(statusCoding("waitlist"), statusExtension("proposed"))
 
         val (transformed, _) = roninAppointment.transform(appointment, tenant)
         assertNull(transformed)

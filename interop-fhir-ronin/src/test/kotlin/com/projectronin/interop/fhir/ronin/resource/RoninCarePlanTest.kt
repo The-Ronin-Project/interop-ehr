@@ -31,6 +31,8 @@ import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.valueset.CarePlanIntent
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.RequestStatus
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -45,6 +47,14 @@ class RoninCarePlanTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
+
+    private val normalizer = mockk<Normalizer> {
+        every { normalize(any(), tenant) } answers { firstArg() }
+    }
+    private val localizer = mockk<Localizer> {
+        every { localize(any(), tenant) } answers { firstArg() }
+    }
+    private val roninCarePlan = RoninCarePlan(normalizer, localizer)
 
     @Test
     fun `validation fails without category`() {
@@ -68,7 +78,7 @@ class RoninCarePlanTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninCarePlan.validate(carePlan, null).alertIfErrors()
+            roninCarePlan.validate(carePlan, null).alertIfErrors()
         }
 
         assertEquals(
@@ -113,7 +123,7 @@ class RoninCarePlanTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninCarePlan.validate(carePlan, null).alertIfErrors()
+            roninCarePlan.validate(carePlan, null).alertIfErrors()
         }
 
         assertEquals(
@@ -154,7 +164,7 @@ class RoninCarePlanTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninCarePlan.validate(carePlan, null).alertIfErrors()
+            roninCarePlan.validate(carePlan, null).alertIfErrors()
         }
 
         assertEquals(
@@ -195,7 +205,7 @@ class RoninCarePlanTest {
             subject = Reference(reference = "Patient/1234".asFHIR()),
         )
 
-        RoninCarePlan.validate(carePlan, null).alertIfErrors()
+        roninCarePlan.validate(carePlan, null).alertIfErrors()
     }
 
     @Test
@@ -356,7 +366,10 @@ class RoninCarePlanTest {
                         scheduled = DynamicValue(DynamicValueType.STRING, "Value".asFHIR()),
                         location = Reference(reference = "DEF123".asFHIR()),
                         performer = listOf(Reference(reference = "GHI123".asFHIR())),
-                        product = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "product".asFHIR())),
+                        product = DynamicValue(
+                            DynamicValueType.CODEABLE_CONCEPT,
+                            CodeableConcept(text = "product".asFHIR())
+                        ),
                         dailyAmount = SimpleQuantity(value = Decimal(1.1)),
                         quantity = SimpleQuantity(value = Decimal(2.2)),
                         description = "Description".asFHIR()
@@ -365,12 +378,12 @@ class RoninCarePlanTest {
             )
         )
 
-        val (transformed, validation) = RoninCarePlan.transform(carePlan, tenant)
+        val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
         validation.alertIfErrors()
         transformed!!
 
         assertEquals("CarePlan", transformed.resourceType)
-        assertEquals(Id(value = "test-12345"), transformed.id)
+        assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value))),
             transformed.meta
@@ -469,7 +482,7 @@ class RoninCarePlanTest {
         )
         assertEquals("CarePlan Title".asFHIR(), transformed.title)
         assertEquals("CarePlan Description".asFHIR(), transformed.description)
-        assertEquals(Reference(reference = "Patient/test-1234".asFHIR()), transformed.subject)
+        assertEquals(Reference(reference = "Patient/1234".asFHIR()), transformed.subject)
         assertEquals(Reference(reference = "reference".asFHIR()), transformed.encounter)
         assertEquals(
             Period(
@@ -503,7 +516,6 @@ class RoninCarePlanTest {
                     ),
                     outcomeCodeableConcept = listOf(
                         CodeableConcept(
-                            text = "Discharge diagnosis".asFHIR(),
                             coding = listOf(
                                 Coding(
                                     system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
@@ -542,7 +554,6 @@ class RoninCarePlanTest {
                         ),
                         instantiatesUri = Uri("uri"),
                         code = CodeableConcept(
-                            text = "Discharge diagnosis".asFHIR(),
                             coding = listOf(
                                 Coding(
                                     system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
@@ -553,7 +564,6 @@ class RoninCarePlanTest {
                         ),
                         reasonCode = listOf(
                             CodeableConcept(
-                                text = "Discharge diagnosis".asFHIR(),
                                 coding = listOf(
                                     Coding(
                                         system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
@@ -568,7 +578,6 @@ class RoninCarePlanTest {
                         ),
                         status = Code("scheduled"),
                         statusReason = CodeableConcept(
-                            text = "Discharge diagnosis".asFHIR(),
                             coding = listOf(
                                 Coding(
                                     system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
@@ -581,7 +590,10 @@ class RoninCarePlanTest {
                         scheduled = DynamicValue(DynamicValueType.STRING, "Value".asFHIR()),
                         location = Reference(reference = "DEF123".asFHIR()),
                         performer = listOf(Reference(reference = "GHI123".asFHIR())),
-                        product = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "product".asFHIR())),
+                        product = DynamicValue(
+                            DynamicValueType.CODEABLE_CONCEPT,
+                            CodeableConcept(text = "product".asFHIR())
+                        ),
                         dailyAmount = SimpleQuantity(value = Decimal(1.1)),
                         quantity = SimpleQuantity(value = Decimal(2.2)),
                         description = "Description".asFHIR()
@@ -611,12 +623,12 @@ class RoninCarePlanTest {
             subject = Reference(reference = "Patient/1234".asFHIR()),
         )
 
-        val (transformed, validation) = RoninCarePlan.transform(carePlan, tenant)
+        val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
         validation.alertIfErrors()
         transformed!!
 
         assertEquals("CarePlan", transformed.resourceType)
-        assertEquals(Id(value = "test-12345"), transformed.id)
+        assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value))),
             transformed.meta
@@ -656,7 +668,7 @@ class RoninCarePlanTest {
             ),
             transformed.category
         )
-        assertEquals(Reference(reference = "Patient/test-1234".asFHIR()), transformed.subject)
+        assertEquals(Reference(reference = "Patient/1234".asFHIR()), transformed.subject)
     }
 
     @Test
@@ -681,7 +693,7 @@ class RoninCarePlanTest {
             subject = Reference(reference = "Patient/1234".asFHIR()),
         )
 
-        val (transformed, _) = RoninCarePlan.transform(carePlan, tenant)
+        val (transformed, _) = roninCarePlan.transform(carePlan, tenant)
         assertNull(transformed)
     }
 
@@ -703,7 +715,7 @@ class RoninCarePlanTest {
             subject = Reference(reference = "Patient/1234".asFHIR()),
         )
 
-        val (transformed, _) = RoninCarePlan.transform(carePlan, tenant)
+        val (transformed, _) = roninCarePlan.transform(carePlan, tenant)
         assertNull(transformed)
     }
 
@@ -726,7 +738,7 @@ class RoninCarePlanTest {
             subject = null,
         )
 
-        val (transformed, _) = RoninCarePlan.transform(carePlan, tenant)
+        val (transformed, _) = roninCarePlan.transform(carePlan, tenant)
         assertNull(transformed)
     }
 }

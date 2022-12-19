@@ -26,6 +26,8 @@ import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.validate.resource.R4ConditionValidator
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -47,6 +49,13 @@ class RoninConditionProblemsAndHealthConcernsTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
+    private val normalizer = mockk<Normalizer> {
+        every { normalize(any(), tenant) } answers { firstArg() }
+    }
+    private val localizer = mockk<Localizer> {
+        every { localize(any(), tenant) } answers { firstArg() }
+    }
+    private val profile = RoninConditionProblemsAndHealthConcerns(normalizer, localizer)
 
     @Test
     fun `does not qualify when no categories`() {
@@ -64,7 +73,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
             subject = Reference(display = "reference".asFHIR())
         )
 
-        val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
+        val qualified = profile.qualifies(condition)
         assertFalse(qualified)
     }
 
@@ -87,7 +96,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
+        val qualified = profile.qualifies(condition)
         assertFalse(qualified)
     }
 
@@ -117,7 +126,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
+        val qualified = profile.qualifies(condition)
         assertFalse(qualified)
     }
 
@@ -147,7 +156,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
+        val qualified = profile.qualifies(condition)
         assertFalse(qualified)
     }
 
@@ -177,7 +186,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
+        val qualified = profile.qualifies(condition)
         assertTrue(qualified)
     }
 
@@ -207,7 +216,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        val qualified = RoninConditionProblemsAndHealthConcerns.qualifies(condition)
+        val qualified = profile.qualifies(condition)
         assertTrue(qualified)
     }
 
@@ -238,7 +247,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+            profile.validate(condition, null).alertIfErrors()
         }
 
         assertEquals(
@@ -282,7 +291,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+            profile.validate(condition, null).alertIfErrors()
         }
 
         assertEquals(
@@ -323,7 +332,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+            profile.validate(condition, null).alertIfErrors()
         }
 
         assertEquals(
@@ -364,7 +373,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+            profile.validate(condition, null).alertIfErrors()
         }
 
         assertEquals(
@@ -423,7 +432,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+            profile.validate(condition, null).alertIfErrors()
         }
 
         assertEquals(
@@ -473,7 +482,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+            profile.validate(condition, null).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -520,7 +529,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+            profile.validate(condition, null).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -567,7 +576,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+            profile.validate(condition, null).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -614,7 +623,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        RoninConditionProblemsAndHealthConcerns.validate(condition, null).alertIfErrors()
+        profile.validate(condition, null).alertIfErrors()
     }
 
     @Test
@@ -642,7 +651,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        val (transformed, _) = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
+        val (transformed, _) = profile.transform(condition, tenant)
         assertNull(transformed)
     }
 
@@ -683,7 +692,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        val (transformed, _) = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
+        val (transformed, _) = profile.transform(condition, tenant)
         assertNull(transformed)
     }
 
@@ -824,12 +833,12 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        val (transformed, validation) = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
+        val (transformed, validation) = profile.transform(condition, tenant)
         validation.alertIfErrors()
 
         transformed!!
         assertEquals("Condition", transformed.resourceType)
-        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value))),
             transformed.meta
@@ -877,7 +886,6 @@ class RoninConditionProblemsAndHealthConcernsTest {
         )
         assertEquals(
             CodeableConcept(
-                text = "Inactive".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = Uri("http://terminology.hl7.org/CodeSystem/condition-clinical"),
@@ -890,7 +898,6 @@ class RoninConditionProblemsAndHealthConcernsTest {
         )
         assertEquals(
             CodeableConcept(
-                text = "Confirmed".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = Uri("http://terminology.hl7.org/CodeSystem/condition-ver-status"),
@@ -916,7 +923,6 @@ class RoninConditionProblemsAndHealthConcernsTest {
         )
         assertEquals(
             CodeableConcept(
-                text = "Moderate to severe".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = Uri("http://snomed.info/sct"),
@@ -929,7 +935,6 @@ class RoninConditionProblemsAndHealthConcernsTest {
         )
         assertEquals(
             CodeableConcept(
-                text = "Non-small cell lung cancer".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = Uri("http://snomed.info/sct"),
@@ -943,7 +948,6 @@ class RoninConditionProblemsAndHealthConcernsTest {
         assertEquals(
             listOf(
                 CodeableConcept(
-                    text = "Lung structure (body structure)".asFHIR(),
                     coding = listOf(
                         Coding(
                             system = Uri("http://snomed.info/sct"),
@@ -957,13 +961,13 @@ class RoninConditionProblemsAndHealthConcernsTest {
         )
         assertEquals(
             Reference(
-                reference = "Patient/test-roninPatientExample01".asFHIR()
+                reference = "Patient/roninPatientExample01".asFHIR()
             ),
             transformed.subject
         )
         assertEquals(
             Reference(
-                reference = "Encounter/test-roninEncounterExample01".asFHIR()
+                reference = "Encounter/roninEncounterExample01".asFHIR()
             ),
             transformed.encounter
         )
@@ -977,18 +981,17 @@ class RoninConditionProblemsAndHealthConcernsTest {
         )
         assertEquals(DateTime("2022-01-01"), transformed.recordedDate)
         assertEquals(
-            Reference(reference = "Practitioner/test-roninPractitionerExample01".asFHIR()),
+            Reference(reference = "Practitioner/roninPractitionerExample01".asFHIR()),
             transformed.recorder
         )
         assertEquals(
-            Reference(reference = "Practitioner/test-roninPractitionerExample01".asFHIR()),
+            Reference(reference = "Practitioner/roninPractitionerExample01".asFHIR()),
             transformed.asserter
         )
         assertEquals(
             listOf(
                 ConditionStage(
                     summary = CodeableConcept(
-                        text = "IIIC".asFHIR(),
                         coding = listOf(
                             Coding(
                                 system = Uri("http://cancerstaging.org"),
@@ -1006,7 +1009,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 ConditionEvidence(
                     detail = listOf(
                         Reference(
-                            reference = "DiagnosticReport/test-Test01".asFHIR()
+                            reference = "DiagnosticReport/Test01".asFHIR()
                         )
                     )
                 )
@@ -1018,7 +1021,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 Annotation(
                     author = DynamicValue(
                         DynamicValueType.REFERENCE,
-                        Reference(reference = "Practitioner/test-roninPractitionerExample01".asFHIR())
+                        Reference(reference = "Practitioner/roninPractitionerExample01".asFHIR())
                     ),
                     text = Markdown("Test")
                 )
@@ -1058,12 +1061,12 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
 
-        val (transformed, validation) = RoninConditionProblemsAndHealthConcerns.transform(condition, tenant)
+        val (transformed, validation) = profile.transform(condition, tenant)
         validation.alertIfErrors()
 
         transformed!!
         assertEquals("Condition", transformed.resourceType)
-        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value))),
             transformed.meta
@@ -1108,7 +1111,6 @@ class RoninConditionProblemsAndHealthConcernsTest {
         assertNull(transformed.severity)
         assertEquals(
             CodeableConcept(
-                text = "Non-small cell lung cancer".asFHIR(),
                 coding = listOf(
                     Coding(
                         system = Uri("http://snomed.info/sct"),
@@ -1122,7 +1124,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
         assertEquals(listOf<CodeableConcept>(), transformed.bodySite)
         assertEquals(
             Reference(
-                reference = "Patient/test-roninPatientExample01".asFHIR()
+                reference = "Patient/roninPatientExample01".asFHIR()
             ),
             transformed.subject
         )

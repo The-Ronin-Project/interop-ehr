@@ -1,6 +1,8 @@
 package com.projectronin.interop.fhir.ronin.resource.base
 
 import com.projectronin.interop.fhir.r4.resource.Resource
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
 import com.projectronin.interop.fhir.validate.Validation
@@ -10,9 +12,11 @@ import com.projectronin.interop.fhir.validate.Validation
  */
 abstract class USCoreBasedProfile<T : Resource<T>>(
     extendedProfile: ProfileValidator<T>,
-    profile: String
+    profile: String,
+    normalizer: Normalizer,
+    localizer: Localizer
 ) :
-    BaseRoninProfile<T>(extendedProfile, profile) {
+    BaseRoninProfile<T>(extendedProfile, profile, normalizer, localizer) {
     /**
      * Validates the [element] against Ronin's rules.
      */

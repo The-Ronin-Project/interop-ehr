@@ -24,6 +24,8 @@ import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Organization
 import com.projectronin.interop.fhir.r4.validate.resource.R4OrganizationValidator
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -46,9 +48,17 @@ class RoninOrganizationTest {
         every { mnemonic } returns "test"
     }
 
+    private val normalizer = mockk<Normalizer> {
+        every { normalize(any(), tenant) } answers { firstArg() }
+    }
+    private val localizer = mockk<Localizer> {
+        every { localize(any(), tenant) } answers { firstArg() }
+    }
+    private val roninOrganization = RoninOrganization(normalizer, localizer)
+
     @Test
     fun `always qualifies`() {
-        assertTrue(RoninOrganization.qualifies(Organization()))
+        assertTrue(roninOrganization.qualifies(Organization()))
     }
 
     @Test
@@ -60,7 +70,7 @@ class RoninOrganizationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninOrganization.validate(organization, null).alertIfErrors()
+            roninOrganization.validate(organization, null).alertIfErrors()
         }
 
         assertEquals(
@@ -91,7 +101,7 @@ class RoninOrganizationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninOrganization.validate(organization, null).alertIfErrors()
+            roninOrganization.validate(organization, null).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -120,7 +130,7 @@ class RoninOrganizationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninOrganization.validate(organization, null).alertIfErrors()
+            roninOrganization.validate(organization, null).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -169,7 +179,7 @@ class RoninOrganizationTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninOrganization.validate(organization, null).alertIfErrors()
+            roninOrganization.validate(organization, null).alertIfErrors()
         }
 
         assertEquals(
@@ -202,7 +212,7 @@ class RoninOrganizationTest {
             active = true.asFHIR()
         )
 
-        RoninOrganization.validate(organization, null).alertIfErrors()
+        roninOrganization.validate(organization, null).alertIfErrors()
     }
 
     @Test
@@ -292,13 +302,13 @@ class RoninOrganizationTest {
             )
         )
 
-        val (transformed, validation) = RoninOrganization.transform(organization, tenant)
+        val (transformed, validation) = roninOrganization.transform(organization, tenant)
         validation.alertIfErrors()
 
         transformed!!
 
         assertEquals("Organization", transformed.resourceType)
-        assertEquals(Id(value = "test-12345"), transformed.id)
+        assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value))),
             transformed.meta
@@ -348,7 +358,6 @@ class RoninOrganizationTest {
         assertEquals(
             listOf(
                 CodeableConcept(
-                    text = "Healthcare Provider".asFHIR(),
                     coding = listOf(
                         Coding(
                             system = Uri("http://terminology.hl7.org/CodeSystem/organization-type"),
@@ -387,7 +396,7 @@ class RoninOrganizationTest {
             ),
             transformed.address
         )
-        assertEquals(Reference(reference = "Organization/test-super".asFHIR()), transformed.partOf)
+        assertEquals(Reference(reference = "Organization/super".asFHIR()), transformed.partOf)
         assertEquals(
             listOf(
                 OrganizationContact(
@@ -419,7 +428,7 @@ class RoninOrganizationTest {
         assertEquals(
             listOf(
                 Reference(
-                    reference = "Endpoint/test-1357".asFHIR()
+                    reference = "Endpoint/1357".asFHIR()
                 )
             ),
             transformed.endpoint
@@ -434,13 +443,13 @@ class RoninOrganizationTest {
             active = true.asFHIR()
         )
 
-        val (transformed, validation) = RoninOrganization.transform(organization, tenant)
+        val (transformed, validation) = roninOrganization.transform(organization, tenant)
         validation.alertIfErrors()
 
         transformed!!
 
         assertEquals("Organization", transformed.resourceType)
-        assertEquals(Id(value = "test-12345"), transformed.id)
+        assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value))),
             transformed.meta

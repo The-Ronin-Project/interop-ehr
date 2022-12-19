@@ -24,6 +24,8 @@ import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.MedicationStatement
 import com.projectronin.interop.fhir.r4.validate.resource.R4MedicationStatementValidator
 import com.projectronin.interop.fhir.r4.valueset.MedicationStatementStatus
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -45,9 +47,17 @@ class RoninMedicationStatementTest {
         every { mnemonic } returns "test"
     }
 
+    private val normalizer = mockk<Normalizer> {
+        every { normalize(any(), tenant) } answers { firstArg() }
+    }
+    private val localizer = mockk<Localizer> {
+        every { localize(any(), tenant) } answers { firstArg() }
+    }
+    private val roninMedicationStatement = RoninMedicationStatement(normalizer, localizer)
+
     @Test
     fun `always qualifies`() {
-        assertTrue(RoninMedicationStatement.qualifies(MedicationStatement()))
+        assertTrue(roninMedicationStatement.qualifies(MedicationStatement()))
     }
 
     @Test
@@ -60,7 +70,7 @@ class RoninMedicationStatementTest {
         } returns validation { }
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
+            roninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
         }
 
         assertEquals(
@@ -102,7 +112,7 @@ class RoninMedicationStatementTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
+            roninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
         }
 
         assertEquals(
@@ -137,7 +147,7 @@ class RoninMedicationStatementTest {
             subject = Reference(display = "display".asFHIR())
         )
 
-        RoninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
+        roninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
     }
 
     @Test
@@ -191,11 +201,11 @@ class RoninMedicationStatementTest {
             dosage = listOf(Dosage(text = "dosage".asFHIR()))
         )
 
-        val (transformed, validation) = RoninMedicationStatement.transform(medicationStatement, tenant)
+        val (transformed, validation) = roninMedicationStatement.transform(medicationStatement, tenant)
         validation.alertIfErrors()
 
         transformed!!
-        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             RoninProfile.MEDICATION_STATEMENT.value,
             transformed.meta!!.profile[0].value
@@ -256,7 +266,7 @@ class RoninMedicationStatementTest {
             )
         )
 
-        val (transformed, validation) = RoninMedicationStatement.transform(medicationStatement, tenant)
+        val (transformed, validation) = roninMedicationStatement.transform(medicationStatement, tenant)
         validation.alertIfErrors()
 
         transformed!!
@@ -298,7 +308,7 @@ class RoninMedicationStatementTest {
                     value = DateTime("1905-08-23")
                 )
             )
-            val (transformed, validation) = RoninMedicationStatement.transform(medicationStatement, tenant)
+            val (transformed, validation) = roninMedicationStatement.transform(medicationStatement, tenant)
             validation.alertIfErrors()
             assertEquals(medicationStatement.medication, transformed!!.medication)
         }
@@ -323,7 +333,7 @@ class RoninMedicationStatementTest {
                     value = value
                 )
             )
-            val (transformed, validation) = RoninMedicationStatement.transform(medicationStatement, tenant)
+            val (transformed, validation) = roninMedicationStatement.transform(medicationStatement, tenant)
             validation.alertIfErrors()
             assertEquals(medicationStatement.medication, transformed!!.medication)
         }
@@ -335,7 +345,7 @@ class RoninMedicationStatementTest {
     @Test
     fun `transform fails with missing attributes`() {
         val medicationStatement = MedicationStatement()
-        val (transformed, _) = RoninMedicationStatement.transform(medicationStatement, tenant)
+        val (transformed, _) = roninMedicationStatement.transform(medicationStatement, tenant)
         assertNull(transformed)
     }
 }

@@ -30,6 +30,8 @@ import com.projectronin.interop.fhir.r4.valueset.MedicationRequestIntent
 import com.projectronin.interop.fhir.r4.valueset.MedicationRequestStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.RequestPriority
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -51,10 +53,18 @@ class RoninMedicationRequestTest {
         every { mnemonic } returns "test"
     }
 
+    private val normalizer = mockk<Normalizer> {
+        every { normalize(any(), tenant) } answers { firstArg() }
+    }
+    private val localizer = mockk<Localizer> {
+        every { localize(any(), tenant) } answers { firstArg() }
+    }
+    private val roninMedicationRequest = RoninMedicationRequest(normalizer, localizer)
+
     @Test
     fun `always qualifies`() {
         assertTrue(
-            RoninMedicationRequest.qualifies(
+            roninMedicationRequest.qualifies(
                 MedicationRequest(
                     status = MedicationRequestStatus.COMPLETED.asCode(),
                     intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
@@ -81,7 +91,7 @@ class RoninMedicationRequestTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
         }
 
         assertEquals(
@@ -115,7 +125,7 @@ class RoninMedicationRequestTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
         }
 
         assertEquals(
@@ -163,7 +173,7 @@ class RoninMedicationRequestTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
         }
 
         assertEquals(
@@ -198,7 +208,7 @@ class RoninMedicationRequestTest {
             requester = Reference(reference = "Practitioner/1234".asFHIR())
         )
 
-        RoninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+        roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
     }
 
     @Test
@@ -261,12 +271,12 @@ class RoninMedicationRequestTest {
             eventHistory = listOf(Reference(reference = "Provenance/1234".asFHIR()))
         )
 
-        val (transformed, validation) = RoninMedicationRequest.transform(medicationRequest, tenant)
+        val (transformed, validation) = roninMedicationRequest.transform(medicationRequest, tenant)
         validation.alertIfErrors()
 
         transformed!!
         assertEquals("MedicationRequest", transformed.resourceType)
-        assertEquals(Id(value = "test-12345"), transformed.id)
+        assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value))),
             transformed.meta
@@ -323,29 +333,29 @@ class RoninMedicationRequestTest {
             DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
             transformed.medication
         )
-        assertEquals(Reference(reference = "Patient/test-1234".asFHIR()), transformed.subject)
-        assertEquals(Reference(reference = "Encounter/test-1234".asFHIR()), transformed.encounter)
-        assertEquals(listOf(Reference(reference = "Condition/test-1234".asFHIR())), transformed.supportingInformation)
+        assertEquals(Reference(reference = "Patient/1234".asFHIR()), transformed.subject)
+        assertEquals(Reference(reference = "Encounter/1234".asFHIR()), transformed.encounter)
+        assertEquals(listOf(Reference(reference = "Condition/1234".asFHIR())), transformed.supportingInformation)
         assertEquals(DateTime("2022-11-03"), transformed.authoredOn)
-        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.requester)
-        assertEquals(Reference(reference = "Practitioner/test-5678".asFHIR()), transformed.performer)
+        assertEquals(Reference(reference = "Practitioner/1234".asFHIR()), transformed.requester)
+        assertEquals(Reference(reference = "Practitioner/5678".asFHIR()), transformed.performer)
         assertEquals(CodeableConcept(text = "performer type".asFHIR()), transformed.performerType)
-        assertEquals(Reference(reference = "Practitioner/test-3456".asFHIR()), transformed.recorder)
+        assertEquals(Reference(reference = "Practitioner/3456".asFHIR()), transformed.recorder)
         assertEquals(listOf(CodeableConcept(text = "reason".asFHIR())), transformed.reasonCode)
-        assertEquals(listOf(Reference(reference = "Condition/test-5678".asFHIR())), transformed.reasonReference)
+        assertEquals(listOf(Reference(reference = "Condition/5678".asFHIR())), transformed.reasonReference)
         assertEquals(listOf(Canonical("canonical")), transformed.instantiatesCanonical)
         assertEquals(listOf(Uri("uri")), transformed.instantiatesUri)
-        assertEquals(listOf(Reference(reference = "CarePlan/test-1234".asFHIR())), transformed.basedOn)
+        assertEquals(listOf(Reference(reference = "CarePlan/1234".asFHIR())), transformed.basedOn)
         assertEquals(Identifier(value = "group".asFHIR()), transformed.groupIdentifier)
         assertEquals(CodeableConcept(text = "therapy".asFHIR()), transformed.courseOfTherapyType)
-        assertEquals(listOf(Reference(reference = "Coverage/test-1234".asFHIR())), transformed.insurance)
+        assertEquals(listOf(Reference(reference = "Coverage/1234".asFHIR())), transformed.insurance)
         assertEquals(listOf(Annotation(text = Markdown("note"))), transformed.note)
         assertEquals(listOf(Dosage(text = "dosage".asFHIR())), transformed.dosageInformation)
         assertEquals(DispenseRequest(numberOfRepeatsAllowed = UnsignedInt(2)), transformed.dispenseRequest)
         assertEquals(Substitution(allowed = DynamicValue(DynamicValueType.BOOLEAN, true)), transformed.substitution)
-        assertEquals(Reference(reference = "MedicationRequest/test-1234".asFHIR()), transformed.priorPrescription)
-        assertEquals(listOf(Reference(reference = "DetectedIssue/test-1234".asFHIR())), transformed.detectedIssue)
-        assertEquals(listOf(Reference(reference = "Provenance/test-1234".asFHIR())), transformed.eventHistory)
+        assertEquals(Reference(reference = "MedicationRequest/1234".asFHIR()), transformed.priorPrescription)
+        assertEquals(listOf(Reference(reference = "DetectedIssue/1234".asFHIR())), transformed.detectedIssue)
+        assertEquals(listOf(Reference(reference = "Provenance/1234".asFHIR())), transformed.eventHistory)
     }
 
     @Test
@@ -359,12 +369,12 @@ class RoninMedicationRequestTest {
             requester = Reference(reference = "Practitioner/1234".asFHIR()),
         )
 
-        val (transformed, validation) = RoninMedicationRequest.transform(medicationRequest, tenant)
+        val (transformed, validation) = roninMedicationRequest.transform(medicationRequest, tenant)
         validation.alertIfErrors()
 
         transformed!!
         assertEquals("MedicationRequest", transformed.resourceType)
-        assertEquals(Id(value = "test-12345"), transformed.id)
+        assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value))),
             transformed.meta
@@ -401,11 +411,11 @@ class RoninMedicationRequestTest {
             DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
             transformed.medication
         )
-        assertEquals(Reference(reference = "Patient/test-1234".asFHIR()), transformed.subject)
+        assertEquals(Reference(reference = "Patient/1234".asFHIR()), transformed.subject)
         assertNull(transformed.encounter)
         assertEquals(listOf<Reference>(), transformed.supportingInformation)
         assertNull(transformed.authoredOn)
-        assertEquals(Reference(reference = "Practitioner/test-1234".asFHIR()), transformed.requester)
+        assertEquals(Reference(reference = "Practitioner/1234".asFHIR()), transformed.requester)
         assertNull(transformed.performer)
         assertNull(transformed.performerType)
         assertNull(transformed.recorder)
@@ -436,7 +446,7 @@ class RoninMedicationRequestTest {
             requester = Reference(reference = "Practitioner/1234".asFHIR()),
         )
 
-        val (transformed, _) = RoninMedicationRequest.transform(medicationRequest, tenant)
+        val (transformed, _) = roninMedicationRequest.transform(medicationRequest, tenant)
         assertNull(transformed)
     }
 }

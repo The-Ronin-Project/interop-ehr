@@ -5,6 +5,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.FHIRError
@@ -14,9 +16,19 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
-object RoninBodyWeight : BaseRoninVitalSign(R4ObservationValidator, RoninProfile.OBSERVATION_BODY_WEIGHT.value) {
-    internal val bodyWeightCode = Code("29463-7")
+@Component
+class RoninBodyWeight(normalizer: Normalizer, localizer: Localizer) :
+    BaseRoninVitalSign(
+        R4ObservationValidator,
+        RoninProfile.OBSERVATION_BODY_WEIGHT.value,
+        normalizer,
+        localizer
+    ) {
+    companion object {
+        internal val bodyWeightCode = Code("29463-7")
+    }
 
     // Quantity unit codes - [USCore Body Weight Units](http://hl7.org/fhir/R4/valueset-ucum-bodyweight.html)
     override val validQuantityCodes = listOf("kg", "[lb_av]", "g")
@@ -25,7 +37,14 @@ object RoninBodyWeight : BaseRoninVitalSign(R4ObservationValidator, RoninProfile
     override val validBasedOnValues = listOf("CarePlan", "MedicationRequest")
     override val validDerivedFromValues = listOf("DocumentReference")
     override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
-    override val validPartOfValues = listOf("ImagingStudy", "Immunization", "MedicationAdministration", "MedicationDispense", "MedicationStatement", "Procedure")
+    override val validPartOfValues = listOf(
+        "ImagingStudy",
+        "Immunization",
+        "MedicationAdministration",
+        "MedicationDispense",
+        "MedicationStatement",
+        "Procedure"
+    )
 
     override fun qualifies(resource: Observation): Boolean {
         return resource.code?.coding?.any { it.system == CodeSystem.LOINC.uri && it.code == bodyWeightCode } ?: false

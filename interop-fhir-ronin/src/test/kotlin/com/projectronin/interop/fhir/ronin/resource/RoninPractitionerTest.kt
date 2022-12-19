@@ -28,6 +28,8 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerValidato
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -49,9 +51,17 @@ class RoninPractitionerTest {
         every { mnemonic } returns "test"
     }
 
+    private val normalizer = mockk<Normalizer> {
+        every { normalize(any(), tenant) } answers { firstArg() }
+    }
+    private val localizer = mockk<Localizer> {
+        every { localize(any(), tenant) } answers { firstArg() }
+    }
+    private val roninPractitioner = RoninPractitioner(normalizer, localizer)
+
     @Test
     fun `always qualifies`() {
-        assertTrue(RoninPractitioner.qualifies(Practitioner()))
+        assertTrue(roninPractitioner.qualifies(Practitioner()))
     }
 
     @Test
@@ -62,7 +72,7 @@ class RoninPractitionerTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninPractitioner.validate(practitioner, null).alertIfErrors()
+            roninPractitioner.validate(practitioner, null).alertIfErrors()
         }
 
         assertEquals(
@@ -93,7 +103,7 @@ class RoninPractitionerTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninPractitioner.validate(practitioner, null).alertIfErrors()
+            roninPractitioner.validate(practitioner, null).alertIfErrors()
         }
 
         assertEquals(
@@ -123,7 +133,7 @@ class RoninPractitionerTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninPractitioner.validate(practitioner, null).alertIfErrors()
+            roninPractitioner.validate(practitioner, null).alertIfErrors()
         }
 
         assertEquals(
@@ -157,7 +167,7 @@ class RoninPractitionerTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninPractitioner.validate(practitioner, null).alertIfErrors()
+            roninPractitioner.validate(practitioner, null).alertIfErrors()
         }
 
         assertEquals(
@@ -202,7 +212,7 @@ class RoninPractitionerTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninPractitioner.validate(practitioner, null).alertIfErrors()
+            roninPractitioner.validate(practitioner, null).alertIfErrors()
         }
 
         assertEquals(
@@ -233,14 +243,14 @@ class RoninPractitionerTest {
             name = listOf(HumanName(family = "Doe".asFHIR()))
         )
 
-        RoninPractitioner.validate(practitioner, null).alertIfErrors()
+        roninPractitioner.validate(practitioner, null).alertIfErrors()
     }
 
     @Test
     fun `transform fails for practitioner with no ID`() {
         val practitioner = Practitioner()
 
-        val (transformed, _) = RoninPractitioner.transform(practitioner, tenant)
+        val (transformed, _) = roninPractitioner.transform(practitioner, tenant)
         assertNull(transformed)
     }
 
@@ -279,12 +289,12 @@ class RoninPractitionerTest {
             communication = listOf(CodeableConcept(text = "communication".asFHIR()))
         )
 
-        val (transformed, validation) = RoninPractitioner.transform(practitioner, tenant)
+        val (transformed, validation) = roninPractitioner.transform(practitioner, tenant)
         validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Practitioner", transformed.resourceType)
-        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value))),
             transformed.meta
@@ -354,12 +364,12 @@ class RoninPractitionerTest {
             name = listOf(HumanName(family = "Doe".asFHIR()))
         )
 
-        val (transformed, validation) = RoninPractitioner.transform(practitioner, tenant)
+        val (transformed, validation) = roninPractitioner.transform(practitioner, tenant)
         validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
         assertEquals("Practitioner", transformed.resourceType)
-        assertEquals(Id("test-12345"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value))),
             transformed.meta

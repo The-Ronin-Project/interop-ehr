@@ -17,19 +17,34 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.validation
+import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
+import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class RoninObservationTest {
+    private val tenant = mockk<Tenant> {
+        every { mnemonic } returns "test"
+    }
+
+    private val normalizer = mockk<Normalizer> {
+        every { normalize(any(), tenant) } answers { firstArg() }
+    }
+    private val localizer = mockk<Localizer> {
+        every { localize(any(), tenant) } answers { firstArg() }
+    }
+    private val roninObservation = RoninObservation(normalizer, localizer)
 
     @Test
     fun `qualifies when Observation code has the wrong system for vital signs`() {
@@ -42,7 +57,7 @@ class RoninObservationTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyHeight.vitalSignsCode
+                            code = BaseRoninVitalSign.vitalSignsCode
                         )
                     )
                 )
@@ -62,7 +77,7 @@ class RoninObservationTest {
             )
         )
 
-        Assertions.assertTrue(RoninObservation.qualifies(observation))
+        assertTrue(roninObservation.qualifies(observation))
     }
 
     @Test
@@ -76,7 +91,7 @@ class RoninObservationTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyHeight.vitalSignsCode
+                            code = BaseRoninVitalSign.vitalSignsCode
                         )
                     )
                 )
@@ -96,7 +111,7 @@ class RoninObservationTest {
             )
         )
 
-        Assertions.assertTrue(RoninObservation.qualifies(observation))
+        assertTrue(roninObservation.qualifies(observation))
     }
 
     @Test
@@ -110,7 +125,7 @@ class RoninObservationTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = RoninBodyHeight.vitalSignsCode
+                            code = BaseRoninVitalSign.vitalSignsCode
                         )
                     )
                 )
@@ -123,7 +138,7 @@ class RoninObservationTest {
             code = null
         )
 
-        Assertions.assertTrue(RoninObservation.qualifies(observation))
+        assertTrue(roninObservation.qualifies(observation))
     }
 
     @Test
@@ -161,7 +176,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -212,7 +227,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -264,7 +279,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -316,7 +331,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -377,7 +392,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -398,7 +413,7 @@ class RoninObservationTest {
                     coding = listOf(
                         Coding(
                             system = Uri(value = "not a good system at all"),
-                            code = RoninBodyHeight.vitalSignsCode
+                            code = BaseRoninVitalSign.vitalSignsCode
                         )
                     )
                 )
@@ -420,7 +435,7 @@ class RoninObservationTest {
             )
         )
 
-        Assertions.assertTrue(RoninObservation.qualifies(observation))
+        assertTrue(roninObservation.qualifies(observation))
     }
 
     @Test
@@ -456,7 +471,7 @@ class RoninObservationTest {
             )
         )
 
-        Assertions.assertTrue(RoninObservation.qualifies(observation))
+        assertTrue(roninObservation.qualifies(observation))
     }
 
     @Test
@@ -483,7 +498,7 @@ class RoninObservationTest {
             )
         )
 
-        Assertions.assertTrue(RoninObservation.qualifies(observation))
+        assertTrue(roninObservation.qualifies(observation))
     }
 
     @Test
@@ -522,7 +537,7 @@ class RoninObservationTest {
             )
         )
 
-        RoninObservation.validate(observation, null).alertIfErrors()
+        roninObservation.validate(observation, null).alertIfErrors()
     }
 
     @Test
@@ -573,7 +588,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -631,7 +646,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -685,7 +700,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -755,7 +770,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals( // TODO: PR 2 of 2 for INT-1289 - fix the duplication here
@@ -809,13 +824,16 @@ class RoninObservationTest {
             note = listOf(
                 Annotation(
                     text = Markdown("more text"),
-                    author = DynamicValue(type = DynamicValueType.REFERENCE, value = Reference(reference = "Device/0001".asFHIR()))
+                    author = DynamicValue(
+                        type = DynamicValueType.REFERENCE,
+                        value = Reference(reference = "Device/0001".asFHIR())
+                    )
                 )
             )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -875,7 +893,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -936,7 +954,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -996,7 +1014,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -1055,7 +1073,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -1115,70 +1133,13 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of CareTeam, Organization, " +
                 "Patient, Practitioner, PractitionerRole @ Observation.performer[0]",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate succeeds in RoninObservation with the same data that fails validation in subclass RoninLaboratoryResult`() {
-        val observation = Observation(
-            id = Id("123"),
-            status = ObservationStatus.AMENDED.asCode(),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                )
-            ),
-            code = CodeableConcept(
-                text = "laboratory".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = CodeSystem.LOINC.uri
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = Code("laboratory")
-                        )
-                    )
-                )
-            ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
-            effective = DynamicValue(
-                type = DynamicValueType.DATE_TIME,
-                "2022-01-01"
-            )
-        )
-
-        RoninObservation.validate(observation, null).alertIfErrors()
-        val exception = assertThrows<IllegalArgumentException> {
-            RoninLaboratoryResult.validate(observation, null).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR USCORE_LABOBS_003: If there is no component or hasMember element then either a " +
-                "value[x] or a data absent reason must be present @ Observation",
             exception.message
         )
     }
@@ -1236,7 +1197,7 @@ class RoninObservationTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            RoninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation, null).alertIfErrors()
         }
 
         assertEquals(
@@ -1293,6 +1254,6 @@ class RoninObservationTest {
             )
         )
 
-        RoninObservation.validate(observation, null).alertIfErrors()
+        roninObservation.validate(observation, null).alertIfErrors()
     }
 }

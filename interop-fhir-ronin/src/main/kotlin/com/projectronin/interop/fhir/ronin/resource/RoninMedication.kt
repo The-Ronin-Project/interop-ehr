@@ -3,6 +3,8 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.fhir.r4.resource.Medication
 import com.projectronin.interop.fhir.r4.validate.resource.R4MedicationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
@@ -11,14 +13,17 @@ import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
+import org.springframework.stereotype.Component
 
 /**
  * Validator and transformer for the Ronin Medication profile
  */
-object RoninMedication :
+@Component
+class RoninMedication(normalizer: Normalizer, localizer: Localizer) :
     USCoreBasedProfile<Medication>(
         R4MedicationValidator,
-        RoninProfile.MEDICATION.value
+        RoninProfile.MEDICATION.value,
+        normalizer, localizer
     ) {
     private val requiredCodeError = RequiredFieldError(Medication::code)
 
