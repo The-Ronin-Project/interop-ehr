@@ -1,0 +1,5 @@
+databaseChangeLog:
+  - include:
+      file: ehr/db/changelog/tenant-cerner/io_tenant_cerner-01.yaml
+  - include:
+      file: ehr/db/changelog/ehr/io_ehr-03.yaml

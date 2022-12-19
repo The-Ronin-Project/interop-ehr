@@ -1,0 +1,44 @@
+io_ehr:
+  - io_ehr_id: 101
+    instance_name: "Cerner Sandbox"
+    name: "CERNER"
+    client_id: "12345"
+    account_id: "account_id"
+    secret: "secret"
+  - io_ehr_id: 999
+    name: "EPIC"
+    instance_name: "Epic Sandbox"
+    client_id: "12345"
+    public_key: "public"
+    private_key: "private"
+
+io_tenant:
+  - io_tenant_id: 1001
+    mnemonic: "tenant"
+    full_name: "Test Tenant"
+    timezone: "America/New_York"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+  - io_tenant_id: 999
+    mnemonic: "epic"
+    full_name: "Test Tenant"
+    timezone: "America/New_York"
+    io_ehr_id: 999
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+
+io_tenant_epic:
+  - io_tenant_id: 999
+    release_version: "2021.10"
+    service_endpoint: "https://localhost:8080/"
+    auth_endpoint: "https://localhost:8080/auth/"
+    ehr_user_id: "RONIN"
+    message_type: "Ronin Alerts"
+    practitioner_provider_system: "urn:oid:provider.system"
+    practitioner_user_system: "urn:oid:user.system"
+    mrn_system: "urn:oid:mrn.system"
+    patient_internal_system: "urn:oid:internal.system"
+    encounter_csn_system: "urn:oid:encounter.system"
+    hsi: "urn:epic:apporchard.curprod"
+    department_internal_system: "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980"

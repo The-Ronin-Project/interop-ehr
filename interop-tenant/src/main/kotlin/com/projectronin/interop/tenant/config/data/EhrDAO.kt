@@ -33,6 +33,8 @@ class EhrDAO(@Qualifier("ehr") private val database: Database) {
                 set(it.clientId, ehrVendor.clientId)
                 set(it.publicKey, ehrVendor.publicKey)
                 set(it.privateKey, ehrVendor.privateKey)
+                set(it.accountId, ehrVendor.accountId)
+                set(it.secret, ehrVendor.secret)
             }
         } catch (e: Exception) {
             logger.error(e) { "insert failed: $e" }
@@ -55,6 +57,8 @@ class EhrDAO(@Qualifier("ehr") private val database: Database) {
                 set(it.clientId, ehrVendor.clientId)
                 set(it.privateKey, ehrVendor.privateKey)
                 set(it.publicKey, ehrVendor.publicKey)
+                set(it.accountId, ehrVendor.accountId)
+                set(it.secret, ehrVendor.secret)
                 where {
                     it.id eq ehrVendor.id
                 }

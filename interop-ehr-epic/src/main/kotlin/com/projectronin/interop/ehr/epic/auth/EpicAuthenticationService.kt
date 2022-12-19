@@ -34,8 +34,9 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
 
     override fun getAuthentication(tenant: Tenant): Authentication? {
         val jti = UUID.randomUUID().toString()
-        val authURL = tenant.vendor.authenticationConfig.authEndpoint
-        val clientId = tenant.vendor.clientId
+        val vendor = tenant.vendorAs<Epic>()
+        val authURL = vendor.authenticationConfig.authEndpoint
+        val clientId = vendor.clientId
 
         logger.debug { "Setting up authentication for $authURL, JTI $jti" }
 
@@ -46,7 +47,7 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
         val privateKeySpec = PKCS8EncodedKeySpec(
             Base64.getDecoder().decode(
                 // Remove any Key formatting before decoding
-                tenant.vendor.authenticationConfig.privateKey?.replace("-----BEGIN PRIVATE KEY-----", "")
+                vendor.authenticationConfig.privateKey?.replace("-----BEGIN PRIVATE KEY-----", "")
                     ?.replace("-----END PRIVATE KEY-----", "")
                     ?.replace(" ", "")
                     ?.replace(System.lineSeparator(), "")
@@ -55,7 +56,7 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
         val privateKeyInstance = KeyFactory.getInstance("RSA").generatePrivate(privateKeySpec)
 
         // Determine the audience value (hsi for Tesseract endpoints or authURL for direct endpoints)
-        val audience = tenant.vendorAs<Epic>().hsi ?: authURL
+        val audience = vendor.hsi ?: authURL
         val token =
             JWT.create().withAudience(audience).withIssuer(clientId).withSubject(clientId).withExpiresAt(expireAt)
                 .withNotBefore(issueDate).withIssuedAt(issueDate).withJWTId(jti)

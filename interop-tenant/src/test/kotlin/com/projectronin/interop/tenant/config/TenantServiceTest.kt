@@ -1,17 +1,23 @@
 package com.projectronin.interop.tenant.config
 
 import com.projectronin.interop.common.vendor.VendorType
+import com.projectronin.interop.tenant.config.data.CernerTenantDAO
+import com.projectronin.interop.tenant.config.data.EHRTenantDAO
 import com.projectronin.interop.tenant.config.data.EhrDAO
 import com.projectronin.interop.tenant.config.data.EpicTenantDAO
 import com.projectronin.interop.tenant.config.data.TenantDAO
+import com.projectronin.interop.tenant.config.data.model.CernerTenantDO
+import com.projectronin.interop.tenant.config.data.model.EHRTenantDO
 import com.projectronin.interop.tenant.config.data.model.EhrDO
 import com.projectronin.interop.tenant.config.data.model.EpicTenantDO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
-import com.projectronin.interop.tenant.config.model.AuthenticationConfig
 import com.projectronin.interop.tenant.config.model.BatchConfig
+import com.projectronin.interop.tenant.config.model.CernerAuthenticationConfig
+import com.projectronin.interop.tenant.config.model.EpicAuthenticationConfig
 import com.projectronin.interop.tenant.config.model.Tenant
+import com.projectronin.interop.tenant.config.model.vendor.Cerner
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.mockk.confirmVerified
 import io.mockk.every
@@ -31,6 +37,7 @@ class TenantServiceTest {
     private lateinit var tenantDAO: TenantDAO
     private lateinit var ehrDAO: EhrDAO
     private lateinit var epicTenantDAO: EpicTenantDAO
+    private lateinit var cernerTenantDAO: CernerTenantDAO
     private lateinit var service: TenantService
     private lateinit var ehrTenantDAOFactory: EHRTenantDAOFactory
 
@@ -52,6 +59,16 @@ class TenantServiceTest {
         every { publicKey } returns "publicKey2"
         every { privateKey } returns "privateKey2"
     }
+
+    private val standardEHRDO3 = mockk<EhrDO> {
+        every { id } returns 3
+        every { instanceName } returns "Cerner Instance 1"
+        every { vendorType } returns VendorType.CERNER
+        every { clientId } returns "clientId2"
+        every { accountId } returns "accountId"
+        every { secret } returns "secret"
+    }
+
     private val standardEpicTenantDO = mockk<EpicTenantDO> {
         every { tenantId } returns 1
         every { release } returns "release"
@@ -84,6 +101,12 @@ class TenantServiceTest {
         every { hsi } returns epicHsiValue
         every { departmentInternalSystem } returns epicDepartmentSystem
     }
+    private val standardCernerTenantDO = mockk<CernerTenantDO> {
+        every { tenantId } returns 3
+        every { serviceEndpoint } returns "http://localhost/"
+        every { patientMRNSystem } returns "mrnSystemExample"
+    }
+
     private val standardTenantDO = mockk<TenantDO> {
         every { id } returns 1
         every { mnemonic } returns "Tenant1"
@@ -104,6 +127,16 @@ class TenantServiceTest {
         every { availableBatchEnd } returns null
     }
 
+    private val standardTenantDO3 = mockk<TenantDO> {
+        every { id } returns 3
+        every { mnemonic } returns "Tenant3"
+        every { name } returns "Third Alternate Tenant"
+        every { timezone } returns ZoneId.of("America/Los_Angeles")
+        every { ehr } returns standardEHRDO3
+        every { availableBatchStart } returns null
+        every { availableBatchEnd } returns null
+    }
+
     private val standardTenant = Tenant(
         internalId = 1,
         mnemonic = "Tenant1",
@@ -113,7 +146,7 @@ class TenantServiceTest {
         vendor = Epic(
             clientId = "clientId",
             instanceName = "Epic Sandbox",
-            authenticationConfig = AuthenticationConfig(
+            authenticationConfig = EpicAuthenticationConfig(
                 authEndpoint = "http://localhost/oauth2/token",
                 publicKey = "publicKey",
                 privateKey = "privateKey"
@@ -142,7 +175,7 @@ class TenantServiceTest {
         vendor = Epic(
             clientId = "clientId2",
             instanceName = "Epic Sandbox Instance 2",
-            authenticationConfig = AuthenticationConfig(
+            authenticationConfig = EpicAuthenticationConfig(
                 authEndpoint = "http://otherhost/oauth2/token",
                 publicKey = "publicKey2",
                 privateKey = "privateKey2"
@@ -162,14 +195,36 @@ class TenantServiceTest {
         )
     )
 
+    private val standardTenant3 = Tenant(
+        internalId = 3,
+        mnemonic = "Tenant3",
+        name = "Third Alternate Tenant",
+        timezone = ZoneId.of("America/Los_Angeles"),
+        batchConfig = null,
+        vendor = Cerner(
+            clientId = "clientId2",
+            instanceName = "Cerner Instance 1",
+            authenticationConfig = CernerAuthenticationConfig(
+                authEndpoint = "http://localhost/oauth2/token",
+                accountId = "accountId",
+                secret = "secretKey"
+            ),
+            serviceEndpoint = "http://localhost/",
+            patientMRNSystem = "mrnSystemExample",
+        )
+    )
+
     @BeforeEach
     fun setup() {
         tenantDAO = mockk()
         ehrDAO = mockk()
         epicTenantDAO = mockk()
+        cernerTenantDAO = mockk()
         database = mockk()
         ehrTenantDAOFactory = mockk {
             every { getEHRTenantDAO(any()) } returns epicTenantDAO
+            every { getEHRTenantDAOByVendorType(VendorType.EPIC) } returns epicTenantDAO
+            every { getEHRTenantDAOByVendorType(VendorType.CERNER) } returns cernerTenantDAO
         }
         service = TenantService(tenantDAO, ehrDAO, ehrTenantDAOFactory)
     }
@@ -208,7 +263,7 @@ class TenantServiceTest {
         every { epicTenantDAO.getByTenantMnemonic("Tenant1") } returns standardEpicTenantDO
 
         val tenant = service.getTenantForMnemonic("Tenant1")
-        assertEquals(standardTenant, tenant)
+        assertEquals(standardTenant.toString(), tenant.toString())
 
         verify(exactly = 1) {
             tenantDAO.getTenantForMnemonic("Tenant1")
@@ -232,7 +287,7 @@ class TenantServiceTest {
         every { epicTenantDAO.getByTenantMnemonic("Tenant1") } returns standardEpicTenantDO
 
         val tenant = service.getTenantForMnemonic("Tenant1")
-        assertEquals(standardTenant, tenant)
+        assertEquals(standardTenant.toString(), tenant.toString())
 
         verify(exactly = 1) {
             tenantDAO.getTenantForMnemonic("Tenant1")
@@ -256,7 +311,7 @@ class TenantServiceTest {
         every { epicTenantDAO.getByTenantMnemonic("Tenant1") } returns standardEpicTenantDO
 
         val tenant = service.getTenantForMnemonic("Tenant1")
-        assertEquals(standardTenant, tenant)
+        assertEquals(standardTenant.toString(), tenant.toString())
 
         verify(exactly = 1) {
             tenantDAO.getTenantForMnemonic("Tenant1")
@@ -291,7 +346,7 @@ class TenantServiceTest {
             vendor = Epic(
                 clientId = "clientId",
                 instanceName = "Epic Sandbox",
-                authenticationConfig = AuthenticationConfig(
+                authenticationConfig = EpicAuthenticationConfig(
                     authEndpoint = "http://localhost/oauth2/token",
                     publicKey = "publicKey",
                     privateKey = "privateKey"
@@ -312,7 +367,7 @@ class TenantServiceTest {
         )
 
         val tenant = service.getTenantForMnemonic("Tenant1")
-        assertEquals(expectedTenant, tenant)
+        assertEquals(expectedTenant.toString(), tenant.toString())
 
         verify(exactly = 1) {
             tenantDAO.getTenantForMnemonic(standardTenant.mnemonic)
@@ -351,7 +406,7 @@ class TenantServiceTest {
             vendor = Epic(
                 clientId = "clientId",
                 instanceName = "Epic Sandbox",
-                authenticationConfig = AuthenticationConfig(
+                authenticationConfig = EpicAuthenticationConfig(
                     authEndpoint = "http://localhost/oauth2/token",
                     publicKey = "publicKey",
                     privateKey = "privateKey"
@@ -372,12 +427,41 @@ class TenantServiceTest {
         )
 
         val tenant = service.getTenantForMnemonic("Tenant1")
-        assertEquals(expectedTenant, tenant)
+        assertEquals(expectedTenant.toString(), tenant.toString())
 
         verify(exactly = 1) {
             tenantDAO.getTenantForMnemonic("Tenant1")
             epicTenantDAO.getByTenantMnemonic("Tenant1")
         }
+    }
+
+    @Test
+    fun `get with bad database throws error, actually impossible to hit`() {
+        val mockEhrDO = mockk<EhrDO> {}
+        val mockTenantDO = mockk<TenantDO> {
+            every { ehr } returns mockEhrDO
+            every { mnemonic } returns "test"
+            every { availableBatchEnd } returns null
+            every { availableBatchStart } returns null
+            every { id } returns 123
+            every { name } returns "cursedVendor"
+            every { timezone } returns ZoneId.of("America/Los_Angeles")
+        }
+        every { tenantDAO.getTenantForMnemonic("test") } returns mockTenantDO
+        val mockEHRTenantDAO = mockk<FakeVendor> {}
+        // this would normally blow up, but this allows us to bypass the blow up to hit a different code path
+        every { ehrTenantDAOFactory.getEHRTenantDAO(mockTenantDO) } returns mockEHRTenantDAO
+
+        every { mockEHRTenantDAO.getByTenantMnemonic("test") } returns mockk {
+        }
+        assertThrows<NotImplementedError> { service.getTenantForMnemonic("test") }
+    }
+
+    class FakeVendor : EHRTenantDAO {
+        override fun update(ehrTenantDO: EHRTenantDO): Int = mockk()
+        override fun insert(ehrTenantDO: EHRTenantDO): EHRTenantDO = mockk()
+        override fun getByTenantMnemonic(tenantMnemonic: String): EHRTenantDO = mockk()
+        override fun getAll(): List<EHRTenantDO> = mockk()
     }
 
     @Test
@@ -390,32 +474,45 @@ class TenantServiceTest {
 
     @Test
     fun `getAll finds 'em`() {
-        every { tenantDAO.getAllTenants() } returns listOf(standardTenantDO)
+        every { tenantDAO.getAllTenants() } returns listOf(standardTenantDO, standardTenantDO3)
         every { epicTenantDAO.getAll() } returns listOf(standardEpicTenantDO)
+        every { cernerTenantDAO.getAll() } returns listOf(standardCernerTenantDO)
 
         val tenants = service.getAllTenants()
-        assertEquals(1, tenants.size)
-        assertEquals(standardTenant, tenants.first())
+        assertEquals(2, tenants.size)
+        assertEquals(listOf(standardTenant, standardTenant3).toString(), tenants.toString())
     }
 
     @Test
     fun `getAll returns multiple tenants with multiple instances`() {
         every { tenantDAO.getAllTenants() } returns listOf(standardTenantDO, standardTenantDO2)
         every { epicTenantDAO.getAll() } returns listOf(standardEpicTenantDO, standardEpicTenantDO2)
+        every { cernerTenantDAO.getAll() } returns emptyList()
 
         val tenants = service.getAllTenants()
         assertEquals(2, tenants.size)
-        assertEquals(listOf(standardTenant, standardTenant2), tenants)
+        assertEquals(listOf(standardTenant, standardTenant2).toString(), tenants.toString())
     }
 
     @Test
-    fun `insert ok`() {
+    fun `insert ok - epic`() {
         every { ehrDAO.getByInstance("Epic Sandbox") } returns standardEHRDO1
         every { tenantDAO.insertTenant(any()) } returns standardTenantDO
         every { epicTenantDAO.insert(any()) } returns standardEpicTenantDO
 
         val tenant = service.insertTenant(standardTenant)
-        assertEquals(standardTenant, tenant)
+        assertEquals(standardTenant.toString(), tenant.toString())
+    }
+
+    @Test
+    fun `insert ok - cerner`() {
+        every { ehrDAO.getByInstance("Cerner Instance 1") } returns standardEHRDO3
+        every { ehrTenantDAOFactory.getEHRTenantDAO(standardTenantDO3) } returns cernerTenantDAO
+        every { tenantDAO.insertTenant(any()) } returns standardTenantDO3
+        every { cernerTenantDAO.insert(any()) } returns standardCernerTenantDO
+
+        val tenant = service.insertTenant(standardTenant3)
+        assertEquals(standardTenant3.toString(), tenant.toString())
     }
 
     @Test
@@ -432,7 +529,7 @@ class TenantServiceTest {
             vendor = Epic(
                 clientId = "clientId",
                 instanceName = "Epic Sandbox",
-                authenticationConfig = AuthenticationConfig(
+                authenticationConfig = EpicAuthenticationConfig(
                     authEndpoint = "http://localhost/oauth2/token",
                     publicKey = "publicKey",
                     privateKey = "privateKey"
@@ -465,7 +562,7 @@ class TenantServiceTest {
         every { epicTenantDAO.insert(any()) } returns standardEpicTenantDO
 
         val tenant = service.insertTenant(newTenant)
-        assertEquals(newTenant, tenant)
+        assertEquals(newTenant.toString(), tenant.toString())
     }
 
     @Test
@@ -482,7 +579,7 @@ class TenantServiceTest {
         every { epicTenantDAO.update(any()) } returns 1
 
         val tenant = service.updateTenant(standardTenant)
-        assertEquals(standardTenant, tenant)
+        assertEquals(standardTenant.toString(), tenant.toString())
     }
 
     @Test

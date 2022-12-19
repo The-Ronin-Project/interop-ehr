@@ -17,4 +17,6 @@ object EhrDOs : Table<EhrDO>("io_ehr") {
     val clientId = varchar("client_id").bindTo { it.clientId }
     val publicKey = varchar("public_key").bindTo { it.publicKey }
     val privateKey = varchar("private_key").bindTo { it.privateKey }
+    val accountId = varchar("account_id").bindTo { it.accountId }
+    val secret = varchar("secret").bindTo { it.secret }
 }

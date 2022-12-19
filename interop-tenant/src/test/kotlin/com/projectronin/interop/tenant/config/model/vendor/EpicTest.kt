@@ -1,14 +1,14 @@
 package com.projectronin.interop.tenant.config.model.vendor
 
 import com.projectronin.interop.common.vendor.VendorType
-import com.projectronin.interop.tenant.config.model.AuthenticationConfig
+import com.projectronin.interop.tenant.config.model.EpicAuthenticationConfig
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class EpicTest {
     @Test
     fun `check getters`() {
-        val authenticationConfig = AuthenticationConfig("authEndpoint", "public", "private")
+        val authenticationConfig = EpicAuthenticationConfig("authEndpoint", "public", "private")
         val epic =
             Epic(
                 "clientId",

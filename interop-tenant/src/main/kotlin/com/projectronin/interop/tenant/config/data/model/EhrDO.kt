@@ -12,6 +12,8 @@ interface EhrDO : Entity<EhrDO> {
     var instanceName: String
     var vendorType: VendorType
     var clientId: String
-    var publicKey: String
-    var privateKey: String
+    var publicKey: String?
+    var privateKey: String?
+    var accountId: String?
+    var secret: String?
 }

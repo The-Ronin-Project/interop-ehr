@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
-import com.projectronin.interop.tenant.config.model.AuthenticationConfig
 import com.projectronin.interop.tenant.config.model.BatchConfig
+import com.projectronin.interop.tenant.config.model.EpicAuthenticationConfig
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.HttpClient
@@ -52,7 +52,7 @@ fun createTestTenant(
         BatchConfig(LocalTime.MIN, LocalTime.MAX),
         Epic(
             clientId,
-            AuthenticationConfig(authEndpoint ?: serviceEndpoint, "pubKey", privateKey),
+            EpicAuthenticationConfig(authEndpoint ?: serviceEndpoint, "pubKey", privateKey),
             serviceEndpoint,
             "instanceName",
             "release",

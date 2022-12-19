@@ -1,7 +1,7 @@
 package com.projectronin.interop.ehr.factory
 
 import com.projectronin.interop.common.vendor.VendorType
-import com.projectronin.interop.tenant.config.model.AuthenticationConfig
+import com.projectronin.interop.tenant.config.model.EpicAuthenticationConfig
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.mockk.every
@@ -21,7 +21,7 @@ class EHRFactoryTest {
         val vendor =
             Epic(
                 "clientId",
-                AuthenticationConfig("authEndpoint", "public", "private"),
+                EpicAuthenticationConfig("authEndpoint", "public", "private"),
                 "endpoint",
                 "Epic Sandbox",
                 "release",
@@ -49,7 +49,7 @@ class EHRFactoryTest {
         val vendor =
             Epic(
                 "clientId",
-                AuthenticationConfig("authEndpoint", "public", "private"),
+                EpicAuthenticationConfig("authEndpoint", "public", "private"),
                 "endpoint",
                 "Epic Sandbox",
                 "release",

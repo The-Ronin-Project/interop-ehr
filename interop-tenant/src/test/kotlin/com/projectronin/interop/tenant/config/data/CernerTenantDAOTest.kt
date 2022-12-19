@@ -1,18 +1,100 @@
 package com.projectronin.interop.tenant.config.data
 
-import com.projectronin.interop.tenant.config.data.model.EpicTenantDO
+import com.github.database.rider.core.api.connection.ConnectionHolder
+import com.github.database.rider.core.api.dataset.DataSet
+import com.github.database.rider.core.api.dataset.ExpectedDataSet
+import com.projectronin.interop.common.test.database.dbrider.DBRiderConnection
+import com.projectronin.interop.common.test.database.ktorm.KtormHelper
+import com.projectronin.interop.common.test.database.liquibase.LiquibaseTest
+import com.projectronin.interop.tenant.config.data.model.CernerTenantDO
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.sql.SQLIntegrityConstraintViolationException
 
+@LiquibaseTest(changeLog = "ehr/db/changelog/ehr.db.changelog-master.yaml")
 class CernerTenantDAOTest {
-    // TODO: Tests for coverage pending implementation
+    @DBRiderConnection
+    lateinit var connectionHolder: ConnectionHolder
+
     @Test
-    fun `test stubs`() {
-        val dao = CernerTenantDAO()
-        val tenant = EpicTenantDO()
-        assertThrows<NotImplementedError> { dao.insert(tenant) }
-        assertThrows<NotImplementedError> { dao.update(tenant) }
-        assertThrows<NotImplementedError> { dao.getByTenantMnemonic("cerner") }
-        assertThrows<NotImplementedError> { dao.getAll() }
+    @DataSet(value = ["/dbunit/cerner-tenants/CernerTenants.yaml"], cleanAfter = true)
+    fun `tenant found`() {
+        val dao = CernerTenantDAO(KtormHelper.database())
+        val cernerTenant = dao.getByTenantMnemonic("tenant")
+        assertNotNull(cernerTenant)
+        assertEquals(1002, cernerTenant?.tenantId)
+        assertEquals("https://localhost:8080/", cernerTenant?.serviceEndpoint)
+        assertEquals("urn:oid:mrn.system", cernerTenant?.patientMRNSystem)
+    }
+    @Test
+    @DataSet(value = ["/dbunit/cerner-tenants/CernerTenants.yaml"], cleanAfter = true)
+    fun `no tenants found`() {
+        val dao = CernerTenantDAO(KtormHelper.database())
+        val tenant = dao.getByTenantMnemonic("fake")
+        assertNull(tenant)
+    }
+
+    @Test
+    @DataSet(value = ["/dbunit/cerner-tenants/CernerTenants.yaml"], cleanAfter = true)
+    fun `all tenants found`() {
+        val dao = CernerTenantDAO(KtormHelper.database())
+        val tenants = dao.getAll()
+        assertEquals(2, tenants.size)
+        assertEquals(1002, tenants[0].tenantId)
+        assertEquals(1003, tenants[1].tenantId)
+    }
+
+    @Test
+    @DataSet(value = ["/dbunit/cerner-tenants/Tenants.yaml"], cleanAfter = true)
+    @ExpectedDataSet(value = ["/dbunit/cerner-tenants/ExpectedCernerTenantsAfterInsert.yaml"])
+    fun `insert cernerTenant`() {
+        val tenantDao = TenantDAO(KtormHelper.database())
+        val tenant = tenantDao.getTenantForMnemonic("tenant")!!
+        val dao = CernerTenantDAO(KtormHelper.database())
+        val testobj = CernerTenantDO {
+            tenantId = tenant.id
+            serviceEndpoint = "newServiceEndpoints"
+            patientMRNSystem = "mrnSystem"
+        }
+
+        val result = dao.insert(testobj)
+        assertEquals(testobj.serviceEndpoint, result.serviceEndpoint)
+        assertEquals(testobj.patientMRNSystem, result.patientMRNSystem)
+    }
+
+    @Test
+    @DataSet(value = ["/dbunit/cerner-tenants/Tenants.yaml"], cleanAfter = true)
+    fun `insert cernerTenant fails`() {
+        val dao = CernerTenantDAO(KtormHelper.database())
+        val testobj = CernerTenantDO {
+            tenantId = -1
+            patientMRNSystem = "mrnSystem"
+        }
+
+        assertThrows<SQLIntegrityConstraintViolationException> { dao.insert(testobj) }
+    }
+
+    @Test
+    @DataSet(value = ["/dbunit/cerner-tenants/CernerTenants.yaml"], cleanAfter = true)
+    @ExpectedDataSet(value = ["/dbunit/cerner-tenants/ExpectedCernerTenantsAfterUpdate.yaml"])
+    fun `update cernerTenant`() {
+        val tenantDao = TenantDAO(KtormHelper.database())
+        val tenant = tenantDao.getTenantForMnemonic("tenant")!!
+        val dao = CernerTenantDAO(KtormHelper.database())
+        val updated = CernerTenantDO {
+            tenantId = tenant.id
+            serviceEndpoint = "newServiceEndpoint"
+            patientMRNSystem = "mrnSystem"
+        }
+        val result = dao.update(updated)
+        assertNotNull(result)
+        assertEquals(1, result)
+
+        val found = dao.getByTenantMnemonic("tenant")
+        assertEquals(updated.serviceEndpoint, found?.serviceEndpoint)
+        assertEquals(updated.patientMRNSystem, found?.patientMRNSystem)
     }
 }

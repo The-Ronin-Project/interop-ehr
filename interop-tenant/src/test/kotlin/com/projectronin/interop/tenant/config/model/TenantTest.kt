@@ -10,7 +10,7 @@ class TenantTest {
     @Test
     fun `check getters`() {
         val batchConfig = BatchConfig(LocalTime.of(20, 0), LocalTime.of(6, 30))
-        val authenticationConfig = AuthenticationConfig("authEndpoint", "public", "private")
+        val authenticationConfig = EpicAuthenticationConfig("authEndpoint", "public", "private")
         val timezone = ZoneId.of("America/Chicago")
         val epic =
             Epic(

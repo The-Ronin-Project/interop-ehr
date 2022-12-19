@@ -1,5 +1,6 @@
 package com.projectronin.interop.tenant.config
 
+import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.tenant.config.data.EhrDAO
 import com.projectronin.interop.tenant.config.data.TenantDAO
 import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
@@ -43,14 +44,24 @@ class TenantService(
         val tenantDOs = tenantDAO.getAllTenants()
         if (tenantDOs.isEmpty()) return emptyList() // if this happens we have gone out of business
         logger.debug { "Found ${tenantDOs.size}" }
+
         val ehrDOByTenantId = tenantDOs.associate { it.id to it.ehr }
-        val ehrDAO = ehrTenantDAOFactory.getEHRTenantDAO(tenantDOs.first())
-        // this is effectively a "getAllEpicTenants" but can be refactored once we have more vendors
-        // likely need some sort of factory to share with getTenantForMnemonic so that given a tenantDO figure out the
-        // right EHRTenantDO and vendorType
-        val ehrTenantDOMap = ehrDAO.getAll().associateBy { it.tenantId }
+
+        val allEhrDAO = VendorType.values().map { ehrTenantDAOFactory.getEHRTenantDAOByVendorType(it) }
+
+        val ehrTenantDOListMap = allEhrDAO.map {
+            it.getAll().associateBy { it.tenantId }
+        }
+        val ehrTenantDOMap = ehrTenantDOListMap.flatMap { it.entries }
+            .associate { it.key to it.value }
+
         logger.debug { "Found ${ehrTenantDOMap.size} EhrTenantDOs" }
-        return tenantDOs.map { it.toTenant(ehrTenantDOMap[it.id]!!, ehrDOByTenantId[it.id]!!) }
+
+        return tenantDOs.map {
+            val ehrTenantDAO = ehrTenantDOMap[it.id]!!
+            val ehrDO = ehrDOByTenantId[it.id]!!
+            it.toTenant(ehrTenantDAO, ehrDO)
+        }
     }
 
     /**

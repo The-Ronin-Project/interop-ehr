@@ -1,0 +1,57 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-ehr-support-cerner-auth
+      author: Sam Felt
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_ehr
+                columnName: account_id
+      changes:
+        - addColumn:
+            tableName: io_ehr
+            columns:
+              - column:
+                  name: account_id
+                  type: java.sql.Types.VARCHAR(30)
+        - addColumn:
+            tableName: io_ehr
+            columns:
+              - column:
+                  name: secret
+                  type: java.sql.Types.VARCHAR(30)
+        - dropNotNullConstraint:
+            columnName: public_key
+            columnDataType: java.sql.Types.VARCHAR(2000)
+            tableName: io_ehr
+        - dropNotNullConstraint:
+            columnName: private_key
+            columnDataType: java.sql.Types.VARCHAR(2000)
+            tableName: io_ehr
+        - sql:
+            sql: ALTER  TABLE  io_ehr  ADD  CONSTRAINT ck_io_ehr_epic_public_key CHECK (NOT (name='EPIC' AND public_key IS NULL));
+        - sql:
+            sql: ALTER  TABLE  io_ehr  ADD  CONSTRAINT ck_io_ehr_epic_private_key CHECK (NOT (name='EPIC' AND private_key IS NULL));
+        - sql:
+            sql: ALTER  TABLE  io_ehr  ADD  CONSTRAINT ck_io_ehr_cerner_account_id CHECK (NOT (name='CERNER' AND account_id IS NULL));
+        - sql:
+            sql: ALTER  TABLE  io_ehr  ADD  CONSTRAINT ck_io_ehr_cerner_secret CHECK (NOT (name='CERNER' AND secret IS NULL));
+
+# Liquibase locks these behind a pro account, but this is how we would do this more cleanly
+#        - addCheckConstraint:
+#            constraintBody: name='EPIC' or public_key IS NOT NULL
+#            constraintName: ck_io_ehr_epic_public_key
+#            tableName: io_ehr
+#        - addCheckConstraint:
+#            constraintBody: name='EPIC' or private_key IS NOT NULL
+#            constraintName: ck_io_ehr_epic_private_key
+#            tableName: io_ehr
+#        - addCheckConstraint:
+#            constraintBody: name='CERNER' or account_id IS NOT NULL
+#            constraintName: ck_io_ehr_cerner_account_id
+#            tableName: io_ehr
+#        - addCheckConstraint:
+#            constraintBody: name='CERNER' or secret IS NOT NULL
+#            constraintName: ck_io_ehr_cerner_secret
+#            tableName: io_ehr

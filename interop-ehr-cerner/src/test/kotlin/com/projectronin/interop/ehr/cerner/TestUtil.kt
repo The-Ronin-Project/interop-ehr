@@ -4,8 +4,8 @@ import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.module.kotlin.readValue
 import com.projectronin.interop.common.jackson.JacksonManager.Companion.objectMapper
-import com.projectronin.interop.tenant.config.model.AuthenticationConfig
 import com.projectronin.interop.tenant.config.model.BatchConfig
+import com.projectronin.interop.tenant.config.model.CernerAuthenticationConfig
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Cerner
 import io.ktor.client.HttpClient
@@ -35,7 +35,7 @@ fun createTestTenant(
         Cerner(
             "instanceName",
             "clientId",
-            AuthenticationConfig(authEndpoint, "", "", clientId, secret),
+            CernerAuthenticationConfig(authEndpoint, clientId, secret),
             serviceEndpoint,
             mrnSystem
         )

@@ -1,12 +1,15 @@
 package com.projectronin.interop.tenant.config
 
+import com.projectronin.interop.tenant.config.data.model.CernerTenantDO
 import com.projectronin.interop.tenant.config.data.model.EHRTenantDO
 import com.projectronin.interop.tenant.config.data.model.EhrDO
 import com.projectronin.interop.tenant.config.data.model.EpicTenantDO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
-import com.projectronin.interop.tenant.config.model.AuthenticationConfig
 import com.projectronin.interop.tenant.config.model.BatchConfig
+import com.projectronin.interop.tenant.config.model.CernerAuthenticationConfig
+import com.projectronin.interop.tenant.config.model.EpicAuthenticationConfig
 import com.projectronin.interop.tenant.config.model.Tenant
+import com.projectronin.interop.tenant.config.model.vendor.Cerner
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import com.projectronin.interop.tenant.config.model.vendor.Vendor
 
@@ -64,18 +67,21 @@ private fun TenantDO.createBatchConfig(): BatchConfig? {
  *  https://github.com/mockk/mockk/issues/64
  */
 fun EHRTenantDO.toVendor(ehrDO: EhrDO): Vendor {
-    // this is where we could do some factory patterns when we get multiple vendors
-    return (this as EpicTenantDO).toEpic(ehrDO)
+    return when (this) {
+        is EpicTenantDO -> this.toEpic(ehrDO)
+        is CernerTenantDO -> this.toCerner(ehrDO)
+        else -> throw NotImplementedError("Received a ehrDO of unknown subtype")
+    }
 }
 
 /**
  *  Transforms an [EpicTenantDO] object into an [Epic] object, provided a link to the ehrDO representing Epic
  */
 private fun EpicTenantDO.toEpic(ehrDO: EhrDO): Epic {
-    val authenticationConfig = AuthenticationConfig(
+    val authenticationConfig = EpicAuthenticationConfig(
         authEndpoint = authEndpoint,
-        publicKey = ehrDO.publicKey,
-        privateKey = ehrDO.privateKey
+        publicKey = ehrDO.publicKey!!,
+        privateKey = ehrDO.privateKey!!
     )
     return Epic(
         clientId = ehrDO.clientId,
@@ -96,9 +102,26 @@ private fun EpicTenantDO.toEpic(ehrDO: EhrDO): Epic {
     )
 }
 
+private fun CernerTenantDO.toCerner(ehrDO: EhrDO): Cerner {
+    val authenticationConfig = CernerAuthenticationConfig(
+        authEndpoint = serviceEndpoint,
+        accountId = ehrDO.accountId!!,
+        secret = ehrDO.secret!!,
+    )
+    return Cerner(
+        clientId = ehrDO.clientId,
+        instanceName = ehrDO.instanceName,
+        authenticationConfig = authenticationConfig,
+        serviceEndpoint = serviceEndpoint,
+        patientMRNSystem = patientMRNSystem,
+    )
+}
+
 internal fun Vendor.toEHRTenantDO(tenantID: Int): EHRTenantDO {
-    // this is where we could do some factory patterns when we get multiple vendors
-    return (this as Epic).toEpicTenantDO(tenantID)
+    return when (this) {
+        is Epic -> this.toEpicTenantDO(tenantID)
+        is Cerner -> this.toCernerTenantDO(tenantID)
+    }
 }
 
 /**
@@ -122,5 +145,13 @@ private fun Epic.toEpicTenantDO(tenantID: Int): EpicTenantDO {
         patientMRNTypeText = this@toEpicTenantDO.patientMRNTypeText
         hsi = this@toEpicTenantDO.hsi
         departmentInternalSystem = this@toEpicTenantDO.departmentInternalSystem
+    }
+}
+
+private fun Cerner.toCernerTenantDO(tenantID: Int): CernerTenantDO {
+    return CernerTenantDO {
+        tenantId = tenantID
+        this.serviceEndpoint = this@toCernerTenantDO.serviceEndpoint
+        patientMRNSystem = this@toCernerTenantDO.patientMRNSystem
     }
 }

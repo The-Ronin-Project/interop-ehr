@@ -5,6 +5,7 @@ import com.projectronin.interop.common.http.request
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.auth.AuthenticationService
 import com.projectronin.interop.tenant.config.model.Tenant
+import com.projectronin.interop.tenant.config.model.vendor.Cerner
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.FormDataContent
@@ -25,8 +26,9 @@ class CernerAuthenticationService(private val client: HttpClient) : Authenticati
     override val vendorType = VendorType.CERNER
 
     override fun getAuthentication(tenant: Tenant): Authentication? {
-        val authURL = tenant.vendor.authenticationConfig.authEndpoint
-        val clientIdWithSecret = "${tenant.vendor.authenticationConfig.accountId}:${tenant.vendor.authenticationConfig.secret}"
+        val vendor = tenant.vendorAs<Cerner>()
+        val authURL = vendor.authenticationConfig.authEndpoint
+        val clientIdWithSecret = "${vendor.authenticationConfig.accountId}:${vendor.authenticationConfig.secret}"
         val encodedSecret = Base64.getEncoder().encodeToString(clientIdWithSecret.toByteArray())
         val scope = "system/Appointment.read system/Patient.read"
 

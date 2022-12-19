@@ -14,7 +14,7 @@ class EHRTenantDAOFactoryTest {
     private val cernerTenantDAO = mockk<CernerTenantDAO>()
 
     @Test
-    fun `returns correctly`() {
+    fun `returns epic correctly`() {
         val tenantDO = mockk<TenantDO> {
             every { ehr.vendorType } returns VendorType.EPIC
         }
@@ -29,5 +29,13 @@ class EHRTenantDAOFactoryTest {
         }
         val dao = EHRTenantDAOFactory(epicTenantDAO, cernerTenantDAO).getEHRTenantDAO(tenantDO)
         assertEquals(cernerTenantDAO, dao)
+    }
+
+    @Test
+    fun `returns all correctly`() {
+        val dao1 = EHRTenantDAOFactory(epicTenantDAO, cernerTenantDAO).getEHRTenantDAOByVendorType(VendorType.EPIC)
+        val dao2 = EHRTenantDAOFactory(epicTenantDAO, cernerTenantDAO).getEHRTenantDAOByVendorType(VendorType.CERNER)
+        assertEquals(epicTenantDAO, dao1)
+        assertEquals(cernerTenantDAO, dao2)
     }
 }
