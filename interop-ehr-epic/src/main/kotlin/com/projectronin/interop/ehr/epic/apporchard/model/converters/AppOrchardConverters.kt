@@ -1,4 +1,4 @@
-package com.projectronin.interop.ehr.epic.util
+package com.projectronin.interop.ehr.epic.apporchard.model.converters
 
 import com.projectronin.interop.ehr.epic.apporchard.model.IDType
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept

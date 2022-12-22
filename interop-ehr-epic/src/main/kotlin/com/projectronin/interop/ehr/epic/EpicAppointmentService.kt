@@ -12,8 +12,8 @@ import com.projectronin.interop.ehr.epic.apporchard.model.GetProviderAppointment
 import com.projectronin.interop.ehr.epic.apporchard.model.IDType
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProvider
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
+import com.projectronin.interop.ehr.epic.apporchard.model.converters.toIdentifier
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.epic.util.toIdentifier
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.outputs.FindPractitionerAppointmentsResponse
 import com.projectronin.interop.fhir.r4.CodeSystem
