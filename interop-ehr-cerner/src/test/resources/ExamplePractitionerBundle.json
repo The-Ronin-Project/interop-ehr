@@ -1,0 +1,76 @@
+{
+  "resourceType": "Bundle",
+  "id": "18e8767b-5bd0-4f05-a1e7-694de846ff25",
+  "type": "searchset",
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Practitioner?_id=12793559"
+    }
+  ],
+  "entry": [
+    {
+      "fullUrl": "https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Practitioner/12793559",
+      "resource": {
+        "resourceType": "Practitioner",
+        "id": "12793559",
+        "meta": {
+          "versionId": "0",
+          "lastUpdated": "2022-05-12T12:16:09.000Z"
+        },
+        "text": {
+          "status": "generated",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Practitioner</b></p><p><b>Name</b>: Barnes M.D, Mr., Billy Tris</p><p><b>Identifiers</b>: NPI: 5076748677</p><p><b>Status</b>: Active</p></div>"
+        },
+        "extension": [
+          {
+            "valueBoolean": false,
+            "url": "https://fhir-ehr.cerner.com/r4/StructureDefinition/is-physician"
+          }
+        ],
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "coding": [
+                {
+                  "system": "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code": "NPI",
+                  "display": "National provider identifier"
+                }
+              ],
+              "text": "National Provider Identifier"
+            },
+            "system": "http://hl7.org/fhir/sid/us-npi",
+            "value": "5076748677",
+            "period": {
+              "start": "2022-03-20T00:00:00.000Z",
+              "end": "2029-12-01T23:59:59.000Z"
+            }
+          }
+        ],
+        "active": true,
+        "name": [
+          {
+            "use": "usual",
+            "text": "Barnes M.D, Mr., Billy Tris",
+            "family": "Barnes",
+            "given": [
+              "Billy",
+              "Tris"
+            ],
+            "prefix": [
+              "Mr."
+            ],
+            "suffix": [
+              "M.D"
+            ],
+            "period": {
+              "start": "2022-03-21T00:00:00.000Z"
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
