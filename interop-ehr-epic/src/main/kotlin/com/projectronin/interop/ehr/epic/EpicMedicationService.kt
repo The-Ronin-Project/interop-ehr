@@ -19,7 +19,7 @@ class EpicMedicationService(
     @Trace
     override fun getMedicationsByFhirId(tenant: Tenant, medicationFhirIds: List<String>): List<Medication> {
         val medicationBundles = medicationFhirIds.toSet().chunked(batchSize) {
-            val parameters = mapOf("_id" to medicationFhirIds.joinToString(","))
+            val parameters = mapOf("_id" to it.joinToString(","))
             getResourceListFromSearch(tenant, parameters)
         }
         return medicationBundles.flatten()
