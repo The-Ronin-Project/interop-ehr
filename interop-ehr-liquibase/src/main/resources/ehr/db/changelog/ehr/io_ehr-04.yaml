@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-ehr-support-cerner-id-lengths
+      author: Mike Esposito
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - changeSetExecuted:
+                id: io-ehr-support-cerner-id-lengths
+                changeLogFile: io_ehr-04.yaml
+                author: Mike Esposito
+      changes:
+        - modifyDataType:
+            columnName: account_id
+            tableName: io_ehr
+            newDataType: java.sql.Types.VARCHAR(1024)
+        - modifyDataType:
+            columnName: secret
+            tableName: io_ehr
+            newDataType: java.sql.Types.VARCHAR(1024)
