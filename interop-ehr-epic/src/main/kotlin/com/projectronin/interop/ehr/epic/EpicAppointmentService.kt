@@ -15,7 +15,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturn
 import com.projectronin.interop.ehr.epic.apporchard.model.converters.toIdentifier
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
-import com.projectronin.interop.ehr.outputs.FindPractitionerAppointmentsResponse
+import com.projectronin.interop.ehr.outputs.AppointmentsWithNewPatients
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
@@ -115,7 +115,7 @@ class EpicAppointmentService(
         locationFHIRIds: List<String>,
         startDate: LocalDate,
         endDate: LocalDate
-    ): FindPractitionerAppointmentsResponse {
+    ): AppointmentsWithNewPatients {
         val searchMap = locationFHIRIds.map { SystemValue(value = it, system = CodeSystem.RONIN_FHIR_ID.uri.value!!) }
         val limitedLocationList = aidboxLocationService.getAllLocationIdentifiers(tenant.mnemonic, searchMap)
         val departmentList = limitedLocationList.flatMap { it.identifiers }
@@ -135,7 +135,7 @@ class EpicAppointmentService(
         providerIDs: List<FHIRIdentifiers>,
         startDate: LocalDate,
         endDate: LocalDate
-    ): FindPractitionerAppointmentsResponse {
+    ): AppointmentsWithNewPatients {
         logger.info { "Provider appointment search started for ${tenant.mnemonic}" }
 
         // Get correct provider IDs for request
@@ -151,7 +151,7 @@ class EpicAppointmentService(
         }
 
         if (selectedIdentifiers.isEmpty()) {
-            return FindPractitionerAppointmentsResponse(emptyList())
+            return AppointmentsWithNewPatients(emptyList())
         }
 
         // Call GetProviderAppointments
@@ -167,7 +167,7 @@ class EpicAppointmentService(
     private fun appointmentsByProviderHelper(
         tenant: Tenant,
         request: GetProviderAppointmentRequest
-    ): FindPractitionerAppointmentsResponse {
+    ): AppointmentsWithNewPatients {
         val getAppointmentsResponse = findAppointments(tenant, providerAppointmentSearchUrlPart, request)
 
         // Get list of patient FHIR IDs
@@ -193,7 +193,7 @@ class EpicAppointmentService(
             transformEpicAppointments(tenant, patientFhirIdToAppointments)
         }
 
-        return FindPractitionerAppointmentsResponse(
+        return AppointmentsWithNewPatients(
             r4AppointmentsToReturn,
             patientFhirIdResponse.mapNotNull { it.value.newPatientObject }
         )

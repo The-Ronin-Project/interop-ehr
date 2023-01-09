@@ -8,14 +8,14 @@ import com.projectronin.interop.fhir.util.asCode
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
-internal class FindPractitionerAppointmentsResponseTest {
+internal class AppointmentsWithNewPatientsTest {
 
     @Test
     fun test() {
         val patients = listOf(Patient(id = Id("12345")))
         val appointments =
             listOf(Appointment(id = Id("54321"), participant = listOf(), status = AppointmentStatus.BOOKED.asCode()))
-        val obj = FindPractitionerAppointmentsResponse(appointments, patients)
+        val obj = AppointmentsWithNewPatients(appointments, patients)
         assertEquals(appointments, obj.appointments)
         assertEquals(patients, obj.newPatients)
     }

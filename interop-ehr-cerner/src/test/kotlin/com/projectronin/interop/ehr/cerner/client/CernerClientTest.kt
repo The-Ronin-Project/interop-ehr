@@ -13,6 +13,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -47,7 +48,7 @@ class CernerClientTest {
         val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = assertThrows<ServerFailureException> {
+        assertThrows<ServerFailureException> {
             runBlocking {
                 cernerClient.get(
                     tenant,
@@ -80,5 +81,46 @@ class CernerClientTest {
             httpResponse.bodyAsText()
         }
         assertEquals(patientResult, response)
+        val requestUrl = mockWebServer.takeRequest().path
+        assertTrue(requestUrl?.contains("/Patient/12724066") == true)
+    }
+
+    @Test
+    fun `ensure get operation returns correctly with parameters`() {
+        mockWebServer.enqueue(
+            MockResponse().setBody(patientResult).setHeader("Content-Type", "application/json")
+        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+
+        val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
+        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+
+        val response = runBlocking {
+            val httpResponse = cernerClient.get(
+                tenant,
+                "/Patient/12724066",
+                parameters = mapOf(
+                    "simple" to "simple",
+                    "single" to listOf("1", "b", "special="),
+                    "repeating" to RepeatingParameter(listOf("first", "second")),
+                    "noValue" to null
+                )
+            )
+            httpResponse.bodyAsText()
+        }
+        assertEquals(patientResult, response)
+        val requestUrl = mockWebServer.takeRequest().path
+        println(requestUrl)
+        assertEquals(true, requestUrl?.contains("/Patient/12724066"))
+        assertEquals(true, requestUrl?.contains("simple=simple"))
+        assertEquals(true, requestUrl?.contains("single=1,b,special%3D"))
+        assertEquals(true, requestUrl?.contains("repeating=first"))
+        assertEquals(true, requestUrl?.contains("repeating=second"))
+        assertEquals(false, requestUrl?.contains("noValue"))
     }
 }

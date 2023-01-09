@@ -1,7 +1,7 @@
 package com.projectronin.interop.ehr
 
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
-import com.projectronin.interop.ehr.outputs.FindPractitionerAppointmentsResponse
+import com.projectronin.interop.ehr.outputs.AppointmentsWithNewPatients
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.tenant.config.model.Tenant
 import java.time.LocalDate
@@ -32,7 +32,7 @@ interface AppointmentService : FHIRService<Appointment> {
         providerIDs: List<FHIRIdentifiers>,
         startDate: LocalDate,
         endDate: LocalDate,
-    ): FindPractitionerAppointmentsResponse
+    ): AppointmentsWithNewPatients
 
     /**
      * Finds the appointments at a given [tenant] for the [locationFHIRIds] between the [startDate] and [endDate].
@@ -42,5 +42,5 @@ interface AppointmentService : FHIRService<Appointment> {
         locationFHIRIds: List<String>,
         startDate: LocalDate,
         endDate: LocalDate,
-    ): FindPractitionerAppointmentsResponse
+    ): AppointmentsWithNewPatients
 }
