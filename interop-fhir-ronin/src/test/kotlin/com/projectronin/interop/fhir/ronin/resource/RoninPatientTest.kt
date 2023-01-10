@@ -9,8 +9,6 @@ import com.projectronin.interop.fhir.r4.datatype.Address
 import com.projectronin.interop.fhir.r4.datatype.Attachment
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
-import com.projectronin.interop.fhir.r4.datatype.Communication
-import com.projectronin.interop.fhir.r4.datatype.Contact
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
@@ -19,7 +17,6 @@ import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
-import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Period
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Base64Binary
@@ -34,8 +31,11 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.PositiveInt
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.fhir.r4.resource.Communication
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.r4.resource.PatientContact
+import com.projectronin.interop.fhir.r4.resource.PatientLink
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
@@ -871,7 +871,7 @@ class RoninPatientTest {
             maritalStatus = CodeableConcept(text = "M".asFHIR()),
             multipleBirth = DynamicValue(DynamicValueType.INTEGER, FHIRInteger(2)),
             photo = listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
-            contact = listOf(Contact(name = HumanName(text = "Jane Doe".asFHIR()))),
+            contact = listOf(PatientContact(name = HumanName(text = "Jane Doe".asFHIR()))),
             communication = listOf(Communication(language = CodeableConcept(text = "English".asFHIR()))),
             generalPractitioner = listOf(Reference(display = "GP".asFHIR())),
             managingOrganization = Reference(display = "organization".asFHIR()),

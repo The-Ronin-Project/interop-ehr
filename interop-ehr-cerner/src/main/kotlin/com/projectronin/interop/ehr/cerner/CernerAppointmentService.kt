@@ -8,8 +8,8 @@ import com.projectronin.interop.ehr.cerner.client.RepeatingParameter
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.outputs.AppointmentsWithNewPatients
 import com.projectronin.interop.fhir.r4.CodeSystem
-import com.projectronin.interop.fhir.r4.datatype.Participant
 import com.projectronin.interop.fhir.r4.resource.Appointment
+import com.projectronin.interop.fhir.r4.resource.Participant
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component

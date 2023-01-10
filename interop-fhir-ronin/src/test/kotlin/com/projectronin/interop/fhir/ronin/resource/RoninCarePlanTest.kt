@@ -3,8 +3,6 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Annotation
-import com.projectronin.interop.fhir.r4.datatype.CarePlanActivity
-import com.projectronin.interop.fhir.r4.datatype.CarePlanDetail
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
@@ -27,6 +25,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.CarePlan
+import com.projectronin.interop.fhir.r4.resource.CarePlanActivity
+import com.projectronin.interop.fhir.r4.resource.CarePlanDetail
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.valueset.CarePlanIntent
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
@@ -307,7 +307,6 @@ class RoninCarePlanTest {
                     progress = listOf(
                         Annotation(text = Markdown("123"))
                     ),
-                    reference = Reference(reference = "reference".asFHIR()),
                     detail = CarePlanDetail(
                         id = "12345".asFHIR(),
                         extension = listOf(
@@ -531,7 +530,6 @@ class RoninCarePlanTest {
                     progress = listOf(
                         Annotation(text = Markdown("123"))
                     ),
-                    reference = Reference(reference = "reference".asFHIR()),
                     detail = CarePlanDetail(
                         id = "12345".asFHIR(),
                         extension = listOf(
@@ -602,6 +600,297 @@ class RoninCarePlanTest {
             ),
             transformed.activity
         )
+    }
+
+    @Test
+    fun `transform fails with activity with both a reference and detail`() {
+        val carePlan = CarePlan(
+            id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical("http://hl7.org/fhir/R4/encounter.html"))
+            ),
+            implicitRules = Uri("implicit-rules"),
+            language = Code("en-US"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
+            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://hl7.org/extension-1"),
+                    value = DynamicValue(DynamicValueType.STRING, "value")
+                )
+            ),
+            modifierExtension = listOf(
+                Extension(
+                    url = Uri("http://localhost/modifier-extension"),
+                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                )
+            ),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            instantiatesCanonical = listOf(
+                Canonical(
+                    value = "canonical"
+                )
+            ),
+            instantiatesUri = listOf(Uri("uri")),
+            basedOn = listOf(Reference(reference = "reference".asFHIR())),
+            replaces = listOf(Reference(reference = "reference".asFHIR())),
+            partOf = listOf(Reference(reference = "reference".asFHIR())),
+            status = RequestStatus.DRAFT.asCode(),
+            intent = CarePlanIntent.OPTION.asCode(),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                            code = Code("assess-plan")
+                        )
+                    )
+                )
+            ),
+            title = "CarePlan Title".asFHIR(),
+            description = "CarePlan Description".asFHIR(),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            encounter = Reference(reference = "reference".asFHIR()),
+            period = Period(start = DateTime("2021"), end = DateTime("2022")),
+            created = DateTime("2022"),
+            author = Reference(reference = "author123".asFHIR()),
+            contributor = listOf(
+                Reference(reference = "contributor123".asFHIR())
+            ),
+            careTeam = listOf(
+                Reference(reference = "careteam123".asFHIR())
+            ),
+            addresses = listOf(
+                Reference(reference = "address123".asFHIR())
+            ),
+            supportingInfo = listOf(
+                Reference(reference = "supportingInfo123".asFHIR())
+            ),
+            goal = listOf(
+                Reference(reference = "goal123".asFHIR())
+            ),
+            activity = listOf(
+                CarePlanActivity(
+                    id = "67890".asFHIR(),
+                    extension = listOf(
+                        Extension(
+                            url = Uri("http://localhost/extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
+                        )
+                    ),
+                    modifierExtension = listOf(
+                        Extension(
+                            url = Uri("http://localhost/modifier-extension"),
+                            value = DynamicValue(DynamicValueType.INTEGER, FHIRInteger(1))
+                        )
+                    ),
+                    outcomeCodeableConcept = listOf(
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
+                                    code = Code("DD"),
+                                    display = "Discharge diagnosis".asFHIR()
+                                )
+                            )
+                        )
+                    ),
+                    outcomeReference = listOf(
+                        Reference(reference = "outcome".asFHIR())
+                    ),
+                    progress = listOf(
+                        Annotation(text = Markdown("123"))
+                    ),
+                    reference = Reference(reference = "reference".asFHIR()),
+                    detail = CarePlanDetail(
+                        id = "12345".asFHIR(),
+                        extension = listOf(
+                            Extension(
+                                url = Uri("http://localhost/extension"),
+                                value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
+                            )
+                        ),
+                        modifierExtension = listOf(
+                            Extension(
+                                url = Uri("http://localhost/modifier-extension"),
+                                value = DynamicValue(DynamicValueType.INTEGER, FHIRInteger(1))
+                            )
+                        ),
+                        kind = Code("Appointment"),
+                        instantiatesCanonical = listOf<Canonical>(
+                            Canonical(
+                                value = "canonical"
+                            )
+                        ),
+                        instantiatesUri = Uri("uri"),
+                        code = CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
+                                    code = Code("DD"),
+                                    display = "Discharge diagnosis".asFHIR()
+                                )
+                            )
+                        ),
+                        reasonCode = listOf(
+                            CodeableConcept(
+                                coding = listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
+                                        code = Code("DD"),
+                                        display = "Discharge diagnosis".asFHIR()
+                                    )
+                                )
+                            )
+                        ),
+                        goal = listOf(
+                            Reference(reference = "ABC123".asFHIR())
+                        ),
+                        status = Code("scheduled"),
+                        statusReason = CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
+                                    code = Code("DD"),
+                                    display = "Discharge diagnosis".asFHIR()
+                                )
+                            )
+                        ),
+                        doNotPerform = FHIRBoolean.TRUE,
+                        scheduled = DynamicValue(DynamicValueType.STRING, "Value".asFHIR()),
+                        location = Reference(reference = "DEF123".asFHIR()),
+                        performer = listOf(Reference(reference = "GHI123".asFHIR())),
+                        product = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "product".asFHIR())),
+                        dailyAmount = SimpleQuantity(value = Decimal(1.1)),
+                        quantity = SimpleQuantity(value = Decimal(2.2)),
+                        description = "Description".asFHIR()
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninCarePlan.validate(carePlan, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR R4_CRPLNACT_001: Provide a reference or detail, not both @ CarePlan.activity[0]",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `transforms care-plan activity with reference instead of detail`() {
+        val carePlan = CarePlan(
+            id = Id("12345"),
+            status = RequestStatus.DRAFT.asCode(),
+            intent = CarePlanIntent.OPTION.asCode(),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                            code = Code("assess-plan")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            activity = listOf(
+                CarePlanActivity(
+                    id = "67890".asFHIR(),
+                    extension = listOf(
+                        Extension(
+                            url = Uri("http://localhost/extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
+                        )
+                    ),
+                    modifierExtension = listOf(
+                        Extension(
+                            url = Uri("http://localhost/modifier-extension"),
+                            value = DynamicValue(DynamicValueType.INTEGER, FHIRInteger(1))
+                        )
+                    ),
+                    outcomeCodeableConcept = listOf(
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = Uri("http://terminology.hl7.org/CodeSystem/diagnosis-role"),
+                                    code = Code("DD"),
+                                    display = "Discharge diagnosis".asFHIR()
+                                )
+                            )
+                        )
+                    ),
+                    outcomeReference = listOf(
+                        Reference(reference = "outcome".asFHIR())
+                    ),
+                    progress = listOf(
+                        Annotation(text = Markdown("123"))
+                    ),
+                    reference = Reference(reference = "reference".asFHIR()),
+                )
+            )
+        )
+
+        val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
+        validation.alertIfErrors()
+        transformed!!
+
+        assertEquals("CarePlan", transformed.resourceType)
+        assertEquals(Id(value = "12345"), transformed.id)
+        assertEquals(
+            Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value))),
+            transformed.meta
+        )
+        assertNull(transformed.implicitRules)
+        assertNull(transformed.language)
+        assertNull(transformed.text)
+        assertEquals(listOf<ContainedResource>(), transformed.contained)
+        assertEquals(listOf<Extension>(), transformed.modifierExtension)
+        assertEquals(
+            listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            transformed.identifier
+        )
+        assertEquals(RequestStatus.DRAFT.asCode(), transformed.status)
+        assertEquals(CarePlanIntent.OPTION.asCode(), transformed.intent)
+        assertEquals(
+            listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                            code = Code("assess-plan")
+                        )
+                    )
+                )
+            ),
+            transformed.category
+        )
+        assertEquals(Reference(reference = "Patient/1234".asFHIR()), transformed.subject)
     }
 
     @Test

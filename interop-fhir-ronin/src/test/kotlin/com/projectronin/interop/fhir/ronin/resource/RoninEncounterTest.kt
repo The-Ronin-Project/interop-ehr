@@ -7,12 +7,6 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Duration
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
-import com.projectronin.interop.fhir.r4.datatype.EncounterClassHistory
-import com.projectronin.interop.fhir.r4.datatype.EncounterDiagnosis
-import com.projectronin.interop.fhir.r4.datatype.EncounterHospitalization
-import com.projectronin.interop.fhir.r4.datatype.EncounterLocation
-import com.projectronin.interop.fhir.r4.datatype.EncounterParticipant
-import com.projectronin.interop.fhir.r4.datatype.EncounterStatusHistory
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
@@ -29,6 +23,12 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Encounter
+import com.projectronin.interop.fhir.r4.resource.EncounterClassHistory
+import com.projectronin.interop.fhir.r4.resource.EncounterDiagnosis
+import com.projectronin.interop.fhir.r4.resource.EncounterHospitalization
+import com.projectronin.interop.fhir.r4.resource.EncounterLocation
+import com.projectronin.interop.fhir.r4.resource.EncounterParticipant
+import com.projectronin.interop.fhir.r4.resource.EncounterStatusHistory
 import com.projectronin.interop.fhir.r4.valueset.EncounterLocationStatus
 import com.projectronin.interop.fhir.r4.valueset.EncounterStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus

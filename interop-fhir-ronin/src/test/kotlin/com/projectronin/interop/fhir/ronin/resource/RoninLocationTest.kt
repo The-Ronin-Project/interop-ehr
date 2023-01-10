@@ -10,8 +10,6 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.Identifier
-import com.projectronin.interop.fhir.r4.datatype.LocationHoursOfOperation
-import com.projectronin.interop.fhir.r4.datatype.LocationPosition
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
 import com.projectronin.interop.fhir.r4.datatype.Period
@@ -28,6 +26,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.r4.resource.LocationHoursOfOperation
+import com.projectronin.interop.fhir.r4.resource.LocationPosition
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.DayOfWeek

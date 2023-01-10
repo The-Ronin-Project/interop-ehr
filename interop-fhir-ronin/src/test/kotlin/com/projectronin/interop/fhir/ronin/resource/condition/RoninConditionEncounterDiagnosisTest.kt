@@ -5,8 +5,6 @@ import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Annotation
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
-import com.projectronin.interop.fhir.r4.datatype.ConditionEvidence
-import com.projectronin.interop.fhir.r4.datatype.ConditionStage
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
@@ -24,6 +22,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Condition
+import com.projectronin.interop.fhir.r4.resource.ConditionEvidence
+import com.projectronin.interop.fhir.r4.resource.ConditionStage
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.validate.resource.R4ConditionValidator
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus

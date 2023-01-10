@@ -1,6 +1,6 @@
 package com.projectronin.interop.fhir.ronin
 
-import com.projectronin.interop.fhir.r4.datatype.Element
+import com.projectronin.interop.fhir.r4.element.Element
 
 /**
  * True when any [Element] in the [List] contains a data absent reason in its extensions.

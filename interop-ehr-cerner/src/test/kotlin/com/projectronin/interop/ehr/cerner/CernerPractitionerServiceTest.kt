@@ -3,8 +3,8 @@ package com.projectronin.interop.ehr.cerner
 import com.projectronin.interop.common.http.exceptions.ClientFailureException
 import com.projectronin.interop.common.http.exceptions.ServerFailureException
 import com.projectronin.interop.ehr.cerner.client.CernerClient
-import com.projectronin.interop.fhir.r4.datatype.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Bundle
+import com.projectronin.interop.fhir.r4.resource.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.tenant.config.model.Tenant

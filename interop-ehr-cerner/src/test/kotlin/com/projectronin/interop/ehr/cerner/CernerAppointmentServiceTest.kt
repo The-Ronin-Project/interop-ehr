@@ -4,10 +4,10 @@ import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.ehr.cerner.client.RepeatingParameter
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
-import com.projectronin.interop.fhir.r4.datatype.Participant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.resource.Bundle
+import com.projectronin.interop.fhir.r4.resource.Participant
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse

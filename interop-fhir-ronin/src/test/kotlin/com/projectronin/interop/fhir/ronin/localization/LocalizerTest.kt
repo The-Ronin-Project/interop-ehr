@@ -3,13 +3,8 @@ package com.projectronin.interop.fhir.ronin.localization
 import com.projectronin.interop.fhir.r4.datatype.Address
 import com.projectronin.interop.fhir.r4.datatype.Annotation
 import com.projectronin.interop.fhir.r4.datatype.Attachment
-import com.projectronin.interop.fhir.r4.datatype.AvailableTime
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
-import com.projectronin.interop.fhir.r4.datatype.Communication
-import com.projectronin.interop.fhir.r4.datatype.ConditionEvidence
-import com.projectronin.interop.fhir.r4.datatype.ConditionStage
-import com.projectronin.interop.fhir.r4.datatype.Contact
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.Dosage
 import com.projectronin.interop.fhir.r4.datatype.DoseAndRate
@@ -21,13 +16,7 @@ import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
-import com.projectronin.interop.fhir.r4.datatype.NotAvailable
-import com.projectronin.interop.fhir.r4.datatype.ObservationComponent
-import com.projectronin.interop.fhir.r4.datatype.ObservationReferenceRange
-import com.projectronin.interop.fhir.r4.datatype.Participant
-import com.projectronin.interop.fhir.r4.datatype.PatientLink
 import com.projectronin.interop.fhir.r4.datatype.Period
-import com.projectronin.interop.fhir.r4.datatype.Qualification
 import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.Range
 import com.projectronin.interop.fhir.r4.datatype.Ratio
@@ -50,6 +39,17 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.UnsignedInt
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.Url
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.fhir.r4.resource.AvailableTime
+import com.projectronin.interop.fhir.r4.resource.Communication
+import com.projectronin.interop.fhir.r4.resource.ConditionEvidence
+import com.projectronin.interop.fhir.r4.resource.ConditionStage
+import com.projectronin.interop.fhir.r4.resource.NotAvailable
+import com.projectronin.interop.fhir.r4.resource.ObservationComponent
+import com.projectronin.interop.fhir.r4.resource.ObservationReferenceRange
+import com.projectronin.interop.fhir.r4.resource.Participant
+import com.projectronin.interop.fhir.r4.resource.PatientContact
+import com.projectronin.interop.fhir.r4.resource.PatientLink
+import com.projectronin.interop.fhir.r4.resource.Qualification
 import com.projectronin.interop.fhir.r4.valueset.AddressType
 import com.projectronin.interop.fhir.r4.valueset.AddressUse
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
@@ -597,7 +597,7 @@ class LocalizerTest {
 
     @Test
     fun `returns current contact if contact has no localizable information`() {
-        val contact = Contact(
+        val contact = PatientContact(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -613,7 +613,7 @@ class LocalizerTest {
 
     @Test
     fun `localizes contact with localizable extension`() {
-        val contact = Contact(
+        val contact = PatientContact(
             id = "12345".asFHIR(),
             extension = localizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -626,7 +626,7 @@ class LocalizerTest {
         val localizedContact = localizer.localize(contact, tenant)
         assertNotEquals(localizedContact, contact)
 
-        val expectedContact = Contact(
+        val expectedContact = PatientContact(
             id = "12345".asFHIR(),
             extension = localizedExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -641,7 +641,7 @@ class LocalizerTest {
 
     @Test
     fun `localizes contact with localizable modifierExtension`() {
-        val contact = Contact(
+        val contact = PatientContact(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = localizableExtensions,
@@ -654,7 +654,7 @@ class LocalizerTest {
         val localizedContact = localizer.localize(contact, tenant)
         assertNotEquals(localizedContact, contact)
 
-        val expectedContact = Contact(
+        val expectedContact = PatientContact(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = localizedExtensions,
@@ -669,7 +669,7 @@ class LocalizerTest {
 
     @Test
     fun `localizes contact with localizable name`() {
-        val contact = Contact(
+        val contact = PatientContact(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -682,7 +682,7 @@ class LocalizerTest {
         val localizedContact = localizer.localize(contact, tenant)
         assertNotEquals(localizedContact, contact)
 
-        val expectedContact = Contact(
+        val expectedContact = PatientContact(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -697,7 +697,7 @@ class LocalizerTest {
 
     @Test
     fun `localizes contact with localizable telecom`() {
-        val contact = Contact(
+        val contact = PatientContact(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -710,7 +710,7 @@ class LocalizerTest {
         val localizedContact = localizer.localize(contact, tenant)
         assertNotEquals(localizedContact, contact)
 
-        val expectedContact = Contact(
+        val expectedContact = PatientContact(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -725,7 +725,7 @@ class LocalizerTest {
 
     @Test
     fun `localizes contact with localizable organization`() {
-        val contact = Contact(
+        val contact = PatientContact(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -738,7 +738,7 @@ class LocalizerTest {
         val localizedContact = localizer.localize(contact, tenant)
         assertNotEquals(localizedContact, contact)
 
-        val expectedContact = Contact(
+        val expectedContact = PatientContact(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -753,7 +753,7 @@ class LocalizerTest {
 
     @Test
     fun `localizes contact with localizable period`() {
-        val contact = Contact(
+        val contact = PatientContact(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -766,7 +766,7 @@ class LocalizerTest {
         val localizedContact = localizer.localize(contact, tenant)
         assertNotEquals(localizedContact, contact)
 
-        val expectedContact = Contact(
+        val expectedContact = PatientContact(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -781,7 +781,7 @@ class LocalizerTest {
 
     @Test
     fun `localizes contact with all localizable values`() {
-        val contact = Contact(
+        val contact = PatientContact(
             id = "12345".asFHIR(),
             extension = localizableExtensions,
             modifierExtension = localizableExtensions,
@@ -794,7 +794,7 @@ class LocalizerTest {
         val localizedContact = localizer.localize(contact, tenant)
         assertNotEquals(localizedContact, contact)
 
-        val expectedContact = Contact(
+        val expectedContact = PatientContact(
             id = "12345".asFHIR(),
             extension = localizedExtensions,
             modifierExtension = localizedExtensions,
@@ -809,7 +809,7 @@ class LocalizerTest {
 
     @Test
     fun `localizes contact with null name, organization and period`() {
-        val contact = Contact(
+        val contact = PatientContact(
             id = "12345".asFHIR(),
             extension = localizableExtensions,
             modifierExtension = localizableExtensions,
@@ -819,7 +819,7 @@ class LocalizerTest {
         val localizedContact = localizer.localize(contact, tenant)
         assertNotEquals(localizedContact, contact)
 
-        val expectedContact = Contact(
+        val expectedContact = PatientContact(
             id = "12345".asFHIR(),
             extension = localizedExtensions,
             modifierExtension = localizedExtensions,

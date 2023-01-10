@@ -2,8 +2,8 @@ package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.ehr.EncounterService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
-import com.projectronin.interop.fhir.r4.datatype.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Bundle
+import com.projectronin.interop.fhir.r4.resource.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body

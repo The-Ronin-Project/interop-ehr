@@ -55,6 +55,8 @@ class EpicVendorFactoryTest {
             fun ociClient(): OCIClient = mockk()
 
             @Bean
+            @Qualifier("datalake")
+            fun datalakePublishService(): Database = mockk()
             fun taskExecutor(): ThreadPoolTaskExecutor = mockk(relaxed = true)
         }
 

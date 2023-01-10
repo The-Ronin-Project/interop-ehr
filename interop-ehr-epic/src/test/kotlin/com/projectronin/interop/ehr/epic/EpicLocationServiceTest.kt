@@ -2,8 +2,8 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.LocationService
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.fhir.r4.datatype.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Bundle
+import com.projectronin.interop.fhir.r4.resource.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
