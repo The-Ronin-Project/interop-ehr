@@ -31,7 +31,7 @@ sealed interface Vendor {
     /**
      * The client ID associated to this vendor.
      */
-    val clientId: String
+    val clientId: String?
 
     /**
      * The authentication configuration for this vendor.

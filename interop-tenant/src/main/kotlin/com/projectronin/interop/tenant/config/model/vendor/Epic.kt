@@ -18,7 +18,7 @@ import com.projectronin.interop.tenant.config.model.EpicAuthenticationConfig
  */
 @JsonTypeName("EPIC")
 data class Epic(
-    override val clientId: String,
+    override val clientId: String?,
     override val authenticationConfig: EpicAuthenticationConfig,
     override val serviceEndpoint: String,
     override val instanceName: String,

@@ -7,7 +7,7 @@ import com.projectronin.interop.tenant.config.model.CernerAuthenticationConfig
 @JsonTypeName("CERNER")
 data class Cerner(
     override val instanceName: String,
-    override val clientId: String,
+    override val clientId: String?,
     override val authenticationConfig: CernerAuthenticationConfig,
     override val serviceEndpoint: String,
     val patientMRNSystem: String,

@@ -1,0 +1,3 @@
+databaseChangeLog:
+  - include:
+      file: ehr/db/changelog/ehr/io_ehr-05.yaml

@@ -1,0 +1,16 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-ehr-remove-client-constraint
+      author: Mike Esposito
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - changeSetExecuted:
+                id: io-ehr-remove-client-constraint
+                changeLogFile: io_ehr-05.yaml
+                author: Mike Esposito
+      changes:
+        - dropNotNullConstraint:
+            columnName: client_id
+            tableName: io_ehr
+            columnDataType: java.sql.Types.VARCHAR(128)
