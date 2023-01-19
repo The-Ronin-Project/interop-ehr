@@ -118,14 +118,7 @@ class EpicAppointmentTest {
 
     @Test
     fun `check that computed fields return null when not returned`() {
-        val appointment = EpicAppointment(
-            appointmentDuration = "30",
-            appointmentStartTime = "3:30 PM",
-            appointmentStatus = "No Show",
-            date = "4/30/2015",
-            patientName = "Test Name",
-            visitTypeName = "Test visit type",
-        )
+        val appointment = EpicAppointment()
 
         assertNull(appointment.patientId)
     }
@@ -245,5 +238,17 @@ class EpicAppointmentTest {
         assertThrows<NoSuchElementException> {
             appointment.id
         }
+    }
+
+    @Test
+    fun `can deserialize from JSON if Epic gives us a bunch of missing fields`() {
+        val json = """
+            {
+            }
+        """.trimIndent()
+        val appointment = JacksonManager.objectMapper.readValue<EpicAppointment>(json)
+
+        assertEquals("", appointment.appointmentDuration)
+        assertEquals("", appointment.date)
     }
 }

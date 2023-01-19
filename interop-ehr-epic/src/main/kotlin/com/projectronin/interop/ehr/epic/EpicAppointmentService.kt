@@ -174,10 +174,10 @@ class EpicAppointmentService(
         val patientFhirIdResponse = patientService.getPatientsFHIRIds(
             tenant,
             tenant.vendorAs<Epic>().patientInternalSystem,
-            getAppointmentsResponse.appointments.map { it.patientId!! }.toSet().toList() // Make Id list unique
+            getAppointmentsResponse.errorOrAppointments().map { it.patientId!! }.toSet().toList() // Make Id list unique
         )
 
-        val patientFhirIdToAppointments = getAppointmentsResponse.appointments.filter {
+        val patientFhirIdToAppointments = getAppointmentsResponse.errorOrAppointments().filter {
             val patient = patientFhirIdResponse[it.patientId]
             if (patient == null) {
                 logger.warn { "FHIR ID not found for patient ${it.patientId}" }

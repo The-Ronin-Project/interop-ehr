@@ -950,7 +950,7 @@ class EpicAppointmentServiceTest {
             )
         } returns httpResponse
 
-        val allProviders = validOldPatientAppointmentSearchResponse.appointments.flatMap { it.providers }
+        val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
@@ -1009,7 +1009,7 @@ class EpicAppointmentServiceTest {
             )
         } returns httpResponse
 
-        val allProviders = validOldPatientAppointmentSearchResponse.appointments.flatMap { it.providers }
+        val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
 
         // mock Epic providers with no identifiers
@@ -1097,7 +1097,7 @@ class EpicAppointmentServiceTest {
             )
         } returns httpResponse
 
-        val allProviders = validOldPatientAppointmentSearchResponse.appointments.flatMap { it.providers }
+        val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         val mockLocationIDs = allProviders.associateWith { prov ->
@@ -1191,7 +1191,7 @@ class EpicAppointmentServiceTest {
             )
         } returns httpResponse
 
-        val allProviders = validOldPatientAppointmentSearchResponse.appointments.flatMap { it.providers }
+        val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
@@ -1301,7 +1301,7 @@ class EpicAppointmentServiceTest {
             )
         } returns httpResponse
 
-        val allProviders = validOldPatientAppointmentSearchResponse.appointments.flatMap { it.providers }
+        val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
         mockEpicProvidersToFhirPractitioners(tenant, allProviders, emptyMap())
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
@@ -1411,7 +1411,7 @@ class EpicAppointmentServiceTest {
             )
         } returns httpResponse
 
-        val allProviders = validOldPatientAppointmentSearchResponse.appointments.flatMap { it.providers }
+        val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders, emptyMap())
@@ -1505,7 +1505,7 @@ class EpicAppointmentServiceTest {
             )
         } returns httpResponse
 
-        val allProviders = validOldPatientAppointmentSearchResponse.appointments.flatMap { it.providers }
+        val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
@@ -1669,7 +1669,7 @@ class EpicAppointmentServiceTest {
             "     Z4575" to GetFHIRIDResponse("fhirID4")
         )
 
-        val allProviders = validProviderAppointmentSearchResponse.appointments.flatMap { it.providers }
+        val allProviders = validProviderAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(6, allProviders.size)
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
@@ -1760,7 +1760,7 @@ class EpicAppointmentServiceTest {
             "     Z4575" to GetFHIRIDResponse("fhirID4")
         )
 
-        val allProviders = validProviderAppointmentSearchResponse.appointments.flatMap { it.providers }
+        val allProviders = validProviderAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(6, allProviders.size)
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
