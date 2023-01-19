@@ -13,7 +13,9 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.encodeURLParameter
 import mu.KotlinLogging
+import org.springframework.stereotype.Component
 
+@Component
 class CernerClient(
     private val client: HttpClient,
     private val cernerAuthenticationService: CernerAuthenticationService
@@ -23,7 +25,8 @@ class CernerClient(
     suspend fun get(tenant: Tenant, urlPart: String, parameters: Map<String, Any?> = mapOf()): HttpResponse {
         logger.debug { "Started GET call to tenant: ${tenant.mnemonic}" }
 
-        val authentication = cernerAuthenticationService.getAuthentication(tenant) ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
+        val authentication = cernerAuthenticationService.getAuthentication(tenant)
+            ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
         val requestUrl = tenant.vendor.serviceEndpoint + urlPart
 
         val response: HttpResponse = client.request("Cerner Organization: ${tenant.name}", requestUrl) { requestedUrl ->
@@ -46,6 +49,7 @@ class CernerClient(
                                     }
                                 )
                             }
+
                             is RepeatingParameter -> url.parameters.appendAll(key, value.values)
                             else -> parameter(key, value)
                         }
