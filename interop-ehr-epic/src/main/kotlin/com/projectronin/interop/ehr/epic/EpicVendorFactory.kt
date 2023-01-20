@@ -20,6 +20,7 @@ class EpicVendorFactory(
     override val locationService: EpicLocationService,
     override val medicationService: EpicMedicationService,
     override val medicationStatementService: EpicMedicationStatementService,
+    override val medicationRequestService: EpicMedicationRequestService,
 ) : VendorFactory {
     override val vendorType: VendorType
         get() = VendorType.EPIC

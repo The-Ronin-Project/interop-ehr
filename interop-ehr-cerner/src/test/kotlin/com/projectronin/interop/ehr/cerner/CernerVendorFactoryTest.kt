@@ -103,4 +103,9 @@ class CernerVendorFactoryTest {
     fun `returns NotImplementedError for MedicationStatementService`() {
         assertThrows<NotImplementedError> { vendorFactory.medicationStatementService }
     }
+
+    @Test
+    fun `returns NotImplementedError for MedicationRequestService`() {
+        assertThrows<NotImplementedError> { vendorFactory.medicationRequestService }
+    }
 }

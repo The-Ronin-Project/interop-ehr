@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr.cerner
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.IdentifierService
 import com.projectronin.interop.ehr.LocationService
+import com.projectronin.interop.ehr.MedicationRequestService
 import com.projectronin.interop.ehr.MedicationService
 import com.projectronin.interop.ehr.MedicationStatementService
 import com.projectronin.interop.ehr.MessageService
@@ -36,5 +37,7 @@ class CernerVendorFactory(
     override val medicationService: MedicationService
         get() = TODO("Not yet implemented")
     override val medicationStatementService: MedicationStatementService
+        get() = TODO("Not yet implemented")
+    override val medicationRequestService: MedicationRequestService
         get() = TODO("Not yet implemented")
 }

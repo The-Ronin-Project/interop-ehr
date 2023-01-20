@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 /**
- * Service providing access to Encounters within Epic.
+ * Service providing access to Encounters within Cerner.
  */
 @Component
 class CernerEncounterService(cernerClient: CernerClient) : EncounterService, CernerFHIRService<Encounter>(cernerClient) {
