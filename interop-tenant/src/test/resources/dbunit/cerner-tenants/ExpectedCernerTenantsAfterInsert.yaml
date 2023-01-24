@@ -32,6 +32,7 @@ io_tenant_cerner:
   - io_tenant_id: 1001
     service_endpoint: "newServiceEndpoints"
     mrn_system: "mrnSystem"
+    auth_endpoint: "newAuthEndpoint"
 
 io_tenant_epic:
   - io_tenant_id: 999

@@ -7,4 +7,5 @@ interface CernerTenantDO : EHRTenantDO, Entity<CernerTenantDO> {
 
     var serviceEndpoint: String
     var patientMRNSystem: String
+    var authEndpoint: String
 }

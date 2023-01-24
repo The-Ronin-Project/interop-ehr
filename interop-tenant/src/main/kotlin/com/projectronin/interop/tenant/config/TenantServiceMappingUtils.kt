@@ -104,7 +104,7 @@ private fun EpicTenantDO.toEpic(ehrDO: EhrDO): Epic {
 
 private fun CernerTenantDO.toCerner(ehrDO: EhrDO): Cerner {
     val authenticationConfig = CernerAuthenticationConfig(
-        authEndpoint = serviceEndpoint,
+        authEndpoint = authEndpoint,
         accountId = ehrDO.accountId!!,
         secret = ehrDO.secret!!,
     )
@@ -152,6 +152,7 @@ private fun Cerner.toCernerTenantDO(tenantID: Int): CernerTenantDO {
     return CernerTenantDO {
         tenantId = tenantID
         this.serviceEndpoint = this@toCernerTenantDO.serviceEndpoint
+        this.authEndpoint = this@toCernerTenantDO.authenticationConfig.authEndpoint
         patientMRNSystem = this@toCernerTenantDO.patientMRNSystem
     }
 }

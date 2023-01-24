@@ -28,7 +28,9 @@ class CernerTenantDAOTest {
         assertEquals(1002, cernerTenant?.tenantId)
         assertEquals("https://localhost:8080/", cernerTenant?.serviceEndpoint)
         assertEquals("urn:oid:mrn.system", cernerTenant?.patientMRNSystem)
+        assertEquals("https://localhost:8080/", cernerTenant?.authEndpoint)
     }
+
     @Test
     @DataSet(value = ["/dbunit/cerner-tenants/CernerTenants.yaml"], cleanAfter = true)
     fun `no tenants found`() {
@@ -58,11 +60,13 @@ class CernerTenantDAOTest {
             tenantId = tenant.id
             serviceEndpoint = "newServiceEndpoints"
             patientMRNSystem = "mrnSystem"
+            authEndpoint = "newAuthEndpoint"
         }
 
         val result = dao.insert(testobj)
         assertEquals(testobj.serviceEndpoint, result.serviceEndpoint)
         assertEquals(testobj.patientMRNSystem, result.patientMRNSystem)
+        assertEquals(testobj.authEndpoint, result.authEndpoint)
     }
 
     @Test
@@ -88,6 +92,7 @@ class CernerTenantDAOTest {
             tenantId = tenant.id
             serviceEndpoint = "newServiceEndpoint"
             patientMRNSystem = "mrnSystem"
+            authEndpoint = "newAuthEndpoint"
         }
         val result = dao.update(updated)
         assertNotNull(result)

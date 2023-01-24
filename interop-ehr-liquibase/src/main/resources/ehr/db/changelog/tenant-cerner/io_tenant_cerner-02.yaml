@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-cerner-add-auth-endpoint
+      author: Mike Esposito
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_tenant_cerner
+                columnName: auth_endpoint
+      changes:
+        - addColumn:
+            tableName: io_tenant_cerner
+            columns:
+              - column:
+                  name: auth_endpoint
+                  type: java.sql.Types.VARCHAR(256)
+                  constraints:
+                    nullable: false

@@ -9,4 +9,5 @@ object CernerTenantDOs : Table<CernerTenantDO>("io_tenant_cerner") {
     var tenantId = int("io_tenant_id").bindTo { it.tenantId }
     val serviceEndpoint = varchar("service_endpoint").bindTo { it.serviceEndpoint }
     val patientMRNSystem = varchar("mrn_system").bindTo { it.patientMRNSystem }
+    val authEndpoint = varchar("auth_endpoint").bindTo { it.authEndpoint }
 }

@@ -27,6 +27,7 @@ class CernerTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTen
             set(it.tenantId, cernerTenant.tenantId)
             set(it.serviceEndpoint, cernerTenant.serviceEndpoint)
             set(it.patientMRNSystem, cernerTenant.patientMRNSystem)
+            set(it.authEndpoint, cernerTenant.authEndpoint)
         }
         val cernerTenants = database.from(CernerTenantDOs)
             .select()
@@ -43,6 +44,7 @@ class CernerTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTen
         return database.update(CernerTenantDOs) {
             set(it.serviceEndpoint, cernerTenant.serviceEndpoint)
             set(it.patientMRNSystem, cernerTenant.patientMRNSystem)
+            set(it.authEndpoint, cernerTenant.authEndpoint)
             where {
                 it.tenantId eq cernerTenant.tenantId
             }

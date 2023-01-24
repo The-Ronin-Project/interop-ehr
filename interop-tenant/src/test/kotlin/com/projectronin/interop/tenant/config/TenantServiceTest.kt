@@ -104,6 +104,7 @@ class TenantServiceTest {
     private val standardCernerTenantDO = mockk<CernerTenantDO> {
         every { tenantId } returns 3
         every { serviceEndpoint } returns "http://localhost/"
+        every { authEndpoint } returns "http://localhost/"
         every { patientMRNSystem } returns "mrnSystemExample"
     }
 
