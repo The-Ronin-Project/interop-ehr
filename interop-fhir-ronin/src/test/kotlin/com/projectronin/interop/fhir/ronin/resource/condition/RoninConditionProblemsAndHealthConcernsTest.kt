@@ -42,6 +42,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -259,6 +260,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
+    @Disabled("Coding Validation is currently disabled due to lack of mapping content.")
     fun `validate fails if code coding is empty`() {
         val condition = Condition(
             id = Id("12345"),
@@ -343,6 +345,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
+    @Disabled("Coding Validation is currently disabled due to lack of mapping content.")
     fun `validate fails if not a qualifying category and no code coding`() {
         val condition = Condition(
             id = Id("12345"),
@@ -445,6 +448,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
+    @Disabled("Coding Validation is currently disabled due to lack of mapping content.")
     fun `validate fails with missing code coding code`() {
         val condition = Condition(
             id = Id("12345"),
@@ -492,6 +496,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
+    @Disabled("Coding Validation is currently disabled due to lack of mapping content.")
     fun `validate fails with missing code coding system`() {
         val condition = Condition(
             id = Id("12345"),
@@ -539,6 +544,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
+    @Disabled("Coding Validation is currently disabled due to lack of mapping content.")
     fun `validate fails with missing code coding display`() {
         val condition = Condition(
             id = Id("12345"),
@@ -656,6 +662,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
+    @Disabled("Coding Validation is currently disabled due to lack of mapping content.")
     fun `transform fails for condition with no code coding display`() {
         val condition = Condition(
             id = Id("12345"),
@@ -1137,5 +1144,88 @@ class RoninConditionProblemsAndHealthConcernsTest {
         assertEquals(listOf<ConditionStage>(), transformed.stage)
         assertEquals(listOf<ConditionEvidence>(), transformed.evidence)
         assertEquals(listOf<Annotation>(), transformed.note)
+    }
+
+    @Test
+    // Note: This test may be temporary while we are waiting on concept mapping data.
+    fun `validate succeeds with partial code codings`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        display = "Non-small cell lung cancer".asFHIR()
+                    ),
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                    ),
+                    Coding(
+                        code = Code("254637007"),
+                        display = "Non-small cell lung cancer".asFHIR()
+                    )
+                )
+            ),
+            subject = Reference(display = "reference".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        profile.validate(condition, null).alertIfErrors()
+    }
+
+    @Test
+    // Note: This test may be temporary while we are waiting on concept mapping data.
+    fun `validate succeeds with empty code codings`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
+            ),
+            code = CodeableConcept(),
+            subject = Reference(display = "reference".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        profile.validate(condition, null).alertIfErrors()
     }
 }
