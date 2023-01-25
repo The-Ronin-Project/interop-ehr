@@ -41,9 +41,8 @@ class RoninConditionProblemsAndHealthConcerns(normalizer: Normalizer, localizer:
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, validation)
 
-            requireCodeableConcept("code", element.code, parentContext, this)
-
-            requireCodeCoding("code", element.code?.coding, parentContext, this)
+            // Note: Disabled coding validation due to lack of mappings.
+            // requireCodeableConcept("code", element.code, parentContext, this)
         }
     }
 
