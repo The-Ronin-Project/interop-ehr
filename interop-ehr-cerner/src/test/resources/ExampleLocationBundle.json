@@ -1,0 +1,129 @@
+{
+  "resourceType": "Bundle",
+  "id": "55f091a0-cc86-421d-8236-5c746121ea94",
+  "type": "searchset",
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Location?_id=20573078%2C31098367"
+    }
+  ],
+  "entry": [
+    {
+      "fullUrl": "https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Location/20573078",
+      "resource": {
+        "resourceType": "Location",
+        "id": "20573078",
+        "meta": {
+          "versionId": "20",
+          "lastUpdated": "2018-05-22T16:42:00Z"
+        },
+        "text": {
+          "status": "generated",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Location</b></p><p><b>Name</b>: Model Behavioral Health Clinic</p><p><b>Alias</b>: MX BH CL</p><p><b>Managing Organization</b>: Model Behavioral Health Clinic</p><p><b>Physical Type</b>: Facility(s)</p><p><b>Status</b>: Active</p></div>"
+        },
+        "status": "active",
+        "name": "Model Behavioral Health Clinic",
+        "alias": [
+          "MX BH CL"
+        ],
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555 555 0001"
+          }
+        ],
+        "address": {
+          "use": "work",
+          "text": "1234 Main\nKansas City, MO 64111\nUS",
+          "line": [
+            "1234 Main"
+          ],
+          "city": "Kansas City",
+          "state": "MO",
+          "postalCode": "64111",
+          "country": "US"
+        },
+        "physicalType": {
+          "coding": [
+            {
+              "system": "https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/222",
+              "code": "783",
+              "display": "Facility(s)",
+              "userSelected": true
+            },
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+              "code": "si",
+              "display": "Site"
+            }
+          ],
+          "text": "Facility(s)"
+        },
+        "managingOrganization": {
+          "reference": "Organization/667844",
+          "display": "Model Behavioral Health Clinic"
+        }
+      }
+    },
+    {
+      "fullUrl": "https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Location/31098367",
+      "resource": {
+        "resourceType": "Location",
+        "id": "31098367",
+        "meta": {
+          "versionId": "9",
+          "lastUpdated": "2018-05-22T16:44:00Z"
+        },
+        "text": {
+          "status": "generated",
+          "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Location</b></p><p><b>Name</b>: Model Behavioral Health Hospital</p><p><b>Alias</b>: MX BH Hosp</p><p><b>Managing Organization</b>: Model Behavioral Health Hospital</p><p><b>Physical Type</b>: Facility(s)</p><p><b>Status</b>: Active</p></div>"
+        },
+        "status": "active",
+        "name": "Model Behavioral Health Hospital",
+        "alias": [
+          "MX BH Hosp"
+        ],
+        "mode": "instance",
+        "telecom": [
+          {
+            "system": "phone",
+            "value": "555 555 0003"
+          }
+        ],
+        "address": {
+          "use": "work",
+          "text": "23413 Southwest Trafficway\nKansas City, MO 64108\nUS",
+          "line": [
+            "23413 Southwest Trafficway"
+          ],
+          "city": "Kansas City",
+          "state": "MO",
+          "postalCode": "64108",
+          "country": "US"
+        },
+        "physicalType": {
+          "coding": [
+            {
+              "system": "https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/222",
+              "code": "783",
+              "display": "Facility(s)",
+              "userSelected": true
+            },
+            {
+              "system": "http://terminology.hl7.org/CodeSystem/location-physical-type",
+              "code": "si",
+              "display": "Site"
+            }
+          ],
+          "text": "Facility(s)"
+        },
+        "managingOrganization": {
+          "reference": "Organization/1054423",
+          "display": "Model Behavioral Health Hospital"
+        }
+      }
+    }
+  ]
+}
