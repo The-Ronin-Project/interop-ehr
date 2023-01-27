@@ -7,6 +7,7 @@ import com.projectronin.interop.ehr.MedicationService
 import com.projectronin.interop.ehr.MedicationStatementService
 import com.projectronin.interop.ehr.MessageService
 import com.projectronin.interop.ehr.ObservationService
+import com.projectronin.interop.ehr.OrganizationService
 import com.projectronin.interop.ehr.PractitionerRoleService
 import com.projectronin.interop.ehr.factory.VendorFactory
 import org.springframework.stereotype.Service
@@ -37,5 +38,7 @@ class CernerVendorFactory(
     override val medicationStatementService: MedicationStatementService
         get() = TODO("Not yet implemented")
     override val medicationRequestService: MedicationRequestService
+        get() = TODO("Not yet implemented")
+    override val organizationService: OrganizationService
         get() = TODO("Not yet implemented")
 }

@@ -10,6 +10,7 @@ import com.projectronin.interop.ehr.MedicationService
 import com.projectronin.interop.ehr.MedicationStatementService
 import com.projectronin.interop.ehr.MessageService
 import com.projectronin.interop.ehr.ObservationService
+import com.projectronin.interop.ehr.OrganizationService
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.PractitionerRoleService
 import com.projectronin.interop.ehr.PractitionerService
@@ -36,4 +37,5 @@ interface VendorFactory {
     val medicationService: MedicationService
     val medicationStatementService: MedicationStatementService
     val medicationRequestService: MedicationRequestService
+    val organizationService: OrganizationService
 }

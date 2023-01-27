@@ -1,0 +1,64 @@
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 1,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://appmarket.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/Organization?_id=e8wMbBzuMGvZrYASWBHiL8w3"
+    }
+  ],
+  "entry": [
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://appmarket.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/Organization/e8wMbBzuMGvZrYASWBHiL8w3"
+        }
+      ],
+      "fullUrl": "https://appmarket.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/Organization/e8wMbBzuMGvZrYASWBHiL8w3",
+      "resource": {
+        "resourceType": "Organization",
+        "id": "e8wMbBzuMGvZrYASWBHiL8w3",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "text": "FAC"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.112",
+            "value": "10501"
+          }
+        ],
+        "active": true,
+        "type": [
+          {
+            "coding": [
+              {
+                "system": "urn:oid:1.2.840.114350.1.13.0.1.7.10.696570.5002",
+                "code": "11",
+                "display": "Office"
+              }
+            ],
+            "text": "Office"
+          }
+        ],
+        "name": "EHS Clinic",
+        "address": [
+          {
+            "line": [
+              "124 Main Street"
+            ],
+            "city": "VERONA",
+            "state": "Wisconsin",
+            "postalCode": "53593-9179",
+            "country": "United States of America"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    }
+  ]
+}

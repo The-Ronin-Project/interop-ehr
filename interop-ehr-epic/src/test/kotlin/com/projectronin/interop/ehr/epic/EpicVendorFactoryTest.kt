@@ -26,6 +26,7 @@ class EpicVendorFactoryTest {
     private val medicationService = mockk<EpicMedicationService>()
     private val medicationStatementService = mockk<EpicMedicationStatementService>()
     private val medicationRequestService = mockk<EpicMedicationRequestService>()
+    private val organizationService = mockk<EpicOrganizationService>()
 
     private val vendorFactory =
         EpicVendorFactory(
@@ -41,6 +42,7 @@ class EpicVendorFactoryTest {
             medicationService,
             medicationStatementService,
             medicationRequestService,
+            organizationService
         )
 
     @Test
@@ -126,5 +128,10 @@ class EpicVendorFactoryTest {
     @Test
     fun `returns MedicationRequestService`() {
         assertEquals(medicationRequestService, vendorFactory.medicationRequestService)
+    }
+
+    @Test
+    fun `returns OrganizationService`() {
+        assertEquals(organizationService, vendorFactory.organizationService)
     }
 }
