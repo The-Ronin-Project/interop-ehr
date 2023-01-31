@@ -1,7 +1,6 @@
 package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.common.vendor.VendorType
-import com.projectronin.interop.ehr.IdentifierService
 import com.projectronin.interop.ehr.MedicationRequestService
 import com.projectronin.interop.ehr.MedicationService
 import com.projectronin.interop.ehr.MedicationStatementService
@@ -21,15 +20,14 @@ class CernerVendorFactory(
     override val practitionerService: CernerPractitionerService,
     override val appointmentService: CernerAppointmentService,
     override val conditionService: CernerConditionService,
-    override val locationService: CernerLocationService
+    override val locationService: CernerLocationService,
+    override val identifierService: CernerIdentifierService
 ) : VendorFactory {
     override val vendorType: VendorType = VendorType.CERNER
 
     override val messageService: MessageService
         get() = TODO("Not yet implemented")
     override val practitionerRoleService: PractitionerRoleService
-        get() = TODO("Not yet implemented")
-    override val identifierService: IdentifierService
         get() = TODO("Not yet implemented")
     override val observationService: ObservationService
         get() = TODO("Not yet implemented")
