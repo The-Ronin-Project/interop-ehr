@@ -17,6 +17,11 @@ abstract class CernerFHIRService<T : Resource<T>>(val cernerClient: CernerClient
     abstract val fhirURLSearchPart: String
     private val standardParameters: Map<String, Any> = mapOf("_count" to 20)
 
+    // Auth scopes required for this service. By default we set read, but if a service needs something different
+    // it can override these values.
+    open val readScope: Boolean = true
+    open val writeScope: Boolean = false
+
     @Trace
     override fun getByID(tenant: Tenant, resourceFHIRId: String): T {
         return runBlocking {
@@ -32,7 +37,7 @@ abstract class CernerFHIRService<T : Resource<T>>(val cernerClient: CernerClient
 
     internal fun getBundleWithPaging(
         tenant: Tenant,
-        parameters: Map<String, Any?>,
+        parameters: Map<String, Any?>
     ): Bundle {
         logger.info { "Get started for ${tenant.mnemonic}" }
 
@@ -59,7 +64,7 @@ abstract class CernerFHIRService<T : Resource<T>>(val cernerClient: CernerClient
     }
 
     protected fun mergeResponses(
-        responses: List<Bundle>,
+        responses: List<Bundle>
     ): Bundle {
         var bundle = responses.first()
         responses.subList(1, responses.size).forEach { bundle = mergeBundles(bundle, it) }
