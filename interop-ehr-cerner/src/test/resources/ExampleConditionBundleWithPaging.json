@@ -2,11 +2,11 @@
   "resourceType": "Bundle",
   "id": "9a115304-90d2-47d7-98c4-026f7fe1580e",
   "type": "searchset",
-  "total": 2,
+  "total": 6,
   "link": [
     {
-      "relation": "self",
-      "url": "https://fhir-ehr-code.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Condition?patient=12724066"
+      "relation": "next",
+      "url": "https://fhir-ehr-code.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Condition?NEXT"
     }
   ],
   "entry": [

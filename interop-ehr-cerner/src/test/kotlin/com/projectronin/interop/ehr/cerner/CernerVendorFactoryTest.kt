@@ -20,6 +20,7 @@ class CernerVendorFactoryTest {
     private val conditionService = mockk<CernerConditionService>()
     private val locationService = mockk<CernerLocationService>()
     private val identifierService = mockk<CernerIdentifierService>()
+    private val medicationStatementService = mockk<CernerMedicationStatementService>()
 
     private val vendorFactory =
         CernerVendorFactory(
@@ -28,7 +29,8 @@ class CernerVendorFactoryTest {
             appointmentService,
             conditionService,
             locationService,
-            identifierService
+            identifierService,
+            medicationStatementService
         )
 
     @Test
@@ -104,8 +106,8 @@ class CernerVendorFactoryTest {
     }
 
     @Test
-    fun `returns NotImplementedError for MedicationStatementService`() {
-        assertThrows<NotImplementedError> { vendorFactory.medicationStatementService }
+    fun `returns MedicationStatementService`() {
+        assertEquals(medicationStatementService, vendorFactory.medicationStatementService)
     }
 
     @Test

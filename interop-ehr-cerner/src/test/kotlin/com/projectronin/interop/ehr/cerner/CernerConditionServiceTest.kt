@@ -258,6 +258,7 @@ class CernerConditionServiceTest {
         val patientFhirId = "abc"
         val categoryToken = "$categorySystem|problem-list-item"
         val clinicalStatusToken = "$clinicalSystem|active"
+        val nextUrl = "https://fhir-ehr-code.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Condition?NEXT"
         val tenant =
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
@@ -285,7 +286,7 @@ class CernerConditionServiceTest {
         coEvery {
             cernerClient.get(
                 tenant,
-                "/Condition",
+                nextUrl,
             )
         } returns httpResponse
 
@@ -297,6 +298,6 @@ class CernerConditionServiceTest {
                 clinicalStatusToken
             )
 
-        assertEquals(6, list.size)
+        assertEquals(9, list.size)
     }
 }
