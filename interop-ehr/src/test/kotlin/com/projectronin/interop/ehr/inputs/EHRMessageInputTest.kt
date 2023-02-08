@@ -12,7 +12,7 @@ class EHRMessageInputTest {
         val actualInput =
             EHRMessageInput(
                 text = "Text",
-                patientMRN = "MRN",
+                patientFHIRID = "fhirID",
                 recipients = listOf(
                     EHRRecipient(
                         "ID",
@@ -22,9 +22,8 @@ class EHRMessageInputTest {
             )
 
         assertEquals("Text", actualInput.text)
-        assertEquals("MRN", actualInput.patientMRN)
         assertEquals("ID", actualInput.recipients[0].id)
-
+        assertEquals("fhirID", actualInput.patientFHIRID)
         val identifier = actualInput.recipients[0].identifier as IdentifierVendorIdentifier
         assertEquals("Ident1".asFHIR(), identifier.identifier.value)
     }

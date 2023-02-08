@@ -18,6 +18,7 @@ import io.opentracing.util.GlobalTracer
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
+import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
 
 /**
  * Service for facilitating sending messages to Epic.
@@ -25,7 +26,12 @@ import org.springframework.stereotype.Component
  * See: [SendMessage Documentation](https://apporchard.epic.com/Sandbox?api=384)
  */
 @Component
-class EpicMessageService(private val epicClient: EpicClient, private val providerPoolService: ProviderPoolService) :
+class EpicMessageService(
+    private val epicClient: EpicClient,
+    private val providerPoolService: ProviderPoolService,
+    private val patientService: AidboxPatientService,
+    private val identifierService: EpicIdentifierService
+) :
     MessageService {
     private val logger = KotlinLogging.logger { }
     private val sendMessageUrlPart = "/api/epic/2014/Common/Utility/SENDMESSAGE/Message"
@@ -36,8 +42,12 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
         if (vendor !is Epic) throw IllegalStateException("Tenant is not Epic vendor: ${tenant.mnemonic}")
         logger.info { "SendMessage started for ${tenant.mnemonic}" }
 
+        val patient = patientService.getPatientByFHIRId(tenant.mnemonic, messageInput.patientFHIRID)
+        val mrn = identifierService.getMRNIdentifier(tenant, patient.identifier)
+        val mrnValue = mrn.value?.value ?: throw VendorIdentifierNotFoundException("Failed to find a value on Patient's MRN")
+
         val sendMessageRequest =
-            translateMessageInput(messageInput, vendor.ehrUserId, vendor.messageType, tenant)
+            translateMessageInput(messageInput, vendor.ehrUserId, vendor.messageType, tenant, mrnValue)
 
         val span = GlobalTracer.get().activeSpan()
         span?.let {
@@ -73,9 +83,10 @@ class EpicMessageService(private val epicClient: EpicClient, private val provide
         userId: String,
         messageType: String,
         tenant: Tenant,
+        patientMRN: String
     ): SendMessageRequest {
         return SendMessageRequest(
-            patientID = messageInput.patientMRN,
+            patientID = patientMRN,
             patientIDType = (tenant.vendor as Epic).patientMRNTypeText,
             recipients = translateRecipients(messageInput.recipients, tenant),
             messageText = messageInput.text.split("\r\n", "\n").map { if (it.isEmpty()) " " else it },

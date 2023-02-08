@@ -27,7 +27,7 @@ import org.springframework.stereotype.Component
 import java.util.Base64
 
 @Component
-class CernerMessageService(cernerClient: CernerClient, private val patientService: CernerPatientService) :
+class CernerMessageService(cernerClient: CernerClient) :
     MessageService,
     CernerFHIRService<Communication>(cernerClient) {
     private val logger = KotlinLogging.logger { }
@@ -62,7 +62,6 @@ class CernerMessageService(cernerClient: CernerClient, private val patientServic
     }
 
     private fun createCommunication(tenant: Tenant, cerner: Cerner, messageInput: EHRMessageInput): Communication {
-        val patientFhirId = patientService.getPatientFHIRId(tenant, messageInput.patientMRN)
         val recipients = messageInput.recipients.map { Reference(reference = FHIRString("Practitioner/${it.id}")) }
         val sender = "Practitioner/${cerner.messagePractitioner}"
         val topic = cerner.messageTopic ?: "Ronin Symptoms Alert"
@@ -83,7 +82,7 @@ class CernerMessageService(cernerClient: CernerClient, private val patientServic
                 )
             ),
             priority = Code(priority),
-            subject = Reference(reference = FHIRString("Patient/$patientFhirId")),
+            subject = Reference(reference = FHIRString("Patient/${messageInput.patientFHIRID}")),
             topic = CodeableConcept(text = FHIRString(topic)),
             recipient = recipients,
             sender = Reference(reference = FHIRString(sender)),

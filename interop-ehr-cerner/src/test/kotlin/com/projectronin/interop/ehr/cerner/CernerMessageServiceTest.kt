@@ -33,8 +33,7 @@ import org.junit.jupiter.api.assertThrows
 
 class CernerMessageServiceTest {
     private val cernerClient = mockk<CernerClient>()
-    private val patientService = mockk<CernerPatientService>()
-    private val messageService = CernerMessageService(cernerClient, patientService)
+    private val messageService = CernerMessageService(cernerClient)
 
     @Test
     fun `write scope is enabled`() {
@@ -64,11 +63,9 @@ class CernerMessageServiceTest {
         )
         val messageInput = EHRMessageInput(
             text = "This is a simple message.",
-            "mrn",
+            "PatientFhirId",
             listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))))
         )
-
-        every { patientService.getPatientFHIRId(tenant, "mrn") } returns "PatientFhirId"
 
         val expectedCommunication = createCommunication(
             patientFhirId = "PatientFhirId",
@@ -100,11 +97,9 @@ class CernerMessageServiceTest {
         )
         val messageInput = EHRMessageInput(
             text = "This is a simple message.",
-            "mrn",
+            "PatientFhirId",
             listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))))
         )
-
-        every { patientService.getPatientFHIRId(tenant, "mrn") } returns "PatientFhirId"
 
         val expectedCommunication = createCommunication(
             patientFhirId = "PatientFhirId",
@@ -139,11 +134,9 @@ class CernerMessageServiceTest {
         )
         val messageInput = EHRMessageInput(
             text = "This is a simple message.",
-            "mrn",
+            "PatientFhirId",
             listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))))
         )
-
-        every { patientService.getPatientFHIRId(tenant, "mrn") } returns "PatientFhirId"
 
         val expectedCommunication = createCommunication(
             patientFhirId = "PatientFhirId",
@@ -175,14 +168,12 @@ class CernerMessageServiceTest {
         )
         val messageInput = EHRMessageInput(
             text = "This is a simple message.",
-            "mrn",
+            "PatientFhirId",
             listOf(
                 EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))),
                 EHRRecipient("Recipient2", IdVendorIdentifier(Id("Recipient2")))
             )
         )
-
-        every { patientService.getPatientFHIRId(tenant, "mrn") } returns "PatientFhirId"
 
         val expectedCommunication = createCommunication(
             patientFhirId = "PatientFhirId",
@@ -217,11 +208,9 @@ class CernerMessageServiceTest {
         )
         val messageInput = EHRMessageInput(
             text = "This is a simple message.",
-            "mrn",
+            "PatientFhirId",
             listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))))
         )
-
-        every { patientService.getPatientFHIRId(tenant, "mrn") } returns "PatientFhirId"
 
         val expectedCommunication = createCommunication(
             patientFhirId = "PatientFhirId",
@@ -253,11 +242,9 @@ class CernerMessageServiceTest {
         )
         val messageInput = EHRMessageInput(
             text = "This is a simple message.",
-            "mrn",
+            "PatientFhirId",
             listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))))
         )
-
-        every { patientService.getPatientFHIRId(tenant, "mrn") } returns "PatientFhirId"
 
         val expectedCommunication = createCommunication(
             patientFhirId = "PatientFhirId",
@@ -289,11 +276,9 @@ class CernerMessageServiceTest {
         )
         val messageInput = EHRMessageInput(
             text = "This is a simple message.",
-            "mrn",
+            "PatientFhirId",
             listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))))
         )
-
-        every { patientService.getPatientFHIRId(tenant, "mrn") } returns "PatientFhirId"
 
         val expectedCommunication = createCommunication(
             patientFhirId = "PatientFhirId",
