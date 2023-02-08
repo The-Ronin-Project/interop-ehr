@@ -4,7 +4,7 @@ on:
   workflow_run:
     workflows: [ Interop Tenant Tests ]
     types: [ completed ]
-    branches: [ master ]
+    branches: [ main ]
 
 jobs:
   get-info:

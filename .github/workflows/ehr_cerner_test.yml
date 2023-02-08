@@ -1,7 +1,7 @@
 name: Interop EHR Cerner Tests
 on:
   push:
-    branches: [ master, refactor ]
+    branches: [ main, refactor ]
   pull_request:
 
 jobs:
