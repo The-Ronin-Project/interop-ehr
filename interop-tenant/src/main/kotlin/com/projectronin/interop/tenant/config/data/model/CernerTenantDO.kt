@@ -8,4 +8,8 @@ interface CernerTenantDO : EHRTenantDO, Entity<CernerTenantDO> {
     var serviceEndpoint: String
     var patientMRNSystem: String
     var authEndpoint: String
+    var messagePractitioner: String
+    var messageTopic: String?
+    var messageCategory: String?
+    var messagePriority: String?
 }

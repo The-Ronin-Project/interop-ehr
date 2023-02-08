@@ -1,0 +1,34 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-cerner-add-message-details
+      author: Josh Smith
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_tenant_cerner
+                columnName: message_practitioner
+      changes:
+        - addColumn:
+            tableName: io_tenant_cerner
+            columns:
+              - column:
+                  name: message_practitioner
+                  type: java.sql.Types.VARCHAR(256)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: message_topic
+                  type: java.sql.Types.VARCHAR(256)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: message_category
+                  type: java.sql.Types.VARCHAR(256)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: message_priority
+                  type: java.sql.Types.VARCHAR(256)
+                  constraints:
+                    nullable: true

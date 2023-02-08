@@ -1,11 +1,14 @@
 package com.projectronin.interop.ehr.cerner.client
 
-import com.projectronin.interop.common.http.exceptions.ServerFailureException
+import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
 import com.projectronin.interop.ehr.cerner.auth.CernerAuthentication
-import com.projectronin.interop.ehr.cerner.auth.CernerAuthenticationService
 import com.projectronin.interop.ehr.cerner.createTestTenant
 import com.projectronin.interop.ehr.cerner.getClient
+import com.projectronin.interop.fhir.r4.resource.Communication
+import com.projectronin.interop.fhir.r4.valueset.EventStatus
+import com.projectronin.interop.fhir.util.asCode
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.HttpStatusCode
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
@@ -20,7 +23,7 @@ import org.junit.jupiter.api.assertThrows
 
 class CernerClientTest {
     private val patientResult = this::class.java.getResource("/ExamplePatientResponse.json")!!.readText()
-    private val authenticationBroker = mockk<CernerAuthenticationService>()
+    private val authenticationBroker = mockk<EHRAuthenticationBroker>()
     private val cernerClient = CernerClient(getClient(), authenticationBroker)
     private lateinit var mockWebServer: MockWebServer
 
@@ -37,27 +40,24 @@ class CernerClientTest {
 
     @Test
     fun `throws exception when unable to retrieve authentication during a get operation`() {
-        mockWebServer.enqueue(MockResponse().setResponseCode(500))
-
         val tenant =
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
                 secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
             )
-        val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
-        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns null
 
-        assertThrows<ServerFailureException> {
+        assertThrows<IllegalStateException> {
             runBlocking {
                 cernerClient.get(
                     tenant,
                     "/Patient/12724066",
-
                 )
             }
         }
     }
+
     @Test
     fun `ensure get operation returns correctly`() {
         mockWebServer.enqueue(
@@ -115,12 +115,65 @@ class CernerClientTest {
         }
         assertEquals(patientResult, response)
         val requestUrl = mockWebServer.takeRequest().path
-        println(requestUrl)
         assertEquals(true, requestUrl?.contains("/Patient/12724066"))
         assertEquals(true, requestUrl?.contains("simple=simple"))
         assertEquals(true, requestUrl?.contains("single=1,b,special%3D"))
         assertEquals(true, requestUrl?.contains("repeating=first"))
         assertEquals(true, requestUrl?.contains("repeating=second"))
         assertEquals(false, requestUrl?.contains("noValue"))
+    }
+
+    @Test
+    fun `throws exception when unable to retrieve authentication during a post operation`() {
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns null
+
+        val communication = Communication(
+            status = EventStatus.COMPLETED.asCode()
+        )
+
+        assertThrows<IllegalStateException> {
+            runBlocking {
+                cernerClient.post(tenant, "/Communication", communication)
+            }
+        }
+    }
+
+    @Test
+    fun `ensure post operation submits to server correctly`() {
+        mockWebServer.enqueue(
+            MockResponse().setResponseCode(HttpStatusCode.Created.value)
+        )
+
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+        val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Location.write", "")
+        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+
+        val communication = Communication(
+            status = EventStatus.COMPLETED.asCode()
+        )
+
+        val response = runBlocking {
+            cernerClient.post(tenant, "/Communication", communication)
+        }
+        assertEquals(HttpStatusCode.Created, response.status)
+
+        val request = mockWebServer.takeRequest()
+
+        assertEquals("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Communication", request.path)
+        assertEquals("Bearer accessToken", request.headers["Authorization"])
+        assertTrue(request.headers["Accept"]!!.contains("application/fhir+json"))
+        assertTrue(request.headers["Content-Type"]!!.startsWith("application/fhir+json"))
+        assertEquals("""{"resourceType":"Communication","status":"completed"}""", request.body.readUtf8())
     }
 }

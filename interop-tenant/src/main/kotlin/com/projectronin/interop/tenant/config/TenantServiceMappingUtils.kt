@@ -114,6 +114,10 @@ private fun CernerTenantDO.toCerner(ehrDO: EhrDO): Cerner {
         authenticationConfig = authenticationConfig,
         serviceEndpoint = serviceEndpoint,
         patientMRNSystem = patientMRNSystem,
+        messagePractitioner = messagePractitioner,
+        messageTopic = messageTopic,
+        messageCategory = messageCategory,
+        messagePriority = messagePriority
     )
 }
 
@@ -154,5 +158,9 @@ private fun Cerner.toCernerTenantDO(tenantID: Int): CernerTenantDO {
         this.serviceEndpoint = this@toCernerTenantDO.serviceEndpoint
         this.authEndpoint = this@toCernerTenantDO.authenticationConfig.authEndpoint
         patientMRNSystem = this@toCernerTenantDO.patientMRNSystem
+        messagePractitioner = this@toCernerTenantDO.messagePractitioner
+        messageTopic = this@toCernerTenantDO.messageTopic
+        messageCategory = this@toCernerTenantDO.messageCategory
+        messagePriority = this@toCernerTenantDO.messagePriority
     }
 }

@@ -16,6 +16,7 @@ import org.ktorm.dsl.update
 import org.ktorm.dsl.where
 import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Repository
+
 /**
  * Provides data access operations for Cerner tenant data models.
  */
@@ -28,6 +29,10 @@ class CernerTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTen
             set(it.serviceEndpoint, cernerTenant.serviceEndpoint)
             set(it.patientMRNSystem, cernerTenant.patientMRNSystem)
             set(it.authEndpoint, cernerTenant.authEndpoint)
+            set(it.messagePractitioner, cernerTenant.messagePractitioner)
+            set(it.messageTopic, cernerTenant.messageTopic)
+            set(it.messageCategory, cernerTenant.messageCategory)
+            set(it.messagePriority, cernerTenant.messagePriority)
         }
         val cernerTenants = database.from(CernerTenantDOs)
             .select()
@@ -45,6 +50,10 @@ class CernerTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTen
             set(it.serviceEndpoint, cernerTenant.serviceEndpoint)
             set(it.patientMRNSystem, cernerTenant.patientMRNSystem)
             set(it.authEndpoint, cernerTenant.authEndpoint)
+            set(it.messagePractitioner, cernerTenant.messagePractitioner)
+            set(it.messageTopic, cernerTenant.messageTopic)
+            set(it.messageCategory, cernerTenant.messageCategory)
+            set(it.messagePriority, cernerTenant.messagePriority)
             where {
                 it.tenantId eq cernerTenant.tenantId
             }

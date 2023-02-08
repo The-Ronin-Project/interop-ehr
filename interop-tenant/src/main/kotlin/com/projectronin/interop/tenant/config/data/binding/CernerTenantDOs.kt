@@ -10,4 +10,8 @@ object CernerTenantDOs : Table<CernerTenantDO>("io_tenant_cerner") {
     val serviceEndpoint = varchar("service_endpoint").bindTo { it.serviceEndpoint }
     val patientMRNSystem = varchar("mrn_system").bindTo { it.patientMRNSystem }
     val authEndpoint = varchar("auth_endpoint").bindTo { it.authEndpoint }
+    val messagePractitioner = varchar("message_practitioner").bindTo { it.messagePractitioner }
+    val messageTopic = varchar("message_topic").bindTo { it.messageTopic }
+    val messageCategory = varchar("message_category").bindTo { it.messageCategory }
+    val messagePriority = varchar("message_priority").bindTo { it.messagePriority }
 }

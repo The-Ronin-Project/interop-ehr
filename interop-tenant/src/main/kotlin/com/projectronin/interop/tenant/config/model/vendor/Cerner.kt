@@ -11,7 +11,10 @@ data class Cerner(
     override val authenticationConfig: CernerAuthenticationConfig,
     override val serviceEndpoint: String,
     val patientMRNSystem: String,
-
+    val messagePractitioner: String,
+    val messageTopic: String?,
+    val messageCategory: String?,
+    val messagePriority: String?
 ) : Vendor {
     override val type: VendorType
         get() = VendorType.CERNER

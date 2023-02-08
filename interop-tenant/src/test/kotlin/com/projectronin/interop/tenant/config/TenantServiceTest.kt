@@ -106,6 +106,10 @@ class TenantServiceTest {
         every { serviceEndpoint } returns "http://localhost/"
         every { authEndpoint } returns "http://localhost/"
         every { patientMRNSystem } returns "mrnSystemExample"
+        every { messagePractitioner } returns "1234-5678"
+        every { messageTopic } returns "Ronin Alert"
+        every { messageCategory } returns "Category"
+        every { messagePriority } returns "Priority"
     }
 
     private val standardTenantDO = mockk<TenantDO> {
@@ -212,6 +216,10 @@ class TenantServiceTest {
             ),
             serviceEndpoint = "http://localhost/",
             patientMRNSystem = "mrnSystemExample",
+            messagePractitioner = "1234-5678",
+            messageTopic = "Ronin Alert",
+            messageCategory = "Category",
+            messagePriority = "Priority"
         )
     )
 

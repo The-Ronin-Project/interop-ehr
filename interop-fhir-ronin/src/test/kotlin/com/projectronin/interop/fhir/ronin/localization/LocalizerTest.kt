@@ -40,13 +40,13 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.Url
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.AvailableTime
-import com.projectronin.interop.fhir.r4.resource.Communication
 import com.projectronin.interop.fhir.r4.resource.ConditionEvidence
 import com.projectronin.interop.fhir.r4.resource.ConditionStage
 import com.projectronin.interop.fhir.r4.resource.NotAvailable
 import com.projectronin.interop.fhir.r4.resource.ObservationComponent
 import com.projectronin.interop.fhir.r4.resource.ObservationReferenceRange
 import com.projectronin.interop.fhir.r4.resource.Participant
+import com.projectronin.interop.fhir.r4.resource.PatientCommunication
 import com.projectronin.interop.fhir.r4.resource.PatientContact
 import com.projectronin.interop.fhir.r4.resource.PatientLink
 import com.projectronin.interop.fhir.r4.resource.Qualification
@@ -504,8 +504,8 @@ class LocalizerTest {
     }
 
     @Test
-    fun `returns current communication if communication has no localizable information`() {
-        val communication = Communication(
+    fun `returns current patient communication if patient communication has no localizable information`() {
+        val communication = PatientCommunication(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -516,8 +516,8 @@ class LocalizerTest {
     }
 
     @Test
-    fun `localizes communication with localizable extension`() {
-        val communication = Communication(
+    fun `localizes patient communication with localizable extension`() {
+        val communication = PatientCommunication(
             id = "12345".asFHIR(),
             extension = localizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -526,7 +526,7 @@ class LocalizerTest {
         val localizedCommunication = localizer.localize(communication, tenant)
         assertNotEquals(localizedCommunication, communication)
 
-        val expectedCommunication = Communication(
+        val expectedCommunication = PatientCommunication(
             id = "12345".asFHIR(),
             extension = localizedExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -536,8 +536,8 @@ class LocalizerTest {
     }
 
     @Test
-    fun `localizes communication with localizable modifierExtension`() {
-        val communication = Communication(
+    fun `localizes patient communication with localizable modifierExtension`() {
+        val communication = PatientCommunication(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = localizableExtensions,
@@ -546,7 +546,7 @@ class LocalizerTest {
         val localizedCommunication = localizer.localize(communication, tenant)
         assertNotEquals(localizedCommunication, communication)
 
-        val expectedCommunication = Communication(
+        val expectedCommunication = PatientCommunication(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = localizedExtensions,
@@ -556,8 +556,8 @@ class LocalizerTest {
     }
 
     @Test
-    fun `localizes communication with localizable language`() {
-        val communication = Communication(
+    fun `localizes patient communication with localizable language`() {
+        val communication = PatientCommunication(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -566,7 +566,7 @@ class LocalizerTest {
         val localizedCommunication = localizer.localize(communication, tenant)
         assertNotEquals(localizedCommunication, communication)
 
-        val expectedCommunication = Communication(
+        val expectedCommunication = PatientCommunication(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             modifierExtension = nonLocalizableExtensions,
@@ -576,8 +576,8 @@ class LocalizerTest {
     }
 
     @Test
-    fun `localizes communication with all localizable values`() {
-        val communication = Communication(
+    fun `localizes patient communication with all localizable values`() {
+        val communication = PatientCommunication(
             id = "12345".asFHIR(),
             extension = localizableExtensions,
             modifierExtension = localizableExtensions,
@@ -586,7 +586,7 @@ class LocalizerTest {
         val localizedCommunication = localizer.localize(communication, tenant)
         assertNotEquals(localizedCommunication, communication)
 
-        val expectedCommunication = Communication(
+        val expectedCommunication = PatientCommunication(
             id = "12345".asFHIR(),
             extension = localizedExtensions,
             modifierExtension = localizedExtensions,

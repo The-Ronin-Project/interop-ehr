@@ -24,11 +24,15 @@ class CernerTenantDAOTest {
     fun `tenant found`() {
         val dao = CernerTenantDAO(KtormHelper.database())
         val cernerTenant = dao.getByTenantMnemonic("tenant")
-        assertNotNull(cernerTenant)
-        assertEquals(1002, cernerTenant?.tenantId)
-        assertEquals("https://localhost:8080/", cernerTenant?.serviceEndpoint)
-        assertEquals("urn:oid:mrn.system", cernerTenant?.patientMRNSystem)
-        assertEquals("https://localhost:8080/", cernerTenant?.authEndpoint)
+        cernerTenant!!
+        assertEquals(1002, cernerTenant.tenantId)
+        assertEquals("https://localhost:8080/", cernerTenant.serviceEndpoint)
+        assertEquals("urn:oid:mrn.system", cernerTenant.patientMRNSystem)
+        assertEquals("https://localhost:8080/", cernerTenant.authEndpoint)
+        assertEquals("Practitioner1", cernerTenant.messagePractitioner)
+        assertEquals("Ronin Alerts", cernerTenant.messageTopic)
+        assertEquals("notification", cernerTenant.messageCategory)
+        assertEquals("urgent", cernerTenant.messagePriority)
     }
 
     @Test
@@ -61,6 +65,10 @@ class CernerTenantDAOTest {
             serviceEndpoint = "newServiceEndpoints"
             patientMRNSystem = "mrnSystem"
             authEndpoint = "newAuthEndpoint"
+            messagePractitioner = "practitioner"
+            messageTopic = "topic"
+            messageCategory = "category"
+            messagePriority = "priority"
         }
 
         val result = dao.insert(testobj)
@@ -93,6 +101,10 @@ class CernerTenantDAOTest {
             serviceEndpoint = "newServiceEndpoint"
             patientMRNSystem = "mrnSystem"
             authEndpoint = "newAuthEndpoint"
+            messagePractitioner = "Practitioner1"
+            messageTopic = null
+            messageCategory = null
+            messagePriority = null
         }
         val result = dao.update(updated)
         assertNotNull(result)

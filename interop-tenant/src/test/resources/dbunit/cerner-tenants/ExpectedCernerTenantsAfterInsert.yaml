@@ -33,6 +33,10 @@ io_tenant_cerner:
     service_endpoint: "newServiceEndpoints"
     mrn_system: "mrnSystem"
     auth_endpoint: "newAuthEndpoint"
+    message_practitioner: "practitioner"
+    message_topic: "topic"
+    message_category: "category"
+    message_priority: "priority"
 
 io_tenant_epic:
   - io_tenant_id: 999

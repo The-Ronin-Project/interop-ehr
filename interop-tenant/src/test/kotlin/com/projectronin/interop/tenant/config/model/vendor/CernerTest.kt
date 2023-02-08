@@ -14,11 +14,20 @@ class CernerTest {
             "clientId",
             authenticationConfig,
             "https://localhost:8080/serviceEndpoint",
-            "mrn"
+            "mrn",
+            "practitioner",
+            "topic",
+            "category",
+            "priority"
         )
         assertEquals(VendorType.CERNER, cerner.type)
         assertEquals("clientId", cerner.clientId)
         assertEquals(authenticationConfig, cerner.authenticationConfig)
         assertEquals("https://localhost:8080/serviceEndpoint", cerner.serviceEndpoint)
+        assertEquals("mrn", cerner.patientMRNSystem)
+        assertEquals("practitioner", cerner.messagePractitioner)
+        assertEquals("topic", cerner.messageTopic)
+        assertEquals("category", cerner.messageCategory)
+        assertEquals("priority", cerner.messagePriority)
     }
 }

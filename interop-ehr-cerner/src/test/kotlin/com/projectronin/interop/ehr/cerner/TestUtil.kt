@@ -24,7 +24,11 @@ fun createTestTenant(
     clientId: String = "client-id",
     secret: String = "secretsecretsecret",
     serviceEndpoint: String = "https://serviceendpoint.cerner.com/r4/",
-    mrnSystem: String = "mrnSystem"
+    mrnSystem: String = "mrnSystem",
+    practitioner: String = "practitioner",
+    messageTopic: String? = "topic",
+    messageCategory: String? = "category",
+    messagePriority: String? = "priority"
 ): Tenant {
     return Tenant(
         internalId,
@@ -37,7 +41,11 @@ fun createTestTenant(
             "clientId",
             CernerAuthenticationConfig(authEndpoint, clientId, secret),
             serviceEndpoint,
-            mrnSystem
+            mrnSystem,
+            practitioner,
+            messageTopic,
+            messageCategory,
+            messagePriority
         )
     )
 }

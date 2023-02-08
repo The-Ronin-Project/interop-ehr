@@ -34,6 +34,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Communication
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.r4.resource.PatientCommunication
 import com.projectronin.interop.fhir.r4.resource.PatientContact
 import com.projectronin.interop.fhir.r4.resource.PatientLink
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
@@ -872,7 +873,7 @@ class RoninPatientTest {
             multipleBirth = DynamicValue(DynamicValueType.INTEGER, FHIRInteger(2)),
             photo = listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
             contact = listOf(PatientContact(name = HumanName(text = "Jane Doe".asFHIR()))),
-            communication = listOf(Communication(language = CodeableConcept(text = "English".asFHIR()))),
+            communication = listOf(PatientCommunication(language = CodeableConcept(text = "English".asFHIR()))),
             generalPractitioner = listOf(Reference(display = "GP".asFHIR())),
             managingOrganization = Reference(display = "organization".asFHIR()),
             link = listOf(
@@ -956,7 +957,7 @@ class RoninPatientTest {
             transformed.photo
         )
         assertEquals(
-            listOf(Communication(language = CodeableConcept(text = "English".asFHIR()))),
+            listOf(PatientCommunication(language = CodeableConcept(text = "English".asFHIR()))),
             transformed.communication
         )
         assertEquals(listOf(Reference(display = "GP".asFHIR())), transformed.generalPractitioner)

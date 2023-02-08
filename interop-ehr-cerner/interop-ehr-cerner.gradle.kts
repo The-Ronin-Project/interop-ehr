@@ -15,6 +15,8 @@ dependencies {
     implementation(project(":interop-ehr"))
     implementation(project(":interop-fhir-ronin"))
     implementation("org.springframework:spring-context")
+    implementation(libs.opentracing.api)
+    implementation(libs.opentracing.util)
 
     testImplementation(libs.mockk)
     testImplementation(libs.interop.datalake)

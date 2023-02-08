@@ -41,10 +41,12 @@ io_tenant_cerner:
     service_endpoint: "newServiceEndpoint"
     mrn_system: "mrnSystem"
     auth_endpoint: "newAuthEndpoint"
+    message_practitioner: "Practitioner1"
   - io_tenant_id: 1003
     service_endpoint: "https://localhost:8080/"
     mrn_system: "urn:oid:mrn.system"
     auth_endpoint: "https://localhost:8080/"
+    message_practitioner: "Practitioner2"
 
 io_tenant_epic:
   - io_tenant_id: 999
