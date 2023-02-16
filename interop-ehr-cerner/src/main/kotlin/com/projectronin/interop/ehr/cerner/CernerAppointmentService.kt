@@ -36,7 +36,7 @@ class CernerAppointmentService(
             "date" to RepeatingParameter(
                 listOf(
                     "ge$startDate",
-                    "le$endDate"
+                    "lt$endDate"
                 )
             )
         )
@@ -55,7 +55,7 @@ class CernerAppointmentService(
             "date" to RepeatingParameter(
                 listOf(
                     "ge$startDate",
-                    "le$endDate"
+                    "lt$endDate"
                 )
             )
         )
@@ -75,7 +75,7 @@ class CernerAppointmentService(
             "date" to RepeatingParameter(
                 listOf(
                     "ge$startDate",
-                    "le$endDate"
+                    "lt$endDate"
                 )
             )
         )

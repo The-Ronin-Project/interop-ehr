@@ -56,7 +56,7 @@ class CernerAppointmentServiceTest {
                 "/Appointment",
                 mapOf(
                     "patient" to "patientFhirId",
-                    "date" to RepeatingParameter(listOf("ge2023-01-03", "le2023-01-07")),
+                    "date" to RepeatingParameter(listOf("ge2023-01-03", "lt2023-01-07")),
                     "_count" to 20
                 )
             )
@@ -80,7 +80,7 @@ class CernerAppointmentServiceTest {
                 "/Appointment",
                 mapOf(
                     "practitioner" to "prac123,prac345",
-                    "date" to RepeatingParameter(listOf("ge2023-01-03", "le2023-01-07")),
+                    "date" to RepeatingParameter(listOf("ge2023-01-03", "lt2023-01-07")),
                     "_count" to 20
                 )
             )
@@ -109,7 +109,7 @@ class CernerAppointmentServiceTest {
                 "/Appointment",
                 mapOf(
                     "practitioner" to "prac123,prac345",
-                    "date" to RepeatingParameter(listOf("ge2023-01-03", "le2023-01-07")),
+                    "date" to RepeatingParameter(listOf("ge2023-01-03", "lt2023-01-07")),
                     "_count" to 20
                 )
             )
@@ -139,7 +139,7 @@ class CernerAppointmentServiceTest {
                 "/Appointment",
                 mapOf(
                     "location" to "loc123,loc345",
-                    "date" to RepeatingParameter(listOf("ge2023-01-03", "le2023-01-07")),
+                    "date" to RepeatingParameter(listOf("ge2023-01-03", "lt2023-01-07")),
                     "_count" to 20
                 )
             )
@@ -180,7 +180,7 @@ class CernerAppointmentServiceTest {
                 "/Appointment",
                 mapOf(
                     "location" to "loc123,loc345",
-                    "date" to RepeatingParameter(listOf("ge2023-01-03", "le2023-01-07")),
+                    "date" to RepeatingParameter(listOf("ge2023-01-03", "lt2023-01-07")),
                     "_count" to 20
                 )
             )
