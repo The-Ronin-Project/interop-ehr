@@ -33,12 +33,7 @@ class CernerAppointmentService(
     ): List<Appointment> {
         val parameters = mapOf(
             "patient" to patientFHIRId,
-            "date" to RepeatingParameter(
-                listOf(
-                    "ge$startDate",
-                    "lt$endDate"
-                )
-            )
+            "date" to getDateParam(startDate, endDate)
         )
         return getResourceListFromSearch(tenant, parameters)
     }
@@ -52,12 +47,7 @@ class CernerAppointmentService(
         val providerFhirIDs = providerIDs.map { it.id.value!! }
         val parameters = mapOf(
             "practitioner" to providerFhirIDs.joinToString(separator = ","),
-            "date" to RepeatingParameter(
-                listOf(
-                    "ge$startDate",
-                    "lt$endDate"
-                )
-            )
+            "date" to getDateParam(startDate, endDate)
         )
         val appointments = getResourceListFromSearch(tenant, parameters)
         val newPatients = appointments.findNewPatients(tenant)
@@ -72,12 +62,7 @@ class CernerAppointmentService(
     ): AppointmentsWithNewPatients {
         val parameters = mapOf(
             "location" to locationFHIRIds.joinToString(separator = ","),
-            "date" to RepeatingParameter(
-                listOf(
-                    "ge$startDate",
-                    "lt$endDate"
-                )
-            )
+            "date" to getDateParam(startDate, endDate)
         )
         val appointments = getResourceListFromSearch(tenant, parameters)
         val newPatients = appointments.findNewPatients(tenant)
@@ -102,7 +87,8 @@ class CernerAppointmentService(
                     value = it
                 )
             }
-            val foundFhirIds = aidboxPatientService.getPatientFHIRIds(tenant.mnemonic, aidboxPatientSearchMap).keys.toList()
+            val foundFhirIds =
+                aidboxPatientService.getPatientFHIRIds(tenant.mnemonic, aidboxPatientSearchMap).keys.toList()
             // we want the ones we didn't find
             this - foundFhirIds.toSet()
         }
@@ -110,6 +96,19 @@ class CernerAppointmentService(
         return newPatientFHIRIds.map {
             cernerPatientService.getPatient(tenant, it)
         }
+    }
+
+    /**
+     * Cerner has some restrictive rules on date params. They allow only 'ge' and 'lt', and they require a timestamp.
+     * This function formats the date params correctly.
+     */
+    private fun getDateParam(startDate: LocalDate, endDate: LocalDate): RepeatingParameter {
+        return RepeatingParameter(
+            listOf(
+                "ge${startDate}T00:00:00Z",
+                "lt${endDate.plusDays(1)}T00:00:00Z"
+            )
+        )
     }
 }
 
