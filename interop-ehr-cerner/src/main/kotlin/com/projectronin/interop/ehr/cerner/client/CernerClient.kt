@@ -32,7 +32,12 @@ class CernerClient(
 
         val authentication = authenticationBroker.getAuthentication(tenant)
             ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
-        val requestUrl = tenant.vendor.serviceEndpoint + urlPart
+        val requestUrl =
+            if (urlPart.first() == '/') {
+                tenant.vendor.serviceEndpoint + urlPart
+            } else {
+                urlPart
+            }
 
         val response: HttpResponse = client.request("Cerner Organization: ${tenant.name}", requestUrl) { requestedUrl ->
             get(requestedUrl) {
