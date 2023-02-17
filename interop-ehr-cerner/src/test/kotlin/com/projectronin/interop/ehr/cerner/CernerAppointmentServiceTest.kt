@@ -42,7 +42,8 @@ class CernerAppointmentServiceTest {
         tenant = createTestTenant(
             clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
             authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            timezone = "America/Chicago"
         )
     }
 
@@ -56,7 +57,7 @@ class CernerAppointmentServiceTest {
                 "/Appointment",
                 mapOf(
                     "patient" to "patientFhirId",
-                    "date" to RepeatingParameter(listOf("ge2023-01-03T00:00:00Z", "lt2023-01-08T00:00:00Z")),
+                    "date" to RepeatingParameter(listOf("ge2023-01-03T00:00:00-06:00", "lt2023-01-08T00:00:00-06:00")),
                     "_count" to 20
                 )
             )
@@ -80,12 +81,17 @@ class CernerAppointmentServiceTest {
                 "/Appointment",
                 mapOf(
                     "practitioner" to "prac123,prac345",
-                    "date" to RepeatingParameter(listOf("ge2023-01-03T00:00:00Z", "lt2023-01-08T00:00:00Z")),
+                    "date" to RepeatingParameter(listOf("ge2023-01-03T00:00:00-06:00", "lt2023-01-08T00:00:00-06:00")),
                     "_count" to 20
                 )
             )
         } returns httpResponse
-        every { aidboxPatientService.getPatientFHIRIds<String>(tenant.mnemonic, any()) } returns mapOf("12724066" to "12724066")
+        every {
+            aidboxPatientService.getPatientFHIRIds<String>(
+                tenant.mnemonic,
+                any()
+            )
+        } returns mapOf("12724066" to "12724066")
         val response = appointmentService.findProviderAppointments(
             tenant = tenant,
             providerIDs = listOf(
@@ -109,7 +115,7 @@ class CernerAppointmentServiceTest {
                 "/Appointment",
                 mapOf(
                     "practitioner" to "prac123,prac345",
-                    "date" to RepeatingParameter(listOf("ge2023-01-03T00:00:00Z", "lt2023-01-08T00:00:00Z")),
+                    "date" to RepeatingParameter(listOf("ge2023-01-03T00:00:00-06:00", "lt2023-01-08T00:00:00-06:00")),
                     "_count" to 20
                 )
             )
@@ -139,12 +145,17 @@ class CernerAppointmentServiceTest {
                 "/Appointment",
                 mapOf(
                     "location" to "loc123,loc345",
-                    "date" to RepeatingParameter(listOf("ge2023-01-03T00:00:00Z", "lt2023-01-08T00:00:00Z")),
+                    "date" to RepeatingParameter(listOf("ge2023-01-03T00:00:00-06:00", "lt2023-01-08T00:00:00-06:00")),
                     "_count" to 20
                 )
             )
         } returns httpResponse
-        every { aidboxPatientService.getPatientFHIRIds<String>(tenant.mnemonic, any()) } returns mapOf("12724066" to "12724066")
+        every {
+            aidboxPatientService.getPatientFHIRIds<String>(
+                tenant.mnemonic,
+                any()
+            )
+        } returns mapOf("12724066" to "12724066")
         val response = appointmentService.findLocationAppointments(
             tenant = tenant,
             locationFHIRIds = listOf("loc123", "loc345"),
@@ -180,12 +191,17 @@ class CernerAppointmentServiceTest {
                 "/Appointment",
                 mapOf(
                     "location" to "loc123,loc345",
-                    "date" to RepeatingParameter(listOf("ge2023-01-03T00:00:00Z", "lt2023-01-08T00:00:00Z")),
+                    "date" to RepeatingParameter(listOf("ge2023-01-03T00:00:00-06:00", "lt2023-01-08T00:00:00-06:00")),
                     "_count" to 20
                 )
             )
         } returns httpResponse
-        every { aidboxPatientService.getPatientFHIRIds<String>(tenant.mnemonic, any()) } returns mapOf("12724066" to "12724066")
+        every {
+            aidboxPatientService.getPatientFHIRIds<String>(
+                tenant.mnemonic,
+                any()
+            )
+        } returns mapOf("12724066" to "12724066")
         assertThrows<NullPointerException> {
             appointmentService.findLocationAppointments(
                 tenant = tenant,

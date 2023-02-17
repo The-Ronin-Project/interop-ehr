@@ -14,6 +14,7 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Component
 class CernerAppointmentService(
@@ -33,7 +34,7 @@ class CernerAppointmentService(
     ): List<Appointment> {
         val parameters = mapOf(
             "patient" to patientFHIRId,
-            "date" to getDateParam(startDate, endDate)
+            "date" to getDateParam(startDate, endDate, tenant)
         )
         return getResourceListFromSearch(tenant, parameters)
     }
@@ -47,7 +48,7 @@ class CernerAppointmentService(
         val providerFhirIDs = providerIDs.map { it.id.value!! }
         val parameters = mapOf(
             "practitioner" to providerFhirIDs.joinToString(separator = ","),
-            "date" to getDateParam(startDate, endDate)
+            "date" to getDateParam(startDate, endDate, tenant)
         )
         val appointments = getResourceListFromSearch(tenant, parameters)
         val newPatients = appointments.findNewPatients(tenant)
@@ -62,7 +63,7 @@ class CernerAppointmentService(
     ): AppointmentsWithNewPatients {
         val parameters = mapOf(
             "location" to locationFHIRIds.joinToString(separator = ","),
-            "date" to getDateParam(startDate, endDate)
+            "date" to getDateParam(startDate, endDate, tenant)
         )
         val appointments = getResourceListFromSearch(tenant, parameters)
         val newPatients = appointments.findNewPatients(tenant)
@@ -102,11 +103,12 @@ class CernerAppointmentService(
      * Cerner has some restrictive rules on date params. They allow only 'ge' and 'lt', and they require a timestamp.
      * This function formats the date params correctly.
      */
-    private fun getDateParam(startDate: LocalDate, endDate: LocalDate): RepeatingParameter {
+    private fun getDateParam(startDate: LocalDate, endDate: LocalDate, tenant: Tenant): RepeatingParameter {
+        val offset = tenant.timezone.rules.getOffset(LocalDateTime.now())
         return RepeatingParameter(
             listOf(
-                "ge${startDate}T00:00:00Z",
-                "lt${endDate.plusDays(1)}T00:00:00Z"
+                "ge${startDate}T00:00:00$offset",
+                "lt${endDate.plusDays(1)}T00:00:00$offset"
             )
         )
     }
