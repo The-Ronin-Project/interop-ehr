@@ -142,7 +142,7 @@ class CernerConditionServiceTest {
             FHIRSearchToken(system = clinicalSystem, code = "active"),
             FHIRSearchToken(system = clinicalSystem, code = "resolved")
         )
-        val clinicalStatusTokens = "$clinicalSystem|active,$clinicalSystem|resolved"
+        val clinicalStatusTokens = "active,resolved"
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validConditionSearch
@@ -198,7 +198,7 @@ class CernerConditionServiceTest {
                 mapOf(
                     "patient" to patientFhirId,
                     "category" to categoryToken,
-                    "clinical-status" to clinicalStatusToken,
+                    "clinical-status" to "active",
                     "_count" to 20
                 )
             )
@@ -236,7 +236,7 @@ class CernerConditionServiceTest {
                 mapOf(
                     "patient" to patientFhirId,
                     "category" to categoryToken,
-                    "clinical-status" to clinicalStatusToken,
+                    "clinical-status" to "active",
                     "_count" to 20
                 )
             )
@@ -275,7 +275,7 @@ class CernerConditionServiceTest {
                 mapOf(
                     "patient" to patientFhirId,
                     "category" to categoryToken,
-                    "clinical-status" to clinicalStatusToken,
+                    "clinical-status" to "active",
                     "_count" to 20
                 )
             )

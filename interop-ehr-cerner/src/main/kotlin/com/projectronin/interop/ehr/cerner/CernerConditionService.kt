@@ -11,7 +11,8 @@ import datadog.trace.api.Trace
 import org.springframework.stereotype.Component
 
 @Component
-class CernerConditionService(cernerClient: CernerClient) : ConditionService, CernerFHIRService<Condition>(cernerClient) {
+class CernerConditionService(cernerClient: CernerClient) : ConditionService,
+    CernerFHIRService<Condition>(cernerClient) {
     override val fhirURLSearchPart = "/Condition"
     override val fhirResourceType = Condition::class.java
 
@@ -22,7 +23,6 @@ class CernerConditionService(cernerClient: CernerClient) : ConditionService, Cer
         conditionCategoryCode: String,
         clinicalStatus: String,
     ): List<Condition> {
-
         return findConditionsByCodes(
             tenant,
             patientFhirId,
@@ -38,11 +38,13 @@ class CernerConditionService(cernerClient: CernerClient) : ConditionService, Cer
         conditionCategoryCodes: List<FHIRSearchToken>,
         clinicalStatusCodes: List<FHIRSearchToken>
     ): List<Condition> {
+        // Cerner does not support the system-portion of Clinical Status for searches.
+        val clinicalStatus = clinicalStatusCodes.joinToString(",") { it.code }
+
         val parameters = mapOf(
             "patient" to patientFhirId,
             "category" to conditionCategoryCodes.toOrParams(),
-            "clinical-status" to clinicalStatusCodes.toOrParams()
-
+            "clinical-status" to clinicalStatus
         )
 
         return getResourceListFromSearch(tenant, parameters)
