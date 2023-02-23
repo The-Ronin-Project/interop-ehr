@@ -25,3 +25,4 @@ io_tenant:
 io_mirth_tenant_config:
   - io_tenant_id: 1001
     location_ids: "blah,blegh,blurgh"
+    load_last_run: "2022-08-01 11:18:00 +0000"

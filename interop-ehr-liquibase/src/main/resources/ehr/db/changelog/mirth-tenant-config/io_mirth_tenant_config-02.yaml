@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-mirth-tenant-config-add-load-timestamp
+      author: Beau Berger
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_mirth_tenant_config
+                columnName: load_last_run
+      changes:
+        - addColumn:
+            tableName: io_mirth_tenant_config
+            columns:
+              - column:
+                  name: load_last_run
+                  type: DATETIME(6)
+                  constraints:
+                    nullable: true

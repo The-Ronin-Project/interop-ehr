@@ -46,6 +46,7 @@ class MirthTenantConfigDAO(@Qualifier("ehr") private val database: Database) {
     fun updateConfig(mirthTenantConfigDO: MirthTenantConfigDO): MirthTenantConfigDO? {
         database.update(MirthTenantConfigDOs) {
             set(it.locationIds, mirthTenantConfigDO.locationIds)
+            set(it.loadTimestamp, mirthTenantConfigDO.lastUpdated)
             where {
                 it.tenantId eq mirthTenantConfigDO.tenant.id
             }
@@ -60,6 +61,7 @@ class MirthTenantConfigDAO(@Qualifier("ehr") private val database: Database) {
         database.insert(MirthTenantConfigDOs) {
             set(it.tenantId, mirthTenantConfigDO.tenant.id)
             set(it.locationIds, mirthTenantConfigDO.locationIds)
+            set(it.loadTimestamp, mirthTenantConfigDO.lastUpdated)
         }
         return getByTenantId(mirthTenantConfigDO.tenant.id)
             // This should be impossible to hit due to DB constraints
