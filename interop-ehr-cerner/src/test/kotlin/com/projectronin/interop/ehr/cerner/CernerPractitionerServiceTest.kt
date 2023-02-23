@@ -3,9 +3,12 @@ package com.projectronin.interop.ehr.cerner
 import com.projectronin.interop.common.http.exceptions.ClientFailureException
 import com.projectronin.interop.common.http.exceptions.ServerFailureException
 import com.projectronin.interop.ehr.cerner.client.CernerClient
+import com.projectronin.interop.ehr.outputs.FindPractitionersResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.BundleEntry
+import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.resource.Practitioner
+import com.projectronin.interop.fhir.r4.resource.PractitionerRole
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
@@ -24,8 +27,10 @@ import org.junit.jupiter.api.assertThrows
 class CernerPractitionerServiceTest {
     private lateinit var cernerClient: CernerClient
     private lateinit var practitionerService: CernerPractitionerService
+    private lateinit var practitionerRoleService: CernerPractitionerRoleService
     private lateinit var httpResponse: HttpResponse
     private lateinit var pagingHttpResponse: HttpResponse
+    private lateinit var tenant: Tenant
 
     private val validPractitionerPaging = readResource<Bundle>("/ExamplePractitionerBundlePaging.json")
 
@@ -34,15 +39,23 @@ class CernerPractitionerServiceTest {
         cernerClient = mockk()
         httpResponse = mockk()
         pagingHttpResponse = mockk()
-        practitionerService = CernerPractitionerService(cernerClient)
+        tenant = mockk()
+        practitionerRoleService = CernerPractitionerRoleService(cernerClient)
+        practitionerService = CernerPractitionerService(cernerClient, practitionerRoleService)
     }
 
     @Test
     fun `getPractitioner works when practitioner exists`() {
-        val tenant = mockk<Tenant>()
         val mockPractitioner = mockk<Practitioner>()
 
-        coEvery { httpResponse.body<Practitioner>(TypeInfo(Practitioner::class, Practitioner::class.java)) } returns mockPractitioner
+        coEvery {
+            httpResponse.body<Practitioner>(
+                TypeInfo(
+                    Practitioner::class,
+                    Practitioner::class.java
+                )
+            )
+        } returns mockPractitioner
         coEvery { cernerClient.get(tenant, "/Practitioner/PractitionerFHIRID") } returns httpResponse
 
         val actual = practitionerService.getPractitioner(tenant, "PractitionerFHIRID")
@@ -51,10 +64,15 @@ class CernerPractitionerServiceTest {
 
     @Test
     fun `getPractitioner propagates exceptions`() {
-        val tenant = mockk<Tenant>()
-
         val thrownException = ClientFailureException(HttpStatusCode.NotFound, "Not Found")
-        coEvery { httpResponse.body<Practitioner>(TypeInfo(Practitioner::class, Practitioner::class.java)) } throws thrownException
+        coEvery {
+            httpResponse.body<Practitioner>(
+                TypeInfo(
+                    Practitioner::class,
+                    Practitioner::class.java
+                )
+            )
+        } throws thrownException
         coEvery { cernerClient.get(tenant, "/Practitioner/PractitionerFHIRID") } returns httpResponse
 
         val exception =
@@ -67,7 +85,6 @@ class CernerPractitionerServiceTest {
 
     @Test
     fun `getPractitionerByProvider works when single practitioner found`() {
-        val tenant = mockk<Tenant>()
         val mockPractitioner = mockk<Practitioner>()
 
         coEvery { httpResponse.body<Bundle>() } returns mockBundle(mockPractitioner)
@@ -85,8 +102,6 @@ class CernerPractitionerServiceTest {
 
     @Test
     fun `getPractitionerByProvider throws exception when no practitioner found`() {
-        val tenant = mockk<Tenant>()
-
         coEvery { httpResponse.body<Bundle>() } returns mockBundle()
         coEvery {
             cernerClient.get(
@@ -101,7 +116,6 @@ class CernerPractitionerServiceTest {
 
     @Test
     fun `getPractitionerByProvider throws exception when multiple practitioners found`() {
-        val tenant = mockk<Tenant>()
         val mockPractitioner1 = mockk<Practitioner>()
         val mockPractitioner2 = mockk<Practitioner>()
         val mockPractitioner3 = mockk<Practitioner>()
@@ -124,8 +138,6 @@ class CernerPractitionerServiceTest {
 
     @Test
     fun `getPractitionerByProvider propagates exceptions`() {
-        val tenant = mockk<Tenant>()
-
         val thrownException = ServerFailureException(HttpStatusCode.InternalServerError, "Server Error")
         coEvery { httpResponse.body<Bundle>() } throws thrownException
         coEvery {
@@ -143,27 +155,20 @@ class CernerPractitionerServiceTest {
     }
 
     @Test
-    fun `findPractitionerByLocation throws exceptions`() {
-        val tenant = mockk<Tenant>()
+    fun `findPractitionerByLocation returns empty result`() {
+        val actualResult = practitionerRoleService.findPractitionersByLocation(tenant, listOf("123", "321"))
 
-        val thrownException = NotImplementedError("Cerner does not support the PractitionerRole resource that connects Practitioners with Locations")
-        coEvery { httpResponse.body<Bundle>() } throws thrownException
-        coEvery {
-            cernerClient.get(
-                tenant,
-                "/Practitioner",
-                mapOf("_count" to 20)
+        var expectedResult = FindPractitionersResponse(
+            Bundle(
+                type = null
             )
-        } returns httpResponse
+        )
 
-        val exception =
-            assertThrows<NotImplementedError> {
-                practitionerService.findPractitionersByLocation(
-                    tenant, listOf("Fake")
-                )
-            }
-
-        assertEquals(thrownException.message, exception.message)
+        assertEquals(expectedResult.resource, actualResult.resource)
+        assertEquals(emptyList<Resource<*>>(), actualResult.resources)
+        assertEquals(emptyList<PractitionerRole>(), actualResult.practitionerRoles)
+        assertEquals(emptyList<Practitioner>(), actualResult.practitioners)
+        assertEquals(emptyList<Location>(), actualResult.locations)
     }
 
     @Test
