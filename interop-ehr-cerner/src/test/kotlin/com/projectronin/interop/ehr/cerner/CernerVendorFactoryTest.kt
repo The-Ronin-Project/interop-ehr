@@ -22,17 +22,19 @@ class CernerVendorFactoryTest {
     private val identifierService = mockk<CernerIdentifierService>()
     private val messageService = mockk<CernerMessageService>()
     private val medicationStatementService = mockk<CernerMedicationStatementService>()
+    private val encounterService = mockk<CernerEncounterService>()
 
     private val vendorFactory =
         CernerVendorFactory(
-            patientService,
-            practitionerService,
-            appointmentService,
-            conditionService,
-            locationService,
-            identifierService,
-            messageService,
-            medicationStatementService
+            patientService = patientService,
+            practitionerService = practitionerService,
+            appointmentService = appointmentService,
+            conditionService = conditionService,
+            locationService = locationService,
+            identifierService = identifierService,
+            messageService = messageService,
+            medicationStatementService = medicationStatementService,
+            encounterService = encounterService
         )
 
     @Test

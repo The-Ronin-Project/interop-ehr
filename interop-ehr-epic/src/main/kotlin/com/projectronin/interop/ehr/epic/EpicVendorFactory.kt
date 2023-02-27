@@ -9,19 +9,21 @@ import org.springframework.stereotype.Component
  */
 @Component
 class EpicVendorFactory(
-    override val patientService: EpicPatientService,
     override val appointmentService: EpicAppointmentService,
-    override val messageService: EpicMessageService,
-    override val practitionerService: EpicPractitionerService,
-    override val practitionerRoleService: EpicPractitionerRoleService,
     override val conditionService: EpicConditionService,
+    override val encounterService: EpicEncounterService,
     override val identifierService: EpicIdentifierService,
-    override val observationService: EpicObservationService,
     override val locationService: EpicLocationService,
     override val medicationService: EpicMedicationService,
     override val medicationStatementService: EpicMedicationStatementService,
     override val medicationRequestService: EpicMedicationRequestService,
-    override val organizationService: EpicOrganizationService
+    override val messageService: EpicMessageService,
+    override val observationService: EpicObservationService,
+    override val organizationService: EpicOrganizationService,
+    override val patientService: EpicPatientService,
+    override val practitionerService: EpicPractitionerService,
+    override val practitionerRoleService: EpicPractitionerRoleService,
+
 ) : VendorFactory {
     override val vendorType: VendorType
         get() = VendorType.EPIC

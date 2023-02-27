@@ -14,14 +14,15 @@ import org.springframework.stereotype.Service
  */
 @Service
 class CernerVendorFactory(
-    override val patientService: CernerPatientService,
-    override val practitionerService: CernerPractitionerService,
     override val appointmentService: CernerAppointmentService,
     override val conditionService: CernerConditionService,
-    override val locationService: CernerLocationService,
+    override val encounterService: CernerEncounterService,
     override val identifierService: CernerIdentifierService,
+    override val locationService: CernerLocationService,
+    override val medicationStatementService: CernerMedicationStatementService,
     override val messageService: CernerMessageService,
-    override val medicationStatementService: CernerMedicationStatementService
+    override val patientService: CernerPatientService,
+    override val practitionerService: CernerPractitionerService,
 ) : VendorFactory {
     override val vendorType: VendorType = VendorType.CERNER
 

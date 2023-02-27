@@ -27,22 +27,24 @@ class EpicVendorFactoryTest {
     private val medicationStatementService = mockk<EpicMedicationStatementService>()
     private val medicationRequestService = mockk<EpicMedicationRequestService>()
     private val organizationService = mockk<EpicOrganizationService>()
+    private val encounterService = mockk<EpicEncounterService>()
 
     private val vendorFactory =
         EpicVendorFactory(
-            patientService,
-            appointmentService,
-            messageService,
-            practitionerService,
-            practitionerRoleService,
-            conditionService,
-            identifierService,
-            observationService,
-            locationService,
-            medicationService,
-            medicationStatementService,
-            medicationRequestService,
-            organizationService
+            patientService = patientService,
+            appointmentService = appointmentService,
+            messageService = messageService,
+            practitionerService = practitionerService,
+            practitionerRoleService = practitionerRoleService,
+            conditionService = conditionService,
+            identifierService = identifierService,
+            observationService = observationService,
+            locationService = locationService,
+            medicationService = medicationService,
+            medicationStatementService = medicationStatementService,
+            medicationRequestService = medicationRequestService,
+            organizationService = organizationService,
+            encounterService = encounterService
         )
 
     @Test
