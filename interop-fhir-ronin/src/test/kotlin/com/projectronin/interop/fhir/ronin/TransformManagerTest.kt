@@ -37,11 +37,14 @@ class TransformManagerTest {
 
     @Test
     fun `transform with validation issues and no transformation`() {
-        val resource = mockk<Patient>()
+        val resource = mockk<Patient> {
+            every { resourceType } returns "Patient"
+        }
         val tenant = mockk<Tenant>()
 
         val validation = mockk<Validation> {
             every { hasIssues() } returns true
+            every { issues() } returns emptyList()
         }
 
         val transformer = mockk<ProfileTransformer<Patient>> {
@@ -58,12 +61,15 @@ class TransformManagerTest {
 
     @Test
     fun `transform with validation issues and a transformation`() {
-        val resource = mockk<Patient>()
+        val resource = mockk<Patient>() {
+            every { resourceType } returns "Patient"
+        }
         val tenant = mockk<Tenant>()
 
         val transformed = mockk<Patient>()
         val validation = mockk<Validation> {
             every { hasIssues() } returns true
+            every { issues() } returns emptyList()
         }
 
         val transformer = mockk<ProfileTransformer<Patient>> {

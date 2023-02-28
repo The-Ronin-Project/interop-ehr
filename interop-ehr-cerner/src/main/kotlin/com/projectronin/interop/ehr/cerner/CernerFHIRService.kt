@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.ehr.FHIRService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
+import com.projectronin.interop.ehr.cerner.client.RepeatingParameter
 import com.projectronin.interop.fhir.r4.mergeBundles
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.Resource
@@ -11,6 +12,8 @@ import io.ktor.client.call.body
 import io.ktor.util.reflect.TypeInfo
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 abstract class CernerFHIRService<T : Resource<T>>(val cernerClient: CernerClient) : FHIRService<T> {
     private val logger = KotlinLogging.logger { }
@@ -83,5 +86,19 @@ abstract class CernerFHIRService<T : Resource<T>>(val cernerClient: CernerClient
             }
         }
         return parameters + parametersToAdd
+    }
+
+    /**
+     * Cerner has some restrictive rules on date params. They allow only 'ge' and 'lt', and they require a timestamp.
+     * This function formats the date params correctly.
+     */
+    protected fun getDateParam(startDate: LocalDate, endDate: LocalDate, tenant: Tenant): RepeatingParameter {
+        val offset = tenant.timezone.rules.getOffset(LocalDateTime.now())
+        return RepeatingParameter(
+            listOf(
+                "ge${startDate}T00:00:00$offset",
+                "lt${endDate.plusDays(1)}T00:00:00$offset"
+            )
+        )
     }
 }

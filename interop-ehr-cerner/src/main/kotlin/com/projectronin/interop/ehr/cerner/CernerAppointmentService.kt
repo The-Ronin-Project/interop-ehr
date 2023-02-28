@@ -4,7 +4,6 @@ import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.ehr.AppointmentService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
-import com.projectronin.interop.ehr.cerner.client.RepeatingParameter
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.outputs.AppointmentsWithNewPatients
 import com.projectronin.interop.fhir.r4.CodeSystem
@@ -14,7 +13,6 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @Component
 class CernerAppointmentService(
@@ -97,20 +95,6 @@ class CernerAppointmentService(
         return newPatientFHIRIds.map {
             cernerPatientService.getPatient(tenant, it)
         }
-    }
-
-    /**
-     * Cerner has some restrictive rules on date params. They allow only 'ge' and 'lt', and they require a timestamp.
-     * This function formats the date params correctly.
-     */
-    private fun getDateParam(startDate: LocalDate, endDate: LocalDate, tenant: Tenant): RepeatingParameter {
-        val offset = tenant.timezone.rules.getOffset(LocalDateTime.now())
-        return RepeatingParameter(
-            listOf(
-                "ge${startDate}T00:00:00$offset",
-                "lt${endDate.plusDays(1)}T00:00:00$offset"
-            )
-        )
     }
 }
 

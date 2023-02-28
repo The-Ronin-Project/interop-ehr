@@ -2,10 +2,10 @@ package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.ehr.EncounterService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
+import com.projectronin.interop.ehr.cerner.client.RepeatingParameter
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Encounter
-import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
 import io.mockk.coEvery
 import io.mockk.every
@@ -20,7 +20,12 @@ class CernerEncounterServiceTest {
 
     @Test
     fun getEncountersByFHIRId() {
-        val tenant = mockk<Tenant>()
+        val tenant = createTestTenant(
+            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+            authEndpoint = "https://example.org",
+            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            timezone = "America/Chicago"
+        )
 
         val encounter1 = mockk<BundleEntry> {
             every { resource } returns mockk<Encounter> {
@@ -41,7 +46,11 @@ class CernerEncounterServiceTest {
             cernerClient.get(
                 tenant,
                 "/Encounter",
-                mapOf("patient" to "12345", "date" to listOf("ge2015-01-01", "le2015-11-01"), "_count" to 20)
+                mapOf(
+                    "patient" to "12345",
+                    "date" to RepeatingParameter(listOf("ge2015-01-01T00:00:00-06:00", "lt2015-11-02T00:00:00-06:00")),
+                    "_count" to 20
+                )
             ).body<Bundle>()
         } returns bundle
 

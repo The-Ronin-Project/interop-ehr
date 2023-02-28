@@ -26,7 +26,7 @@ class CernerEncounterService(cernerClient: CernerClient) : EncounterService, Cer
         List<Encounter> {
         val parameters = mapOf(
             "patient" to patientFhirId,
-            "date" to listOf("ge$startDate", "le$endDate")
+            "date" to getDateParam(startDate, endDate, tenant)
         )
         return getResourceListFromSearch(tenant, parameters)
     }
