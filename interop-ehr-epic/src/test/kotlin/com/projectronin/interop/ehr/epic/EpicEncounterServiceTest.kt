@@ -2,7 +2,6 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.EncounterService
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.ehr.epic.client.RepeatingParameter
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Encounter
@@ -42,7 +41,7 @@ internal class EpicEncounterServiceTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Encounter",
-                mapOf("patient" to "12345", "date" to RepeatingParameter(listOf("ge2015-01-01", "le2015-11-01")), "_count" to 50)
+                mapOf("patient" to "12345", "date" to listOf("ge2015-01-01", "le2015-11-01"), "_count" to 50)
             ).body<Bundle>()
         } returns bundle
 

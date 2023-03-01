@@ -7,13 +7,16 @@ import com.projectronin.interop.ehr.epic.auth.EpicAuthentication
 import com.projectronin.interop.ehr.epic.createTestTenant
 import com.projectronin.interop.ehr.epic.getClient
 import io.ktor.client.statement.bodyAsText
+import io.ktor.client.statement.request
 import io.ktor.http.HttpStatusCode
+import io.ktor.http.Url
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -305,7 +308,7 @@ class EpicClientTest {
     }
 
     @Test
-    fun `ensure get operation returns correctly with repeating parameters`() {
+    fun `ensure get operation correctly encodes parameters`() {
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(
             MockResponse().setBody(validPatientSearchJson).setHeader("Content-Type", "application/json")
@@ -325,15 +328,21 @@ class EpicClientTest {
         every { authenticationBroker.getAuthentication(tenant) } returns authentication
 
         // Execute test
+        var url: Url
         val response = runBlocking {
             val httpResponse = epicClient.get(
                 tenant,
                 "/api/FHIR/R4/Patient",
-                mapOf("list" to RepeatingParameter(listOf("one", "two")))
+                mapOf(
+                    "list" to listOf("one", "two"),
+                    "nonList" to "nonList"
+                )
             )
+            url = httpResponse.request.url
             httpResponse.bodyAsText()
         }
 
+        assertTrue(url.toString().endsWith("?list=one&list=two&nonList=nonList"))
         // Validate Response
         assertEquals(validPatientSearchJson, response)
     }

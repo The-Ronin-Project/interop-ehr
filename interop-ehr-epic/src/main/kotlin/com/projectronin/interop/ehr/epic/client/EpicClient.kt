@@ -14,7 +14,6 @@ import io.ktor.client.statement.HttpResponse
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
-import io.ktor.http.encodeURLParameter
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
 
@@ -76,30 +75,20 @@ class EpicClient(
                 urlPart
             }
 
-        val response: HttpResponse = client.request("Epic Organization: ${tenant.name}", requestUrl) { requestedUrl ->
-            get(requestedUrl) {
+        val response: HttpResponse = client.request("Epic Organization: ${tenant.name}", requestUrl) { url ->
+            get(url) {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
                 }
                 accept(ContentType.Application.Json)
-                url {
-                    parameters.map { parameterEntry ->
-                        val key = parameterEntry.key
-                        when (val value = parameterEntry.value) {
-                            is List<*> -> {
-                                encodedParameters.append(
-                                    key,
-                                    // tricky, but this takes a list of any objects, converts, them to string, encodes them
-                                    // and then combines this in a comma separated list
-                                    value.joinToString(separator = ",") { parameterValue ->
-                                        parameterValue.toString().encodeURLParameter(spaceToPlus = true)
-                                    }
-                                )
-                            }
-                            is RepeatingParameter -> url.parameters.appendAll(key, value.values)
-                            else -> parameter(key, value)
+                parameters.map {
+                    val key = it.key
+                    val value = it.value
+                    if (value is List<*>) {
+                        value.forEach { repetition ->
+                            parameter(key, repetition)
                         }
-                    }
+                    } else value?.let { parameter(key, value) }
                 }
             }
         }
@@ -109,4 +98,3 @@ class EpicClient(
         return response
     }
 }
-data class RepeatingParameter(val values: List<String>)
