@@ -298,6 +298,6 @@ class CernerConditionServiceTest {
                 clinicalStatusToken
             )
 
-        assertEquals(9, list.size)
+        assertEquals(6, list.size)
     }
 }

@@ -117,8 +117,8 @@ class EpicPractitionerServiceTest {
                 listOf("abc", "123")
             )
 
-        // 142 = 71 practitioner roles from each of 2 locations
-        assertEquals(142, bundle.practitionerRoles.size)
+        // 142 = 71 practitioner roles from each of 2 locations, remove duplicates = 71
+        assertEquals(71, bundle.practitionerRoles.size)
         // 142 becomes 71 total because duplicate practitioners are removed by EpicPractitionerBundle
         assertEquals(71, bundle.practitioners.size)
         // 106 becomes 53 total because duplicate practitioner locations are removed by EpicLocationBundle
@@ -192,8 +192,8 @@ class EpicPractitionerServiceTest {
                 listOf("loc1", "loc2", "loc3")
             )
 
-        // 142 = 71 practitioner roles from each of 3 batch calls
-        assertEquals(213, bundle.practitionerRoles.size)
+        // 142 = 71 practitioner roles from each of 3 batch calls, remove duplicates = 71
+        assertEquals(71, bundle.practitionerRoles.size)
         // 142 becomes 71 total because duplicate practitioners are removed by EpicPractitionerBundle
         assertEquals(71, bundle.practitioners.size)
         // 106 becomes 53 total because duplicate practitioner locations are removed by EpicLocationBundle
@@ -241,8 +241,8 @@ class EpicPractitionerServiceTest {
                 listOf("e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03")
             )
 
-        // 2 Resources from the first query, 71 from the second
-        assertEquals(73, bundle.practitionerRoles.size)
+        // 2 Resources from the first query, 71 from the second, remove duplicates = 71
+        assertEquals(71, bundle.practitionerRoles.size)
 
         // 2 of the practitioners are duplicates and get filtered out
         assertEquals(71, bundle.practitioners.size)

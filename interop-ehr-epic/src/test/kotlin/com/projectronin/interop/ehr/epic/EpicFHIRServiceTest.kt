@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.Condition
@@ -294,7 +295,12 @@ class EpicFHIRServiceTest {
                 "TEST_TENANT"
             )
 
-        val condition = mockk<Condition>()
+        val condition1 = mockk<Condition>() {
+            every { id } returns Id("1234")
+        }
+        val condition2 = mockk<Condition>() {
+            every { id } returns Id("5678")
+        }
         val bundle1 = mockk<Bundle>(relaxed = true) {
             every { link } returns listOf(
                 mockk {
@@ -304,7 +310,7 @@ class EpicFHIRServiceTest {
             )
             every { entry } returns listOf(
                 mockk {
-                    every { resource } returns condition
+                    every { resource } returns condition1
                 }
             )
         }
@@ -312,7 +318,7 @@ class EpicFHIRServiceTest {
             every { link } returns listOf()
             every { entry } returns listOf(
                 mockk {
-                    every { resource } returns condition
+                    every { resource } returns condition2
                 }
             )
         }

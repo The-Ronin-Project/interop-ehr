@@ -290,7 +290,7 @@ class EpicConditionServiceTest {
                 clinicalStatusToken
             )
 
-        // 7 resources from the first query, 7 from the second
-        assertEquals(14, list.size)
+        // 7 resources from the first query, 7 from the second total of 14, remove duplicates = 7
+        assertEquals(7, list.size)
     }
 }

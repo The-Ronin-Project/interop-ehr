@@ -166,6 +166,6 @@ class CernerMedicationStatementServiceTest {
             patientFHIRId
         )
 
-        assertEquals(4, bundleFromPaging.size)
+        assertEquals(2, bundleFromPaging.size)
     }
 }

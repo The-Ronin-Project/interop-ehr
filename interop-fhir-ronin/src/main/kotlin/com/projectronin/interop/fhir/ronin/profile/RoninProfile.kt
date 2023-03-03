@@ -11,6 +11,7 @@ enum class RoninProfile(val value: String) {
     CONDITION_PROBLEMS_CONCERNS("http://projectronin.io/fhir/StructureDefinition/ronin-conditionProblemsHealthConcerns"),
     CONDITION_ENCOUNTER_DIAGNOSIS("http://projectronin.io/fhir/StructureDefinition/ronin-conditionEncounterDiagnosis"),
     DIAGNOSTIC_REPORT_LABORATORY("http://projectronin.io/fhir/StructureDefinition/ronin-diagnosticReportLaboratoryReporting"),
+    DIAGNOSTIC_REPORT_NOTE_EXCHANGE("http://projectronin.io/fhir/StructureDefinition/ronin-diagnosticReportNoteExchange"),
     DOCUMENT_REFERENCE("http://projectronin.io/fhir/StructureDefinition/ronin-documentReference"),
     ENCOUNTER("http://projectronin.io/fhir/StructureDefinition/ronin-encounter"),
     LOCATION("http://projectronin.io/fhir/StructureDefinition/ronin-location"),

@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.Patient
@@ -122,7 +123,12 @@ class CernerFHIRServiceTest {
             secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
         )
 
-        val patient = mockk<Patient>()
+        val patient1 = mockk<Patient>() {
+            every { id } returns Id("1234")
+        }
+        val patient2 = mockk<Patient>() {
+            every { id } returns Id("5678")
+        }
         val bundle1 = mockk<Bundle>(relaxed = true) {
             every { link } returns listOf(
                 mockk {
@@ -132,7 +138,7 @@ class CernerFHIRServiceTest {
             )
             every { entry } returns listOf(
                 mockk {
-                    every { resource } returns patient
+                    every { resource } returns patient1
                 }
             )
         }
@@ -140,7 +146,7 @@ class CernerFHIRServiceTest {
             every { link } returns listOf()
             every { entry } returns listOf(
                 mockk {
-                    every { resource } returns patient
+                    every { resource } returns patient2
                 }
             )
         }

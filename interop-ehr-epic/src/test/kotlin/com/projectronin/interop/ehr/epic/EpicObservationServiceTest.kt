@@ -309,7 +309,7 @@ class EpicObservationServiceTest {
                 categoryCodes
             )
 
-        // 4 observations on the first page + 2 observations on the second page
-        assertEquals(6, bundle.size)
+        // 4 observations on the first page + 2 observations on the second page, remove duplicates = 4
+        assertEquals(4, bundle.size)
     }
 }
