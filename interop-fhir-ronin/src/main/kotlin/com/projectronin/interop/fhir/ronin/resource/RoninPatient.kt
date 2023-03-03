@@ -11,6 +11,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
+import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.hasDataAbsentReason
 import com.projectronin.interop.fhir.ronin.localization.Localizer
@@ -151,7 +152,11 @@ class RoninPatient(
                 )
             )
         )
-
+        val gender = normalized.gender.takeIf { !it.hasDataAbsentReason() } ?: Code(
+            AdministrativeGender.UNKNOWN.code,
+            normalized.gender!!.id,
+            normalized.gender!!.extension
+        )
         val validation = Validation()
         val contactPointTransformed = if (normalized.telecom.isNotEmpty()) {
             contactPoint.transform(normalized.telecom, tenant, LocationContext(Patient::class), validation)
@@ -159,6 +164,7 @@ class RoninPatient(
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
+            gender = gender,
             identifier = normalized.identifier + tenant.toFhirIdentifier() + getRoninIdentifiers(normalized, tenant),
             maritalStatus = maritalStatus,
             telecom = contactPointTransformed.first ?: emptyList(),

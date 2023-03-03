@@ -569,6 +569,39 @@ class RoninPatientTest {
     }
 
     @Test
+    fun `validate passes for gender with data absent reason`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_MRN,
+                    system = CodeSystem.RONIN_MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
+            ),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
+            gender = Code(
+                value = null,
+                extension = listOf(Extension(url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason")))
+            ),
+            birthDate = Date("1975-07-05")
+        )
+        roninPatient.validate(patient, null).alertIfErrors()
+        val transformed = roninPatient.transform(patient, tenant)
+        assertEquals(AdministrativeGender.UNKNOWN.code, transformed.first?.gender?.value)
+    }
+
+    @Test
     fun `validate fails for missing identifier system`() {
         val patient = Patient(
             id = Id("12345"),
