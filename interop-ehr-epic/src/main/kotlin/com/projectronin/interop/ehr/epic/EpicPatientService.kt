@@ -9,7 +9,6 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Patient
-import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import datadog.trace.api.Trace
@@ -142,7 +141,7 @@ class EpicPatientService(
             ehrPatientIDValues.associateWith { Identifier(value = FHIRString(it), system = Uri(patientIDSystem)) }
         ).filterNot {
             it.value.id == null
-        }.mapValues { GetFHIRIDResponse(it.value.id!!.value!!.unlocalize(tenant), it.value) }
+        }.mapValues { GetFHIRIDResponse(it.value.id!!.value!!, it.value) }
 
         return aidboxResponse + ehrResponse
     }
