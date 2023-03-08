@@ -43,6 +43,7 @@ class TenantServiceTest {
 
     private val epicHsiValue = "urn:epic:apporchard.curprod"
     private val epicDepartmentSystem = "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980"
+    private val epicPatientOnboardedFlagId = "E8675309"
     private val standardEHRDO1 = mockk<EhrDO> {
         every { id } returns 1
         every { instanceName } returns "Epic Sandbox"
@@ -84,6 +85,7 @@ class TenantServiceTest {
         every { patientMRNTypeText } returns "patientMRNTypeText"
         every { hsi } returns epicHsiValue
         every { departmentInternalSystem } returns epicDepartmentSystem
+        every { patientOnboardedFlagId } returns epicPatientOnboardedFlagId
     }
     private val standardEpicTenantDO2 = mockk<EpicTenantDO> {
         every { tenantId } returns 2
@@ -100,6 +102,7 @@ class TenantServiceTest {
         every { patientMRNTypeText } returns "patientMRNTypeText"
         every { hsi } returns epicHsiValue
         every { departmentInternalSystem } returns epicDepartmentSystem
+        every { patientOnboardedFlagId } returns epicPatientOnboardedFlagId
     }
     private val standardCernerTenantDO = mockk<CernerTenantDO> {
         every { tenantId } returns 3
@@ -168,6 +171,7 @@ class TenantServiceTest {
             patientMRNTypeText = "patientMRNTypeText",
             hsi = epicHsiValue,
             departmentInternalSystem = epicDepartmentSystem,
+            patientOnboardedFlagId = epicPatientOnboardedFlagId,
         )
     )
 
@@ -197,6 +201,7 @@ class TenantServiceTest {
             patientMRNTypeText = "patientMRNTypeText",
             hsi = epicHsiValue,
             departmentInternalSystem = epicDepartmentSystem,
+            patientOnboardedFlagId = epicPatientOnboardedFlagId,
         )
     )
 
@@ -372,6 +377,7 @@ class TenantServiceTest {
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = epicHsiValue,
                 departmentInternalSystem = epicDepartmentSystem,
+                patientOnboardedFlagId = epicPatientOnboardedFlagId,
             )
         )
 
@@ -403,6 +409,7 @@ class TenantServiceTest {
             every { patientMRNTypeText } returns "patientMRNTypeText"
             every { hsi } returns epicHsiValue
             every { departmentInternalSystem } returns epicDepartmentSystem
+            every { patientOnboardedFlagId } returns epicPatientOnboardedFlagId
         }
         every { epicTenantDAO.getByTenantMnemonic("Tenant1") } returns epicTenantDO
 
@@ -432,6 +439,7 @@ class TenantServiceTest {
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = epicHsiValue,
                 departmentInternalSystem = epicDepartmentSystem,
+                patientOnboardedFlagId = epicPatientOnboardedFlagId,
             )
         )
 
@@ -555,6 +563,7 @@ class TenantServiceTest {
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = epicHsiValue,
                 departmentInternalSystem = epicDepartmentSystem,
+                patientOnboardedFlagId = epicPatientOnboardedFlagId,
             )
         )
         val tenantDO = mockk<TenantDO> {
