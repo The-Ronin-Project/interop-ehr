@@ -38,6 +38,7 @@ class EpicTenantDAOTest {
         assertEquals("urn:oid:encounter.system", epicTenant?.encounterCSNSystem)
         assertEquals("urn:oid:1.2.840.114350.1.13.297.3.7.2.686980", epicTenant?.departmentInternalSystem)
         assertEquals("urn:epic:apporchard.curprod", epicTenant?.hsi)
+        assertEquals("E8675309", epicTenant?.patientOnboardedFlagId)
     }
 
     @Test
@@ -80,6 +81,7 @@ class EpicTenantDAOTest {
             encounterCSNSystem = "csnSystem"
             hsi = "hsi"
             departmentInternalSystem = "departmentSystem"
+            patientOnboardedFlagId = "flagID"
         }
 
         val result = dao.insert(testobj)
@@ -96,6 +98,7 @@ class EpicTenantDAOTest {
         assertEquals(testobj.encounterCSNSystem, result.encounterCSNSystem)
         assertEquals(testobj.hsi, result.hsi)
         assertEquals(testobj.departmentInternalSystem, result.departmentInternalSystem)
+        assertEquals(testobj.patientOnboardedFlagId, result.patientOnboardedFlagId)
     }
 
     @Test
@@ -141,6 +144,7 @@ class EpicTenantDAOTest {
             encounterCSNSystem = "csnSystem"
             hsi = "hsi"
             departmentInternalSystem = "departmentSystem"
+            patientOnboardedFlagId = "flagID"
         }
         val result = dao.update(updated)
         assertNotNull(result)
@@ -160,5 +164,6 @@ class EpicTenantDAOTest {
         assertEquals(updated.encounterCSNSystem, found?.encounterCSNSystem)
         assertEquals(updated.hsi, found?.hsi)
         assertEquals(updated.departmentInternalSystem, found?.departmentInternalSystem)
+        assertEquals(updated.patientOnboardedFlagId, found?.patientOnboardedFlagId)
     }
 }
