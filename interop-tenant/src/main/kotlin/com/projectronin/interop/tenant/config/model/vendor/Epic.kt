@@ -15,6 +15,7 @@ import com.projectronin.interop.tenant.config.model.EpicAuthenticationConfig
  * @property patientInternalSystem The system utilized by this Epic instance to represent the Epic "internal" identifier
  * @property hsi The HSI value to be used for integration with Epic's Tesseract gateway, null if not leveraging Tesseract.
  * @property departmentInternalSystem The system that represent the Epic "internal" department identifier on a Location.
+ * @property patientOnboardedFlagId Epic ID for the patient flag that indicates if the patient has onboarded with Ronin.
  */
 @JsonTypeName("EPIC")
 data class Epic(

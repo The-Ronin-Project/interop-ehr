@@ -391,7 +391,7 @@ class TenantServiceTest {
     }
 
     @Test
-    fun `epic tenant with hsi found`() {
+    fun `epic tenant with hsi and patientOnboardedFlagId found`() {
         every { tenantDAO.getTenantForMnemonic(standardTenant.mnemonic) } returns standardTenantDO
 
         val epicTenantDO = mockk<EpicTenantDO> {

@@ -42,3 +42,4 @@ io_tenant_epic:
     encounter_csn_system: "urn:oid:encounter.system"
     hsi: "urn:epic:apporchard.curprod"
     department_internal_system: "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980"
+    patient_onboarded_flag_id: "E8675309"
