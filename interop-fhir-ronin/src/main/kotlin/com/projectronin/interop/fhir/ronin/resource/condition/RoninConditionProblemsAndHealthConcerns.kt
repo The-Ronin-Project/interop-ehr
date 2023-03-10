@@ -27,12 +27,17 @@ class RoninConditionProblemsAndHealthConcerns(normalizer: Normalizer, localizer:
         normalizer,
         localizer
     ) {
+    private val qualifyingCodeProblemListItem = Code("problem-list-item")
+    private val qualifyingCodeHealthConcerns = Code("health-concern")
     private val qualifyingCodes = setOf(Code("problem-list-item"), Code("health-concern"))
 
     override fun qualifies(resource: Condition): Boolean {
         return resource.category.any { codeableConcept ->
             codeableConcept.coding.any { coding ->
-                coding.system == CodeSystem.CONDITION_CATEGORY.uri && qualifyingCodes.contains(coding.code)
+                (
+                    coding.system == CodeSystem.CONDITION_CATEGORY.uri && coding.code == qualifyingCodeProblemListItem ||
+                        coding.system == CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri && coding.code == qualifyingCodeHealthConcerns
+                    )
             }
         }
     }
@@ -65,7 +70,10 @@ class RoninConditionProblemsAndHealthConcerns(normalizer: Normalizer, localizer:
             checkTrue(
                 element.category.any { codeableConcept ->
                     codeableConcept.coding.any { coding ->
-                        coding.system == CodeSystem.CONDITION_CATEGORY.uri && qualifyingCodes.contains(coding.code)
+                        (
+                            coding.system == CodeSystem.CONDITION_CATEGORY.uri && coding.code == qualifyingCodeProblemListItem ||
+                                coding.system == CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri && coding.code == qualifyingCodeHealthConcerns
+                            )
                     }
                 },
                 noValidCategoryError,

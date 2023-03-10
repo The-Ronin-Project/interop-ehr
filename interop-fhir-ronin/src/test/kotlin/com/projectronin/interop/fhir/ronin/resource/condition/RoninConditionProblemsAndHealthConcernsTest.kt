@@ -162,6 +162,65 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
+    fun `does not qualify when category coding code is problem-list-item and system is for health-concern`() {
+        val condition = Condition(
+            id = Id("12345"),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = "Non-small cell lung cancer".asFHIR()
+                    )
+                )
+            ),
+            subject = Reference(display = "reference".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
+                            code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        val qualified = profile.qualifies(condition)
+        assertFalse(qualified)
+    }
+    @Test
+    fun `does not qualify when category coding code is health-concern and system is for problem-list-item`() {
+        val condition = Condition(
+            id = Id("12345"),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = "Non-small cell lung cancer".asFHIR()
+                    )
+                )
+            ),
+            subject = Reference(display = "reference".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("health-concern")
+                        )
+                    )
+                )
+            )
+        )
+
+        val qualified = profile.qualifies(condition)
+        assertFalse(qualified)
+    }
+
+    @Test
     fun `qualifies for problem list item`() {
         val condition = Condition(
             id = Id("12345"),
@@ -209,7 +268,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 CodeableConcept(
                     coding = listOf(
                         Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
                             code = Code("health-concern")
                         )
                     )
@@ -239,8 +298,8 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 CodeableConcept(
                     coding = listOf(
                         Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("problem-list-item")
+                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
+                            code = Code("health-concern")
                         )
                     )
                 )
@@ -255,6 +314,106 @@ class RoninConditionProblemsAndHealthConcernsTest {
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ Condition.identifier\n" +
                 "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Condition.identifier",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with incorrect code and system problem-list-item code`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = "Non-small cell lung cancer".asFHIR()
+                    )
+                )
+            ),
+            subject = Reference(display = "reference".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
+                            code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            profile.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_CNDPAHC_001: One of the following condition categories required for US Core Condition " +
+                "Problem and Health Concerns profile: problem-list-item, health-concern @ Condition.category",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with incorrect code and system health-concern code`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = "Non-small cell lung cancer".asFHIR()
+                    )
+                )
+            ),
+            subject = Reference(display = "reference".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("health-concern")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            profile.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_CNDPAHC_001: One of the following condition categories required for US Core Condition " +
+                "Problem and Health Concerns profile: problem-list-item, health-concern @ Condition.category",
             exception.message
         )
     }
@@ -284,8 +443,8 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 CodeableConcept(
                     coding = listOf(
                         Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("problem-list-item")
+                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
+                            code = Code("health-concern")
                         )
                     )
                 )
@@ -525,8 +684,8 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 CodeableConcept(
                     coding = listOf(
                         Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("problem-list-item")
+                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
+                            code = Code("health-concern")
                         )
                     )
                 )
@@ -592,7 +751,48 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
-    fun `validate succeeds`() {
+    fun `validate succeeds with health-concern`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("254637007"),
+                        display = "Non-small cell lung cancer".asFHIR()
+                    )
+                )
+            ),
+            subject = Reference(display = "reference".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
+                            code = Code("health-concern")
+                        )
+                    )
+                )
+            )
+        )
+
+        profile.validate(condition, null).alertIfErrors()
+    }
+
+    @Test
+    fun `validate succeeds with problem-list-item`() {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
@@ -1048,8 +1248,8 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 CodeableConcept(
                     coding = listOf(
                         Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("problem-list-item")
+                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
+                            code = Code("health-concern")
                         )
                     )
                 )
@@ -1107,8 +1307,8 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 CodeableConcept(
                     coding = listOf(
                         Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("problem-list-item")
+                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
+                            code = Code("health-concern")
                         )
                     )
                 )
@@ -1186,6 +1386,10 @@ class RoninConditionProblemsAndHealthConcernsTest {
                         Coding(
                             system = CodeSystem.CONDITION_CATEGORY.uri,
                             code = Code("problem-list-item")
+                        ),
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
+                            code = Code("health-concern")
                         )
                     )
                 )
@@ -1197,7 +1401,41 @@ class RoninConditionProblemsAndHealthConcernsTest {
 
     @Test
     // Note: This test may be temporary while we are waiting on concept mapping data.
-    fun `validate succeeds with empty code codings`() {
+    fun `validate succeeds with empty code codings and health-concern`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
+            ),
+            code = CodeableConcept(),
+            subject = Reference(display = "reference".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
+                            code = Code("health-concern")
+                        )
+                    )
+                )
+            )
+        )
+
+        profile.validate(condition, null).alertIfErrors()
+    }
+
+    @Test
+    // Note: This test may be temporary while we are waiting on concept mapping data.
+    fun `validate succeeds with empty code codings and problem-list-item`() {
         val condition = Condition(
             id = Id("12345"),
             identifier = listOf(
@@ -1220,6 +1458,44 @@ class RoninConditionProblemsAndHealthConcernsTest {
                         Coding(
                             system = CodeSystem.CONDITION_CATEGORY.uri,
                             code = Code("problem-list-item")
+                        )
+                    )
+                )
+            )
+        )
+
+        profile.validate(condition, null).alertIfErrors()
+    }
+
+    @Test
+    // Note: This test may be temporary while we are waiting on concept mapping data.
+    fun `validate succeeds with multiple categories`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
+            ),
+            code = CodeableConcept(),
+            subject = Reference(display = "reference".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("problem-list-item")
+                        ),
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
+                            code = Code("health-concern")
                         )
                     )
                 )
