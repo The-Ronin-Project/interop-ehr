@@ -308,6 +308,51 @@ class EpicClientTest {
     }
 
     @Test
+    fun `ensure post operation returns correctly with parameters`() {
+        val mockWebServer = MockWebServer()
+        mockWebServer.enqueue(
+            MockResponse().setBody(validPatientSearchJson).setHeader("Content-Type", "application/json")
+        )
+        mockWebServer.start()
+
+        // Set up mock tenant service
+        val tenantId = "TEST_EPIC"
+        val tenant = createTestTenant(
+            clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            serviceEndpoint = mockWebServer.url("/FHIR-test").toString(),
+            privateKey = "testPrivateKey",
+            tenantMnemonic = tenantId
+        )
+
+        val authentication = EpicAuthentication("accessToken", "tokenType", 3600, "scope")
+        every { authenticationBroker.getAuthentication(tenant) } returns authentication
+
+        // Execute test
+        var url: Url
+        val response = runBlocking {
+            val httpResponse =
+                epicClient.post(
+                    tenant,
+                    "api/epic/2013/Scheduling/Patient/GETPATIENTAPPOINTMENTS/GetPatientAppointments",
+                    GetProviderAppointmentRequest(
+                        "1",
+                        "EMP",
+                        "1/1/2015",
+                        "11/1/2015",
+                        "false",
+                        providers = listOf()
+                    ),
+                    mapOf("string" to "string", "list" to listOf("1", "2"))
+                )
+            url = httpResponse.request.url
+            httpResponse.bodyAsText()
+        }
+        assertTrue(url.toString().endsWith("?string=string&list=1&list=2"))
+        // Validate Response
+        assertEquals(validPatientSearchJson, response)
+    }
+
+    @Test
     fun `ensure get operation correctly encodes parameters`() {
         val mockWebServer = MockWebServer()
         mockWebServer.enqueue(

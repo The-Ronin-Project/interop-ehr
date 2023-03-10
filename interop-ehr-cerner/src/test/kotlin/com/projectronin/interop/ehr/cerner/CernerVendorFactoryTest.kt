@@ -123,4 +123,9 @@ class CernerVendorFactoryTest {
     fun `returns NotImplementedError for OrganizationService`() {
         assertThrows<NotImplementedError> { vendorFactory.organizationService }
     }
+
+    @Test
+    fun `returns NotImplementedError for OnboardFlagService`() {
+        assertThrows<NotImplementedError> { vendorFactory.onboardFlagService }
+    }
 }

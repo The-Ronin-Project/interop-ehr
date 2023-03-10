@@ -4,6 +4,7 @@ import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.MedicationRequestService
 import com.projectronin.interop.ehr.MedicationService
 import com.projectronin.interop.ehr.ObservationService
+import com.projectronin.interop.ehr.OnboardFlagService
 import com.projectronin.interop.ehr.OrganizationService
 import com.projectronin.interop.ehr.PractitionerRoleService
 import com.projectronin.interop.ehr.factory.VendorFactory
@@ -35,5 +36,7 @@ class CernerVendorFactory(
     override val medicationRequestService: MedicationRequestService
         get() = TODO("Not yet implemented")
     override val organizationService: OrganizationService
+        get() = TODO("Not yet implemented")
+    override val onboardFlagService: OnboardFlagService
         get() = TODO("Not yet implemented")
 }

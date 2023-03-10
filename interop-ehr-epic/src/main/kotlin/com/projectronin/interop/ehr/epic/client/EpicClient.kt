@@ -31,7 +31,7 @@ class EpicClient(
      * Performs a json POST operation for the service url + [urlPart] and the [requestBody] specified for the [tenant]
      *  and returns the [HttpResponse].
      */
-    suspend fun post(tenant: Tenant, urlPart: String, requestBody: Any): HttpResponse {
+    suspend fun post(tenant: Tenant, urlPart: String, requestBody: Any, parameters: Map<String, Any?> = mapOf()): HttpResponse {
         logger.debug { "Started POST call to tenant: ${tenant.mnemonic}" }
 
         // Authenticate
@@ -48,6 +48,15 @@ class EpicClient(
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                     setBody(requestBody)
+                    parameters.map {
+                        val key = it.key
+                        val value = it.value
+                        if (value is List<*>) {
+                            value.forEach { repetition ->
+                                parameter(key, repetition)
+                            }
+                        } else value?.let { parameter(key, value) }
+                    }
                 }
             }
 
