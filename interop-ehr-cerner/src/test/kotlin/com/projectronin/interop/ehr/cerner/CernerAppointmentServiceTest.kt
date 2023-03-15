@@ -43,7 +43,7 @@ class CernerAppointmentServiceTest {
             clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
             authEndpoint = "https://example.org",
             secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-            timezone = "America/Chicago"
+            timezone = "UTC-06:00"
         )
     }
 
