@@ -49,6 +49,21 @@ abstract class BaseRoninVitalSign(
         location = LocationContext(Observation::category)
     )
 
+    private val singleObservationCodeError = FHIRError(
+        code = "RONIN_VSOBS_001",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Coding list must contain exactly 1 entry",
+        location = LocationContext(Observation::code)
+    )
+
+    override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
+        validation.apply {
+            element.code?.coding?.let {
+                checkTrue(it.size == 1, singleObservationCodeError, parentContext)
+            }
+        }
+    }
+
     /**
      * Validates the [element] against Ronin rules for vital sign Observations.
      */
@@ -134,7 +149,8 @@ abstract class BaseRoninVitalSign(
      * Validates the Observation against rules from Ronin, USCore, specific Observation type, and vital signs.
      */
     override fun validate(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validate(element, parentContext, validation)
+        super.validate(element, parentContext, validation) // Ronin, USCore
+        validateObservation(element, parentContext, validation)
         validateVitalSign(element, parentContext, validation)
     }
 }

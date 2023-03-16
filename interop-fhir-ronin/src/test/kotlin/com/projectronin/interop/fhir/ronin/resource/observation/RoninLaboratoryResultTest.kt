@@ -608,6 +608,68 @@ class RoninLaboratoryResultTest {
     }
 
     @Test
+    fun `validate fails if more than 1 entry in coding list for code when Observation type is a laboratory`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code-1"),
+                        display = "some-display-1".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    ),
+                    Coding(
+                        code = Code("some-code-2"),
+                        display = "some-display-2".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    ),
+                    Coding(
+                        code = Code("some-code-3"),
+                        display = "some-display-3".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_LABOBS_002: Coding list must contain exactly 1 entry @ Observation.code",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate succeeds`() {
         val observation = Observation(
             id = Id("123"),

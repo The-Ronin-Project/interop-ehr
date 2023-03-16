@@ -5,6 +5,8 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.validate.LocationContext
+import com.projectronin.interop.fhir.validate.Validation
 import org.springframework.stereotype.Component
 
 /**
@@ -21,4 +23,6 @@ class RoninObservation(normalizer: Normalizer, localizer: Localizer) :
     override fun qualifies(resource: Observation): Boolean {
         return true
     }
+
+    override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {}
 }

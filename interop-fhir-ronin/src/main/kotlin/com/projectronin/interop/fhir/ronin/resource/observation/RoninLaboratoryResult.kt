@@ -94,6 +94,13 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
         location = LocationContext(Observation::code)
     )
 
+    private val singleObservationCodeError = FHIRError(
+        code = "RONIN_LABOBS_002",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Coding list must contain exactly 1 entry",
+        location = LocationContext(Observation::code)
+    )
+
     override fun validateRonin(element: Observation, parentContext: LocationContext, validation: Validation) {
         super.validateRonin(element, parentContext, validation)
         validation.apply {
@@ -144,7 +151,6 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
     }
 
     override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validateObservation(element, parentContext, validation)
         validation.apply {
             checkTrue(
                 element.category.flatMap { it.coding }
@@ -152,7 +158,19 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
                 requiredLaboratoryCodeError,
                 parentContext
             )
+            val codingList = element.code?.coding
+            ifNotNull(codingList) {
+                checkTrue((codingList!!.size == 1), singleObservationCodeError, parentContext)
+            }
         }
+    }
+
+    /**
+     * Validates the Observation against rules from Ronin, USCore, and laboratory Observation type.
+     */
+    override fun validate(element: Observation, parentContext: LocationContext, validation: Validation) {
+        super.validate(element, parentContext, validation) // Ronin, USCore
+        validateObservation(element, parentContext, validation)
     }
 
     private val requiredIdError = RequiredFieldError(Observation::id)

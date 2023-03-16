@@ -139,25 +139,10 @@ abstract class BaseRoninObservation(
     override fun validateUSCore(element: Observation, parentContext: LocationContext, validation: Validation) {}
 
     /**
-     * Validates the [element] against Ronin rules for a specific Observation type.
-     * Type is defined by the Ronin Common Data Model based on Observation.category and Observation.code.
+     * To validate subclasses against Ronin rules for a specific Observation type.
+     * Observation type is defined by Ronin Common Data Model based on Observation.category and Observation.code.
      */
-    open fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
-        validation.apply {
-            val codingList = element.code?.coding
-            ifNotNull(codingList) {
-                checkTrue((codingList!!.size <= 1), singleObservationCodeError, parentContext)
-            }
-        }
-    }
-
-    /**
-     * Validates the Observation against rules from Ronin, USCore, and specific Observation type profiles.
-     */
-    override fun validate(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validate(element, parentContext, validation)
-        validateObservation(element, parentContext, validation)
-    }
+    abstract fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation)
 
     private val requiredIdError = RequiredFieldError(Observation::id)
 

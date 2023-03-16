@@ -45,6 +45,8 @@ class RoninObservationTest {
         every { localize(any(), tenant) } answers { firstArg() }
     }
     private val roninObservation = RoninObservation(normalizer, localizer)
+    private val roninVitalSign = RoninBodyTemperature(normalizer, localizer)
+    private val roninLaboratory = RoninLaboratoryResult(normalizer, localizer)
 
     @Test
     fun `qualifies when Observation code has the wrong system for vital signs`() {
@@ -342,7 +344,7 @@ class RoninObservationTest {
     }
 
     @Test
-    fun `validate fails if more than 1 entry in coding list for code`() {
+    fun `validate succeeds if more than 1 entry in coding list for code when Observation type is not known`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
@@ -391,15 +393,7 @@ class RoninObservationTest {
             subject = Reference(reference = "Patient/1234".asFHIR())
         )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_OBS_001: Coding list is restricted to 1 entry @ Observation.code",
-            exception.message
-        )
+        roninObservation.validate(observation, null).alertIfErrors()
     }
 
     @Test

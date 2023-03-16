@@ -21,7 +21,6 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
-import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -42,15 +41,7 @@ class BaseRoninVitalSignTest {
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
-    private val roninVitalSign =
-        object : BaseRoninVitalSign(R4ObservationValidator, "profile", normalizer, localizer) {
-            override fun validateObservation(
-                element: Observation,
-                parentContext: LocationContext,
-                validation: Validation
-            ) {
-            }
-        }
+    private val roninVitalSign = object : BaseRoninVitalSign(R4ObservationValidator, "profile", normalizer, localizer) {}
 
     @Test
     fun `validate fails if no vital signs category`() {
@@ -313,6 +304,68 @@ class BaseRoninVitalSignTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Observation.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if more than 1 entry in coding list for code when Observation type is a vital sign`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code-1"),
+                        display = "some-display-1".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    ),
+                    Coding(
+                        code = Code("some-code-2"),
+                        display = "some-display-2".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    ),
+                    Coding(
+                        code = Code("some-code-3"),
+                        display = "some-display-3".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("vital-signs")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninVitalSign.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_VSOBS_001: Coding list must contain exactly 1 entry @ Observation.code",
             exception.message
         )
     }
