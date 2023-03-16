@@ -71,7 +71,7 @@ class RoninConditionEncounterDiagnosisTest {
                         display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
                     )
                 ),
-                text = "code".asFHIR(),
+                text = "code".asFHIR()
             ),
             subject = Reference(display = "reference".asFHIR())
         )
@@ -93,9 +93,9 @@ class RoninConditionEncounterDiagnosisTest {
                         display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
                     )
                 ),
-                text = "code".asFHIR(),
+                text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(display = "reference".asFHIR())
         )
 
         val qualified = profile.qualifies(condition)
@@ -124,9 +124,9 @@ class RoninConditionEncounterDiagnosisTest {
                         display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
                     )
                 ),
-                text = "code".asFHIR(),
+                text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(display = "reference".asFHIR())
         )
 
         val qualified = profile.qualifies(condition)
@@ -155,7 +155,7 @@ class RoninConditionEncounterDiagnosisTest {
                         display = FHIRString("Malignant neoplasm of unspecified kidney except renal pelvis")
                     )
                 ),
-                text = "code".asFHIR(),
+                text = "code".asFHIR()
             ),
             subject = Reference(display = "reference".asFHIR())
         )
@@ -186,9 +186,9 @@ class RoninConditionEncounterDiagnosisTest {
                         display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
                     )
                 ),
-                text = "code".asFHIR(),
+                text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(display = "reference".asFHIR())
         )
 
         val qualified = profile.qualifies(condition)
@@ -207,7 +207,7 @@ class RoninConditionEncounterDiagnosisTest {
                         display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
                     )
                 ),
-                text = "code".asFHIR(),
+                text = "code".asFHIR()
             ),
             subject = Reference(display = "reference".asFHIR()),
             category = listOf(
@@ -294,7 +294,7 @@ class RoninConditionEncounterDiagnosisTest {
             ),
             code = CodeableConcept(
                 coding = listOf(),
-                text = "code".asFHIR(),
+                text = "code".asFHIR()
             ),
             subject = Reference(display = "reference".asFHIR()),
             category = listOf(
@@ -344,7 +344,7 @@ class RoninConditionEncounterDiagnosisTest {
                         display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
                     )
                 ),
-                text = "code".asFHIR(),
+                text = "code".asFHIR()
             ),
             subject = Reference(display = "reference".asFHIR()),
             category = listOf(
@@ -391,10 +391,10 @@ class RoninConditionEncounterDiagnosisTest {
                 coding = listOf(
                     Coding(
                         system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
-                        code = Code("C64.9"),
+                        code = Code("C64.9")
                     )
                 ),
-                text = "code".asFHIR(),
+                text = "code".asFHIR()
             ),
             subject = Reference(display = "reference".asFHIR()),
             category = listOf(
@@ -444,7 +444,7 @@ class RoninConditionEncounterDiagnosisTest {
                         display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
                     )
                 ),
-                text = "code".asFHIR(),
+                text = "code".asFHIR()
             ),
             subject = Reference(display = "reference".asFHIR()),
             category = listOf(
@@ -494,7 +494,7 @@ class RoninConditionEncounterDiagnosisTest {
                         display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
                     )
                 ),
-                text = "code".asFHIR(),
+                text = "code".asFHIR()
             ),
             subject = Reference(display = "reference".asFHIR()),
             category = listOf(
@@ -555,8 +555,8 @@ class RoninConditionEncounterDiagnosisTest {
                         display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
                     )
                 ),
-                text = "code".asFHIR(),
-            ),
+                text = "code".asFHIR()
+            )
         )
 
         mockkObject(R4ConditionValidator)
@@ -616,8 +616,8 @@ class RoninConditionEncounterDiagnosisTest {
                         display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
                     )
                 ),
-                text = "code".asFHIR(),
-            ),
+                text = "code".asFHIR()
+            )
         )
 
         profile.validate(condition, null).alertIfErrors()
@@ -645,8 +645,8 @@ class RoninConditionEncounterDiagnosisTest {
                         display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
                     )
                 ),
-                text = "code".asFHIR(),
-            ),
+                text = "code".asFHIR()
+            )
         )
 
         val (transformed, _) = profile.transform(condition, tenant)
@@ -1096,8 +1096,8 @@ class RoninConditionEncounterDiagnosisTest {
         assertEquals(listOf<Annotation>(), transformed.note)
     }
 
-    @Test
     // Note: This test may be temporary while we are waiting on concept mapping data.
+    @Test
     fun `validate succeeds with partial code codings`() {
         val condition = Condition(
             id = Id("12345"),
@@ -1132,22 +1132,22 @@ class RoninConditionEncounterDiagnosisTest {
                     ),
                     Coding(
                         system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
-                        code = Code("C64.9"),
+                        code = Code("C64.9")
                     ),
                     Coding(
                         code = Code("C64.9"),
                         display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
                     )
                 ),
-                text = "code".asFHIR(),
-            ),
+                text = "code".asFHIR()
+            )
         )
 
         profile.validate(condition, null).alertIfErrors()
     }
 
-    @Test
     // Note: This test may be temporary while we are waiting on concept mapping data.
+    @Test
     fun `validate succeeds with no code codings`() {
         val condition = Condition(
             id = Id("12345"),
@@ -1175,8 +1175,8 @@ class RoninConditionEncounterDiagnosisTest {
                 )
             ),
             code = CodeableConcept(
-                text = "code".asFHIR(),
-            ),
+                text = "code".asFHIR()
+            )
         )
 
         profile.validate(condition, null).alertIfErrors()

@@ -278,7 +278,7 @@ class EpicConditionServiceTest {
         coEvery {
             epicClient.get(
                 tenant,
-                "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition?patient=eovSKnwDlsv-8MsEzCJO3BA3&clinical-status=active,inactive,resolved&category=problem-list-item",
+                "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition?patient=eovSKnwDlsv-8MsEzCJO3BA3&clinical-status=active,inactive,resolved&category=problem-list-item"
             )
         } returns httpResponse
 

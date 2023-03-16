@@ -171,7 +171,7 @@ class TenantServiceTest {
             patientMRNTypeText = "patientMRNTypeText",
             hsi = epicHsiValue,
             departmentInternalSystem = epicDepartmentSystem,
-            patientOnboardedFlagId = epicPatientOnboardedFlagId,
+            patientOnboardedFlagId = epicPatientOnboardedFlagId
         )
     )
 
@@ -201,7 +201,7 @@ class TenantServiceTest {
             patientMRNTypeText = "patientMRNTypeText",
             hsi = epicHsiValue,
             departmentInternalSystem = epicDepartmentSystem,
-            patientOnboardedFlagId = epicPatientOnboardedFlagId,
+            patientOnboardedFlagId = epicPatientOnboardedFlagId
         )
     )
 
@@ -377,7 +377,7 @@ class TenantServiceTest {
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = epicHsiValue,
                 departmentInternalSystem = epicDepartmentSystem,
-                patientOnboardedFlagId = epicPatientOnboardedFlagId,
+                patientOnboardedFlagId = epicPatientOnboardedFlagId
             )
         )
 
@@ -439,7 +439,7 @@ class TenantServiceTest {
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = epicHsiValue,
                 departmentInternalSystem = epicDepartmentSystem,
-                patientOnboardedFlagId = epicPatientOnboardedFlagId,
+                patientOnboardedFlagId = epicPatientOnboardedFlagId
             )
         )
 
@@ -563,7 +563,7 @@ class TenantServiceTest {
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = epicHsiValue,
                 departmentInternalSystem = epicDepartmentSystem,
-                patientOnboardedFlagId = epicPatientOnboardedFlagId,
+                patientOnboardedFlagId = epicPatientOnboardedFlagId
             )
         )
         val tenantDO = mockk<TenantDO> {

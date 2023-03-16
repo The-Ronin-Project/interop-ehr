@@ -23,13 +23,13 @@ class RoninMedication(normalizer: Normalizer, localizer: Localizer) :
     USCoreBasedProfile<Medication>(
         R4MedicationValidator,
         RoninProfile.MEDICATION.value,
-        normalizer, localizer
+        normalizer,
+        localizer
     ) {
     private val requiredCodeError = RequiredFieldError(Medication::code)
 
     override fun validateRonin(element: Medication, parentContext: LocationContext, validation: Validation) {
         validation.apply {
-
             requireRoninIdentifiers(element.identifier, parentContext, this)
 
             requireCodeableConcept("code", element.code, parentContext, this)

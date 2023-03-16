@@ -1203,7 +1203,7 @@ class RoninHeartRateTest {
                         code = RoninHeartRate.heartRateCode
                     )
                 ),
-                text = "Heart Rate".asFHIR(),
+                text = "Heart Rate".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -1261,7 +1261,7 @@ class RoninHeartRateTest {
                         code = RoninHeartRate.heartRateCode
                     )
                 ),
-                text = "Heart Rate".asFHIR(),
+                text = "Heart Rate".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -1319,7 +1319,7 @@ class RoninHeartRateTest {
                         code = RoninHeartRate.heartRateCode
                     )
                 ),
-                text = "Heart Rate".asFHIR(),
+                text = "Heart Rate".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -1377,7 +1377,7 @@ class RoninHeartRateTest {
                         code = RoninHeartRate.heartRateCode
                     )
                 ),
-                text = "Heart Rate".asFHIR(),
+                text = "Heart Rate".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(

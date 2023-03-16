@@ -21,7 +21,7 @@ class CernerConditionService(cernerClient: CernerClient) : ConditionService,
         tenant: Tenant,
         patientFhirId: String,
         conditionCategoryCode: String,
-        clinicalStatus: String,
+        clinicalStatus: String
     ): List<Condition> {
         return findConditionsByCodes(
             tenant,

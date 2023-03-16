@@ -5,7 +5,7 @@ package com.projectronin.interop.ehr.inputs
  */
 data class FHIRSearchToken(
     var system: String? = null,
-    val code: String,
+    val code: String
 ) {
     init {
         if (code.isEmpty()) {

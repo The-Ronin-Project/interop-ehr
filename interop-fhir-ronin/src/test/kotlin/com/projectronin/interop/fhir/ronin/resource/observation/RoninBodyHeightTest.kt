@@ -1264,7 +1264,7 @@ class RoninBodyHeightTest {
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 ),
-                text = "Body Height".asFHIR(),
+                text = "Body Height".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -1322,7 +1322,7 @@ class RoninBodyHeightTest {
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 ),
-                text = "Body Height".asFHIR(),
+                text = "Body Height".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -1380,7 +1380,7 @@ class RoninBodyHeightTest {
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 ),
-                text = "Body Height".asFHIR(),
+                text = "Body Height".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -1438,7 +1438,7 @@ class RoninBodyHeightTest {
                         code = RoninBodyHeight.bodyHeightCode
                     )
                 ),
-                text = "Body Height".asFHIR(),
+                text = "Body Height".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(

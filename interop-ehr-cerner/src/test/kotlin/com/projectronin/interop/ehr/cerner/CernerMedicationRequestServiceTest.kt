@@ -89,7 +89,7 @@ class CernerMedicationRequestServiceTest {
             tenant,
             "fakeFaKEfAKefakE",
             null,
-            null,
+            null
         )
 
         assertEquals(validPatientIdBundle.entry.map { it.resource }, actual)
@@ -126,7 +126,7 @@ class CernerMedicationRequestServiceTest {
             tenant,
             "fakeFaKEfAKefakE",
             null,
-            null,
+            null
         )
 
         assertEquals(validPatientIdBundle.entry.map { it.resource }, actual)
@@ -164,7 +164,7 @@ class CernerMedicationRequestServiceTest {
                 tenant,
                 "fakeFaKEfAKefakE",
                 null,
-                LocalDate.of(2019, 11, 1),
+                LocalDate.of(2019, 11, 1)
             )
 
         assertEquals(validPatientIdBundle.entry.map { it.resource }, validResponse)
@@ -197,7 +197,7 @@ class CernerMedicationRequestServiceTest {
                 tenant,
                 "fakeFaKEfAKefakE",
                 LocalDate.of(2018, 1, 1),
-                null,
+                null
             )
 
         assertEquals(validPatientIdBundle.entry.map { it.resource }, validResponse)

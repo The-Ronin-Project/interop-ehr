@@ -131,7 +131,9 @@ class RoninContactPoint(private val conceptMapClient: ConceptMapClient) {
                         parentContext
                     )
                 }
-                if (systemPair == null) null else {
+                if (systemPair == null) {
+                    null
+                } else {
                     val systemTarget = systemPair.first.code?.value
                     validation.apply {
                         checkNotNull(
@@ -159,7 +161,9 @@ class RoninContactPoint(private val conceptMapClient: ConceptMapClient) {
                         parentContext
                     )
                 }
-                if (usePair == null) null else {
+                if (usePair == null) {
+                    null
+                } else {
                     val useTarget = usePair.first.code?.value
                     validation.apply {
                         checkNotNull(
@@ -178,7 +182,7 @@ class RoninContactPoint(private val conceptMapClient: ConceptMapClient) {
                 value = telecom.value,
                 use = mappedUse,
                 rank = telecom.rank,
-                period = telecom.period,
+                period = telecom.period
             )
         }
         return Pair(transformed, validation)

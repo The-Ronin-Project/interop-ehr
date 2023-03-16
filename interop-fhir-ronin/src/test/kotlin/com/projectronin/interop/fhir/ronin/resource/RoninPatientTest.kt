@@ -477,7 +477,7 @@ class RoninPatientTest {
                 )
             ),
             gender = AdministrativeGender.FEMALE.asCode(),
-            birthDate = Date("1975-07-05"),
+            birthDate = Date("1975-07-05")
         )
 
         roninPatient.validate(patient, null).alertIfErrors()
@@ -516,7 +516,7 @@ class RoninPatientTest {
                 )
             ),
             gender = AdministrativeGender.FEMALE.asCode(),
-            birthDate = Date("1975-07-05"),
+            birthDate = Date("1975-07-05")
         )
 
         val exception = assertThrows<IllegalArgumentException> {

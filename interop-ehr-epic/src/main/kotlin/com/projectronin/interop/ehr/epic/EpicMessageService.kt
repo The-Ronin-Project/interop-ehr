@@ -97,9 +97,8 @@ class EpicMessageService(
 
     private fun translateRecipients(
         recipients: List<EHRRecipient>,
-        tenant: Tenant,
+        tenant: Tenant
     ): List<SendMessageRecipient> {
-
         // The Epic implementation of sendMessage expects the VendorIdentifier to be an IdentifierVendorIdentifier.
         // with a value. If it isn't, this will rightfully throw an exception.
         val idList =

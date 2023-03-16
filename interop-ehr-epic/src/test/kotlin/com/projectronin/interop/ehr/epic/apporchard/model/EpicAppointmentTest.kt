@@ -109,7 +109,7 @@ class EpicAppointmentTest {
             ),
             patientIDs = listOf(
                 IDType(id = "12345", type = "Internal")
-            ),
+            )
         )
 
         assertEquals("12345", appointment.patientId)
@@ -148,7 +148,7 @@ class EpicAppointmentTest {
             ),
             visitTypeName = "Test visit type",
             contactIDs = listOf(),
-            patientIDs = listOf(),
+            patientIDs = listOf()
         )
         val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(appointment)
 
@@ -232,7 +232,7 @@ class EpicAppointmentTest {
             ),
             visitTypeName = "Test visit type",
             contactIDs = listOf(),
-            patientIDs = listOf(),
+            patientIDs = listOf()
         )
 
         assertThrows<NoSuchElementException> {

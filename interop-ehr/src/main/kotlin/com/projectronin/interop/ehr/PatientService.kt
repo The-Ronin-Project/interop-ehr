@@ -8,7 +8,7 @@ import java.time.LocalDate
 /**
  * Defines the functionality for an EHR's patient service.
  */
-interface PatientService : FHIRService <Patient> {
+interface PatientService : FHIRService<Patient> {
     /**
      * Finds the Bundle of patients associated to the requested
      * [tenant], [birthDate], [givenName], and [familyName] from an EHR tenant.

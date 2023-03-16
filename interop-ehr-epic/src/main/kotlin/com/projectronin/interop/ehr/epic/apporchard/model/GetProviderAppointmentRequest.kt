@@ -26,5 +26,5 @@ data class GetProviderAppointmentRequest(
     val departments: List<IDType>? = listOf(),
     val subgroups: List<Any>? = listOf(),
     val extraExtensions: List<Any>? = listOf(),
-    val includeAllStatuses: String? = "true",
+    val includeAllStatuses: String? = "true"
 )

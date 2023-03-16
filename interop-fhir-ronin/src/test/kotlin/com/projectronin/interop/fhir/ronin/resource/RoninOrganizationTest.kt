@@ -249,7 +249,7 @@ class RoninOrganizationTest {
                             display = "Healthcare Provider".asFHIR()
                         )
                     )
-                ),
+                )
             ),
             name = "Organization Name".asFHIR(),
             alias = listOf(

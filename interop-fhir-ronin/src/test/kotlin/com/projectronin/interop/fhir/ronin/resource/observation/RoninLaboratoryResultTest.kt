@@ -1310,7 +1310,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = CodeSystem.LOINC.uri,
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),
@@ -1373,7 +1373,7 @@ class RoninLaboratoryResultTest {
                     Coding(
                         code = Code("some-code"),
                         display = "some-display".asFHIR(),
-                        system = CodeSystem.LOINC.uri,
+                        system = CodeSystem.LOINC.uri
                     )
                 )
             ),

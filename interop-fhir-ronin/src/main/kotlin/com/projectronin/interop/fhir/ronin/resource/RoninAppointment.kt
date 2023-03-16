@@ -123,7 +123,7 @@ class RoninAppointment(private val conceptMapClient: ConceptMapClient, normalize
             meta = normalized.meta.transform(),
             identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier(),
             extension = normalized.extension + statusExtension,
-            status = statusValue,
+            status = statusValue
         )
         return Pair(transformed, validation)
     }

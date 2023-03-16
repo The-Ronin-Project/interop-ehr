@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component
 @Component
 class TransformManager(private val validationClient: ValidationClient) {
     val logger = KotlinLogging.logger {}
+
     /**
      * Attempts to transform the [resource] with the [transformer] for [tenant]. If transformation was not possible,
      * null will be returned. Any issues that occur during transformation will be reported to the Data Ingestion Validation

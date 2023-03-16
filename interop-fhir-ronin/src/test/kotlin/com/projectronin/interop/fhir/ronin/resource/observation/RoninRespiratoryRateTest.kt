@@ -1209,7 +1209,7 @@ class RoninRespiratoryRateTest {
                         code = RoninRespiratoryRate.respiratoryRateCode
                     )
                 ),
-                text = "Respiratory Rate".asFHIR(),
+                text = "Respiratory Rate".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -1267,7 +1267,7 @@ class RoninRespiratoryRateTest {
                         code = RoninRespiratoryRate.respiratoryRateCode
                     )
                 ),
-                text = "Respiratory Rate".asFHIR(),
+                text = "Respiratory Rate".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -1325,7 +1325,7 @@ class RoninRespiratoryRateTest {
                         code = RoninRespiratoryRate.respiratoryRateCode
                     )
                 ),
-                text = "Respiratory Rate".asFHIR(),
+                text = "Respiratory Rate".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -1383,7 +1383,7 @@ class RoninRespiratoryRateTest {
                         code = RoninRespiratoryRate.respiratoryRateCode
                     )
                 ),
-                text = "Respiratory Rate".asFHIR(),
+                text = "Respiratory Rate".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(

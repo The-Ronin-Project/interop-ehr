@@ -21,7 +21,7 @@ class EpicEncounterService(epicClient: EpicClient) : EncounterService, EpicFHIRS
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate,
-        endDate: LocalDate,
+        endDate: LocalDate
     ):
         List<Encounter> {
         val parameters = mapOf(

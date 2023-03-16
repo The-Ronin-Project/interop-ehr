@@ -21,7 +21,7 @@ class CernerEncounterService(cernerClient: CernerClient) : EncounterService, Cer
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate,
-        endDate: LocalDate,
+        endDate: LocalDate
     ):
         List<Encounter> {
         val parameters = mapOf(

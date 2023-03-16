@@ -23,5 +23,5 @@ data class GetPatientAppointmentsRequest(
     @field:Schema(example = "External", type = "string")
     val userIDType: String? = "External",
     @field:Schema(example = "true", type = "string")
-    val includeAllStatuses: String? = "true",
+    val includeAllStatuses: String? = "true"
 )

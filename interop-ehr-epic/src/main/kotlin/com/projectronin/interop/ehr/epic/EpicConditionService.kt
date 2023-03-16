@@ -45,9 +45,8 @@ class EpicConditionService(epicClient: EpicClient) : ConditionService, EpicFHIRS
         tenant: Tenant,
         patientFhirId: String,
         conditionCategoryCode: String,
-        clinicalStatus: String,
+        clinicalStatus: String
     ): List<Condition> {
-
         return findConditionsByCodes(
             tenant,
             patientFhirId,
@@ -61,12 +60,12 @@ class EpicConditionService(epicClient: EpicClient) : ConditionService, EpicFHIRS
         tenant: Tenant,
         patientFhirId: String,
         conditionCategoryCodes: List<FHIRSearchToken>,
-        clinicalStatusCodes: List<FHIRSearchToken>,
+        clinicalStatusCodes: List<FHIRSearchToken>
     ): List<Condition> {
         val parameters = mapOf(
             "patient" to patientFhirId,
             "category" to conditionCategoryCodes.toOrParams(),
-            "clinical-status" to clinicalStatusCodes.toOrParams(),
+            "clinical-status" to clinicalStatusCodes.toOrParams()
         )
 
         return getResourceListFromSearch(tenant, parameters)

@@ -199,7 +199,8 @@ class BaseRoninProfileTest {
     @Test
     fun `getExtensionOrEmptyList - not null codeableConcept`() {
         val locationTest = Location(
-            id = Id("123"), identifier = listOf(validTenantIdentifier, validFhirIdentifier),
+            id = Id("123"),
+            identifier = listOf(validTenantIdentifier, validFhirIdentifier),
             physicalType =
             CodeableConcept(
                 text = "b".asFHIR(),

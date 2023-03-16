@@ -46,6 +46,7 @@ class MirthTenantConfigDAOTest {
         every { availableBatchStart } returns null
         every { availableBatchEnd } returns null
     }
+
     @Test
     @DataSet(value = ["/dbunit/mirth-tenant-config/MirthTenantConfig.yaml"], cleanAfter = true)
     fun `getAll works`() {

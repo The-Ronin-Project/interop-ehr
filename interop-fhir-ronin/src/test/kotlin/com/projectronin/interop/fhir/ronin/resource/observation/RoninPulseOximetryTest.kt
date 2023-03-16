@@ -910,7 +910,7 @@ class RoninPulseOximetryTest {
                         text = "Flow Rate".asFHIR()
                     ),
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
-                ),
+                )
             )
         )
 
@@ -1729,7 +1729,7 @@ class RoninPulseOximetryTest {
                         text = "Concentration".asFHIR()
                     ),
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
-                ),
+                )
             )
         )
 
@@ -3014,7 +3014,7 @@ class RoninPulseOximetryTest {
                         code = RoninPulseOximetry.O2SatCode
                     )
                 ),
-                text = "Pulse Oximetry".asFHIR(),
+                text = "Pulse Oximetry".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -3077,7 +3077,7 @@ class RoninPulseOximetryTest {
                         code = RoninPulseOximetry.O2SatCode
                     )
                 ),
-                text = "Pulse Oximetry".asFHIR(),
+                text = "Pulse Oximetry".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -3140,7 +3140,7 @@ class RoninPulseOximetryTest {
                         code = RoninPulseOximetry.O2SatCode
                     )
                 ),
-                text = "Pulse Oximetry".asFHIR(),
+                text = "Pulse Oximetry".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(

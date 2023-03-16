@@ -117,15 +117,17 @@ class ConceptMapClient(private val ociClient: OCIClient) {
             // find matching registry entry based on mapURL
             currentRegistry.find { old -> old.registry_uuid == new.registry_uuid }?.let { old ->
                 // load a new version. if tenant is null, it's a 'universal' map we should also load.
-                if (old.version != new.version && new.tenant_id in listOf(tenant.mnemonic, null))
+                if (old.version != new.version && new.tenant_id in listOf(tenant.mnemonic, null)) {
                     new.map = getConceptMap(new.filename)
-                // otherwise copy from the old map
-                else
+                } // otherwise copy from the old map
+                else {
                     new.map = old.map
+                }
             } ?: run {
                 // a new ConceptMap was added
-                if (new.tenant_id in listOf(tenant.mnemonic, null))
+                if (new.tenant_id in listOf(tenant.mnemonic, null)) {
                     new.map = getConceptMap(new.filename)
+                }
             }
         }
         ConceptMapCache.setNewRegistry(newRegistry, tenant)

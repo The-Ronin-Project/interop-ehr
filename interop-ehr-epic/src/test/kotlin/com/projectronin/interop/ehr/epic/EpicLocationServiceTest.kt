@@ -46,6 +46,7 @@ internal class EpicLocationServiceTest {
 
         assertEquals(mapOf("12345" to location1.resource, "67890" to location2.resource), response)
     }
+
     @Test
     fun `getLocationsByFHIRId - chunk works`() {
         val smallLocationService = EpicLocationService(epicClient, 2)
@@ -89,7 +90,8 @@ internal class EpicLocationServiceTest {
             smallLocationService.getLocationsByFHIRId(tenant, listOf("12345", "67890", "456"))
 
         assertEquals(
-            mapOf("12345" to location1.resource, "67890" to location2.resource, "456" to location3.resource), response
+            mapOf("12345" to location1.resource, "67890" to location2.resource, "456" to location3.resource),
+            response
         )
     }
 }

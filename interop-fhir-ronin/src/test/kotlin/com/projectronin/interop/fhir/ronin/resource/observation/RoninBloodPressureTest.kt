@@ -742,7 +742,7 @@ class RoninBloodPressureTest {
                         text = "Systolic".asFHIR()
                     ),
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
-                ),
+                )
             )
         )
 
@@ -1521,7 +1521,7 @@ class RoninBloodPressureTest {
                         text = "Diastolic".asFHIR()
                     ),
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
-                ),
+                )
             )
         )
 
@@ -2747,7 +2747,7 @@ class RoninBloodPressureTest {
                         code = RoninBloodPressure.bloodPressureCode
                     )
                 ),
-                text = "Blood Pressure".asFHIR(),
+                text = "Blood Pressure".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -2805,7 +2805,7 @@ class RoninBloodPressureTest {
                         code = RoninBloodPressure.bloodPressureCode
                     )
                 ),
-                text = "Blood Pressure".asFHIR(),
+                text = "Blood Pressure".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -2863,7 +2863,7 @@ class RoninBloodPressureTest {
                         code = RoninBloodPressure.bloodPressureCode
                     )
                 ),
-                text = "Blood Pressure".asFHIR(),
+                text = "Blood Pressure".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -2921,7 +2921,7 @@ class RoninBloodPressureTest {
                         code = RoninBloodPressure.bloodPressureCode
                     )
                 ),
-                text = "Blood Pressure".asFHIR(),
+                text = "Blood Pressure".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(

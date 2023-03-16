@@ -96,7 +96,7 @@ class CernerAppointmentServiceTest {
             tenant = tenant,
             providerIDs = listOf(
                 FHIRIdentifiers(id = Id("prac123"), identifiers = emptyList()),
-                FHIRIdentifiers(id = Id("prac345"), identifiers = emptyList()),
+                FHIRIdentifiers(id = Id("prac345"), identifiers = emptyList())
             ),
             startDate = LocalDate.of(2023, 1, 3),
             endDate = LocalDate.of(2023, 1, 7)
@@ -126,7 +126,7 @@ class CernerAppointmentServiceTest {
             tenant = tenant,
             providerIDs = listOf(
                 FHIRIdentifiers(id = Id("prac123"), identifiers = emptyList()),
-                FHIRIdentifiers(id = Id("prac345"), identifiers = emptyList()),
+                FHIRIdentifiers(id = Id("prac345"), identifiers = emptyList())
             ),
             startDate = LocalDate.of(2023, 1, 3),
             endDate = LocalDate.of(2023, 1, 7)
@@ -179,7 +179,7 @@ class CernerAppointmentServiceTest {
                             mockk {
                                 every { type } returns listOf(mockk { every { text?.value } returns "Patient" })
                                 every { actor } returns null
-                            },
+                            }
                         )
                     }
                 }
@@ -221,7 +221,7 @@ class CernerAppointmentServiceTest {
                             mockk {
                                 every { type } returns listOf(mockk { every { text?.value } returns "Patient" })
                                 every { actor?.reference } returns null
-                            },
+                            }
                         )
                     }
                 }

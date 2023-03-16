@@ -45,7 +45,6 @@ class RoninOrganization(normalizer: Normalizer, localizer: Localizer) :
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<Organization?, Validation> {
-
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier()

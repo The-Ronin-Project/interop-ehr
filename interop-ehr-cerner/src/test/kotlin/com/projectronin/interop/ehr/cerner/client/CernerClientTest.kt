@@ -52,7 +52,7 @@ class CernerClientTest {
             runBlocking {
                 cernerClient.get(
                     tenant,
-                    "/Patient/12724066",
+                    "/Patient/12724066"
                 )
             }
         }

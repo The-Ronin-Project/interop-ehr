@@ -1209,7 +1209,7 @@ class RoninBodyTemperatureTest {
                         code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 ),
-                text = "Body Temp".asFHIR(),
+                text = "Body Temp".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -1267,7 +1267,7 @@ class RoninBodyTemperatureTest {
                         code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 ),
-                text = "Body Temp".asFHIR(),
+                text = "Body Temp".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -1325,7 +1325,7 @@ class RoninBodyTemperatureTest {
                         code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 ),
-                text = "Body Temp".asFHIR(),
+                text = "Body Temp".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(
@@ -1383,7 +1383,7 @@ class RoninBodyTemperatureTest {
                         code = RoninBodyTemperature.bodyTemperatureCode
                     )
                 ),
-                text = "Body Temp".asFHIR(),
+                text = "Body Temp".asFHIR()
             ),
             category = listOf(
                 CodeableConcept(

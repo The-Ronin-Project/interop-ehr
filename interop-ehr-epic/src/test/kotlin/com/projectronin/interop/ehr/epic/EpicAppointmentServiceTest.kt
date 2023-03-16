@@ -2054,7 +2054,7 @@ class EpicAppointmentServiceTest {
                     ),
                     providerName = "Test Doc 1",
                     time = "3:30 PM"
-                ),
+                )
             ),
             visitTypeName = "Test visit type",
             contactIDs = listOf(
@@ -2083,7 +2083,7 @@ class EpicAppointmentServiceTest {
                     ),
                     providerName = "Test Doc 1",
                     time = "5:30 PM"
-                ),
+                )
             ),
             visitTypeName = "Test visit type",
             contactIDs = listOf(
@@ -2112,7 +2112,7 @@ class EpicAppointmentServiceTest {
                     ),
                     providerName = "Test Doc 1",
                     time = "7:30 PM"
-                ),
+                )
             ),
             visitTypeName = "Test visit type",
             contactIDs = listOf(
@@ -2279,7 +2279,7 @@ class EpicAppointmentServiceTest {
                     ),
                     providerName = "Test Doc 2",
                     time = "3:30 PM"
-                ),
+                )
             ),
             visitTypeName = "Test visit type",
             contactIDs = listOf(
@@ -2308,7 +2308,7 @@ class EpicAppointmentServiceTest {
                     ),
                     providerName = "Test Doc 1",
                     time = "5:30 PM"
-                ),
+                )
             ),
             visitTypeName = "Test visit type",
             contactIDs = listOf(
@@ -2337,7 +2337,7 @@ class EpicAppointmentServiceTest {
                     ),
                     providerName = "Test Doc 3",
                     time = "7:30 PM"
-                ),
+                )
             ),
             visitTypeName = "Test visit type",
             contactIDs = listOf(

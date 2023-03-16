@@ -47,7 +47,7 @@ abstract class EpicFHIRService<T : Resource<T>>(val epicClient: EpicClient) : FH
      */
     internal fun getBundleWithPaging(
         tenant: Tenant,
-        parameters: Map<String, Any?>,
+        parameters: Map<String, Any?>
     ): Bundle {
         logger.info { "Get started for ${tenant.mnemonic}" }
 
@@ -80,7 +80,7 @@ abstract class EpicFHIRService<T : Resource<T>>(val epicClient: EpicClient) : FH
      */
     internal fun getBundleWithPagingSTU3(
         tenant: Tenant,
-        parameters: Map<String, Any?>,
+        parameters: Map<String, Any?>
     ): Bundle {
         logger.info { "Get started for ${tenant.mnemonic}" }
 
@@ -107,7 +107,7 @@ abstract class EpicFHIRService<T : Resource<T>>(val epicClient: EpicClient) : FH
     }
 
     protected fun mergeResponses(
-        responses: List<Bundle>,
+        responses: List<Bundle>
     ): Bundle {
         var bundle = responses.first()
         responses.subList(1, responses.size).forEach { bundle = mergeBundles(bundle, it) }

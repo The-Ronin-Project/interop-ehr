@@ -372,7 +372,7 @@ class RoninMedicationTest {
                         version = "1.0.1".asFHIR(),
                         display = "i".asFHIR(),
                         userSelected = FHIRBoolean.TRUE
-                    ),
+                    )
                 )
             )
         )
@@ -459,11 +459,11 @@ class RoninMedicationTest {
                 Ingredient(
                     item = DynamicValue(
                         type = DynamicValueType.REFERENCE,
-                        value = Reference(reference = "Organization/item".asFHIR()),
+                        value = Reference(reference = "Organization/item".asFHIR())
                     ),
                     isActive = FHIRBoolean.TRUE
                 ),
-                Ingredient(isActive = FHIRBoolean.FALSE),
+                Ingredient(isActive = FHIRBoolean.FALSE)
             )
         )
 
@@ -649,7 +649,7 @@ class RoninMedicationTest {
                 Ingredient(
                     item = DynamicValue(
                         type = DynamicValueType.REFERENCE,
-                        value = Reference(reference = "Organization/item".asFHIR()),
+                        value = Reference(reference = "Organization/item".asFHIR())
                     ),
                     isActive = FHIRBoolean.TRUE,
                     strength = Ratio(
@@ -671,7 +671,7 @@ class RoninMedicationTest {
             batch = Batch(
                 lotNumber = "e".asFHIR(),
                 expirationDate = DateTime("2022-10-14")
-            ),
+            )
         )
 
         // transformation
@@ -843,7 +843,7 @@ class RoninMedicationTest {
             batch = Batch(
                 lotNumber = "e".asFHIR(),
                 expirationDate = DateTime("2022-10-14")
-            ),
+            )
         )
 
         // transformation
@@ -928,7 +928,7 @@ class RoninMedicationTest {
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
                 )
-            ),
+            )
             // required code attribute is missing
         )
         val (transformed, _) = roninMedication.transform(medication, tenant)

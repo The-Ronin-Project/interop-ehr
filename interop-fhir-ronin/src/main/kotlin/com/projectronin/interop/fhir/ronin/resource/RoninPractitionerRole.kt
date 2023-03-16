@@ -24,7 +24,9 @@ import org.springframework.stereotype.Component
 @Component
 class RoninPractitionerRole(normalizer: Normalizer, localizer: Localizer) : USCoreBasedProfile<PractitionerRole>(
     R4PractitionerRoleValidator,
-    RoninProfile.PRACTITIONER_ROLE.value, normalizer, localizer
+    RoninProfile.PRACTITIONER_ROLE.value,
+    normalizer,
+    localizer
 ) {
     private val requiredPractitionerError = RequiredFieldError(PractitionerRole::practitioner)
 

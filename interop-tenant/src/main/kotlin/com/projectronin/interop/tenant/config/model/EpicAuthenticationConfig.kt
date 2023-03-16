@@ -9,7 +9,7 @@ package com.projectronin.interop.tenant.config.model
 data class EpicAuthenticationConfig(
     override val authEndpoint: String,
     val publicKey: String,
-    val privateKey: String,
+    val privateKey: String
 ) : AuthenticationConfig {
     override fun toString(): String = this::class.simpleName!!
 }

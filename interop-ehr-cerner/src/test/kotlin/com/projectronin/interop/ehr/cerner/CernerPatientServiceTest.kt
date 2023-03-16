@@ -113,7 +113,7 @@ class CernerPatientServiceTest {
             mapOf(
                 "patient#1" to Identifier(
                     value = "9299".asFHIR(),
-                    system = Uri("urn:oid:2.16.840.1.113883.6.1000"),
+                    system = Uri("urn:oid:2.16.840.1.113883.6.1000")
                 )
             )
         )

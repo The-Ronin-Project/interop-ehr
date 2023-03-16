@@ -79,13 +79,15 @@ class RoninLocation(
 
         val contactPointTransformed = if (normalized.telecom.isNotEmpty()) {
             contactPoint.transform(normalized.telecom, tenant, LocationContext(Location::class), validation)
-        } else Pair(normalized.telecom, validation)
+        } else {
+            Pair(normalized.telecom, validation)
+        }
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier(),
             name = name,
-            telecom = contactPointTransformed.first ?: emptyList(),
+            telecom = contactPointTransformed.first ?: emptyList()
         )
         return Pair(transformed, contactPointTransformed.second)
     }

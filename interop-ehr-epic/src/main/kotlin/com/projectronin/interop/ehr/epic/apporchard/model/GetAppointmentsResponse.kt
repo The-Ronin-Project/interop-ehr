@@ -13,7 +13,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.exceptions.AppOrchardE
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class GetAppointmentsResponse(
     val appointments: List<EpicAppointment>?,
-    val error: String?,
+    val error: String?
 ) {
     fun errorOrAppointments(): List<EpicAppointment> = appointments ?: throw AppOrchardError(error)
 }

@@ -24,6 +24,6 @@ interface MedicationRequestService : FHIRService<MedicationRequest> {
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate?,
-        endDate: LocalDate?,
+        endDate: LocalDate?
     ): List<MedicationRequest>
 }

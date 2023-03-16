@@ -31,7 +31,7 @@ interface AppointmentService : FHIRService<Appointment> {
         tenant: Tenant,
         providerIDs: List<FHIRIdentifiers>,
         startDate: LocalDate,
-        endDate: LocalDate,
+        endDate: LocalDate
     ): AppointmentsWithNewPatients
 
     /**
@@ -41,6 +41,6 @@ interface AppointmentService : FHIRService<Appointment> {
         tenant: Tenant,
         locationFHIRIds: List<String>,
         startDate: LocalDate,
-        endDate: LocalDate,
+        endDate: LocalDate
     ): AppointmentsWithNewPatients
 }

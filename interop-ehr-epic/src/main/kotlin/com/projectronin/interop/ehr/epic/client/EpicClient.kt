@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component
 @Component
 class EpicClient(
     private val client: HttpClient,
-    private val authenticationBroker: EHRAuthenticationBroker,
+    private val authenticationBroker: EHRAuthenticationBroker
 ) {
     private val logger = KotlinLogging.logger { }
 
@@ -55,7 +55,9 @@ class EpicClient(
                             value.forEach { repetition ->
                                 parameter(key, repetition)
                             }
-                        } else value?.let { parameter(key, value) }
+                        } else {
+                            value?.let { parameter(key, value) }
+                        }
                     }
                 }
             }
@@ -97,7 +99,9 @@ class EpicClient(
                         value.forEach { repetition ->
                             parameter(key, repetition)
                         }
-                    } else value?.let { parameter(key, value) }
+                    } else {
+                        value?.let { parameter(key, value) }
+                    }
                 }
             }
         }

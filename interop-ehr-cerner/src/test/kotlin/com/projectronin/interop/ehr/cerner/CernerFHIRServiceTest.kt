@@ -54,7 +54,7 @@ class CernerFHIRServiceTest {
         coEvery {
             cernerClient.get(
                 tenant,
-                "url/fhirId",
+                "url/fhirId"
             )
         } returns httpResponse
 

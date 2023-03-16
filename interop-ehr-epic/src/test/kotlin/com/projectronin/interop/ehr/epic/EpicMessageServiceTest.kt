@@ -94,13 +94,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
@@ -123,7 +125,9 @@ class EpicMessageServiceTest {
         val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
             tenant,
             EHRMessageInput(
-                "Message Text", "fhirId1", recipientsList
+                "Message Text",
+                "fhirId1",
+                recipientsList
             )
         )
 
@@ -146,13 +150,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
@@ -175,7 +181,9 @@ class EpicMessageServiceTest {
         val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
             tenant,
             EHRMessageInput(
-                "Message Text\nLine 2\n\nLine 4", "fhirId1", recipientsList
+                "Message Text\nLine 2\n\nLine 4",
+                "fhirId1",
+                recipientsList
             )
         )
 
@@ -198,13 +206,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
@@ -227,7 +237,9 @@ class EpicMessageServiceTest {
         val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
             tenant,
             EHRMessageInput(
-                "Message Text\r\nLine 2\r\n\r\nLine 4", "fhirId1", recipientsList
+                "Message Text\r\nLine 2\r\n\r\nLine 4",
+                "fhirId1",
+                recipientsList
             )
         )
 
@@ -250,13 +262,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
@@ -279,7 +293,9 @@ class EpicMessageServiceTest {
         val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
             tenant,
             EHRMessageInput(
-                "Message Text\r\nLine 2\n\nLine 4", "fhirId1", recipientsList
+                "Message Text\r\nLine 2\n\nLine 4",
+                "fhirId1",
+                recipientsList
             )
         )
 
@@ -288,7 +304,6 @@ class EpicMessageServiceTest {
 
     @Test
     fun `ensure multi-line messages preserve blank lines using spaces - newlines only`() {
-
         // test private fun translateMessageInput() messageText input processing logic
 
         val messageInput = "\n\nMessage Text\n\nLine 2\nLine 3\nLine 4\n\n\nLine 7\n\nLine 8\n"
@@ -314,13 +329,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
@@ -350,7 +367,6 @@ class EpicMessageServiceTest {
 
     @Test
     fun `ensure multi-line messages preserve blank lines using spaces - carriage returned newlines only`() {
-
         // test private fun translateMessageInput() messageText input processing logic
 
         val messageInput = "\r\n\r\nMessage Text\r\n\r\nLine 2\r\nLine 3\r\nLine 4\r\n\r\n\r\nLine 7\r\n\r\nLine 8\r\n"
@@ -376,13 +392,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
@@ -412,7 +430,6 @@ class EpicMessageServiceTest {
 
     @Test
     fun `ensure multi-line messages preserve blank lines using spaces - mixed newlines and carriage returned newlines`() {
-
         // test private fun translateMessageInput() messageText input processing logic
 
         val messageInput = "\r\n\nMessage Text\n\r\nLine 2\r\nLine 3\nLine 4\n\r\n\nLine 7\r\n\r\nLine 8\n"
@@ -438,13 +455,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
@@ -488,13 +507,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("PoolID", true)), // this is an implied assertion
@@ -519,7 +540,9 @@ class EpicMessageServiceTest {
         val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
             tenant,
             EHRMessageInput(
-                "Message Text", "fhirId1", recipientsList
+                "Message Text",
+                "fhirId1",
+                recipientsList
             )
         )
 
@@ -541,13 +564,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(), // this is an implied assertion
@@ -569,7 +594,9 @@ class EpicMessageServiceTest {
             EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
                 tenant,
                 EHRMessageInput(
-                    "Message Text", "fhirId1", recipientsList
+                    "Message Text",
+                    "fhirId1",
+                    recipientsList
                 )
             )
         }
@@ -590,13 +617,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(), // this is an implied assertion
@@ -618,7 +647,9 @@ class EpicMessageServiceTest {
             EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
                 tenant,
                 EHRMessageInput(
-                    "Message Text", "fhirId1", recipientsList
+                    "Message Text",
+                    "fhirId1",
+                    recipientsList
                 )
             )
         }
@@ -639,13 +670,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(), // this is an implied assertion
@@ -667,7 +700,9 @@ class EpicMessageServiceTest {
             EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
                 tenant,
                 EHRMessageInput(
-                    "Message Text", "fhirId1", recipientsList
+                    "Message Text",
+                    "fhirId1",
+                    recipientsList
                 )
             )
         }
@@ -687,7 +722,8 @@ class EpicMessageServiceTest {
 
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
@@ -711,7 +747,9 @@ class EpicMessageServiceTest {
             EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
                 tenant,
                 EHRMessageInput(
-                    "Message Text", "fhirId1", recipientsList
+                    "Message Text",
+                    "fhirId1",
+                    recipientsList
                 )
             )
         }
@@ -733,13 +771,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
@@ -762,7 +802,9 @@ class EpicMessageServiceTest {
         val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
             tenant,
             EHRMessageInput(
-                "Message Text", "fhirId1", recipientsList
+                "Message Text",
+                "fhirId1",
+                recipientsList
             )
         )
 
@@ -788,13 +830,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("PoolID", true)),
@@ -822,7 +866,9 @@ class EpicMessageServiceTest {
         val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
             tenant,
             EHRMessageInput(
-                "Message Text", "fhirId1", recipientsList
+                "Message Text",
+                "fhirId1",
+                recipientsList
             )
         )
 
@@ -848,13 +894,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(
@@ -889,7 +937,9 @@ class EpicMessageServiceTest {
         val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
             tenant,
             EHRMessageInput(
-                "Message Text", "fhirId1", recipientsList
+                "Message Text",
+                "fhirId1",
+                recipientsList
             )
         )
 
@@ -919,13 +969,15 @@ class EpicMessageServiceTest {
         coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
             listOf(
                 IDType(
-                    "130375", "Type"
+                    "130375",
+                    "Type"
                 )
             )
         )
         coEvery {
             epicClient.post(
-                tenant, "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
+                tenant,
+                "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
@@ -948,7 +1000,9 @@ class EpicMessageServiceTest {
         val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
             tenant,
             EHRMessageInput(
-                "Message Text", "fhirId1", recipientsList
+                "Message Text",
+                "fhirId1",
+                recipientsList
             )
         )
 
@@ -992,7 +1046,9 @@ class EpicMessageServiceTest {
             EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
                 tenant,
                 EHRMessageInput(
-                    "Message Text", "badId", recipientsList
+                    "Message Text",
+                    "badId",
+                    recipientsList
                 )
             )
         }

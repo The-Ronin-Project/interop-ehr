@@ -286,7 +286,7 @@ class CernerConditionServiceTest {
         coEvery {
             cernerClient.get(
                 tenant,
-                nextUrl,
+                nextUrl
             )
         } returns httpResponse
 

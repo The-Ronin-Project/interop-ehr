@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class CernerMedicationService(
-    cernerClient: CernerClient,
+    cernerClient: CernerClient
 ) : MedicationService, CernerFHIRService<Medication>(cernerClient) {
     override val fhirURLSearchPart = "/Medication"
     override val fhirResourceType = Medication::class.java

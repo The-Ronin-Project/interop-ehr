@@ -63,8 +63,12 @@ abstract class BaseGenericTransformer {
         val originalAndLocalizedItems = collection.filter { it != null && it::class == collectionType }.map {
             it to transformType(it!!, parameterName, tenant)
         }
-        return if (originalAndLocalizedItems.all { it.second == null }) null else originalAndLocalizedItems.map {
-            it.second ?: it.first
+        return if (originalAndLocalizedItems.all { it.second == null }) {
+            null
+        } else {
+            originalAndLocalizedItems.map {
+                it.second ?: it.first
+            }
         }
     }
 

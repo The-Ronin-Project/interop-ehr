@@ -72,7 +72,7 @@ class RoninDiagnosticReportLaboratoryTest {
                                 )
                             )
                         )
-                    ),
+                    )
                 )
             )
         )
@@ -165,7 +165,7 @@ class RoninDiagnosticReportLaboratoryTest {
                 )
             ),
             code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered"),
+            status = Code("registered")
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -472,7 +472,7 @@ class RoninDiagnosticReportLaboratoryTest {
                 DiagnosticReportMedia(
                     id = "mediaId".asFHIR(),
                     link = Reference(id = "linkId".asFHIR(), display = "linkDisplay".asFHIR())
-                ),
+                )
             ),
             conclusion = "conclusionFhirString".asFHIR(),
             conclusionCode = listOf(

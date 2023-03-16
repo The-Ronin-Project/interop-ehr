@@ -20,7 +20,6 @@ class EpicOrganizationService(
         tenant: Tenant,
         organizationFHIRIds: List<String>
     ): List<Organization> {
-
         // Epic allows searching by multiple _ids at once
         val parameters = mapOf("_id" to organizationFHIRIds.toSet().joinToString(separator = ","))
         return getResourceListFromSearch(tenant, parameters)

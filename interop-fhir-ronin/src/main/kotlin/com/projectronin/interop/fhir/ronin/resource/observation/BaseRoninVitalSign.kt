@@ -108,7 +108,8 @@ abstract class BaseRoninVitalSign(
                     ifNotNull(quantity?.system) {
                         checkTrue(
                             quantity?.system == CodeSystem.UCUM.uri,
-                            invalidQuantitySystemError, parentContext
+                            invalidQuantitySystemError,
+                            parentContext
                         )
                     }
 

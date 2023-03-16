@@ -152,7 +152,7 @@ class EpicMedicationRequestServiceTest {
                 tenant,
                 "fakeFaKEfAKefakE",
                 LocalDate.of(2018, 1, 1),
-                null,
+                null
             )
 
         assertEquals(medicationRequestReturnBundle.entry.map { it.resource }, bundle)
@@ -187,7 +187,7 @@ class EpicMedicationRequestServiceTest {
                 tenant,
                 "fakeFaKEfAKefakE",
                 null,
-                null,
+                null
             )
 
         assertEquals(medicationRequestReturnBundle.entry.map { it.resource }, bundle)

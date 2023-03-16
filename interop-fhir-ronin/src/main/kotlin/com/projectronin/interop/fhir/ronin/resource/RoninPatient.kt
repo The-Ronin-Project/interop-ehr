@@ -106,7 +106,6 @@ class RoninPatient(
 
     override fun validateUSCore(element: Patient, parentContext: LocationContext, validation: Validation) {
         validation.apply {
-
             checkTrue(element.name.isNotEmpty(), requiredNameError, parentContext)
             // Each human name should have a first or last name populated, otherwise a data absent reason.
             element.name.forEachIndexed { index, humanName ->
@@ -142,7 +141,6 @@ class RoninPatient(
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<Patient?, Validation> {
-
         val maritalStatus = normalized.maritalStatus ?: CodeableConcept(
             coding = listOf(
                 Coding(
@@ -160,14 +158,16 @@ class RoninPatient(
         val validation = Validation()
         val contactPointTransformed = if (normalized.telecom.isNotEmpty()) {
             contactPoint.transform(normalized.telecom, tenant, LocationContext(Patient::class), validation)
-        } else Pair(normalized.telecom, validation)
+        } else {
+            Pair(normalized.telecom, validation)
+        }
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             gender = gender,
             identifier = normalized.identifier + tenant.toFhirIdentifier() + getRoninIdentifiers(normalized, tenant),
             maritalStatus = maritalStatus,
-            telecom = contactPointTransformed.first ?: emptyList(),
+            telecom = contactPointTransformed.first ?: emptyList()
         )
         return Pair(transformed, contactPointTransformed.second)
     }

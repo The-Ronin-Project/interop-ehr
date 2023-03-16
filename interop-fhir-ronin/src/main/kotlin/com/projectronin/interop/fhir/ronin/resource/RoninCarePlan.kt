@@ -38,7 +38,7 @@ class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
     ): Pair<CarePlan?, Validation> {
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier(),
+            identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier()
         )
 
         return Pair(transformed, Validation())

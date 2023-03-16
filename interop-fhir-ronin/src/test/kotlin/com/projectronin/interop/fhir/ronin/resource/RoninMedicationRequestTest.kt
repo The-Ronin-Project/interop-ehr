@@ -216,7 +216,7 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("MedicationRequest")),
+                profile = listOf(Canonical("MedicationRequest"))
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -366,7 +366,7 @@ class RoninMedicationRequestTest {
             intent = MedicationRequestIntent.PROPOSAL.asCode(),
             medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
             subject = Reference(reference = "Patient/1234".asFHIR()),
-            requester = Reference(reference = "Practitioner/1234".asFHIR()),
+            requester = Reference(reference = "Practitioner/1234".asFHIR())
         )
 
         val (transformed, validation) = roninMedicationRequest.transform(medicationRequest, tenant)
@@ -443,7 +443,7 @@ class RoninMedicationRequestTest {
             intent = MedicationRequestIntent.PROPOSAL.asCode(),
             medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
             subject = Reference(reference = "Patient/1234".asFHIR()),
-            requester = Reference(reference = "Practitioner/1234".asFHIR()),
+            requester = Reference(reference = "Practitioner/1234".asFHIR())
         )
 
         val (transformed, _) = roninMedicationRequest.transform(medicationRequest, tenant)

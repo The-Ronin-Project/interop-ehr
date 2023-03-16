@@ -354,7 +354,7 @@ class RoninContactPointTest {
             ContactPoint(system = Code("email"), value = "8675311".asFHIR(), use = Code("uvw")),
             ContactPoint(system = Code("email"), value = "8675312".asFHIR(), use = Code("def")),
             ContactPoint(system = Code("email"), value = "8675313".asFHIR(), use = Code("planet")),
-            ContactPoint(system = Code("email"), value = "8675314".asFHIR(), use = Code("")),
+            ContactPoint(system = Code("email"), value = "8675314".asFHIR(), use = Code(""))
         )
 
         val transformResult =
@@ -489,7 +489,7 @@ class RoninContactPointTest {
         val telecom = listOf(
             ContactPoint(system = Code("telephone"), value = "8675309".asFHIR()),
             ContactPoint(system = Code("phone"), value = "8675302".asFHIR()),
-            ContactPoint(system = Code("email"), value = "8675301".asFHIR()),
+            ContactPoint(system = Code("email"), value = "8675301".asFHIR())
         )
         val transformResult =
             roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
@@ -879,7 +879,7 @@ class RoninContactPointTest {
             ContactPoint(system = Code("email"), value = "8675311".asFHIR(), use = Code("uvw")),
             ContactPoint(system = Code("email"), value = "8675312".asFHIR(), use = Code("def")),
             ContactPoint(system = Code("email"), value = "8675313".asFHIR(), use = Code("planet")),
-            ContactPoint(system = Code("email"), value = "8675314".asFHIR(), use = Code("")),
+            ContactPoint(system = Code("email"), value = "8675314".asFHIR(), use = Code(""))
         )
 
         val transformResult =
@@ -1044,7 +1044,7 @@ class RoninContactPointTest {
         val telecom = listOf(
             ContactPoint(system = Code("email"), value = "8675309".asFHIR(), use = Code("planet")),
             ContactPoint(system = Code("email"), value = "8675302".asFHIR(), use = Code("city")),
-            ContactPoint(system = Code("email"), value = "8675301".asFHIR(), use = Code("planet")),
+            ContactPoint(system = Code("email"), value = "8675301".asFHIR(), use = Code("planet"))
         )
         val transformResult =
             roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())

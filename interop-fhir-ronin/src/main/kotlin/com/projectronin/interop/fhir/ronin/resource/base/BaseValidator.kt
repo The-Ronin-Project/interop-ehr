@@ -10,7 +10,7 @@ import com.projectronin.interop.fhir.validate.validation
  * Base class supporting validation. If supplied with an optional [extendedProfile], this validator will also validate against it.
  */
 abstract class BaseValidator<T : Validatable<T>>(
-    private val extendedProfile: ProfileValidator<T>?,
+    private val extendedProfile: ProfileValidator<T>?
 ) :
     ProfileValidator<T> {
     /**

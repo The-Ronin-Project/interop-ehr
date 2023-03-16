@@ -190,6 +190,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
         val qualified = profile.qualifies(condition)
         assertFalse(qualified)
     }
+
     @Test
     fun `does not qualify when category coding code is health-concern and system is for problem-list-item`() {
         val condition = Condition(
@@ -723,7 +724,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 coding = listOf(
                     Coding(
                         code = Code("254637007"),
-                        system = Uri("http://snomed.info/sct"),
+                        system = Uri("http://snomed.info/sct")
                     )
                 )
             ),
@@ -882,7 +883,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 coding = listOf(
                     Coding(
                         system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
+                        code = Code("254637007")
                     )
                 )
             ),
@@ -1346,8 +1347,8 @@ class RoninConditionProblemsAndHealthConcernsTest {
         assertEquals(listOf<Annotation>(), transformed.note)
     }
 
-    @Test
     // Note: This test may be temporary while we are waiting on concept mapping data.
+    @Test
     fun `validate succeeds with partial code codings`() {
         val condition = Condition(
             id = Id("12345"),
@@ -1371,7 +1372,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
                     ),
                     Coding(
                         system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
+                        code = Code("254637007")
                     ),
                     Coding(
                         code = Code("254637007"),
@@ -1399,8 +1400,8 @@ class RoninConditionProblemsAndHealthConcernsTest {
         profile.validate(condition, null).alertIfErrors()
     }
 
-    @Test
     // Note: This test may be temporary while we are waiting on concept mapping data.
+    @Test
     fun `validate succeeds with empty code codings and health-concern`() {
         val condition = Condition(
             id = Id("12345"),
@@ -1433,8 +1434,8 @@ class RoninConditionProblemsAndHealthConcernsTest {
         profile.validate(condition, null).alertIfErrors()
     }
 
-    @Test
     // Note: This test may be temporary while we are waiting on concept mapping data.
+    @Test
     fun `validate succeeds with empty code codings and problem-list-item`() {
         val condition = Condition(
             id = Id("12345"),
@@ -1467,8 +1468,8 @@ class RoninConditionProblemsAndHealthConcernsTest {
         profile.validate(condition, null).alertIfErrors()
     }
 
-    @Test
     // Note: This test may be temporary while we are waiting on concept mapping data.
+    @Test
     fun `validate succeeds with multiple categories`() {
         val condition = Condition(
             id = Id("12345"),

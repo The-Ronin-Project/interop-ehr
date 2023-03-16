@@ -67,7 +67,7 @@ fun createTestTenant(
             mrnTypeText,
             hsi,
             departmentInternalSystem,
-            patientOnboardedFlagId,
+            patientOnboardedFlagId
         )
     )
 }

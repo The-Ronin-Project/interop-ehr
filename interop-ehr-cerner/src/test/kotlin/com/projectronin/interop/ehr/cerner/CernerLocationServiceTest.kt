@@ -93,7 +93,8 @@ class CernerLocationServiceTest {
             smallLocationService.getLocationsByFHIRId(tenant, listOf("123", "456", "789"))
 
         assertEquals(
-            mapOf("123" to location1.resource, "456" to location2.resource, "789" to location3.resource), response
+            mapOf("123" to location1.resource, "456" to location2.resource, "789" to location3.resource),
+            response
         )
     }
 }

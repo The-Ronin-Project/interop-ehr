@@ -74,7 +74,7 @@ class RoninCarePlanTest {
             ),
             status = RequestStatus.DRAFT.asCode(),
             intent = CarePlanIntent.OPTION.asCode(),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR())
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -160,7 +160,7 @@ class RoninCarePlanTest {
                         )
                     )
                 )
-            ),
+            )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -202,7 +202,7 @@ class RoninCarePlanTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR())
         )
 
         roninCarePlan.validate(carePlan, null).alertIfErrors()
@@ -840,7 +840,7 @@ class RoninCarePlanTest {
                     progress = listOf(
                         Annotation(text = Markdown("123"))
                     ),
-                    reference = Reference(reference = "reference".asFHIR()),
+                    reference = Reference(reference = "reference".asFHIR())
                 )
             )
         )
@@ -909,7 +909,7 @@ class RoninCarePlanTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR())
         )
 
         val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
@@ -979,7 +979,7 @@ class RoninCarePlanTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR())
         )
 
         val (transformed, _) = roninCarePlan.transform(carePlan, tenant)
@@ -1001,7 +1001,7 @@ class RoninCarePlanTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR())
         )
 
         val (transformed, _) = roninCarePlan.transform(carePlan, tenant)
@@ -1024,7 +1024,7 @@ class RoninCarePlanTest {
                     )
                 )
             ),
-            subject = null,
+            subject = null
         )
 
         val (transformed, _) = roninCarePlan.transform(carePlan, tenant)

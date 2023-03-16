@@ -159,7 +159,7 @@ class RoninPulseOximetry(normalizer: Normalizer, localizer: Localizer) :
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier(),
+            identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier()
         )
         return Pair(transformed, validation)
     }

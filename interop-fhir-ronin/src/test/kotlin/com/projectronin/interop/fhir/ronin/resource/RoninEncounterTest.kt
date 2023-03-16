@@ -64,7 +64,7 @@ class RoninEncounterTest {
             roninEncounter.qualifies(
                 Encounter(
                     status = EncounterStatus.CANCELLED.asCode(),
-                    `class` = Coding(code = Code("OBSENC")),
+                    `class` = Coding(code = Code("OBSENC"))
                 )
             )
         )
@@ -175,7 +175,7 @@ class RoninEncounterTest {
                 )
             ),
             status = EncounterStatus.CANCELLED.asCode(),
-            `class` = Coding(code = Code("OBSENC")),
+            `class` = Coding(code = Code("OBSENC"))
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -875,7 +875,7 @@ class RoninEncounterTest {
     fun `transform fails for encounter with missing id`() {
         val encounter = Encounter(
             status = EncounterStatus.CANCELLED.asCode(),
-            `class` = Coding(code = Code("OBSENC")),
+            `class` = Coding(code = Code("OBSENC"))
         )
 
         val (transformed, _) = roninEncounter.transform(encounter, tenant)

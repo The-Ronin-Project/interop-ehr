@@ -88,7 +88,8 @@ class EpicAppointmentService(
             val mrnToUse = patientMRN ?: getPatientMRN(tenant, patientFHIRId)
             val appointments = mrnToUse?.let {
                 findAppointments(
-                    tenant, patientAppointmentSearchUrlPart,
+                    tenant,
+                    patientAppointmentSearchUrlPart,
                     GetPatientAppointmentsRequest(
                         userID = tenant.vendorAs<Epic>().ehrUserId,
                         startDate = dateFormat.format(startDate),
@@ -205,7 +206,7 @@ class EpicAppointmentService(
     private fun findAppointments(
         tenant: Tenant,
         urlPart: String,
-        request: Any,
+        request: Any
     ): GetAppointmentsResponse {
         logger.info { "Appointment search started for ${tenant.mnemonic}" }
 
@@ -339,7 +340,7 @@ class EpicAppointmentService(
                     tenant = tenant,
                     patientFHIRId = entries.key,
                     providerToPractitionerFHIRIds = provToParticipant,
-                    providerToLocationFHIRIds = deptToParticipant,
+                    providerToLocationFHIRIds = deptToParticipant
                 )
             }
         }.flatten()
@@ -393,7 +394,7 @@ class EpicAppointmentService(
         tenant: Tenant,
         patientFHIRId: String,
         providerToPractitionerFHIRIds: Map<ScheduleProviderReturnWithTime, Any?>,
-        providerToLocationFHIRIds: Map<ScheduleProviderReturnWithTime, String?>,
+        providerToLocationFHIRIds: Map<ScheduleProviderReturnWithTime, String?>
     ): Appointment {
         // TODO: Replace with ConceptMap
         val transformedStatus = transformStatus(appointmentStatus)
@@ -504,7 +505,7 @@ class EpicAppointmentService(
             patientInstruction = null,
             basedOn = emptyList(),
             participant = listOf(patientParticipant) + practitionerParticipants + locationParticipants,
-            requestedPeriod = emptyList(),
+            requestedPeriod = emptyList()
         )
     }
 

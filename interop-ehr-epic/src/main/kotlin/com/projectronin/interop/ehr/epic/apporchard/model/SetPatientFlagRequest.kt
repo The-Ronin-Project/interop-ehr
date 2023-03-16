@@ -19,5 +19,5 @@ data class PatientFlag(
     val status: String? = "1", // 1 = on, null = off
     val summary: String? = null,
     val text: List<String>? = null,
-    val type: String?,
+    val type: String?
 )
