@@ -11,5 +11,7 @@ dependencies {
     implementation(libs.interop.fhir)
     implementation("org.springframework:spring-context")
 
+    implementation(libs.dd.trace.api)
+
     testImplementation(libs.mockk)
 }
