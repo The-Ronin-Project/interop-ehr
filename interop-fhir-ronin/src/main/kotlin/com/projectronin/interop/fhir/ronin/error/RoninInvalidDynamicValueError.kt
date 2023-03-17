@@ -20,7 +20,7 @@ class RoninInvalidDynamicValueError(
     FHIRError(
         "RONIN_INV_DYN_VAL",
         ValidationIssueSeverity.ERROR,
-        "$profileName profile allows ${actualLocation.field} to be one of: ${validTypes.joinToString { it.code }}",
+        "$profileName profile restricts ${actualLocation.field} to one of: ${validTypes.joinToString { it.code }}",
         actualLocation
     ) {
     /**

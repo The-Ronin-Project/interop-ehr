@@ -71,8 +71,8 @@ class RoninBodyWeight(normalizer: Normalizer, localizer: Localizer) :
         location = LocationContext(Observation::code)
     )
 
-    override fun validateUSCore(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validateUSCore(element, parentContext, validation)
+    override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
+        super.validateVitalSign(element, parentContext, validation)
         validation.apply {
             val code = element.code
             if (code != null) {

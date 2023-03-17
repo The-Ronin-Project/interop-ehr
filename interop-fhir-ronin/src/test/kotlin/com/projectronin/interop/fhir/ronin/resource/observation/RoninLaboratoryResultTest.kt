@@ -533,6 +533,63 @@ class RoninLaboratoryResultTest {
     }
 
     @Test
+    fun `validate fails if invalid effective type`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.BOOLEAN,
+                value = true
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_DYN_VAL: Ronin Laboratory Result profile restricts effective to one of: DateTime, Period @ Observation.effective\n" +
+                "ERROR INV_DYN_VAL: effective can only be one of the following: DateTime, Period, Timing, Instant @ Observation.effective",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate checks R4 profile`() {
         val observation = Observation(
             id = Id("123"),
@@ -1476,7 +1533,7 @@ class RoninLaboratoryResultTest {
     }
 
     @Test
-    fun `validate fails if quantity system is not UCUM`() {
+    fun `validate fails if value quantity system is not UCUM`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
@@ -1537,6 +1594,132 @@ class RoninLaboratoryResultTest {
                 "ERROR USCORE_LABOBS_002: Quantity system must be UCUM @ Observation.valueQuantity.system",
             exception.message
         )
+    }
+
+    @Test
+    fun `validate fails if value coding system is not SNOMED CT`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01"
+            ),
+            value = DynamicValue(
+                DynamicValueType.CODEABLE_CONCEPT,
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            code = Code("some-code"),
+                            system = CodeSystem.RXNORM.uri,
+                            display = "display".asFHIR()
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninLaboratoryResult.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_LABOBS_003: Value code system must be SNOMED CT @ Observation.value",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate succeeds if value coding system is SNOMED CT`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("laboratory")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01"
+            ),
+            value = DynamicValue(
+                DynamicValueType.CODEABLE_CONCEPT,
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            code = Code("some-code"),
+                            system = CodeSystem.SNOMED_CT.uri,
+                            display = "display".asFHIR()
+                        )
+                    )
+                )
+            )
+        )
+
+        roninLaboratoryResult.validate(observation, null).alertIfErrors()
     }
 
     @Test

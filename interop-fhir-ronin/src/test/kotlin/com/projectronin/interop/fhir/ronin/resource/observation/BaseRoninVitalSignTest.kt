@@ -165,7 +165,7 @@ class BaseRoninVitalSignTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_DYN_VAL: Ronin Vital Signs profile allows effective to be one of: DateTime, Period @ Observation.effective\n" +
+                "ERROR RONIN_INV_DYN_VAL: Ronin Vital Sign profile restricts effective to one of: DateTime, Period @ Observation.effective\n" +
                 "ERROR INV_DYN_VAL: effective can only be one of the following: DateTime, Period, Timing, Instant @ Observation.effective",
             exception.message
         )

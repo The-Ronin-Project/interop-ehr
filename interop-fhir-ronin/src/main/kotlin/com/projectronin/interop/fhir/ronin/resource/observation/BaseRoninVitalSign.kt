@@ -37,7 +37,7 @@ abstract class BaseRoninVitalSign(
     override val validSubjectValues = listOf("Patient")
 
     // Dynamic value checks - override BaseRoninObservation for BaseRoninVitalSign
-    private val acceptedVitalSignsEffectives = listOf(
+    override val acceptedEffectiveTypes = listOf(
         DynamicValueType.DATE_TIME,
         DynamicValueType.PERIOD
     )
@@ -61,13 +61,24 @@ abstract class BaseRoninVitalSign(
             element.code?.coding?.let {
                 checkTrue(it.size == 1, singleObservationCodeError, parentContext)
             }
+            element.effective?.let { data ->
+                checkTrue(
+                    acceptedEffectiveTypes.contains(data.type),
+                    RoninInvalidDynamicValueError(
+                        Observation::effective,
+                        acceptedEffectiveTypes,
+                        "Ronin Vital Sign"
+                    ),
+                    parentContext
+                )
+            }
         }
     }
 
     /**
      * Validates the [element] against Ronin rules for vital sign Observations.
      */
-    fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
+    open fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             checkTrue(
                 element.category.flatMap { it.coding }
@@ -75,18 +86,6 @@ abstract class BaseRoninVitalSign(
                 requiredVitalSignsCodeError,
                 parentContext
             )
-
-            element.effective?.let { data ->
-                checkTrue(
-                    acceptedVitalSignsEffectives.contains(data.type),
-                    RoninInvalidDynamicValueError(
-                        Observation::effective,
-                        acceptedVitalSignsEffectives,
-                        "Ronin Vital Signs"
-                    ),
-                    parentContext
-                )
-            }
         }
     }
 
@@ -106,7 +105,7 @@ abstract class BaseRoninVitalSign(
      * Checks that the value includes a value and unit, and that the value system is UCUM.
      * Checks that the quantity's coded unit value is in the supplied [validUnitCodeList].
      */
-    fun validateVitalSignValue(
+    open fun validateVitalSignValue(
         value: DynamicValue<Any>?,
         validUnitCodeList: List<String>,
         parentContext: LocationContext,

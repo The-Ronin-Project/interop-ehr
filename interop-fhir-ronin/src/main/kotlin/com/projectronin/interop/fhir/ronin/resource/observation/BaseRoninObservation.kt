@@ -48,6 +48,14 @@ abstract class BaseRoninObservation(
     open val validPartOfValues = listOf("Immunization", "MedicationStatement", "Procedure")
     open val validPerformerValues = listOf("CareTeam", "Organization", "Patient", "Practitioner", "PractitionerRole")
 
+    // Dynamic value checks - subclasses may override lists
+    open val acceptedEffectiveTypes = listOf(
+        DynamicValueType.DATE_TIME,
+        DynamicValueType.PERIOD,
+        DynamicValueType.TIMING,
+        DynamicValueType.INSTANT
+    )
+
     // Dynamic value checks - same for all subclasses
     private val acceptedAuthorTypes = listOf(
         DynamicValueType.STRING,

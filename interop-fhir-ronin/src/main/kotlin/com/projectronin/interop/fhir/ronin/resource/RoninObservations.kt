@@ -18,6 +18,9 @@ import org.springframework.stereotype.Component
 
 /**
  * Validator and Transformer for the group of active Ronin Observation profiles.
+ * Any Observation that has a laboratory category code qualifies for the RoninLaboratoryResult class.
+ * There is no generic vital-sign Observation class. Every vital-sign Observation class is specific.
+ * If an Observation does not qualify as a known vital-sign or laboratory, it qualifies as the generic RoninObservation.
  */
 @Component
 class RoninObservations(

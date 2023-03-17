@@ -1,11 +1,13 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
 import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
+import com.projectronin.interop.fhir.ronin.error.RoninInvalidDynamicValueError
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -56,6 +58,12 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
     override val validPerformerValues =
         listOf("Patient", "Practitioner", "PractitionerRole", "RelatedPerson", "Organization")
 
+    // Dynamic value checks - override BaseRoninObservation for RoninLaboratoryResult
+    override val acceptedEffectiveTypes = listOf(
+        DynamicValueType.DATE_TIME,
+        DynamicValueType.PERIOD
+    )
+
     override fun qualifies(resource: Observation): Boolean {
         return resource.category.any { category ->
             category.coding.any { it.system == CodeSystem.OBSERVATION_CATEGORY.uri && it.code == laboratoryCode }
@@ -101,6 +109,13 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
         location = LocationContext(Observation::code)
     )
 
+    private val invalidCodedValueSystemError = FHIRError(
+        code = "RONIN_LABOBS_003",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Value code system must be SNOMED CT",
+        location = LocationContext(Observation::value)
+    )
+
     override fun validateRonin(element: Observation, parentContext: LocationContext, validation: Validation) {
         super.validateRonin(element, parentContext, validation)
         validation.apply {
@@ -128,6 +143,19 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
                 // The presence of a code requires a system, so we're bypassing the check here.
                 ifNotNull(quantity.system) {
                     checkTrue(quantity.system == CodeSystem.UCUM.uri, invalidQuantitySystemError, parentContext)
+                }
+            }
+
+            if (element.value?.type == DynamicValueType.CODEABLE_CONCEPT) {
+                val quantity = element.value!!.value as CodeableConcept
+
+                // The presence of a code requires a system, so we're bypassing the check here.
+                ifNotNull(quantity.coding) {
+                    checkTrue(
+                        quantity.coding.none { it.system?.value != CodeSystem.SNOMED_CT.uri.value },
+                        invalidCodedValueSystemError,
+                        parentContext
+                    )
                 }
             }
 
@@ -161,6 +189,17 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
             val codingList = element.code?.coding
             ifNotNull(codingList) {
                 checkTrue((codingList!!.size == 1), singleObservationCodeError, parentContext)
+            }
+            element.effective?.let { data ->
+                checkTrue(
+                    acceptedEffectiveTypes.contains(data.type),
+                    RoninInvalidDynamicValueError(
+                        Observation::effective,
+                        acceptedEffectiveTypes,
+                        "Ronin Laboratory Result"
+                    ),
+                    parentContext
+                )
             }
         }
     }
