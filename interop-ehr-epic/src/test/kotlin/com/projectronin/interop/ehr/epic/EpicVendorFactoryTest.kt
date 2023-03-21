@@ -65,6 +65,7 @@ class EpicVendorFactoryTest {
             @Bean
             @Qualifier("datalake")
             fun datalakePublishService(): Database = mockk()
+
             fun taskExecutor(): ThreadPoolTaskExecutor = mockk(relaxed = true)
         }
 
