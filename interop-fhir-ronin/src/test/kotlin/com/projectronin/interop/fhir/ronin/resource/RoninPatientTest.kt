@@ -569,7 +569,7 @@ class RoninPatientTest {
     }
 
     @Test
-    fun `validate passes for gender with data absent reason`() {
+    fun `validate fails for gender with data absent reason`() {
         val patient = Patient(
             id = Id("12345"),
             identifier = listOf(
@@ -596,9 +596,15 @@ class RoninPatientTest {
             ),
             birthDate = Date("1975-07-05")
         )
-        roninPatient.validate(patient, null).alertIfErrors()
-        val transformed = roninPatient.transform(patient, tenant)
-        assertEquals(AdministrativeGender.UNKNOWN.code, transformed.first?.gender?.value)
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPatient.validate(patient, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR INV_VALUE_SET: 'null' is outside of required value set @ Patient.gender",
+            exception.message
+        )
     }
 
     @Test
