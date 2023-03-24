@@ -16,7 +16,6 @@ import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
-import java.time.LocalDate
 
 class CernerMedicationRequestServiceTest {
     private val cernerClient: CernerClient = mockk()
@@ -87,9 +86,7 @@ class CernerMedicationRequestServiceTest {
 
         val actual = medicationRequestService.getMedicationRequestByPatient(
             tenant,
-            "fakeFaKEfAKefakE",
-            null,
-            null
+            "fakeFaKEfAKefakE"
         )
 
         assertEquals(validPatientIdBundle.entry.map { it.resource }, actual)
@@ -101,44 +98,7 @@ class CernerMedicationRequestServiceTest {
     }
 
     @Test
-    fun `getMedicationRequestByPatient with null dates returns patient medication request bundle`() {
-        val tenant =
-            createTestTenant(
-                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-                authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns validPatientIdBundle
-        coEvery {
-            cernerClient.get(
-                tenant,
-                "/MedicationRequest",
-                mapOf(
-                    "patient" to "fakeFaKEfAKefakE",
-                    "_count" to 20
-                )
-            )
-        } returns httpResponse
-
-        val actual = medicationRequestService.getMedicationRequestByPatient(
-            tenant,
-            "fakeFaKEfAKefakE",
-            null,
-            null
-        )
-
-        assertEquals(validPatientIdBundle.entry.map { it.resource }, actual)
-        assertEquals(25, actual.size)
-        actual.forEachIndexed { _, medicationRequest ->
-            val subject = medicationRequest.subject?.reference?.value
-            assertTrue(subject == "Patient/fakeFaKEfAKefakE")
-        }
-    }
-
-    @Test
-    fun `getMedicationRequestByPatient success when null startDate and actual endDate are provided`() {
+    fun `getMedicationRequestByPatient succeeds`() {
         val tenant =
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
@@ -162,75 +122,7 @@ class CernerMedicationRequestServiceTest {
         val validResponse =
             medicationRequestService.getMedicationRequestByPatient(
                 tenant,
-                "fakeFaKEfAKefakE",
-                null,
-                LocalDate.of(2019, 11, 1)
-            )
-
-        assertEquals(validPatientIdBundle.entry.map { it.resource }, validResponse)
-    }
-
-    @Test
-    fun `getMedicationRequestByPatient success when actual startDate and null endDate are provided`() {
-        val tenant =
-            createTestTenant(
-                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-                authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns validPatientIdBundle
-        coEvery {
-            cernerClient.get(
-                tenant,
-                "/MedicationRequest",
-                mapOf(
-                    "patient" to "fakeFaKEfAKefakE",
-                    "_count" to 20
-                )
-            )
-        } returns httpResponse
-
-        val validResponse =
-            medicationRequestService.getMedicationRequestByPatient(
-                tenant,
-                "fakeFaKEfAKefakE",
-                LocalDate.of(2018, 1, 1),
-                null
-            )
-
-        assertEquals(validPatientIdBundle.entry.map { it.resource }, validResponse)
-    }
-
-    @Test
-    fun `getMedicationRequestByPatient success when both startDate and endDate are provided and ignored`() {
-        val tenant =
-            createTestTenant(
-                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-                authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns validPatientIdBundle
-        coEvery {
-            cernerClient.get(
-                tenant,
-                "/MedicationRequest",
-                mapOf(
-                    "patient" to "fakeFaKEfAKefakE",
-                    "_count" to 20
-                )
-            )
-        } returns httpResponse
-
-        val validResponse =
-            medicationRequestService.getMedicationRequestByPatient(
-                tenant,
-                "fakeFaKEfAKefakE",
-                LocalDate.of(2018, 1, 1),
-                LocalDate.of(2019, 11, 1)
+                "fakeFaKEfAKefakE"
             )
 
         assertEquals(validPatientIdBundle.entry.map { it.resource }, validResponse)

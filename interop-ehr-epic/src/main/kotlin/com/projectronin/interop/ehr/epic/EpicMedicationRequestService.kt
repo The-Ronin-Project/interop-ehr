@@ -6,7 +6,6 @@ import com.projectronin.interop.fhir.r4.resource.MedicationRequest
 import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
 import org.springframework.stereotype.Component
-import java.time.LocalDate
 
 /**
  * Service providing access to MedicationRequestService within Epic.
@@ -28,19 +27,11 @@ class EpicMedicationRequestService(
 
     override fun getMedicationRequestByPatient(
         tenant: Tenant,
-        patientFhirId: String,
-        startDate: LocalDate?,
-        endDate: LocalDate?
+        patientFhirId: String
     ): List<MedicationRequest> {
-        val dates = mutableListOf<String>()
-        startDate?.let { dates += "ge$it" }
-        endDate?.let { dates += "le$it" }
-
-        /* if startDate and endDate are null only use patientFhirId otherwise use dates and patientFhirId */
-        val parameters = buildMap {
-            put("patient", patientFhirId)
-            if (dates.isNotEmpty()) put("date", dates)
-        }
+        val parameters = mapOf(
+            "patient" to patientFhirId
+        )
         return getResourceListFromSearch(tenant, parameters)
     }
 }

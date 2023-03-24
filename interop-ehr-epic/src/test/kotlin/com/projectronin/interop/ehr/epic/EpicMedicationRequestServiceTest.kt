@@ -16,7 +16,6 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import java.time.LocalDate
 
 class EpicMedicationRequestServiceTest {
     private val epicClient: EpicClient = mockk()
@@ -69,7 +68,6 @@ class EpicMedicationRequestServiceTest {
                 "/api/FHIR/R4/MedicationRequest",
                 mapOf(
                     "patient" to "fakeFaKEfAKefakE",
-                    "date" to listOf("ge2018-01-01", "le2019-11-01"),
                     "_count" to 50
                 )
             )
@@ -78,116 +76,7 @@ class EpicMedicationRequestServiceTest {
         val bundle =
             medicationRequestService.getMedicationRequestByPatient(
                 tenant,
-                "fakeFaKEfAKefakE",
-                LocalDate.of(2018, 1, 1),
-                LocalDate.of(2019, 11, 1)
-            )
-
-        assertEquals(medicationRequestReturnBundle.entry.map { it.resource }, bundle)
-    }
-
-    @Test
-    fun `getMedicationRequestByPatient returns patient medication request bundle with only endDate given`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                "testPrivateKey",
-                "TEST_TENANT"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns medicationRequestReturnBundle
-
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/MedicationRequest",
-                mapOf(
-                    "patient" to "fakeFaKEfAKefakE",
-                    "date" to listOf("le2019-11-01"),
-                    "_count" to 50
-                )
-            )
-        } returns httpResponse
-
-        val bundle =
-            medicationRequestService.getMedicationRequestByPatient(
-                tenant,
-                "fakeFaKEfAKefakE",
-                null,
-                LocalDate.of(2019, 11, 1)
-            )
-
-        assertEquals(medicationRequestReturnBundle.entry.map { it.resource }, bundle)
-    }
-
-    @Test
-    fun `getMedicationRequestByPatient returns patient medication request bundle with only startDate given`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                "testPrivateKey",
-                "TEST_TENANT"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns medicationRequestReturnBundle
-
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/MedicationRequest",
-                mapOf(
-                    "patient" to "fakeFaKEfAKefakE",
-                    "date" to listOf("ge2018-01-01"),
-                    "_count" to 50
-                )
-            )
-        } returns httpResponse
-
-        val bundle =
-            medicationRequestService.getMedicationRequestByPatient(
-                tenant,
-                "fakeFaKEfAKefakE",
-                LocalDate.of(2018, 1, 1),
-                null
-            )
-
-        assertEquals(medicationRequestReturnBundle.entry.map { it.resource }, bundle)
-    }
-
-    @Test
-    fun `getMedicationRequestByPatient success with null values for startDate and endDate`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                "testPrivateKey",
-                "TEST_TENANT"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns medicationRequestReturnBundle
-
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/MedicationRequest",
-                mapOf(
-                    "patient" to "fakeFaKEfAKefakE",
-                    "_count" to 50
-                )
-            )
-        } returns httpResponse
-
-        val bundle =
-            medicationRequestService.getMedicationRequestByPatient(
-                tenant,
-                "fakeFaKEfAKefakE",
-                null,
-                null
+                "fakeFaKEfAKefakE"
             )
 
         assertEquals(medicationRequestReturnBundle.entry.map { it.resource }, bundle)
