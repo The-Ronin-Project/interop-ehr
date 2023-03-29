@@ -11,7 +11,7 @@ interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.4.0"
 
 interop-datalake = "com.projectronin.interop.publish:interop-datalake:7.4.3"
 
-interop-fhir = "com.projectronin.interop.fhir:interop-fhir:7.5.0"
+interop-fhir = "com.projectronin.interop.fhir:interop-fhir:7.6.0"
 
 interop-validation-client = "com.projectronin.interop.validation:interop-validation-client:1.1.0"
 
