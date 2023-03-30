@@ -15,6 +15,7 @@ class CernerVendorFactory(
     override val appointmentService: CernerAppointmentService,
     override val conditionService: CernerConditionService,
     override val encounterService: CernerEncounterService,
+    override val healthCheckService: CernerHealthCheckService,
     override val identifierService: CernerIdentifierService,
     override val locationService: CernerLocationService,
     override val medicationStatementService: CernerMedicationStatementService,

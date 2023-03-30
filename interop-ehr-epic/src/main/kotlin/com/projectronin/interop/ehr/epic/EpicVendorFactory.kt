@@ -12,6 +12,7 @@ class EpicVendorFactory(
     override val appointmentService: EpicAppointmentService,
     override val conditionService: EpicConditionService,
     override val encounterService: EpicEncounterService,
+    override val healthCheckService: EpicHealthCheckService,
     override val identifierService: EpicIdentifierService,
     override val locationService: EpicLocationService,
     override val medicationService: EpicMedicationService,
