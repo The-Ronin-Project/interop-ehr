@@ -4,9 +4,9 @@ import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
-import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
 import com.projectronin.interop.fhir.ronin.error.ConceptMapInvalidValueSetError
 import com.projectronin.interop.fhir.ronin.error.FailedConceptMapLookupError
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.util.getCodedEnumOrNull
@@ -23,7 +23,7 @@ import org.springframework.stereotype.Component
  * Validator and Transformer for a list of ContactPoint elements in Patient, Practitioner, or Organization.
  */
 @Component
-class RoninContactPoint(private val conceptMapClient: ConceptMapClient) {
+class RoninContactPoint(private val registryClient: NormalizationRegistryClient) {
     private val requiredTelecomSystemExtensionError = FHIRError(
         code = "RONIN_CNTCTPT_001",
         severity = ValidationIssueSeverity.ERROR,
@@ -117,9 +117,8 @@ class RoninContactPoint(private val conceptMapClient: ConceptMapClient) {
         val transformed = element.mapIndexed { index, telecom ->
             val systemContext = LocationContext(parentContext.element, "telecom[$index].system")
             val mappedSystem = telecom.system?.value?.let { systemValue ->
-                val systemPair = conceptMapClient.getConceptMappingForEnum(
+                val systemPair = registryClient.getConceptMappingForEnum(
                     tenant,
-                    parentContext.element,
                     "${parentContext.element}.telecom.system",
                     RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.system", systemValue),
                     ContactPointSystem::class
@@ -147,9 +146,8 @@ class RoninContactPoint(private val conceptMapClient: ConceptMapClient) {
             }
             val useContext = LocationContext(parentContext.element, "telecom[$index].use")
             val mappedUse = telecom.use?.value?.let { useValue ->
-                val usePair = conceptMapClient.getConceptMappingForEnum(
+                val usePair = registryClient.getConceptMappingForEnum(
                     tenant,
-                    parentContext.element,
                     "${parentContext.element}.telecom.use",
                     RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.use", useValue),
                     ContactPointUse::class

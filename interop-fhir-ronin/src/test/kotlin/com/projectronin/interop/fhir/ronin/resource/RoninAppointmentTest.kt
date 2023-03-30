@@ -26,9 +26,9 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4AppointmentValidator
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
-import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -47,7 +47,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class RoninAppointmentTest {
-    private lateinit var conceptMapClient: ConceptMapClient
+    private lateinit var registryClient: NormalizationRegistryClient
     private lateinit var normalizer: Normalizer
     private lateinit var localizer: Localizer
     private lateinit var roninAppointment: RoninAppointment
@@ -58,14 +58,14 @@ class RoninAppointmentTest {
 
     @BeforeEach
     fun setup() {
-        conceptMapClient = mockk()
+        registryClient = mockk()
         normalizer = mockk {
             every { normalize(any(), tenant) } answers { firstArg() }
         }
         localizer = mockk {
             every { localize(any(), tenant) } answers { firstArg() }
         }
-        roninAppointment = RoninAppointment(conceptMapClient, normalizer, localizer)
+        roninAppointment = RoninAppointment(registryClient, normalizer, localizer)
     }
 
     @Test
@@ -245,9 +245,8 @@ class RoninAppointmentTest {
         )
 
         every {
-            conceptMapClient.getConceptMappingForEnum(
+            registryClient.getConceptMappingForEnum(
                 tenant,
-                "Appointment",
                 "Appointment.status",
                 Coding(
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
@@ -366,9 +365,8 @@ class RoninAppointmentTest {
         )
 
         every {
-            conceptMapClient.getConceptMappingForEnum(
+            registryClient.getConceptMappingForEnum(
                 tenant,
-                "Appointment",
                 "Appointment.status",
                 Coding(
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
@@ -468,9 +466,8 @@ class RoninAppointmentTest {
         )
 
         every {
-            conceptMapClient.getConceptMappingForEnum(
+            registryClient.getConceptMappingForEnum(
                 tenant,
-                "Appointment",
                 "Appointment.status",
                 Coding(
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
@@ -785,9 +782,8 @@ class RoninAppointmentTest {
         )
 
         every {
-            conceptMapClient.getConceptMappingForEnum(
+            registryClient.getConceptMappingForEnum(
                 tenant,
-                "Appointment",
                 "Appointment.status",
                 Coding(
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
@@ -848,9 +844,8 @@ class RoninAppointmentTest {
         )
 
         every {
-            conceptMapClient.getConceptMappingForEnum(
+            registryClient.getConceptMappingForEnum(
                 tenant,
-                "Appointment",
                 "Appointment.status",
                 Coding(
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
@@ -897,9 +892,8 @@ class RoninAppointmentTest {
             )
         )
         every {
-            conceptMapClient.getConceptMappingForEnum(
+            registryClient.getConceptMappingForEnum(
                 tenant,
-                "Appointment",
                 "Appointment.status",
                 Coding(
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
@@ -949,9 +943,8 @@ class RoninAppointmentTest {
         )
 
         every {
-            conceptMapClient.getConceptMappingForEnum(
+            registryClient.getConceptMappingForEnum(
                 tenant,
-                "Appointment",
                 "Appointment.status",
                 Coding(
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
@@ -992,9 +985,8 @@ class RoninAppointmentTest {
         )
 
         every {
-            conceptMapClient.getConceptMappingForEnum(
+            registryClient.getConceptMappingForEnum(
                 tenant,
-                "Appointment",
                 "Appointment.status",
                 Coding(
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
@@ -1038,9 +1030,8 @@ class RoninAppointmentTest {
         )
 
         every {
-            conceptMapClient.getConceptMappingForEnum(
+            registryClient.getConceptMappingForEnum(
                 tenant,
-                "Appointment",
                 "Appointment.status",
                 Coding(
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),

@@ -4,12 +4,12 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.validate.resource.R4AppointmentValidator
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
-import com.projectronin.interop.fhir.ronin.conceptmap.ConceptMapClient
 import com.projectronin.interop.fhir.ronin.error.ConceptMapInvalidValueSetError
 import com.projectronin.interop.fhir.ronin.error.FailedConceptMapLookupError
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
@@ -28,7 +28,7 @@ import org.springframework.stereotype.Component
  * Validator and Transformer for the Ronin Appointment profile.
  */
 @Component
-class RoninAppointment(private val conceptMapClient: ConceptMapClient, normalizer: Normalizer, localizer: Localizer) :
+class RoninAppointment(private val registryClient: NormalizationRegistryClient, normalizer: Normalizer, localizer: Localizer) :
     USCoreBasedProfile<Appointment>(R4AppointmentValidator, RoninProfile.APPOINTMENT.value, normalizer, localizer) {
 
     private val requiredAppointmentExtensionError = FHIRError(
@@ -81,9 +81,8 @@ class RoninAppointment(private val conceptMapClient: ConceptMapClient, normalize
         val validation = Validation()
 
         val mappedStatusPair = normalized.status?.value?.let { statusValue ->
-            val statusPair = conceptMapClient.getConceptMappingForEnum(
+            val statusPair = registryClient.getConceptMappingForEnum(
                 tenant,
-                parentContext.element,
                 "Appointment.status",
                 RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "Appointment.status", statusValue),
                 AppointmentStatus::class
