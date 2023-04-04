@@ -478,4 +478,82 @@ class NormalizationRegistryClientTest {
         assertEquals(1, mapping.size)
         assertEquals(Code("code1"), mapping[0].code)
     }
+
+    @Test
+    fun `universal getValueSet`() {
+        val registry1 = NormalizationRegistryItem(
+            data_element = "Patient.telecom.system",
+            registry_uuid = "12345",
+            filename = "file1.json",
+            value_set_name = "PatientTelecomSystemTenant",
+            value_set_uuid = "cm-010",
+            version = "1",
+            resource_type = "Patient",
+            tenant_id = null,
+            profile_url = "specialAppointment",
+            set = listOf(TargetValue("code1", "system1", "display1", "version1"))
+        )
+
+        every { NormalizationRegistryCache.getCurrentRegistry() } returns listOf(registry1)
+
+        val mapping =
+            client.getValueSet(
+                "Patient.telecom.system",
+                "specialAppointment"
+            )
+        mapping!!
+        assertEquals(1, mapping.size)
+        assertEquals(Code("code1"), mapping[0].code)
+    }
+
+    @Test
+    fun `universal getValueSet with universal profile match`() {
+        val registry1 = NormalizationRegistryItem(
+            data_element = "Patient.telecom.system",
+            registry_uuid = "12345",
+            filename = "file1.json",
+            value_set_name = "PatientTelecomSystem",
+            value_set_uuid = "cm-010",
+            version = "1",
+            resource_type = "Patient",
+            tenant_id = null,
+            set = listOf(TargetValue("code1", "system1", "display1", "version1"))
+        )
+        every { NormalizationRegistryCache.getCurrentRegistry() } returns listOf(registry1)
+
+        val mapping =
+            client.getValueSet(
+                "Patient.telecom.system"
+                // default profile_url is null
+            )
+        mapping!!
+        assertEquals(1, mapping.size)
+        assertEquals(Code("code1"), mapping[0].code)
+    }
+
+    @Test
+    fun `universal getValueSet with special profile match`() {
+        val registry1 = NormalizationRegistryItem(
+            data_element = "Patient.telecom.system",
+            registry_uuid = "12345",
+            filename = "file1.json",
+            value_set_name = "PatientTelecomSystem",
+            value_set_uuid = "cm-010",
+            version = "1",
+            resource_type = "Patient",
+            tenant_id = null,
+            profile_url = "specialPatient",
+            set = listOf(TargetValue("code1", "system1", "display1", "version1"))
+        )
+        every { NormalizationRegistryCache.getCurrentRegistry() } returns listOf(registry1)
+
+        val mapping =
+            client.getValueSet(
+                "Patient.telecom.system",
+                "specialPatient"
+            )
+        mapping!!
+        assertEquals(1, mapping.size)
+        assertEquals(Code("code1"), mapping[0].code)
+    }
 }

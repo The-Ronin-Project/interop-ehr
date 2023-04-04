@@ -45,8 +45,8 @@ class RoninObservationTest {
         every { localize(any(), tenant) } answers { firstArg() }
     }
     private val roninObservation = RoninObservation(normalizer, localizer)
-    private val roninVitalSign = RoninBodyTemperature(normalizer, localizer)
-    private val roninLaboratory = RoninLaboratoryResult(normalizer, localizer)
+    private val vitalSignsCategory = Code("vital-signs")
+    private val laboratoryCategory = Code("laboratory")
 
     @Test
     fun `qualifies when Observation code has the wrong system for vital signs`() {
@@ -59,7 +59,7 @@ class RoninObservationTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -73,7 +73,7 @@ class RoninObservationTest {
                 coding = listOf(
                     Coding(
                         system = Uri(value = "any system"),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = Code("8302-2")
                     )
                 )
             )
@@ -93,7 +93,7 @@ class RoninObservationTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -127,7 +127,7 @@ class RoninObservationTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -407,7 +407,7 @@ class RoninObservationTest {
                     coding = listOf(
                         Coding(
                             system = Uri(value = "not a good system at all"),
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -672,7 +672,7 @@ class RoninObservationTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Laboratory Result".asFHIR(),
-                        code = RoninLaboratoryResult.laboratoryCode
+                        code = laboratoryCategory
                     )
                 )
             ),
@@ -726,7 +726,7 @@ class RoninObservationTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Laboratory Result".asFHIR(),
-                        code = RoninLaboratoryResult.laboratoryCode
+                        code = laboratoryCategory
                     )
                 )
             ),
@@ -767,7 +767,7 @@ class RoninObservationTest {
             roninObservation.validate(observation, null).alertIfErrors()
         }
 
-        assertEquals( // TODO: PR 2 of 2 for INT-1289 - fix the duplication here
+        assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR INV_DYN_VAL: author can only be one of the following: Reference, String @ Observation.note[1].author",
             exception.message
@@ -796,7 +796,7 @@ class RoninObservationTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Laboratory Result".asFHIR(),
-                        code = RoninLaboratoryResult.laboratoryCode
+                        code = laboratoryCategory
                     )
                 )
             ),
@@ -1160,7 +1160,7 @@ class RoninObservationTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Laboratory Result".asFHIR(),
-                        code = RoninLaboratoryResult.laboratoryCode
+                        code = laboratoryCategory
                     )
                 )
             ),

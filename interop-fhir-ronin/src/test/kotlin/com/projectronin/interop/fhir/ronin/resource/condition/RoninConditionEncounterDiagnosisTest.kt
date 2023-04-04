@@ -515,7 +515,8 @@ class RoninConditionEncounterDiagnosisTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_CND_ENC_DX_001: Encounter diagnosis condition category required for US Core Condition Encounter Diagnosis profile @ Condition.category",
+                "ERROR USCORE_CND_001: Must match this system|code: " +
+                "http://terminology.hl7.org/CodeSystem/condition-category|encounter-diagnosis @ Condition.category",
             exception.message
         )
     }

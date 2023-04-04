@@ -52,6 +52,8 @@ class RoninHeartRateTest {
         every { localize(any(), tenant) } answers { firstArg() }
     }
     private val roninHeartRate = RoninHeartRate(normalizer, localizer)
+    private val vitalSignsCategory = Code("vital-signs")
+    private val heartRateCode = Code("8867-4")
 
     @Test
     fun `does not qualify when no category`() {
@@ -82,7 +84,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -109,7 +111,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -136,7 +138,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -163,7 +165,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -177,7 +179,7 @@ class RoninHeartRateTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.UCUM.uri,
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 )
             )
@@ -197,7 +199,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -211,7 +213,7 @@ class RoninHeartRateTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 )
             )
@@ -231,7 +233,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 )
             ),
@@ -240,7 +242,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -296,7 +298,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -314,8 +316,8 @@ class RoninHeartRateTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_HROBS_001: LOINC code 8867-4 required for " +
-                "US Core Heart Rate profile @ Observation.code",
+                "ERROR RONIN_OBS_003: Must match this system|code: " +
+                "http://loinc.org|8867-4 @ Observation.code",
             exception.message
         )
     }
@@ -342,7 +344,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 )
             ),
@@ -351,7 +353,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -404,7 +406,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 )
             ),
@@ -413,7 +415,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -466,7 +468,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 )
             ),
@@ -475,7 +477,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -529,7 +531,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 )
             ),
@@ -538,7 +540,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -591,7 +593,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 )
             ),
@@ -600,7 +602,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -654,7 +656,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 )
             ),
@@ -690,8 +692,8 @@ class RoninHeartRateTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_VSOBS_001: Vital signs must use code \"vital-signs\" in system " +
-                "\"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
+                "ERROR RONIN_OBS_002: Must match this system|code: " +
+                "http://terminology.hl7.org/CodeSystem/observation-category|vital-signs @ Observation.category",
             exception.message
         )
     }
@@ -718,7 +720,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 )
             ),
@@ -727,7 +729,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -771,7 +773,7 @@ class RoninHeartRateTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 )
             ),
@@ -780,7 +782,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -837,7 +839,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -847,7 +849,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 ),
                 text = "Heart Rate".asFHIR()
@@ -947,7 +949,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -960,7 +962,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 ),
                 text = "Heart Rate".asFHIR()
@@ -1028,7 +1030,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 ),
                 text = "Heart Rate".asFHIR()
@@ -1038,7 +1040,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1088,7 +1090,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1101,7 +1103,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 ),
                 text = "Heart Rate".asFHIR()
@@ -1144,7 +1146,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 )
             ),
@@ -1153,7 +1155,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1200,7 +1202,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 ),
                 text = "Heart Rate".asFHIR()
@@ -1210,7 +1212,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1258,7 +1260,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 ),
                 text = "Heart Rate".asFHIR()
@@ -1268,7 +1270,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1316,7 +1318,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 ),
                 text = "Heart Rate".asFHIR()
@@ -1326,7 +1328,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1374,7 +1376,7 @@ class RoninHeartRateTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Heart Rate".asFHIR(),
-                        code = RoninHeartRate.heartRateCode
+                        code = heartRateCode
                     )
                 ),
                 text = "Heart Rate".asFHIR()
@@ -1384,7 +1386,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )

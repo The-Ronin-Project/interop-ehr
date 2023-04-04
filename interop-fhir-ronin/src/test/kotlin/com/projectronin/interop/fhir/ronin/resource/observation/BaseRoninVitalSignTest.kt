@@ -41,7 +41,8 @@ class BaseRoninVitalSignTest {
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
-    private val roninVitalSign = object : BaseRoninVitalSign(R4ObservationValidator, "profile", normalizer, localizer) {}
+    private val roninVitalSign = RoninBodyHeight(normalizer, localizer)
+    private val bodyHeightCode = Code("8302-2")
 
     @Test
     fun `validate fails if no vital signs category`() {
@@ -65,7 +66,7 @@ class BaseRoninVitalSignTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -101,8 +102,8 @@ class BaseRoninVitalSignTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_VSOBS_001: Vital signs must use code \"vital-signs\" in system " +
-                "\"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
+                "ERROR RONIN_OBS_002: Must match this system|code: " +
+                "http://terminology.hl7.org/CodeSystem/observation-category|vital-signs @ Observation.category",
             exception.message
         )
     }
@@ -129,7 +130,7 @@ class BaseRoninVitalSignTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -193,7 +194,7 @@ class BaseRoninVitalSignTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -267,7 +268,7 @@ class BaseRoninVitalSignTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -365,6 +366,7 @@ class BaseRoninVitalSignTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
+                "ERROR RONIN_OBS_003: Must match this system|code: http://loinc.org|8302-2 @ Observation.code\n" +
                 "ERROR RONIN_VSOBS_001: Coding list must contain exactly 1 entry @ Observation.code",
             exception.message
         )
@@ -392,7 +394,7 @@ class BaseRoninVitalSignTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),

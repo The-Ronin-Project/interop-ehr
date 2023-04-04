@@ -1,6 +1,7 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
 import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Quantity
@@ -22,13 +23,13 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
  */
 abstract class BaseRoninVitalSign(
     extendedProfile: ProfileValidator<Observation>,
-    profile: String,
+    protected val profile: String,
     normalizer: Normalizer,
     localizer: Localizer
 ) : BaseRoninObservation(extendedProfile, profile, normalizer, localizer) {
-    companion object {
-        internal val vitalSignsCode = Code("vital-signs")
-    }
+
+    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
+    override val qualifyingCategories = listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("vital-signs")))
 
     // Quantity unit codes - subclasses may override to modify validation logic for quantity units like "cm" "kg"
     open val validQuantityCodes: List<String> = emptyList()
@@ -42,13 +43,6 @@ abstract class BaseRoninVitalSign(
         DynamicValueType.PERIOD
     )
 
-    private val requiredVitalSignsCodeError = FHIRError(
-        code = "USCORE_VSOBS_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Vital signs must use code \"${vitalSignsCode.value}\" in system \"${CodeSystem.OBSERVATION_CATEGORY.uri.value}\"",
-        location = LocationContext(Observation::category)
-    )
-
     private val singleObservationCodeError = FHIRError(
         code = "RONIN_VSOBS_001",
         severity = ValidationIssueSeverity.ERROR,
@@ -57,6 +51,8 @@ abstract class BaseRoninVitalSign(
     )
 
     override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
+        super.validateObservation(element, parentContext, validation)
+
         validation.apply {
             element.code?.coding?.let {
                 checkTrue(it.size == 1, singleObservationCodeError, parentContext)
@@ -79,14 +75,7 @@ abstract class BaseRoninVitalSign(
      * Validates the [element] against Ronin rules for vital sign Observations.
      */
     open fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
-        validation.apply {
-            checkTrue(
-                element.category.flatMap { it.coding }
-                    .any { it.system == CodeSystem.OBSERVATION_CATEGORY.uri && it.code == vitalSignsCode },
-                requiredVitalSignsCodeError,
-                parentContext
-            )
-        }
+        validateVitalSignValue(element.value, validQuantityCodes, parentContext, validation)
     }
 
     private val requiredQuantityValueError = RequiredFieldError(LocationContext("Observation", "valueQuantity.value"))

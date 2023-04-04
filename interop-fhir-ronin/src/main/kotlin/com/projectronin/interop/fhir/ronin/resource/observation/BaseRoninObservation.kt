@@ -1,5 +1,6 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
+import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.resource.Observation
@@ -7,6 +8,7 @@ import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
+import com.projectronin.interop.fhir.ronin.util.isInValueSet
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.ronin.util.validateReferenceList
@@ -28,6 +30,21 @@ abstract class BaseRoninObservation(
     normalizer: Normalizer,
     localizer: Localizer
 ) : USCoreBasedProfile<Observation>(extendedProfile, profile, normalizer, localizer) {
+
+    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
+    open val qualifyingCategories: List<Coding> = emptyList()
+
+    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
+    open val qualifyingCodes: List<Coding> = emptyList()
+
+    override fun qualifies(resource: Observation): Boolean {
+        return (
+            qualifyingCategories.isEmpty() || resource.category.any { category ->
+                category.coding.any { it.isInValueSet(qualifyingCategories) }
+            }
+            ) &&
+            (qualifyingCodes.isEmpty() || resource.code?.coding?.any { it.isInValueSet(qualifyingCodes) } ?: false)
+    }
 
     // Reference checks - subclasses may override lists to modify validation logic for reference attributes
     open val validBasedOnValues = listOf(
@@ -150,7 +167,38 @@ abstract class BaseRoninObservation(
      * To validate subclasses against Ronin rules for a specific Observation type.
      * Observation type is defined by Ronin Common Data Model based on Observation.category and Observation.code.
      */
-    abstract fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation)
+    open fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
+        validation.apply {
+            if (element.category.isNotEmpty() && qualifyingCategories.isNotEmpty()) {
+                checkTrue(
+                    element.category.any { category ->
+                        category.coding.any { it.isInValueSet(qualifyingCategories) }
+                    },
+                    FHIRError(
+                        code = "RONIN_OBS_002",
+                        severity = ValidationIssueSeverity.ERROR,
+                        description = "Must match this system|code: ${ qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" } }",
+                        location = LocationContext(Observation::category)
+                    ),
+                    parentContext
+                )
+            }
+
+            val code = element.code
+            if (code != null && qualifyingCodes.isNotEmpty()) {
+                checkTrue(
+                    code.coding.any { it.isInValueSet(qualifyingCodes) },
+                    FHIRError(
+                        code = "RONIN_OBS_003",
+                        severity = ValidationIssueSeverity.ERROR,
+                        description = "Must match this system|code: ${ qualifyingCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" } }",
+                        location = LocationContext(Observation::code)
+                    ),
+                    parentContext
+                )
+            }
+        }
+    }
 
     private val requiredIdError = RequiredFieldError(Observation::id)
 

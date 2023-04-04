@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.resource.observation
 
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
+import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
@@ -32,9 +33,9 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
         normalizer,
         localizer
     ) {
-    companion object {
-        internal val laboratoryCode = Code("laboratory")
-    }
+
+    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
+    override val qualifyingCategories = listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("laboratory")))
 
     // Reference checks - override BaseRoninObservation value lists as needed for RoninLaboratoryResult
     override val validDerivedFromValues = listOf(
@@ -64,19 +65,7 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
         DynamicValueType.PERIOD
     )
 
-    override fun qualifies(resource: Observation): Boolean {
-        return resource.category.any { category ->
-            category.coding.any { it.system == CodeSystem.OBSERVATION_CATEGORY.uri && it.code == laboratoryCode }
-        }
-    }
-
     private val requiredCategoryError = RequiredFieldError(Observation::category)
-    private val requiredLaboratoryCodeError = FHIRError(
-        code = "USCORE_LABOBS_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Laboratory result must use code \"${laboratoryCode.value}\" in system \"${CodeSystem.OBSERVATION_CATEGORY.uri.value}\"",
-        location = LocationContext(Observation::category)
-    )
     private val invalidQuantitySystemError = FHIRError(
         code = "USCORE_LABOBS_002",
         severity = ValidationIssueSeverity.ERROR,
@@ -179,13 +168,9 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
     }
 
     override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
+        super.validateObservation(element, parentContext, validation)
+
         validation.apply {
-            checkTrue(
-                element.category.flatMap { it.coding }
-                    .any { it.system == CodeSystem.OBSERVATION_CATEGORY.uri && it.code == laboratoryCode },
-                requiredLaboratoryCodeError,
-                parentContext
-            )
             val codingList = element.code?.coding
             ifNotNull(codingList) {
                 checkTrue((codingList!!.size == 1), singleObservationCodeError, parentContext)

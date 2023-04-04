@@ -3,6 +3,7 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
+import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
@@ -10,6 +11,8 @@ import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBloodPressure
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyHeight
+import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyMassIndex
+import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodySurfaceArea
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyTemperature
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyWeight
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninHeartRate
@@ -34,6 +37,10 @@ class RoninObservationsTest {
     private val normalizer = mockk<Normalizer>()
     private val localizer = mockk<Localizer>()
     private val bodyHeight = mockk<RoninBodyHeight>()
+    private val bodyHeightCode = Code("8302-2")
+
+    private val bodyMassIndex = mockk<RoninBodyMassIndex>()
+    private val bodySurfaceArea = mockk<RoninBodySurfaceArea>()
     private val bodyWeight = mockk<RoninBodyWeight>()
     private val bodyTemperature = mockk<RoninBodyTemperature>()
     private val bloodPressure = mockk<RoninBloodPressure>()
@@ -49,6 +56,8 @@ class RoninObservationsTest {
             normalizer,
             localizer,
             bodyHeight,
+            bodyMassIndex,
+            bodySurfaceArea,
             bodyWeight,
             bodyTemperature,
             bloodPressure,
@@ -71,7 +80,7 @@ class RoninObservationsTest {
                         coding = listOf(
                             Coding(
                                 system = CodeSystem.LOINC.uri,
-                                code = RoninBodyHeight.bodyHeightCode
+                                code = bodyHeightCode
                             )
                         )
                     )
@@ -86,6 +95,8 @@ class RoninObservationsTest {
 
         every { bodyHeight.qualifies(observation) } returns true
         every { bodyHeight.validate(observation, LocationContext(Observation::class)) } returns Validation()
+        every { bodyMassIndex.qualifies(observation) } returns false
+        every { bodySurfaceArea.qualifies(observation) } returns false
         every { bodyWeight.qualifies(observation) } returns false
         every { bodyTemperature.qualifies(observation) } returns false
         every { bloodPressure.qualifies(observation) } returns false
@@ -115,12 +126,17 @@ class RoninObservationsTest {
             roninObservation,
             Validation()
         )
+        every { bodyMassIndex.qualifies(original) } returns false
+        every { bodySurfaceArea.qualifies(original) } returns false
         every { bodyTemperature.qualifies(original) } returns false
         every { bloodPressure.qualifies(original) } returns false
         every { respiratoryRate.qualifies(original) } returns false
         every { heartRate.qualifies(original) } returns false
         every { pulseOximetry.qualifies(original) } returns false
         every { laboratoryResult.qualifies(original) } returns false
+
+        every { bodyMassIndex.qualifies(roninObservation) } returns false
+        every { bodySurfaceArea.qualifies(roninObservation) } returns false
         every { bodyHeight.qualifies(roninObservation) } returns false
         every { bodyWeight.qualifies(roninObservation) } returns true
         every { bodyWeight.validate(roninObservation, LocationContext(Observation::class)) } returns Validation()

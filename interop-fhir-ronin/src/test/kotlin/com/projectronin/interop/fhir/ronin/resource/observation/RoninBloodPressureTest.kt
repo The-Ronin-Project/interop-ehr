@@ -52,6 +52,10 @@ class RoninBloodPressureTest {
         every { localize(any(), tenant) } answers { firstArg() }
     }
     private val roninBloodPressure = RoninBloodPressure(normalizer, localizer)
+    private val vitalSignsCategory = Code("vital-signs")
+    private val bloodPressureCode = Code("85354-9")
+    private val systolicCode = Code("8480-6")
+    private val diastolicCode = Code("8462-4")
 
     @Test
     fun `does not qualify when no category`() {
@@ -82,7 +86,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -109,7 +113,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -136,7 +140,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -163,7 +167,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -177,7 +181,7 @@ class RoninBloodPressureTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.UCUM.uri,
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             )
@@ -197,7 +201,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -211,7 +215,7 @@ class RoninBloodPressureTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             )
@@ -231,7 +235,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -240,7 +244,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -296,7 +300,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -313,7 +317,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -334,7 +338,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -358,7 +362,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_BPOBS_001: LOINC code 85354-9 required for US Core Blood Pressure profile @ Observation.code",
+                "ERROR RONIN_OBS_003: Must match this system|code: http://loinc.org|85354-9 @ Observation.code",
             exception.message
         )
     }
@@ -385,7 +389,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -394,7 +398,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -412,8 +416,8 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_BPOBS_002: LOINC code 8480-6 required for systolic blood pressure @ Observation.component.code\n" +
-                "ERROR USCORE_BPOBS_003: LOINC code 8462-4 required for diastolic blood pressure @ Observation.component.code",
+                "ERROR USCORE_BPOBS_001: Must match this system|code: http://loinc.org|8480-6 @ Observation.component.component\n" +
+                "ERROR USCORE_BPOBS_002: Must match this system|code: http://loinc.org|8462-4 @ Observation.component.component",
             exception.message
         )
     }
@@ -441,7 +445,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -450,7 +454,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -487,7 +491,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -496,7 +500,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -513,7 +517,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -535,7 +539,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -586,7 +590,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -595,7 +599,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -612,7 +616,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -625,7 +629,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -668,7 +672,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -677,7 +681,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -694,7 +698,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -715,7 +719,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -736,7 +740,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -779,7 +783,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -788,7 +792,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -805,7 +809,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -825,7 +829,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -876,7 +880,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -885,7 +889,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -902,7 +906,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -922,7 +926,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -973,7 +977,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -982,7 +986,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -999,7 +1003,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -1020,7 +1024,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -1071,7 +1075,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -1080,7 +1084,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1097,7 +1101,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -1117,7 +1121,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -1168,7 +1172,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -1177,7 +1181,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1194,7 +1198,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -1215,7 +1219,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -1266,7 +1270,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -1275,7 +1279,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1292,7 +1296,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -1313,7 +1317,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -1365,7 +1369,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -1374,7 +1378,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1391,7 +1395,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -1412,7 +1416,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -1447,7 +1451,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -1456,7 +1460,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1473,7 +1477,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -1494,7 +1498,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -1515,7 +1519,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -1558,7 +1562,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -1567,7 +1571,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1584,7 +1588,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -1605,7 +1609,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -1655,7 +1659,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -1664,7 +1668,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1681,7 +1685,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -1702,7 +1706,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -1752,7 +1756,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -1761,7 +1765,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1778,7 +1782,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -1799,7 +1803,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -1850,7 +1854,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -1859,7 +1863,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1876,7 +1880,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -1897,7 +1901,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -1947,7 +1951,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -1956,7 +1960,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1973,7 +1977,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -1994,7 +1998,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -2045,7 +2049,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -2071,7 +2075,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -2092,7 +2096,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -2116,8 +2120,8 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_VSOBS_001: Vital signs must use code \"vital-signs\" in system " +
-                "\"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
+                "ERROR RONIN_OBS_002: Must match this system|code: " +
+                "http://terminology.hl7.org/CodeSystem/observation-category|vital-signs @ Observation.category",
             exception.message
         )
     }
@@ -2144,7 +2148,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -2153,7 +2157,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -2170,7 +2174,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -2191,7 +2195,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -2232,7 +2236,7 @@ class RoninBloodPressureTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -2241,7 +2245,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -2298,7 +2302,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -2308,7 +2312,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 ),
                 text = "Blood Pressure".asFHIR()
@@ -2341,7 +2345,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Systolic".asFHIR(),
-                                code = RoninBloodPressure.systolicCode
+                                code = systolicCode
                             )
                         ),
                         text = "Systolic".asFHIR()
@@ -2362,7 +2366,7 @@ class RoninBloodPressureTest {
                             Coding(
                                 system = CodeSystem.LOINC.uri,
                                 display = "Diastolic".asFHIR(),
-                                code = RoninBloodPressure.diastolicCode
+                                code = diastolicCode
                             )
                         ),
                         text = "Diastolic".asFHIR()
@@ -2446,7 +2450,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -2459,7 +2463,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 ),
                 text = "Blood Pressure".asFHIR()
@@ -2510,7 +2514,7 @@ class RoninBloodPressureTest {
                         Coding(
                             system = CodeSystem.LOINC.uri,
                             display = "Systolic".asFHIR(),
-                            code = RoninBloodPressure.systolicCode
+                            code = systolicCode
                         )
                     ),
                     text = "Systolic".asFHIR()
@@ -2534,7 +2538,7 @@ class RoninBloodPressureTest {
                         Coding(
                             system = CodeSystem.LOINC.uri,
                             display = "Diastolic".asFHIR(),
-                            code = RoninBloodPressure.diastolicCode
+                            code = diastolicCode
                         )
                     ),
                     text = "Diastolic".asFHIR()
@@ -2572,7 +2576,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 ),
                 text = "Blood Pressure".asFHIR()
@@ -2582,7 +2586,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -2632,7 +2636,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -2645,7 +2649,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 ),
                 text = "Blood Pressure".asFHIR()
@@ -2688,7 +2692,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 )
             ),
@@ -2697,7 +2701,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -2744,7 +2748,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 ),
                 text = "Blood Pressure".asFHIR()
@@ -2754,7 +2758,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -2802,7 +2806,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 ),
                 text = "Blood Pressure".asFHIR()
@@ -2812,7 +2816,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -2860,7 +2864,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 ),
                 text = "Blood Pressure".asFHIR()
@@ -2870,7 +2874,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -2918,7 +2922,7 @@ class RoninBloodPressureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Blood Pressure".asFHIR(),
-                        code = RoninBloodPressure.bloodPressureCode
+                        code = bloodPressureCode
                     )
                 ),
                 text = "Blood Pressure".asFHIR()
@@ -2928,7 +2932,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )

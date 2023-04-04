@@ -127,6 +127,59 @@ internal class NormalizationRegistryCacheTest {
         )
     )
 
+    private val tenant1 = mockk<Tenant> {
+        every { mnemonic } returns "tenant1"
+    }
+    private val tenant2 = mockk<Tenant> {
+        every { mnemonic } returns "tenant2"
+    }
+    private val mixedTenantRegistry = listOf(
+        NormalizationRegistryItem(
+            data_element = "Appointment.status",
+            registry_uuid = "01234",
+            filename = "file3.json",
+            value_set_name = "AppointmentStatus-tenant2",
+            value_set_uuid = "vs-3333",
+            version = "1",
+            resource_type = "Appointment",
+            tenant_id = "tenant2",
+            profile_url = null
+        ),
+        NormalizationRegistryItem(
+            data_element = "Appointment.status",
+            registry_uuid = "12345",
+            filename = "file1.json",
+            value_set_name = "AppointmentStatus-tenant1",
+            value_set_uuid = "vs-1111",
+            version = "1",
+            resource_type = "Appointment",
+            tenant_id = "tenant1",
+            profile_url = null
+        ),
+        NormalizationRegistryItem(
+            data_element = "Patient.telecom.use",
+            registry_uuid = "56789",
+            filename = "file4.json",
+            value_set_name = "PatientTelecomUse-tenant2",
+            value_set_uuid = "vs-4444",
+            version = "1",
+            resource_type = "Patient",
+            tenant_id = "tenant2",
+            profile_url = "specialPatient"
+        ),
+        NormalizationRegistryItem(
+            data_element = "Patient.telecom.use",
+            registry_uuid = "67890",
+            filename = "file2.json",
+            value_set_name = "PatientTelecomUse-tenant1",
+            value_set_uuid = "vs-2222",
+            version = "1",
+            resource_type = "Patient",
+            tenant_id = "tenant1",
+            profile_url = "specialPatient"
+        )
+    )
+
     @Test
     fun `reload works correctly for ConceptMap`() {
         val mockkMap1 = mockk<ConceptMap> {
@@ -188,7 +241,7 @@ internal class NormalizationRegistryCacheTest {
         every { JacksonUtil.readJsonObject("mapJson2", ConceptMap::class) } returns mockkMap2
 
         mockkObject(NormalizationRegistryCache)
-        normClient.reload(tenant)
+        normClient.reload(tenant.mnemonic)
         var actual = NormalizationRegistryCache.getCurrentRegistry()
         assertEquals(2, actual.size)
         assertEquals("12345", actual[0].registry_uuid)
@@ -209,7 +262,7 @@ internal class NormalizationRegistryCacheTest {
         every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns testRegistry2
         every { ociClient.getObjectFromINFX("newFile") } returns "mapJson3"
         every { JacksonUtil.readJsonObject("mapJson3", ConceptMap::class) } returns mockkMap1
-        normClient.reload(tenant)
+        normClient.reload(tenant.mnemonic)
         actual = NormalizationRegistryCache.getCurrentRegistry()
         assertEquals(3, actual.size)
         assertEquals("12345", actual[0].registry_uuid)
@@ -246,7 +299,7 @@ internal class NormalizationRegistryCacheTest {
         every { JacksonUtil.readJsonObject("mapJson2", ConceptMap::class) } returns mockkMap2
         every { ociClient.getObjectFromINFX("universal.json") } returns "universalJson"
         every { JacksonUtil.readJsonObject("universalJson", ConceptMap::class) } returns mockkMap2
-        normClient.reload(tenant)
+        normClient.reload(tenant.mnemonic)
         actual = NormalizationRegistryCache.getCurrentRegistry()
         assertEquals(2, actual.size)
         assertEquals("12345", actual[0].registry_uuid)
@@ -262,7 +315,7 @@ internal class NormalizationRegistryCacheTest {
         // --
         // don't reload if version hasn't changed
         every { JacksonUtil.readJsonObject("mapJson1", ConceptMap::class) } returns mockkMap1
-        normClient.reload(tenant)
+        normClient.reload(tenant.mnemonic)
         actual = NormalizationRegistryCache.getCurrentRegistry()
         assertEquals(2, actual.size)
         assertEquals("12345", actual[0].registry_uuid)
@@ -305,7 +358,7 @@ internal class NormalizationRegistryCacheTest {
         every { JacksonUtil.readJsonObject("mapJson2", ConceptMap::class) } returns mockkMap2
         every { ociClient.getObjectFromINFX("universal.json") } returns "universalJson"
         every { JacksonUtil.readJsonObject("universalJson", ConceptMap::class) } returns mockkMap2
-        normClient.reload(tenant)
+        normClient.reload(tenant.mnemonic)
         actual = NormalizationRegistryCache.getCurrentRegistry()
         assertEquals(2, actual.size)
         assertEquals("12345", actual[0].registry_uuid)
@@ -335,7 +388,7 @@ internal class NormalizationRegistryCacheTest {
                 to TargetValue("targetValue2", "targetSystem2", "targetDisplay2", "targetVersion2")
         )
         val sourceCoding = Coding(code = Code("sourceValue1"), system = Uri("sourceSystem1"))
-        NormalizationRegistryCache.setNewRegistry(cmTestRegistry, tenant)
+        NormalizationRegistryCache.setNewRegistry(cmTestRegistry, tenant.mnemonic)
         // calling the client here tests the 'reload' line of code
         val mapped = normClient.getConceptMappingForEnum(
             tenant,
@@ -365,8 +418,8 @@ internal class NormalizationRegistryCacheTest {
             every { mnemonic } returns "badTenant"
         }
         mockkObject(NormalizationRegistryCache)
-        NormalizationRegistryCache.setNewRegistry(cmTestRegistry, tenant)
-        NormalizationRegistryCache.setNewRegistry(cmTestRegistry, badTenant) // avoid reloads
+        NormalizationRegistryCache.setNewRegistry(cmTestRegistry, tenant.mnemonic)
+        NormalizationRegistryCache.setNewRegistry(cmTestRegistry, badTenant.mnemonic) // avoid reloads
         val sourceCoding = Coding(code = Code("sourceValue1"), system = Uri("sourceSystem1"))
         // bad tenant
         assertNull(
@@ -425,7 +478,7 @@ internal class NormalizationRegistryCacheTest {
     fun `try catch works for ConceptMap`() {
         mockkObject(JacksonUtil)
         every { JacksonUtil.readJsonObject(any(), ConceptMap::class) } throws Exception("bad")
-        assertEquals(emptyMap<SourceKey, TargetValue>(), normClient.getConceptMap("name"))
+        assertEquals(emptyMap<SourceKey, TargetValue>(), normClient.getConceptMapData("name"))
 
         every { JacksonUtil.readJsonList(any(), NormalizationRegistryItem::class) } throws Exception("bad")
         assertEquals(emptyList<NormalizationRegistryItem>(), normClient.getNewRegistry())
@@ -447,7 +500,7 @@ internal class NormalizationRegistryCacheTest {
             code = Code("sourceValue1"),
             system = RoninConceptMap.CODE_SYSTEMS.toUri(tenant, "AppointmentStatus")
         )
-        NormalizationRegistryCache.setNewRegistry(cmTestRegistry, tenant)
+        NormalizationRegistryCache.setNewRegistry(cmTestRegistry, tenant.mnemonic)
         // calling the client here tests the 'reload' line of code
         val mapped = normClient.getConceptMappingForEnum(
             tenant,
@@ -486,7 +539,7 @@ internal class NormalizationRegistryCacheTest {
             code = Code("sourceValue1"),
             system = RoninConceptMap.CODE_SYSTEMS.toUri(tenant, "AppointmentStatus")
         )
-        NormalizationRegistryCache.setNewRegistry(mixedTestRegistry, tenant)
+        NormalizationRegistryCache.setNewRegistry(mixedTestRegistry, tenant.mnemonic)
 
         val mappedAppointment = normClient.getConceptMappingForEnum(
             tenant,
@@ -565,7 +618,7 @@ internal class NormalizationRegistryCacheTest {
         every { JacksonUtil.readJsonObject("setJson2", ValueSet::class) } returns mockkSet2
 
         mockkObject(NormalizationRegistryCache)
-        normClient.reload(tenant)
+        normClient.reload(tenant.mnemonic)
         var actual = NormalizationRegistryCache.getCurrentRegistry()
         assertEquals(2, actual.size)
         assertEquals("01234", actual[0].registry_uuid)
@@ -586,7 +639,7 @@ internal class NormalizationRegistryCacheTest {
         every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns testRegistry2
         every { ociClient.getObjectFromINFX("newFile") } returns "setJson3"
         every { JacksonUtil.readJsonObject("setJson3", ValueSet::class) } returns mockkSet1
-        normClient.reload(tenant)
+        normClient.reload(tenant.mnemonic)
         actual = NormalizationRegistryCache.getCurrentRegistry()
         assertEquals(3, actual.size)
         assertEquals("01234", actual[0].registry_uuid)
@@ -623,7 +676,7 @@ internal class NormalizationRegistryCacheTest {
         every { JacksonUtil.readJsonObject("setJson2", ValueSet::class) } returns mockkSet2
         every { ociClient.getObjectFromINFX("universal.json") } returns "universalJson"
         every { JacksonUtil.readJsonObject("universalJson", ValueSet::class) } returns mockkSet2
-        normClient.reload(tenant)
+        normClient.reload(tenant.mnemonic)
         actual = NormalizationRegistryCache.getCurrentRegistry()
         assertEquals(2, actual.size)
         assertEquals("01234", actual[0].registry_uuid)
@@ -636,7 +689,7 @@ internal class NormalizationRegistryCacheTest {
         // --
         // don't reload if version hasn't changed
         every { JacksonUtil.readJsonObject("setJson1", ValueSet::class) } returns mockkSet1
-        normClient.reload(tenant)
+        normClient.reload(tenant.mnemonic)
         actual = NormalizationRegistryCache.getCurrentRegistry()
         assertEquals(2, actual.size)
         assertEquals("01234", actual[0].registry_uuid)
@@ -676,7 +729,7 @@ internal class NormalizationRegistryCacheTest {
         every { JacksonUtil.readJsonObject("setJson2", ValueSet::class) } returns mockkSet2
         every { ociClient.getObjectFromINFX("universal.json") } returns "universalJson"
         every { JacksonUtil.readJsonObject("universalJson", ValueSet::class) } returns mockkSet2
-        normClient.reload(tenant)
+        normClient.reload(tenant.mnemonic)
         actual = NormalizationRegistryCache.getCurrentRegistry()
         assertEquals(2, actual.size)
         assertEquals("01234", actual[0].registry_uuid)
@@ -700,7 +753,7 @@ internal class NormalizationRegistryCacheTest {
         vsTestRegistry[1].set = listOf(
             TargetValue("code2", "system2", "display2", "version2")
         )
-        NormalizationRegistryCache.setNewRegistry(vsTestRegistry, tenant)
+        NormalizationRegistryCache.setNewRegistry(vsTestRegistry, tenant.mnemonic)
         // calling the client here tests the 'reload' line of code
         val set = normClient.getValueSet(
             tenant,
@@ -727,8 +780,8 @@ internal class NormalizationRegistryCacheTest {
             every { mnemonic } returns "badTenant"
         }
         mockkObject(NormalizationRegistryCache)
-        NormalizationRegistryCache.setNewRegistry(vsTestRegistry, tenant)
-        NormalizationRegistryCache.setNewRegistry(vsTestRegistry, badTenant) // avoid reloads
+        NormalizationRegistryCache.setNewRegistry(vsTestRegistry, tenant.mnemonic)
+        NormalizationRegistryCache.setNewRegistry(vsTestRegistry, badTenant.mnemonic) // avoid reloads
         val sourceCoding = Coding(code = Code("sourceValue1"), system = Uri("sourceSystem1"))
         // bad tenant
         assertNull(
@@ -786,7 +839,7 @@ internal class NormalizationRegistryCacheTest {
     fun `try catch works for ValueSet`() {
         mockkObject(JacksonUtil)
         every { JacksonUtil.readJsonObject(any(), ConceptMap::class) } throws Exception("bad")
-        assertEquals(emptyMap<SourceKey, TargetValue>(), normClient.getConceptMap("name"))
+        assertEquals(emptyMap<SourceKey, TargetValue>(), normClient.getConceptMapData("name"))
 
         every { JacksonUtil.readJsonList(any(), NormalizationRegistryItem::class) } throws Exception("bad")
         assertEquals(emptyList<NormalizationRegistryItem>(), normClient.getNewRegistry())
@@ -811,7 +864,7 @@ internal class NormalizationRegistryCacheTest {
         every { ociClient.getObjectFromINFX("file1.json") } returns "setJson1"
         every { JacksonUtil.readJsonObject("setJson1", ValueSet::class) } returns mockkSet1
         mockkObject(NormalizationRegistryCache)
-        assertEquals(emptyList<TargetValue>(), normClient.getValueSet("file1.json"))
+        assertEquals(emptyList<TargetValue>(), normClient.getValueSetData("file1.json"))
         // --
         // null display
         val mockkSet2 = mockk<ValueSet> {
@@ -828,7 +881,7 @@ internal class NormalizationRegistryCacheTest {
         every { ociClient.getObjectFromINFX("file1.json") } returns "setJson1"
         every { JacksonUtil.readJsonObject("setJson1", ValueSet::class) } returns mockkSet2
         mockkObject(NormalizationRegistryCache)
-        assertEquals(emptyList<TargetValue>(), normClient.getValueSet("file1.json"))
+        assertEquals(emptyList<TargetValue>(), normClient.getValueSetData("file1.json"))
         // --
         // empty expansion
         val mockkSet4 = mockk<ValueSet> {
@@ -839,7 +892,7 @@ internal class NormalizationRegistryCacheTest {
         every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns vsTestRegistry
         every { ociClient.getObjectFromINFX("file1.json") } returns "setJson1"
         every { JacksonUtil.readJsonObject("setJson1", ValueSet::class) } returns mockkSet4
-        assertEquals(emptyList<TargetValue>(), normClient.getValueSet("file1.json"))
+        assertEquals(emptyList<TargetValue>(), normClient.getValueSetData("file1.json"))
         // --
         // empty contains
         val mockkSet5 = mockk<ValueSet> {
@@ -850,7 +903,7 @@ internal class NormalizationRegistryCacheTest {
         every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns vsTestRegistry
         every { ociClient.getObjectFromINFX("file1.json") } returns "setJson1"
         every { JacksonUtil.readJsonObject("setJson1", ValueSet::class) } returns mockkSet5
-        assertEquals(emptyList<TargetValue>(), normClient.getValueSet("file1.json"))
+        assertEquals(emptyList<TargetValue>(), normClient.getValueSetData("file1.json"))
         // --
         unmockkObject(NormalizationRegistryCache)
         unmockkObject(JacksonUtil)
@@ -865,7 +918,7 @@ internal class NormalizationRegistryCacheTest {
         mixedTestRegistry[2].set = listOf(
             TargetValue("code2", "system2", "display2", "version2")
         )
-        NormalizationRegistryCache.setNewRegistry(mixedTestRegistry, tenant)
+        NormalizationRegistryCache.setNewRegistry(mixedTestRegistry, tenant.mnemonic)
 
         val setAppointment = normClient.getValueSet(
             tenant,
@@ -897,6 +950,92 @@ internal class NormalizationRegistryCacheTest {
         )
 
         vsTestRegistry.forEach { it.set = null } // reset
+        unmockkObject(NormalizationRegistryCache)
+    }
+
+    @Test
+    fun `getValueSet works correctly with registry that has ValueSets for 2 tenants`() {
+        mockkObject(NormalizationRegistryCache)
+        mixedTenantRegistry[0].set = listOf(
+            TargetValue("targetValue0", "targetSystem0", "targetDisplay0", "targetVersion0")
+        )
+        mixedTenantRegistry[1].set = listOf(
+            TargetValue("targetValue1", "targetSystem1", "targetDisplay1", "targetVersion1")
+        )
+        mixedTenantRegistry[2].set = listOf(
+            TargetValue("targetValue2", "targetSystem2", "targetDisplay2", "targetVersion2")
+        )
+        mixedTenantRegistry[3].set = listOf(
+            TargetValue("targetValue3", "targetSystem3", "targetDisplay3", "targetVersion3")
+        )
+
+        NormalizationRegistryCache.setNewRegistry(mixedTenantRegistry, "tenant1")
+
+        val mappingA = normClient.getValueSet(
+            tenant1,
+            "Appointment.status"
+        )
+        mappingA!!
+        assertEquals(
+            Coding(
+                code = Code("targetValue1"),
+                system = Uri("targetSystem1"),
+                display = "targetDisplay1".asFHIR(),
+                version = "targetVersion1".asFHIR()
+            ),
+            mappingA[0]
+        )
+
+        val mappingB = normClient.getValueSet(
+            tenant1,
+            "Patient.telecom.use",
+            "specialPatient"
+        )
+        mappingB!!
+        assertEquals(
+            Coding(
+                code = Code("targetValue3"),
+                system = Uri("targetSystem3"),
+                display = "targetDisplay3".asFHIR(),
+                version = "targetVersion3".asFHIR()
+            ),
+            mappingB[0]
+        )
+
+        NormalizationRegistryCache.setNewRegistry(mixedTenantRegistry, "tenant2")
+
+        val mappingC = normClient.getValueSet(
+            tenant2,
+            "Appointment.status"
+        )
+        mappingC!!
+        assertEquals(
+            Coding(
+                code = Code("targetValue0"),
+                system = Uri("targetSystem0"),
+                display = "targetDisplay0".asFHIR(),
+                version = "targetVersion0".asFHIR()
+            ),
+            mappingC[0]
+        )
+
+        val mappingD = normClient.getValueSet(
+            tenant2,
+            "Patient.telecom.use",
+            "specialPatient"
+        )
+        mappingD!!
+        assertEquals(
+            Coding(
+                code = Code("targetValue2"),
+                system = Uri("targetSystem2"),
+                display = "targetDisplay2".asFHIR(),
+                version = "targetVersion2".asFHIR()
+            ),
+            mappingD[0]
+        )
+
+        mixedTenantRegistry.forEach { it.set = null } // reset
         unmockkObject(NormalizationRegistryCache)
     }
 }

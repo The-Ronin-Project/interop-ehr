@@ -53,6 +53,8 @@ class RoninBodyHeightTest {
         every { localize(any(), tenant) } answers { firstArg() }
     }
     private val roninBodyHeight = RoninBodyHeight(normalizer, localizer)
+    private val vitalSignsCategory = Code("vital-signs")
+    private val bodyHeightCode = Code("8302-2")
 
     @Test
     fun `does not qualify when no category`() {
@@ -83,7 +85,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -111,7 +113,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -139,7 +141,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -167,7 +169,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -181,7 +183,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.UCUM.uri,
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             )
@@ -202,7 +204,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -216,7 +218,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             )
@@ -237,7 +239,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -246,7 +248,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -293,7 +295,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -302,7 +304,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -358,7 +360,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -376,7 +378,7 @@ class RoninBodyHeightTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_HTOBS_001: LOINC code ${RoninBodyHeight.bodyHeightCode.value} required for US Core Body Height profile @ Observation.code",
+                "ERROR RONIN_OBS_003: Must match this system|code: http://loinc.org|8302-2 @ Observation.code",
             exception.message
         )
     }
@@ -403,7 +405,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -412,7 +414,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -465,7 +467,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -474,7 +476,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -527,7 +529,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -536,7 +538,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -590,7 +592,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -599,7 +601,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -652,7 +654,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -661,7 +663,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -715,7 +717,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -751,8 +753,8 @@ class RoninBodyHeightTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_VSOBS_001: Vital signs must use code \"vital-signs\" in system " +
-                "\"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
+                "ERROR RONIN_OBS_002: Must match this system|code: " +
+                "http://terminology.hl7.org/CodeSystem/observation-category|vital-signs @ Observation.category",
             exception.message
         )
     }
@@ -779,7 +781,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -788,7 +790,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -832,7 +834,7 @@ class RoninBodyHeightTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -841,7 +843,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -898,7 +900,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -908,7 +910,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 ),
                 text = "Body Height".asFHIR()
@@ -1008,7 +1010,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1021,7 +1023,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 ),
                 text = "Body Height".asFHIR()
@@ -1089,7 +1091,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 ),
                 text = "Body Height".asFHIR()
@@ -1099,7 +1101,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1149,7 +1151,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1162,7 +1164,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 ),
                 text = "Body Height".asFHIR()
@@ -1205,7 +1207,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 )
             ),
@@ -1214,7 +1216,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1261,7 +1263,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 ),
                 text = "Body Height".asFHIR()
@@ -1271,7 +1273,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1319,7 +1321,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 ),
                 text = "Body Height".asFHIR()
@@ -1329,7 +1331,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1377,7 +1379,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 ),
                 text = "Body Height".asFHIR()
@@ -1387,7 +1389,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1435,7 +1437,7 @@ class RoninBodyHeightTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Height".asFHIR(),
-                        code = RoninBodyHeight.bodyHeightCode
+                        code = bodyHeightCode
                     )
                 ),
                 text = "Body Height".asFHIR()
@@ -1445,7 +1447,7 @@ class RoninBodyHeightTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )

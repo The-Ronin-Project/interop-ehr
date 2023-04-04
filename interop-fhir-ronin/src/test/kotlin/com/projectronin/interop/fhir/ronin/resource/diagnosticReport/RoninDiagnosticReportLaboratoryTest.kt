@@ -207,7 +207,7 @@ class RoninDiagnosticReportLaboratoryTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_DX_RPT_LAB_001: Diagnostic Report Laboratory category required for US Core Diagnostic Report Laboratory profile @ DiagnosticReport.category",
+                "ERROR REQ_FIELD: category is a required element @ DiagnosticReport.category",
             exception.message
         )
     }
@@ -251,7 +251,7 @@ class RoninDiagnosticReportLaboratoryTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_DX_RPT_LAB_001: Diagnostic Report Laboratory category required for US Core Diagnostic Report Laboratory profile @ DiagnosticReport.category",
+                "ERROR USCORE_DX_RPT_001: Must match this system|code: http://terminology.hl7.org/CodeSystem/v2-0074|LAB @ DiagnosticReport.category",
             exception.message
         )
     }
@@ -295,7 +295,8 @@ class RoninDiagnosticReportLaboratoryTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_DX_RPT_LAB_001: Diagnostic Report Laboratory category required for US Core Diagnostic Report Laboratory profile @ DiagnosticReport.category",
+                "ERROR USCORE_DX_RPT_001: Must match this system|code: " +
+                "http://terminology.hl7.org/CodeSystem/v2-0074|LAB @ DiagnosticReport.category",
             exception.message
         )
     }

@@ -6,7 +6,6 @@ import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
-import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -20,7 +19,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 class RoninDiagnosticReportNoteExchange(normalizer: Normalizer, localizer: Localizer) :
-    USCoreBasedProfile<DiagnosticReport>(
+    BaseRoninDiagnosticReport(
         R4DiagnosticReportValidator,
         RoninProfile.DIAGNOSTIC_REPORT_NOTE_EXCHANGE.value,
         normalizer,
@@ -38,6 +37,8 @@ class RoninDiagnosticReportNoteExchange(normalizer: Normalizer, localizer: Local
     }
 
     override fun validateUSCore(element: DiagnosticReport, parentContext: LocationContext, validation: Validation) {
+        super.validateUSCore(element, parentContext, validation)
+
         validation.apply {
             checkTrue(element.category.isNotEmpty(), requiredCategoryFieldError, parentContext)
 

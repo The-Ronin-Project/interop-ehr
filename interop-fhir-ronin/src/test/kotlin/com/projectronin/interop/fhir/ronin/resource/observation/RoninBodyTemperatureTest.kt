@@ -52,6 +52,8 @@ class RoninBodyTemperatureTest {
         every { localize(any(), tenant) } answers { firstArg() }
     }
     private val roninBodyTemperature = RoninBodyTemperature(normalizer, localizer)
+    private val vitalSignsCategory = Code("vital-signs")
+    private val bodyTemperatureCode = Code("8310-5")
 
     @Test
     fun `does not qualify when no category`() {
@@ -82,7 +84,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -109,7 +111,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -136,7 +138,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -163,7 +165,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -177,7 +179,7 @@ class RoninBodyTemperatureTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.UCUM.uri,
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 )
             )
@@ -197,7 +199,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -211,7 +213,7 @@ class RoninBodyTemperatureTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 )
             )
@@ -231,7 +233,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 )
             ),
@@ -240,7 +242,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -296,7 +298,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -314,8 +316,7 @@ class RoninBodyTemperatureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_TMPOBS_001: LOINC code 8310-5 required for " +
-                "US Core Body Temperature profile @ Observation.code",
+                "ERROR RONIN_OBS_003: Must match this system|code: http://loinc.org|8310-5 @ Observation.code",
             exception.message
         )
     }
@@ -342,7 +343,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 )
             ),
@@ -351,7 +352,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -404,7 +405,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 )
             ),
@@ -413,7 +414,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -466,7 +467,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 )
             ),
@@ -475,7 +476,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -529,7 +530,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 )
             ),
@@ -538,7 +539,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -591,7 +592,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 )
             ),
@@ -600,7 +601,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -654,7 +655,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 )
             ),
@@ -690,8 +691,8 @@ class RoninBodyTemperatureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_VSOBS_001: Vital signs must use code \"vital-signs\" in system " +
-                "\"http://terminology.hl7.org/CodeSystem/observation-category\" @ Observation.category",
+                "ERROR RONIN_OBS_002: Must match this system|code: " +
+                "http://terminology.hl7.org/CodeSystem/observation-category|vital-signs @ Observation.category",
             exception.message
         )
     }
@@ -718,7 +719,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 )
             ),
@@ -727,7 +728,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -771,7 +772,7 @@ class RoninBodyTemperatureTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 )
             ),
@@ -780,7 +781,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -837,7 +838,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -847,7 +848,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 ),
                 text = "Body Temp".asFHIR()
@@ -950,7 +951,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -963,7 +964,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 ),
                 text = "Body Temp".asFHIR()
@@ -1031,7 +1032,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 ),
                 text = "Body Temp".asFHIR()
@@ -1041,7 +1042,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1094,7 +1095,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1107,7 +1108,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 ),
                 text = "Body Temp".asFHIR()
@@ -1150,7 +1151,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 )
             ),
@@ -1159,7 +1160,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1206,7 +1207,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 ),
                 text = "Body Temp".asFHIR()
@@ -1216,7 +1217,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1264,7 +1265,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 ),
                 text = "Body Temp".asFHIR()
@@ -1274,7 +1275,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1322,7 +1323,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 ),
                 text = "Body Temp".asFHIR()
@@ -1332,7 +1333,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )
@@ -1380,7 +1381,7 @@ class RoninBodyTemperatureTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Body Temp".asFHIR(),
-                        code = RoninBodyTemperature.bodyTemperatureCode
+                        code = bodyTemperatureCode
                     )
                 ),
                 text = "Body Temp".asFHIR()
@@ -1390,7 +1391,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = BaseRoninVitalSign.vitalSignsCode
+                            code = vitalSignsCategory
                         )
                     )
                 )

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.KeyDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
-import com.projectronin.interop.tenant.config.model.Tenant
 import java.time.LocalDateTime
 
 /**
@@ -12,22 +11,24 @@ import java.time.LocalDateTime
  * shared by INFX in the OCI data store. Each item in the [registry] is a [NormalizationRegistryItem]
  * containing metadata and a squashed version of the ConceptMap or ValueSet for ease of use.
  * This object should only ever be directly accessed by an instance of [NormalizationRegistryClient].
+ *
+ * Note: A registry cache for a given tenant includes ALL registry items that apply to that tenant.
  */
 internal object NormalizationRegistryCache {
-    private val lastUpdated = mutableMapOf<Tenant, LocalDateTime>()
+    private val lastUpdated = mutableMapOf<String, LocalDateTime>()
     private var registry = listOf<NormalizationRegistryItem>()
 
     fun getCurrentRegistry(): List<NormalizationRegistryItem> {
         return registry
     }
 
-    fun setNewRegistry(new: List<NormalizationRegistryItem>, tenantReloaded: Tenant) {
+    fun setNewRegistry(new: List<NormalizationRegistryItem>, mnemonic: String) {
         registry = new
-        lastUpdated[tenantReloaded] = LocalDateTime.now()
+        lastUpdated[mnemonic] = LocalDateTime.now()
     }
 
-    fun reloadNeeded(tenant: Tenant): Boolean {
-        return lastUpdated[tenant]?.isBefore(LocalDateTime.now().minusHours(2)) ?: true
+    fun reloadNeeded(mnemonic: String): Boolean {
+        return lastUpdated[mnemonic]?.isBefore(LocalDateTime.now().minusHours(2)) ?: true
     }
 }
 

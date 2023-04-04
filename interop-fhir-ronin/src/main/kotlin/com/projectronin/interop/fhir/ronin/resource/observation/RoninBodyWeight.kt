@@ -1,6 +1,7 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
 import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
@@ -26,9 +27,9 @@ class RoninBodyWeight(normalizer: Normalizer, localizer: Localizer) :
         normalizer,
         localizer
     ) {
-    companion object {
-        internal val bodyWeightCode = Code("29463-7")
-    }
+
+    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
+    override val qualifyingCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("29463-7")))
 
     // Quantity unit codes - [USCore Body Weight Units](http://hl7.org/fhir/R4/valueset-ucum-bodyweight.html)
     override val validQuantityCodes = listOf("kg", "[lb_av]", "g")
@@ -46,10 +47,6 @@ class RoninBodyWeight(normalizer: Normalizer, localizer: Localizer) :
         "Procedure"
     )
 
-    override fun qualifies(resource: Observation): Boolean {
-        return resource.code?.coding?.any { it.system == CodeSystem.LOINC.uri && it.code == bodyWeightCode } ?: false
-    }
-
     private val noBodySiteError = FHIRError(
         code = "RONIN_WTOBS_001",
         severity = ValidationIssueSeverity.ERROR,
@@ -62,28 +59,6 @@ class RoninBodyWeight(normalizer: Normalizer, localizer: Localizer) :
         validation.apply {
             checkTrue(element.bodySite == null, noBodySiteError, parentContext)
         }
-    }
-
-    private val noBodyWeightCodeError = FHIRError(
-        code = "USCORE_WTOBS_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "LOINC code ${bodyWeightCode.value} required for US Core Body Weight profile",
-        location = LocationContext(Observation::code)
-    )
-
-    override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validateVitalSign(element, parentContext, validation)
-        validation.apply {
-            val code = element.code
-            if (code != null) {
-                checkTrue(
-                    code.coding.any { it.system == CodeSystem.LOINC.uri && it.code == bodyWeightCode },
-                    noBodyWeightCodeError,
-                    parentContext
-                )
-            }
-        }
-        validateVitalSignValue(element.value, validQuantityCodes, parentContext, validation)
     }
 
     private val requiredIdError = RequiredFieldError(Observation::id)

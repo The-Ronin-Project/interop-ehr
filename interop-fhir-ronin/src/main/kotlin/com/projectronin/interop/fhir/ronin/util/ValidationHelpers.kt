@@ -1,6 +1,7 @@
 package com.projectronin.interop.fhir.ronin.util
 
 import com.projectronin.interop.common.enums.CodedEnum
+import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.ronin.error.InvalidReferenceResourceTypeError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -44,6 +45,16 @@ fun Reference?.isInTypeList(resourceTypeList: List<String>): Boolean {
                 return true
             }
         }
+    }
+    return false
+}
+
+/**
+ * Check whether the system and code in a Coding match a getValueSet() result from the NormalizationRegistryClient
+ */
+fun Coding?.isInValueSet(valueSetCodingList: List<Coding>): Boolean {
+    this?.let { coding ->
+        return valueSetCodingList.any { (it.system == coding.system) && (it.code == coding.code) }
     }
     return false
 }

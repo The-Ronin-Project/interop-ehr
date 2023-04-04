@@ -7,6 +7,8 @@ import com.projectronin.interop.fhir.ronin.resource.base.BaseProfile
 import com.projectronin.interop.fhir.ronin.resource.base.MultipleProfileResource
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBloodPressure
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyHeight
+import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyMassIndex
+import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodySurfaceArea
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyTemperature
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodyWeight
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninHeartRate
@@ -27,6 +29,8 @@ class RoninObservations(
     normalizer: Normalizer,
     localizer: Localizer,
     roninBodyHeight: RoninBodyHeight,
+    roninBodyMassIndex: RoninBodyMassIndex,
+    roninBodySurfaceArea: RoninBodySurfaceArea,
     roninBodyWeight: RoninBodyWeight,
     roninBodyTemperature: RoninBodyTemperature,
     roninBloodPressure: RoninBloodPressure,
@@ -40,6 +44,8 @@ class RoninObservations(
         listOf(
             roninLaboratoryResult,
             roninBodyHeight,
+            roninBodyMassIndex,
+            roninBodySurfaceArea,
             roninBodyWeight,
             roninBodyTemperature,
             roninBloodPressure,

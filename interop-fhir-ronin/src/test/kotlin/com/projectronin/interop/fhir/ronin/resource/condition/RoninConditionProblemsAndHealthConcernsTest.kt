@@ -363,8 +363,9 @@ class RoninConditionProblemsAndHealthConcernsTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_CNDPAHC_001: One of the following condition categories required for US Core Condition " +
-                "Problem and Health Concerns profile: problem-list-item, health-concern @ Condition.category",
+                "ERROR USCORE_CND_001: Must match this system|code: " +
+                "http://terminology.hl7.org/CodeSystem/condition-category|problem-list-item, " +
+                "http://hl7.org/fhir/us/core/CodeSystem/condition-category|health-concern @ Condition.category",
             exception.message
         )
     }
@@ -413,8 +414,9 @@ class RoninConditionProblemsAndHealthConcernsTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_CNDPAHC_001: One of the following condition categories required for US Core Condition " +
-                "Problem and Health Concerns profile: problem-list-item, health-concern @ Condition.category",
+                "ERROR USCORE_CND_001: Must match this system|code: " +
+                "http://terminology.hl7.org/CodeSystem/condition-category|problem-list-item, " +
+                "http://hl7.org/fhir/us/core/CodeSystem/condition-category|health-concern @ Condition.category",
             exception.message
         )
     }

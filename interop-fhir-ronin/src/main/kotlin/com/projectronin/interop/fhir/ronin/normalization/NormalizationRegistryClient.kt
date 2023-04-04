@@ -28,15 +28,14 @@ class NormalizationRegistryClient(
     private val logger = KotlinLogging.logger { }
 
     /**
+     * mnenomic for tenant-agnostic ConceptMaps and ValueSets - cases where the tenant_id is null in the registry item
+     */
+    private val tenantAgnosticRegistryKey = "tenantAgnosticRegistryKey"
+
+    /**
      * Returns a [Pair] with the transformed [Coding] as the first and an [Extension] as the second,
      * or null if no such mapping could be found. The [Extension] represents the original value before mapping.
      * Calling this will reload the [NormalizationRegistryCache] if necessary.
-     *
-     * @param tenant the [Tenant] currently in use
-     * @param resourceType the [String] representation of the type of resource, i.e. "Appointment"
-     * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
-     *      This must match what INFX has decided is the name of the element. Includes the resourceType as prefix.
-     * @param coding a FHIR [Coding] to be mapped. value and system must not be null.
      */
     fun getConceptMapping(
         tenant: Tenant,
@@ -44,7 +43,7 @@ class NormalizationRegistryClient(
         coding: Coding,
         profileUrl: String? = null
     ): Pair<Coding, Extension>? {
-        val registryItem = getConceptMapItem(tenant, elementName, profileUrl) ?: return null
+        val registryItem = getConceptMapRegistryItem(tenant, elementName, profileUrl) ?: return null
         return getConceptMapping(registryItem, coding)
     }
 
@@ -52,13 +51,6 @@ class NormalizationRegistryClient(
      * Returns a [Pair] with the transformed [Coding] as the first and an [Extension] as the second,
      * or null if no such mapping could be found. The [Extension] represents the original value before mapping.
      * Calling this will reload the [NormalizationRegistryCache] if necessary.
-     *
-     * @param tenant the [Tenant] currently in use
-     * @param resourceType the [String] representation of the type of resource, i.e. "Appointment"
-     * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
-     *      This must match what INFX has decided is the name of the element. Includes the resourceType as prefix.
-     * @param coding a FHIR [Coding] to be mapped. value and system must not be null.
-     * @param enumClass The CodedEnum that should be returned by this concept mapping.
      */
     fun <T : CodedEnum<T>> getConceptMappingForEnum(
         tenant: Tenant,
@@ -67,7 +59,7 @@ class NormalizationRegistryClient(
         enumClass: KClass<T>,
         profileUrl: String? = null
     ): Pair<Coding, Extension>? {
-        val registryItem = getConceptMapItem(tenant, elementName, profileUrl) ?: return null
+        val registryItem = getConceptMapRegistryItem(tenant, elementName, profileUrl) ?: return null
         val codedEnum = enumClass.java.enumConstants.find { it.code == coding.code?.value }
         return codedEnum?.let { Pair(coding, createExtension(registryItem, coding)) } ?: getConceptMapping(
             registryItem,
@@ -91,12 +83,12 @@ class NormalizationRegistryClient(
         )
     }
 
-    private fun getConceptMapItem(
+    private fun getConceptMapRegistryItem(
         tenant: Tenant,
         elementName: String,
         profileUrl: String? = null
     ): NormalizationRegistryItem? {
-        if (NormalizationRegistryCache.reloadNeeded(tenant)) reload(tenant)
+        if (NormalizationRegistryCache.reloadNeeded(tenant.mnemonic)) reload(tenant.mnemonic)
         val cache = NormalizationRegistryCache.getCurrentRegistry()
         return cache.filter { it.tenant_id in listOf(tenant.mnemonic, null) } // null tenant means universal map
             .filter { it.profile_url in listOf(profileUrl, null) } // null profile_url means universal map
@@ -123,18 +115,18 @@ class NormalizationRegistryClient(
     }
 
     // internal for testing purposes.
-    internal fun reload(tenant: Tenant) {
+    internal fun reload(mnemonic: String) {
         val newRegistry = getNewRegistry()
         val currentRegistry = NormalizationRegistryCache.getCurrentRegistry()
         newRegistry.forEach { new ->
             // find matching registry entry based on mapURL
             currentRegistry.find { old -> old.registry_uuid == new.registry_uuid }?.let { old ->
-                val useNew = new.tenant_id in listOf(tenant.mnemonic, null)
+                val useNew = new.tenant_id in listOf(mnemonic, null)
                 // ConceptMap
                 new.concept_map_uuid?.let {
                     // load a new version. if tenant is null, it's a 'universal' map we should also load.
                     if (old.version != new.version && useNew) {
-                        new.map = getConceptMap(new.filename)
+                        new.map = getConceptMapData(new.filename)
                     } // otherwise copy from the old map
                     else {
                         new.map = old.map
@@ -142,27 +134,27 @@ class NormalizationRegistryClient(
                 } ?: run {
                     // a new ConceptMap was added
                     if (useNew) {
-                        new.map = getConceptMap(new.filename)
+                        new.map = getConceptMapData(new.filename)
                     }
                 }
                 // ValueSet
                 new.value_set_uuid?.let {
                     if (old.version != new.version && useNew) {
-                        new.set = getValueSet(new.filename)
+                        new.set = getValueSetData(new.filename)
                     } else {
                         new.set = old.set
                     }
                 } ?: run {
                     if (useNew) {
-                        new.set = getValueSet(new.filename)
+                        new.set = getValueSetData(new.filename)
                     }
                 }
             }
         }
-        NormalizationRegistryCache.setNewRegistry(newRegistry, tenant)
+        NormalizationRegistryCache.setNewRegistry(newRegistry, mnemonic)
     }
 
-    internal fun getConceptMap(filename: String): Map<SourceKey, TargetValue> {
+    internal fun getConceptMapData(filename: String): Map<SourceKey, TargetValue> {
         val conceptMap = try {
             JacksonUtil.readJsonObject(ociClient.getObjectFromINFX(filename)!!, ConceptMap::class)
         } catch (e: Exception) {
@@ -197,35 +189,44 @@ class NormalizationRegistryClient(
     /**
      * Returns a [List] or null if no such value set could be found.
      * Calling this will reload the [NormalizationRegistryCache] if necessary.
-     *
-     * @param tenant the [Tenant] currently in use
-     * @param resourceType the [String] representation of the type of resource, i.e. "Appointment"
-     * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
-     *      This must match what INFX has decided is the name of the element. Includes the resourceType as prefix.
      */
     fun getValueSet(
         tenant: Tenant,
         elementName: String,
         profileUrl: String? = null
     ): List<Coding>? {
-        return getValueSet(getValueSetItem(tenant, elementName, profileUrl) ?: return null)
+        return getValueSetRegistryItemValues(
+            getValueSetRegistryItem(tenant.mnemonic, elementName, profileUrl)
+        )
     }
 
-    private fun getValueSetItem(
-        tenant: Tenant,
+    /**
+     * Get a "universal" Ronin value set independent of specific tenants.
+     */
+    fun getValueSet(
+        elementName: String,
+        profileUrl: String? = null
+    ): List<Coding>? {
+        return getValueSetRegistryItemValues(
+            getValueSetRegistryItem(tenantAgnosticRegistryKey, elementName, profileUrl)
+        )
+    }
+
+    private fun getValueSetRegistryItem(
+        mnemonic: String,
         elementName: String,
         profileUrl: String? = null
     ): NormalizationRegistryItem? {
-        if (NormalizationRegistryCache.reloadNeeded(tenant)) reload(tenant)
+        if (NormalizationRegistryCache.reloadNeeded(mnemonic)) reload(mnemonic)
         val cache = NormalizationRegistryCache.getCurrentRegistry()
-        return cache.filter { it.tenant_id in listOf(tenant.mnemonic, null) } // null tenant means universal set
+        return cache.filter { it.tenant_id in listOf(mnemonic, null) } // null tenant means universal set
             .filter { it.profile_url in listOf(profileUrl, null) } // null profile_url means universal set
             .filter { it.value_set_uuid?.isNotEmpty() == true }
             .find { it.data_element == elementName }
     }
 
-    private fun getValueSet(registry: NormalizationRegistryItem?): List<Coding>? {
-        return registry?.set?.map {
+    private fun getValueSetRegistryItemValues(registryItem: NormalizationRegistryItem?): List<Coding>? {
+        return registryItem?.set?.map {
             Coding(
                 system = Uri(it.system),
                 code = Code(it.value),
@@ -235,7 +236,7 @@ class NormalizationRegistryClient(
         }
     }
 
-    internal fun getValueSet(filename: String): List<TargetValue> {
+    internal fun getValueSetData(filename: String): List<TargetValue> {
         val valueSet = try {
             JacksonUtil.readJsonObject(ociClient.getObjectFromINFX(filename)!!, ValueSet::class)
         } catch (e: Exception) {
