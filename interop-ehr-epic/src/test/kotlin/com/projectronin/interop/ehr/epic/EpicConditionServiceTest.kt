@@ -293,4 +293,48 @@ class EpicConditionServiceTest {
         // 7 resources from the first query, 7 from the second total of 14, remove duplicates = 7
         assertEquals(7, list.size)
     }
+
+    @Test
+    fun `ensure clinical status defaults work`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                "testPrivateKey",
+                "TEST_TENANT"
+            )
+        val patientFhirId = "abc"
+        val categoryCodes = listOf(
+            FHIRSearchToken(code = "problem-list-item"),
+            FHIRSearchToken(code = "encounter-diagnosis")
+        )
+        val clinicalStatusCodes = "http://terminology.hl7.org/CodeSystem/condition-clinical|active," +
+            "http://terminology.hl7.org/CodeSystem/condition-clinical|inactive," +
+            "http://terminology.hl7.org/CodeSystem/condition-clinical|resolved"
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validConditionSearch
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Condition",
+                mapOf(
+                    "patient" to patientFhirId,
+                    "category" to "problem-list-item,encounter-diagnosis",
+                    "clinical-status" to clinicalStatusCodes,
+                    "_count" to 50
+                )
+            )
+        } returns httpResponse
+
+        val bundle =
+            conditionService.findConditionsByCodes(
+                tenant,
+                patientFhirId,
+                categoryCodes
+            )
+
+        // 1 patient had 7 problem-list-item conditions and 0 encounter-diagnosis conditions
+        assertEquals(7, bundle.size)
+    }
 }

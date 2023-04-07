@@ -5,7 +5,9 @@ import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRSearchToken
 import com.projectronin.interop.ehr.util.toOrParams
 import com.projectronin.interop.ehr.util.toSearchTokens
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.resource.Condition
+import com.projectronin.interop.fhir.r4.valueset.ConditionClinicalStatusCodes
 import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
 import org.springframework.stereotype.Component
@@ -39,6 +41,14 @@ import org.springframework.stereotype.Component
 class EpicConditionService(epicClient: EpicClient) : ConditionService, EpicFHIRService<Condition>(epicClient) {
     override val fhirURLSearchPart = "/api/FHIR/R4/Condition"
     override val fhirResourceType = Condition::class.java
+    val clinicalSystem = CodeSystem.CONDITION_CLINICAL.uri.value
+    val searchableCodes = listOf(
+        ConditionClinicalStatusCodes.ACTIVE,
+        ConditionClinicalStatusCodes.INACTIVE,
+        ConditionClinicalStatusCodes.RESOLVED
+    ).map {
+        FHIRSearchToken(clinicalSystem, it.code)
+    }
 
     @Trace
     override fun findConditions(
@@ -62,12 +72,12 @@ class EpicConditionService(epicClient: EpicClient) : ConditionService, EpicFHIRS
         conditionCategoryCodes: List<FHIRSearchToken>,
         clinicalStatusCodes: List<FHIRSearchToken>
     ): List<Condition> {
+        val searchCodes = clinicalStatusCodes.ifEmpty { searchableCodes }
         val parameters = mapOf(
             "patient" to patientFhirId,
             "category" to conditionCategoryCodes.toOrParams(),
-            "clinical-status" to clinicalStatusCodes.toOrParams()
+            "clinical-status" to searchCodes.toOrParams()
         )
-
         return getResourceListFromSearch(tenant, parameters)
     }
 }

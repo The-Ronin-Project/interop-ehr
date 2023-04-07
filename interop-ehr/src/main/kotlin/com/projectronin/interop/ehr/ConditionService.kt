@@ -25,7 +25,7 @@ interface ConditionService : FHIRService<Condition> {
         tenant: Tenant,
         patientFhirId: String,
         conditionCategoryCodes: List<FHIRSearchToken>,
-        clinicalStatusCodes: List<FHIRSearchToken>
+        clinicalStatusCodes: List<FHIRSearchToken> = emptyList()
     ):
         List<Condition>
 }

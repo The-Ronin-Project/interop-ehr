@@ -300,4 +300,51 @@ class CernerConditionServiceTest {
 
         assertEquals(6, list.size)
     }
+
+    @Test
+    fun `ensure clinicalStatus defaults work`() {
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+        val patientFhirId = "abc"
+        val categoryCodes = listOf(
+            FHIRSearchToken(system = categorySystem, code = "problem-list-item")
+        )
+        val categoryToken = "$categorySystem|problem-list-item"
+        val clinicalStatusTokens = "active,inactive,resolved"
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validConditionSearch
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "/Condition",
+                mapOf(
+                    "patient" to patientFhirId,
+                    "category" to categoryToken,
+                    "clinical-status" to clinicalStatusTokens,
+                    "_count" to 20
+                )
+            )
+        } returns httpResponse
+
+        val bundle =
+            conditionService.findConditionsByCodes(
+                tenant,
+                patientFhirId,
+                categoryCodes
+            )
+        // 2 active, 1 resolved
+        assertEquals(3, bundle.size)
+        assertTrue(
+            bundle.any {
+                it.clinicalStatus?.coding!!.any { coding ->
+                    coding.code?.value == "active" || coding.code?.value == "resolved"
+                }
+            }
+        )
+    }
 }
