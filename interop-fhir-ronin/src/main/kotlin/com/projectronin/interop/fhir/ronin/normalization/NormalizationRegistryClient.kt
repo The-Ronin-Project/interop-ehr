@@ -92,15 +92,13 @@ class NormalizationRegistryClient(
         val cache = NormalizationRegistryCache.getCurrentRegistry()
         return cache.filter { it.tenant_id in listOf(tenant.mnemonic, null) } // null tenant means universal map
             .filter { it.profile_url in listOf(profileUrl, null) } // null profile_url means universal map
-            .filter { it.concept_map_uuid?.isNotEmpty() == true }
-            .find { it.data_element == elementName }
+            .filter { it.concept_map_uuid?.isNotEmpty() == true }.find { it.data_element == elementName }
     }
 
-    private fun createExtension(registryItem: NormalizationRegistryItem, coding: Coding) =
-        Extension(
-            url = Uri(registryItem.source_extension_url),
-            value = DynamicValue(type = DynamicValueType.CODING, value = coding)
-        )
+    private fun createExtension(registryItem: NormalizationRegistryItem, coding: Coding) = Extension(
+        url = Uri(registryItem.source_extension_url),
+        value = DynamicValue(type = DynamicValueType.CODING, value = coding)
+    )
 
     internal fun getNewRegistry(): List<NormalizationRegistryItem> {
         return try {
@@ -173,7 +171,8 @@ class NormalizationRegistryClient(
                 // pray that informatics never has multiple target values
                 val targetCode = element.target.first().code?.value ?: return@forEachElement
                 val targetDisplay = element.target.first().display?.value ?: return@forEachElement
-                mutableMap[SourceKey(sourceCode, agnosticSourceSystem)] = TargetValue(targetCode, targetSystem, targetDisplay, targetVersion)
+                mutableMap[SourceKey(sourceCode, agnosticSourceSystem)] =
+                    TargetValue(targetCode, targetSystem, targetDisplay, targetVersion)
             }
         }
         return mutableMap
@@ -194,10 +193,18 @@ class NormalizationRegistryClient(
         tenant: Tenant,
         elementName: String,
         profileUrl: String? = null
-    ): List<Coding>? {
+    ): List<Coding> {
         return getValueSetRegistryItemValues(
             getValueSetRegistryItem(tenant.mnemonic, elementName, profileUrl)
         )
+    }
+
+    /**
+     * Get a "universal" Ronin value set independent of specific tenants.  Throws [MissingNormalizationContentException] if the value set cannot be loaded.
+     */
+    fun getRequiredValueSet(elementName: String, profileUrl: String? = null): List<Coding> {
+        return getValueSet(elementName, profileUrl).takeIf { it.isNotEmpty() }
+            ?: throw MissingNormalizationContentException("Required value set for $profileUrl and $elementName not found")
     }
 
     /**
@@ -206,7 +213,7 @@ class NormalizationRegistryClient(
     fun getValueSet(
         elementName: String,
         profileUrl: String? = null
-    ): List<Coding>? {
+    ): List<Coding> {
         return getValueSetRegistryItemValues(
             getValueSetRegistryItem(tenantAgnosticRegistryKey, elementName, profileUrl)
         )
@@ -221,11 +228,10 @@ class NormalizationRegistryClient(
         val cache = NormalizationRegistryCache.getCurrentRegistry()
         return cache.filter { it.tenant_id in listOf(mnemonic, null) } // null tenant means universal set
             .filter { it.profile_url in listOf(profileUrl, null) } // null profile_url means universal set
-            .filter { it.value_set_uuid?.isNotEmpty() == true }
-            .find { it.data_element == elementName }
+            .filter { it.value_set_uuid?.isNotEmpty() == true }.find { it.data_element == elementName }
     }
 
-    private fun getValueSetRegistryItemValues(registryItem: NormalizationRegistryItem?): List<Coding>? {
+    private fun getValueSetRegistryItemValues(registryItem: NormalizationRegistryItem?): List<Coding> {
         return registryItem?.set?.map {
             Coding(
                 system = Uri(it.system),
@@ -233,7 +239,7 @@ class NormalizationRegistryClient(
                 display = it.display.asFHIR(),
                 version = it.version.asFHIR()
             )
-        }
+        } ?: emptyList()
     }
 
     internal fun getValueSetData(filename: String): List<TargetValue> {

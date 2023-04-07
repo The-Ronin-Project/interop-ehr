@@ -29,6 +29,7 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -45,15 +46,21 @@ class RoninBloodPressureTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
+    private val bloodPressureCode = Code("85354-9")
+    private val bloodPressureCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = bloodPressureCode))
+    private val normRegistryClient = mockk<NormalizationRegistryClient> {
+        every {
+            getRequiredValueSet("Observation.coding.code", RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)
+        } returns bloodPressureCoding
+    }
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
     }
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
-    private val roninBloodPressure = RoninBloodPressure(normalizer, localizer)
+    private val roninBloodPressure = RoninBloodPressure(normalizer, localizer, normRegistryClient)
     private val vitalSignsCategory = Code("vital-signs")
-    private val bloodPressureCode = Code("85354-9")
     private val systolicCode = Code("8480-6")
     private val diastolicCode = Code("8462-4")
 

@@ -8,6 +8,7 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.isInValueSet
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -21,7 +22,11 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
 
 @Component
-class RoninBloodPressure(normalizer: Normalizer, localizer: Localizer) :
+class RoninBloodPressure(
+    normalizer: Normalizer,
+    localizer: Localizer,
+    private val registryClient: NormalizationRegistryClient
+) :
     BaseRoninVitalSign(
         R4ObservationValidator,
         RoninProfile.OBSERVATION_BLOOD_PRESSURE.value,
@@ -29,12 +34,17 @@ class RoninBloodPressure(normalizer: Normalizer, localizer: Localizer) :
         localizer
     ) {
 
-    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("85354-9")))
+    // Load the qualifying codes from the value set. These are required to process.
+    override val qualifyingCodes: List<Coding> by lazy {
+        registryClient.getRequiredValueSet(
+            "Observation.coding.code",
+            profile
+        )
+    }
 
     // Multipart qualifying codes for RoninBloodPressure
-    internal val qualifyingSystolicCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8480-6")))
-    internal val qualifyingDiastolicCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8462-4")))
+    internal val validSystolicCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8480-6")))
+    internal val validDiastolicCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8462-4")))
 
     // Quantity unit codes - [USCore Blood Pressure Units](http://hl7.org/fhir/us/core/STU5.0.1/StructureDefinition-us-core-blood-pressure.html)
     override val validQuantityCodes = listOf("mm[Hg]")
@@ -65,10 +75,10 @@ class RoninBloodPressure(normalizer: Normalizer, localizer: Localizer) :
             val componentCodeContext = LocationContext(Observation::component)
             val components = element.component
             val systolic = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(qualifyingSystolicCodes) } ?: false
+                comp.code?.coding?.any { it.isInValueSet(validSystolicCodes) } ?: false
             }
             val diastolic = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(qualifyingDiastolicCodes) } ?: false
+                comp.code?.coding?.any { it.isInValueSet(validDiastolicCodes) } ?: false
             }
 
             if (systolic.size == 1) {
@@ -85,9 +95,9 @@ class RoninBloodPressure(normalizer: Normalizer, localizer: Localizer) :
                         code = "USCORE_BPOBS_001",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        qualifyingSystolicCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        validSystolicCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
-                        location = componentCodeContext
+                        location = LocationContext(Observation::component)
                     ),
                     componentCodeContext
                 )
@@ -98,7 +108,7 @@ class RoninBloodPressure(normalizer: Normalizer, localizer: Localizer) :
                         code = "USCORE_BPOBS_002",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        qualifyingDiastolicCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        validDiastolicCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
                         location = componentCodeContext
                     ),

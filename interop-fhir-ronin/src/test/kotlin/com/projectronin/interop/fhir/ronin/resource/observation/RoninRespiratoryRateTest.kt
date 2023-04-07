@@ -29,6 +29,7 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -45,15 +46,21 @@ class RoninRespiratoryRateTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
+    private val respiratoryRateCode = Code("9279-1")
+    private val respiratoryRateCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = respiratoryRateCode))
+    private val normRegistryClient = mockk<NormalizationRegistryClient> {
+        every {
+            getRequiredValueSet("Observation.coding.code", RoninProfile.OBSERVATION_RESPIRATORY_RATE.value)
+        } returns respiratoryRateCoding
+    }
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
     }
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
-    private val roninRespiratoryRate = RoninRespiratoryRate(normalizer, localizer)
+    private val roninRespiratoryRate = RoninRespiratoryRate(normalizer, localizer, normRegistryClient)
     private val vitalSignsCategory = Code("vital-signs")
-    private val respiratoryRateCode = Code("9279-1")
 
     @Test
     fun `does not qualify when no category`() {

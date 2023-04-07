@@ -19,8 +19,10 @@ import io.mockk.unmockkAll
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 
 class NormalizationRegistryClientTest {
     private val ociClient = mockk<OCIClient>()
@@ -163,7 +165,12 @@ class NormalizationRegistryClientTest {
             )
         mapping!!
         assertEquals(
-            Coding(system = Uri("http://hl7.org/fhir/contact-point-system"), code = Code("phone"), display = "Phone".asFHIR(), version = "1".asFHIR()),
+            Coding(
+                system = Uri("http://hl7.org/fhir/contact-point-system"),
+                code = Code("phone"),
+                display = "Phone".asFHIR(),
+                version = "1".asFHIR()
+            ),
             mapping.first
         )
         assertEquals(
@@ -207,7 +214,12 @@ class NormalizationRegistryClientTest {
             )
         mapping!!
         assertEquals(
-            Coding(system = Uri("http://hl7.org/fhir/contact-point-system"), code = Code("phone"), display = "Phone".asFHIR(), version = "1".asFHIR()),
+            Coding(
+                system = Uri("http://hl7.org/fhir/contact-point-system"),
+                code = Code("phone"),
+                display = "Phone".asFHIR(),
+                version = "1".asFHIR()
+            ),
             mapping.first
         )
         assertEquals(
@@ -249,7 +261,12 @@ class NormalizationRegistryClientTest {
             )
         mapping!!
         assertEquals(
-            Coding(system = Uri("http://hl7.org/fhir/contact-point-system"), code = Code("phone"), display = "Phone".asFHIR(), version = "1".asFHIR()),
+            Coding(
+                system = Uri("http://hl7.org/fhir/contact-point-system"),
+                code = Code("phone"),
+                display = "Phone".asFHIR(),
+                version = "1".asFHIR()
+            ),
             mapping.first
         )
         assertEquals(
@@ -292,7 +309,12 @@ class NormalizationRegistryClientTest {
             )
         mapping!!
         assertEquals(
-            Coding(system = Uri("http://hl7.org/fhir/contact-point-system"), code = Code("phone"), display = "Phone".asFHIR(), version = "1".asFHIR()),
+            Coding(
+                system = Uri("http://hl7.org/fhir/contact-point-system"),
+                code = Code("phone"),
+                display = "Phone".asFHIR(),
+                version = "1".asFHIR()
+            ),
             mapping.first
         )
         assertEquals(
@@ -337,7 +359,12 @@ class NormalizationRegistryClientTest {
             )
         mapping!!
         assertEquals(
-            Coding(system = Uri("http://hl7.org/fhir/contact-point-system"), code = Code("phone"), display = "Phone".asFHIR(), version = "1".asFHIR()),
+            Coding(
+                system = Uri("http://hl7.org/fhir/contact-point-system"),
+                code = Code("phone"),
+                display = "Phone".asFHIR(),
+                version = "1".asFHIR()
+            ),
             mapping.first
         )
         assertEquals(
@@ -370,7 +397,7 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system",
                 "specialAppointment"
             )
-        assertNull(mapping)
+        assertTrue(mapping.isEmpty())
     }
 
     @Test
@@ -526,7 +553,6 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system"
                 // default profile_url is null
             )
-        mapping!!
         assertEquals(1, mapping.size)
         assertEquals(Code("code1"), mapping[0].code)
     }
@@ -552,8 +578,42 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system",
                 "specialPatient"
             )
-        mapping!!
         assertEquals(1, mapping.size)
         assertEquals(Code("code1"), mapping[0].code)
+    }
+
+    @Test
+    fun `universal getRequiredValueSet with profile match`() {
+        val registry1 = NormalizationRegistryItem(
+            data_element = "Patient.telecom.system",
+            registry_uuid = "12345",
+            filename = "file1.json",
+            value_set_name = "PatientTelecomSystem",
+            value_set_uuid = "cm-010",
+            version = "1",
+            resource_type = "Patient",
+            tenant_id = null,
+            profile_url = "specialPatient",
+            set = listOf(TargetValue("code1", "system1", "display1", "version1"))
+        )
+        every { NormalizationRegistryCache.getCurrentRegistry() } returns listOf(registry1)
+
+        val actualValueSet =
+            client.getRequiredValueSet(
+                "Patient.telecom.system",
+                "specialPatient"
+            )
+        assertEquals(1, actualValueSet.size)
+        assertEquals(Code("code1"), actualValueSet[0].code)
+    }
+
+    @Test
+    fun `ensure getRequiredValueSet fails when value set is not found`() {
+        every { NormalizationRegistryCache.getCurrentRegistry() } returns listOf()
+
+        val exception = assertThrows<MissingNormalizationContentException> {
+            client.getRequiredValueSet("Patient.telecom.system", "specialPatient")
+        }
+        assertEquals("Required value set for specialPatient and Patient.telecom.system not found", exception.message)
     }
 }

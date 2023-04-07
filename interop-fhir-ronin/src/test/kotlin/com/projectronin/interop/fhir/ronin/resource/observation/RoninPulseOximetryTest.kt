@@ -29,6 +29,7 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -45,16 +46,23 @@ class RoninPulseOximetryTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
+    private val pulseOxCode = Code("59408-5")
+    private val pulseOximetryCoding = listOf(
+        Coding(system = CodeSystem.LOINC.uri, code = pulseOxCode)
+    )
+    private val normRegistryClient = mockk<NormalizationRegistryClient> {
+        every {
+            getRequiredValueSet("Observation.coding.code", RoninProfile.OBSERVATION_PULSE_OXIMETRY.value)
+        } returns pulseOximetryCoding
+    }
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
     }
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
-    private val roninPulseOximetry = RoninPulseOximetry(normalizer, localizer)
+    private val roninPulseOximetry = RoninPulseOximetry(normalizer, localizer, normRegistryClient)
     private val vitalSignsCategory = Code("vital-signs")
-    private val pulseOxCode = Code("59408-5")
-    private val o2SatCode = Code("2708-6")
     private val flowRateCode = Code("3151-8")
     private val concentrationCode = Code("3150-0")
 
@@ -169,7 +177,7 @@ class RoninPulseOximetryTest {
     }
 
     @Test
-    fun `does not qualify when coding code present for pulse oximetry, but not oxygen saturation`() {
+    fun `does not qualify when wrong system for code`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
@@ -191,51 +199,9 @@ class RoninPulseOximetryTest {
             ),
             code = CodeableConcept(
                 coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = Code("13245")
-                    )
-                )
-            )
-        )
-
-        assertFalse(roninPulseOximetry.qualifies(observation))
-    }
-
-    @Test
-    fun `does not qualify when both coding codes are present, but wrong system for oxygen saturation`() {
-        val observation = Observation(
-            id = Id("123"),
-            status = ObservationStatus.AMENDED.asCode(),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
-            effective = DynamicValue(
-                type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = pulseOxCode
-                    ),
                     Coding(
                         system = Uri("faulty"),
-                        code = o2SatCode
+                        code = pulseOxCode
                     )
                 )
             )
@@ -270,10 +236,6 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         code = Code("13245")
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = o2SatCode
                     )
                 )
             )
@@ -308,10 +270,6 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = Uri("faulty"),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = o2SatCode
                     )
                 )
             )
@@ -346,10 +304,6 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = o2SatCode
                     )
                 )
             )
@@ -370,11 +324,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -431,11 +380,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = Code("random")
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -506,7 +450,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_PXOBS_002: Must match this system|code: http://loinc.org|59408-5 @ Observation.code",
+                "ERROR RONIN_OBS_003: Must match this system|code: http://loinc.org|59408-5 @ Observation.code",
             exception.message
         )
     }
@@ -534,11 +478,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -595,11 +534,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -646,11 +580,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -750,11 +679,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -837,11 +761,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -953,11 +872,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -1055,11 +969,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -1157,11 +1066,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -1260,11 +1164,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -1362,11 +1261,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -1465,11 +1359,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -1569,11 +1458,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -1656,11 +1540,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -1772,11 +1651,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -1874,11 +1748,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -1976,11 +1845,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -2079,11 +1943,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -2181,11 +2040,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -2284,11 +2138,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -2359,7 +2208,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_PXOBS_001: Must match this system|code: http://terminology.hl7.org/CodeSystem/observation-category|vital-signs @ Observation.category",
+                "ERROR RONIN_OBS_002: Must match this system|code: http://terminology.hl7.org/CodeSystem/observation-category|vital-signs @ Observation.category",
             exception.message
         )
     }
@@ -2387,11 +2236,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -2481,11 +2325,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -2562,11 +2401,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()
@@ -2715,11 +2549,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()
@@ -2824,11 +2653,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()
@@ -2902,11 +2726,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()
@@ -2950,11 +2769,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 )
             ),
@@ -3011,11 +2825,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()
@@ -3074,11 +2883,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()
@@ -3137,11 +2941,6 @@ class RoninPulseOximetryTest {
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
                         code = pulseOxCode
-                    ),
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "O2 Saturation".asFHIR(),
-                        code = o2SatCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()

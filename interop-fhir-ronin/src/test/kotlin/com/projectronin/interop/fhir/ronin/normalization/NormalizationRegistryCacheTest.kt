@@ -975,7 +975,6 @@ internal class NormalizationRegistryCacheTest {
             tenant1,
             "Appointment.status"
         )
-        mappingA!!
         assertEquals(
             Coding(
                 code = Code("targetValue1"),
@@ -991,7 +990,6 @@ internal class NormalizationRegistryCacheTest {
             "Patient.telecom.use",
             "specialPatient"
         )
-        mappingB!!
         assertEquals(
             Coding(
                 code = Code("targetValue3"),
@@ -1008,7 +1006,6 @@ internal class NormalizationRegistryCacheTest {
             tenant2,
             "Appointment.status"
         )
-        mappingC!!
         assertEquals(
             Coding(
                 code = Code("targetValue0"),
@@ -1024,7 +1021,6 @@ internal class NormalizationRegistryCacheTest {
             "Patient.telecom.use",
             "specialPatient"
         )
-        mappingD!!
         assertEquals(
             Coding(
                 code = Code("targetValue2"),

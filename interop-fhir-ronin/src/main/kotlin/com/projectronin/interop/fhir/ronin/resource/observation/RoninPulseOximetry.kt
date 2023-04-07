@@ -8,6 +8,7 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.isInValueSet
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -21,7 +22,11 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
 
 @Component
-class RoninPulseOximetry(normalizer: Normalizer, localizer: Localizer) :
+class RoninPulseOximetry(
+    normalizer: Normalizer,
+    localizer: Localizer,
+    private val registryClient: NormalizationRegistryClient
+) :
     BaseRoninVitalSign(
         R4ObservationValidator,
         RoninProfile.OBSERVATION_PULSE_OXIMETRY.value,
@@ -29,12 +34,13 @@ class RoninPulseOximetry(normalizer: Normalizer, localizer: Localizer) :
         localizer
     ) {
 
-    // RoninPulseOximetry has 2 different lists of qualifying codes
-    private val qualifyingPulseOxCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("59408-5")))
-    private val qualifyingO2SatCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("2708-6")))
-
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCodes = qualifyingPulseOxCodes + qualifyingO2SatCodes
+    override val qualifyingCodes: List<Coding> by lazy {
+        registryClient.getRequiredValueSet(
+            "Observation.coding.code",
+            profile
+        )
+    }
 
     // Multipart qualifying codes for RoninPulseOximetry
     private val qualifyingFlowRateCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("3151-8")))
@@ -63,12 +69,6 @@ class RoninPulseOximetry(normalizer: Normalizer, localizer: Localizer) :
         "Procedure"
     )
 
-    override fun qualifies(resource: Observation): Boolean {
-        return (resource.category.any { category -> category.coding.any { it.isInValueSet(qualifyingCategories) } }) &&
-            (resource.code?.coding?.any { it.isInValueSet(qualifyingPulseOxCodes) } ?: false) &&
-            (resource.code?.coding?.any { it.isInValueSet(qualifyingO2SatCodes) } ?: false)
-    }
-
     private val conflictingFlowRateCodeError = FHIRError(
         code = "USCORE_PXOBS_005",
         severity = ValidationIssueSeverity.ERROR,
@@ -83,50 +83,7 @@ class RoninPulseOximetry(normalizer: Normalizer, localizer: Localizer) :
     )
 
     override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
-        validation.apply {
-            if (element.category.isNotEmpty()) {
-                checkTrue(
-                    element.category.any { category ->
-                        category.coding.any { it.isInValueSet(qualifyingCategories) }
-                    },
-                    FHIRError(
-                        code = "RONIN_PXOBS_001",
-                        severity = ValidationIssueSeverity.ERROR,
-                        description = "Must match this system|code: ${ qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" } }",
-                        location = LocationContext(Observation::category)
-                    ),
-                    parentContext
-                )
-            }
-
-            val code = element.code
-            if (code != null) {
-                checkTrue(
-                    code.coding.any { it.isInValueSet(qualifyingPulseOxCodes) },
-                    FHIRError(
-                        code = "RONIN_PXOBS_002",
-                        severity = ValidationIssueSeverity.ERROR,
-                        description = "Must match this system|code: ${
-                        qualifyingPulseOxCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
-                        }",
-                        location = LocationContext(Observation::code)
-                    ),
-                    parentContext
-                )
-                checkTrue(
-                    code.coding.any { it.isInValueSet(qualifyingO2SatCodes) },
-                    FHIRError(
-                        code = "RONIN_PXOBS_003",
-                        severity = ValidationIssueSeverity.ERROR,
-                        description = "Must match this system|code: ${
-                        qualifyingO2SatCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
-                        }",
-                        location = LocationContext(Observation::code)
-                    ),
-                    parentContext
-                )
-            }
-        }
+        super.validateVitalSign(element, parentContext, validation)
 
         if (element.dataAbsentReason == null) {
             val componentCodeContext = LocationContext(Observation::component)
@@ -175,11 +132,6 @@ class RoninPulseOximetry(normalizer: Normalizer, localizer: Localizer) :
             }
         }
     }
-
-    /**
-     * Cancel the base validation that would overly restrict Observation.code.codingn for this profile.
-     */
-    override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {}
 
     private val requiredIdError = RequiredFieldError(Observation::id)
 

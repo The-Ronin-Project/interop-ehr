@@ -29,6 +29,7 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -45,15 +46,21 @@ class RoninBodyTemperatureTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
+    private val bodyTemperatureCode = Code("8310-5")
+    private val bodyTemperatureCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = bodyTemperatureCode))
+    private val normRegistryClient = mockk<NormalizationRegistryClient> {
+        every {
+            getRequiredValueSet("Observation.coding.code", RoninProfile.OBSERVATION_BODY_TEMPERATURE.value)
+        } returns bodyTemperatureCoding
+    }
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
     }
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
-    private val roninBodyTemperature = RoninBodyTemperature(normalizer, localizer)
+    private val roninBodyTemperature = RoninBodyTemperature(normalizer, localizer, normRegistryClient)
     private val vitalSignsCategory = Code("vital-signs")
-    private val bodyTemperatureCode = Code("8310-5")
 
     @Test
     fun `does not qualify when no category`() {
