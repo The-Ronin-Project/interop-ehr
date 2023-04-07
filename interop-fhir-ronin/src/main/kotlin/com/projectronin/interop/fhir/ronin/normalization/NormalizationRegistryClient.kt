@@ -22,8 +22,8 @@ import kotlin.reflect.KClass
 @Component
 class NormalizationRegistryClient(
     private val ociClient: OCIClient,
-    @Value("\${oci.infx.registry.path:/DataNormalizationRegistry/v2/registry.json}")
-    private val registryPath: String
+    @Value("\${oci.infx.registry.file:DataNormalizationRegistry/v2/registry.json}")
+    private val registryFileName: String
 ) {
     private val logger = KotlinLogging.logger { }
 
@@ -105,7 +105,7 @@ class NormalizationRegistryClient(
     internal fun getNewRegistry(): List<NormalizationRegistryItem> {
         return try {
             JacksonUtil.readJsonList(
-                ociClient.getObjectFromINFX(registryPath)!!,
+                ociClient.getObjectFromINFX(registryFileName)!!,
                 NormalizationRegistryItem::class
             )
         } catch (e: Exception) {

@@ -26,8 +26,8 @@ internal class NormalizationRegistryCacheTest {
         every { mnemonic } returns "tenant"
     }
     private val ociClient = mockk<OCIClient>()
-    private val registryPath = "/DataNormalizationRegistry/v2/registry.json"
-    private val normClient = NormalizationRegistryClient(ociClient, registryPath)
+    private val registryFile = "DataNormalizationRegistry/v2/registry.json"
+    private val normClient = NormalizationRegistryClient(ociClient, registryFile)
     private val cmTestRegistry = listOf(
         NormalizationRegistryItem(
             data_element = "Appointment.status",
@@ -233,7 +233,7 @@ internal class NormalizationRegistryCacheTest {
             )
         }
         mockkObject(JacksonUtil)
-        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
+        every { ociClient.getObjectFromINFX(registryFile) } returns "registryJson"
         every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns cmTestRegistry
         every { ociClient.getObjectFromINFX("file1.json") } returns "mapJson1"
         every { JacksonUtil.readJsonObject("mapJson1", ConceptMap::class) } returns mockkMap1
@@ -610,7 +610,7 @@ internal class NormalizationRegistryCacheTest {
             )
         }
         mockkObject(JacksonUtil)
-        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
+        every { ociClient.getObjectFromINFX(registryFile) } returns "registryJson"
         every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns vsTestRegistry
         every { ociClient.getObjectFromINFX("file1.json") } returns "setJson1"
         every { JacksonUtil.readJsonObject("setJson1", ValueSet::class) } returns mockkSet1
@@ -888,7 +888,7 @@ internal class NormalizationRegistryCacheTest {
             every { expansion } returns null
         }
         mockkObject(JacksonUtil)
-        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
+        every { ociClient.getObjectFromINFX(registryFile) } returns "registryJson"
         every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns vsTestRegistry
         every { ociClient.getObjectFromINFX("file1.json") } returns "setJson1"
         every { JacksonUtil.readJsonObject("setJson1", ValueSet::class) } returns mockkSet4
@@ -899,7 +899,7 @@ internal class NormalizationRegistryCacheTest {
             every { expansion?.contains } returns emptyList()
         }
         mockkObject(JacksonUtil)
-        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
+        every { ociClient.getObjectFromINFX(registryFile) } returns "registryJson"
         every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns vsTestRegistry
         every { ociClient.getObjectFromINFX("file1.json") } returns "setJson1"
         every { JacksonUtil.readJsonObject("setJson1", ValueSet::class) } returns mockkSet5
