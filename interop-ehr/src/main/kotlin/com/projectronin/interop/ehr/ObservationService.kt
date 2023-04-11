@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr
 import com.projectronin.interop.ehr.inputs.FHIRSearchToken
 import com.projectronin.interop.ehr.util.toSearchTokens
 import com.projectronin.interop.fhir.r4.resource.Observation
+import com.projectronin.interop.fhir.r4.valueset.ObservationCategoryCodes
 import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
 
@@ -59,6 +60,13 @@ interface ObservationService : FHIRService<Observation> {
         tenant: Tenant,
         patientFhirIds: List<String>,
         observationCategoryCodes: List<FHIRSearchToken>
+    ):
+        List<Observation>
+
+    fun findObservationsByCategory(
+        tenant: Tenant,
+        patientFhirIds: List<String>,
+        observationCategoryCodes: List<ObservationCategoryCodes>
     ):
         List<Observation>
 }

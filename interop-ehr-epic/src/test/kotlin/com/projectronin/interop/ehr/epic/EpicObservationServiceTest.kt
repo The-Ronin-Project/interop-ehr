@@ -4,6 +4,8 @@ import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRSearchToken
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.resource.Bundle
+import com.projectronin.interop.fhir.r4.valueset.ObservationCategoryCodes
+import com.projectronin.interop.tenant.config.data.TenantCodesDAO
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
@@ -19,6 +21,7 @@ class EpicObservationServiceTest {
     private lateinit var observationService: EpicObservationService
     private lateinit var httpResponse: HttpResponse
     private lateinit var pagingHttpResponse: HttpResponse
+    private lateinit var codesDAO: TenantCodesDAO
     private val validObservationSearchBundle = readResource<Bundle>("/ExampleObservationBundle.json")
     private val pagingObservationSearchBundle = readResource<Bundle>("/ExampleObservationBundleWithPaging.json")
     private val categorySystem = CodeSystem.OBSERVATION_CATEGORY.uri.value
@@ -28,7 +31,8 @@ class EpicObservationServiceTest {
         epicClient = mockk()
         httpResponse = mockk()
         pagingHttpResponse = mockk()
-        observationService = EpicObservationService(epicClient, 1)
+        codesDAO = mockk()
+        observationService = EpicObservationService(epicClient, 1, codesDAO)
     }
 
     @Test
@@ -114,79 +118,6 @@ class EpicObservationServiceTest {
     }
 
     @Test
-    fun `ensure multiple patients are supported with batching`() {
-        val batchingObservationService = EpicObservationService(epicClient, 2)
-
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                "testPrivateKey",
-                "TEST_TENANT"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns validObservationSearchBundle
-
-        /*
-        Uncomment when we are no longer forcing batchSize to 1 in EpicObservation and remove the 3 temporary cases below
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/Observation",
-                mapOf(
-                    "patient" to "loc1,loc2,loc3",
-                    "category" to "social-history"
-                )
-            )
-        } returns httpResponse
-         */
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/Observation",
-                mapOf(
-                    "patient" to "loc1",
-                    "category" to "social-history",
-                    "_count" to 50
-                )
-            )
-        } returns httpResponse
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/Observation",
-                mapOf(
-                    "patient" to "loc2",
-                    "category" to "social-history",
-                    "_count" to 50
-                )
-            )
-        } returns httpResponse
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/Observation",
-                mapOf(
-                    "patient" to "loc3",
-                    "category" to "social-history",
-                    "_count" to 50
-                )
-            )
-        } returns httpResponse
-
-        val bundle =
-            batchingObservationService.findObservationsByPatient(
-                tenant,
-                listOf("loc1", "loc2", "loc3"),
-                listOf("social-history")
-            )
-
-        // each of 3 patients had 4 social-history observations
-        assertEquals(12, bundle.size)
-    }
-
-    @Test
     fun `ensure multiple category codes are supported`() {
         val tenant =
             createTestTenant(
@@ -224,6 +155,107 @@ class EpicObservationServiceTest {
 
         // 1 patient had 4 social-history observations and 0 laboratory observations
         assertEquals(4, bundle.size)
+    }
+
+    @Test
+    fun `ensure multiple category codes are supported new API`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                "testPrivateKey",
+                "TEST_TENANT"
+            )
+        val categoryCodes = listOf(
+            ObservationCategoryCodes.SOCIAL_HISTORY,
+            ObservationCategoryCodes.LABORATORY
+        )
+        val categoryTokens = "social-history,laboratory"
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validObservationSearchBundle
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Observation",
+                mapOf(
+                    "patient" to "abc",
+                    "category" to categoryTokens,
+                    "_count" to 50
+                )
+            )
+        } returns httpResponse
+
+        val bundle =
+            observationService.findObservationsByCategory(
+                tenant,
+                listOf("abc"),
+                categoryCodes
+            )
+
+        // 1 patient had 4 social-history observations and 0 laboratory observations
+        assertEquals(4, bundle.size)
+    }
+
+    @Test
+    fun `ensure multiple category codes are supported new API and extra codes`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                "testPrivateKey",
+                "TEST_TENANT"
+            )
+        val categoryCodes = listOf(
+            ObservationCategoryCodes.VITAL_SIGNS,
+            ObservationCategoryCodes.LABORATORY
+        )
+        val categoryTokens = "vital-signs,laboratory"
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validObservationSearchBundle
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Observation",
+                mapOf(
+                    "patient" to "abc",
+                    "category" to categoryTokens,
+                    "_count" to 50
+                )
+            )
+        } returns httpResponse
+        val httpResponse2 = mockk<HttpResponse> {
+            every { status } returns HttpStatusCode.OK
+        }
+        coEvery { httpResponse2.body<Bundle>() } returns validObservationSearchBundle
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Observation",
+                mapOf(
+                    "patient" to "abc",
+                    "code" to "12345,23456",
+                    "_count" to 50
+                )
+            )
+        } returns httpResponse2
+
+        every {
+            codesDAO.getByTenantMnemonic("TEST_TENANT")
+        } returns mockk {
+            every { bmiCode } returns "12345"
+            every { bsaCode } returns "23456"
+        }
+        val bundle =
+            observationService.findObservationsByCategory(
+                tenant,
+                listOf("abc"),
+                categoryCodes
+            )
+
+        // 1 patient had 4 social-history observations and 0 laboratory observations
+        assertEquals(8, bundle.size)
     }
 
     @Test

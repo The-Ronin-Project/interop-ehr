@@ -3,6 +3,8 @@ package com.projectronin.interop.ehr.cerner
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.ehr.inputs.FHIRSearchToken
 import com.projectronin.interop.fhir.r4.resource.Observation
+import com.projectronin.interop.fhir.r4.valueset.ObservationCategoryCodes
+import com.projectronin.interop.tenant.config.data.TenantCodesDAO
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -13,8 +15,11 @@ import org.junit.jupiter.api.Test
 
 class CernerObservationServiceTest {
     private val client = mockk<CernerClient>()
-    private val cernerObservationService = spyk(CernerObservationService(client))
-    private val tenant = mockk<Tenant>()
+    private val codesDAO = mockk<TenantCodesDAO>()
+    private val cernerObservationService = spyk(CernerObservationService(client, codesDAO))
+    private val tenant = mockk<Tenant> {
+        every { mnemonic } returns "ronin"
+    }
 
     private val observation = mockk<Observation> {
         every { id } returns mockk {
@@ -73,6 +78,74 @@ class CernerObservationServiceTest {
 
         assertEquals(1, results.size)
         assertEquals(observation, results[0])
+    }
+
+    @Test
+    fun `findObservationsByCategory handles multiple categories`() {
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "category" to "exam,laboratory"
+                )
+            )
+        } returns listOf(observation)
+
+        val results = cernerObservationService.findObservationsByCategory(
+            tenant,
+            listOf("fhirId"),
+            listOf(
+                ObservationCategoryCodes.EXAM,
+                ObservationCategoryCodes.LABORATORY
+            )
+        )
+
+        assertEquals(1, results.size)
+        assertEquals(observation, results[0])
+    }
+
+    @Test
+    fun `findObservationsByCategory handles multiple categories and extra codes`() {
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "category" to "vital-signs,laboratory"
+                )
+            )
+        } returns listOf(observation)
+
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "code" to "12345,09876"
+                )
+            )
+        } returns listOf(observation2)
+
+        every {
+            codesDAO.getByTenantMnemonic("ronin")
+        } returns mockk {
+            every { bmiCode } returns "12345"
+            every { bsaCode } returns "09876"
+        }
+
+        val results = cernerObservationService.findObservationsByCategory(
+            tenant,
+            listOf("fhirId"),
+            listOf(
+                ObservationCategoryCodes.VITAL_SIGNS,
+                ObservationCategoryCodes.LABORATORY
+            )
+        )
+
+        assertEquals(2, results.size)
+        assertEquals(observation, results[0])
+        assertEquals(observation2, results[1])
     }
 
     @Test
