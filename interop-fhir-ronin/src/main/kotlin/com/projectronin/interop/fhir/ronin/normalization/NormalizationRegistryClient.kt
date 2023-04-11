@@ -118,38 +118,50 @@ class NormalizationRegistryClient(
         val currentRegistry = NormalizationRegistryCache.getCurrentRegistry()
         newRegistry.forEach { new ->
             // find matching registry entry based on mapURL
-            currentRegistry.find { old -> old.registry_uuid == new.registry_uuid }?.let { old ->
-                val useNew = new.tenant_id in listOf(mnemonic, null)
-                // ConceptMap
-                new.concept_map_uuid?.let {
-                    // load a new version. if tenant is null, it's a 'universal' map we should also load.
-                    if (old.version != new.version && useNew) {
+            val type = new.getRegistryItemType()
+            // tenant on the new registry is the tenant we care about
+            val requestedTenant = new.tenant_id in listOf(mnemonic, null)
+            val old = currentRegistry.findMatching(new)
+            // if we don't have an existing entry, or we do and the version is the same and it's for the
+            // tenant we want to reload, load it from the registry
+            if (old == null || (old.version != new.version && requestedTenant)) {
+                when (type) {
+                    NormalizationRegistryItem.RegistryType.ConceptMap -> {
                         new.map = getConceptMapData(new.filename)
-                    } // otherwise copy from the old map
-                    else {
-                        new.map = old.map
                     }
-                } ?: run {
-                    // a new ConceptMap was added
-                    if (useNew) {
-                        new.map = getConceptMapData(new.filename)
+                    NormalizationRegistryItem.RegistryType.ValueSet -> {
+                        new.set = getValueSetData(new.filename)
                     }
                 }
-                // ValueSet
-                new.value_set_uuid?.let {
-                    if (old.version != new.version && useNew) {
-                        new.set = getValueSetData(new.filename)
-                    } else {
-                        new.set = old.set
-                    }
-                } ?: run {
-                    if (useNew) {
-                        new.set = getValueSetData(new.filename)
-                    }
+            } else {
+                when (type) {
+                    NormalizationRegistryItem.RegistryType.ConceptMap -> new.map = old.map
+                    NormalizationRegistryItem.RegistryType.ValueSet -> new.set = old.set
                 }
             }
         }
-        NormalizationRegistryCache.setNewRegistry(newRegistry, mnemonic)
+
+        // these are all new tenant registry objects that aren't in the current registry.
+        // we don't want to persist these in the cache because we're not reloading for these tenants,
+        // but we can't add them to the cache because we haven't loaded them yet and their map / set would be null
+        val newOtherTenantRegistryItems =
+            newRegistry
+                .filter { it.tenant_id !in listOf(mnemonic, null) }
+                .filter { currentRegistry.doesNotContain(it) }
+
+        // don't persist new tenant registry items for tenants we didn't call
+        val modifiedNewRegistry =
+            newRegistry.filter { newOtherTenantRegistryItems.doesNotContain(it) }
+        NormalizationRegistryCache.setNewRegistry(modifiedNewRegistry, mnemonic)
+    }
+
+    // given a list of NormalizationRegistryItem, find the one that matches the given normalization item
+    private fun List<NormalizationRegistryItem>.findMatching(searchItem: NormalizationRegistryItem): NormalizationRegistryItem? {
+        return this.find { it.registry_uuid == searchItem.registry_uuid }
+    }
+
+    private fun List<NormalizationRegistryItem>.doesNotContain(searchItem: NormalizationRegistryItem): Boolean {
+        return this.findMatching(searchItem) == null
     }
 
     internal fun getConceptMapData(filename: String): Map<SourceKey, TargetValue> {

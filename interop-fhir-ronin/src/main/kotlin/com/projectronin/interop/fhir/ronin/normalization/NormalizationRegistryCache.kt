@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.KeyDeserializer
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryCache.registry
 import java.time.LocalDateTime
 
 /**
@@ -51,7 +52,19 @@ internal data class NormalizationRegistryItem(
     @JsonDeserialize(keyUsing = NullSet::class)
     @JsonIgnore
     var set: List<TargetValue>? = null
-)
+) {
+    enum class RegistryType {
+        ConceptMap,
+        ValueSet
+    }
+    fun getRegistryItemType(): RegistryType {
+        return if (concept_map_uuid != null) {
+            RegistryType.ConceptMap
+        } else {
+            RegistryType.ValueSet
+        }
+    }
+}
 internal data class SourceKey(val value: String, val system: String)
 internal data class TargetValue(val value: String, val system: String, val display: String, val version: String)
 

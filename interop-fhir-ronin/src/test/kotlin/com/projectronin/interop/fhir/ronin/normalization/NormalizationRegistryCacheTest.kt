@@ -19,6 +19,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 internal class NormalizationRegistryCacheTest {
@@ -767,7 +768,7 @@ internal class NormalizationRegistryCacheTest {
                 display = "display1".asFHIR(),
                 version = "version1".asFHIR()
             ),
-            set?.first()
+            set.first()
         )
 
         vsTestRegistry.forEach { it.set = null } // reset
@@ -932,7 +933,7 @@ internal class NormalizationRegistryCacheTest {
                 display = "display1".asFHIR(),
                 version = "version1".asFHIR()
             ),
-            setAppointment?.first()
+            setAppointment.first()
         )
         val setPatient = normClient.getValueSet(
             tenant,
@@ -946,7 +947,7 @@ internal class NormalizationRegistryCacheTest {
                 display = "display2".asFHIR(),
                 version = "version2".asFHIR()
             ),
-            setPatient?.first()
+            setPatient.first()
         )
 
         vsTestRegistry.forEach { it.set = null } // reset
@@ -1032,6 +1033,203 @@ internal class NormalizationRegistryCacheTest {
         )
 
         mixedTenantRegistry.forEach { it.set = null } // reset
+        unmockkObject(NormalizationRegistryCache)
+    }
+
+    @Test
+    fun `maps and sets are set on first read`() {
+        mockkObject(NormalizationRegistryCache)
+        mockkObject(JacksonUtil)
+        val client2 = NormalizationRegistryClient(ociClient, registryFile)
+        val mockkSet = mockk<ValueSet> {
+            every { expansion?.contains } returns listOf(
+                mockk {
+                    every { system?.value.toString() } returns "system1"
+                    every { version?.value.toString() } returns "version1"
+                    every { code?.value.toString() } returns "code1"
+                    every { display?.value.toString() } returns "display1"
+                }
+            )
+        }
+
+        val mockConeptMap = mockk<ConceptMap> {
+            every { group } returns listOf(
+                mockk {
+                    every { target?.value } returns "targetSystem"
+                    every { targetVersion?.value } returns "targetVersion"
+                    every { source?.value } returns "sourceSystem"
+                    every { element } returns listOf(
+                        mockk {
+                            every { code?.value } returns "sourceValueA"
+                            every { target } returns listOf(
+                                mockk {
+                                    every { code?.value } returns "targetValueA"
+                                    every { display?.value } returns "targetDisplayA"
+                                }
+                            )
+                        },
+                        mockk {
+                            every { code?.value } returns "sourceValueB"
+                            every { target } returns listOf(
+                                mockk {
+                                    every { code?.value } returns "targetValueB"
+                                    every { display?.value } returns "targetDisplayB"
+                                }
+                            )
+                        }
+                    )
+                }
+            )
+        }
+        val testRegistry = listOf(
+            NormalizationRegistryItem(
+                data_element = "Appointment.status",
+                registry_uuid = "unique",
+                filename = "fake1.json",
+                concept_map_name = "ok",
+                concept_map_uuid = "cm",
+                version = "1",
+                source_extension_url = "ext1",
+                resource_type = "Appointment",
+                tenant_id = "tenant",
+                profile_url = null
+            ),
+            NormalizationRegistryItem(
+                data_element = "Observation.coding",
+                registry_uuid = "unique2",
+                filename = "fake2.json",
+                value_set_name = "a valueset",
+                value_set_uuid = "vs",
+                version = "1",
+                source_extension_url = "ext1",
+                resource_type = "Observation",
+                tenant_id = "tenant",
+                profile_url = null
+            )
+        )
+
+        every { ociClient.getObjectFromINFX("DataNormalizationRegistry/v2/registry.json") } returns "registryJson"
+        every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns testRegistry
+        every { ociClient.getObjectFromINFX("fake1.json") } returns "mockConceptMap"
+        every { ociClient.getObjectFromINFX("fake2.json") } returns "mockValueSet"
+        every { JacksonUtil.readJsonObject("mockConceptMap", ConceptMap::class) } returns mockConeptMap
+        every { JacksonUtil.readJsonObject("mockValueSet", ValueSet::class) } returns mockkSet
+
+        client2.reload(tenant.mnemonic)
+
+        val actual = NormalizationRegistryCache.getCurrentRegistry()
+        assertEquals(2, actual.size)
+        assertEquals("unique", actual[0].registry_uuid)
+        assertEquals("unique2", actual[1].registry_uuid)
+        assertTrue(actual[0].map?.isNotEmpty() == true) // map was set
+        assertTrue(actual[0].set.isNullOrEmpty())
+        assertTrue(actual[1].set?.isNotEmpty() == true) // set was set
+        assertTrue(actual[1].map.isNullOrEmpty())
+
+        unmockkObject(JacksonUtil)
+        unmockkObject(NormalizationRegistryCache)
+    }
+
+    @Test
+    fun `reload works correctly when we've added a new tenant object`() {
+        val mockkMap1 = mockk<ConceptMap> {
+            every { group } returns listOf(
+                mockk {
+                    every { target?.value } returns "targetSystem"
+                    every { targetVersion?.value } returns "targetVersion"
+                    every { source?.value } returns "sourceSystem"
+                    every { element } returns listOf(
+                        mockk {
+                            every { code?.value } returns "sourceValueA"
+                            every { target } returns listOf(
+                                mockk {
+                                    every { code?.value } returns "targetValueA"
+                                    every { display?.value } returns "targetDisplayA"
+                                }
+                            )
+                        },
+                        mockk {
+                            every { code?.value } returns "sourceValueB"
+                            every { target } returns listOf(
+                                mockk {
+                                    every { code?.value } returns "targetValueB"
+                                    every { display?.value } returns "targetDisplayB"
+                                }
+                            )
+                        }
+                    )
+                }
+            )
+        }
+
+        val mockkMap2 = mockk<ConceptMap> {
+            every { group } returns listOf(
+                mockk {
+                    every { target?.value } returns "targetSystem2"
+                    every { targetVersion?.value } returns "targetVersion2"
+                    every { source?.value } returns "sourceSystem2"
+                    every { element } returns listOf(
+                        mockk {
+                            every { code?.value } returns "sourceValue2"
+                            every { target } returns listOf(
+                                mockk {
+                                    every { code?.value } returns "targetValue2"
+                                    every { display?.value } returns "targetDisplay2"
+                                }
+                            )
+                        }
+                    )
+                }
+            )
+        }
+        mockkObject(JacksonUtil)
+        every { ociClient.getObjectFromINFX(registryFile) } returns "registryJson"
+        every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns cmTestRegistry
+        every { ociClient.getObjectFromINFX("file1.json") } returns "mapJson1"
+        every { JacksonUtil.readJsonObject("mapJson1", ConceptMap::class) } returns mockkMap1
+        every { ociClient.getObjectFromINFX("file2.json") } returns "mapJson2"
+        every { JacksonUtil.readJsonObject("mapJson2", ConceptMap::class) } returns mockkMap2
+
+        mockkObject(NormalizationRegistryCache)
+        normClient.reload(tenant.mnemonic)
+        var actual = NormalizationRegistryCache.getCurrentRegistry()
+        assertEquals(2, actual.size)
+        assertEquals("12345", actual[0].registry_uuid)
+        assertEquals("67890", actual[1].registry_uuid)
+
+        // adding a new entry gets added to cache after reload
+        val testRegistry2 = cmTestRegistry + NormalizationRegistryItem(
+            data_element = "Appointment.status",
+            registry_uuid = "newUUID",
+            filename = "newFile",
+            concept_map_name = "AppointmentStatusNew",
+            concept_map_uuid = "cm-555",
+            version = "1",
+            source_extension_url = "ext1",
+            resource_type = "Appointment",
+            tenant_id = "tenant"
+        ) + NormalizationRegistryItem(
+            data_element = "Appointment.status",
+            registry_uuid = "newUUID2",
+            filename = "newFile",
+            concept_map_name = "AppointmentStatusNew",
+            concept_map_uuid = "cm-555",
+            version = "1",
+            source_extension_url = "ext1",
+            resource_type = "Appointment",
+            tenant_id = "tenantNotAskedFor"
+        )
+
+        every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns testRegistry2
+        every { ociClient.getObjectFromINFX("newFile") } returns "mapJson3"
+        every { JacksonUtil.readJsonObject("mapJson3", ConceptMap::class) } returns mockkMap1
+        normClient.reload(tenant.mnemonic)
+        actual = NormalizationRegistryCache.getCurrentRegistry()
+        assertEquals(3, actual.size)
+        assertEquals("12345", actual[0].registry_uuid)
+        assertEquals("67890", actual[1].registry_uuid)
+        assertEquals("newUUID", actual[2].registry_uuid)
+        unmockkObject(JacksonUtil)
         unmockkObject(NormalizationRegistryCache)
     }
 }

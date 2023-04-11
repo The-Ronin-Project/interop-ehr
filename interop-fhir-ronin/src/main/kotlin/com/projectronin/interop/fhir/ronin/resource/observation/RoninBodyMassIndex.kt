@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component
 class RoninBodyMassIndex(
     normalizer: Normalizer,
     localizer: Localizer,
-    private val registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient
 ) :
     BaseRoninVitalSign(
         R4ObservationValidator,
@@ -33,7 +33,7 @@ class RoninBodyMassIndex(
     override val qualifyingCodes: List<Coding> = registryClient.getValueSet(
         "Observation.coding.code",
         profile
-    ) ?: emptyList()
+    )
 
     // Quantity unit codes
     override val validQuantityCodes = listOf("kg/m2")
