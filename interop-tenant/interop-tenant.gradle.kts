@@ -7,6 +7,7 @@ dependencies {
     api(libs.ktorm.core)
 
     implementation(libs.interop.common)
+    implementation(libs.interop.commonKtorm)
 
     implementation(libs.commons.text)
     implementation(libs.jackson.datatype.jsr310)
