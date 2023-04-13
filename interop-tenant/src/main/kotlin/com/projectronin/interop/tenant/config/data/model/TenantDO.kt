@@ -12,6 +12,7 @@ import java.time.ZoneId
  * @property ehr EHR data object provides EHR ID, vendorType, access keys, etc.
  * @property availableBatchStart Sets an availability start time for the tenant EHR.
  * @property availableBatchStart Sets an availability end time for the tenant EHR.
+ * @property monitoredIndicator Flag indicating whether a tenant is monitored or not.
  */
 interface TenantDO : Entity<TenantDO> {
     companion object : Entity.Factory<TenantDO>()
@@ -23,4 +24,5 @@ interface TenantDO : Entity<TenantDO> {
     var availableBatchStart: LocalTime?
     var availableBatchEnd: LocalTime?
     var timezone: ZoneId
+    var monitoredIndicator: Boolean?
 }

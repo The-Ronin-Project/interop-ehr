@@ -11,6 +11,7 @@ import java.time.ZoneId
  * @property timezone The tenant's timezone.
  * @property batchConfig The batch configuration.
  * @property vendor The vendor-specific configuration.
+ * @property monitoredIndicator Flag indicating whether the tenant is monitored or not.
  */
 data class Tenant(
     val internalId: Int,
@@ -18,7 +19,8 @@ data class Tenant(
     val name: String,
     val timezone: ZoneId,
     val batchConfig: BatchConfig?,
-    val vendor: Vendor
+    val vendor: Vendor,
+    val monitoredIndicator: Boolean?
 ) {
     inline fun <reified T : Vendor> vendorAs(): T {
         if (vendor !is T) throw RuntimeException("Vendor is not a ${T::class.java.simpleName}")

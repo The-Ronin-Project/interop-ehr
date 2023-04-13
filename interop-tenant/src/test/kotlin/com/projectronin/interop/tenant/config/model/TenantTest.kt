@@ -2,6 +2,7 @@ package com.projectronin.interop.tenant.config.model
 
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalTime
 import java.time.ZoneId
@@ -36,7 +37,8 @@ class TenantTest {
             "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated",
             timezone,
             batchConfig,
-            epic
+            epic,
+            true
         )
         assertEquals(1, tenant.internalId)
         assertEquals("mnemonic", tenant.mnemonic)
@@ -44,5 +46,6 @@ class TenantTest {
         assertEquals(timezone, tenant.timezone)
         assertEquals(batchConfig, tenant.batchConfig)
         assertEquals(epic, tenant.vendor)
+        assertTrue(tenant.monitoredIndicator!!)
     }
 }

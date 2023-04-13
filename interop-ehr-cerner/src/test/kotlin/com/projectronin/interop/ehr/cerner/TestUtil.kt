@@ -28,7 +28,8 @@ fun createTestTenant(
     practitioner: String = "practitioner",
     messageTopic: String? = "topic",
     messageCategory: String? = "category",
-    messagePriority: String? = "priority"
+    messagePriority: String? = "priority",
+    monitoredIndicator: Boolean? = null
 ): Tenant {
     return Tenant(
         internalId,
@@ -46,7 +47,8 @@ fun createTestTenant(
             messageTopic,
             messageCategory,
             messagePriority
-        )
+        ),
+        monitoredIndicator
     )
 }
 

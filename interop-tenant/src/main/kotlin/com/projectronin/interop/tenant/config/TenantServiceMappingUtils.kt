@@ -26,6 +26,7 @@ internal fun Tenant.toTenantDO(ehrDO: EhrDO): TenantDO {
         timezone = this@toTenantDO.timezone
         availableBatchStart = this@toTenantDO.batchConfig?.availableStart
         availableBatchEnd = this@toTenantDO.batchConfig?.availableEnd
+        monitoredIndicator = this@toTenantDO.monitoredIndicator
     }
 }
 
@@ -44,7 +45,8 @@ fun TenantDO.toTenant(ehrTenantDO: EHRTenantDO, ehrDO: EhrDO): Tenant {
         name = name,
         timezone = timezone,
         batchConfig = batchConfig,
-        vendor = ehrTenantDO.toVendor(ehrDO)
+        vendor = ehrTenantDO.toVendor(ehrDO),
+        monitoredIndicator = monitoredIndicator
     )
 }
 

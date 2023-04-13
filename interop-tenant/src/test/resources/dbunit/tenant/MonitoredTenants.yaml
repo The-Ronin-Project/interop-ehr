@@ -1,0 +1,32 @@
+io_ehr:
+  - io_ehr_id: 101
+    name: "EPIC"
+    instance_name: "Epic Sandbox"
+    client_id: "12345"
+    public_key: "public"
+    private_key: "private"
+
+io_tenant:
+  - io_tenant_id: 1001
+    mnemonic: "one"
+    full_name: "Alternate Test Tenant"
+    timezone: "America/New_York"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+  - io_tenant_id: 1002
+    mnemonic: "two"
+    full_name: "Alternate Test Tenant"
+    timezone: "America/New_York"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+    monitored_indicator: "false"
+  - io_tenant_id: 1003
+    mnemonic: "three"
+    full_name: "Alternate Test Tenant"
+    timezone: "America/New_York"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+    monitored_indicator: "true"

@@ -123,6 +123,7 @@ class TenantServiceTest {
         every { ehr } returns standardEHRDO1
         every { availableBatchStart } returns null
         every { availableBatchEnd } returns null
+        every { monitoredIndicator } returns null
     }
 
     private val standardTenantDO2 = mockk<TenantDO> {
@@ -133,6 +134,7 @@ class TenantServiceTest {
         every { ehr } returns standardEHRDO2
         every { availableBatchStart } returns null
         every { availableBatchEnd } returns null
+        every { monitoredIndicator } returns false
     }
 
     private val standardTenantDO3 = mockk<TenantDO> {
@@ -143,6 +145,7 @@ class TenantServiceTest {
         every { ehr } returns standardEHRDO3
         every { availableBatchStart } returns null
         every { availableBatchEnd } returns null
+        every { monitoredIndicator } returns true
     }
 
     private val standardTenant = Tenant(
@@ -172,7 +175,8 @@ class TenantServiceTest {
             hsi = epicHsiValue,
             departmentInternalSystem = epicDepartmentSystem,
             patientOnboardedFlagId = epicPatientOnboardedFlagId
-        )
+        ),
+        monitoredIndicator = null
     )
 
     private val standardTenant2 = Tenant(
@@ -202,7 +206,8 @@ class TenantServiceTest {
             hsi = epicHsiValue,
             departmentInternalSystem = epicDepartmentSystem,
             patientOnboardedFlagId = epicPatientOnboardedFlagId
-        )
+        ),
+        monitoredIndicator = false
     )
 
     private val standardTenant3 = Tenant(
@@ -225,7 +230,8 @@ class TenantServiceTest {
             messageTopic = "Ronin Alert",
             messageCategory = "Category",
             messagePriority = "Priority"
-        )
+        ),
+        monitoredIndicator = true
     )
 
     @BeforeEach
@@ -295,6 +301,7 @@ class TenantServiceTest {
             every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns null
             every { availableBatchEnd } returns LocalTime.of(6, 0)
+            every { monitoredIndicator } returns null
         }
         every { tenantDAO.getTenantForMnemonic("Tenant1") } returns tenantDO
 
@@ -319,6 +326,7 @@ class TenantServiceTest {
             every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns LocalTime.of(20, 0)
             every { availableBatchEnd } returns null
+            every { monitoredIndicator } returns null
         }
         every { tenantDAO.getTenantForMnemonic("Tenant1") } returns tenantDO
 
@@ -343,6 +351,7 @@ class TenantServiceTest {
             every { timezone } returns ZoneId.of("America/Chicago")
             every { availableBatchStart } returns LocalTime.of(20, 0)
             every { availableBatchEnd } returns LocalTime.of(6, 0)
+            every { monitoredIndicator } returns null
         }
         every { tenantDAO.getTenantForMnemonic("Tenant1") } returns tenantDO
 
@@ -378,7 +387,8 @@ class TenantServiceTest {
                 hsi = epicHsiValue,
                 departmentInternalSystem = epicDepartmentSystem,
                 patientOnboardedFlagId = epicPatientOnboardedFlagId
-            )
+            ),
+            monitoredIndicator = null
         )
 
         val tenant = service.getTenantForMnemonic("Tenant1")
@@ -440,7 +450,8 @@ class TenantServiceTest {
                 hsi = epicHsiValue,
                 departmentInternalSystem = epicDepartmentSystem,
                 patientOnboardedFlagId = epicPatientOnboardedFlagId
-            )
+            ),
+            monitoredIndicator = null
         )
 
         val tenant = service.getTenantForMnemonic("Tenant1")
@@ -512,6 +523,16 @@ class TenantServiceTest {
     }
 
     @Test
+    fun `getMonitoredTenants works`() {
+        every { tenantDAO.getMonitoredTenants() } returns listOf(standardTenantDO, standardTenantDO2)
+        every { epicTenantDAO.getAll() } returns listOf(standardEpicTenantDO, standardEpicTenantDO2)
+        every { cernerTenantDAO.getAll() } returns emptyList()
+
+        val tenants = service.getMonitoredTenants()
+        assertEquals(listOf(standardTenant, standardTenant2).toString(), tenants.toString())
+    }
+
+    @Test
     fun `insert ok - epic`() {
         every { ehrDAO.getByInstance("Epic Sandbox") } returns standardEHRDO1
         every { tenantDAO.insertTenant(any()) } returns standardTenantDO
@@ -564,7 +585,8 @@ class TenantServiceTest {
                 hsi = epicHsiValue,
                 departmentInternalSystem = epicDepartmentSystem,
                 patientOnboardedFlagId = epicPatientOnboardedFlagId
-            )
+            ),
+            monitoredIndicator = false
         )
         val tenantDO = mockk<TenantDO> {
             every { id } returns 1
@@ -574,6 +596,7 @@ class TenantServiceTest {
             every { ehr } returns standardEHRDO1
             every { availableBatchStart } returns LocalTime.of(20, 0)
             every { availableBatchEnd } returns LocalTime.of(6, 0)
+            every { monitoredIndicator } returns false
         }
         every { ehrDAO.getByInstance("Epic Sandbox") } returns standardEHRDO1
         every { tenantDAO.insertTenant(any()) } returns tenantDO

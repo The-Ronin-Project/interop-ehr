@@ -3,6 +3,7 @@ package com.projectronin.interop.tenant.config
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.tenant.config.data.EhrDAO
 import com.projectronin.interop.tenant.config.data.TenantDAO
+import com.projectronin.interop.tenant.config.data.model.TenantDO
 import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -42,7 +43,20 @@ class TenantService(
     fun getAllTenants(): List<Tenant> {
         logger.info { "Retrieving all tenants" }
         val tenantDOs = tenantDAO.getAllTenants()
-        if (tenantDOs.isEmpty()) return emptyList() // if this happens we have gone out of business
+        return getTenantsFromTenantDOs(tenantDOs)
+    }
+
+    /**
+     * Retrieves all [Tenant]s flagged as monitored
+     */
+    fun getMonitoredTenants(): List<Tenant> {
+        logger.info { "Retrieving all tenants" }
+        val tenantDOs = tenantDAO.getMonitoredTenants()
+        return getTenantsFromTenantDOs(tenantDOs)
+    }
+
+    private fun getTenantsFromTenantDOs(tenantDOs: List<TenantDO>): List<Tenant> {
+        if (tenantDOs.isEmpty()) return emptyList()
         logger.debug { "Found ${tenantDOs.size}" }
 
         val ehrDOByTenantId = tenantDOs.associate { it.id to it.ehr }

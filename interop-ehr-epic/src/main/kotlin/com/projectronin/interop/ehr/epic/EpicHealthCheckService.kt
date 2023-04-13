@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.HealthCheckService
 import com.projectronin.interop.ehr.epic.auth.EpicAuthenticationService
+import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -9,7 +10,8 @@ import java.time.LocalDate
 @Component
 class EpicHealthCheckService(
     private val authorizationService: EpicAuthenticationService,
-    private val patientService: EpicPatientService
+    private val patientService: EpicPatientService,
+    private val tenantService: TenantService
 ) : HealthCheckService {
     private val logger = KotlinLogging.logger { }
     override fun healthCheck(tenant: Tenant): Boolean {
@@ -28,4 +30,6 @@ class EpicHealthCheckService(
         logger.debug { "Health check successful for ${tenant.mnemonic}" }
         return true
     }
+
+    override fun healthCheck(): Map<Tenant, Boolean> = tenantService.getMonitoredTenants().associateWith { healthCheck(it) }
 }

@@ -106,6 +106,16 @@ class TenantDAOTest {
     }
 
     @Test
+    @DataSet(value = ["/dbunit/tenant/MonitoredTenants.yaml"], cleanAfter = true)
+    fun `all monitored tenants found`() {
+        val dao = TenantDAO(KtormHelper.database())
+        val tenants = dao.getMonitoredTenants()
+        assertNotNull(tenants)
+        assertEquals(1, tenants.size)
+        assertEquals(1003, tenants.first().id)
+    }
+
+    @Test
     @DataSet(value = ["/dbunit/tenant/Tenants.yaml"], cleanAfter = true)
     @ExpectedDataSet(value = ["/dbunit/tenant/ExpectedTenantsAfterInsert.yaml"], ignoreCols = ["io_tenant_id"])
     fun `can insert tenant`() {
@@ -214,6 +224,7 @@ class TenantDAOTest {
             ehr = ehrDAO.read().first()
             availableBatchStart = LocalTime.of(23, 0)
             availableBatchEnd = LocalTime.of(5, 0, 0)
+            monitoredIndicator = true
         }
 
         every {
@@ -224,6 +235,7 @@ class TenantDAOTest {
                 set(it.timezone, updatedTenantDO.timezone)
                 set(it.availableBatchStart, updatedTenantDO.availableBatchStart)
                 set(it.availableBatchEnd, updatedTenantDO.availableBatchEnd)
+                set(it.monitoredIndicator, updatedTenantDO.monitoredIndicator)
                 where {
                     it.id eq updatedTenantDO.id
                 }

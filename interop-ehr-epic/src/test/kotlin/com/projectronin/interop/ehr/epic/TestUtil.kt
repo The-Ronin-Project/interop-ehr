@@ -43,7 +43,8 @@ fun createTestTenant(
     authEndpoint: String? = null,
     departmentInternalSystem: String = "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980",
     patientOnboardedFlagId: String? = null,
-    timezone: String = "Etc/UTC"
+    timezone: String = "Etc/UTC",
+    monitoredIndicator: Boolean? = null
 ): Tenant {
     return Tenant(
         internalId,
@@ -68,7 +69,8 @@ fun createTestTenant(
             hsi,
             departmentInternalSystem,
             patientOnboardedFlagId
-        )
+        ),
+        monitoredIndicator
     )
 }
 

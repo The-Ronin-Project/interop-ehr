@@ -1,0 +1,21 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-important-create
+      author: Mike Esposito
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_tenant
+                columnName: monitored_indicator
+      changes:
+        - addColumn:
+            tableName: io_tenant
+            columns:
+              - column:
+                  name: monitored_indicator
+                  type: BOOLEAN
+                  constraints:
+                    nullable: true
+        - sql:
+            sql: UPDATE io_tenant SET monitored_indicator = true

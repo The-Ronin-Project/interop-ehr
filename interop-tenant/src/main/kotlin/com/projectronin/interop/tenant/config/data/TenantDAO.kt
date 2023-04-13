@@ -42,11 +42,22 @@ class TenantDAO(@Qualifier("ehr") private val database: Database) {
     }
 
     /**
-     * Retrieves all [TenantDO]s
+     * Retrieves all [TenantDO]s.
      */
     fun getAllTenants(): List<TenantDO> {
         return database.from(TenantDOs)
-            .joinReferencesAndSelect().map { TenantDOs.createEntity(it) }
+            .joinReferencesAndSelect()
+            .map { TenantDOs.createEntity(it) }
+    }
+
+    /**
+     * Retrieves all [TenantDO]s flagged as monitored.
+     */
+    fun getMonitoredTenants(): List<TenantDO> {
+        return database.from(TenantDOs)
+            .joinReferencesAndSelect()
+            .where { TenantDOs.monitoredIndicator }
+            .map { TenantDOs.createEntity(it) }
     }
 
     /**
@@ -62,6 +73,7 @@ class TenantDAO(@Qualifier("ehr") private val database: Database) {
                 set(it.timezone, tenant.timezone)
                 set(it.availableBatchStart, tenant.availableBatchStart)
                 set(it.availableBatchEnd, tenant.availableBatchEnd)
+                set(it.monitoredIndicator, tenant.monitoredIndicator)
             }
         } catch (e: Exception) {
             logger.error(e) { "Tenant insert failed: $e" }
@@ -83,6 +95,7 @@ class TenantDAO(@Qualifier("ehr") private val database: Database) {
                 set(it.timezone, tenant.timezone)
                 set(it.availableBatchStart, tenant.availableBatchStart)
                 set(it.availableBatchEnd, tenant.availableBatchEnd)
+                set(it.monitoredIndicator, tenant.monitoredIndicator)
                 where {
                     it.id eq tenant.id
                 }

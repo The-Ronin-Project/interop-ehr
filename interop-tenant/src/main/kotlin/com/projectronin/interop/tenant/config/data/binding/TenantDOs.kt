@@ -2,6 +2,7 @@ package com.projectronin.interop.tenant.config.data.binding
 
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import org.ktorm.schema.Table
+import org.ktorm.schema.boolean
 import org.ktorm.schema.int
 import org.ktorm.schema.time
 import org.ktorm.schema.varchar
@@ -17,4 +18,5 @@ object TenantDOs : Table<TenantDO>("io_tenant") {
     val availableBatchStart = time("available_batch_start").bindTo { it.availableBatchStart }
     val availableBatchEnd = time("available_batch_end").bindTo { it.availableBatchEnd }
     val timezone = timezone("timezone").bindTo { it.timezone }
+    val monitoredIndicator = boolean("monitored_indicator").bindTo { it.monitoredIndicator }
 }
