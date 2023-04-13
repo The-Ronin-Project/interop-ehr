@@ -31,7 +31,7 @@ class RoninBodySurfaceArea(
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
     override val qualifyingCodes: List<Coding> = registryClient.getValueSet(
-        "Observation.coding.code",
+        "Observation.code",
         profile
     )
 

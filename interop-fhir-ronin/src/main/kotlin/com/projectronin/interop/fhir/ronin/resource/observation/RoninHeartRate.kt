@@ -32,7 +32,7 @@ class RoninHeartRate(
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
     override val qualifyingCodes: List<Coding> by lazy {
         registryClient.getRequiredValueSet(
-            "Observation.coding.code",
+            "Observation.code",
             profile
         )
     }

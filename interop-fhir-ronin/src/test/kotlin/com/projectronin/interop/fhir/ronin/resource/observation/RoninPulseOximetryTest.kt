@@ -52,7 +52,7 @@ class RoninPulseOximetryTest {
     )
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
-            getRequiredValueSet("Observation.coding.code", RoninProfile.OBSERVATION_PULSE_OXIMETRY.value)
+            getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_PULSE_OXIMETRY.value)
         } returns pulseOximetryCoding
     }
     private val normalizer = mockk<Normalizer> {

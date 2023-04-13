@@ -50,7 +50,7 @@ class RoninHeartRateTest {
     private val heartRateCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = heartRateCode))
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
-            getRequiredValueSet("Observation.coding.code", RoninProfile.OBSERVATION_HEART_RATE.value)
+            getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_HEART_RATE.value)
         } returns heartRateCoding
     }
     private val normalizer = mockk<Normalizer> {

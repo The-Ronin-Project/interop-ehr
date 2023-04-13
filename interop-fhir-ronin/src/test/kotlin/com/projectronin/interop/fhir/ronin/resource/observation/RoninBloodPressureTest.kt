@@ -50,7 +50,7 @@ class RoninBloodPressureTest {
     private val bloodPressureCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = bloodPressureCode))
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
-            getRequiredValueSet("Observation.coding.code", RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)
+            getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)
         } returns bloodPressureCoding
     }
     private val normalizer = mockk<Normalizer> {

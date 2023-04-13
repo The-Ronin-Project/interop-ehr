@@ -50,7 +50,7 @@ class RoninBodyTemperatureTest {
     private val bodyTemperatureCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = bodyTemperatureCode))
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
-            getRequiredValueSet("Observation.coding.code", RoninProfile.OBSERVATION_BODY_TEMPERATURE.value)
+            getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_TEMPERATURE.value)
         } returns bodyTemperatureCoding
     }
     private val normalizer = mockk<Normalizer> {

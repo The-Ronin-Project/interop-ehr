@@ -37,7 +37,7 @@ class RoninBloodPressure(
     // Load the qualifying codes from the value set. These are required to process.
     override val qualifyingCodes: List<Coding> by lazy {
         registryClient.getRequiredValueSet(
-            "Observation.coding.code",
+            "Observation.code",
             profile
         )
     }

@@ -49,7 +49,7 @@ class RoninBodySurfaceAreaTest {
     private val bodySurfaceAreaCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("3140-1")))
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
-            getValueSet("Observation.coding.code", RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value)
+            getValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value)
         } returns bodySurfaceAreaCoding
     }
     private val testNormalizer = mockk<Normalizer> {

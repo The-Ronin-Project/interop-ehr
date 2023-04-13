@@ -49,7 +49,7 @@ class RoninBodyMassIndexTest {
     private val bodyMassIndexCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("39156-5")))
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
-            getValueSet("Observation.coding.code", RoninProfile.OBSERVATION_BODY_MASS_INDEX.value)
+            getValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_MASS_INDEX.value)
         } returns bodyMassIndexCoding
     }
     private val testNormalizer = mockk<Normalizer> {
