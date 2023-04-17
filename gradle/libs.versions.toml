@@ -2,7 +2,7 @@
 commons-text = "org.apache.commons:commons-text:1.10.0"
 
 dd-trace-api = "com.datadoghq:dd-trace-api:1.11.2"
-interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:7.4.6"
+interop-aidbox = "com.projectronin.interop.publish:interop-aidbox:7.4.7"
 
 interop-common = "com.projectronin.interop:interop-common:3.6.0"
 interop-commonHttp = "com.projectronin.interop:interop-common-http:3.6.0"
@@ -10,7 +10,7 @@ interop-commonJackson = "com.projectronin.interop:interop-common-jackson:3.6.0"
 interop-commonKtorm = "com.projectronin.interop:interop-common-ktorm:3.6.0"
 interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.6.0"
 
-interop-datalake = "com.projectronin.interop.publish:interop-datalake:7.4.6"
+interop-datalake = "com.projectronin.interop.publish:interop-datalake:7.4.7"
 
 interop-fhir = "com.projectronin.interop.fhir:interop-fhir:7.7.0"
 
