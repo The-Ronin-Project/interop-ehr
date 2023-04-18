@@ -50,10 +50,23 @@ class RoninPulseOximetryTest {
     private val pulseOximetryCoding = listOf(
         Coding(system = CodeSystem.LOINC.uri, code = pulseOxCode)
     )
+    private val flowRateCoding = listOf(
+        Coding(system = CodeSystem.LOINC.uri, code = Code("3151-8"))
+    )
+    private val concentrationCoding = listOf(
+        Coding(system = CodeSystem.LOINC.uri, code = Code("3150-0"))
+    )
+
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_PULSE_OXIMETRY.value)
         } returns pulseOximetryCoding
+        every {
+            getRequiredValueSet("Observation.component:FlowRate.code", RoninProfile.OBSERVATION_PULSE_OXIMETRY.value)
+        } returns flowRateCoding
+        every {
+            getRequiredValueSet("Observation.component:Concentration.code", RoninProfile.OBSERVATION_PULSE_OXIMETRY.value)
+        } returns concentrationCoding
     }
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
@@ -63,8 +76,6 @@ class RoninPulseOximetryTest {
     }
     private val roninPulseOximetry = RoninPulseOximetry(normalizer, localizer, normRegistryClient)
     private val vitalSignsCategory = Code("vital-signs")
-    private val flowRateCode = Code("3151-8")
-    private val concentrationCode = Code("3150-0")
 
     @Test
     fun `does not qualify when no category`() {
@@ -401,13 +412,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -422,13 +427,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -504,8 +503,8 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_PXOBS_004: Must match this system|code: http://loinc.org|3151-8 @ Observation.component.component\n" +
-                "ERROR RONIN_PXOBS_005: Must match this system|code: http://loinc.org|3150-0 @ Observation.component.component",
+                "ERROR RONIN_PXOBS_004: Must match this system|code: http://loinc.org|3151-8 @ Observation.component:FlowRate.code\n" +
+                "ERROR RONIN_PXOBS_005: Must match this system|code: http://loinc.org|3150-0 @ Observation.component:Concentration.code",
             exception.message
         )
     }
@@ -601,13 +600,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -623,13 +616,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -700,26 +687,14 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -782,13 +757,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -803,13 +772,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -824,13 +787,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
@@ -844,7 +801,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_PXOBS_005: Only 1 entry is allowed for pulse oximetry flow rate @ Observation.component.code",
+                "ERROR USCORE_PXOBS_005: Only 1 entry is allowed for pulse oximetry flow rate @ Observation.component:FlowRate.code",
             exception.message
         )
     }
@@ -893,13 +850,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -913,13 +864,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -941,7 +886,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: valueQuantity.value is a required element @ Observation.valueQuantity.value",
+                "ERROR REQ_FIELD: valueQuantity.value is a required element @ Observation.component:FlowRate.valueQuantity.value",
             exception.message
         )
     }
@@ -990,13 +935,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1010,13 +949,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1038,7 +971,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: valueQuantity.unit is a required element @ Observation.valueQuantity.unit",
+                "ERROR REQ_FIELD: valueQuantity.unit is a required element @ Observation.component:FlowRate.valueQuantity.unit",
             exception.message
         )
     }
@@ -1087,13 +1020,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1108,13 +1035,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1136,7 +1057,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_VSOBS_002: Quantity system must be UCUM @ Observation.valueQuantity.system",
+                "ERROR USCORE_VSOBS_002: Quantity system must be UCUM @ Observation.component:FlowRate.valueQuantity.system",
             exception.message
         )
     }
@@ -1185,13 +1106,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1205,13 +1120,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1233,7 +1142,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: valueQuantity.code is a required element @ Observation.valueQuantity.code",
+                "ERROR REQ_FIELD: valueQuantity.code is a required element @ Observation.component:FlowRate.valueQuantity.code",
             exception.message
         )
     }
@@ -1282,13 +1191,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1303,13 +1206,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1331,7 +1228,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR INV_VALUE_SET: 'invalid-code' is outside of required value set @ Observation.valueQuantity.code",
+                "ERROR INV_VALUE_SET: 'invalid-code' is outside of required value set @ Observation.component:FlowRate.valueQuantity.code",
             exception.message
         )
     }
@@ -1380,13 +1277,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1401,13 +1292,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1479,13 +1364,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1500,13 +1379,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
@@ -1561,13 +1434,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1582,13 +1449,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1603,13 +1464,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
@@ -1623,7 +1478,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_PXOBS_006: Only 1 entry is allowed for pulse oximetry oxygen concentration @ Observation.component.code",
+                "ERROR USCORE_PXOBS_006: Only 1 entry is allowed for pulse oximetry oxygen concentration @ Observation.component:Concentration.code",
             exception.message
         )
     }
@@ -1672,13 +1527,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1693,13 +1542,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1720,7 +1563,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: valueQuantity.value is a required element @ Observation.valueQuantity.value",
+                "ERROR REQ_FIELD: valueQuantity.value is a required element @ Observation.component:Concentration.valueQuantity.value",
             exception.message
         )
     }
@@ -1769,13 +1612,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1790,13 +1627,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1817,7 +1648,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: valueQuantity.unit is a required element @ Observation.valueQuantity.unit",
+                "ERROR REQ_FIELD: valueQuantity.unit is a required element @ Observation.component:Concentration.valueQuantity.unit",
             exception.message
         )
     }
@@ -1866,13 +1697,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1887,13 +1712,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1915,7 +1734,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_VSOBS_002: Quantity system must be UCUM @ Observation.valueQuantity.system",
+                "ERROR USCORE_VSOBS_002: Quantity system must be UCUM @ Observation.component:Concentration.valueQuantity.system",
             exception.message
         )
     }
@@ -1964,13 +1783,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1985,13 +1798,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2012,7 +1819,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: valueQuantity.code is a required element @ Observation.valueQuantity.code",
+                "ERROR REQ_FIELD: valueQuantity.code is a required element @ Observation.component:Concentration.valueQuantity.code",
             exception.message
         )
     }
@@ -2061,13 +1868,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2082,13 +1883,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2110,7 +1905,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR INV_VALUE_SET: 'invalid-code' is outside of required value set @ Observation.valueQuantity.code",
+                "ERROR INV_VALUE_SET: 'invalid-code' is outside of required value set @ Observation.component:Concentration.valueQuantity.code",
             exception.message
         )
     }
@@ -2159,13 +1954,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2180,13 +1969,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2257,13 +2040,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2278,13 +2055,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2429,13 +2200,7 @@ class RoninPulseOximetryTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Flow Rate".asFHIR(),
-                                code = flowRateCode
-                            )
-                        ),
+                        coding = flowRateCoding,
                         text = "Flow Rate".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2450,13 +2215,7 @@ class RoninPulseOximetryTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Concentration".asFHIR(),
-                                code = concentrationCode
-                            )
-                        ),
+                        coding = concentrationCoding,
                         text = "Concentration".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2586,13 +2345,7 @@ class RoninPulseOximetryTest {
         assertEquals(
             ObservationComponent(
                 code = CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.LOINC.uri,
-                            display = "Flow Rate".asFHIR(),
-                            code = flowRateCode
-                        )
-                    ),
+                    coding = flowRateCoding,
                     text = "Flow Rate".asFHIR()
                 ),
                 value = DynamicValue(
@@ -2610,13 +2363,7 @@ class RoninPulseOximetryTest {
         assertEquals(
             ObservationComponent(
                 code = CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.LOINC.uri,
-                            display = "Concentration".asFHIR(),
-                            code = concentrationCode
-                        )
-                    ),
+                    coding = concentrationCoding,
                     text = "Concentration".asFHIR()
                 ),
                 value = DynamicValue(
@@ -2972,6 +2719,188 @@ class RoninPulseOximetryTest {
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of ImagingStudy, Immunization, " +
                 "MedicationAdministration, MedicationDispense, MedicationStatement, Procedure @ Observation.partOf[0]",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if invalid flow rate`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        display = "Pulse Oximetry".asFHIR(),
+                        code = pulseOxCode
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = vitalSignsCategory
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            component = listOf(
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = listOf(
+                            Coding(
+                                system = CodeSystem.LOINC.uri,
+                                display = "Flow Rate".asFHIR(),
+                                code = Code("blah")
+                            )
+                        ),
+                        text = "Flow Rate".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 110.0),
+                            unit = "L/min".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("L/min")
+                        )
+                    )
+                ),
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = concentrationCoding,
+                        text = "Concentration".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 70.0),
+                            unit = "%".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("%")
+                        )
+                    )
+                )
+            )
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPulseOximetry.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_PXOBS_004: Must match this system|code: http://loinc.org|3151-8 @ Observation.component:FlowRate.code",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if invalid concentration`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        display = "Pulse Oximetry".asFHIR(),
+                        code = pulseOxCode
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = vitalSignsCategory
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            component = listOf(
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = flowRateCoding,
+                        text = "Flow Rate".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 110.0),
+                            unit = "L/min".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("L/min")
+                        )
+                    )
+                ),
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = listOf(
+                            Coding(
+                                system = CodeSystem.LOINC.uri,
+                                display = "Concentration".asFHIR(),
+                                code = Code("blah")
+                            )
+                        ),
+                        text = "Concentration".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 70.0),
+                            unit = "%".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("%")
+                        )
+                    )
+                )
+            )
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPulseOximetry.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_PXOBS_005: Must match this system|code: http://loinc.org|3150-0 @ Observation.component:Concentration.code",
             exception.message
         )
     }

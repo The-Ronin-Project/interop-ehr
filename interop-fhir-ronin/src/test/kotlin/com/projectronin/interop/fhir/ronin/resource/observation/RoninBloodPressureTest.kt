@@ -48,10 +48,18 @@ class RoninBloodPressureTest {
     }
     private val bloodPressureCode = Code("85354-9")
     private val bloodPressureCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = bloodPressureCode))
+    private val systolicCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8480-6")))
+    private val diastolicCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8462-4")))
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)
         } returns bloodPressureCoding
+        every {
+            getRequiredValueSet("Observation.component:systolic.code", RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)
+        } returns systolicCoding
+        every {
+            getRequiredValueSet("Observation.component:diastolic.code", RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)
+        } returns diastolicCoding
     }
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
@@ -61,8 +69,6 @@ class RoninBloodPressureTest {
     }
     private val roninBloodPressure = RoninBloodPressure(normalizer, localizer, normRegistryClient)
     private val vitalSignsCategory = Code("vital-signs")
-    private val systolicCode = Code("8480-6")
-    private val diastolicCode = Code("8462-4")
 
     @Test
     fun `does not qualify when no category`() {
@@ -320,13 +326,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -341,13 +341,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -423,8 +417,8 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_BPOBS_001: Must match this system|code: http://loinc.org|8480-6 @ Observation.component.component\n" +
-                "ERROR USCORE_BPOBS_002: Must match this system|code: http://loinc.org|8462-4 @ Observation.component.component",
+                "ERROR USCORE_BPOBS_001: Must match this system|code: http://loinc.org|8480-6 @ Observation.component:systolic.code\n" +
+                "ERROR USCORE_BPOBS_002: Must match this system|code: http://loinc.org|8462-4 @ Observation.component:diastolic.code",
             exception.message
         )
     }
@@ -520,13 +514,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -542,13 +530,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -619,26 +601,14 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -701,13 +671,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -722,13 +686,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -743,13 +701,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
@@ -763,7 +715,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_BPOBS_004: Only 1 entry is allowed for systolic blood pressure @ Observation.component.code",
+                "ERROR USCORE_BPOBS_004: Only 1 entry is allowed for systolic blood pressure @ Observation.component:systolic.code",
             exception.message
         )
     }
@@ -812,13 +764,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -832,13 +778,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -860,7 +800,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: valueQuantity.value is a required element @ Observation.valueQuantity.value",
+                "ERROR REQ_FIELD: valueQuantity.value is a required element @ Observation.component:systolic.valueQuantity.value",
             exception.message
         )
     }
@@ -909,13 +849,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -929,13 +863,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -957,7 +885,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: valueQuantity.unit is a required element @ Observation.valueQuantity.unit",
+                "ERROR REQ_FIELD: valueQuantity.unit is a required element @ Observation.component:systolic.valueQuantity.unit",
             exception.message
         )
     }
@@ -1006,13 +934,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1027,13 +949,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1055,7 +971,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_VSOBS_002: Quantity system must be UCUM @ Observation.valueQuantity.system",
+                "ERROR USCORE_VSOBS_002: Quantity system must be UCUM @ Observation.component:systolic.valueQuantity.system",
             exception.message
         )
     }
@@ -1104,13 +1020,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1124,13 +1034,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1152,7 +1056,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: valueQuantity.code is a required element @ Observation.valueQuantity.code",
+                "ERROR REQ_FIELD: valueQuantity.code is a required element @ Observation.component:systolic.valueQuantity.code",
             exception.message
         )
     }
@@ -1201,13 +1105,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1222,13 +1120,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1250,7 +1142,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR INV_VALUE_SET: 'invalid-code' is outside of required value set @ Observation.valueQuantity.code",
+                "ERROR INV_VALUE_SET: 'invalid-code' is outside of required value set @ Observation.component:systolic.valueQuantity.code",
             exception.message
         )
     }
@@ -1299,13 +1191,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1320,13 +1206,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1398,13 +1278,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1419,13 +1293,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
@@ -1480,13 +1348,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1501,13 +1363,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1522,13 +1378,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
@@ -1542,7 +1392,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_BPOBS_005: Only 1 entry is allowed for diastolic blood pressure @ Observation.component.code",
+                "ERROR USCORE_BPOBS_005: Only 1 entry is allowed for diastolic blood pressure @ Observation.component:diastolic.code",
             exception.message
         )
     }
@@ -1591,13 +1441,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1612,13 +1456,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1639,7 +1477,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: valueQuantity.value is a required element @ Observation.valueQuantity.value",
+                "ERROR REQ_FIELD: valueQuantity.value is a required element @ Observation.component:diastolic.valueQuantity.value",
             exception.message
         )
     }
@@ -1688,13 +1526,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1709,13 +1541,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1736,7 +1562,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: valueQuantity.unit is a required element @ Observation.valueQuantity.unit",
+                "ERROR REQ_FIELD: valueQuantity.unit is a required element @ Observation.component:diastolic.valueQuantity.unit",
             exception.message
         )
     }
@@ -1785,13 +1611,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1806,13 +1626,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1834,7 +1648,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_VSOBS_002: Quantity system must be UCUM @ Observation.valueQuantity.system",
+                "ERROR USCORE_VSOBS_002: Quantity system must be UCUM @ Observation.component:diastolic.valueQuantity.system",
             exception.message
         )
     }
@@ -1883,13 +1697,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1904,13 +1712,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -1931,7 +1733,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: valueQuantity.code is a required element @ Observation.valueQuantity.code",
+                "ERROR REQ_FIELD: valueQuantity.code is a required element @ Observation.component:diastolic.valueQuantity.code",
             exception.message
         )
     }
@@ -1980,13 +1782,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2001,13 +1797,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2029,7 +1819,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR INV_VALUE_SET: 'invalid-code' is outside of required value set @ Observation.valueQuantity.code",
+                "ERROR INV_VALUE_SET: 'invalid-code' is outside of required value set @ Observation.component:diastolic.valueQuantity.code",
             exception.message
         )
     }
@@ -2078,13 +1868,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2099,13 +1883,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2127,8 +1905,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_OBS_002: Must match this system|code: " +
-                "http://terminology.hl7.org/CodeSystem/observation-category|vital-signs @ Observation.category",
+                "ERROR RONIN_OBS_002: Must match this system|code: http://terminology.hl7.org/CodeSystem/observation-category|vital-signs @ Observation.category",
             exception.message
         )
     }
@@ -2177,13 +1954,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2198,13 +1969,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2348,13 +2113,7 @@ class RoninBloodPressureTest {
             component = listOf(
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Systolic".asFHIR(),
-                                code = systolicCode
-                            )
-                        ),
+                        coding = systolicCoding,
                         text = "Systolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2369,13 +2128,7 @@ class RoninBloodPressureTest {
                 ),
                 ObservationComponent(
                     code = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = CodeSystem.LOINC.uri,
-                                display = "Diastolic".asFHIR(),
-                                code = diastolicCode
-                            )
-                        ),
+                        coding = diastolicCoding,
                         text = "Diastolic".asFHIR()
                     ),
                     value = DynamicValue(
@@ -2517,13 +2270,7 @@ class RoninBloodPressureTest {
         assertEquals(
             ObservationComponent(
                 code = CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.LOINC.uri,
-                            display = "Systolic".asFHIR(),
-                            code = systolicCode
-                        )
-                    ),
+                    coding = systolicCoding,
                     text = "Systolic".asFHIR()
                 ),
                 value = DynamicValue(
@@ -2541,13 +2288,7 @@ class RoninBloodPressureTest {
         assertEquals(
             ObservationComponent(
                 code = CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.LOINC.uri,
-                            display = "Diastolic".asFHIR(),
-                            code = diastolicCode
-                        )
-                    ),
+                    coding = diastolicCoding,
                     text = "Diastolic".asFHIR()
                 ),
                 value = DynamicValue(
@@ -2961,6 +2702,190 @@ class RoninBloodPressureTest {
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of " +
                 "MedicationStatement, Procedure @ Observation.partOf[0]",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if invalid systolic code`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        display = "Blood Pressure".asFHIR(),
+                        code = bloodPressureCode
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = vitalSignsCategory
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            component = listOf(
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = listOf(
+                            Coding(
+                                system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                                code = Code("blah"),
+                                display = "Systolic".asFHIR()
+                            )
+                        ),
+                        text = "Systolic".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 110.0),
+                            unit = "mm[Hg]".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("mm[Hg]")
+                        )
+                    )
+                ),
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = diastolicCoding,
+                        text = "Diastolic".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 70.0),
+                            unit = "mm[Hg]".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("mm[Hg]")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninBloodPressure.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_BPOBS_001: Must match this system|code: http://loinc.org|8480-6 @ Observation.component:systolic.code",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if invalid diastolic code`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        display = "Blood Pressure".asFHIR(),
+                        code = bloodPressureCode
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = vitalSignsCategory
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            component = listOf(
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = systolicCoding,
+                        text = "Systolic".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 110.0),
+                            unit = "mm[Hg]".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("mm[Hg]")
+                        )
+                    )
+                ),
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = listOf(
+                            Coding(
+                                system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                                code = Code("blah"),
+                                display = "Diastolic".asFHIR()
+                            )
+                        ),
+                        text = "Diastolic".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 70.0),
+                            unit = "mm[Hg]".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("mm[Hg]")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninBloodPressure.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR USCORE_BPOBS_002: Must match this system|code: http://loinc.org|8462-4 @ Observation.component:diastolic.code",
             exception.message
         )
     }

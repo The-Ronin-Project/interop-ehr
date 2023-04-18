@@ -1,8 +1,6 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
-import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Coding
-import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
@@ -43,8 +41,18 @@ class RoninBloodPressure(
     }
 
     // Multipart qualifying codes for RoninBloodPressure
-    internal val validSystolicCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8480-6")))
-    internal val validDiastolicCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8462-4")))
+    private val validSystolicCodes: List<Coding> by lazy {
+        registryClient.getRequiredValueSet(
+            "Observation.component:systolic.code",
+            profile
+        )
+    }
+    private val validDiastolicCodes: List<Coding> by lazy {
+        registryClient.getRequiredValueSet(
+            "Observation.component:diastolic.code",
+            profile
+        )
+    }
 
     // Quantity unit codes - [USCore Blood Pressure Units](http://hl7.org/fhir/us/core/STU5.0.1/StructureDefinition-us-core-blood-pressure.html)
     override val validQuantityCodes = listOf("mm[Hg]")
@@ -55,24 +63,8 @@ class RoninBloodPressure(
     override val validDerivedFromValues = listOf("DocumentReference")
     override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
 
-    private val conflictingSystolicCodeError = FHIRError(
-        code = "USCORE_BPOBS_004",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Only 1 entry is allowed for systolic blood pressure",
-        location = LocationContext(Observation::code)
-    )
-    private val conflictingDiastolicCodeError = FHIRError(
-        code = "USCORE_BPOBS_005",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Only 1 entry is allowed for diastolic blood pressure",
-        location = LocationContext(Observation::code)
-    )
-
     override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validateVitalSign(element, parentContext, validation)
-
         if (element.dataAbsentReason == null) {
-            val componentCodeContext = LocationContext(Observation::component)
             val components = element.component
             val systolic = components.filter { comp ->
                 comp.code?.coding?.any { it.isInValueSet(validSystolicCodes) } ?: false
@@ -82,13 +74,24 @@ class RoninBloodPressure(
             }
 
             if (systolic.size == 1) {
-                validateVitalSignValue(systolic.first().value, validQuantityCodes, parentContext, validation)
+                validateVitalSignValue(
+                    systolic.first().value,
+                    validQuantityCodes,
+                    LocationContext("Observation", "component:systolic"),
+                    validation
+                )
             }
             if (diastolic.size == 1) {
-                validateVitalSignValue(diastolic.first().value, validQuantityCodes, parentContext, validation)
+                validateVitalSignValue(
+                    diastolic.first().value,
+                    validQuantityCodes,
+                    LocationContext("Observation", "component:diastolic"),
+                    validation
+                )
             }
 
             validation.apply {
+                val componentSystolicCodeContext = LocationContext("Observation", "component:systolic.code")
                 checkTrue(
                     systolic.isNotEmpty(),
                     FHIRError(
@@ -97,11 +100,22 @@ class RoninBloodPressure(
                         description = "Must match this system|code: ${
                         validSystolicCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
-                        location = LocationContext(Observation::component)
+                        location = componentSystolicCodeContext
                     ),
-                    componentCodeContext
+                    parentContext
                 )
-                checkTrue(systolic.size <= 1, conflictingSystolicCodeError, componentCodeContext)
+                checkTrue(
+                    systolic.size <= 1,
+                    FHIRError(
+                        code = "USCORE_BPOBS_004",
+                        severity = ValidationIssueSeverity.ERROR,
+                        description = "Only 1 entry is allowed for systolic blood pressure",
+                        location = componentSystolicCodeContext
+                    ),
+                    parentContext
+                )
+
+                val componentDiastolicCodeContext = LocationContext("Observation", "component:diastolic.code")
                 checkTrue(
                     diastolic.isNotEmpty(),
                     FHIRError(
@@ -110,11 +124,20 @@ class RoninBloodPressure(
                         description = "Must match this system|code: ${
                         validDiastolicCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
-                        location = componentCodeContext
+                        location = componentDiastolicCodeContext
                     ),
-                    componentCodeContext
+                    parentContext
                 )
-                checkTrue(diastolic.size <= 1, conflictingDiastolicCodeError, componentCodeContext)
+                checkTrue(
+                    diastolic.size <= 1,
+                    FHIRError(
+                        code = "USCORE_BPOBS_005",
+                        severity = ValidationIssueSeverity.ERROR,
+                        description = "Only 1 entry is allowed for diastolic blood pressure",
+                        location = componentDiastolicCodeContext
+                    ),
+                    parentContext
+                )
             }
         }
     }

@@ -1,8 +1,6 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
-import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Coding
-import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
@@ -43,8 +41,18 @@ class RoninPulseOximetry(
     }
 
     // Multipart qualifying codes for RoninPulseOximetry
-    private val qualifyingFlowRateCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("3151-8")))
-    private val qualifyingConcentrationCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("3150-0")))
+    private val qualifyingFlowRateCodes: List<Coding> by lazy {
+        registryClient.getRequiredValueSet(
+            "Observation.component:FlowRate.code",
+            profile
+        )
+    }
+    private val qualifyingConcentrationCodes: List<Coding> by lazy {
+        registryClient.getRequiredValueSet(
+            "Observation.component:Concentration.code",
+            profile
+        )
+    }
 
     // Quantity unit codes - [US Core Pulse Oximetry](http://hl7.org/fhir/us/core/STU5.0.1/StructureDefinition-us-core-pulse-oximetry.html)
     private val validFlowRateCodes = listOf("L/min")
@@ -69,24 +77,8 @@ class RoninPulseOximetry(
         "Procedure"
     )
 
-    private val conflictingFlowRateCodeError = FHIRError(
-        code = "USCORE_PXOBS_005",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Only 1 entry is allowed for pulse oximetry flow rate",
-        location = LocationContext(Observation::code)
-    )
-    private val conflictingConcentrationCodeError = FHIRError(
-        code = "USCORE_PXOBS_006",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Only 1 entry is allowed for pulse oximetry oxygen concentration",
-        location = LocationContext(Observation::code)
-    )
-
     override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validateVitalSign(element, parentContext, validation)
-
         if (element.dataAbsentReason == null) {
-            val componentCodeContext = LocationContext(Observation::component)
             val components = element.component
             val flowRate = components.filter { comp ->
                 comp.code?.coding?.any { it.isInValueSet(qualifyingFlowRateCodes) } ?: false
@@ -96,13 +88,24 @@ class RoninPulseOximetry(
             }
 
             if (flowRate.size == 1) {
-                validateVitalSignValue(flowRate.first().value, validFlowRateCodes, parentContext, validation)
+                validateVitalSignValue(
+                    flowRate.first().value,
+                    validFlowRateCodes,
+                    LocationContext("Observation", "component:FlowRate"),
+                    validation
+                )
             }
             if (concentration.size == 1) {
-                validateVitalSignValue(concentration.first().value, validConcentrationCodes, parentContext, validation)
+                validateVitalSignValue(
+                    concentration.first().value,
+                    validConcentrationCodes,
+                    LocationContext("Observation", "component:Concentration"),
+                    validation
+                )
             }
 
             validation.apply {
+                val flowRateCodeContext = LocationContext("Observation", "component:FlowRate.code")
                 checkTrue(
                     flowRate.isNotEmpty(),
                     FHIRError(
@@ -111,11 +114,22 @@ class RoninPulseOximetry(
                         description = "Must match this system|code: ${
                         qualifyingFlowRateCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
-                        location = componentCodeContext
+                        location = flowRateCodeContext
                     ),
-                    componentCodeContext
+                    parentContext
                 )
-                checkTrue(flowRate.size <= 1, conflictingFlowRateCodeError, componentCodeContext)
+                checkTrue(
+                    flowRate.size <= 1,
+                    FHIRError(
+                        code = "USCORE_PXOBS_005",
+                        severity = ValidationIssueSeverity.ERROR,
+                        description = "Only 1 entry is allowed for pulse oximetry flow rate",
+                        location = flowRateCodeContext
+                    ),
+                    parentContext
+                )
+
+                val concentrationCodeContext = LocationContext("Observation", "component:Concentration.code")
                 checkTrue(
                     concentration.isNotEmpty(),
                     FHIRError(
@@ -124,11 +138,20 @@ class RoninPulseOximetry(
                         description = "Must match this system|code: ${
                         qualifyingConcentrationCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
-                        location = componentCodeContext
+                        location = concentrationCodeContext
                     ),
-                    componentCodeContext
+                    parentContext
                 )
-                checkTrue(concentration.size <= 1, conflictingConcentrationCodeError, componentCodeContext)
+                checkTrue(
+                    concentration.size <= 1,
+                    FHIRError(
+                        code = "USCORE_PXOBS_006",
+                        severity = ValidationIssueSeverity.ERROR,
+                        description = "Only 1 entry is allowed for pulse oximetry oxygen concentration",
+                        location = concentrationCodeContext
+                    ),
+                    parentContext
+                )
             }
         }
     }
