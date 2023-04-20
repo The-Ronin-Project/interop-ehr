@@ -32,7 +32,7 @@ class TransformManagerTest {
         val result = transformManager.transformResource(resource, transformer, tenant)
         assertEquals(transformed, result)
 
-        verify(exactly = 0) { validationClient.reportIssues(any(), any<Patient>(), any()) }
+        verify(exactly = 0) { validationClient.reportIssues(any(), any<Patient>(), any<Tenant>()) }
     }
 
     @Test

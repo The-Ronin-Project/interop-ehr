@@ -23,7 +23,14 @@ class ValidationClient(private val resourceClient: ResourceClient) {
      * Reports [validation] issues for the [resource] for [tenant].
      */
     fun <T : Resource<T>> reportIssues(validation: Validation, resource: T, tenant: Tenant): UUID {
-        val newResource = validation.asNewResource(resource, tenant)
+        return reportIssues(validation, resource, tenant.mnemonic)
+    }
+
+    /**
+     * Reports [validation] issues for the [resource] for [tenantMnemonic].
+     */
+    fun <T : Resource<T>> reportIssues(validation: Validation, resource: T, tenantMnemonic: String): UUID {
+        val newResource = validation.asNewResource(resource, tenantMnemonic)
         val generatedId = runBlocking { resourceClient.addResource(newResource) }
         return generatedId.id!!
     }
@@ -31,9 +38,9 @@ class ValidationClient(private val resourceClient: ResourceClient) {
     /**
      * Converts this [Validation] into a [NewResource].
      */
-    private fun <T : Resource<T>> Validation.asNewResource(resource: T, tenant: Tenant): NewResource =
+    private fun <T : Resource<T>> Validation.asNewResource(resource: T, tenantMnemonic: String): NewResource =
         NewResource(
-            organizationId = tenant.mnemonic,
+            organizationId = tenantMnemonic,
             resourceType = resource.resourceType,
             resource = objectMapper.writeValueAsString(resource),
             issues = this.issues().map { it.asNewIssue() }

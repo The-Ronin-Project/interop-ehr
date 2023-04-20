@@ -135,4 +135,41 @@ class ValidationClientTest {
         val id = validationClient.reportIssues(validation, resource, tenant)
         assertEquals(uuid, id)
     }
+
+    @Test
+    fun `reports resource using just mnemonic`() {
+        val issue = mockk<ValidationIssue> {
+            every { severity } returns ValidationIssueSeverity.ERROR
+            every { code } returns "Error Code"
+            every { description } returns "Error Description"
+            every { location } returns LocationContext(Patient::name)
+        }
+        val validation = mockk<Validation> {
+            every { issues() } returns listOf(issue)
+        }
+
+        val resource = mockk<Patient>() {
+            every { resourceType } returns "Patient"
+        }
+        every { jsonMapper.writeValueAsString(resource) } returns "{}"
+
+        val expectedResource = NewResource(
+            organizationId = "tenant",
+            resourceType = "Patient",
+            resource = "{}",
+            issues = listOf(
+                NewIssue(
+                    severity = Severity.FAILED,
+                    type = "Error Code",
+                    description = "Error Description",
+                    location = "Patient.name"
+                )
+            )
+        )
+        val uuid = UUID.randomUUID()
+        coEvery { resourceClient.addResource(expectedResource) } returns GeneratedId(uuid)
+
+        val id = validationClient.reportIssues(validation, resource, "tenant")
+        assertEquals(uuid, id)
+    }
 }
