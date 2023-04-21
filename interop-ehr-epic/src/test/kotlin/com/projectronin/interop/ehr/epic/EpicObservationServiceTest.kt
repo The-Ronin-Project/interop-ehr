@@ -32,7 +32,7 @@ class EpicObservationServiceTest {
         httpResponse = mockk()
         pagingHttpResponse = mockk()
         codesDAO = mockk()
-        observationService = EpicObservationService(epicClient, 1, codesDAO)
+        observationService = EpicObservationService(epicClient, 1, codesDAO, 60)
     }
 
     @Test
@@ -54,6 +54,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "em2zwhHegmZEu39N4dUEIYA3",
                     "category" to "social-history",
+                    "date" to "ge2023-02-20",
                     "_count" to 50
                 )
             )
@@ -90,6 +91,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "abc",
                     "category" to "social-history",
+                    "date" to "ge2023-02-20",
                     "_count" to 50
                 )
             )
@@ -101,6 +103,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "123",
                     "category" to "social-history",
+                    "date" to "ge2023-02-20",
                     "_count" to 50
                 )
             )
@@ -141,6 +144,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "abc",
                     "category" to categoryTokens,
+                    "date" to "ge2023-02-20",
                     "_count" to 50
                 )
             )
@@ -181,6 +185,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "abc",
                     "category" to categoryTokens,
+                    "date" to "ge2023-02-20",
                     "_count" to 50
                 )
             )
@@ -221,6 +226,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "abc",
                     "category" to categoryTokens,
+                    "date" to "ge2023-02-20",
                     "_count" to 50
                 )
             )
@@ -236,6 +242,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "abc",
                     "code" to "12345,23456",
+                    "date" to "ge2023-02-20",
                     "_count" to 50
                 )
             )
@@ -280,6 +287,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "abc",
                     "category" to "$categorySystem|social-history",
+                    "date" to "ge2023-02-20",
                     "_count" to 50
                 )
             )
@@ -319,6 +327,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "em2zwhHegmZEu39N4dUEIYA3",
                     "category" to "$categorySystem|social-history",
+                    "date" to "ge2023-02-20",
                     "_count" to 50
                 )
             )
@@ -330,7 +339,7 @@ class EpicObservationServiceTest {
         coEvery {
             epicClient.get(
                 tenant,
-                "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation?patient=em2zwhHegmZEu39N4dUEIYA3&category=social-history&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
+                "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation?patient=em2zwhHegmZEu39N4dUEIYA3&category=social-history&date=ge2023-02-20&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
             )
         } returns httpResponse
 

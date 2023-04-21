@@ -5,7 +5,7 @@
   "link": [
     {
       "relation": "next",
-      "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation?patient=em2zwhHegmZEu39N4dUEIYA3&category=social-history&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
+      "url": "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation?patient=em2zwhHegmZEu39N4dUEIYA3&category=social-history&date=ge2023-02-20&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
     }
   ],
   "entry": [
