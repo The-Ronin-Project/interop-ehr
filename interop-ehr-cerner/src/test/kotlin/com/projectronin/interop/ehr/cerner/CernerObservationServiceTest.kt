@@ -12,11 +12,13 @@ import io.mockk.spyk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class CernerObservationServiceTest {
     private val client = mockk<CernerClient>()
     private val codesDAO = mockk<TenantCodesDAO>()
     private val cernerObservationService = spyk(CernerObservationService(client, codesDAO, 60))
+    private val pastDate = LocalDate.now().minusDays(60).toString()
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "ronin"
     }
@@ -41,7 +43,7 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "code",
-                    "date" to "ge2023-02-20"
+                    "date" to "ge$pastDate"
                 )
             )
         } returns listOf(observation)
@@ -64,7 +66,7 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "code,system2|code2",
-                    "date" to "ge2023-02-20"
+                    "date" to "ge$pastDate"
                 )
             )
         } returns listOf(observation)
@@ -90,7 +92,7 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "exam,laboratory",
-                    "date" to "ge2023-02-20"
+                    "date" to "ge$pastDate"
                 )
             )
         } returns listOf(observation)
@@ -116,7 +118,7 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "vital-signs,laboratory",
-                    "date" to "ge2023-02-20"
+                    "date" to "ge$pastDate"
                 )
             )
         } returns listOf(observation)
@@ -127,7 +129,7 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "code" to "12345,09876",
-                    "date" to "ge2023-02-20"
+                    "date" to "ge$pastDate"
                 )
             )
         } returns listOf(observation2)
@@ -161,7 +163,7 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId1",
                     "category" to "code",
-                    "date" to "ge2023-02-20"
+                    "date" to "ge$pastDate"
                 )
             )
         } returns listOf(observation)
@@ -172,7 +174,7 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId2",
                     "category" to "code",
-                    "date" to "ge2023-02-20"
+                    "date" to "ge$pastDate"
                 )
             )
         } returns listOf(observation2)

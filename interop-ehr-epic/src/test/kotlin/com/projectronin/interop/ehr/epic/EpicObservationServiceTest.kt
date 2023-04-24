@@ -15,6 +15,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class EpicObservationServiceTest {
     private lateinit var epicClient: EpicClient
@@ -25,6 +26,7 @@ class EpicObservationServiceTest {
     private val validObservationSearchBundle = readResource<Bundle>("/ExampleObservationBundle.json")
     private val pagingObservationSearchBundle = readResource<Bundle>("/ExampleObservationBundleWithPaging.json")
     private val categorySystem = CodeSystem.OBSERVATION_CATEGORY.uri.value
+    private val pastDate = LocalDate.now().minusDays(60).toString()
 
     @BeforeEach
     fun setup() {
@@ -54,7 +56,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "em2zwhHegmZEu39N4dUEIYA3",
                     "category" to "social-history",
-                    "date" to "ge2023-02-20",
+                    "date" to "ge$pastDate",
                     "_count" to 50
                 )
             )
@@ -91,7 +93,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "abc",
                     "category" to "social-history",
-                    "date" to "ge2023-02-20",
+                    "date" to "ge$pastDate",
                     "_count" to 50
                 )
             )
@@ -103,7 +105,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "123",
                     "category" to "social-history",
-                    "date" to "ge2023-02-20",
+                    "date" to "ge$pastDate",
                     "_count" to 50
                 )
             )
@@ -144,7 +146,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "abc",
                     "category" to categoryTokens,
-                    "date" to "ge2023-02-20",
+                    "date" to "ge$pastDate",
                     "_count" to 50
                 )
             )
@@ -185,7 +187,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "abc",
                     "category" to categoryTokens,
-                    "date" to "ge2023-02-20",
+                    "date" to "ge$pastDate",
                     "_count" to 50
                 )
             )
@@ -226,7 +228,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "abc",
                     "category" to categoryTokens,
-                    "date" to "ge2023-02-20",
+                    "date" to "ge$pastDate",
                     "_count" to 50
                 )
             )
@@ -242,7 +244,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "abc",
                     "code" to "12345,23456",
-                    "date" to "ge2023-02-20",
+                    "date" to "ge$pastDate",
                     "_count" to 50
                 )
             )
@@ -287,7 +289,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "abc",
                     "category" to "$categorySystem|social-history",
-                    "date" to "ge2023-02-20",
+                    "date" to "ge$pastDate",
                     "_count" to 50
                 )
             )
@@ -327,7 +329,7 @@ class EpicObservationServiceTest {
                 mapOf(
                     "patient" to "em2zwhHegmZEu39N4dUEIYA3",
                     "category" to "$categorySystem|social-history",
-                    "date" to "ge2023-02-20",
+                    "date" to "ge$pastDate",
                     "_count" to 50
                 )
             )
