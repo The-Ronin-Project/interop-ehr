@@ -98,8 +98,6 @@ abstract class BaseRoninObservation(
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, validation)
 
-            checkNotNull(element.code, requiredCodeError, parentContext)
-
             requireCodeableConcept("code", element.code, parentContext, validation)
             requireCodeCoding("code", element.code?.coding, parentContext, validation)
 

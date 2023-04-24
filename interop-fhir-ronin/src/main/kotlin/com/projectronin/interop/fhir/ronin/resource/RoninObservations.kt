@@ -16,6 +16,7 @@ import com.projectronin.interop.fhir.ronin.resource.observation.RoninLaboratoryR
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninObservation
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninPulseOximetry
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninRespiratoryRate
+import com.projectronin.interop.fhir.ronin.resource.observation.RoninStagingRelated
 import org.springframework.stereotype.Component
 
 /**
@@ -38,6 +39,7 @@ class RoninObservations(
     roninHeartRate: RoninHeartRate,
     roninPulseOximetry: RoninPulseOximetry,
     roninLaboratoryResult: RoninLaboratoryResult,
+    roninStagingRelated: RoninStagingRelated,
     roninObservation: RoninObservation
 ) : MultipleProfileResource<Observation>(normalizer, localizer) {
     override val potentialProfiles: List<BaseProfile<Observation>> =
@@ -51,7 +53,8 @@ class RoninObservations(
             roninBloodPressure,
             roninRespiratoryRate,
             roninHeartRate,
-            roninPulseOximetry
+            roninPulseOximetry,
+            roninStagingRelated
         )
     override val defaultProfile: BaseProfile<Observation>? = roninObservation
 }

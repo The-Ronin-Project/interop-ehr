@@ -20,6 +20,7 @@ import com.projectronin.interop.fhir.ronin.resource.observation.RoninLaboratoryR
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninObservation
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninPulseOximetry
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninRespiratoryRate
+import com.projectronin.interop.fhir.ronin.resource.observation.RoninStagingRelated
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -48,6 +49,7 @@ class RoninObservationsTest {
     private val heartRate = mockk<RoninHeartRate>()
     private val pulseOximetry = mockk<RoninPulseOximetry>()
     private val laboratoryResult = mockk<RoninLaboratoryResult>()
+    private val stagingRelated = mockk<RoninStagingRelated>()
     private val default = mockk<RoninObservation>() {
         every { qualifies(any()) } returns true
     }
@@ -65,6 +67,7 @@ class RoninObservationsTest {
             heartRate,
             pulseOximetry,
             laboratoryResult,
+            stagingRelated,
             default
         )
 
@@ -104,6 +107,7 @@ class RoninObservationsTest {
         every { heartRate.qualifies(observation) } returns false
         every { pulseOximetry.qualifies(observation) } returns false
         every { laboratoryResult.qualifies(observation) } returns false
+        every { stagingRelated.qualifies(observation) } returns false
 
         roninObservations.validate(observation, null).alertIfErrors()
     }
@@ -134,6 +138,7 @@ class RoninObservationsTest {
         every { heartRate.qualifies(original) } returns false
         every { pulseOximetry.qualifies(original) } returns false
         every { laboratoryResult.qualifies(original) } returns false
+        every { stagingRelated.qualifies(original) } returns false
 
         every { bodyMassIndex.qualifies(roninObservation) } returns false
         every { bodySurfaceArea.qualifies(roninObservation) } returns false
@@ -146,6 +151,7 @@ class RoninObservationsTest {
         every { heartRate.qualifies(roninObservation) } returns false
         every { pulseOximetry.qualifies(roninObservation) } returns false
         every { laboratoryResult.qualifies(roninObservation) } returns false
+        every { stagingRelated.qualifies(roninObservation) } returns false
 
         val (transformed, validation) = roninObservations.transform(original, tenant)
         validation.alertIfErrors()
