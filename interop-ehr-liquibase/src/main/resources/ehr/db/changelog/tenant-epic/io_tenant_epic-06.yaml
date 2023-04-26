@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-epic-create-pk
+      author: Josh Smith
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - primaryKeyExists:
+                tableName: io_tenant_epic
+      changes:
+        - addPrimaryKey:
+            tableName: io_tenant_epic
+            columnNames: io_tenant_id

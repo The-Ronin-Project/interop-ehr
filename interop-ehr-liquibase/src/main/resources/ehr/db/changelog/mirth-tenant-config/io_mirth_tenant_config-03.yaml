@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-mirth-tenant-config-create-pk
+      author: Josh Smith
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - primaryKeyExists:
+                tableName: io_mirth_tenant_config
+      changes:
+        - addPrimaryKey:
+            tableName: io_mirth_tenant_config
+            columnNames: io_tenant_id

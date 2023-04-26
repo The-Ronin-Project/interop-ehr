@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-cerner-create-pk
+      author: Josh Smith
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - primaryKeyExists:
+                tableName: io_tenant_cerner
+      changes:
+        - addPrimaryKey:
+            tableName: io_tenant_cerner
+            columnNames: io_tenant_id

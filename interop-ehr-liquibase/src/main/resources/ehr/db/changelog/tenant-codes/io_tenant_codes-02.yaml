@@ -1,0 +1,13 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-codes-create-pk
+      author: Josh Smith
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - primaryKeyExists:
+                tableName: io_tenant_codes
+      changes:
+        - addPrimaryKey:
+            tableName: io_tenant_codes
+            columnNames: io_tenant_id

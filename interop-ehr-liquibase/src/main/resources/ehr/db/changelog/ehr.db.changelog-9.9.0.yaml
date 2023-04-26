@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - include:
+      file: ehr/db/changelog/mirth-tenant-config/io_mirth_tenant_config-03.yaml
+  - include:
+      file: ehr/db/changelog/tenant-cerner/io_tenant_cerner-04.yaml
+  - include:
+      file: ehr/db/changelog/tenant-codes/io_tenant_codes-02.yaml
+  - include:
+      file: ehr/db/changelog/tenant-epic/io_tenant_epic-06.yaml
