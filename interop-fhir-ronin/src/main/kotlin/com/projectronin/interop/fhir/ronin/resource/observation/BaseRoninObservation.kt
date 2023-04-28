@@ -8,7 +8,7 @@ import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
-import com.projectronin.interop.fhir.ronin.util.isInValueSet
+import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.ronin.util.validateReferenceList
@@ -39,11 +39,9 @@ abstract class BaseRoninObservation(
 
     override fun qualifies(resource: Observation): Boolean {
         return (
-            qualifyingCategories.isEmpty() || resource.category.any { category ->
-                category.coding.any { it.isInValueSet(qualifyingCategories) }
-            }
-            ) &&
-            (qualifyingCodes.isEmpty() || resource.code?.coding?.any { it.isInValueSet(qualifyingCodes) } ?: false)
+            resource.category.qualifiesForValueSet(qualifyingCategories) &&
+                resource.code.qualifiesForValueSet(qualifyingCodes)
+            )
     }
 
     // Reference checks - subclasses may override lists to modify validation logic for reference attributes
@@ -167,34 +165,27 @@ abstract class BaseRoninObservation(
      */
     open fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
         validation.apply {
-            if (element.category.isNotEmpty() && qualifyingCategories.isNotEmpty()) {
-                checkTrue(
-                    element.category.any { category ->
-                        category.coding.any { it.isInValueSet(qualifyingCategories) }
-                    },
-                    FHIRError(
-                        code = "RONIN_OBS_002",
-                        severity = ValidationIssueSeverity.ERROR,
-                        description = "Must match this system|code: ${ qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" } }",
-                        location = LocationContext(Observation::category)
-                    ),
-                    parentContext
-                )
-            }
+            checkTrue(
+                element.category.qualifiesForValueSet(qualifyingCategories),
+                FHIRError(
+                    code = "RONIN_OBS_002",
+                    severity = ValidationIssueSeverity.ERROR,
+                    description = "Must match this system|code: ${ qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" } }",
+                    location = LocationContext(Observation::category)
+                ),
+                parentContext
+            )
 
-            val code = element.code
-            if (code != null && qualifyingCodes.isNotEmpty()) {
-                checkTrue(
-                    code.coding.any { it.isInValueSet(qualifyingCodes) },
-                    FHIRError(
-                        code = "RONIN_OBS_003",
-                        severity = ValidationIssueSeverity.ERROR,
-                        description = "Must match this system|code: ${ qualifyingCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" } }",
-                        location = LocationContext(Observation::code)
-                    ),
-                    parentContext
-                )
-            }
+            checkTrue(
+                element.code.qualifiesForValueSet(qualifyingCodes),
+                FHIRError(
+                    code = "RONIN_OBS_003",
+                    severity = ValidationIssueSeverity.ERROR,
+                    description = "Must match this system|code: ${ qualifyingCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" } }",
+                    location = LocationContext(Observation::code)
+                ),
+                parentContext
+            )
         }
     }
 

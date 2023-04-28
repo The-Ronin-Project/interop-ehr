@@ -7,6 +7,7 @@ import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
+import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
@@ -43,6 +44,7 @@ class RoninDiagnosticReportNoteExchange(normalizer: Normalizer, localizer: Local
             checkTrue(element.category.isNotEmpty(), requiredCategoryFieldError, parentContext)
 
             checkNotNull(element.subject, requiredSubjectFieldError, parentContext)
+            validateReference(element.subject, listOf("Patient"), LocationContext(DiagnosticReport::subject), validation)
 
             // code and status field checks are done by R4DiagnosticReportValidator
         }

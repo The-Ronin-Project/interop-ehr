@@ -18,7 +18,10 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
 
 @Component
-class RoninConditionEncounterDiagnosis(normalizer: Normalizer, localizer: Localizer) :
+class RoninConditionEncounterDiagnosis(
+    normalizer: Normalizer,
+    localizer: Localizer
+) :
     BaseRoninCondition(
         R4ConditionValidator,
         RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value,
@@ -28,15 +31,6 @@ class RoninConditionEncounterDiagnosis(normalizer: Normalizer, localizer: Locali
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
     override val qualifyingCategories = listOf(Coding(system = CodeSystem.CONDITION_CATEGORY.uri, code = Code("encounter-diagnosis")))
-
-    override fun validateRonin(element: Condition, parentContext: LocationContext, validation: Validation) {
-        validation.apply {
-            requireRoninIdentifiers(element.identifier, parentContext, validation)
-
-            // Note: Disabled coding validation due to lack of mappings.
-            // requireCodeableConcept("code", element.code, parentContext, this)
-        }
-    }
 
     private val requiredIdError = RequiredFieldError(Condition::id)
 

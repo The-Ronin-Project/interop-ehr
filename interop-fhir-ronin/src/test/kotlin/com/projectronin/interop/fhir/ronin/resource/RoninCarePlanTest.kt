@@ -1030,4 +1030,88 @@ class RoninCarePlanTest {
         val (transformed, _) = roninCarePlan.transform(carePlan, tenant)
         assertNull(transformed)
     }
+
+    @Test
+    fun `validate fails with missing subject reference attribute`() {
+        val carePlan = CarePlan(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = RequestStatus.DRAFT.asCode(),
+            intent = CarePlanIntent.OPTION.asCode(),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                            code = Code("assess-plan")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(display = "display".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninCarePlan.validate(carePlan, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ CarePlan.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with wrong subject reference type`() {
+        val carePlan = CarePlan(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = RequestStatus.DRAFT.asCode(),
+            intent = CarePlanIntent.OPTION.asCode(),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                            code = Code("assess-plan")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Condition/12345".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninCarePlan.validate(carePlan, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ CarePlan.subject",
+            exception.message
+        )
+    }
 }

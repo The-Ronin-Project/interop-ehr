@@ -5,7 +5,8 @@ import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
-import com.projectronin.interop.fhir.ronin.util.isInValueSet
+import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
+import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
@@ -27,31 +28,39 @@ abstract class BaseRoninCondition(
     open val qualifyingCategories: List<Coding> = emptyList()
 
     override fun qualifies(resource: Condition): Boolean {
-        return qualifyingCategories.isEmpty() || resource.category.any { category ->
-            category.coding.any { it.isInValueSet(qualifyingCategories) }
-        }
+        return resource.category.qualifiesForValueSet(qualifyingCategories)
     }
 
     private val requiredCodeError = RequiredFieldError(Condition::code)
 
-    override fun validateUSCore(element: Condition, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(element: Condition, parentContext: LocationContext, validation: Validation) {
         validation.apply {
-            checkNotNull(element.code, requiredCodeError, parentContext)
+            requireRoninIdentifiers(element.identifier, parentContext, validation)
 
-            if (element.category.isNotEmpty() && qualifyingCategories.isNotEmpty()) {
-                checkTrue(
-                    element.category.any { category ->
-                        category.coding.any { it.isInValueSet(qualifyingCategories) }
-                    },
-                    FHIRError(
-                        code = "USCORE_CND_001",
-                        severity = ValidationIssueSeverity.ERROR,
-                        description = "Must match this system|code: ${ qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" } }",
-                        location = LocationContext(Condition::category)
-                    ),
-                    parentContext
-                )
-            }
+            checkTrue(
+                element.category.qualifiesForValueSet(qualifyingCategories),
+                FHIRError(
+                    code = "RONIN_CND_001",
+                    severity = ValidationIssueSeverity.ERROR,
+                    description = "Must match this system|code: ${
+                    qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                    }",
+                    location = LocationContext(Condition::category)
+                ),
+                parentContext
+            )
+
+            checkNotNull(element.code, requiredCodeError, parentContext)
+            requireCodeableConcept("code", element.code, parentContext, validation)
+            // code value set is not validated, as it is too large
+
+            // clinicalStatus required value set is validated in R4
+            // verificationStatus required value set is validated in R4
+
+            // subject required is validated in R4
+            validateReference(element.subject, listOf("Patient"), LocationContext(Condition::subject), validation)
         }
     }
+
+    override fun validateUSCore(element: Condition, parentContext: LocationContext, validation: Validation) {}
 }

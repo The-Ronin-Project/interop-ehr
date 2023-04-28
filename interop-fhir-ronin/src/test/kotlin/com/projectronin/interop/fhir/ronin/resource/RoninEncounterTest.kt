@@ -882,4 +882,70 @@ class RoninEncounterTest {
 
         assertNull(transformed)
     }
+
+    @Test
+    fun `validate fails with missing reference attribute`() {
+        val encounter = Encounter(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = EncounterStatus.CANCELLED.asCode(),
+            `class` = Coding(code = Code("OBSENC")),
+            type = listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))),
+            subject = Reference(display = "reference".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninEncounter.validate(encounter, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Encounter.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with wrong reference type`() {
+        val encounter = Encounter(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = EncounterStatus.CANCELLED.asCode(),
+            `class` = Coding(code = Code("OBSENC")),
+            type = listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))),
+            subject = Reference(display = "Condition/12345".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninEncounter.validate(encounter, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Encounter.subject",
+            exception.message
+        )
+    }
 }

@@ -422,7 +422,6 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system",
                 "specialAppointment"
             )
-        mapping!!
         assertEquals(1, mapping.size)
         assertEquals(Code("code1"), mapping[0].code)
     }
@@ -448,7 +447,6 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system",
                 "specialAppointment"
             )
-        mapping!!
         assertEquals(1, mapping.size)
         assertEquals(Code("code1"), mapping[0].code)
     }
@@ -474,7 +472,6 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system"
                 // default profile_url is null
             )
-        mapping!!
         assertEquals(1, mapping.size)
         assertEquals(Code("code1"), mapping[0].code)
     }
@@ -501,7 +498,6 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system",
                 "specialPatient"
             )
-        mapping!!
         assertEquals(1, mapping.size)
         assertEquals(Code("code1"), mapping[0].code)
     }
@@ -528,7 +524,6 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system",
                 "specialAppointment"
             )
-        mapping!!
         assertEquals(1, mapping.size)
         assertEquals(Code("code1"), mapping[0].code)
     }

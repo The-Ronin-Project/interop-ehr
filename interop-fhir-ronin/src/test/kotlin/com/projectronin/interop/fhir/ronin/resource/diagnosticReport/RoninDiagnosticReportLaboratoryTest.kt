@@ -95,8 +95,7 @@ class RoninDiagnosticReportLaboratoryTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -128,8 +127,7 @@ class RoninDiagnosticReportLaboratoryTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -197,8 +195,7 @@ class RoninDiagnosticReportLaboratoryTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -207,7 +204,8 @@ class RoninDiagnosticReportLaboratoryTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: category is a required element @ DiagnosticReport.category",
+                "ERROR REQ_FIELD: category is a required element @ DiagnosticReport.category\n" +
+                "ERROR USCORE_DX_RPT_001: Must match this system|code: http://terminology.hl7.org/CodeSystem/v2-0074|LAB @ DiagnosticReport.category",
             exception.message
         )
     }
@@ -241,8 +239,7 @@ class RoninDiagnosticReportLaboratoryTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -277,7 +274,7 @@ class RoninDiagnosticReportLaboratoryTest {
                     coding = listOf(
                         Coding(
                             system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074-wrong"),
-                            code = Code("NOT-LAB")
+                            code = Code("LAB")
                         )
                     )
                 )
@@ -285,8 +282,7 @@ class RoninDiagnosticReportLaboratoryTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -330,8 +326,7 @@ class RoninDiagnosticReportLaboratoryTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -397,8 +392,7 @@ class RoninDiagnosticReportLaboratoryTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -445,8 +439,7 @@ class RoninDiagnosticReportLaboratoryTest {
             ),
             code = CodeableConcept(text = "dx report".asFHIR()),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             ),
             encounter = Reference(id = "encounterReference".asFHIR(), display = "encounterDisplay".asFHIR()),
             effective = DynamicValue(
@@ -563,8 +556,7 @@ class RoninDiagnosticReportLaboratoryTest {
         )
         assertEquals(
             Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             ),
             transformed.subject
         )
@@ -657,8 +649,7 @@ class RoninDiagnosticReportLaboratoryTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -715,8 +706,7 @@ class RoninDiagnosticReportLaboratoryTest {
         )
         assertEquals(
             Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             ),
             transformed.subject
         )
@@ -732,5 +722,92 @@ class RoninDiagnosticReportLaboratoryTest {
         assertEquals(null, transformed.conclusion)
         assertEquals(listOf<CodeableConcept>(), transformed.conclusionCode)
         assertEquals(listOf<Attachment>(), transformed.presentedForm)
+    }
+
+    @Test
+    fun `validate fails with missing reference attribute`() {
+        val dxReport = DiagnosticReport(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                            code = Code("LAB")
+                        )
+                    )
+                )
+            ),
+            code = CodeableConcept(text = "dx report".asFHIR()),
+            status = Code("registered"),
+            subject = Reference(
+                id = "subject".asFHIR(),
+                display = "display".asFHIR()
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ DiagnosticReport.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with wrong reference type`() {
+        val dxReport = DiagnosticReport(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                            code = Code("LAB")
+                        )
+                    )
+                )
+            ),
+            code = CodeableConcept(text = "dx report".asFHIR()),
+            status = Code("registered"),
+            subject = Reference(
+                reference = "Condition/123".asFHIR()
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ DiagnosticReport.subject",
+            exception.message
+        )
     }
 }

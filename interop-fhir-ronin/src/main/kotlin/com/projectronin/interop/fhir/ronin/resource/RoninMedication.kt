@@ -19,13 +19,17 @@ import org.springframework.stereotype.Component
  * Validator and transformer for the Ronin Medication profile
  */
 @Component
-class RoninMedication(normalizer: Normalizer, localizer: Localizer) :
+class RoninMedication(
+    normalizer: Normalizer,
+    localizer: Localizer
+) :
     USCoreBasedProfile<Medication>(
         R4MedicationValidator,
         RoninProfile.MEDICATION.value,
         normalizer,
         localizer
     ) {
+
     private val requiredCodeError = RequiredFieldError(Medication::code)
 
     override fun validateRonin(element: Medication, parentContext: LocationContext, validation: Validation) {
@@ -33,6 +37,7 @@ class RoninMedication(normalizer: Normalizer, localizer: Localizer) :
             requireRoninIdentifiers(element.identifier, parentContext, this)
 
             requireCodeableConcept("code", element.code, parentContext, this)
+            // code will be populated by from mapping
         }
     }
 

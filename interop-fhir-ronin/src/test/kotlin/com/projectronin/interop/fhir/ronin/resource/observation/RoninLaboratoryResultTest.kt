@@ -264,7 +264,8 @@ class RoninLaboratoryResultTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: category is a required element @ Observation.category",
+                "ERROR REQ_FIELD: category is a required element @ Observation.category\n" +
+                "ERROR RONIN_OBS_002: Must match this system|code: http://terminology.hl7.org/CodeSystem/observation-category|laboratory @ Observation.category",
             exception.message
         )
     }

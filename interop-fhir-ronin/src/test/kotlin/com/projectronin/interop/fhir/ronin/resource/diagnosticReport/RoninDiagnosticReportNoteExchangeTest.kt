@@ -60,6 +60,7 @@ class RoninDiagnosticReportNoteExchangeTest {
             roninDiagnosticReport.qualifies(
                 DiagnosticReport(
                     code = CodeableConcept(text = "dx report".asFHIR()),
+                    category = listOf(CodeableConcept(text = "dx report".asFHIR())),
                     status = Code("registered")
                 )
             )
@@ -76,8 +77,7 @@ class RoninDiagnosticReportNoteExchangeTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -102,8 +102,7 @@ class RoninDiagnosticReportNoteExchangeTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -164,8 +163,7 @@ class RoninDiagnosticReportNoteExchangeTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -201,8 +199,7 @@ class RoninDiagnosticReportNoteExchangeTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -261,8 +258,7 @@ class RoninDiagnosticReportNoteExchangeTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -302,8 +298,7 @@ class RoninDiagnosticReportNoteExchangeTest {
             ),
             code = CodeableConcept(text = "dx report".asFHIR()),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             ),
             encounter = Reference(id = "encounterReference".asFHIR(), display = "encounterDisplay".asFHIR()),
             effective = DynamicValue(
@@ -413,8 +408,7 @@ class RoninDiagnosticReportNoteExchangeTest {
         )
         assertEquals(
             Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             ),
             transformed.subject
         )
@@ -500,8 +494,7 @@ class RoninDiagnosticReportNoteExchangeTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             )
         )
 
@@ -551,8 +544,7 @@ class RoninDiagnosticReportNoteExchangeTest {
         )
         assertEquals(
             Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR()
+                reference = "Patient/123".asFHIR()
             ),
             transformed.subject
         )
@@ -568,5 +560,78 @@ class RoninDiagnosticReportNoteExchangeTest {
         assertEquals(null, transformed.conclusion)
         assertEquals(listOf<CodeableConcept>(), transformed.conclusionCode)
         assertEquals(listOf<Attachment>(), transformed.presentedForm)
+    }
+
+    @Test
+    fun `validate fails with missing reference attribute`() {
+        val dxReport = DiagnosticReport(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            category = listOf(
+                CodeableConcept(text = "dx report".asFHIR())
+            ),
+            code = CodeableConcept(text = "dx report".asFHIR()),
+            status = Code("registered"),
+            subject = Reference(
+                id = "123".asFHIR(),
+                display = "display".asFHIR()
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ DiagnosticReport.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with wrong reference type`() {
+        val dxReport = DiagnosticReport(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            category = listOf(
+                CodeableConcept(text = "dx report".asFHIR())
+            ),
+            code = CodeableConcept(text = "dx report".asFHIR()),
+            status = Code("registered"),
+            subject = Reference(
+                reference = "Condition/123".asFHIR()
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ DiagnosticReport.subject",
+            exception.message
+        )
     }
 }

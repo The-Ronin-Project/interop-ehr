@@ -144,7 +144,7 @@ class RoninMedicationStatementTest {
                 type = DynamicValueType.CODEABLE_CONCEPT,
                 value = CodeableConcept()
             ),
-            subject = Reference(display = "display".asFHIR())
+            subject = Reference(reference = "Patient/123".asFHIR())
         )
 
         roninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
@@ -186,7 +186,7 @@ class RoninMedicationStatementTest {
                 type = DynamicValueType.CODEABLE_CONCEPT,
                 value = CodeableConcept(text = "medication".asFHIR())
             ),
-            subject = Reference(display = "subject".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             context = Reference(display = "context".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -259,7 +259,7 @@ class RoninMedicationStatementTest {
                 type = DynamicValueType.CODEABLE_CONCEPT,
                 value = CodeableConcept(text = "medication".asFHIR())
             ),
-            subject = Reference(display = "subject".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 value = DateTime("1905-08-23")
@@ -302,7 +302,7 @@ class RoninMedicationStatementTest {
                     type = type,
                     value = value
                 ),
-                subject = Reference(display = "subject".asFHIR()),
+                subject = Reference(reference = "Patient/123".asFHIR()),
                 effective = DynamicValue(
                     type = DynamicValueType.DATE_TIME,
                     value = DateTime("1905-08-23")
@@ -327,7 +327,7 @@ class RoninMedicationStatementTest {
                     type = DynamicValueType.CODEABLE_CONCEPT,
                     value = CodeableConcept(text = "codeableConcep".asFHIR())
                 ),
-                subject = Reference(display = "subject".asFHIR()),
+                subject = Reference(reference = "Patient/123".asFHIR()),
                 effective = DynamicValue(
                     type = type,
                     value = value
@@ -347,5 +347,121 @@ class RoninMedicationStatementTest {
         val medicationStatement = MedicationStatement()
         val (transformed, _) = roninMedicationStatement.transform(medicationStatement, tenant)
         assertNull(transformed)
+    }
+
+    @Test
+    fun `validate fails with missing subject reference attribute`() {
+        val medicationStatement = MedicationStatement(
+            identifier = listOf(
+                Identifier(value = "id".asFHIR()),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = MedicationStatementStatus.ACTIVE.asCode(),
+            medication = DynamicValue(
+                type = DynamicValueType.CODEABLE_CONCEPT,
+                value = CodeableConcept(text = "medication".asFHIR())
+            ),
+            subject = Reference(display = "subject".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                value = DateTime("1905-08-23")
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ MedicationStatement.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with wrong subject reference type`() {
+        val medicationStatement = MedicationStatement(
+            identifier = listOf(
+                Identifier(value = "id".asFHIR()),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = MedicationStatementStatus.ACTIVE.asCode(),
+            medication = DynamicValue(
+                type = DynamicValueType.CODEABLE_CONCEPT,
+                value = CodeableConcept(text = "medication".asFHIR())
+            ),
+            subject = Reference(reference = "Condition/12345".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                value = DateTime("1905-08-23")
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ MedicationStatement.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with missing subject`() {
+        val medicationStatement = MedicationStatement(
+            identifier = listOf(
+                Identifier(value = "id".asFHIR()),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = MedicationStatementStatus.ACTIVE.asCode(),
+            medication = DynamicValue(
+                type = DynamicValueType.CODEABLE_CONCEPT,
+                value = CodeableConcept(text = "medication".asFHIR())
+            ),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                value = DateTime("1905-08-23")
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: subject is a required element @ MedicationStatement.subject",
+            exception.message
+        )
     }
 }

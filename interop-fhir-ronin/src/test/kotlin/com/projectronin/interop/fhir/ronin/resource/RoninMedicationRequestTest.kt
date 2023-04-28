@@ -449,4 +449,242 @@ class RoninMedicationRequestTest {
         val (transformed, _) = roninMedicationRequest.transform(medicationRequest, tenant)
         assertNull(transformed)
     }
+
+    @Test
+    fun `validate fails with missing subject reference attribute`() {
+        val medicationRequest = MedicationRequest(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = MedicationRequestStatus.COMPLETED.asCode(),
+            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = Reference(display = "reference".asFHIR()),
+            requester = Reference(reference = "Practitioner/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ MedicationRequest.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with wrong subject reference type`() {
+        val medicationRequest = MedicationRequest(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = MedicationRequestStatus.COMPLETED.asCode(),
+            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = Reference(reference = "Condition/1234".asFHIR()),
+            requester = Reference(reference = "Practitioner/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ MedicationRequest.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with missing subject`() {
+        val medicationRequest = MedicationRequest(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = MedicationRequestStatus.COMPLETED.asCode(),
+            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = null,
+            requester = Reference(reference = "Practitioner/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: subject is a required element @ MedicationRequest.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with missing requester reference attribute`() {
+        val medicationRequest = MedicationRequest(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = MedicationRequestStatus.COMPLETED.asCode(),
+            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            requester = Reference(display = "reference".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of Device, Organization, Patient, Practitioner, PractitionerRole, RelatedPerson @ MedicationRequest.requester",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with wrong requester reference type`() {
+        val medicationRequest = MedicationRequest(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = MedicationRequestStatus.COMPLETED.asCode(),
+            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            requester = Reference(reference = "Condition/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of Device, Organization, " +
+                "Patient, Practitioner, PractitionerRole, RelatedPerson @ MedicationRequest.requester",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with missing requester`() {
+        val medicationRequest = MedicationRequest(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = MedicationRequestStatus.COMPLETED.asCode(),
+            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            requester = null
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: requester is a required element @ MedicationRequest.requester",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with bad priority`() {
+        val medicationRequest = MedicationRequest(
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            status = MedicationRequestStatus.CANCELLED.asCode(),
+            intent = MedicationRequestIntent.PROPOSAL.asCode(),
+            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            requester = Reference(reference = "Practitioner/1234".asFHIR()),
+            priority = Code("bad")
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR INV_VALUE_SET: 'bad' is outside of required value set @ MedicationRequest.priority",
+            exception.message
+        )
+    }
 }

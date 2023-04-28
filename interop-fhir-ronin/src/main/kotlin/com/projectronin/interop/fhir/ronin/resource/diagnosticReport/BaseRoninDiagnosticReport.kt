@@ -6,13 +6,11 @@ import com.projectronin.interop.fhir.r4.resource.DiagnosticReport
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
-import com.projectronin.interop.fhir.ronin.util.isInValueSet
-import com.projectronin.interop.fhir.validate.FHIRError
+import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
-import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 
 /**
  * Base class capable of handling common tasks associated to Ronin Condition profiles.
@@ -28,9 +26,7 @@ abstract class BaseRoninDiagnosticReport(
     open val qualifyingCategories: List<Coding> = emptyList()
 
     override fun qualifies(resource: DiagnosticReport): Boolean {
-        return qualifyingCategories.isEmpty() || resource.category.any { category ->
-            category.coding.any { it.isInValueSet(qualifyingCategories) }
-        }
+        return resource.category.qualifiesForValueSet(qualifyingCategories)
     }
 
     private val requiredCodeError = RequiredFieldError(Condition::code)
@@ -38,21 +34,6 @@ abstract class BaseRoninDiagnosticReport(
     override fun validateUSCore(element: DiagnosticReport, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             checkNotNull(element.code, requiredCodeError, parentContext)
-
-            if (element.category.isNotEmpty() && qualifyingCategories.isNotEmpty()) {
-                checkTrue(
-                    element.category.any { category ->
-                        category.coding.any { it.isInValueSet(qualifyingCategories) }
-                    },
-                    FHIRError(
-                        code = "USCORE_DX_RPT_001",
-                        severity = ValidationIssueSeverity.ERROR,
-                        description = "Must match this system|code: ${ qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" } }",
-                        location = LocationContext(DiagnosticReport::category)
-                    ),
-                    parentContext
-                )
-            }
         }
     }
 }

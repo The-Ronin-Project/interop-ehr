@@ -39,15 +39,12 @@ import com.projectronin.interop.fhir.r4.resource.PatientContact
 import com.projectronin.interop.fhir.r4.resource.PatientLink
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
-import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.IdentifierUse
 import com.projectronin.interop.fhir.r4.valueset.LinkType
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
-import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
-import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -126,7 +123,7 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -159,7 +156,7 @@ class RoninPatientTest {
                     value = "12345".asFHIR()
                 )
             ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -196,7 +193,7 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -229,7 +226,7 @@ class RoninPatientTest {
                 ),
                 Identifier(type = CodeableConcepts.RONIN_MRN, system = CodeSystem.RONIN_MRN.uri, value = null)
             ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -267,7 +264,7 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = null
         )
@@ -315,6 +312,7 @@ class RoninPatientTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
+                "ERROR RONIN_PAT_005: A name for official use must be present @ Patient.name\n" +
                 "ERROR USCORE_PAT_001: At least one name must be provided @ Patient.name",
             exception.message
         )
@@ -341,7 +339,7 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            name = listOf(HumanName(family = null, given = emptyList())),
+            name = listOf(HumanName(family = null, given = emptyList(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -379,7 +377,7 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            name = listOf(HumanName(family = "Family Name".asFHIR())),
+            name = listOf(HumanName(family = "Family Name".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -408,7 +406,7 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            name = listOf(HumanName(given = listOf("Given Name").asFHIR())),
+            name = listOf(HumanName(given = listOf("Given Name").asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -437,7 +435,7 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            name = listOf(HumanName(given = listOf("Given Name", "Other Given Name").asFHIR())),
+            name = listOf(HumanName(given = listOf("Given Name", "Other Given Name").asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -468,6 +466,7 @@ class RoninPatientTest {
             ),
             name = listOf(
                 HumanName(
+                    use = Code("official"),
                     extension = listOf(
                         Extension(
                             url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason"),
@@ -506,6 +505,7 @@ class RoninPatientTest {
             ),
             name = listOf(
                 HumanName(
+                    use = Code("official"),
                     family = "Family Name".asFHIR(),
                     extension = listOf(
                         Extension(
@@ -552,7 +552,7 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = null,
             birthDate = Date("1975-07-05")
         )
@@ -589,7 +589,7 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = Code(
                 value = null,
                 extension = listOf(Extension(url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason")))
@@ -629,7 +629,7 @@ class RoninPatientTest {
                 ),
                 Identifier(type = CodeableConcepts.RONIN_MRN, system = null, value = "missing system".asFHIR())
             ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -667,7 +667,7 @@ class RoninPatientTest {
                 ),
                 Identifier(type = CodeableConcepts.RONIN_MRN, system = CodeSystem.RONIN_MRN.uri)
             ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -679,71 +679,6 @@ class RoninPatientTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: value is a required element @ Patient.identifier[3].value",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails for invalid telecom`() {
-        val emailSystemValue = ContactPointSystem.EMAIL.code
-        val emailSystemExtensionUri = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri
-        val emailSystemExtensionValue = DynamicValue(
-            type = DynamicValueType.CODING,
-            value = RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.system", emailSystemValue)
-        )
-        val emailSystem = Code(
-            value = emailSystemValue,
-            extension = listOf(Extension(url = emailSystemExtensionUri, value = emailSystemExtensionValue))
-        )
-        val telecom = listOf(ContactPoint(system = emailSystem))
-        every {
-            roninContactPoint.validateRonin(
-                telecom,
-                LocationContext(Patient::class),
-                any()
-            )
-        } answers {
-            val validation = thirdArg<Validation>()
-            validation.checkNotNull(
-                null,
-                RequiredFieldError(ContactPoint::value),
-                LocationContext("Patient", "telecom[0]")
-            )
-            validation
-        }
-
-        val patient = Patient(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_MRN,
-                    system = CodeSystem.RONIN_MRN.uri,
-                    value = "An MRN".asFHIR()
-                )
-            ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
-            gender = AdministrativeGender.FEMALE.asCode(),
-            birthDate = Date("1975-07-05"),
-            telecom = telecom
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: value is a required element @ Patient.telecom[0].value",
             exception.message
         )
     }
@@ -769,7 +704,7 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -817,7 +752,7 @@ class RoninPatientTest {
                     value = "An MRN".asFHIR()
                 )
             ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -902,7 +837,7 @@ class RoninPatientTest {
             ),
             identifier = identifierList,
             active = FHIRBoolean.TRUE,
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             telecom = telecom,
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05"),
@@ -980,7 +915,7 @@ class RoninPatientTest {
             transformed.identifier
         )
         assertEquals(FHIRBoolean.TRUE, transformed.active)
-        assertEquals(listOf(HumanName(family = "Doe".asFHIR())), transformed.name)
+        assertEquals(listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))), transformed.name)
         assertEquals(transformedTelecom, transformed.telecom)
         assertEquals(AdministrativeGender.FEMALE.asCode(), transformed.gender)
         assertEquals(Date("1975-07-05"), transformed.birthDate)
@@ -1017,7 +952,7 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = identifierList,
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -1065,7 +1000,7 @@ class RoninPatientTest {
             transformed.identifier
         )
         assertNull(transformed.active)
-        assertEquals(listOf(HumanName(family = "Doe".asFHIR())), transformed.name)
+        assertEquals(listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))), transformed.name)
         assertEquals(emptyList<ContactPoint>(), transformed.telecom)
         assertEquals(AdministrativeGender.FEMALE.asCode(), transformed.gender)
         assertEquals(Date("1975-07-05"), transformed.birthDate)
@@ -1084,7 +1019,7 @@ class RoninPatientTest {
     fun `transform fails for patient with missing id`() {
         val patient = Patient(
             identifier = identifierList,
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05"),
             address = listOf(Address(country = "USA".asFHIR())),
@@ -1129,7 +1064,7 @@ class RoninPatientTest {
                     )
                 )
             ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -1160,7 +1095,7 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             identifier = identifiers,
-            name = listOf(HumanName(family = "Doe".asFHIR())),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
             birthDate = Date("1975-07-05")
         )
@@ -1209,7 +1144,7 @@ class RoninPatientTest {
             transformed.identifier
         )
         assertNull(transformed.active)
-        assertEquals(listOf(HumanName(family = "Doe".asFHIR())), transformed.name)
+        assertEquals(listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))), transformed.name)
         assertEquals(emptyList<ContactPoint>(), transformed.telecom)
         assertEquals(AdministrativeGender.FEMALE.asCode(), transformed.gender)
         assertEquals(Date("1975-07-05"), transformed.birthDate)
@@ -1222,6 +1157,117 @@ class RoninPatientTest {
         assertEquals(listOf<Reference>(), transformed.generalPractitioner)
         assertNull(transformed.managingOrganization)
         assertEquals(listOf<PatientLink>(), transformed.link)
+    }
+
+    @Test
+    fun `validate passes if 1 of many names has official use`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_MRN,
+                    system = CodeSystem.RONIN_MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
+            ),
+            name = listOf(
+                HumanName(family = "Day".asFHIR()),
+                HumanName(family = "Doe".asFHIR(), use = Code("official")),
+                HumanName(family = "Dee".asFHIR())
+            ),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05")
+        )
+
+        roninPatient.validate(patient, null).alertIfErrors()
+    }
+
+    @Test
+    fun `validate fails if no name has official use`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_MRN,
+                    system = CodeSystem.RONIN_MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
+            ),
+            name = listOf(
+                HumanName(family = "Day".asFHIR()),
+                HumanName(family = "Doe".asFHIR()),
+                HumanName(family = "Dee".asFHIR())
+            ),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05")
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPatient.validate(patient, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_PAT_005: A name for official use must be present @ Patient.name",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails for invalid birth date`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_MRN,
+                    system = CodeSystem.RONIN_MRN.uri,
+                    value = "An MRN".asFHIR()
+                )
+            ),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("2020")
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPatient.validate(patient, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_PAT_004: Birth date is invalid @ Patient.birthDate",
+            exception.message
+        )
     }
 
     private fun systemExtension(value: String) = Extension(

@@ -9,7 +9,7 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
-import com.projectronin.interop.fhir.ronin.util.isInValueSet
+import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -80,10 +80,8 @@ class RoninStagingRelated(
     // code.coding must exist in the valueSet
     override fun qualifies(resource: Observation): Boolean {
         return (
-            (resource.code?.coding?.any { it.isInValueSet(qualifyingCodes) } ?: false) &&
-                resource.category.isNotEmpty() && resource.category.any { category ->
-                category.coding.isNotEmpty()
-            }
+            resource.code.qualifiesForValueSet(qualifyingCodes) &&
+                resource.category.isNotEmpty() && resource.category.any { category -> category.coding.isNotEmpty() }
             )
     }
 
@@ -91,29 +89,28 @@ class RoninStagingRelated(
         super.validateRonin(element, parentContext, validation)
         validation.apply {
             checkTrue(
-                element.category.any { category ->
-                    category.coding.isNotEmpty()
-                },
+                element.category.any { category -> category.coding.isNotEmpty() },
                 requiredObservationCategoryCoding,
                 parentContext
             )
         }
     }
 
-    override fun validateUSCore(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validateUSCore(element, parentContext, validation)
-        validation.apply {
-            checkNotNull(element.category, requiredCategoryError, parentContext)
-            checkTrue(element.category.isNotEmpty(), requiredCategoryError, parentContext)
-        }
-    }
-
     override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validateObservation(element, parentContext, validation)
         validation.apply {
             element.code?.coding?.let {
                 checkTrue(it.size == 1, singleObservationCodeError, parentContext)
             }
+            checkTrue(
+                element.code.qualifiesForValueSet(qualifyingCodes),
+                FHIRError(
+                    code = "RONIN_OBS_003",
+                    severity = ValidationIssueSeverity.ERROR,
+                    description = "Must match this system|code: ${qualifyingCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }}",
+                    location = LocationContext(Observation::code)
+                ),
+                parentContext
+            )
         }
     }
 

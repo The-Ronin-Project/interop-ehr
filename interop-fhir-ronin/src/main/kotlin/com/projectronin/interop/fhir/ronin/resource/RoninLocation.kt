@@ -2,9 +2,11 @@ package com.projectronin.interop.fhir.ronin.resource
 
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
 import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.hasDataAbsentReason
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
@@ -35,14 +37,30 @@ class RoninLocation(
             if (element.telecom.isNotEmpty()) {
                 contactPoint.validateRonin(element.telecom, parentContext, validation)
             }
+
+            // status value set is checked by R4
+            // mode value set is checked by R4
         }
     }
 
     private val requiredNameError = RequiredFieldError(Location::name)
+    private val nameInvariantError = FHIRError(
+        code = "RONIN_LOC_001",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Either Location.name SHALL be present or a Data Absent Reason Extension SHALL be present.",
+        location = LocationContext(Patient::name)
+    )
 
     override fun validateUSCore(element: Location, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             checkNotNull(element.name, requiredNameError, parentContext)
+            element.name?.let {
+                checkTrue(
+                    (it.value != null) xor it.hasDataAbsentReason(),
+                    nameInvariantError,
+                    parentContext
+                )
+            }
 
             if (element.telecom.isNotEmpty()) {
                 contactPoint.validateUSCore(element.telecom, parentContext, validation)

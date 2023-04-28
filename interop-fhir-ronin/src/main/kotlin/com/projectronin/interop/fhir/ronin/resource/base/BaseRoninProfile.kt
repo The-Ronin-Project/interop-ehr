@@ -27,7 +27,7 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
  */
 abstract class BaseRoninProfile<T : Resource<T>>(
     extendedProfile: ProfileValidator<T>,
-    private val profile: String,
+    protected val profile: String,
     normalizer: Normalizer,
     localizer: Localizer
 ) : BaseProfile<T>(extendedProfile, normalizer, localizer) {

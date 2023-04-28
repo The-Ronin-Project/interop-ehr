@@ -8,6 +8,7 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
+import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
@@ -25,19 +26,25 @@ class RoninMedicationRequest(normalizer: Normalizer, localizer: Localizer) :
         normalizer,
         localizer
     ) {
-    override fun validateRonin(element: MedicationRequest, parentContext: LocationContext, validation: Validation) {
-        validation.apply {
-            requireRoninIdentifiers(element.identifier, parentContext, this)
-        }
-    }
+    private val validRequesterValues = listOf("Device", "Organization", "Patient", "Practitioner", "PractitionerRole", "RelatedPerson")
 
     private val requiredRequesterError = RequiredFieldError(MedicationRequest::requester)
 
-    override fun validateUSCore(element: MedicationRequest, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(element: MedicationRequest, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            requireRoninIdentifiers(element.identifier, parentContext, this)
+
+            // subject required is validated in R4
+            validateReference(element.subject, listOf("Patient"), LocationContext(MedicationRequest::subject), this)
+
             checkNotNull(element.requester, requiredRequesterError, parentContext)
+            validateReference(element.requester, validRequesterValues, LocationContext(MedicationRequest::requester), this)
+
+            // priority required value set is validated in R4
         }
     }
+
+    override fun validateUSCore(element: MedicationRequest, parentContext: LocationContext, validation: Validation) {}
 
     override fun transformInternal(
         normalized: MedicationRequest,

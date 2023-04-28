@@ -52,6 +52,10 @@ class RoninMedicationTest {
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
+    private val vitaminD = "11253"
+    private val medicationCode = Code(vitaminD)
+    private val medicationCoding = Coding(system = CodeSystem.RXNORM.uri, code = medicationCode, display = "Vitamin D".asFHIR())
+    private val medicationCodingList = listOf(medicationCoding)
     private val roninMedication = RoninMedication(normalizer, localizer)
 
     @Test
@@ -64,14 +68,7 @@ class RoninMedicationTest {
         val medication = Medication(
             code = CodeableConcept(
                 text = "b".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    )
-                )
+                coding = medicationCodingList
             )
         )
 
@@ -134,7 +131,8 @@ class RoninMedicationTest {
                 text = "k".asFHIR(),
                 coding = listOf(
                     Coding(
-                        code = Code("b")
+                        system = CodeSystem.RXNORM.uri,
+                        code = medicationCode
                     ),
                     Coding(
                         system = CodeSystem.RXNORM.uri
@@ -187,13 +185,7 @@ class RoninMedicationTest {
                         version = "1.0.1".asFHIR(),
                         display = "i".asFHIR()
                     ),
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("z"),
-                        version = "1.0.0".asFHIR(),
-                        display = "z".asFHIR()
-                    )
-
+                    medicationCoding
                 )
             )
         )
@@ -228,12 +220,7 @@ class RoninMedicationTest {
                         version = "1.0.1".asFHIR(),
                         display = "i".asFHIR()
                     ),
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("z"),
-                        version = "1.0.0".asFHIR(),
-                        display = "z".asFHIR()
-                    )
+                    medicationCoding
                 )
             ),
             transformed.code
@@ -277,12 +264,7 @@ class RoninMedicationTest {
                         version = "1.0.1".asFHIR(),
                         display = "i".asFHIR()
                     ),
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("z"),
-                        version = "1.0.0".asFHIR(),
-                        display = "z".asFHIR()
-                    )
+                    medicationCoding
                 )
             )
         )
@@ -318,12 +300,7 @@ class RoninMedicationTest {
                         version = "1.0.1".asFHIR(),
                         display = "i".asFHIR()
                     ),
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("z"),
-                        version = "1.0.0".asFHIR(),
-                        display = "z".asFHIR()
-                    )
+                    medicationCoding
                 )
             ),
             transformed.code
@@ -361,14 +338,14 @@ class RoninMedicationTest {
                     ),
                     Coding(
                         system = CodeSystem.RXNORM.uri,
-                        code = Code("e"),
+                        code = medicationCode,
                         version = "1.0.0".asFHIR(),
                         display = "e".asFHIR(),
                         userSelected = FHIRBoolean.TRUE
                     ),
                     Coding(
                         system = CodeSystem.RXNORM.uri,
-                        code = Code("i"),
+                        code = medicationCode,
                         version = "1.0.1".asFHIR(),
                         display = "i".asFHIR(),
                         userSelected = FHIRBoolean.TRUE
@@ -405,14 +382,7 @@ class RoninMedicationTest {
             ),
             code = CodeableConcept(
                 text = "b".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    )
-                )
+                coding = medicationCodingList
             ),
             status = Code("x")
         )
@@ -445,14 +415,7 @@ class RoninMedicationTest {
             ),
             code = CodeableConcept(
                 text = "b".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    )
-                )
+                coding = medicationCodingList
             ),
             ingredient = listOf(
                 Ingredient(isActive = FHIRBoolean.TRUE),
@@ -496,14 +459,7 @@ class RoninMedicationTest {
             ),
             code = CodeableConcept(
                 text = "b".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    )
-                )
+                coding = medicationCodingList
             ),
             ingredient = listOf()
         )
@@ -528,14 +484,7 @@ class RoninMedicationTest {
             ),
             code = CodeableConcept(
                 text = "b".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    )
-                )
+                coding = medicationCodingList
             )
         )
 
@@ -548,14 +497,7 @@ class RoninMedicationTest {
             id = Id("12345"),
             code = CodeableConcept(
                 text = "b".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    )
-                )
+                coding = medicationCodingList
             )
         )
 
@@ -609,27 +551,13 @@ class RoninMedicationTest {
             identifier = listOf(Identifier(value = "67890".asFHIR())),
             code = CodeableConcept(
                 text = "b".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    )
-                )
+                coding = medicationCodingList
             ),
             status = MedicationStatus.ACTIVE.asCode(),
             manufacturer = Reference(reference = "Organization/c".asFHIR()),
             form = CodeableConcept(
                 text = "d".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = Uri("d"),
-                        code = Code("d"),
-                        version = "1.0.0".asFHIR(),
-                        display = "d".asFHIR()
-                    )
-                )
+                coding = medicationCodingList
             ),
             amount = Ratio(
                 numerator = Quantity(
@@ -697,14 +625,7 @@ class RoninMedicationTest {
                             DynamicValueType.CODEABLE_CONCEPT,
                             CodeableConcept(
                                 text = "b".asFHIR(),
-                                coding = listOf(
-                                    Coding(
-                                        system = CodeSystem.RXNORM.uri,
-                                        code = Code("b"),
-                                        version = "1.0.0".asFHIR(),
-                                        display = "b".asFHIR()
-                                    )
-                                )
+                                coding = medicationCodingList
                             )
                         )
                     )
@@ -771,27 +692,13 @@ class RoninMedicationTest {
             identifier = listOf(Identifier(value = "67890".asFHIR())),
             code = CodeableConcept(
                 text = "b".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    )
-                )
+                coding = medicationCodingList
             ),
             status = MedicationStatus.ACTIVE.asCode(),
             manufacturer = Reference(reference = "Organization/c".asFHIR()),
             form = CodeableConcept(
                 text = "d".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = Uri("d"),
-                        code = Code("d"),
-                        version = "1.0.0".asFHIR(),
-                        display = "d".asFHIR()
-                    )
-                )
+                coding = medicationCodingList
             ),
             amount = Ratio(
                 numerator = Quantity(
@@ -813,14 +720,7 @@ class RoninMedicationTest {
                         DynamicValueType.CODEABLE_CONCEPT,
                         CodeableConcept(
                             text = "f".asFHIR(),
-                            coding = listOf(
-                                Coding(
-                                    system = Uri("f"),
-                                    code = Code("f"),
-                                    version = "1.0.0".asFHIR(),
-                                    display = "f".asFHIR()
-                                )
-                            )
+                            coding = medicationCodingList
                         )
                     ),
                     isActive = FHIRBoolean.TRUE,
@@ -869,14 +769,7 @@ class RoninMedicationTest {
                             DynamicValueType.CODEABLE_CONCEPT,
                             CodeableConcept(
                                 text = "b".asFHIR(),
-                                coding = listOf(
-                                    Coding(
-                                        system = CodeSystem.RXNORM.uri,
-                                        code = Code("b"),
-                                        version = "1.0.0".asFHIR(),
-                                        display = "b".asFHIR()
-                                    )
-                                )
+                                coding = medicationCodingList
                             )
                         )
                     )
@@ -933,5 +826,52 @@ class RoninMedicationTest {
         )
         val (transformed, _) = roninMedication.transform(medication, tenant)
         assertNull(transformed)
+    }
+
+    @Test
+    fun `validate - passes with any code value`() {
+        // except for the test case details,
+        // all attributes are correct
+
+        val medication = Medication(
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.RXNORM.uri,
+                        code = Code("b"),
+                        version = "1.0.0".asFHIR(),
+                        display = "b".asFHIR()
+                    ),
+                    Coding(
+                        system = CodeSystem.RXNORM.uri,
+                        code = Code("x"),
+                        version = "1.0.0".asFHIR(),
+                        display = "e".asFHIR(),
+                        userSelected = FHIRBoolean.TRUE
+                    ),
+                    Coding(
+                        system = CodeSystem.RXNORM.uri,
+                        code = Code("y"),
+                        version = "1.0.1".asFHIR(),
+                        display = "i".asFHIR()
+                    )
+                ),
+                text = "test".asFHIR()
+            )
+        )
+
+        roninMedication.validate(medication, null).alertIfErrors()
     }
 }

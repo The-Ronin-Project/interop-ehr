@@ -23,7 +23,7 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
  */
 abstract class BaseRoninVitalSign(
     extendedProfile: ProfileValidator<Observation>,
-    protected val profile: String,
+    profile: String,
     normalizer: Normalizer,
     localizer: Localizer
 ) : BaseRoninObservation(extendedProfile, profile, normalizer, localizer) {

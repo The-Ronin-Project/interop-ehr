@@ -203,8 +203,7 @@ class RoninStagingRelatedTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_STAGING_OBS_002: Coding is required @ Observation.category\n" +
-                "ERROR REQ_FIELD: category is a required element @ Observation.category",
+                "ERROR RONIN_STAGING_OBS_002: Coding is required @ Observation.category",
             exception.message
         )
     }
@@ -287,6 +286,7 @@ class RoninStagingRelatedTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
+                "ERROR RONIN_OBS_003: Must match this system|code: some-system-uri|some-code @ Observation.code\n" +
                 "ERROR REQ_FIELD: code is a required element @ Observation.code",
             exception.message
         )
@@ -387,8 +387,8 @@ class RoninStagingRelatedTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Observation.code\n" +
-                "ERROR RONIN_OBS_003: Must match this system|code: some-system-uri|some-code @ Observation.code\n" +
-                "ERROR RONIN_STAGING_OBS_001: Coding list must contain exactly 1 entry @ Observation.code",
+                "ERROR RONIN_STAGING_OBS_001: Coding list must contain exactly 1 entry @ Observation.code\n" +
+                "ERROR RONIN_OBS_003: Must match this system|code: some-system-uri|some-code @ Observation.code",
             exception.message
         )
     }

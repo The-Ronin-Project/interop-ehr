@@ -29,7 +29,6 @@ import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.resource.LocationHoursOfOperation
 import com.projectronin.interop.fhir.r4.resource.LocationPosition
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
-import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.DayOfWeek
 import com.projectronin.interop.fhir.r4.valueset.LocationMode
 import com.projectronin.interop.fhir.r4.valueset.LocationStatus
@@ -37,8 +36,6 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
-import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
-import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -107,7 +104,37 @@ class RoninLocationTest {
     }
 
     @Test
-    fun `validate fails for no name`() {
+    fun `validate succeeds for no name with data absent extension`() {
+        val location = Location(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            name = FHIRString(
+                value = null,
+                extension = listOf(
+                    Extension(
+                        url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason"),
+                        value = DynamicValue(type = DynamicValueType.CODE, value = Code("unknown"))
+                    )
+                )
+            )
+        )
+
+        roninLocation.validate(location, null).alertIfErrors()
+    }
+
+    @Test
+    fun `validate fails for no name and no data absent extension`() {
         val location = Location(
             id = Id("12345"),
             identifier = listOf(
@@ -131,6 +158,44 @@ class RoninLocationTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: name is a required element @ Location.name",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails for name and data absent extension both present`() {
+        val location = Location(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            name = FHIRString(
+                value = "Local Hospital",
+                extension = listOf(
+                    Extension(
+                        url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason"),
+                        value = DynamicValue(type = DynamicValueType.CODE, value = Code("unknown"))
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninLocation.validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_LOC_001: Either Location.name SHALL be present or a Data Absent Reason Extension SHALL be present. @ Location.name",
             exception.message
         )
     }
@@ -652,64 +717,6 @@ class RoninLocationTest {
         roninLocation.validate(transformed, null).alertIfErrors()
     }
 
-    @Test
-    fun `validate fails for invalid telecom`() {
-        val emailSystemValue = ContactPointSystem.EMAIL.code
-        val emailSystemExtensionUri = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri
-        val emailSystemExtensionValue = DynamicValue(
-            type = DynamicValueType.CODING,
-            value = RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.system", emailSystemValue)
-        )
-        val emailSystem = Code(
-            value = emailSystemValue,
-            extension = listOf(Extension(url = emailSystemExtensionUri, value = emailSystemExtensionValue))
-        )
-        val telecom = listOf(ContactPoint(system = emailSystem))
-        every {
-            roninContactPoint.validateRonin(
-                telecom,
-                LocationContext(Location::class),
-                any()
-            )
-        } answers {
-            val validation = thirdArg<Validation>()
-            validation.checkNotNull(
-                null,
-                RequiredFieldError(ContactPoint::value),
-                LocationContext("Location", "telecom[0]")
-            )
-            validation
-        }
-
-        val location = Location(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                )
-            ),
-            name = "Location A".asFHIR(),
-            telecom = telecom
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninLocation.validate(location, null).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: value is a required element @ Location.telecom[0].value",
-            exception.message
-        )
-    }
-
     private fun systemExtension(value: String) = Extension(
         url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem"),
         value = DynamicValue(
@@ -731,4 +738,66 @@ class RoninLocationTest {
             )
         )
     )
+
+    @Test
+    fun `validate fails with bad status`() {
+        val location = Location(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            name = "My Office".asFHIR(),
+            status = Code("bad")
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninLocation.validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR INV_VALUE_SET: 'bad' is outside of required value set @ Location.status",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with bad mode`() {
+        val location = Location(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                )
+            ),
+            name = "My Office".asFHIR(),
+            mode = Code("bad")
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninLocation.validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR INV_VALUE_SET: 'bad' is outside of required value set @ Location.mode",
+            exception.message
+        )
+    }
 }

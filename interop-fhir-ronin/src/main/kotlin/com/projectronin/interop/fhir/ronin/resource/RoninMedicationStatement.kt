@@ -8,6 +8,7 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.BaseRoninProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
+import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -28,6 +29,9 @@ class RoninMedicationStatement(normalizer: Normalizer, localizer: Localizer) :
     override fun validate(element: MedicationStatement, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
+
+            // required subject is validated in R4
+            validateReference(element.subject, listOf("Patient"), LocationContext(MedicationStatement::subject), this)
         }
     }
 

@@ -12,6 +12,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
+import com.projectronin.interop.fhir.r4.valueset.NameUse
 import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.hasDataAbsentReason
 import com.projectronin.interop.fhir.ronin.localization.Localizer
@@ -60,6 +61,18 @@ class RoninPatient(
         description = "MRN identifier value is required",
         location = LocationContext(Patient::identifier)
     )
+    private val invalidBirthDateError = FHIRError(
+        code = "RONIN_PAT_004",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Birth date is invalid",
+        location = LocationContext(Patient::birthDate)
+    )
+    private val invalidOfficialNameError = FHIRError(
+        code = "RONIN_PAT_005",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "A name for official use must be present",
+        location = LocationContext(Patient::name)
+    )
 
     override fun validateRonin(element: Patient, parentContext: LocationContext, validation: Validation) {
         validation.apply {
@@ -77,6 +90,12 @@ class RoninPatient(
             }
 
             checkNotNull(element.birthDate, requiredBirthDateError, parentContext)
+            element.birthDate?.value?.let {
+                checkTrue(it.length == 10, invalidBirthDateError, parentContext)
+            }
+
+            val nameList = element.name.find { it.use?.value == NameUse.OFFICIAL.code }
+            checkNotNull(nameList, invalidOfficialNameError, parentContext)
 
             // the gender required value set inherits validation from R4
 

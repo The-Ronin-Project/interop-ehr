@@ -57,6 +57,10 @@ class RoninConditionEncounterDiagnosisTest {
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
+    private val apnea = "1023001"
+    private val diagnosisCode = Code(apnea)
+    private val diagnosisCoding = Coding(system = CodeSystem.SNOMED_CT.uri, code = diagnosisCode, display = "Apnea".asFHIR())
+    private val diagnosisCodingList = listOf(diagnosisCoding)
     private val profile = RoninConditionEncounterDiagnosis(normalizer, localizer)
 
     @Test
@@ -73,7 +77,7 @@ class RoninConditionEncounterDiagnosisTest {
                 ),
                 text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR())
+            subject = Reference(reference = "Patient/123".asFHIR())
         )
 
         val qualified = profile.qualifies(condition)
@@ -86,16 +90,10 @@ class RoninConditionEncounterDiagnosisTest {
             id = Id("12345"),
             category = listOf(CodeableConcept(text = "category".asFHIR())),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
-                        code = Code("C64.9"),
-                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
-                    )
-                ),
+                coding = diagnosisCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR())
+            subject = Reference(reference = "Patient/123".asFHIR())
         )
 
         val qualified = profile.qualifies(condition)
@@ -117,16 +115,10 @@ class RoninConditionEncounterDiagnosisTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
-                        code = Code("C64.9"),
-                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
-                    )
-                ),
+                coding = diagnosisCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR())
+            subject = Reference(reference = "Patient/123".asFHIR())
         )
 
         val qualified = profile.qualifies(condition)
@@ -148,16 +140,10 @@ class RoninConditionEncounterDiagnosisTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
-                        code = Code("C64.9"),
-                        display = FHIRString("Malignant neoplasm of unspecified kidney except renal pelvis")
-                    )
-                ),
+                coding = diagnosisCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR())
+            subject = Reference(reference = "Patient/123".asFHIR())
         )
 
         val qualified = profile.qualifies(condition)
@@ -179,16 +165,10 @@ class RoninConditionEncounterDiagnosisTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
-                        code = Code("C64.9"),
-                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
-                    )
-                ),
+                coding = diagnosisCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR())
+            subject = Reference(reference = "Patient/123".asFHIR())
         )
 
         val qualified = profile.qualifies(condition)
@@ -200,16 +180,10 @@ class RoninConditionEncounterDiagnosisTest {
         val condition = Condition(
             id = Id("12345"),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
-                        code = Code("C64.9"),
-                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
-                    )
-                ),
+                coding = diagnosisCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -251,7 +225,7 @@ class RoninConditionEncounterDiagnosisTest {
                 )
             ),
             code = null,
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -296,7 +270,7 @@ class RoninConditionEncounterDiagnosisTest {
                 coding = listOf(),
                 text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -340,13 +314,13 @@ class RoninConditionEncounterDiagnosisTest {
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
-                        code = Code("C64.9"),
+                        code = diagnosisCode,
                         display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
                     )
                 ),
                 text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -396,7 +370,7 @@ class RoninConditionEncounterDiagnosisTest {
                 ),
                 text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -440,13 +414,13 @@ class RoninConditionEncounterDiagnosisTest {
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
-                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
-                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                        system = CodeSystem.SNOMED_CT.uri,
+                        display = "Apnea".asFHIR()
                     )
                 ),
                 text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -487,16 +461,10 @@ class RoninConditionEncounterDiagnosisTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
-                        code = Code("C64.9"),
-                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
-                    )
-                ),
+                coding = diagnosisCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -515,8 +483,7 @@ class RoninConditionEncounterDiagnosisTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR USCORE_CND_001: Must match this system|code: " +
-                "http://terminology.hl7.org/CodeSystem/condition-category|encounter-diagnosis @ Condition.category",
+                "ERROR RONIN_CND_001: Must match this system|code: http://terminology.hl7.org/CodeSystem/condition-category|encounter-diagnosis @ Condition.category",
             exception.message
         )
     }
@@ -537,7 +504,7 @@ class RoninConditionEncounterDiagnosisTest {
                     value = "12345".asFHIR()
                 )
             ),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -549,13 +516,7 @@ class RoninConditionEncounterDiagnosisTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
-                        code = Code("C64.9"),
-                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
-                    )
-                ),
+                coding = diagnosisCodingList,
                 text = "code".asFHIR()
             )
         )
@@ -598,7 +559,7 @@ class RoninConditionEncounterDiagnosisTest {
                     value = "12345".asFHIR()
                 )
             ),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -610,13 +571,7 @@ class RoninConditionEncounterDiagnosisTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
-                        code = Code("C64.9"),
-                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
-                    )
-                ),
+                coding = diagnosisCodingList,
                 text = "code".asFHIR()
             )
         )
@@ -627,7 +582,7 @@ class RoninConditionEncounterDiagnosisTest {
     @Test
     fun `transform fails for condition with no ID`() {
         val condition = Condition(
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -639,13 +594,7 @@ class RoninConditionEncounterDiagnosisTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
-                        code = Code("C64.9"),
-                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
-                    )
-                ),
+                coding = diagnosisCodingList,
                 text = "code".asFHIR()
             )
         )
@@ -721,13 +670,7 @@ class RoninConditionEncounterDiagnosisTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer".asFHIR()
-                    )
-                )
+                coding = diagnosisCodingList
             ),
             bodySite = listOf(
                 CodeableConcept(
@@ -893,13 +836,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
         assertEquals(
             CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer".asFHIR()
-                    )
-                )
+                coding = diagnosisCodingList
             ),
             transformed.code
         )
@@ -1006,13 +943,7 @@ class RoninConditionEncounterDiagnosisTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer".asFHIR()
-                    )
-                )
+                coding = diagnosisCodingList
             ),
             subject = Reference(
                 reference = "Patient/roninPatientExample01".asFHIR()
@@ -1069,13 +1000,7 @@ class RoninConditionEncounterDiagnosisTest {
         assertNull(transformed.severity)
         assertEquals(
             CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer".asFHIR()
-                    )
-                )
+                coding = diagnosisCodingList
             ),
             transformed.code
         )
@@ -1097,8 +1022,8 @@ class RoninConditionEncounterDiagnosisTest {
         assertEquals(listOf<Annotation>(), transformed.note)
     }
 
-    // Note: This test may be temporary while we are waiting on concept mapping data.
     @Test
+    @Disabled("Coding Validation is currently disabled due to lack of mapping content.")
     fun `validate succeeds with partial code codings`() {
         val condition = Condition(
             id = Id("12345"),
@@ -1114,7 +1039,7 @@ class RoninConditionEncounterDiagnosisTest {
                     value = "12345".asFHIR()
                 )
             ),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -1147,8 +1072,8 @@ class RoninConditionEncounterDiagnosisTest {
         profile.validate(condition, null).alertIfErrors()
     }
 
-    // Note: This test may be temporary while we are waiting on concept mapping data.
     @Test
+    @Disabled("Coding Validation is currently disabled due to lack of mapping content.")
     fun `validate succeeds with no code codings`() {
         val condition = Condition(
             id = Id("12345"),
@@ -1164,7 +1089,7 @@ class RoninConditionEncounterDiagnosisTest {
                     value = "12345".asFHIR()
                 )
             ),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -1181,5 +1106,261 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         profile.validate(condition, null).alertIfErrors()
+    }
+
+    @Test
+    fun `validate fails if no subject`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = diagnosisCodingList,
+                text = "code".asFHIR()
+            ),
+            subject = null,
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            profile.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: subject is a required element @ Condition.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if subject has no reference attribute`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = diagnosisCodingList,
+                text = "code".asFHIR()
+            ),
+            subject = Reference(display = "display".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            profile.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Condition.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if subject reference is wrong type`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = diagnosisCodingList,
+                text = "code".asFHIR()
+            ),
+            subject = Reference(reference = "Condition/12345".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            profile.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Condition.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if bad clinicalStatus`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = diagnosisCodingList,
+                text = "code".asFHIR()
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            ),
+            clinicalStatus = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://terminology.hl7.org/CodeSystem/condition-clinical"),
+                        code = Code("bad"),
+                        display = "Inactive".asFHIR()
+                    )
+                )
+            ),
+            verificationStatus = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://terminology.hl7.org/CodeSystem/condition-ver-status"),
+                        code = Code("confirmed"),
+                        display = "Confirmed".asFHIR()
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            profile.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR INV_VALUE_SET: 'bad' is outside of required value set @ Condition.clinicalStatus",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if bad verificationStatus`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = diagnosisCodingList,
+                text = "code".asFHIR()
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            ),
+            clinicalStatus = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://terminology.hl7.org/CodeSystem/condition-clinical"),
+                        code = Code("inactive"),
+                        display = "Inactive".asFHIR()
+                    )
+                )
+            ),
+            verificationStatus = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://terminology.hl7.org/CodeSystem/condition-ver-status"),
+                        code = Code("bad"),
+                        display = "Confirmed".asFHIR()
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            profile.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR INV_VALUE_SET: 'bad' is outside of required value set @ Condition.verificationStatus",
+            exception.message
+        )
     }
 }

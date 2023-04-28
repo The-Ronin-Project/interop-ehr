@@ -8,6 +8,7 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.BaseRoninProfile
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
+import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
@@ -27,8 +28,13 @@ class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
             requireRoninIdentifiers(element.identifier, parentContext, validation)
 
             checkTrue(element.category.isNotEmpty(), requireCategoryError, parentContext)
+
+            // subject required is validated in R4
+            validateReference(element.subject, listOf("Patient"), LocationContext(CarePlan::subject), validation)
+
+            // status required, and the required value set, is validated in R4
+            // intent required, and the required value set, is validated in R4
         }
-        // status, intent, and subject required values and value sets inherit validation from R4
     }
 
     override fun transformInternal(
