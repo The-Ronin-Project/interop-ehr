@@ -53,6 +53,12 @@ class BaseRoninProfileTest {
             type = CodeableConcepts.RONIN_FHIR_ID,
             value = "fhir".asFHIR()
         )
+    private val validDataAuthorityIdentifier =
+        Identifier(
+            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+            value = "EHR Data Authority".asFHIR()
+        )
 
     private lateinit var location: Location
 
@@ -65,7 +71,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `no tenant identifier`() {
-        every { location.identifier } returns listOf(validFhirIdentifier)
+        every { location.identifier } returns listOf(validFhirIdentifier, validDataAuthorityIdentifier)
 
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
@@ -80,7 +86,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `tenant identifier system with wrong type`() {
-        every { location.identifier } returns listOf(validFhirIdentifier, validTenantIdentifier.copy(type = null))
+        every { location.identifier } returns listOf(validFhirIdentifier, validDataAuthorityIdentifier, validTenantIdentifier.copy(type = null))
 
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
@@ -95,7 +101,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `tenant identifier with no value`() {
-        every { location.identifier } returns listOf(validFhirIdentifier, validTenantIdentifier.copy(value = null))
+        every { location.identifier } returns listOf(validFhirIdentifier, validDataAuthorityIdentifier, validTenantIdentifier.copy(value = null))
 
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
@@ -110,7 +116,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `no FHIR identifier`() {
-        every { location.identifier } returns listOf(validTenantIdentifier)
+        every { location.identifier } returns listOf(validTenantIdentifier, validDataAuthorityIdentifier)
 
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
@@ -125,7 +131,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `FHIR identifier system with wrong type`() {
-        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier.copy(type = null))
+        every { location.identifier } returns listOf(validTenantIdentifier, validDataAuthorityIdentifier, validFhirIdentifier.copy(type = null))
 
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
@@ -140,7 +146,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `FHIR identifier with no value`() {
-        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier.copy(value = null))
+        every { location.identifier } returns listOf(validTenantIdentifier, validDataAuthorityIdentifier, validFhirIdentifier.copy(value = null))
 
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
@@ -154,8 +160,53 @@ class BaseRoninProfileTest {
     }
 
     @Test
-    fun `all ronin identifiers are valid`() {
+    fun `no Data Authority identifier`() {
         every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+
+        val exception = assertThrows<IllegalArgumentException> {
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DAUTH_ID_001: Data Authority identifier required @ Location.identifier",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `Data Authority identifier system with wrong type`() {
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier.copy(type = null))
+
+        val exception = assertThrows<IllegalArgumentException> {
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DAUTH_ID_002: Data Authority identifier provided without proper CodeableConcept defined @ Location.identifier",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `Data Authority identifier with no value`() {
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier.copy(value = null))
+
+        val exception = assertThrows<IllegalArgumentException> {
+            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DAUTH_ID_003: Data Authority identifier value is required @ Location.identifier",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `all ronin identifiers are valid`() {
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
 
         TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
     }
@@ -189,7 +240,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `getExtensionOrEmptyList - null codeableConcept`() {
-        val locationTest = Location(id = Id("123"), identifier = listOf(validTenantIdentifier, validFhirIdentifier))
+        val locationTest = Location(id = Id("123"), identifier = listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier))
 
         val (transformedLocation, _) = TestProfile(normalizer, localizer).transform(locationTest, tenant)
 
@@ -200,7 +251,7 @@ class BaseRoninProfileTest {
     fun `getExtensionOrEmptyList - not null codeableConcept`() {
         val locationTest = Location(
             id = Id("123"),
-            identifier = listOf(validTenantIdentifier, validFhirIdentifier),
+            identifier = listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier),
             physicalType =
             CodeableConcept(
                 text = "b".asFHIR(),
@@ -243,7 +294,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `codeable concept contains coding missing display - validation error`() {
-        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -266,7 +317,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `codeable concept contains coding missing code - validation error`() {
-        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -289,7 +340,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `codeable concept contains coding missing system - validation error`() {
-        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -312,7 +363,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `codeable concept contains invalid and valid coding - validation error`() {
-        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -340,7 +391,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `codeable concept blanks counted as error - validation error`() {
-        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -374,7 +425,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `codeable concept contains all valid coding - no validation error`() {
-        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -395,7 +446,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `codeable concept contains single user selected - no validation error`() {
-        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -417,7 +468,7 @@ class BaseRoninProfileTest {
 
     @Test
     fun `codeable concept contains multiple user selected - validation error`() {
-        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(

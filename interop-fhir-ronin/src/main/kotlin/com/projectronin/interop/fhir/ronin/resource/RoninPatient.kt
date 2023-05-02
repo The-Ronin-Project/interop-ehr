@@ -20,6 +20,7 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.toFhirIdentifier
+import com.projectronin.interop.fhir.ronin.util.dataAuthorityIdentifier
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -184,7 +185,7 @@ class RoninPatient(
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             gender = gender,
-            identifier = normalized.identifier + tenant.toFhirIdentifier() + getRoninIdentifiers(normalized, tenant),
+            identifier = normalized.identifier + tenant.toFhirIdentifier() + getRoninIdentifiers(normalized, tenant) + dataAuthorityIdentifier,
             maritalStatus = maritalStatus,
             telecom = contactPointTransformed.first ?: emptyList()
         )

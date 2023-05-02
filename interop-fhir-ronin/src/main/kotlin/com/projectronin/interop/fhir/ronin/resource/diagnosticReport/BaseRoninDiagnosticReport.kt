@@ -31,6 +31,17 @@ abstract class BaseRoninDiagnosticReport(
 
     private val requiredCodeError = RequiredFieldError(Condition::code)
 
+    override fun validateRonin(element: DiagnosticReport, parentContext: LocationContext, validation: Validation) {
+        validation.apply {
+            requireRoninIdentifiers(element.identifier, parentContext, this)
+
+            // check that subject reference has type and the extension is the data authority extension identifier
+            ifNotNull(element.subject) {
+                requireDataAuthorityExtensionIdentifier(element.subject, LocationContext(DiagnosticReport::subject), validation)
+            }
+        }
+    }
+
     override fun validateUSCore(element: DiagnosticReport, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             checkNotNull(element.code, requiredCodeError, parentContext)

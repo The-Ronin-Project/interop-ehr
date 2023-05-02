@@ -26,6 +26,8 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
+import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -42,10 +44,14 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class RoninDiagnosticReportNoteExchangeTest {
+    // using to double-check transformation for reference
+    private val mockReference = Reference(
+        display = "reference".asFHIR(), // r4 required?
+        reference = "Patient/123".asFHIR()
+    )
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
-
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
     }
@@ -77,6 +83,7 @@ class RoninDiagnosticReportNoteExchangeTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
+                type = Uri("Patient", extension = dataAuthorityExtension),
                 reference = "Patient/123".asFHIR()
             )
         )
@@ -88,7 +95,8 @@ class RoninDiagnosticReportNoteExchangeTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ DiagnosticReport.identifier\n" +
-                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ DiagnosticReport.identifier",
+                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ DiagnosticReport.identifier\n" +
+                "ERROR RONIN_DAUTH_ID_001: Data Authority identifier required @ DiagnosticReport.identifier",
             exception.message
         )
     }
@@ -125,6 +133,11 @@ class RoninDiagnosticReportNoteExchangeTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             category = listOf(
@@ -158,7 +171,55 @@ class RoninDiagnosticReportNoteExchangeTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
+            ),
+            code = CodeableConcept(text = "dx report".asFHIR()),
+            status = Code("registered"),
+            subject = Reference(
+                id = "subject".asFHIR(),
+                display = "display".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: category is a required element @ DiagnosticReport.category",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with no subject type`() {
+        val dxReport = DiagnosticReport(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            category = listOf(
+                CodeableConcept(text = "dx report".asFHIR())
             ),
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
@@ -172,7 +233,50 @@ class RoninDiagnosticReportNoteExchangeTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: category is a required element @ DiagnosticReport.category",
+                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ DiagnosticReport.subject.",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with subject type but no data authority extension identifier`() {
+        val dxReport = DiagnosticReport(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            category = listOf(
+                CodeableConcept(text = "dx report".asFHIR())
+            ),
+            code = CodeableConcept(text = "dx report".asFHIR()),
+            status = Code("registered"),
+            subject = Reference(
+                id = "subject".asFHIR(),
+                display = "display".asFHIR(),
+                type = Uri("Patient")
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DAUTH_EX_001: Data Authority extension identifier is required for reference @ DiagnosticReport.subject.type.extension",
             exception.message
         )
     }
@@ -191,6 +295,11 @@ class RoninDiagnosticReportNoteExchangeTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             category = listOf(
@@ -199,6 +308,9 @@ class RoninDiagnosticReportNoteExchangeTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
+                id = "subject".asFHIR(),
+                display = "display".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension),
                 reference = "Patient/123".asFHIR()
             )
         )
@@ -250,6 +362,11 @@ class RoninDiagnosticReportNoteExchangeTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             category = listOf(
@@ -258,6 +375,9 @@ class RoninDiagnosticReportNoteExchangeTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
+                id = "subject".asFHIR(),
+                display = "display".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension),
                 reference = "Patient/123".asFHIR()
             )
         )
@@ -297,9 +417,7 @@ class RoninDiagnosticReportNoteExchangeTest {
                 CodeableConcept(text = "dx report".asFHIR())
             ),
             code = CodeableConcept(text = "dx report".asFHIR()),
-            subject = Reference(
-                reference = "Patient/123".asFHIR()
-            ),
+            subject = localizeReferenceTest(mockReference), // check transform
             encounter = Reference(id = "encounterReference".asFHIR(), display = "encounterDisplay".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -383,6 +501,11 @@ class RoninDiagnosticReportNoteExchangeTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             transformed.identifier
@@ -408,7 +531,9 @@ class RoninDiagnosticReportNoteExchangeTest {
         )
         assertEquals(
             Reference(
-                reference = "Patient/123".asFHIR()
+                reference = "Patient/test-123".asFHIR(),
+                display = "reference".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
             ),
             transformed.subject
         )
@@ -493,9 +618,7 @@ class RoninDiagnosticReportNoteExchangeTest {
             ),
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
-            subject = Reference(
-                reference = "Patient/123".asFHIR()
-            )
+            subject = localizeReferenceTest(mockReference) // check transform
         )
 
         val (transformed, validation) = roninDiagnosticReport.transform(dxReport, tenant)
@@ -524,6 +647,11 @@ class RoninDiagnosticReportNoteExchangeTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             transformed.identifier
@@ -544,7 +672,9 @@ class RoninDiagnosticReportNoteExchangeTest {
         )
         assertEquals(
             Reference(
-                reference = "Patient/123".asFHIR()
+                display = "reference".asFHIR(),
+                reference = "Patient/test-123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
             ),
             transformed.subject
         )
@@ -576,6 +706,11 @@ class RoninDiagnosticReportNoteExchangeTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             category = listOf(
@@ -585,7 +720,8 @@ class RoninDiagnosticReportNoteExchangeTest {
             status = Code("registered"),
             subject = Reference(
                 id = "123".asFHIR(),
-                display = "display".asFHIR()
+                display = "display".asFHIR(),
+                type = Uri("DiagnosisReport", extension = dataAuthorityExtension)
             )
         )
 
@@ -613,6 +749,11 @@ class RoninDiagnosticReportNoteExchangeTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             category = listOf(
@@ -621,7 +762,8 @@ class RoninDiagnosticReportNoteExchangeTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                reference = "Condition/123".asFHIR()
+                reference = "Condition/123".asFHIR(),
+                type = Uri("Condition", extension = dataAuthorityExtension)
             )
         )
 

@@ -135,7 +135,8 @@ class RoninPatientTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ Patient.identifier\n" +
-                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Patient.identifier",
+                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Patient.identifier\n" +
+                "ERROR RONIN_DAUTH_ID_001: Data Authority identifier required @ Patient.identifier",
             exception.message
         )
     }
@@ -154,6 +155,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
@@ -191,6 +197,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
@@ -224,6 +235,11 @@ class RoninPatientTest {
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
                 ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                ),
                 Identifier(type = CodeableConcepts.RONIN_MRN, system = CodeSystem.RONIN_MRN.uri, value = null)
             ),
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
@@ -238,7 +254,7 @@ class RoninPatientTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_PAT_003: MRN identifier value is required @ Patient.identifier\n" +
-                "ERROR REQ_FIELD: value is a required element @ Patient.identifier[2].value",
+                "ERROR REQ_FIELD: value is a required element @ Patient.identifier[3].value",
             exception.message
         )
     }
@@ -262,6 +278,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
@@ -299,6 +320,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(),
@@ -337,6 +363,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(HumanName(family = null, given = emptyList(), use = Code("official"))),
@@ -375,6 +406,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(HumanName(family = "Family Name".asFHIR(), use = Code("official"))),
@@ -404,6 +440,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(HumanName(given = listOf("Given Name").asFHIR(), use = Code("official"))),
@@ -433,6 +474,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(HumanName(given = listOf("Given Name", "Other Given Name").asFHIR(), use = Code("official"))),
@@ -462,6 +508,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(
@@ -501,6 +552,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(
@@ -550,6 +606,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
@@ -587,6 +648,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
@@ -627,6 +693,11 @@ class RoninPatientTest {
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
                 ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                ),
                 Identifier(type = CodeableConcepts.RONIN_MRN, system = null, value = "missing system".asFHIR())
             ),
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
@@ -640,7 +711,7 @@ class RoninPatientTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: system is a required element @ Patient.identifier[3].system",
+                "ERROR REQ_FIELD: system is a required element @ Patient.identifier[4].system",
             exception.message
         )
     }
@@ -665,6 +736,11 @@ class RoninPatientTest {
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
                 ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                ),
                 Identifier(type = CodeableConcepts.RONIN_MRN, system = CodeSystem.RONIN_MRN.uri)
             ),
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
@@ -678,7 +754,7 @@ class RoninPatientTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: value is a required element @ Patient.identifier[3].value",
+                "ERROR REQ_FIELD: value is a required element @ Patient.identifier[4].value",
             exception.message
         )
     }
@@ -702,6 +778,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
@@ -750,6 +831,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
@@ -910,6 +996,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             transformed.identifier
@@ -995,6 +1086,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             transformed.identifier
@@ -1049,6 +1145,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 ),
                 Identifier(
                     use = IdentifierUse.USUAL.asCode(),
@@ -1139,6 +1240,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             transformed.identifier
@@ -1178,6 +1284,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(
@@ -1211,6 +1322,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(
@@ -1252,6 +1368,11 @@ class RoninPatientTest {
                     type = CodeableConcepts.RONIN_MRN,
                     system = CodeSystem.RONIN_MRN.uri,
                     value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),

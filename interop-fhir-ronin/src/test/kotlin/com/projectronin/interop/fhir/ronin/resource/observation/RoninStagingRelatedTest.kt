@@ -30,6 +30,8 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
+import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -41,6 +43,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class RoninStagingRelatedTest {
+    // using to double-check transformation for reference
+    private val mockReference = Reference(
+        display = "reference".asFHIR(), // r4 required?
+        reference = "Patient/123".asFHIR()
+    )
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
@@ -68,7 +75,8 @@ class RoninStagingRelatedTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             category = listOf(),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+
             code = CodeableConcept(
                 text = "fake text".asFHIR(),
                 coding = listOf(
@@ -90,7 +98,8 @@ class RoninStagingRelatedTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             category = listOf(CodeableConcept(coding = listOf())),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+
             code = CodeableConcept(
                 text = "fake text".asFHIR(),
                 coding = listOf(
@@ -120,7 +129,8 @@ class RoninStagingRelatedTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+
             code = CodeableConcept(text = "fake text".asFHIR())
         )
 
@@ -141,7 +151,8 @@ class RoninStagingRelatedTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+
             code = CodeableConcept(
                 text = "fake text".asFHIR(),
                 coding = listOf(
@@ -161,7 +172,8 @@ class RoninStagingRelatedTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ Observation.identifier\n" +
-                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Observation.identifier",
+                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Observation.identifier\n" +
+                "ERROR RONIN_DAUTH_ID_001: Data Authority identifier required @ Observation.identifier",
             exception.message
         )
     }
@@ -180,11 +192,17 @@ class RoninStagingRelatedTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
             category = listOf(),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+
             code = CodeableConcept(
                 text = "fake text".asFHIR(),
                 coding = listOf(
@@ -222,11 +240,17 @@ class RoninStagingRelatedTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
             category = listOf(CodeableConcept(coding = listOf())),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+
             code = CodeableConcept(
                 text = "fake text".asFHIR(),
                 coding = listOf(
@@ -264,6 +288,11 @@ class RoninStagingRelatedTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
@@ -276,7 +305,8 @@ class RoninStagingRelatedTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+
             code = null
         )
 
@@ -307,6 +337,11 @@ class RoninStagingRelatedTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
@@ -334,7 +369,7 @@ class RoninStagingRelatedTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR())
+            subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -362,6 +397,11 @@ class RoninStagingRelatedTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
@@ -374,7 +414,8 @@ class RoninStagingRelatedTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+
             code = CodeableConcept(
                 text = "fake text".asFHIR(),
                 coding = listOf()
@@ -419,7 +460,8 @@ class RoninStagingRelatedTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+
             code = CodeableConcept(
                 text = "fake text".asFHIR(),
                 coding = listOf()
@@ -443,6 +485,11 @@ class RoninStagingRelatedTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
@@ -455,7 +502,8 @@ class RoninStagingRelatedTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+
             code = CodeableConcept(
                 text = "fake text".asFHIR(),
                 coding = listOf(
@@ -486,6 +534,11 @@ class RoninStagingRelatedTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
@@ -498,7 +551,8 @@ class RoninStagingRelatedTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+
             code = null
         )
 
@@ -509,7 +563,7 @@ class RoninStagingRelatedTest {
     @Test
     fun `transform succeeds with all attributes`() {
         val observation = Observation(
-            id = Id("123"),
+            id = Id("12345"),
             meta = Meta(
                 profile = listOf(Canonical("https://www.hl7.org/fhir/observation"))
             ),
@@ -523,7 +577,9 @@ class RoninStagingRelatedTest {
                     value = DynamicValue(DynamicValueType.STRING, "Value")
                 )
             ),
-            identifier = listOf(Identifier(value = "id".asFHIR())),
+            identifier = listOf(
+                Identifier(value = "id".asFHIR())
+            ),
             basedOn = listOf(Reference(reference = "ServiceRequest/1234".asFHIR())),
             partOf = listOf(Reference(reference = "ImagingStudy/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
@@ -546,7 +602,7 @@ class RoninStagingRelatedTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = localizeReferenceTest(mockReference), // check that it transforms
             focus = listOf(Reference(display = "focus".asFHIR())),
             encounter = Reference(reference = "Encounter/1234".asFHIR()),
             effective = DynamicValue(
@@ -589,7 +645,7 @@ class RoninStagingRelatedTest {
 
         transformed!!
         assertEquals("Observation", transformed.resourceType)
-        assertEquals(Id("123"), transformed.id)
+        assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_STAGING_RELATED.value))),
             transformed.meta
@@ -637,12 +693,17 @@ class RoninStagingRelatedTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
+                    value = "12345".asFHIR()
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             transformed.identifier
@@ -675,7 +736,7 @@ class RoninStagingRelatedTest {
             ),
             transformed.code
         )
-        assertEquals(Reference(reference = "Patient/1234".asFHIR()), transformed.subject)
+        assertEquals(Reference(display = "reference".asFHIR(), reference = "Patient/test-123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)), transformed.subject)
         assertEquals(listOf(Reference(display = "focus".asFHIR())), transformed.focus)
         assertEquals(Reference(reference = "Encounter/1234".asFHIR()), transformed.encounter)
         assertEquals(
@@ -750,7 +811,8 @@ class RoninStagingRelatedTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR())
         )
 
@@ -800,6 +862,11 @@ class RoninStagingRelatedTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             transformed.identifier
@@ -832,7 +899,7 @@ class RoninStagingRelatedTest {
             ),
             transformed.code
         )
-        assertEquals(Reference(reference = "Patient/1234".asFHIR()), transformed.subject)
+        assertEquals(Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)), transformed.subject)
         assertEquals(listOf<Reference>(), transformed.focus)
         assertNull(transformed.encounter)
         assertNull(transformed.effective)
@@ -856,6 +923,23 @@ class RoninStagingRelatedTest {
     fun `transform inherits R4 validation`() {
         val observation = Observation(
             id = Id("123"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
             status = Code("bad-status"),
             code = CodeableConcept(
                 coding = listOf(
@@ -877,7 +961,7 @@ class RoninStagingRelatedTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/1234".asFHIR())
+            subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
         )
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
@@ -906,6 +990,11 @@ class RoninStagingRelatedTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
@@ -929,7 +1018,7 @@ class RoninStagingRelatedTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Practitioner/1234".asFHIR())
+            subject = Reference(reference = "Practitioner/1234".asFHIR(), type = Uri("something", extension = dataAuthorityExtension))
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -957,6 +1046,69 @@ class RoninStagingRelatedTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = Uri("some-system-uri")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = Uri("some-system-here"),
+                            code = Code("some-code")
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+
+            performer = listOf(Reference(reference = "CarePlan/1234".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninStagingRelated.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of Patient, Practitioner, PractitionerRole, RelatedPerson, Organization, CareTeam @ Observation.performer[0]",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails subject but no type`() {
+        val observation = Observation(
+            id = Id("123"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
@@ -981,7 +1133,8 @@ class RoninStagingRelatedTest {
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(reference = "Patient/1234".asFHIR()),
-            performer = listOf(Reference(reference = "CarePlan/1234".asFHIR()))
+
+            performer = listOf(Reference(reference = "Patient/1234".asFHIR()))
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -990,7 +1143,65 @@ class RoninStagingRelatedTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of Patient, Practitioner, PractitionerRole, RelatedPerson, Organization, CareTeam @ Observation.performer[0]",
+                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Observation.subject.",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails subject and type but no data authority reference extension`() {
+        val observation = Observation(
+            id = Id("123"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = Uri("some-system-uri")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = Uri("some-system-here"),
+                            code = Code("some-code")
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient")),
+
+            performer = listOf(Reference(reference = "Patient/1234".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninStagingRelated.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DAUTH_EX_001: Data Authority extension identifier is required for reference @ Observation.subject.type.extension",
             exception.message
         )
     }

@@ -37,6 +37,11 @@ abstract class BaseRoninCondition(
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, validation)
 
+            // check that subject reference has type and the extension is the data authority extension identifier
+            ifNotNull(element.subject) {
+                requireDataAuthorityExtensionIdentifier(element.subject, LocationContext(Condition::subject), validation)
+            }
+
             checkTrue(
                 element.category.qualifiesForValueSet(qualifyingCategories),
                 FHIRError(

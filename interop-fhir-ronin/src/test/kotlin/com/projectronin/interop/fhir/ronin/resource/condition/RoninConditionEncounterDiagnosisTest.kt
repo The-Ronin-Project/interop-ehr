@@ -30,6 +30,8 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
+import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -48,6 +50,11 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class RoninConditionEncounterDiagnosisTest {
+    // using to double-check transformation for reference
+    private val mockReference = Reference(
+        display = "reference".asFHIR(),
+        reference = "Patient/123".asFHIR()
+    )
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
@@ -77,7 +84,7 @@ class RoninConditionEncounterDiagnosisTest {
                 ),
                 text = "code".asFHIR()
             ),
-            subject = Reference(reference = "Patient/123".asFHIR())
+            subject = Reference(display = "reference".asFHIR())
         )
 
         val qualified = profile.qualifies(condition)
@@ -183,7 +190,10 @@ class RoninConditionEncounterDiagnosisTest {
                 coding = diagnosisCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Condition", extension = dataAuthorityExtension)
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -203,7 +213,121 @@ class RoninConditionEncounterDiagnosisTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ Condition.identifier\n" +
-                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Condition.identifier",
+                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Condition.identifier\n" +
+                "ERROR RONIN_DAUTH_ID_001: Data Authority identifier required @ Condition.identifier",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails without subject reference having data authority extension identifier`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        code = Code("C64.9"),
+                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                    )
+                ),
+                text = "code".asFHIR()
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient")),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            profile.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DAUTH_EX_001: Data Authority extension identifier is required for reference @ Condition.subject.type.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with type in subject reference but no data authority extension identifier`() {
+        val condition = Condition(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://hl7.org/fhir/sid/icd-10-cm"),
+                        code = Code("C64.9"),
+                        display = "Malignant neoplasm of unspecified kidney except renal pelvis".asFHIR()
+                    )
+                ),
+                text = "code".asFHIR()
+            ),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient")
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            profile.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DAUTH_EX_001: Data Authority extension identifier is required for reference @ Condition.subject.type.extension",
             exception.message
         )
     }
@@ -222,10 +346,18 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             code = null,
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -270,7 +402,7 @@ class RoninConditionEncounterDiagnosisTest {
                 coding = listOf(),
                 text = "code".asFHIR()
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Condition", extension = dataAuthorityExtension)),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -320,7 +452,7 @@ class RoninConditionEncounterDiagnosisTest {
                 ),
                 text = "code".asFHIR()
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Condition", extension = dataAuthorityExtension)),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -370,7 +502,7 @@ class RoninConditionEncounterDiagnosisTest {
                 ),
                 text = "code".asFHIR()
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Condition", extension = dataAuthorityExtension)),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -420,7 +552,7 @@ class RoninConditionEncounterDiagnosisTest {
                 ),
                 text = "code".asFHIR()
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Condition", extension = dataAuthorityExtension)),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -458,13 +590,21 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             code = CodeableConcept(
                 coding = diagnosisCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -502,9 +642,14 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Condition", extension = dataAuthorityExtension)),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -557,9 +702,17 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Condition", extension = dataAuthorityExtension)
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -683,9 +836,7 @@ class RoninConditionEncounterDiagnosisTest {
                     )
                 )
             ),
-            subject = Reference(
-                reference = "Patient/roninPatientExample01".asFHIR()
-            ),
+            subject = localizeReferenceTest(mockReference), // check that this is transformed correctly,
             encounter = Reference(
                 reference = "Encounter/roninEncounterExample01".asFHIR()
             ),
@@ -781,6 +932,11 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             transformed.identifier
@@ -856,7 +1012,9 @@ class RoninConditionEncounterDiagnosisTest {
         )
         assertEquals(
             Reference(
-                reference = "Patient/roninPatientExample01".asFHIR()
+                reference = "Patient/test-123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension),
+                display = "reference".asFHIR()
             ),
             transformed.subject
         )
@@ -946,7 +1104,8 @@ class RoninConditionEncounterDiagnosisTest {
                 coding = diagnosisCodingList
             ),
             subject = Reference(
-                reference = "Patient/roninPatientExample01".asFHIR()
+                reference = "Patient/roninPatientExample01".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
             )
         )
 
@@ -978,6 +1137,11 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             transformed.identifier
@@ -1007,7 +1171,8 @@ class RoninConditionEncounterDiagnosisTest {
         assertEquals(listOf<CodeableConcept>(), transformed.bodySite)
         assertEquals(
             Reference(
-                reference = "Patient/roninPatientExample01".asFHIR()
+                reference = "Patient/roninPatientExample01".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
             ),
             transformed.subject
         )
@@ -1022,6 +1187,7 @@ class RoninConditionEncounterDiagnosisTest {
         assertEquals(listOf<Annotation>(), transformed.note)
     }
 
+    // Note: This test may be temporary while we are waiting on concept mapping data.
     @Test
     @Disabled("Coding Validation is currently disabled due to lack of mapping content.")
     fun `validate succeeds with partial code codings`() {
@@ -1037,9 +1203,17 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Condition", extension = dataAuthorityExtension)
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -1072,6 +1246,7 @@ class RoninConditionEncounterDiagnosisTest {
         profile.validate(condition, null).alertIfErrors()
     }
 
+    // Note: This test may be temporary while we are waiting on concept mapping data.
     @Test
     @Disabled("Coding Validation is currently disabled due to lack of mapping content.")
     fun `validate succeeds with no code codings`() {
@@ -1087,9 +1262,17 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -1122,6 +1305,11 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             code = CodeableConcept(
@@ -1166,13 +1354,18 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             code = CodeableConcept(
                 coding = diagnosisCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(display = "display".asFHIR()),
+            subject = Reference(display = "display".asFHIR(), type = Uri("Condition", extension = dataAuthorityExtension)),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -1210,13 +1403,18 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             code = CodeableConcept(
                 coding = diagnosisCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(reference = "Condition/12345".asFHIR()),
+            subject = Reference(reference = "Condition/12345".asFHIR(), type = Uri("Condition", extension = dataAuthorityExtension)),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -1254,13 +1452,21 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             code = CodeableConcept(
                 coding = diagnosisCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -1316,13 +1522,18 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             code = CodeableConcept(
                 coding = diagnosisCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(

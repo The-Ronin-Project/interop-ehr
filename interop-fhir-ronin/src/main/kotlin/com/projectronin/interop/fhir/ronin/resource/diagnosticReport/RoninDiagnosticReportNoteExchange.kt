@@ -2,11 +2,10 @@ package com.projectronin.interop.fhir.ronin.resource.diagnosticReport
 
 import com.projectronin.interop.fhir.r4.resource.DiagnosticReport
 import com.projectronin.interop.fhir.r4.validate.resource.R4DiagnosticReportValidator
-import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
-import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -30,12 +29,6 @@ class RoninDiagnosticReportNoteExchange(normalizer: Normalizer, localizer: Local
     private val requiredCategoryFieldError = RequiredFieldError(DiagnosticReport::category)
     private val requiredSubjectFieldError = RequiredFieldError(DiagnosticReport::subject)
     private val requiredIdError = RequiredFieldError(DiagnosticReport::id)
-
-    override fun validateRonin(element: DiagnosticReport, parentContext: LocationContext, validation: Validation) {
-        validation.apply {
-            requireRoninIdentifiers(element.identifier, parentContext, this)
-        }
-    }
 
     override fun validateUSCore(element: DiagnosticReport, parentContext: LocationContext, validation: Validation) {
         super.validateUSCore(element, parentContext, validation)
@@ -61,7 +54,7 @@ class RoninDiagnosticReportNoteExchange(normalizer: Normalizer, localizer: Local
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier()
+            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
 
         return Pair(transformed, validation)

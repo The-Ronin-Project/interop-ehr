@@ -9,12 +9,14 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
+import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
+import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
@@ -31,6 +33,7 @@ abstract class BaseRoninProfile<T : Resource<T>>(
     normalizer: Normalizer,
     localizer: Localizer
 ) : BaseProfile<T>(extendedProfile, normalizer, localizer) {
+
     private val requiredTenantIdentifierError = FHIRError(
         code = "RONIN_TNNT_ID_001",
         severity = ValidationIssueSeverity.ERROR,
@@ -67,6 +70,39 @@ abstract class BaseRoninProfile<T : Resource<T>>(
         severity = ValidationIssueSeverity.ERROR,
         description = "FHIR identifier value is required",
         location = LocationContext("", "identifier")
+    )
+
+    private val requiredDataAuthorityIdentifierError = FHIRError(
+        code = "RONIN_DAUTH_ID_001",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Data Authority identifier required",
+        location = LocationContext("", "identifier")
+    )
+    private val wrongDataAuthorityIdentifierTypeError = FHIRError(
+        code = "RONIN_DAUTH_ID_002",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Data Authority identifier provided without proper CodeableConcept defined",
+        location = LocationContext("", "identifier")
+    )
+    private val requiredDataAuthorityIdentifierValueError = FHIRError(
+        code = "RONIN_DAUTH_ID_003",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Data Authority identifier value is required",
+        location = LocationContext("", "identifier")
+    )
+
+    private val requiredDataAuthorityExtensionIdentifier = FHIRError(
+        code = "RONIN_DAUTH_EX_001",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Data Authority extension identifier is required for reference",
+        location = LocationContext("", "type.extension")
+    )
+
+    private val requiredReferenceType = FHIRError(
+        code = "RONIN_REQ_REF_TYPE_001",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Attribute Type is required for the reference",
+        location = LocationContext("", "")
     )
 
     /**
@@ -108,6 +144,7 @@ abstract class BaseRoninProfile<T : Resource<T>>(
     ) {
         requireTenantIdentifier(identifier, parentContext, validation)
         requireFhirIdentifier(identifier, parentContext, validation)
+        requireDataAuthorityIdentifier(identifier, parentContext, validation)
     }
 
     /**
@@ -151,6 +188,52 @@ abstract class BaseRoninProfile<T : Resource<T>>(
                     parentContext
                 )
                 checkNotNull(fhirIdentifier.value, requiredFhirIdentifierValueError, parentContext)
+            }
+        }
+    }
+
+    /**
+     * Validates that the supplied [identifier] list contains the Data Authority identifier.
+     */
+    private fun requireDataAuthorityIdentifier(
+        identifier: List<Identifier>,
+        parentContext: LocationContext,
+        validation: Validation
+    ) {
+        val dataAuthorityIdentifier = identifier.find { it.system == CodeSystem.RONIN_DATA_AUTHORITY.uri }
+        validation.apply {
+            checkNotNull(dataAuthorityIdentifier, requiredDataAuthorityIdentifierError, parentContext)
+            ifNotNull(dataAuthorityIdentifier) {
+                checkTrue(
+                    dataAuthorityIdentifier.type == CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    wrongDataAuthorityIdentifierTypeError,
+                    parentContext
+                )
+
+                checkNotNull(dataAuthorityIdentifier.value, requiredDataAuthorityIdentifierValueError, parentContext)
+            }
+        }
+    }
+
+    protected fun requireDataAuthorityExtensionIdentifier(
+        reference: Reference?,
+        parentContext: LocationContext,
+        validation: Validation
+    ) {
+        validation.apply {
+            val referenceType = reference?.type
+            checkNotNull(
+                referenceType,
+                requiredReferenceType,
+                parentContext
+            )
+            ifNotNull(referenceType) {
+                val dataAuthExtensionIdentifier = referenceType?.extension
+                checkTrue(
+                    dataAuthExtensionIdentifier == dataAuthorityExtension,
+                    requiredDataAuthorityExtensionIdentifier,
+                    parentContext
+                )
             }
         }
     }

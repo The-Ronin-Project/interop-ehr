@@ -135,7 +135,8 @@ class RoninDocumentReferenceTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ DocumentReference.identifier\n" +
-                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ DocumentReference.identifier",
+                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ DocumentReference.identifier\n" +
+                "ERROR RONIN_DAUTH_ID_001: Data Authority identifier required @ DocumentReference.identifier",
             exception.message
         )
     }
@@ -153,6 +154,11 @@ class RoninDocumentReferenceTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             status = DocumentReferenceStatus.CURRENT.asCode(),
@@ -191,6 +197,11 @@ class RoninDocumentReferenceTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             type = CodeableConcept(
@@ -230,6 +241,11 @@ class RoninDocumentReferenceTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             type = CodeableConcept(
@@ -279,6 +295,11 @@ class RoninDocumentReferenceTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             type = CodeableConcept(
@@ -331,6 +352,11 @@ class RoninDocumentReferenceTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             type = CodeableConcept(
@@ -371,6 +397,11 @@ class RoninDocumentReferenceTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             type = CodeableConcept(
@@ -410,7 +441,7 @@ class RoninDocumentReferenceTest {
 
         transformed!!
         assertEquals(Id("12345"), transformed.id)
-        assertEquals(2, transformed.identifier.size)
+        assertEquals(3, transformed.identifier.size)
         assertEquals(
             listOf(
                 Identifier(
@@ -422,6 +453,11 @@ class RoninDocumentReferenceTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             transformed.identifier
@@ -505,7 +541,7 @@ class RoninDocumentReferenceTest {
         assertEquals(documentReference.text, transformed.text)
         assertEquals(documentReference.contained, transformed.contained)
         assertEquals(documentReference.modifierExtension, transformed.modifierExtension)
-        assertEquals(3, transformed.identifier.size)
+        assertEquals(4, transformed.identifier.size)
         assertEquals(
             listOf(
                 Identifier(value = "67890".asFHIR()),
@@ -518,6 +554,11 @@ class RoninDocumentReferenceTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             transformed.identifier
@@ -574,6 +615,11 @@ class RoninDocumentReferenceTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             type = CodeableConcept(
@@ -619,6 +665,11 @@ class RoninDocumentReferenceTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             type = CodeableConcept(
@@ -664,6 +715,11 @@ class RoninDocumentReferenceTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             type = CodeableConcept(
@@ -713,6 +769,11 @@ class RoninDocumentReferenceTest {
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
                     value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             type = CodeableConcept(

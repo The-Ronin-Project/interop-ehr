@@ -29,6 +29,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
@@ -60,13 +61,13 @@ import com.projectronin.interop.fhir.r4.valueset.NameUse
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipantRequired
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
+import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotEquals
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertSame
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
@@ -110,7 +111,13 @@ class LocalizerTest {
         Extension(
             id = "5678".asFHIR(),
             url = Uri("http://localhost/extension"),
-            value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/test-1234".asFHIR()))
+            value = DynamicValue(
+                DynamicValueType.REFERENCE,
+                Reference(
+                    reference = "Patient/test-1234".asFHIR(),
+                    type = Uri("Patient", extension = dataAuthorityExtension)
+                )
+            )
         )
     )
     private val mixedLocalizedExtensions = listOf(
@@ -122,7 +129,13 @@ class LocalizerTest {
         Extension(
             id = "5678".asFHIR(),
             url = Uri("http://localhost/extension"),
-            value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/test-1234".asFHIR()))
+            value = DynamicValue(
+                DynamicValueType.REFERENCE,
+                Reference(
+                    reference = "Patient/test-1234".asFHIR(),
+                    type = Uri("Patient", extension = dataAuthorityExtension)
+                )
+            )
         )
     )
 
@@ -608,7 +621,7 @@ class LocalizerTest {
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedContact = localizer.localize(contact, tenant)
-        assertTrue(localizedContact === contact)
+        assertEquals(localizedContact, contact)
     }
 
     @Test
@@ -1719,7 +1732,13 @@ class LocalizerTest {
         val expectedExtension = Extension(
             id = "12345".asFHIR(),
             url = Uri("url"),
-            value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/test-123".asFHIR()))
+            value = DynamicValue(
+                DynamicValueType.REFERENCE,
+                Reference(
+                    reference = "Patient/test-123".asFHIR(),
+                    type = Uri("Patient", extension = dataAuthorityExtension)
+                )
+            )
         )
         assertEquals(expectedExtension, localizedExtension)
     }
@@ -1844,7 +1863,7 @@ class LocalizerTest {
             assigner = Reference(display = "assigner".asFHIR())
         )
         val localizedIdentifier = localizer.localize(identifier, tenant)
-        assertTrue(localizedIdentifier === identifier)
+        assertEquals(localizedIdentifier, identifier)
     }
 
     @Test
@@ -1885,7 +1904,7 @@ class LocalizerTest {
             type = LinkType.REPLACES.asCode()
         )
         val localizedLink = localizer.localize(link, tenant)
-        assertTrue(localizedLink === link)
+        assertEquals(localizedLink, link)
     }
 
     @Test
@@ -2250,7 +2269,7 @@ class LocalizerTest {
             period = Period(extension = nonLocalizableExtensions)
         )
         val localizedParticipant = localizer.localize(participant, tenant)
-        assertTrue(localizedParticipant === participant)
+        assertEquals(localizedParticipant, participant)
     }
 
     @Test
@@ -2504,7 +2523,7 @@ class LocalizerTest {
             issuer = Reference(display = "issuer".asFHIR())
         )
         val localizedQualification = localizer.localize(qualification, tenant)
-        assertTrue(qualification === localizedQualification)
+        assertEquals(qualification, localizedQualification)
     }
 
     @Test
@@ -2700,7 +2719,7 @@ class LocalizerTest {
         )
 
         val localizedReference = localizeReference(reference)
-        assertNull(localizedReference)
+        assertEquals(reference, localizedReference)
     }
 
     @Test
@@ -2709,7 +2728,6 @@ class LocalizerTest {
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
             reference = "Patient/123".asFHIR(),
-            type = Uri("Patient"),
             identifier = Identifier(value = "123".asFHIR()),
             display = "Patient 123".asFHIR()
         )
@@ -2720,8 +2738,8 @@ class LocalizerTest {
         val expectedReference = Reference(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
-            reference = "Patient/test-123".asFHIR(),
-            type = Uri("Patient"),
+            reference = FHIRString("Patient/test-123", id = "12345".asFHIR(), extension = nonLocalizableExtensions),
+            type = Uri("Patient", extension = dataAuthorityExtension),
             identifier = Identifier(value = "123".asFHIR()),
             display = "Patient 123".asFHIR()
         )
@@ -2779,7 +2797,8 @@ class LocalizerTest {
             ),
             assessment = listOf(
                 Reference(
-                    reference = "Condition/test-ReferenceExample01".asFHIR()
+                    reference = "Condition/test-ReferenceExample01".asFHIR(),
+                    type = Uri("Condition", extension = dataAuthorityExtension)
                 )
             ),
             type = CodeableConcept(
@@ -2830,7 +2849,8 @@ class LocalizerTest {
             modifierExtension = localizedExtensions,
             assessment = listOf(
                 Reference(
-                    reference = "Condition/test-ReferenceExample01".asFHIR()
+                    reference = "Condition/test-ReferenceExample01".asFHIR(),
+                    type = Uri("Condition", extension = dataAuthorityExtension)
                 )
             )
         )
@@ -2868,7 +2888,8 @@ class LocalizerTest {
             ),
             detail = listOf(
                 Reference(
-                    reference = "Condition/test-ReferenceExample01".asFHIR()
+                    reference = "Condition/test-ReferenceExample01".asFHIR(),
+                    type = Uri("Condition", extension = dataAuthorityExtension)
                 )
             )
         )
@@ -2915,7 +2936,8 @@ class LocalizerTest {
             modifierExtension = nonLocalizableExtensions,
             detail = listOf(
                 Reference(
-                    reference = "Condition/test-ReferenceExample01".asFHIR()
+                    reference = "Condition/test-ReferenceExample01".asFHIR(),
+                    type = Uri("Condition", extension = dataAuthorityExtension)
                 )
             )
         )
@@ -2970,7 +2992,10 @@ class LocalizerTest {
             extension = localizedExtensions,
             author = DynamicValue(
                 DynamicValueType.REFERENCE,
-                Reference(reference = "Practitioner/test-roninPractitionerExample01".asFHIR())
+                Reference(
+                    reference = "Practitioner/test-roninPractitionerExample01".asFHIR(),
+                    type = Uri("Practitioner", extension = dataAuthorityExtension)
+                )
             ),
             time = DateTime("2022-02"),
             text = Markdown("Test")
@@ -3136,7 +3161,10 @@ class LocalizerTest {
             code = expectedCodeableConcept,
             value = DynamicValue(
                 DynamicValueType.REFERENCE,
-                Reference(reference = "Practitioner/test-123".asFHIR())
+                Reference(
+                    reference = "Practitioner/test-123".asFHIR(),
+                    type = Uri("Practitioner", extension = dataAuthorityExtension)
+                )
             ),
             dataAbsentReason = null,
             interpretation = listOf(expectedCodeableConcept),

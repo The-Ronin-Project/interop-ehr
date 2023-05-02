@@ -27,6 +27,8 @@ import com.projectronin.interop.fhir.r4.valueset.MedicationStatementStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
+import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -43,6 +45,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class RoninMedicationStatementTest {
+    private val mockReference = Reference(
+        display = "reference".asFHIR(), // r4 required?
+        reference = "Patient/1234".asFHIR()
+    )
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
@@ -76,7 +82,8 @@ class RoninMedicationStatementTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ MedicationStatement.identifier\n" +
-                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ MedicationStatement.identifier",
+                "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ MedicationStatement.identifier\n" +
+                "ERROR RONIN_DAUTH_ID_001: Data Authority identifier required @ MedicationStatement.identifier",
             exception.message
         )
 
@@ -96,6 +103,11 @@ class RoninMedicationStatementTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             )
         )
@@ -125,6 +137,84 @@ class RoninMedicationStatementTest {
     }
 
     @Test
+    fun `validate fails with subject but no type`() {
+        val medicationStatement = MedicationStatement(
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = MedicationStatementStatus.ACTIVE.asCode(),
+            medication = DynamicValue(
+                type = DynamicValueType.CODEABLE_CONCEPT,
+                value = CodeableConcept()
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ MedicationStatement.subject.",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with subject and type but no data authority reference extension`() {
+        val medicationStatement = MedicationStatement(
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = MedicationStatementStatus.ACTIVE.asCode(),
+            medication = DynamicValue(
+                type = DynamicValueType.CODEABLE_CONCEPT,
+                value = CodeableConcept()
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient"))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DAUTH_EX_001: Data Authority extension identifier is required for reference @ MedicationStatement.subject.type.extension",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate succeeds`() {
         val medicationStatement = MedicationStatement(
             identifier = listOf(
@@ -137,6 +227,11 @@ class RoninMedicationStatementTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             status = MedicationStatementStatus.ACTIVE.asCode(),
@@ -144,7 +239,7 @@ class RoninMedicationStatementTest {
                 type = DynamicValueType.CODEABLE_CONCEPT,
                 value = CodeableConcept()
             ),
-            subject = Reference(reference = "Patient/123".asFHIR())
+            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
         )
 
         roninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
@@ -186,7 +281,7 @@ class RoninMedicationStatementTest {
                 type = DynamicValueType.CODEABLE_CONCEPT,
                 value = CodeableConcept(text = "medication".asFHIR())
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = localizeReferenceTest(mockReference), // check that it transforms
             context = Reference(display = "context".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -216,7 +311,7 @@ class RoninMedicationStatementTest {
         assertEquals(medicationStatement.contained, transformed.contained)
         assertEquals(medicationStatement.extension, transformed.extension)
         assertEquals(medicationStatement.modifierExtension, transformed.modifierExtension)
-        assertEquals(3, transformed.identifier.size)
+        assertEquals(4, transformed.identifier.size)
         assertEquals(
             listOf(
                 Identifier(value = "id".asFHIR()),
@@ -229,6 +324,11 @@ class RoninMedicationStatementTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             transformed.identifier
@@ -259,7 +359,7 @@ class RoninMedicationStatementTest {
                 type = DynamicValueType.CODEABLE_CONCEPT,
                 value = CodeableConcept(text = "medication".asFHIR())
             ),
-            subject = Reference(reference = "Patient/123".asFHIR()),
+            subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 value = DateTime("1905-08-23")
@@ -270,7 +370,7 @@ class RoninMedicationStatementTest {
         validation.alertIfErrors()
 
         transformed!!
-        assertEquals(2, transformed.identifier.size)
+        assertEquals(3, transformed.identifier.size)
         assertEquals(
             listOf(
                 Identifier(
@@ -282,6 +382,11 @@ class RoninMedicationStatementTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             transformed.identifier
@@ -302,7 +407,7 @@ class RoninMedicationStatementTest {
                     type = type,
                     value = value
                 ),
-                subject = Reference(reference = "Patient/123".asFHIR()),
+                subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
                 effective = DynamicValue(
                     type = DynamicValueType.DATE_TIME,
                     value = DateTime("1905-08-23")
@@ -327,7 +432,7 @@ class RoninMedicationStatementTest {
                     type = DynamicValueType.CODEABLE_CONCEPT,
                     value = CodeableConcept(text = "codeableConcep".asFHIR())
                 ),
-                subject = Reference(reference = "Patient/123".asFHIR()),
+                subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
                 effective = DynamicValue(
                     type = type,
                     value = value
@@ -363,6 +468,11 @@ class RoninMedicationStatementTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             status = MedicationStatementStatus.ACTIVE.asCode(),
@@ -370,7 +480,7 @@ class RoninMedicationStatementTest {
                 type = DynamicValueType.CODEABLE_CONCEPT,
                 value = CodeableConcept(text = "medication".asFHIR())
             ),
-            subject = Reference(display = "subject".asFHIR()),
+            subject = Reference(display = "subject".asFHIR(), type = Uri("", extension = dataAuthorityExtension)),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 value = DateTime("1905-08-23")
@@ -402,6 +512,11 @@ class RoninMedicationStatementTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             status = MedicationStatementStatus.ACTIVE.asCode(),
@@ -409,7 +524,7 @@ class RoninMedicationStatementTest {
                 type = DynamicValueType.CODEABLE_CONCEPT,
                 value = CodeableConcept(text = "medication".asFHIR())
             ),
-            subject = Reference(reference = "Condition/12345".asFHIR()),
+            subject = Reference(reference = "Condition/12345".asFHIR(), type = Uri("", extension = dataAuthorityExtension)),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 value = DateTime("1905-08-23")
@@ -441,6 +556,11 @@ class RoninMedicationStatementTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
                 )
             ),
             status = MedicationStatementStatus.ACTIVE.asCode(),

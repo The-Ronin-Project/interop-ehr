@@ -9,13 +9,12 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.error.RoninInvalidDynamicValueError
-import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.hasDayFormat
-import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -218,7 +217,7 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             extension = normalized.extension + tenantSourceCodeExtension,
-            identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier()
+            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
         return Pair(transformed, validation)
     }

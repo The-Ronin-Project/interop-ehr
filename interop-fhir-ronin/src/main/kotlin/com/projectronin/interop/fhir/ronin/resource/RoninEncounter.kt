@@ -3,12 +3,11 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.fhir.r4.validate.resource.R4EncounterValidator
-import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
-import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -37,6 +36,11 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
     override fun validateRonin(element: Encounter, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
+
+            // check that subject reference has type and the extension is the data authority extension identifier
+            ifNotNull(element.subject) {
+                requireDataAuthorityExtensionIdentifier(element.subject, LocationContext(Encounter::subject), validation)
+            }
         }
     }
 
@@ -66,7 +70,7 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
     ): Pair<Encounter?, Validation> {
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier()
+            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
         return Pair(transformed, Validation())
     }

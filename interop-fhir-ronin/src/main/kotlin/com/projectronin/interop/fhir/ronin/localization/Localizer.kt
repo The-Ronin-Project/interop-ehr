@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 class Localizer : BaseGenericTransformer() {
+
     /**
      * Localizes the [element] for the [tenant]
      */
@@ -55,12 +56,7 @@ class Localizer : BaseGenericTransformer() {
      * Localizes the [reference] for the [tenant].
      */
     private fun localizeReference(reference: Reference, parameterName: String, tenant: Tenant): Reference? {
-        val nonReferenceLocalized = transformOrNull(reference, parameterName, tenant)
-        val localizedReference = reference.reference?.localizeReference(tenant)
-        return if (localizedReference == reference.reference) {
-            nonReferenceLocalized
-        } else {
-            (nonReferenceLocalized ?: reference).copy(reference = localizedReference)
-        }
+        val nonReferenceLocalized = transformOrNull(reference, parameterName, tenant) ?: reference
+        return nonReferenceLocalized.localizeReference(tenant)
     }
 }

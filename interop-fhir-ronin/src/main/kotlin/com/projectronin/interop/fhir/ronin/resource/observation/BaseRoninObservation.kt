@@ -4,12 +4,11 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.resource.Observation
-import com.projectronin.interop.fhir.ronin.getFhirIdentifiers
+import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
-import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.ronin.util.validateReferenceList
 import com.projectronin.interop.fhir.validate.FHIRError
@@ -101,6 +100,10 @@ abstract class BaseRoninObservation(
 
             checkNotNull(element.subject, requiredSubjectError, parentContext)
             validateReference(element.subject, validSubjectValues, LocationContext(Observation::subject), validation)
+            // check that subject reference has type and the extension is the data authority extension identifier
+            ifNotNull(element.subject) {
+                requireDataAuthorityExtensionIdentifier(element.subject, LocationContext(Observation::subject), validation)
+            }
 
             validateReferenceList(
                 element.basedOn,
@@ -202,7 +205,7 @@ abstract class BaseRoninObservation(
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getFhirIdentifiers() + tenant.toFhirIdentifier()
+            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
         return Pair(transformed, validation)
     }
