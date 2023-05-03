@@ -10,7 +10,7 @@ dependencies {
 
     implementation(libs.interop.common)
     implementation(libs.interop.commonJackson)
-    implementation(libs.interop.datalake)
+    implementation(libs.interop.publishers.datalake)
     implementation(libs.interop.fhir)
     implementation(libs.interop.validation.client)
     implementation(libs.kotlinx.coroutines.core)

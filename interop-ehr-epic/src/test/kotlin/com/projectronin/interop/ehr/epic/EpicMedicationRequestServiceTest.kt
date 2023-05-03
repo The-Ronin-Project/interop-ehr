@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr.epic
 import com.projectronin.interop.common.http.exceptions.ClientFailureException
 import com.projectronin.interop.ehr.MedicationRequestService
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.MedicationRequest
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -21,16 +22,17 @@ class EpicMedicationRequestServiceTest {
     private val epicClient: EpicClient = mockk()
     private val medicationRequestService: MedicationRequestService = EpicMedicationRequestService(epicClient)
     private val httpResponse: HttpResponse = mockk()
+    private val ehrResponse = EHRResponse(httpResponse, "12345")
 
     private val medicationRequestReturnBundle = readResource<Bundle>("/ExampleMedicationRequestBundle.json")
 
     @Test
     fun `getMedicationRequestById - works with one medication`() {
         val tenant = mockk<Tenant>()
-        val medicationRequest = mockk<MedicationRequest>()
+        val medicationRequest = mockk<MedicationRequest>(relaxed = true)
 
         coEvery { httpResponse.body<MedicationRequest>(TypeInfo(MedicationRequest::class, MedicationRequest::class.java)) } returns medicationRequest
-        coEvery { epicClient.get(tenant, "/api/FHIR/R4/MedicationRequest/fakeFaKEfAKefakE") } returns httpResponse
+        coEvery { epicClient.get(tenant, "/api/FHIR/R4/MedicationRequest/fakeFaKEfAKefakE") } returns ehrResponse
 
         val actual = medicationRequestService.getMedicationRequestById(tenant, "fakeFaKEfAKefakE")
         assertEquals(medicationRequest, actual)
@@ -41,7 +43,7 @@ class EpicMedicationRequestServiceTest {
         val tenant = mockk<Tenant>()
         val thrownException = ClientFailureException(HttpStatusCode.NotFound, "Not Found")
         coEvery { httpResponse.body<MedicationRequest>(TypeInfo(MedicationRequest::class, MedicationRequest::class.java)) } throws thrownException
-        coEvery { epicClient.get(tenant, "/api/FHIR/R4/MedicationRequest/fakeFaKEfAKefakE") } returns httpResponse
+        coEvery { epicClient.get(tenant, "/api/FHIR/R4/MedicationRequest/fakeFaKEfAKefakE") } returns ehrResponse
 
         val exception =
             assertThrows<ClientFailureException> { medicationRequestService.getMedicationRequestById(tenant, "fakeFaKEfAKefakE") }
@@ -71,7 +73,7 @@ class EpicMedicationRequestServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             medicationRequestService.getMedicationRequestByPatient(

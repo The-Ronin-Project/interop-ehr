@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRSearchToken
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.valueset.ObservationCategoryCodes
@@ -21,6 +22,7 @@ class EpicObservationServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var observationService: EpicObservationService
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
     private lateinit var pagingHttpResponse: HttpResponse
     private lateinit var codesDAO: TenantCodesDAO
     private val validObservationSearchBundle = readResource<Bundle>("/ExampleObservationBundle.json")
@@ -32,6 +34,7 @@ class EpicObservationServiceTest {
     fun setup() {
         epicClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
         pagingHttpResponse = mockk()
         codesDAO = mockk()
         observationService = EpicObservationService(epicClient, 1, codesDAO, 60)
@@ -60,7 +63,7 @@ class EpicObservationServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             observationService.findObservationsByPatient(
@@ -97,7 +100,7 @@ class EpicObservationServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
         coEvery {
             epicClient.get(
                 tenant,
@@ -109,7 +112,7 @@ class EpicObservationServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             observationService.findObservationsByPatient(
@@ -150,7 +153,7 @@ class EpicObservationServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             observationService.findObservationsByPatientAndCategory(
@@ -191,7 +194,7 @@ class EpicObservationServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             observationService.findObservationsByCategory(
@@ -232,7 +235,7 @@ class EpicObservationServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
         val httpResponse2 = mockk<HttpResponse> {
             every { status } returns HttpStatusCode.OK
         }
@@ -248,7 +251,7 @@ class EpicObservationServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse2
+        } returns EHRResponse(httpResponse2, "67890")
 
         every {
             codesDAO.getByTenantMnemonic("TEST_TENANT")
@@ -293,7 +296,7 @@ class EpicObservationServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             observationService.findObservationsByPatientAndCategory(
@@ -333,7 +336,7 @@ class EpicObservationServiceTest {
                     "_count" to 50
                 )
             )
-        } returns pagingHttpResponse
+        } returns EHRResponse(pagingHttpResponse, "67890")
 
         // Mock response without paging
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -343,7 +346,7 @@ class EpicObservationServiceTest {
                 tenant,
                 "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation?patient=em2zwhHegmZEu39N4dUEIYA3&category=social-history&date=ge2023-02-20&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             observationService.findObservationsByPatientAndCategory(

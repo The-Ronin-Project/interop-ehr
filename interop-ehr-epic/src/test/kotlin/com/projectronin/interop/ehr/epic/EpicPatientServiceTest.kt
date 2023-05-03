@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr.epic
 import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
@@ -31,6 +32,7 @@ class EpicPatientServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var aidboxClient: AidboxPatientService
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
     private val validPatientBundle = readResource<Bundle>("/ExamplePatientBundle.json")
     private val testPrivateKey = this::class.java.getResource("/TestPrivateKey.txt")!!.readText()
 
@@ -39,6 +41,7 @@ class EpicPatientServiceTest {
         epicClient = mockk()
         aidboxClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
     }
 
     @Test
@@ -58,7 +61,7 @@ class EpicPatientServiceTest {
                 "/api/FHIR/R4/Patient",
                 mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "2015-01-01", "_count" to 50)
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle = EpicPatientService(epicClient, 100, aidboxClient).findPatient(
             tenant,
@@ -77,10 +80,10 @@ class EpicPatientServiceTest {
             testPrivateKey,
             "TEST_TENANT"
         )
-        val fakePat = mockk<Patient>()
+        val fakePat = mockk<Patient>(relaxed = true)
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Patient>(TypeInfo(Patient::class, Patient::class.java)) } returns fakePat
-        coEvery { epicClient.get(tenant, "/api/FHIR/R4/Patient/FHIRID") } returns httpResponse
+        coEvery { epicClient.get(tenant, "/api/FHIR/R4/Patient/FHIRID") } returns ehrResponse
         val actual = EpicPatientService(epicClient, 100, aidboxClient).getPatient(tenant, "FHIRID")
         assertEquals(fakePat, actual)
     }
@@ -105,7 +108,7 @@ class EpicPatientServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val resultPatientsByKey = EpicPatientService(epicClient, 100, aidboxClient).findPatientsById(
             tenant,
@@ -130,7 +133,7 @@ class EpicPatientServiceTest {
             mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
         )
 
-        val patient = mockk<Patient> {
+        val patient = mockk<Patient>(relaxed = true) {
             every { identifier } returns listOf(
                 mockk {
                     every { system } returns Uri("urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14")
@@ -142,7 +145,7 @@ class EpicPatientServiceTest {
                 }
             )
         }
-        val bundle = mockk<Bundle> {
+        val bundle = mockk<Bundle>(relaxed = true) {
             every { link } returns listOf()
             every { entry } returns listOf(
                 mockk {
@@ -161,7 +164,7 @@ class EpicPatientServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val resultPatientsByKey = EpicPatientService(epicClient, 100, aidboxClient).findPatientsById(
             tenant,
@@ -197,7 +200,7 @@ class EpicPatientServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val resultPatientsByKey = EpicPatientService(epicClient, 100, aidboxClient).findPatientsById(
             tenant,
@@ -240,7 +243,7 @@ class EpicPatientServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val resultPatientsByKey = EpicPatientService(epicClient, 100, aidboxClient).findPatientsById(
             tenant,
@@ -280,7 +283,7 @@ class EpicPatientServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val resultPatientsByKey = EpicPatientService(epicClient, 100, aidboxClient).findPatientsById(
             tenant,
@@ -324,7 +327,7 @@ class EpicPatientServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         // 2nd batch
         val httpResponse2 = mockk<HttpResponse>()
@@ -339,7 +342,7 @@ class EpicPatientServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse2
+        } returns EHRResponse(httpResponse2, "67890")
 
         val resultPatientsByKey = EpicPatientService(epicClient, 2, aidboxClient).findPatientsById(
             tenant,

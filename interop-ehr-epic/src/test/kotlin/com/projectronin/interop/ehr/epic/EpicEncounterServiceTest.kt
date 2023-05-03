@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.EncounterService
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Encounter
@@ -23,16 +24,16 @@ internal class EpicEncounterServiceTest {
         val tenant = mockk<Tenant>()
 
         val encounter1 = mockk<BundleEntry> {
-            every { resource } returns mockk<Encounter> {
+            every { resource } returns mockk<Encounter>(relaxed = true) {
                 every { id!!.value } returns "12345"
             }
         }
         val encounter2 = mockk<BundleEntry> {
-            every { resource } returns mockk<Encounter> {
+            every { resource } returns mockk<Encounter>(relaxed = true) {
                 every { id!!.value } returns "67890"
             }
         }
-        val bundle = mockk<Bundle> {
+        val bundle = mockk<Bundle>(relaxed = true) {
             every { entry } returns listOf(encounter1, encounter2)
             every { link } returns emptyList()
         }
@@ -42,8 +43,8 @@ internal class EpicEncounterServiceTest {
                 tenant,
                 "/api/FHIR/R4/Encounter",
                 mapOf("patient" to "12345", "date" to listOf("ge2015-01-01", "le2015-11-01"), "_count" to 50)
-            ).body<Bundle>()
-        } returns bundle
+            )
+        } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
 
         val response =
             encounterService.findPatientEncounters(

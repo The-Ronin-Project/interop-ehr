@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.ehr.MedicationStatementService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
@@ -20,6 +21,8 @@ class CernerMedicationStatementServiceTest {
     private lateinit var cernerClient: CernerClient
     private lateinit var medicationStatementService: MedicationStatementService
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
+
     private lateinit var pagingHttpResponse: HttpResponse
     private val validMedicationStatementResponse = readResource<Bundle>("/ExampleMedicationStatementBundle.json")
     private val pagingMedicationStatementResponse =
@@ -31,6 +34,8 @@ class CernerMedicationStatementServiceTest {
     fun setup() {
         cernerClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
+
         pagingHttpResponse = mockk()
         medicationStatementService = CernerMedicationStatementService(cernerClient)
         tenant =
@@ -56,7 +61,7 @@ class CernerMedicationStatementServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle = medicationStatementService.getMedicationStatementsByPatientFHIRId(
             tenant,
@@ -83,7 +88,7 @@ class CernerMedicationStatementServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val emptyBundle = medicationStatementService.getMedicationStatementsByPatientFHIRId(
             tenant,
@@ -110,7 +115,7 @@ class CernerMedicationStatementServiceTest {
                     "_count" to 20
                 )
             )
-        } returns pagingHttpResponse
+        } returns EHRResponse(pagingHttpResponse, "65789")
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validMedicationStatementResponse
@@ -119,7 +124,7 @@ class CernerMedicationStatementServiceTest {
                 tenant,
                 nextUrl
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundleFromPaging = medicationStatementService.getMedicationStatementsByPatientFHIRId(
             tenant,
@@ -150,7 +155,7 @@ class CernerMedicationStatementServiceTest {
                     "_count" to 20
                 )
             )
-        } returns pagingHttpResponse
+        } returns EHRResponse(pagingHttpResponse, "65789")
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validMedicationStatementResponse
@@ -159,7 +164,7 @@ class CernerMedicationStatementServiceTest {
                 tenant,
                 nextUrl
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundleFromPaging = medicationStatementService.getMedicationStatementsByPatientFHIRId(
             tenant,

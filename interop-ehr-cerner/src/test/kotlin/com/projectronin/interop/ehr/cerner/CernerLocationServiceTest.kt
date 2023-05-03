@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.ehr.cerner.client.CernerClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Location
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Test
 class CernerLocationServiceTest {
     private lateinit var cernerClient: CernerClient
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
     private lateinit var locationService: CernerLocationService
     private val locationBundle = readResource<Bundle>("/ExampleLocationBundle.json")
     private val testTenant = createTestTenant(
@@ -31,6 +33,8 @@ class CernerLocationServiceTest {
     fun setup() {
         cernerClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
+
         locationService = CernerLocationService(cernerClient, 5)
     }
 
@@ -44,7 +48,7 @@ class CernerLocationServiceTest {
                 "/Location",
                 mapOf("_id" to "123,456", "_count" to 20)
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val result = locationService.getLocationsByFHIRId(testTenant, listOf("123,456"))
         assertEquals(2, result.size)
@@ -56,38 +60,37 @@ class CernerLocationServiceTest {
         val tenant = mockk<Tenant>()
 
         val location1 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location> {
+            every { resource } returns mockk<Location>(relaxed = true) {
                 every { id!!.value } returns "123"
             }
         }
         val location2 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location> {
+            every { resource } returns mockk<Location>(relaxed = true) {
                 every { id!!.value } returns "456"
             }
         }
 
         val location3 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location> {
+            every { resource } returns mockk<Location>(relaxed = true) {
                 every { id!!.value } returns "789"
             }
         }
-        val bundle = mockk<Bundle> {
+        val bundle = mockk<Bundle>(relaxed = true) {
             every { entry } returns listOf(location1, location2)
             every { link } returns emptyList()
         }
-        val bundle2 = mockk<Bundle> {
+        val bundle2 = mockk<Bundle>(relaxed = true) {
             every { entry } returns listOf(location3)
             every { link } returns emptyList()
         }
 
         coEvery {
             cernerClient.get(tenant, "/Location", mapOf("_id" to "123,456", "_count" to 20))
-                .body<Bundle>()
-        } returns bundle
+        } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
+
         coEvery {
             cernerClient.get(tenant, "/Location", mapOf("_id" to "789", "_count" to 20))
-                .body<Bundle>()
-        } returns bundle2
+        } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle2 }, "67890")
 
         val response =
             smallLocationService.getLocationsByFHIRId(tenant, listOf("123", "456", "789"))

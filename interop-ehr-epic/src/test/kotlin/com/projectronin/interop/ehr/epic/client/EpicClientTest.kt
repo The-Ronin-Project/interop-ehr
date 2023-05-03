@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic.client
 
 import com.projectronin.interop.common.http.exceptions.ServerFailureException
+import com.projectronin.interop.datalake.DatalakePublishService
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
 import com.projectronin.interop.ehr.epic.apporchard.model.GetProviderAppointmentRequest
 import com.projectronin.interop.ehr.epic.auth.EpicAuthentication
@@ -23,7 +24,10 @@ import org.junit.jupiter.api.assertThrows
 class EpicClientTest {
     private val validPatientSearchJson = this::class.java.getResource("/ExamplePatientBundle.json")!!.readText()
     private val authenticationBroker = mockk<EHRAuthenticationBroker>()
-    private val epicClient = EpicClient(getClient(), authenticationBroker)
+    private val datalakePublishService = mockk<DatalakePublishService> {
+        every { publishRawData(any(), any(), any()) } returns "12345"
+    }
+    private val epicClient = EpicClient(getClient(), authenticationBroker, datalakePublishService)
 
     @Test
     fun `throws exception when unable to retrieve authentication during a get operation`() {
@@ -80,7 +84,7 @@ class EpicClientTest {
                 "/api/FHIR/R4/Patient",
                 mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "birthDate")
             )
-            httpResponse.bodyAsText()
+            httpResponse.httpResponse.bodyAsText()
         }
 
         // Validate Response
@@ -114,7 +118,7 @@ class EpicClientTest {
                 "/api/FHIR/R4/Patient",
                 mapOf("list" to listOf("one", "two"))
             )
-            httpResponse.bodyAsText()
+            httpResponse.httpResponse.bodyAsText()
         }
 
         // Validate Response
@@ -147,7 +151,7 @@ class EpicClientTest {
                 tenant,
                 mockWebServer.url("/FHIR-test?sessionId=123").toString()
             )
-            httpResponse.bodyAsText()
+            httpResponse.httpResponse.bodyAsText()
         }
 
         // Validate Response
@@ -180,7 +184,7 @@ class EpicClientTest {
                 tenant,
                 "/api/FHIR/R4/Patient"
             )
-            httpResponse.bodyAsText()
+            httpResponse.httpResponse.bodyAsText()
         }
 
         // Validate Response
@@ -217,7 +221,7 @@ class EpicClientTest {
                     "/api/FHIR/R4/Patient",
                     mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "birthDate")
                 )
-                httpResponse.bodyAsText()
+                httpResponse.httpResponse.bodyAsText()
             }
         }
     }
@@ -260,7 +264,7 @@ class EpicClientTest {
                             providers = listOf()
                         )
                     )
-                httpResponse.bodyAsText()
+                httpResponse.httpResponse.bodyAsText()
             }
         }
     }
@@ -300,7 +304,7 @@ class EpicClientTest {
                         providers = listOf()
                     )
                 )
-            httpResponse.bodyAsText()
+            httpResponse.httpResponse.bodyAsText()
         }
 
         // Validate Response
@@ -344,8 +348,8 @@ class EpicClientTest {
                     ),
                     mapOf("string" to "string", "list" to listOf("1", "2"))
                 )
-            url = httpResponse.request.url
-            httpResponse.bodyAsText()
+            url = httpResponse.httpResponse.request.url
+            httpResponse.httpResponse.bodyAsText()
         }
         assertTrue(url.toString().endsWith("?string=string&list=1&list=2"))
         // Validate Response
@@ -383,8 +387,8 @@ class EpicClientTest {
                     "nonList" to "nonList"
                 )
             )
-            url = httpResponse.request.url
-            httpResponse.bodyAsText()
+            url = httpResponse.httpResponse.request.url
+            httpResponse.httpResponse.bodyAsText()
         }
 
         assertTrue(url.toString().endsWith("?list=one&list=two&nonList=nonList"))

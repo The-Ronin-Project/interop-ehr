@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.ehr.MedicationRequestService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.MedicationRequest
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -21,17 +22,24 @@ class CernerMedicationRequestServiceTest {
     private val cernerClient: CernerClient = mockk()
     private val medicationRequestService: MedicationRequestService = CernerMedicationRequestService(cernerClient)
     private val httpResponse: HttpResponse = mockk()
-
+    private val ehrResponse = EHRResponse(httpResponse, "12345")
     private val validPatientIdBundle = readResource<Bundle>("/ExampleMedicationRequestPatientIdBundle.json")
     private val validMedIdReturn = readResource<MedicationRequest>("/ExampleMedicalRequestByIdResponse.json")
 
     @Test
     fun `getMedicationRequestById works for medication Id`() {
         val tenant = mockk<Tenant>()
-        val mockMedicationRequest = mockk<MedicationRequest>()
+        val mockMedicationRequest = mockk<MedicationRequest>(relaxed = true)
 
-        coEvery { httpResponse.body<MedicationRequest>(TypeInfo(MedicationRequest::class, MedicationRequest::class.java)) } returns mockMedicationRequest
-        coEvery { cernerClient.get(tenant, "/MedicationRequest/fakeFaKEfAKefakE") } returns httpResponse
+        coEvery {
+            httpResponse.body<MedicationRequest>(
+                TypeInfo(
+                    MedicationRequest::class,
+                    MedicationRequest::class.java
+                )
+            )
+        } returns mockMedicationRequest
+        coEvery { cernerClient.get(tenant, "/MedicationRequest/fakeFaKEfAKefakE") } returns ehrResponse
 
         val actual = medicationRequestService.getMedicationRequestById(tenant, "fakeFaKEfAKefakE")
         assertEquals(mockMedicationRequest, actual)
@@ -82,7 +90,7 @@ class CernerMedicationRequestServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val actual = medicationRequestService.getMedicationRequestByPatient(
             tenant,
@@ -117,7 +125,7 @@ class CernerMedicationRequestServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val validResponse =
             medicationRequestService.getMedicationRequestByPatient(

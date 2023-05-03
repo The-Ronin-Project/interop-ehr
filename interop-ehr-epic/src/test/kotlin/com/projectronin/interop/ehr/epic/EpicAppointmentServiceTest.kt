@@ -15,6 +15,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProvider
 import com.projectronin.interop.ehr.epic.apporchard.model.ScheduleProviderReturnWithTime
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
@@ -58,6 +59,7 @@ class EpicAppointmentServiceTest {
     private lateinit var aidboxPatientService: PatientService
     private lateinit var aidboxLocationService: LocationService
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
 
     private val validPatientAppointmentSearchResponse =
         readResource<STU3Bundle>("/ExampleFHIRAppointmentBundle.json")
@@ -273,6 +275,7 @@ class EpicAppointmentServiceTest {
     fun initTest() {
         epicClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
         patientService = mockk()
         identifierService = mockk()
         aidboxPractitionerService = mockk()
@@ -302,7 +305,7 @@ class EpicAppointmentServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val response =
             EpicAppointmentService(
@@ -373,7 +376,7 @@ class EpicAppointmentServiceTest {
                     endDate = "11/01/2015"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         // Patient service request
         every {
@@ -491,7 +494,7 @@ class EpicAppointmentServiceTest {
                     endDate = "11/01/2015"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         // Patient service request
         every {
@@ -702,7 +705,7 @@ class EpicAppointmentServiceTest {
                     endDate = "11/01/2015"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         // Patient service request
         every {
@@ -814,7 +817,7 @@ class EpicAppointmentServiceTest {
                     endDate = "11/01/2015"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         // Patient service request
         every {
@@ -886,7 +889,7 @@ class EpicAppointmentServiceTest {
                     endDate = "11/01/2015"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         // Patient service request
         every {
@@ -948,7 +951,7 @@ class EpicAppointmentServiceTest {
                     patientIdType = tenant.vendorAs<Epic>().patientMRNTypeText
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
@@ -1007,7 +1010,7 @@ class EpicAppointmentServiceTest {
                     patientIdType = epicVendor.patientMRNTypeText
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
@@ -1095,7 +1098,7 @@ class EpicAppointmentServiceTest {
                     patientIdType = epicVendor.patientMRNTypeText
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
@@ -1189,7 +1192,7 @@ class EpicAppointmentServiceTest {
                     patientIdType = epicVendor.patientMRNTypeText
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
@@ -1219,7 +1222,6 @@ class EpicAppointmentServiceTest {
         // patient, providers, and locations are correct per appointment
         val appt0 = appointments[0]
         assertEquals("22792", appt0.id?.value)
-        assertNull(appt0.meta)
         assertEquals(3, appt0.identifier.size)
         assertFalse(appt0.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("noshow"), appt0.status)
@@ -1230,7 +1232,6 @@ class EpicAppointmentServiceTest {
         assertEquals("Location/EMHPHXCTHDEPT-fhir-id".asFHIR(), appt0.participant[2].actor?.reference)
         val appt1 = appointments[1]
         assertEquals("22787", appt1.id?.value)
-        assertNull(appt1.meta)
         assertEquals(3, appt1.identifier.size)
         assertFalse(appt1.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("fulfilled"), appt1.status)
@@ -1241,7 +1242,6 @@ class EpicAppointmentServiceTest {
         assertEquals("Location/EMHINFUSIONTHERAPY-fhir-id".asFHIR(), appt1.participant[2].actor?.reference)
         val appt2 = appointments[2]
         assertEquals("22784", appt2.id?.value)
-        assertNull(appt2.meta)
         assertEquals(3, appt2.identifier.size)
         assertFalse(appt2.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("booked"), appt2.status)
@@ -1252,7 +1252,6 @@ class EpicAppointmentServiceTest {
         assertEquals("Location/EMHPEDCHEMOINFUSION-fhir-id".asFHIR(), appt2.participant[2].actor?.reference)
         val appt3 = appointments[3]
         assertEquals("22783", appt3.id?.value)
-        assertNull(appt3.meta)
         assertEquals(3, appt3.identifier.size)
         assertFalse(appt3.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("arrived"), appt3.status)
@@ -1299,7 +1298,7 @@ class EpicAppointmentServiceTest {
                     patientIdType = epicVendor.patientMRNTypeText
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
@@ -1329,7 +1328,6 @@ class EpicAppointmentServiceTest {
         // patient and locations are correct per appointment, providers use identifier instead of reference
         val appt0 = appointments[0]
         assertEquals("22792", appt0.id?.value)
-        assertNull(appt0.meta)
         assertEquals(3, appt0.identifier.size)
         assertFalse(appt0.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("noshow"), appt0.status)
@@ -1340,7 +1338,6 @@ class EpicAppointmentServiceTest {
         assertEquals("Location/EMHPHXCTHDEPT-fhir-id".asFHIR(), appt0.participant[2].actor?.reference)
         val appt1 = appointments[1]
         assertEquals("22787", appt1.id?.value)
-        assertNull(appt1.meta)
         assertEquals(3, appt1.identifier.size)
         assertFalse(appt1.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("fulfilled"), appt1.status)
@@ -1351,7 +1348,6 @@ class EpicAppointmentServiceTest {
         assertEquals("Location/EMHINFUSIONTHERAPY-fhir-id".asFHIR(), appt1.participant[2].actor?.reference)
         val appt2 = appointments[2]
         assertEquals("22784", appt2.id?.value)
-        assertNull(appt2.meta)
         assertEquals(3, appt2.identifier.size)
         assertFalse(appt2.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("booked"), appt2.status)
@@ -1362,7 +1358,6 @@ class EpicAppointmentServiceTest {
         assertEquals("Location/EMHPEDCHEMOINFUSION-fhir-id".asFHIR(), appt2.participant[2].actor?.reference)
         val appt3 = appointments[3]
         assertEquals("22783", appt3.id?.value)
-        assertNull(appt3.meta)
         assertEquals(3, appt3.identifier.size)
         assertFalse(appt3.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("arrived"), appt3.status)
@@ -1409,7 +1404,7 @@ class EpicAppointmentServiceTest {
                     patientIdType = epicVendor.patientMRNTypeText
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
@@ -1503,7 +1498,7 @@ class EpicAppointmentServiceTest {
                     patientIdType = tenant.vendorAs<Epic>().patientMRNTypeText
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
         assertEquals(4, allProviders.size)
@@ -1653,7 +1648,7 @@ class EpicAppointmentServiceTest {
                     endDate = "11/01/2015"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         // Patient service request
         every {
@@ -1744,7 +1739,7 @@ class EpicAppointmentServiceTest {
                     endDate = "11/01/2015"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         // Patient service request
         every {
@@ -1836,7 +1831,7 @@ class EpicAppointmentServiceTest {
                     endDate = "11/01/2015"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         every {
             patientService.getPatientsFHIRIds(
@@ -1865,7 +1860,6 @@ class EpicAppointmentServiceTest {
         assertEquals(1, response.appointments.size)
         val appt = response.appointments[0]
         assertEquals(epicAppointment1.id, appt.id?.value)
-        assertNull(appt.meta)
         assertEquals(2, appt.identifier.size)
         assertFalse(appt.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("Deliberately new"), appt.status)
@@ -1941,7 +1935,7 @@ class EpicAppointmentServiceTest {
                     endDate = "11/01/2015"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         every {
             patientService.getPatientsFHIRIds(
@@ -1973,7 +1967,6 @@ class EpicAppointmentServiceTest {
         assertEquals(2, response.appointments.size)
         val appt0 = response.appointments[0]
         assertEquals(epicAppointment1.id, appt0.id?.value)
-        assertNull(appt0.meta)
         assertEquals(2, appt0.identifier.size)
         assertFalse(
             appt0.identifier.filter { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } }
@@ -1999,7 +1992,6 @@ class EpicAppointmentServiceTest {
 
         val appt1 = response.appointments[1]
         assertEquals(epicAppointment2.id, appt1.id?.value)
-        assertNull(appt1.meta)
         assertEquals(2, appt1.identifier.size)
         assertFalse(appt1.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("Deliberately unknown"), appt1.status)
@@ -2175,7 +2167,7 @@ class EpicAppointmentServiceTest {
                     endDate = "11/01/2015"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         every {
             patientService.getPatientsFHIRIds(
@@ -2212,7 +2204,6 @@ class EpicAppointmentServiceTest {
         // unique Location A (not B or C)
         val appt0 = response.appointments[0]
         assertEquals(epicAppointment1.id, appt0.id?.value)
-        assertNull(appt0.meta)
         assertEquals(2, appt0.identifier.size)
         assertFalse(appt0.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("booked"), appt0.status)
@@ -2228,7 +2219,6 @@ class EpicAppointmentServiceTest {
         // unique Location B (not A or C)
         val appt1 = response.appointments[1]
         assertEquals(epicAppointment2.id, appt1.id?.value)
-        assertNull(appt1.meta)
         assertEquals(2, appt1.identifier.size)
         assertFalse(appt1.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("arrived"), appt1.status)
@@ -2244,7 +2234,6 @@ class EpicAppointmentServiceTest {
         // unique Location C (not A or B)
         val appt2 = response.appointments[2]
         assertEquals(epicAppointment2.id, appt2.id?.value)
-        assertNull(appt2.meta)
         assertEquals(2, appt2.identifier.size)
         assertFalse(appt2.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("booked"), appt2.status)
@@ -2400,7 +2389,7 @@ class EpicAppointmentServiceTest {
                     endDate = "11/01/2015"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         every {
             patientService.getPatientsFHIRIds(
@@ -2437,7 +2426,6 @@ class EpicAppointmentServiceTest {
         // unique Practitioner 2 (not 1 or 3)
         val appt0 = response.appointments[0]
         assertEquals(epicAppointment1.id, appt0.id?.value)
-        assertNull(appt0.meta)
         assertEquals(2, appt0.identifier.size)
         assertFalse(appt0.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("booked"), appt0.status)
@@ -2453,7 +2441,6 @@ class EpicAppointmentServiceTest {
         // unique Practitioner 1 (not 2 or 3)
         val appt1 = response.appointments[1]
         assertEquals(epicAppointment2.id, appt1.id?.value)
-        assertNull(appt1.meta)
         assertEquals(2, appt1.identifier.size)
         assertFalse(appt1.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("arrived"), appt1.status)
@@ -2469,7 +2456,6 @@ class EpicAppointmentServiceTest {
         // unique Practitioner 3 (not 1 or 2)
         val appt2 = response.appointments[2]
         assertEquals(epicAppointment2.id, appt2.id?.value)
-        assertNull(appt2.meta)
         assertEquals(2, appt2.identifier.size)
         assertFalse(appt2.identifier.none { ident -> ident.system.let { it?.value == epicVendor.encounterCSNSystem } })
         assertEquals(Code("booked"), appt2.status)

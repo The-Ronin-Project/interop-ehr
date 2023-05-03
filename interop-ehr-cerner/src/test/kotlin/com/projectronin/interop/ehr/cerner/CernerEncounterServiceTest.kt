@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr.cerner
 import com.projectronin.interop.ehr.EncounterService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.ehr.cerner.client.RepeatingParameter
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Encounter
@@ -28,16 +29,16 @@ class CernerEncounterServiceTest {
         )
 
         val encounter1 = mockk<BundleEntry> {
-            every { resource } returns mockk<Encounter> {
+            every { resource } returns mockk<Encounter>(relaxed = true) {
                 every { id!!.value } returns "12345"
             }
         }
         val encounter2 = mockk<BundleEntry> {
-            every { resource } returns mockk<Encounter> {
+            every { resource } returns mockk<Encounter>(relaxed = true) {
                 every { id!!.value } returns "67890"
             }
         }
-        val bundle = mockk<Bundle> {
+        val bundle = mockk<Bundle>(relaxed = true) {
             every { entry } returns listOf(encounter1, encounter2)
             every { link } returns emptyList()
         }
@@ -51,8 +52,8 @@ class CernerEncounterServiceTest {
                     "date" to RepeatingParameter(listOf("ge2015-01-01T00:00:00-06:00", "lt2015-11-02T00:00:00-06:00")),
                     "_count" to 20
                 )
-            ).body<Bundle>()
-        } returns bundle
+            )
+        } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
 
         val response =
             encounterService.findPatientEncounters(

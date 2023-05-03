@@ -9,6 +9,7 @@ dependencies {
     implementation(libs.interop.commonHttp)
     implementation(libs.interop.commonJackson)
     implementation(libs.interop.fhir)
+    implementation(libs.interop.publishers.datalake)
     implementation("org.springframework:spring-context")
 
     implementation(libs.dd.trace.api)

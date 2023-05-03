@@ -16,6 +16,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.converters.toIdentifie
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.outputs.AppointmentsWithNewPatients
+import com.projectronin.interop.ehr.outputs.addMetaSource
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
@@ -34,7 +35,6 @@ import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import datadog.trace.api.Trace
-import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.beans.factory.annotation.Value
@@ -105,9 +105,10 @@ class EpicAppointmentService(
 
     private fun getPatientMRN(tenant: Tenant, patientFHIRId: String): String? {
         // try aidbox first
-        val patient = runCatching { aidboxPatientService.getPatientByUDPId(tenant.mnemonic, patientFHIRId.localize(tenant)) }
-            // try EHR next
-            .getOrElse { patientService.getPatient(tenant, patientFHIRId) }
+        val patient =
+            runCatching { aidboxPatientService.getPatientByUDPId(tenant.mnemonic, patientFHIRId.localize(tenant)) }
+                // try EHR next
+                .getOrElse { patientService.getPatient(tenant, patientFHIRId) }
         return identifierService.getMRNIdentifier(tenant, patient.identifier).value?.value
     }
 
@@ -212,7 +213,9 @@ class EpicAppointmentService(
 
         return runBlocking {
             val httpResponse = epicClient.post(tenant, urlPart, request)
-            httpResponse.body()
+            val body = httpResponse.body<GetAppointmentsResponse>()
+            body.appointments?.forEach { it.transactionID = httpResponse.sourceURL }
+            body
         }
     }
 
@@ -506,7 +509,7 @@ class EpicAppointmentService(
             basedOn = emptyList(),
             participant = listOf(patientParticipant) + practitionerParticipants + locationParticipants,
             requestedPeriod = emptyList()
-        )
+        ).addMetaSource(this.transactionID) as Appointment
     }
 
     /**

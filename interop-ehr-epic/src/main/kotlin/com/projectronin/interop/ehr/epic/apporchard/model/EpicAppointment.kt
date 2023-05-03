@@ -20,7 +20,8 @@ data class EpicAppointment(
     val patientIDs: List<IDType> = listOf(),
     val patientName: String = "",
     val providers: List<ScheduleProviderReturnWithTime> = listOf(),
-    val visitTypeName: String = ""
+    val visitTypeName: String = "",
+    var transactionID: String = ""
 ) {
     @get:JsonIgnore
     val id: String by lazy {

@@ -2,8 +2,9 @@ package com.projectronin.interop.ehr.cerner.client
 
 import com.projectronin.interop.common.http.FhirJson
 import com.projectronin.interop.common.http.request
+import com.projectronin.interop.datalake.DatalakePublishService
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
-import com.projectronin.interop.fhir.r4.resource.Resource
+import com.projectronin.interop.ehr.client.EHRClient
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
@@ -23,11 +24,12 @@ import org.springframework.stereotype.Component
 @Component
 class CernerClient(
     private val client: HttpClient,
-    private val authenticationBroker: EHRAuthenticationBroker
-) {
+    private val authenticationBroker: EHRAuthenticationBroker,
+    datalakePublishService: DatalakePublishService
+) : EHRClient(client, authenticationBroker, datalakePublishService) {
     private val logger = KotlinLogging.logger { }
 
-    suspend fun get(tenant: Tenant, urlPart: String, parameters: Map<String, Any?> = mapOf()): HttpResponse {
+    override suspend fun getImpl(tenant: Tenant, urlPart: String, parameters: Map<String, Any?>): HttpResponse {
         logger.debug { "Started GET call to tenant: ${tenant.mnemonic}" }
 
         val authentication = authenticationBroker.getAuthentication(tenant)
@@ -70,7 +72,7 @@ class CernerClient(
         return response
     }
 
-    suspend fun post(tenant: Tenant, urlPart: String, requestBody: Resource<*>): HttpResponse {
+    override suspend fun postImpl(tenant: Tenant, urlPart: String, requestBody: Any, parameters: Map<String, Any?>): HttpResponse {
         logger.debug { "Started POST call to tenant: ${tenant.mnemonic}" }
 
         val authentication = authenticationBroker.getAuthentication(tenant)

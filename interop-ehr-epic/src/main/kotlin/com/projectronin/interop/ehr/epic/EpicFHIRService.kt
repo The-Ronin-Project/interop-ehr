@@ -8,7 +8,6 @@ import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.stu3.resource.STU3Bundle
 import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
-import io.ktor.client.call.body
 import io.ktor.util.reflect.TypeInfo
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
@@ -96,6 +95,7 @@ abstract class EpicFHIRService<T : Resource<T>>(val epicClient: EpicClient) : FH
                     } else {
                         epicClient.get(tenant, nextURL!!)
                     }
+                // TODO: update to use EHRResponse + transaction ID
                 httpResponse.body<STU3Bundle>()
             }
 

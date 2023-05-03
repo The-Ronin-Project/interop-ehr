@@ -77,7 +77,7 @@ class CernerMessageServiceTest {
             encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
         )
         coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { headers } returns mockk {
+            every { httpResponse.headers } returns mockk {
                 every { this@mockk["Location"] } returns null
             }
         }
@@ -111,7 +111,7 @@ class CernerMessageServiceTest {
             encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
         )
         coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { headers } returns mockk {
+            every { httpResponse.headers } returns mockk {
                 every { this@mockk["Location"] } returns "http://projectronin.com"
             }
         }
@@ -148,7 +148,7 @@ class CernerMessageServiceTest {
             encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
         )
         coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { headers } returns mockk {
+            every { httpResponse.headers } returns mockk {
                 every { this@mockk["Location"] } returns "Communication/1-2-3-4"
             }
         }
@@ -188,7 +188,7 @@ class CernerMessageServiceTest {
             encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
         )
         coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { headers } returns mockk {
+            every { httpResponse.headers } returns mockk {
                 every { this@mockk["Location"] } returns "Communication/1-2-3-4"
             }
         }
@@ -222,7 +222,7 @@ class CernerMessageServiceTest {
             encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
         )
         coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { headers } returns mockk {
+            every { httpResponse.headers } returns mockk {
                 every { this@mockk["Location"] } returns "Communication/1-2-3-4"
             }
         }
@@ -256,7 +256,7 @@ class CernerMessageServiceTest {
             encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
         )
         coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { headers } returns mockk {
+            every { httpResponse.headers } returns mockk {
                 every { this@mockk["Location"] } returns "Communication/1-2-3-4"
             }
         }
@@ -290,7 +290,7 @@ class CernerMessageServiceTest {
             encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
         )
         coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { headers } returns mockk {
+            every { httpResponse.headers } returns mockk {
                 every { this@mockk["Location"] } returns "Communication/1-2-3-4"
             }
         }

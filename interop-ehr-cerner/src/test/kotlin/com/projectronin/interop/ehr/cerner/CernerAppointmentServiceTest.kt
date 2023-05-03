@@ -4,6 +4,7 @@ import com.projectronin.interop.aidbox.PatientService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.ehr.cerner.client.RepeatingParameter
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.resource.Bundle
@@ -29,6 +30,7 @@ class CernerAppointmentServiceTest {
     private lateinit var cernerPatientService: CernerPatientService
     private lateinit var appointmentService: CernerAppointmentService
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
     private lateinit var tenant: Tenant
     private val validAppointmentBundle = readResource<Bundle>("/ExampleAppointmentBundle.json")
 
@@ -37,6 +39,7 @@ class CernerAppointmentServiceTest {
         cernerClient = mockk()
         aidboxPatientService = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
         cernerPatientService = mockk()
         appointmentService = CernerAppointmentService(cernerClient, aidboxPatientService, cernerPatientService)
         tenant = createTestTenant(
@@ -61,7 +64,7 @@ class CernerAppointmentServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
         val appointments = appointmentService.findPatientAppointments(
             tenant = tenant,
             patientFHIRId = "patientFhirId",
@@ -85,7 +88,7 @@ class CernerAppointmentServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
         every {
             aidboxPatientService.getPatientFHIRIds<String>(
                 tenant.mnemonic,
@@ -119,7 +122,7 @@ class CernerAppointmentServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
         every { aidboxPatientService.getPatientFHIRIds<String>(tenant.mnemonic, any()) } returns emptyMap()
         every { cernerPatientService.getPatient(tenant, "12724066") } returns mockk()
         val response = appointmentService.findProviderAppointments(
@@ -149,7 +152,7 @@ class CernerAppointmentServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
         every {
             aidboxPatientService.getPatientFHIRIds<String>(
                 tenant.mnemonic,
@@ -169,11 +172,11 @@ class CernerAppointmentServiceTest {
     @Test
     fun `findLocationAppointments - throws error when missing valid patient reference`() {
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns mockk {
+        coEvery { httpResponse.body<Bundle>() } returns mockk(relaxed = true) {
             every { link } returns emptyList()
             every { entry } returns listOf(
                 mockk {
-                    every { resource } returns mockk<Appointment> {
+                    every { resource } returns mockk<Appointment>(relaxed = true) {
                         every { participant } returns listOf(
                             // this one is causing an error
                             mockk {
@@ -195,7 +198,7 @@ class CernerAppointmentServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
         every {
             aidboxPatientService.getPatientFHIRIds<String>(
                 tenant.mnemonic,
@@ -211,11 +214,11 @@ class CernerAppointmentServiceTest {
             )
         }
         // do it again but make the reference slightly different
-        coEvery { httpResponse.body<Bundle>() } returns mockk {
+        coEvery { httpResponse.body<Bundle>() } returns mockk(relaxed = true) {
             every { link } returns emptyList()
             every { entry } returns listOf(
                 mockk {
-                    every { resource } returns mockk<Appointment> {
+                    every { resource } returns mockk<Appointment>(relaxed = true) {
                         every { participant } returns listOf(
                             // this one is causing an error
                             mockk {

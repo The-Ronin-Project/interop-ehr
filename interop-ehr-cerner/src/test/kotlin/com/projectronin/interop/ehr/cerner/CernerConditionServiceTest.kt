@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.ehr.inputs.FHIRSearchToken
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.body
@@ -19,6 +20,7 @@ class CernerConditionServiceTest {
     private lateinit var cernerClient: CernerClient
     private lateinit var conditionService: CernerConditionService
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
     private lateinit var pagingHttpResponse: HttpResponse
     private val validConditionSearch = readResource<Bundle>("/ExampleConditionBundle.json")
     private val pagingConditionSearch = readResource<Bundle>("/ExampleConditionBundleWithPaging.json")
@@ -29,6 +31,7 @@ class CernerConditionServiceTest {
     fun setup() {
         cernerClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
         pagingHttpResponse = mockk()
         conditionService = CernerConditionService(cernerClient)
     }
@@ -58,7 +61,7 @@ class CernerConditionServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             conditionService.findConditions(
@@ -101,7 +104,7 @@ class CernerConditionServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             conditionService.findConditionsByCodes(
@@ -157,7 +160,7 @@ class CernerConditionServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             conditionService.findConditionsByCodes(
@@ -202,7 +205,7 @@ class CernerConditionServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             conditionService.findConditions(
@@ -240,7 +243,7 @@ class CernerConditionServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             conditionService.findConditions(
@@ -279,7 +282,7 @@ class CernerConditionServiceTest {
                     "_count" to 20
                 )
             )
-        } returns pagingHttpResponse
+        } returns EHRResponse(pagingHttpResponse, "67890")
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validConditionSearch
@@ -288,7 +291,7 @@ class CernerConditionServiceTest {
                 tenant,
                 nextUrl
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val list =
             conditionService.findConditions(
@@ -329,7 +332,7 @@ class CernerConditionServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             conditionService.findConditionsByCodes(

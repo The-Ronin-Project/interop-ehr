@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
@@ -20,12 +21,14 @@ import org.junit.jupiter.api.Test
 class EpicFHIRServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
     private val conditionBundle = readResource<Bundle>("/ExampleConditionBundle.json")
 
     @BeforeEach
     fun setup() {
         epicClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
     }
 
     @Test
@@ -48,7 +51,7 @@ class EpicFHIRServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val service = TestService(epicClient, mapOf())
         val conditions = service.getConditions(tenant)
@@ -75,7 +78,7 @@ class EpicFHIRServiceTest {
                     "_count" to 250
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val service = TestService(epicClient, mapOf("_count" to 250))
         val conditions = service.getConditions(tenant)
@@ -92,8 +95,8 @@ class EpicFHIRServiceTest {
                 "TEST_TENANT"
             )
 
-        val condition = mockk<Condition>()
-        val bundle = mockk<Bundle> {
+        val condition = mockk<Condition>(relaxed = true)
+        val bundle = mockk<Bundle>(relaxed = true) {
             every { link } returns listOf()
             every { entry } returns listOf(
                 mockk {
@@ -112,7 +115,7 @@ class EpicFHIRServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val service = TestService(epicClient, mapOf())
         val conditions = service.getConditions(tenant)
@@ -129,8 +132,8 @@ class EpicFHIRServiceTest {
                 "TEST_TENANT"
             )
 
-        val condition = mockk<Condition>()
-        val bundle = mockk<Bundle> {
+        val condition = mockk<Condition>(relaxed = true)
+        val bundle = mockk<Bundle>(relaxed = true) {
             every { link } returns listOf(
                 mockk {
                     every { relation } returns FHIRString("self")
@@ -153,7 +156,7 @@ class EpicFHIRServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val service = TestService(epicClient, mapOf())
         val conditions = service.getConditions(tenant)
@@ -170,8 +173,8 @@ class EpicFHIRServiceTest {
                 "TEST_TENANT"
             )
 
-        val condition = mockk<Condition>()
-        val bundle = mockk<Bundle> {
+        val condition = mockk<Condition>(relaxed = true)
+        val bundle = mockk<Bundle>(relaxed = true) {
             every { link } returns listOf(
                 mockk {
                     every { relation } returns null
@@ -194,7 +197,7 @@ class EpicFHIRServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val service = TestService(epicClient, mapOf())
         val conditions = service.getConditions(tenant)
@@ -211,8 +214,8 @@ class EpicFHIRServiceTest {
                 "TEST_TENANT"
             )
 
-        val condition = mockk<Condition>()
-        val bundle = mockk<Bundle> {
+        val condition = mockk<Condition>(relaxed = true)
+        val bundle = mockk<Bundle>(relaxed = true) {
             every { link } returns listOf(
                 mockk {
                     every { relation } returns FHIRString("next")
@@ -236,7 +239,7 @@ class EpicFHIRServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val service = TestService(epicClient, mapOf())
         val conditions = service.getConditions(tenant)
@@ -253,8 +256,8 @@ class EpicFHIRServiceTest {
                 "TEST_TENANT"
             )
 
-        val condition = mockk<Condition>()
-        val bundle = mockk<Bundle> {
+        val condition = mockk<Condition>(relaxed = true)
+        val bundle = mockk<Bundle>(relaxed = true) {
             every { link } returns listOf(
                 mockk {
                     every { relation } returns FHIRString("next")
@@ -278,7 +281,7 @@ class EpicFHIRServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val service = TestService(epicClient, mapOf())
         val conditions = service.getConditions(tenant)
@@ -295,10 +298,10 @@ class EpicFHIRServiceTest {
                 "TEST_TENANT"
             )
 
-        val condition1 = mockk<Condition>() {
+        val condition1 = mockk<Condition>(relaxed = true) {
             every { id } returns Id("1234")
         }
-        val condition2 = mockk<Condition>() {
+        val condition2 = mockk<Condition>(relaxed = true) {
             every { id } returns Id("5678")
         }
         val bundle1 = mockk<Bundle>(relaxed = true) {
@@ -333,14 +336,14 @@ class EpicFHIRServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val httpResponse2 = mockk<HttpResponse> {
             every { status } returns HttpStatusCode.OK
             coEvery { body<Bundle>() } returns bundle2
         }
 
-        coEvery { epicClient.get(tenant, "http://test/1234") } returns httpResponse2
+        coEvery { epicClient.get(tenant, "http://test/1234") } returns EHRResponse(httpResponse2, "67890")
 
         val service = TestService(epicClient, mapOf())
         val conditions = service.getConditions(tenant)

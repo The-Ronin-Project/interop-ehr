@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.cerner.client
 
+import com.projectronin.interop.datalake.DatalakePublishService
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
 import com.projectronin.interop.ehr.cerner.auth.CernerAuthentication
 import com.projectronin.interop.ehr.cerner.createTestTenant
@@ -24,7 +25,10 @@ import org.junit.jupiter.api.assertThrows
 class CernerClientTest {
     private val patientResult = this::class.java.getResource("/ExamplePatientResponse.json")!!.readText()
     private val authenticationBroker = mockk<EHRAuthenticationBroker>()
-    private val cernerClient = CernerClient(getClient(), authenticationBroker)
+    private val datalakePublishService = mockk<DatalakePublishService> {
+        every { publishRawData(any(), any(), any()) } returns "12345"
+    }
+    private val cernerClient = CernerClient(getClient(), authenticationBroker, datalakePublishService)
     private lateinit var mockWebServer: MockWebServer
 
     @BeforeEach
@@ -78,7 +82,7 @@ class CernerClientTest {
                 tenant,
                 "/Patient/12724066"
             )
-            httpResponse.bodyAsText()
+            httpResponse.httpResponse.bodyAsText()
         }
         assertEquals(patientResult, response)
         val requestUrl = mockWebServer.takeRequest().path
@@ -111,7 +115,7 @@ class CernerClientTest {
                     "noValue" to null
                 )
             )
-            httpResponse.bodyAsText()
+            httpResponse.httpResponse.bodyAsText()
         }
         assertEquals(patientResult, response)
         val requestUrl = mockWebServer.takeRequest().path
@@ -166,7 +170,7 @@ class CernerClientTest {
         val response = runBlocking {
             cernerClient.post(tenant, "/Communication", communication)
         }
-        assertEquals(HttpStatusCode.Created, response.status)
+        assertEquals(HttpStatusCode.Created, response.httpResponse.status)
 
         val request = mockWebServer.takeRequest()
 

@@ -6,7 +6,7 @@ plugins {
 dependencies {
     implementation(libs.dd.trace.api)
 
-    implementation(libs.interop.aidbox)
+    implementation(libs.interop.publishers.aidbox)
     implementation(libs.interop.common)
     implementation(libs.interop.commonHttp)
     implementation(libs.interop.commonJackson)
@@ -23,7 +23,7 @@ dependencies {
     implementation(libs.opentracing.util)
 
     testImplementation(libs.mockk)
-    testImplementation(libs.interop.datalake)
+    implementation(libs.interop.publishers.datalake)
 
     // Using MockWebservice to ensure we can verify the headers set by the ktor engine
     testImplementation(libs.mockwebserver)

@@ -46,7 +46,7 @@ class CernerMessageService(cernerClient: CernerClient) :
         val communication = createCommunication(tenant, vendor, messageInput)
         val response = runBlocking { cernerClient.post(tenant, fhirURLSearchPart, communication) }
 
-        val resourceLocation = response.headers["Location"]
+        val resourceLocation = response.httpResponse.headers["Location"]
             ?: throw ResourceCreateException(tenant, fhirURLSearchPart) { "No Location header received" }
         val createdFhirId = Reference.getId(resourceLocation)
             ?: throw ResourceCreateException(

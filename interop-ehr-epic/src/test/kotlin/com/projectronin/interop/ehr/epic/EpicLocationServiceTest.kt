@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.LocationService
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Location
@@ -22,24 +23,23 @@ internal class EpicLocationServiceTest {
         val tenant = mockk<Tenant>()
 
         val location1 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location> {
+            every { resource } returns mockk<Location>(relaxed = true) {
                 every { id!!.value } returns "12345"
             }
         }
         val location2 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location> {
+            every { resource } returns mockk<Location>(relaxed = true) {
                 every { id!!.value } returns "67890"
             }
         }
-        val bundle = mockk<Bundle> {
+        val bundle = mockk<Bundle>(relaxed = true) {
             every { entry } returns listOf(location1, location2)
             every { link } returns emptyList()
         }
 
         coEvery {
             epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to "12345,67890", "_count" to 50))
-                .body<Bundle>()
-        } returns bundle
+        } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
 
         val response =
             locationService.getLocationsByFHIRId(tenant, listOf("12345", "67890", "12345")) // test de-duplicate
@@ -53,38 +53,36 @@ internal class EpicLocationServiceTest {
         val tenant = mockk<Tenant>()
 
         val location1 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location> {
+            every { resource } returns mockk<Location>(relaxed = true) {
                 every { id!!.value } returns "12345"
             }
         }
         val location2 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location> {
+            every { resource } returns mockk<Location>(relaxed = true) {
                 every { id!!.value } returns "67890"
             }
         }
 
         val location3 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location> {
+            every { resource } returns mockk<Location>(relaxed = true) {
                 every { id!!.value } returns "456"
             }
         }
-        val bundle = mockk<Bundle> {
+        val bundle = mockk<Bundle>(relaxed = true) {
             every { entry } returns listOf(location1, location2)
             every { link } returns emptyList()
         }
-        val bundle2 = mockk<Bundle> {
+        val bundle2 = mockk<Bundle>(relaxed = true) {
             every { entry } returns listOf(location3)
             every { link } returns emptyList()
         }
 
         coEvery {
             epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to "12345,67890", "_count" to 50))
-                .body<Bundle>()
-        } returns bundle
+        } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
         coEvery {
             epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to "456", "_count" to 50))
-                .body<Bundle>()
-        } returns bundle2
+        } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle2 }, "67890")
 
         val response =
             smallLocationService.getLocationsByFHIRId(tenant, listOf("12345", "67890", "456"))

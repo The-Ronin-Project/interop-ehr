@@ -5,6 +5,7 @@ import com.projectronin.interop.common.http.exceptions.ServerFailureException
 import com.projectronin.interop.ehr.cerner.CernerFHIRService
 import com.projectronin.interop.ehr.cerner.createTestTenant
 import com.projectronin.interop.ehr.cerner.getClient
+import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -33,7 +34,7 @@ class CernerAuthenticationServiceTest {
     class FakeResource : Resource<FakeResource> {
         override val resourceType = "Fake"
         override val id: Nothing? = null
-        override val meta: Nothing? = null
+        override var meta: Meta? = null
         override val implicitRules: Nothing? = null
         override val language: Nothing? = null
     }

@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr.cerner
 import com.projectronin.interop.common.http.exceptions.ClientFailureException
 import com.projectronin.interop.common.http.exceptions.ServerFailureException
 import com.projectronin.interop.ehr.cerner.client.CernerClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.ehr.outputs.FindPractitionersResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.BundleEntry
@@ -29,6 +30,7 @@ class CernerPractitionerServiceTest {
     private lateinit var practitionerService: CernerPractitionerService
     private lateinit var practitionerRoleService: CernerPractitionerRoleService
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
     private lateinit var pagingHttpResponse: HttpResponse
     private lateinit var tenant: Tenant
 
@@ -38,6 +40,7 @@ class CernerPractitionerServiceTest {
     fun setup() {
         cernerClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
         pagingHttpResponse = mockk()
         tenant = mockk()
         practitionerRoleService = CernerPractitionerRoleService(cernerClient)
@@ -46,7 +49,7 @@ class CernerPractitionerServiceTest {
 
     @Test
     fun `getPractitioner works when practitioner exists`() {
-        val mockPractitioner = mockk<Practitioner>()
+        val mockPractitioner = mockk<Practitioner>(relaxed = true)
 
         coEvery {
             httpResponse.body<Practitioner>(
@@ -56,7 +59,7 @@ class CernerPractitionerServiceTest {
                 )
             )
         } returns mockPractitioner
-        coEvery { cernerClient.get(tenant, "/Practitioner/PractitionerFHIRID") } returns httpResponse
+        coEvery { cernerClient.get(tenant, "/Practitioner/PractitionerFHIRID") } returns ehrResponse
 
         val actual = practitionerService.getPractitioner(tenant, "PractitionerFHIRID")
         assertEquals(mockPractitioner, actual)
@@ -73,7 +76,7 @@ class CernerPractitionerServiceTest {
                 )
             )
         } throws thrownException
-        coEvery { cernerClient.get(tenant, "/Practitioner/PractitionerFHIRID") } returns httpResponse
+        coEvery { cernerClient.get(tenant, "/Practitioner/PractitionerFHIRID") } returns ehrResponse
 
         val exception =
             assertThrows<ClientFailureException> {
@@ -85,7 +88,7 @@ class CernerPractitionerServiceTest {
 
     @Test
     fun `getPractitionerByProvider works when single practitioner found`() {
-        val mockPractitioner = mockk<Practitioner>()
+        val mockPractitioner = mockk<Practitioner>(relaxed = true)
 
         coEvery { httpResponse.body<Bundle>() } returns mockBundle(mockPractitioner)
         coEvery {
@@ -94,7 +97,7 @@ class CernerPractitionerServiceTest {
                 "/Practitioner",
                 mapOf("_id" to "ProviderId", "_count" to 20)
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val actual = practitionerService.getPractitionerByProvider(tenant, "ProviderId")
         assertEquals(mockPractitioner, actual)
@@ -109,16 +112,16 @@ class CernerPractitionerServiceTest {
                 "/Practitioner",
                 mapOf("_id" to "ProviderId", "_count" to 20)
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         assertThrows<NoSuchElementException> { practitionerService.getPractitionerByProvider(tenant, "ProviderId") }
     }
 
     @Test
     fun `getPractitionerByProvider throws exception when multiple practitioners found`() {
-        val mockPractitioner1 = mockk<Practitioner>()
-        val mockPractitioner2 = mockk<Practitioner>()
-        val mockPractitioner3 = mockk<Practitioner>()
+        val mockPractitioner1 = mockk<Practitioner>(relaxed = true)
+        val mockPractitioner2 = mockk<Practitioner>(relaxed = true)
+        val mockPractitioner3 = mockk<Practitioner>(relaxed = true)
 
         coEvery { httpResponse.body<Bundle>() } returns mockBundle(
             mockPractitioner1,
@@ -131,7 +134,7 @@ class CernerPractitionerServiceTest {
                 "/Practitioner",
                 mapOf("_id" to "ProviderId", "_count" to 20)
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         assertThrows<IllegalArgumentException> { practitionerService.getPractitionerByProvider(tenant, "ProviderId") }
     }
@@ -146,7 +149,7 @@ class CernerPractitionerServiceTest {
                 "/Practitioner",
                 mapOf("_id" to "ProviderId", "_count" to 20)
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val exception =
             assertThrows<ServerFailureException> { practitionerService.getPractitionerByProvider(tenant, "ProviderId") }
@@ -191,7 +194,7 @@ class CernerPractitionerServiceTest {
                     "_count" to 20
                 )
             )
-        } returns pagingHttpResponse
+        } returns EHRResponse(pagingHttpResponse, "67890")
 
         val parameters = mapOf(
             "_count" to 20
@@ -223,12 +226,12 @@ class CernerPractitionerServiceTest {
 
     private fun <R : Resource<R>> mockBundle(vararg resources: R): Bundle {
         val entries = resources.map {
-            mockk<BundleEntry> {
+            mockk<BundleEntry>(relaxed = true) {
                 every { resource } returns it
             }
         }
 
-        return mockk {
+        return mockk(relaxed = true) {
             every { entry } returns entries
             every { link } returns emptyList()
         }

@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.aidbox.model.SystemValue
 import com.projectronin.interop.ehr.cerner.client.CernerClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
@@ -30,6 +31,8 @@ class CernerPatientServiceTest {
     private lateinit var cernerClient: CernerClient
     private lateinit var aidboxClient: AidboxPatientService
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
+
     private val validPatientBundle = readResource<Bundle>("/ExamplePatientBundle.json")
     private val validPatientBundleSingle = readResource<Bundle>("/ExamplePatientBundleSingle.json")
 
@@ -38,6 +41,7 @@ class CernerPatientServiceTest {
         cernerClient = mockk()
         aidboxClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
     }
 
     @Test
@@ -59,7 +63,7 @@ class CernerPatientServiceTest {
                 "/Patient",
                 mapOf("given" to "givenName", "family:exact" to "familyName", "birthdate" to "2015-01-01", "_count" to 20)
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle = CernerPatientService(cernerClient, aidboxClient).findPatient(
             tenant,
@@ -77,10 +81,10 @@ class CernerPatientServiceTest {
             authEndpoint = "https://example.org",
             secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
         )
-        val fakePat = mockk<Patient>()
+        val fakePat = mockk<Patient>(relaxed = true)
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Patient>(TypeInfo(Patient::class, Patient::class.java)) } returns fakePat
-        coEvery { cernerClient.get(tenant, "/Patient/FHIRID") } returns httpResponse
+        coEvery { cernerClient.get(tenant, "/Patient/FHIRID") } returns ehrResponse
         val actual = CernerPatientService(cernerClient, aidboxClient).getPatient(tenant, "FHIRID")
         assertEquals(fakePat, actual)
     }
@@ -106,7 +110,7 @@ class CernerPatientServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val resultPatientsByKey = CernerPatientService(cernerClient, aidboxClient).findPatientsById(
             tenant,
@@ -131,7 +135,7 @@ class CernerPatientServiceTest {
             mrnSystem = mrnSystem
         )
 
-        val patient = mockk<Patient> {
+        val patient = mockk<Patient>(relaxed = true) {
             every { identifier } returns listOf(
                 mockk {
                     every { system } returns Uri("urn:oid:2.16.840.1.113883.6.1000")
@@ -143,7 +147,7 @@ class CernerPatientServiceTest {
                 }
             )
         }
-        val bundle = mockk<Bundle> {
+        val bundle = mockk<Bundle>(relaxed = true) {
             every { link } returns listOf()
             every { entry } returns listOf(
                 mockk {
@@ -162,7 +166,7 @@ class CernerPatientServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val resultPatientsByKey = CernerPatientService(cernerClient, aidboxClient).findPatientsById(
             tenant,
@@ -189,7 +193,7 @@ class CernerPatientServiceTest {
             mrnSystem = mrnSystem
         )
 
-        val bundle = mockk<Bundle> {
+        val bundle = mockk<Bundle>(relaxed = true) {
             every { link } returns listOf()
             every { entry } returns emptyList()
         }
@@ -204,7 +208,7 @@ class CernerPatientServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val resultPatientsByKey = CernerPatientService(cernerClient, aidboxClient).findPatientsById(
             tenant,
@@ -240,7 +244,7 @@ class CernerPatientServiceTest {
                     "_count" to 20
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val resultPatientsByKey = CernerPatientService(cernerClient, aidboxClient).findPatientsById(
             tenant,

@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
@@ -18,12 +19,14 @@ internal class EpicOrganizationServiceTest {
     private lateinit var organizationService: EpicOrganizationService
     private lateinit var tenant: Tenant
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
     private val validOrganizationResponse = readResource<Bundle>("/ExampleOrganizationBundle.json")
 
     @BeforeEach
     fun setup() {
         epicClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
         organizationService = EpicOrganizationService(epicClient)
         tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
@@ -46,7 +49,7 @@ internal class EpicOrganizationServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle = organizationService.findOrganizationsByFHIRId(
             tenant,

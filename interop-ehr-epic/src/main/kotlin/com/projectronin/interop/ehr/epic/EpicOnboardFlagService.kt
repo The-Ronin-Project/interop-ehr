@@ -8,7 +8,6 @@ import com.projectronin.interop.ehr.epic.apporchard.model.exceptions.AppOrchardE
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
-import io.ktor.client.call.body
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
@@ -41,13 +40,12 @@ class EpicOnboardFlagService(
             "UserIDType" to "External"
         )
         val response: SetPatientFlagResponse = runBlocking {
-            val httpResponse = epicClient.post(
+            epicClient.post(
                 tenant = tenant,
                 urlPart = apiEndpoint,
                 requestBody = SetPatientFlagRequest(flag),
                 parameters = postParameters
-            )
-            httpResponse.body()
+            ).body()
         }
         // if Epic returns a non-2XX status code, our ktor wrapper will handle throwing an exception,
         // but a cool thing Epic does it return a 2XX code with an "Error" present, we should still treat that

@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.common.vendor.VendorType
+import com.projectronin.interop.datalake.DatalakePublishService
 import com.projectronin.interop.datalake.oci.client.OCIClient
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -58,7 +59,7 @@ class CernerVendorFactoryTest {
             fun ociClient(): OCIClient = mockk()
 
             @Bean
-            fun datalakePublishService(): Database = mockk()
+            fun datalakePublishService(): DatalakePublishService = mockk()
         }
 
         val applicationContext = AnnotationConfigApplicationContext(TestConfig::class.java)

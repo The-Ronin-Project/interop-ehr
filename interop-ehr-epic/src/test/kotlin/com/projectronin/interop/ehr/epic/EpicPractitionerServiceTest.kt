@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr.epic
 import com.projectronin.interop.common.http.exceptions.ClientFailureException
 import com.projectronin.interop.common.http.exceptions.ServerFailureException
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.ehr.outputs.FindPractitionersResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.BundleEntry
@@ -26,6 +27,7 @@ class EpicPractitionerServiceTest {
     private lateinit var practitionerService: EpicPractitionerService
     private lateinit var practitionerRoleService: EpicPractitionerRoleService
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
     private lateinit var pagingHttpResponse: HttpResponse
     private val validPractitionerSearchBundle = readResource<Bundle>("/ExampleFindPractitionersResponse.json")
     private val pagingPractitionerSearchBundle =
@@ -35,6 +37,7 @@ class EpicPractitionerServiceTest {
     fun setup() {
         epicClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
         pagingHttpResponse = mockk()
         practitionerRoleService = EpicPractitionerRoleService(epicClient, 1)
         practitionerService = EpicPractitionerService(epicClient, practitionerRoleService, 1)
@@ -62,7 +65,7 @@ class EpicPractitionerServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             practitionerService.findPractitionersByLocation(
@@ -98,7 +101,7 @@ class EpicPractitionerServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
         coEvery {
             epicClient.get(
                 tenant,
@@ -109,7 +112,7 @@ class EpicPractitionerServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             practitionerService.findPractitionersByLocation(
@@ -150,7 +153,7 @@ class EpicPractitionerServiceTest {
                     "_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to "loc1,loc2"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
          */
         coEvery {
             epicClient.get(
@@ -162,7 +165,7 @@ class EpicPractitionerServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
         coEvery {
             epicClient.get(
                 tenant,
@@ -173,7 +176,7 @@ class EpicPractitionerServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
         coEvery {
             epicClient.get(
                 tenant,
@@ -184,7 +187,7 @@ class EpicPractitionerServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             batchingPractitionerService.findPractitionersByLocation(
@@ -223,7 +226,7 @@ class EpicPractitionerServiceTest {
                     "_count" to 50
                 )
             )
-        } returns pagingHttpResponse
+        } returns EHRResponse(pagingHttpResponse, "67890")
 
         // Mock response without paging
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -233,7 +236,7 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole?_include=PractitionerRole:practitioner,PractitionerRole:location&location=e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             practitionerService.findPractitionersByLocation(
@@ -254,10 +257,17 @@ class EpicPractitionerServiceTest {
     @Test
     fun `getPractitioner works when practitioner exists`() {
         val tenant = mockk<Tenant>()
-        val mockPractitioner = mockk<Practitioner>()
+        val mockPractitioner = mockk<Practitioner>(relaxed = true)
 
-        coEvery { httpResponse.body<Practitioner>(TypeInfo(Practitioner::class, Practitioner::class.java)) } returns mockPractitioner
-        coEvery { epicClient.get(tenant, "/api/FHIR/R4/Practitioner/PracFHIRID") } returns httpResponse
+        coEvery {
+            httpResponse.body<Practitioner>(
+                TypeInfo(
+                    Practitioner::class,
+                    Practitioner::class.java
+                )
+            )
+        } returns mockPractitioner
+        coEvery { epicClient.get(tenant, "/api/FHIR/R4/Practitioner/PracFHIRID") } returns ehrResponse
 
         val actual = practitionerService.getPractitioner(tenant, "PracFHIRID")
         assertEquals(mockPractitioner, actual)
@@ -268,8 +278,15 @@ class EpicPractitionerServiceTest {
         val tenant = mockk<Tenant>()
 
         val thrownException = ClientFailureException(HttpStatusCode.NotFound, "Not Found")
-        coEvery { httpResponse.body<Practitioner>(TypeInfo(Practitioner::class, Practitioner::class.java)) } throws thrownException
-        coEvery { epicClient.get(tenant, "/api/FHIR/R4/Practitioner/PracFHIRID") } returns httpResponse
+        coEvery {
+            httpResponse.body<Practitioner>(
+                TypeInfo(
+                    Practitioner::class,
+                    Practitioner::class.java
+                )
+            )
+        } throws thrownException
+        coEvery { epicClient.get(tenant, "/api/FHIR/R4/Practitioner/PracFHIRID") } returns ehrResponse
 
         val exception =
             assertThrows<ClientFailureException> { practitionerService.getPractitioner(tenant, "PracFHIRID") }
@@ -280,7 +297,7 @@ class EpicPractitionerServiceTest {
     @Test
     fun `getPractitionerByProvider works when single practitioner found`() {
         val tenant = mockk<Tenant>()
-        val mockPractitioner = mockk<Practitioner>()
+        val mockPractitioner = mockk<Practitioner>(relaxed = true)
 
         coEvery { httpResponse.body<Bundle>() } returns mockBundle(mockPractitioner)
         coEvery {
@@ -289,7 +306,7 @@ class EpicPractitionerServiceTest {
                 "/api/FHIR/R4/Practitioner",
                 mapOf("identifier" to "External|ProviderId", "_count" to 50)
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val actual = practitionerService.getPractitionerByProvider(tenant, "ProviderId")
         assertEquals(mockPractitioner, actual)
@@ -306,7 +323,7 @@ class EpicPractitionerServiceTest {
                 "/api/FHIR/R4/Practitioner",
                 mapOf("identifier" to "External|ProviderId", "_count" to 50)
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         assertThrows<NoSuchElementException> { practitionerService.getPractitionerByProvider(tenant, "ProviderId") }
     }
@@ -314,9 +331,9 @@ class EpicPractitionerServiceTest {
     @Test
     fun `getPractitionerByProvider throws exception when multiple practitioners found`() {
         val tenant = mockk<Tenant>()
-        val mockPractitioner1 = mockk<Practitioner>()
-        val mockPractitioner2 = mockk<Practitioner>()
-        val mockPractitioner3 = mockk<Practitioner>()
+        val mockPractitioner1 = mockk<Practitioner>(relaxed = true)
+        val mockPractitioner2 = mockk<Practitioner>(relaxed = true)
+        val mockPractitioner3 = mockk<Practitioner>(relaxed = true)
 
         coEvery { httpResponse.body<Bundle>() } returns mockBundle(
             mockPractitioner1,
@@ -329,7 +346,7 @@ class EpicPractitionerServiceTest {
                 "/api/FHIR/R4/Practitioner",
                 mapOf("identifier" to "External|ProviderId", "_count" to 50)
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         assertThrows<IllegalArgumentException> { practitionerService.getPractitionerByProvider(tenant, "ProviderId") }
     }
@@ -346,7 +363,7 @@ class EpicPractitionerServiceTest {
                 "/api/FHIR/R4/Practitioner",
                 mapOf("identifier" to "External|ProviderId", "_count" to 50)
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val exception =
             assertThrows<ServerFailureException> { practitionerService.getPractitionerByProvider(tenant, "ProviderId") }
@@ -361,7 +378,7 @@ class EpicPractitionerServiceTest {
             }
         }
 
-        return mockk {
+        return mockk(relaxed = true) {
             every { entry } returns entries
             every { link } returns emptyList()
         }

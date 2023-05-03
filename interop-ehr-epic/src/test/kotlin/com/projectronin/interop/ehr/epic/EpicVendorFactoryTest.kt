@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.common.vendor.VendorType
+import com.projectronin.interop.datalake.DatalakePublishService
 import com.projectronin.interop.datalake.oci.client.OCIClient
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -66,7 +67,7 @@ class EpicVendorFactoryTest {
 
             @Bean
             @Qualifier("datalake")
-            fun datalakePublishService(): Database = mockk()
+            fun datalakePublishService(): DatalakePublishService = mockk()
 
             fun taskExecutor(): ThreadPoolTaskExecutor = mockk(relaxed = true)
         }

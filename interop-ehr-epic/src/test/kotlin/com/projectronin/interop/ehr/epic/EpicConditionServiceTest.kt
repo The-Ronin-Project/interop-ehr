@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRSearchToken
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import io.ktor.client.call.body
@@ -19,6 +20,8 @@ class EpicConditionServiceTest {
     private lateinit var conditionService: EpicConditionService
     private lateinit var httpResponse: HttpResponse
     private lateinit var pagingHttpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
+
     private val validConditionSearch = readResource<Bundle>("/ExampleConditionBundle.json")
     private val pagingConditionSearch = readResource<Bundle>("/ExampleConditionBundleWithPaging.json")
     private val categorySystem = CodeSystem.CONDITION_CATEGORY.uri.value
@@ -28,6 +31,7 @@ class EpicConditionServiceTest {
     fun setup() {
         epicClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
         pagingHttpResponse = mockk()
         conditionService = EpicConditionService(epicClient)
     }
@@ -58,7 +62,7 @@ class EpicConditionServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             conditionService.findConditions(
@@ -102,7 +106,7 @@ class EpicConditionServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             conditionService.findConditionsByCodes(
@@ -149,7 +153,7 @@ class EpicConditionServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             conditionService.findConditionsByCodes(
@@ -189,7 +193,7 @@ class EpicConditionServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             conditionService.findConditions(
@@ -229,7 +233,7 @@ class EpicConditionServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             conditionService.findConditions(
@@ -270,7 +274,7 @@ class EpicConditionServiceTest {
                     "_count" to 50
                 )
             )
-        } returns pagingHttpResponse
+        } returns EHRResponse(pagingHttpResponse, "67890")
 
         // Mock response without paging
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -280,7 +284,7 @@ class EpicConditionServiceTest {
                 tenant,
                 "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition?patient=eovSKnwDlsv-8MsEzCJO3BA3&clinical-status=active,inactive,resolved&category=problem-list-item"
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val list =
             conditionService.findConditions(
@@ -325,7 +329,7 @@ class EpicConditionServiceTest {
                     "_count" to 50
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val bundle =
             conditionService.findConditionsByCodes(

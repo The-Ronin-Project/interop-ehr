@@ -13,7 +13,6 @@ import com.projectronin.interop.tenant.config.ProviderPoolService
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import datadog.trace.api.Trace
-import io.ktor.client.call.body
 import io.opentracing.util.GlobalTracer
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
@@ -59,8 +58,7 @@ class EpicMessageService(
 
         val response = try {
             runBlocking {
-                val httpResponse = epicClient.post(tenant, sendMessageUrlPart, sendMessageRequest)
-                httpResponse.body<SendMessageResponse>()
+                epicClient.post(tenant, sendMessageUrlPart, sendMessageRequest).body<SendMessageResponse>()
             }
         } catch (e: Exception) { // further investigation required to see if this is a sustainable solution
             logger.error { "SendMessage failed for ${tenant.mnemonic}, with exception ${e.message}" }

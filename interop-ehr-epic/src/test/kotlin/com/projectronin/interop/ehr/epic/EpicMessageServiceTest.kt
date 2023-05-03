@@ -10,6 +10,7 @@ import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
 import com.projectronin.interop.ehr.inputs.IdVendorIdentifier
 import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
@@ -39,6 +40,7 @@ import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
 class EpicMessageServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
     private lateinit var providerPoolService: ProviderPoolService
     private lateinit var aidboxPatientService: AidboxPatientService
     private lateinit var identifierService: EpicIdentifierService
@@ -49,6 +51,7 @@ class EpicMessageServiceTest {
     fun initTest() {
         epicClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
         aidboxPatientService = mockk()
         identifierService = mockk()
         providerPoolService = mockk()
@@ -111,7 +114,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -167,7 +170,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -223,7 +226,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -279,7 +282,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -346,7 +349,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -409,7 +412,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -472,7 +475,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -524,7 +527,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -581,7 +584,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -634,7 +637,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -687,7 +690,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -788,7 +791,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -847,7 +850,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -914,7 +917,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(
@@ -986,7 +989,7 @@ class EpicMessageServiceTest {
                     messageType = "Symptom Alert"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val recipientsList = listOf(
             EHRRecipient(

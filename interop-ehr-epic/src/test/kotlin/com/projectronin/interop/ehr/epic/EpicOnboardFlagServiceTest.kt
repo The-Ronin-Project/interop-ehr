@@ -6,6 +6,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.SetPatientFlagRequest
 import com.projectronin.interop.ehr.epic.apporchard.model.SetPatientFlagResponse
 import com.projectronin.interop.ehr.epic.apporchard.model.exceptions.AppOrchardError
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.resource.Patient
@@ -28,12 +29,14 @@ class EpicOnboardFlagServiceTest {
     private lateinit var identifierService: EpicIdentifierService
     private lateinit var aidboxPatientService: PatientService
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
     private lateinit var tenant: Tenant
 
     @BeforeEach
     fun initTest() {
         epicClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
         identifierService = mockk()
         aidboxPatientService = mockk()
         onboardFlagService = EpicOnboardFlagService(epicClient, identifierService, aidboxPatientService)
@@ -82,7 +85,7 @@ class EpicOnboardFlagServiceTest {
                     "UserIDType" to "External"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         assertTrue(onboardFlagService.setOnboardedFlag(tenant, "fhirId"))
     }
@@ -112,7 +115,7 @@ class EpicOnboardFlagServiceTest {
                     "UserIDType" to "External"
                 )
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val error = assertThrows<AppOrchardError> { (onboardFlagService.setOnboardedFlag(tenant, "fhirId")) }
         assertEquals("Wow, I should really be an http status", error.message)

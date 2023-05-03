@@ -74,7 +74,7 @@ class ResourceFunctionsTest {
         override val id: Id? = null,
         override val implicitRules: Uri? = null,
         override val language: Code? = null,
-        override val meta: Meta? = null,
+        override var meta: Meta? = null,
         override val resourceType: String = "Sample"
     ) : Resource<SampleResource>
 }

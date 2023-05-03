@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.resource.MedicationStatement
 import com.projectronin.interop.fhir.stu3.resource.STU3Bundle
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -19,6 +20,7 @@ class EpicMedicationStatementTest {
     private lateinit var epicClient: EpicClient
     private lateinit var medicationStatementService: EpicMedicationStatementService
     private lateinit var httpResponse: HttpResponse
+    private lateinit var ehrResponse: EHRResponse
     private lateinit var pagingHttpResponse: HttpResponse
     private val searchUrlPart = "/api/FHIR/STU3/MedicationStatement"
 
@@ -32,6 +34,7 @@ class EpicMedicationStatementTest {
         )
         epicClient = mockk()
         httpResponse = mockk()
+        ehrResponse = EHRResponse(httpResponse, "12345")
         pagingHttpResponse = mockk()
         medicationStatementService = EpicMedicationStatementService(epicClient)
     }
@@ -57,7 +60,7 @@ class EpicMedicationStatementTest {
                 searchUrlPart,
                 mapOf("patient" to patientFhirId, "_count" to 50)
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val medicationStatements = medicationStatementService.getMedicationStatementsByPatientFHIRId(
             tenant,
@@ -80,7 +83,7 @@ class EpicMedicationStatementTest {
                 searchUrlPart,
                 mapOf("patient" to patientFhirId, "_count" to 50)
             )
-        } returns httpResponse
+        } returns ehrResponse
 
         val medicationStatements = medicationStatementService.getMedicationStatementsByPatientFHIRId(
             tenant,
