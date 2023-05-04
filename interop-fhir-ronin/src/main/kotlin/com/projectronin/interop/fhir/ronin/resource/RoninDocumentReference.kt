@@ -46,6 +46,7 @@ class RoninDocumentReference(
     override fun validateRonin(element: DocumentReference, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
+            containedResourcePresent(element.contained, parentContext, validation)
             validateReference(
                 element.subject,
                 listOf("Patient"),

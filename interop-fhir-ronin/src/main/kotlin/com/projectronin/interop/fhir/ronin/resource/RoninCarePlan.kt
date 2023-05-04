@@ -25,6 +25,7 @@ class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
     override fun validate(element: CarePlan, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, validation)
+            containedResourcePresent(element.contained, parentContext, validation)
 
             // check that subject reference has type and the extension is the data authority extension identifier
             ifNotNull(element.subject) {

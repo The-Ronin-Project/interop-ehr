@@ -32,6 +32,7 @@ class RoninPractitionerRole(normalizer: Normalizer, localizer: Localizer) : USCo
     override fun validateRonin(element: PractitionerRole, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
+            containedResourcePresent(element.contained, parentContext, validation)
 
             checkNotNull(element.practitioner, requiredPractitionerError, parentContext)
         }

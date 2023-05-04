@@ -25,6 +25,7 @@ class RoninPractitioner(normalizer: Normalizer, localizer: Localizer) :
     override fun validateRonin(element: Practitioner, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
+            containedResourcePresent(element.contained, parentContext, validation)
 
             // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG and consider requireCodeableConcept()
             // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG and consider requireCodeableConcept()

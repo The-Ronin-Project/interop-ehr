@@ -35,6 +35,8 @@ class RoninMedication(
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
 
+            containedResourcePresent(element.contained, parentContext, validation)
+
             requireCodeableConcept("code", element.code, parentContext, this)
             // code will be populated by from mapping
         }

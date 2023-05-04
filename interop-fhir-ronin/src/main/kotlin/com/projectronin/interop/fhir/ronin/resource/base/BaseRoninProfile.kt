@@ -12,6 +12,7 @@ import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -70,6 +71,12 @@ abstract class BaseRoninProfile<T : Resource<T>>(
         severity = ValidationIssueSeverity.ERROR,
         description = "FHIR identifier value is required",
         location = LocationContext("", "identifier")
+    )
+    private val containedResourcePresentWarning = FHIRError(
+        code = "RONIN_CONTAINED_RESOURCE",
+        severity = ValidationIssueSeverity.WARNING,
+        description = "There is a Contained Resource present",
+        location = LocationContext("", "contained")
     )
 
     private val requiredDataAuthorityIdentifierError = FHIRError(
@@ -189,6 +196,17 @@ abstract class BaseRoninProfile<T : Resource<T>>(
                 )
                 checkNotNull(fhirIdentifier.value, requiredFhirIdentifierValueError, parentContext)
             }
+        }
+    }
+
+    protected fun containedResourcePresent(
+        containedResource: List<ContainedResource>,
+        parentContext: LocationContext,
+        validation: Validation
+    ) {
+        validation.apply {
+            checkTrue(containedResource.isEmpty(), containedResourcePresentWarning, parentContext)
+            if (containedResource.isNotEmpty()) { logger.warn { "contained resource found @ $parentContext" } }
         }
     }
 

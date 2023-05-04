@@ -41,6 +41,7 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
             ifNotNull(element.subject) {
                 requireDataAuthorityExtensionIdentifier(element.subject, LocationContext(Encounter::subject), validation)
             }
+            containedResourcePresent(element.contained, parentContext, validation)
         }
     }
 

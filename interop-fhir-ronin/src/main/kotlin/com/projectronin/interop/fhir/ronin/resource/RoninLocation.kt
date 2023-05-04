@@ -32,6 +32,7 @@ class RoninLocation(
     override fun validateRonin(element: Location, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, validation)
+            containedResourcePresent(element.contained, parentContext, validation)
 
             if (element.telecom.isNotEmpty()) {
                 contactPoint.validateRonin(element.telecom, parentContext, validation)

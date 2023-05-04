@@ -78,6 +78,7 @@ class RoninPatient(
     override fun validateRonin(element: Patient, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
+            containedResourcePresent(element.contained, parentContext, validation)
 
             val mrnIdentifier = element.identifier.find { it.system == CodeSystem.RONIN_MRN.uri }
             checkNotNull(mrnIdentifier, requiredMrnIdentifierError, parentContext)

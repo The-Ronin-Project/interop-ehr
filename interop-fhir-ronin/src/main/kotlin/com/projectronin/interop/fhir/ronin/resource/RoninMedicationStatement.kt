@@ -28,6 +28,7 @@ class RoninMedicationStatement(normalizer: Normalizer, localizer: Localizer) :
     override fun validate(element: MedicationStatement, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
+            containedResourcePresent(element.contained, parentContext, validation)
 
             // required subject is validated in R4
             validateReference(element.subject, listOf("Patient"), LocationContext(MedicationStatement::subject), this)

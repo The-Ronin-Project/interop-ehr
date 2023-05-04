@@ -26,6 +26,7 @@ class RoninOrganization(normalizer: Normalizer, localizer: Localizer) :
     override fun validateRonin(element: Organization, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
+            containedResourcePresent(element.contained, parentContext, validation)
         }
     }
 

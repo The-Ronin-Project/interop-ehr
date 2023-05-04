@@ -46,7 +46,7 @@ class RoninAppointment(private val registryClient: NormalizationRegistryClient, 
     override fun validateRonin(element: Appointment, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireRoninIdentifiers(element.identifier, parentContext, this)
-
+            containedResourcePresent(element.contained, parentContext, validation)
             // null status is checked by R4ContactPointValidator
 
             // extension - not empty - 1..*

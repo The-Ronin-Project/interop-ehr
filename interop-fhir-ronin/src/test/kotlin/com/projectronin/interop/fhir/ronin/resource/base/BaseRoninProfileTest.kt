@@ -15,6 +15,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
 import com.projectronin.interop.fhir.ronin.localization.Localizer
@@ -26,9 +27,12 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.io.ByteArrayOutputStream
+import java.io.PrintStream
 
 class BaseRoninProfileTest {
     private val tenant = mockk<Tenant> {
@@ -497,6 +501,31 @@ class BaseRoninProfileTest {
         )
     }
 
+    @Test
+    fun `contained resource logged`() {
+        val outputStream = ByteArrayOutputStream()
+        val out = System.out
+        System.setOut(PrintStream(outputStream))
+
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
+        every { location.contained } returns listOf(ContainedResource("Patient"))
+
+        TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+        val output = outputStream.toString()
+        assertTrue(output.contains("contained resource found @ Location"))
+        System.setOut(out)
+    }
+
+    @Test
+    fun `contained resource warning`() {
+        every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
+        every { location.contained } returns listOf(ContainedResource("Patient"))
+        val warning = TestProfile(normalizer, localizer).validate(location, null)
+
+        assertTrue(warning.issues().isNotEmpty())
+        assertEquals(warning.issues()[0].toString(), "WARNING RONIN_CONTAINED_RESOURCE: There is a Contained Resource present @ Location.contained")
+    }
+
     private open class TestProfile(normalizer: Normalizer, localizer: Localizer) :
         BaseRoninProfile<Location>(R4LocationValidator, "profile", normalizer, localizer) {
         override fun transformInternal(
@@ -515,6 +544,7 @@ class BaseRoninProfileTest {
             validation.apply {
                 requireRoninIdentifiers(element.identifier, parentContext, validation)
                 requireCodeableConcept("physicalType", element.physicalType, parentContext, validation)
+                containedResourcePresent(element.contained, parentContext, validation)
             }
         }
     }
