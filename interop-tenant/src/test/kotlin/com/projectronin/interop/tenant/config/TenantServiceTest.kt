@@ -5,11 +5,13 @@ import com.projectronin.interop.tenant.config.data.CernerTenantDAO
 import com.projectronin.interop.tenant.config.data.EHRTenantDAO
 import com.projectronin.interop.tenant.config.data.EhrDAO
 import com.projectronin.interop.tenant.config.data.EpicTenantDAO
+import com.projectronin.interop.tenant.config.data.TenantCodesDAO
 import com.projectronin.interop.tenant.config.data.TenantDAO
 import com.projectronin.interop.tenant.config.data.model.CernerTenantDO
 import com.projectronin.interop.tenant.config.data.model.EHRTenantDO
 import com.projectronin.interop.tenant.config.data.model.EhrDO
 import com.projectronin.interop.tenant.config.data.model.EpicTenantDO
+import com.projectronin.interop.tenant.config.data.model.TenantCodesDO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
 import com.projectronin.interop.tenant.config.exception.NoTenantFoundException
@@ -25,6 +27,7 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -35,6 +38,7 @@ import java.time.ZoneId
 class TenantServiceTest {
     private lateinit var database: Database
     private lateinit var tenantDAO: TenantDAO
+    private lateinit var tenantCodesDAO: TenantCodesDAO
     private lateinit var ehrDAO: EhrDAO
     private lateinit var epicTenantDAO: EpicTenantDAO
     private lateinit var cernerTenantDAO: CernerTenantDAO
@@ -237,6 +241,7 @@ class TenantServiceTest {
     @BeforeEach
     fun setup() {
         tenantDAO = mockk()
+        tenantCodesDAO = mockk()
         ehrDAO = mockk()
         epicTenantDAO = mockk()
         cernerTenantDAO = mockk()
@@ -246,7 +251,7 @@ class TenantServiceTest {
             every { getEHRTenantDAOByVendorType(VendorType.EPIC) } returns epicTenantDAO
             every { getEHRTenantDAOByVendorType(VendorType.CERNER) } returns cernerTenantDAO
         }
-        service = TenantService(tenantDAO, ehrDAO, ehrTenantDAOFactory)
+        service = TenantService(tenantDAO, ehrDAO, ehrTenantDAOFactory, tenantCodesDAO)
     }
 
     @Test
@@ -530,6 +535,26 @@ class TenantServiceTest {
 
         val tenants = service.getMonitoredTenants()
         assertEquals(listOf(standardTenant, standardTenant2).toString(), tenants.toString())
+    }
+
+    @Test
+    fun `getCodesForTenantMnemonic works`() {
+        val mnemonic = "tenantMnemonic"
+        val expectedCodes = mapOf("bsaCode" to "bsaCode", "bmiCode" to "bmiCode")
+        val tenantCodesDO = TenantCodesDO {
+            tenantId = 0
+            bsaCode = "bsaCode"
+            bmiCode = "bmiCode"
+        }
+
+        every { tenantCodesDAO.getByTenantMnemonic(mnemonic) } returns tenantCodesDO
+
+        val actualCodes = service.getCodesForTenantMnemonic(mnemonic)
+        assertEquals(expectedCodes.size, actualCodes.size)
+        actualCodes.forEach {
+            assertTrue(it.key in expectedCodes.keys)
+            assertEquals(expectedCodes[it.key], it.value)
+        }
     }
 
     @Test

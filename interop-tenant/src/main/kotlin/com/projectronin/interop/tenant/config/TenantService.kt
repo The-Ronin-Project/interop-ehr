@@ -2,6 +2,7 @@ package com.projectronin.interop.tenant.config
 
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.tenant.config.data.EhrDAO
+import com.projectronin.interop.tenant.config.data.TenantCodesDAO
 import com.projectronin.interop.tenant.config.data.TenantDAO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import com.projectronin.interop.tenant.config.exception.NoEHRFoundException
@@ -18,7 +19,8 @@ import org.springframework.transaction.annotation.Transactional
 class TenantService(
     private val tenantDAO: TenantDAO,
     private val ehrDAO: EhrDAO,
-    private val ehrTenantDAOFactory: EHRTenantDAOFactory
+    private val ehrTenantDAOFactory: EHRTenantDAOFactory,
+    private val tenantCodesDao: TenantCodesDAO
 ) {
     private val logger = KotlinLogging.logger { }
 
@@ -53,6 +55,15 @@ class TenantService(
         logger.info { "Retrieving all tenants" }
         val tenantDOs = tenantDAO.getMonitoredTenants()
         return getTenantsFromTenantDOs(tenantDOs)
+    }
+
+    /**
+     * Retrieves configured codes for specified [mnemonic]
+     */
+    fun getCodesForTenantMnemonic(mnemonic: String): Map<String, String> {
+        logger.info { "Retrieving codes for tenant with mnemonic: $mnemonic" }
+        val tenantCodesDO = tenantCodesDao.getByTenantMnemonic(mnemonic) ?: return mapOf()
+        return tenantCodesDO.properties.filterValues { it is String } as Map<String, String>
     }
 
     private fun getTenantsFromTenantDOs(tenantDOs: List<TenantDO>): List<Tenant> {
