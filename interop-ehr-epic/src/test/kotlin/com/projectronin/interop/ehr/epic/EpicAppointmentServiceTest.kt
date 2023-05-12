@@ -20,6 +20,7 @@ import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
@@ -55,14 +56,15 @@ class EpicAppointmentServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var patientService: EpicPatientService
     private lateinit var identifierService: EpicIdentifierService
+    private lateinit var locationService: EpicLocationService
+    private lateinit var practitionerService: EpicPractitionerService
     private lateinit var aidboxPractitionerService: PractitionerService
     private lateinit var aidboxPatientService: PatientService
     private lateinit var aidboxLocationService: LocationService
     private lateinit var httpResponse: HttpResponse
     private lateinit var ehrResponse: EHRResponse
 
-    private val validPatientAppointmentSearchResponse =
-        readResource<STU3Bundle>("/ExampleFHIRAppointmentBundle.json")
+    private val validPatientAppointmentSearchResponse = readResource<STU3Bundle>("/ExampleFHIRAppointmentBundle.json")
     private val validProviderAppointmentSearchResponse =
         readResource<GetAppointmentsResponse>("/ExampleProviderAppointmentBundle.json")
     private val validOldPatientAppointmentSearchResponse =
@@ -281,17 +283,18 @@ class EpicAppointmentServiceTest {
         aidboxPractitionerService = mockk()
         aidboxLocationService = mockk()
         aidboxPatientService = mockk()
+        locationService = mockk()
+        practitionerService = mockk()
     }
 
     @Test
     fun `findPatientAppointments - ensure patient appointments are returned`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<STU3Bundle>() } returns validPatientAppointmentSearchResponse
         coEvery {
@@ -307,22 +310,25 @@ class EpicAppointmentServiceTest {
             )
         } returns ehrResponse
 
-        val response =
-            EpicAppointmentService(
-                epicClient,
-                patientService,
-                identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
-                5,
-                true
-            ).findPatientAppointments(
-                tenant,
-                "E5597",
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = EpicAppointmentService(
+            epicClient,
+            patientService,
+            locationService,
+            practitionerService,
+            identifierService,
+            aidboxPractitionerService,
+            aidboxLocationService,
+            aidboxPatientService,
+            5,
+            true
+        ).findPatientAppointments(
+            tenant,
+            "E5597",
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1),
+            null,
+            false
+        )
         assertEquals(
             validPatientAppointmentSearchResponse.transformToR4().entry.map { it.resource }
                 .filterIsInstance<Appointment>(),
@@ -332,18 +338,19 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findProviderAppointments - ensure provider appointments are returned`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
 
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
                 patientService,
+                locationService,
+                practitionerService,
                 identifierService,
                 aidboxPractitionerService,
                 aidboxLocationService,
@@ -430,13 +437,12 @@ class EpicAppointmentServiceTest {
             )
         } returns singleAppointmentBundle
 
-        val response =
-            epicAppointmentService.findProviderAppointments(
-                tenant,
-                listOf(goodProviderFHIRIdentifier),
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = epicAppointmentService.findProviderAppointments(
+            tenant,
+            listOf(goodProviderFHIRIdentifier),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         assertEquals(6, response.appointments.size)
         assertEquals("123", response.appointments[0].id!!.value)
@@ -450,18 +456,19 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findProviderAppointments - ensure provider appointments returns new patients`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
 
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
                 patientService,
+                locationService,
+                practitionerService,
                 identifierService,
                 aidboxPractitionerService,
                 aidboxLocationService,
@@ -548,13 +555,12 @@ class EpicAppointmentServiceTest {
             )
         } returns singleAppointmentBundle
 
-        val response =
-            epicAppointmentService.findProviderAppointments(
-                tenant,
-                listOf(goodProviderFHIRIdentifier),
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = epicAppointmentService.findProviderAppointments(
+            tenant,
+            listOf(goodProviderFHIRIdentifier),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         assertEquals(2, response.newPatients!!.size)
 
@@ -565,18 +571,19 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findProviderAppointments - ensure provider appointments handles failed GetProviderAppointments call `() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
 
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
                 patientService,
+                locationService,
+                practitionerService,
                 identifierService,
                 aidboxPractitionerService,
                 aidboxLocationService,
@@ -612,18 +619,19 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findProviderAppointments- ensure provider appointments handles failed identifier service call for all providers`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
 
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
                 patientService,
+                locationService,
+                practitionerService,
                 identifierService,
                 aidboxPractitionerService,
                 aidboxLocationService,
@@ -641,13 +649,12 @@ class EpicAppointmentServiceTest {
             )
         } returns Identifier(value = null)
 
-        val response =
-            epicAppointmentService.findProviderAppointments(
-                tenant,
-                listOf(goodProviderFHIRIdentifier),
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = epicAppointmentService.findProviderAppointments(
+            tenant,
+            listOf(goodProviderFHIRIdentifier),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         assertEquals(0, response.appointments.size)
         assertNull(response.newPatients)
@@ -655,18 +662,19 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findProviderAppointments - ensure provider appointments handles failed identifier service call for some providers`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
 
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
                 patientService,
+                locationService,
+                practitionerService,
                 identifierService,
                 aidboxPractitionerService,
                 aidboxLocationService,
@@ -759,13 +767,12 @@ class EpicAppointmentServiceTest {
             )
         } returns singleAppointmentBundle
 
-        val response =
-            epicAppointmentService.findProviderAppointments(
-                tenant,
-                listOf(goodProviderFHIRIdentifier, badProviderFHIRIdentifier),
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = epicAppointmentService.findProviderAppointments(
+            tenant,
+            listOf(goodProviderFHIRIdentifier, badProviderFHIRIdentifier),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         assertEquals(6, response.appointments.size)
         assertEquals(2, response.newPatients!!.size)
@@ -773,18 +780,19 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findProviderAppointments - ensure provider appointments handles patient FHIR id not found`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
 
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
                 patientService,
+                locationService,
+                practitionerService,
                 identifierService,
                 aidboxPractitionerService,
                 aidboxLocationService,
@@ -828,13 +836,12 @@ class EpicAppointmentServiceTest {
             )
         } returns mapOf()
 
-        val response =
-            epicAppointmentService.findProviderAppointments(
-                tenant,
-                listOf(goodProviderFHIRIdentifier),
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = epicAppointmentService.findProviderAppointments(
+            tenant,
+            listOf(goodProviderFHIRIdentifier),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         assertEquals(0, response.appointments.size)
         assertEquals(0, response.newPatients!!.size)
@@ -842,18 +849,19 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findProviderAppointments - ensure provider appointments handles no appointments found`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
 
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
                 patientService,
+                locationService,
+                practitionerService,
                 identifierService,
                 aidboxPractitionerService,
                 aidboxLocationService,
@@ -912,14 +920,13 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findPatientAppointments - ensure patient appointments are returned old API`() {
-        val tenant =
-            createTestTenant(
-                clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                serviceEndpoint = "https://example.org",
-                privateKey = testPrivateKey,
-                tenantMnemonic = "TEST_TENANT",
-                internalId = 1
-            )
+        val tenant = createTestTenant(
+            clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            serviceEndpoint = "https://example.org",
+            privateKey = testPrivateKey,
+            tenantMnemonic = "TEST_TENANT",
+            internalId = 1
+        )
         val existingIdentifiers = mockk<List<Identifier>> {}
 
         every {
@@ -958,37 +965,42 @@ class EpicAppointmentServiceTest {
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
 
-        val response =
-            EpicAppointmentService(
-                epicClient,
-                patientService,
-                identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
-                5,
-                false
-            ).findPatientAppointments(
-                tenant,
-                "E5597",
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = EpicAppointmentService(
+            epicClient,
+            patientService,
+            locationService,
+            practitionerService,
+            identifierService,
+            aidboxPractitionerService,
+            aidboxLocationService,
+            aidboxPatientService,
+            5,
+            false
+        ).findPatientAppointments(
+            tenant,
+            "E5597",
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
         assertEquals(4, response.size)
     }
 
     @Test
     fun `findPatientAppointments - missing Epic provider identifier skips that provider`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every { aidboxPatientService.getPatientByUDPId(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
+        every {
+            aidboxPatientService.getPatientByUDPId(
+                tenantMnemonic = tenant.mnemonic,
+                "TEST_TENANT-E5597"
+            )
+        } returns mockk {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1037,22 +1049,23 @@ class EpicAppointmentServiceTest {
         } returns emptyMap()
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
 
-        val response =
-            EpicAppointmentService(
-                epicClient,
-                patientService,
-                identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
-                5,
-                false
-            ).findPatientAppointments(
-                tenant,
-                "E5597",
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = EpicAppointmentService(
+            epicClient,
+            patientService,
+            locationService,
+            practitionerService,
+            identifierService,
+            aidboxPractitionerService,
+            aidboxLocationService,
+            aidboxPatientService,
+            5,
+            false
+        ).findPatientAppointments(
+            tenant,
+            "E5597",
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         // all appointments were found
         assertEquals(4, response.size)
@@ -1066,17 +1079,113 @@ class EpicAppointmentServiceTest {
     }
 
     @Test
-    fun `findPatientAppointments - missing Epic department identifier skips that location`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+    fun `findPatientAppointments - missing Epic provider fallsback on EHR search`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every { aidboxPatientService.getPatientByUDPId(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
+        every {
+            aidboxPatientService.getPatientByUDPId(
+                tenantMnemonic = tenant.mnemonic,
+                "TEST_TENANT-E5597"
+            )
+        } returns mockk {
+            every { identifier } returns existingIdentifiers
+        }
+        every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
+            every { value } returns "MRN".asFHIR()
+        }
+        every { httpResponse.status } returns HttpStatusCode.OK
+        mockkStatic(HttpResponse::throwExceptionFromHttpStatus)
+        justRun { httpResponse.throwExceptionFromHttpStatus("GetAppointments", patientAppointmentSearchUrlPart) }
+        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns validOldPatientAppointmentSearchResponse
+        coEvery {
+            epicClient.post(
+                tenant,
+                patientAppointmentSearchUrlPart,
+                GetPatientAppointmentsRequest(
+                    userID = "ehrUserId",
+                    startDate = "01/01/2015",
+                    endDate = "11/01/2015",
+                    patientId = "MRN",
+                    patientIdType = epicVendor.patientMRNTypeText
+                )
+            )
+        } returns ehrResponse
+
+        val allProviders = validOldPatientAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
+        assertEquals(4, allProviders.size)
+
+        // mock Epic providers with no identifiers
+        val mockProvIDs = allProviders.associateWith { prov ->
+            prov.providerIDs.map { Identifier(value = it.id.asFHIR(), type = CodeableConcept(text = it.type.asFHIR())) }
+        }
+        mockProvIDs.entries.forEach {
+            it.value
+            every { identifierService.getPractitionerIdentifier(tenant, it.value) } returns mockk {
+                every { value } returns FHIRString("ID1")
+                every { system } returns Uri("System1")
+            }
+        }
+        every {
+            aidboxPractitionerService.getPractitionerFHIRIds(
+                tenant.mnemonic,
+                any<Map<ScheduleProviderReturnWithTime, SystemValue>>()
+            )
+        } returns emptyMap()
+
+        every { practitionerService.getPractitionerByProvider(any(), any()).id!!.value } returns "PractFHIRID1"
+        mockEpicDepartmentsToFhirLocations(tenant, allProviders)
+
+        val response = EpicAppointmentService(
+            epicClient,
+            patientService,
+            locationService,
+            practitionerService,
+            identifierService,
+            aidboxPractitionerService,
+            aidboxLocationService,
+            aidboxPatientService,
+            5,
+            false
+        ).findPatientAppointments(
+            tenant,
+            "E5597",
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
+
+        // all appointments were found
+        assertEquals(4, response.size)
+
+        // no provider identifiers were found, while location identifiers were found
+        response.forEach { appt ->
+            assertFalse(appt.participant.none { it.actor!!.reference!!.value!!.contains("Patient/") })
+            assertFalse(appt.participant.none { it.actor!!.reference!!.value!!.contains("Practitioner/PractFHIRID1") })
+            assertFalse(appt.participant.none { it.actor!!.reference!!.value!!.contains("Location/") })
+        }
+    }
+
+    @Test
+    fun `findPatientAppointments - missing Epic department identifier skips that location`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
+        val epicVendor = tenant.vendorAs<Epic>()
+        val existingIdentifiers = mockk<List<Identifier>> {}
+        every {
+            aidboxPatientService.getPatientByUDPId(
+                tenantMnemonic = tenant.mnemonic,
+                "TEST_TENANT-E5597"
+            )
+        } returns mockk {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1128,22 +1237,23 @@ class EpicAppointmentServiceTest {
             )
         } returns emptyMap()
 
-        val response =
-            EpicAppointmentService(
-                epicClient,
-                patientService,
-                identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
-                5,
-                false
-            ).findPatientAppointments(
-                tenant,
-                "E5597",
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = EpicAppointmentService(
+            epicClient,
+            patientService,
+            locationService,
+            practitionerService,
+            identifierService,
+            aidboxPractitionerService,
+            aidboxLocationService,
+            aidboxPatientService,
+            5,
+            false
+        ).findPatientAppointments(
+            tenant,
+            "E5597",
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         // all appointments were found
         assertEquals(4, response.size)
@@ -1158,16 +1268,20 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findPatientAppointments - detailed test - every practitioner and location is unique`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every { aidboxPatientService.getPatientByUDPId(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
+        every {
+            aidboxPatientService.getPatientByUDPId(
+                tenantMnemonic = tenant.mnemonic,
+                "TEST_TENANT-E5597"
+            )
+        } returns mockk {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1199,22 +1313,23 @@ class EpicAppointmentServiceTest {
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
 
-        val appointments =
-            EpicAppointmentService(
-                epicClient,
-                patientService,
-                identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
-                5,
-                false
-            ).findPatientAppointments(
-                tenant,
-                "E5597",
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val appointments = EpicAppointmentService(
+            epicClient,
+            patientService,
+            locationService,
+            practitionerService,
+            identifierService,
+            aidboxPractitionerService,
+            aidboxLocationService,
+            aidboxPatientService,
+            5,
+            false
+        ).findPatientAppointments(
+            tenant,
+            "E5597",
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         // all appointments were found
         assertEquals(4, appointments.size)
@@ -1264,16 +1379,20 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findPatientAppointments - no practitioners found in aidbox - providers use identifier instead of reference`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every { aidboxPatientService.getPatientByUDPId(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
+        every {
+            aidboxPatientService.getPatientByUDPId(
+                tenantMnemonic = tenant.mnemonic,
+                "TEST_TENANT-E5597"
+            )
+        } returns mockk {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1305,22 +1424,23 @@ class EpicAppointmentServiceTest {
         mockEpicProvidersToFhirPractitioners(tenant, allProviders, emptyMap())
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
 
-        val appointments =
-            EpicAppointmentService(
-                epicClient,
-                patientService,
-                identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
-                5,
-                false
-            ).findPatientAppointments(
-                tenant,
-                "E5597",
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val appointments = EpicAppointmentService(
+            epicClient,
+            patientService,
+            locationService,
+            practitionerService,
+            identifierService,
+            aidboxPractitionerService,
+            aidboxLocationService,
+            aidboxPatientService,
+            5,
+            false
+        ).findPatientAppointments(
+            tenant,
+            "E5597",
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         // all appointments were found
         assertEquals(4, appointments.size)
@@ -1370,16 +1490,20 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findPatientAppointments - no locations found in aidbox - locations are not added to participants`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every { aidboxPatientService.getPatientByUDPId(tenantMnemonic = tenant.mnemonic, "TEST_TENANT-E5597") } returns mockk {
+        every {
+            aidboxPatientService.getPatientByUDPId(
+                tenantMnemonic = tenant.mnemonic,
+                "TEST_TENANT-E5597"
+            )
+        } returns mockk {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1411,22 +1535,23 @@ class EpicAppointmentServiceTest {
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders, emptyMap())
 
-        val appointments =
-            EpicAppointmentService(
-                epicClient,
-                patientService,
-                identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
-                5,
-                false
-            ).findPatientAppointments(
-                tenant,
-                "E5597",
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val appointments = EpicAppointmentService(
+            epicClient,
+            patientService,
+            locationService,
+            practitionerService,
+            identifierService,
+            aidboxPractitionerService,
+            aidboxLocationService,
+            aidboxPatientService,
+            5,
+            false
+        ).findPatientAppointments(
+            tenant,
+            "E5597",
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         // all appointments were found
         assertEquals(4, appointments.size)
@@ -1475,13 +1600,12 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findPatientAppointmentsByMRN returns patient appointments`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
         every { httpResponse.status } returns HttpStatusCode.OK
         mockkStatic(HttpResponse::throwExceptionFromHttpStatus)
         justRun { httpResponse.throwExceptionFromHttpStatus("GetAppointments", patientAppointmentSearchUrlPart) }
@@ -1505,70 +1629,70 @@ class EpicAppointmentServiceTest {
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
 
-        val response =
-            EpicAppointmentService(
-                epicClient,
-                patientService,
-                identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
-                5,
-                false
-            ).findPatientAppointments(
-                tenant,
-                "FHIRID",
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1),
-                "MRN"
-            )
+        val response = EpicAppointmentService(
+            epicClient,
+            patientService,
+            locationService,
+            practitionerService,
+            identifierService,
+            aidboxPractitionerService,
+            aidboxLocationService,
+            aidboxPatientService,
+            5,
+            false
+        ).findPatientAppointments(
+            tenant,
+            "FHIRID",
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1),
+            "MRN"
+        )
         assertEquals(4, response.size)
     }
 
     @Test
     fun `findPatientAppointmentsByMRN no MRN test`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
         val mockID = mockk<Identifier>()
         val mockPat = mockk<Patient> {
             every { identifier } returns listOf(mockID)
         }
         every { aidboxPatientService.getPatientByUDPId("TEST_TENANT", "TEST_TENANT-FHIRID") } returns mockPat
         every { identifierService.getMRNIdentifier(tenant, listOf(mockID)).value } returns null
-        val response =
-            EpicAppointmentService(
-                epicClient,
-                patientService,
-                identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
-                5,
-                false
-            ).findPatientAppointments(
-                tenant,
-                "FHIRID",
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1),
-                null
-            )
+        val response = EpicAppointmentService(
+            epicClient,
+            patientService,
+            locationService,
+            practitionerService,
+            identifierService,
+            aidboxPractitionerService,
+            aidboxLocationService,
+            aidboxPatientService,
+            5,
+            false
+        ).findPatientAppointments(
+            tenant,
+            "FHIRID",
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1),
+            null
+        )
         assertEquals(0, response.size)
     }
 
     @Test
     fun `findPatientAppointmentsByMRN no MRN no aidbox test`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
         val mockID = mockk<Identifier>()
         val mockPat = mockk<Patient> {
             every { identifier } returns listOf(mockID)
@@ -1576,40 +1700,42 @@ class EpicAppointmentServiceTest {
         every { aidboxPatientService.getPatientByUDPId("TEST_TENANT", "TEST_TENANT-FHIRID") } throws Exception()
         every { patientService.getPatient(tenant, "FHIRID") } returns mockPat
         every { identifierService.getMRNIdentifier(tenant, listOf(mockID)).value } returns null
-        val response =
-            EpicAppointmentService(
-                epicClient,
-                patientService,
-                identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
-                5,
-                false
-            ).findPatientAppointments(
-                tenant,
-                "FHIRID",
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1),
-                null
-            )
+        val response = EpicAppointmentService(
+            epicClient,
+            patientService,
+            locationService,
+            practitionerService,
+            identifierService,
+            aidboxPractitionerService,
+            aidboxLocationService,
+            aidboxPatientService,
+            5,
+            false
+        ).findPatientAppointments(
+            tenant,
+            "FHIRID",
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1),
+            null
+        )
         assertEquals(0, response.size)
     }
 
     @Test
     fun `findProviderAppointments - ensure old API works`() {
-        val tenant =
-            createTestTenant(
-                clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                serviceEndpoint = "https://example.org",
-                privateKey = testPrivateKey,
-                tenantMnemonic = "TEST_TENANT",
-                internalId = 1
-            )
+        val tenant = createTestTenant(
+            clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            serviceEndpoint = "https://example.org",
+            privateKey = testPrivateKey,
+            tenantMnemonic = "TEST_TENANT",
+            internalId = 1
+        )
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
                 patientService,
+                locationService,
+                practitionerService,
                 identifierService,
                 aidboxPractitionerService,
                 aidboxLocationService,
@@ -1669,13 +1795,12 @@ class EpicAppointmentServiceTest {
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
 
-        val response =
-            epicAppointmentService.findProviderAppointments(
-                tenant,
-                listOf(goodProviderFHIRIdentifier),
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = epicAppointmentService.findProviderAppointments(
+            tenant,
+            listOf(goodProviderFHIRIdentifier),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         assertEquals(6, response.appointments.size)
         assertEquals("38033", response.appointments[0].id!!.value)
@@ -1689,19 +1814,20 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findLocationAppointments`() {
-        val tenant =
-            createTestTenant(
-                clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                serviceEndpoint = "https://example.org",
-                privateKey = testPrivateKey,
-                tenantMnemonic = "TEST_TENANT",
-                internalId = 1,
-                departmentInternalSystem = "internalDepartmentSystem"
-            )
+        val tenant = createTestTenant(
+            clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            serviceEndpoint = "https://example.org",
+            privateKey = testPrivateKey,
+            tenantMnemonic = "TEST_TENANT",
+            internalId = 1,
+            departmentInternalSystem = "internalDepartmentSystem"
+        )
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
                 patientService,
+                locationService,
+                practitionerService,
                 identifierService,
                 aidboxPractitionerService,
                 aidboxLocationService,
@@ -1760,13 +1886,111 @@ class EpicAppointmentServiceTest {
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
 
-        val response =
-            epicAppointmentService.findLocationAppointments(
-                tenant,
-                listOf("FHIRID1"),
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
+        val response = epicAppointmentService.findLocationAppointments(
+            tenant,
+            listOf("FHIRID1"),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
+
+        assertEquals(6, response.appointments.size)
+        assertEquals("38033", response.appointments[0].id!!.value)
+        assertEquals("38035", response.appointments[1].id!!.value)
+        assertEquals("38034", response.appointments[2].id!!.value)
+        assertEquals("38036", response.appointments[3].id!!.value)
+        assertEquals("38037", response.appointments[4].id!!.value)
+        assertEquals("38184", response.appointments[5].id!!.value)
+        assertTrue(response.newPatients!!.isEmpty())
+    }
+
+    @Test
+    fun `findLocationAppointments - fallbacks`() {
+        val tenant = createTestTenant(
+            clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            serviceEndpoint = "https://example.org",
+            privateKey = testPrivateKey,
+            tenantMnemonic = "TEST_TENANT",
+            internalId = 1,
+            departmentInternalSystem = "internalDepartmentSystem"
+        )
+        val epicAppointmentService = spyk(
+            EpicAppointmentService(
+                epicClient,
+                patientService,
+                locationService,
+                practitionerService,
+                identifierService,
+                aidboxPractitionerService,
+                aidboxLocationService,
+                aidboxPatientService,
+                5,
+                false
             )
+        )
+
+        // Identifier service
+        every {
+            aidboxLocationService.getAllLocationIdentifiers(
+                "TEST_TENANT",
+                any()
+            )
+        } returns listOf()
+
+        every {
+            locationService.getLocationsByFHIRId(any(), any())
+        } returns mapOf(
+            "FHIRID" to mockk {
+                every { identifier } returns listOf(
+                    Identifier(
+                        value = "E100".asFHIR(),
+                        system = Uri("internalDepartmentSystem")
+                    )
+                )
+            }
+        )
+
+        // GetAppointments request
+        mockkStatic(HttpResponse::throwExceptionFromHttpStatus)
+        justRun { httpResponse.throwExceptionFromHttpStatus("GetAppointments", providerAppointmentSearchUrlPart) }
+        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns validProviderAppointmentSearchResponse
+        coEvery {
+            epicClient.post(
+                tenant,
+                "/api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments",
+                GetProviderAppointmentRequest(
+                    userID = "ehrUserId",
+                    departments = listOf(IDType("E100", "Internal")),
+                    startDate = "01/01/2015",
+                    endDate = "11/01/2015"
+                )
+            )
+        } returns ehrResponse
+
+        // Patient service request
+        every {
+            patientService.getPatientsFHIRIds(
+                tenant = tenant,
+                patientIDSystem = tenant.vendorAs<Epic>().patientInternalSystem,
+                patientIDValues = listOf("     Z6156", "     Z6740", "     Z6783", "     Z4575")
+            )
+        } returns mapOf(
+            "     Z6156" to GetFHIRIDResponse("fhirID1"),
+            "     Z6740" to GetFHIRIDResponse("fhirID2"),
+            "     Z6783" to GetFHIRIDResponse("fhirID3"),
+            "     Z4575" to GetFHIRIDResponse("fhirID4")
+        )
+
+        val allProviders = validProviderAppointmentSearchResponse.errorOrAppointments().flatMap { it.providers }
+        assertEquals(6, allProviders.size)
+        mockEpicProvidersToFhirPractitioners(tenant, allProviders)
+        mockEpicDepartmentsToFhirLocations(tenant, allProviders)
+
+        val response = epicAppointmentService.findLocationAppointments(
+            tenant,
+            listOf("FHIRID1"),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         assertEquals(6, response.appointments.size)
         assertEquals("38033", response.appointments[0].id!!.value)
@@ -1780,19 +2004,20 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findProviderAppointments - detailed test - allows duplicates when same practitioners and locations appear in 1 appointment`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
         val epicVendor = tenant.vendorAs<Epic>()
 
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
                 patientService,
+                locationService,
+                practitionerService,
                 identifierService,
                 aidboxPractitionerService,
                 aidboxLocationService,
@@ -1840,8 +2065,7 @@ class EpicAppointmentServiceTest {
                 listOf(epicAppointment1.patientId!!)
             )
         } returns mapOf(
-            epicAppointment1.patientId!! to
-                GetFHIRIDResponse("PatientFhirID1", null)
+            epicAppointment1.patientId!! to GetFHIRIDResponse("PatientFhirID1", null)
         )
 
         val allProviders = epicAppointment1.providers
@@ -1849,13 +2073,12 @@ class EpicAppointmentServiceTest {
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
 
-        val response =
-            epicAppointmentService.findProviderAppointments(
-                tenant,
-                listOf(goodProviderFHIRIdentifier),
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = epicAppointmentService.findProviderAppointments(
+            tenant,
+            listOf(goodProviderFHIRIdentifier),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         assertEquals(1, response.appointments.size)
         val appt = response.appointments[0]
@@ -1883,20 +2106,21 @@ class EpicAppointmentServiceTest {
 
     @Test
     fun `findProviderAppointments - detailed test - allows duplicates when same practitioners and locations appear across a list of appointments`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT",
-                timezone = "America/Denver"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            timezone = "America/Denver"
+        )
         val epicVendor = tenant.vendorAs<Epic>()
 
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
                 patientService,
+                locationService,
+                practitionerService,
                 identifierService,
                 aidboxPractitionerService,
                 aidboxLocationService,
@@ -1944,10 +2168,8 @@ class EpicAppointmentServiceTest {
                 listOf(epicAppointment1.patientId!!, epicAppointment2.patientId!!)
             )
         } returns mapOf(
-            epicAppointment1.patientId!! to
-                GetFHIRIDResponse("PatientFhirID1", null),
-            epicAppointment2.patientId!! to
-                GetFHIRIDResponse("PatientFhirID2", null)
+            epicAppointment1.patientId!! to GetFHIRIDResponse("PatientFhirID1", null),
+            epicAppointment2.patientId!! to GetFHIRIDResponse("PatientFhirID2", null)
 
         )
 
@@ -1956,13 +2178,12 @@ class EpicAppointmentServiceTest {
         mockEpicProvidersToFhirPractitioners(tenant, allProviders)
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
 
-        val response =
-            epicAppointmentService.findProviderAppointments(
-                tenant,
-                listOf(goodProviderFHIRIdentifier),
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = epicAppointmentService.findProviderAppointments(
+            tenant,
+            listOf(goodProviderFHIRIdentifier),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         assertEquals(2, response.appointments.size)
         val appt0 = response.appointments[0]
@@ -2116,19 +2337,20 @@ class EpicAppointmentServiceTest {
         )
         val epicAppointmentList2 = listOf(epicAppointment3, epicAppointment4, epicAppointment5)
 
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
         val epicVendor = tenant.vendorAs<Epic>()
 
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
                 patientService,
+                locationService,
+                practitionerService,
                 identifierService,
                 aidboxPractitionerService,
                 aidboxLocationService,
@@ -2176,12 +2398,9 @@ class EpicAppointmentServiceTest {
                 listOf(epicAppointment3.patientId!!, epicAppointment4.patientId!!, epicAppointment5.patientId!!)
             )
         } returns mapOf(
-            epicAppointment3.patientId!! to
-                GetFHIRIDResponse("PatientFhirID1", null),
-            epicAppointment4.patientId!! to
-                GetFHIRIDResponse("PatientFhirID2", null),
-            epicAppointment5.patientId!! to
-                GetFHIRIDResponse("PatientFhirID3", null)
+            epicAppointment3.patientId!! to GetFHIRIDResponse("PatientFhirID1", null),
+            epicAppointment4.patientId!! to GetFHIRIDResponse("PatientFhirID2", null),
+            epicAppointment5.patientId!! to GetFHIRIDResponse("PatientFhirID3", null)
         )
 
         val allProviders = epicAppointmentList2.flatMap { it.providers }
@@ -2191,13 +2410,12 @@ class EpicAppointmentServiceTest {
         val locationFhirIDs = mockEpicDepartmentsToFhirLocations(tenant, allProviders)
         assertEquals(3, locationFhirIDs.size)
 
-        val response =
-            epicAppointmentService.findProviderAppointments(
-                tenant,
-                listOf(goodProviderFHIRIdentifier),
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = epicAppointmentService.findProviderAppointments(
+            tenant,
+            listOf(goodProviderFHIRIdentifier),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         // all appointments found
         assertEquals(3, response.appointments.size)
@@ -2338,19 +2556,20 @@ class EpicAppointmentServiceTest {
         )
         val epicAppointmentList2 = listOf(epicAppointment3, epicAppointment4, epicAppointment5)
 
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                testPrivateKey,
-                "TEST_TENANT"
-            )
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
         val epicVendor = tenant.vendorAs<Epic>()
 
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
                 patientService,
+                locationService,
+                practitionerService,
                 identifierService,
                 aidboxPractitionerService,
                 aidboxLocationService,
@@ -2398,12 +2617,9 @@ class EpicAppointmentServiceTest {
                 listOf(epicAppointment3.patientId!!, epicAppointment4.patientId!!, epicAppointment5.patientId!!)
             )
         } returns mapOf(
-            epicAppointment3.patientId!! to
-                GetFHIRIDResponse("PatientFhirID1", null),
-            epicAppointment4.patientId!! to
-                GetFHIRIDResponse("PatientFhirID2", null),
-            epicAppointment5.patientId!! to
-                GetFHIRIDResponse("PatientFhirID3", null)
+            epicAppointment3.patientId!! to GetFHIRIDResponse("PatientFhirID1", null),
+            epicAppointment4.patientId!! to GetFHIRIDResponse("PatientFhirID2", null),
+            epicAppointment5.patientId!! to GetFHIRIDResponse("PatientFhirID3", null)
         )
 
         val allProviders = epicAppointmentList2.flatMap { it.providers }
@@ -2413,13 +2629,12 @@ class EpicAppointmentServiceTest {
         val locationFhirIDs = mockEpicDepartmentsToFhirLocations(tenant, allProviders)
         assertEquals(1, locationFhirIDs.size)
 
-        val response =
-            epicAppointmentService.findProviderAppointments(
-                tenant,
-                listOf(goodProviderFHIRIdentifier),
-                LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
-            )
+        val response = epicAppointmentService.findProviderAppointments(
+            tenant,
+            listOf(goodProviderFHIRIdentifier),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
 
         // all appointments found
         assertEquals(3, response.appointments.size)
@@ -2489,6 +2704,8 @@ class EpicAppointmentServiceTest {
         val epicAppointmentService = EpicAppointmentService(
             epicClient,
             patientService,
+            locationService,
+            practitionerService,
             identifierService,
             aidboxPractitionerService,
             aidboxLocationService,
@@ -2507,6 +2724,8 @@ class EpicAppointmentServiceTest {
         val epicAppointmentService = EpicAppointmentService(
             epicClient,
             patientService,
+            locationService,
+            practitionerService,
             identifierService,
             aidboxPractitionerService,
             aidboxLocationService,

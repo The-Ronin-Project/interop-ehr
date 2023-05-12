@@ -51,6 +51,8 @@ import java.time.Instant as JavaInstant
 class EpicAppointmentService(
     epicClient: EpicClient,
     private val patientService: EpicPatientService,
+    private val locationService: EpicLocationService,
+    private val practitionerService: EpicPractitionerService,
     private val identifierService: EpicIdentifierService,
     private val aidboxPractitionerService: PractitionerService,
     private val aidboxLocationService: LocationService,
@@ -73,7 +75,8 @@ class EpicAppointmentService(
         patientFHIRId: String,
         startDate: LocalDate,
         endDate: LocalDate,
-        patientMRN: String? // leverage the MRN if we already have it to avoid unnecessary calls to external systems
+        patientMRN: String?, // leverage the MRN if we already have it to avoid unnecessary calls to external systems
+        useEHRFallback: Boolean // if true, reaches out to EHR for any missing data in Aidbox
     ): List<Appointment> {
         logger.info { "Patient appointment search started for ${tenant.mnemonic}" }
 
@@ -99,7 +102,7 @@ class EpicAppointmentService(
                     )
                 ).appointments
             }
-            appointments?.let { transformEpicAppointments(tenant, mapOf(patientFHIRId to it)) } ?: emptyList()
+            appointments?.let { transformEpicAppointments(tenant, mapOf(patientFHIRId to it), useEHRFallback) } ?: emptyList()
         }
     }
 
@@ -120,8 +123,18 @@ class EpicAppointmentService(
     ): AppointmentsWithNewPatients {
         val searchMap = locationFHIRIds.map { SystemValue(value = it, system = CodeSystem.RONIN_FHIR_ID.uri.value!!) }
         val limitedLocationList = aidboxLocationService.getAllLocationIdentifiers(tenant.mnemonic, searchMap)
-        val departmentList = limitedLocationList.flatMap { it.identifiers }
-            .filter { it.system?.value == tenant.vendorAs<Epic>().departmentInternalSystem && it.value?.value != null }
+        val identifiers = limitedLocationList.flatMap { it.identifiers }.toMutableList()
+
+        val missingLocationList = locationFHIRIds.filter { fhirID ->
+            !limitedLocationList.any { it.udpId.contains(fhirID) }
+        }
+
+        if (missingLocationList.isNotEmpty()) {
+            logger.warn { "Some locations not found in Aidbox, starting search in EHR" }
+            identifiers += locationService.getLocationsByFHIRId(tenant, missingLocationList).flatMap { it.value.identifier }
+        }
+        val departmentList =
+            identifiers.filter { it.system?.value == tenant.vendorAs<Epic>().departmentInternalSystem && it.value?.value != null }
         val request = GetProviderAppointmentRequest(
             userID = tenant.vendorAs<Epic>().ehrUserId,
             departments = departmentList.map { IDType(id = it.value!!.value!!, type = "Internal") },
@@ -176,7 +189,8 @@ class EpicAppointmentService(
         val patientFhirIdResponse = patientService.getPatientsFHIRIds(
             tenant,
             tenant.vendorAs<Epic>().patientInternalSystem,
-            getAppointmentsResponse.errorOrAppointments().map { it.patientId!! }.toSet().toList() // Make Id list unique
+            getAppointmentsResponse.errorOrAppointments().map { it.patientId!! }.toSet()
+                .toList() // Make Id list unique
         )
 
         val patientFhirIdToAppointments = getAppointmentsResponse.errorOrAppointments().filter {
@@ -253,7 +267,8 @@ class EpicAppointmentService(
      */
     private fun transformEpicAppointments(
         tenant: Tenant,
-        patientFhirIdToAppointments: Map<String, List<EpicAppointment>>
+        patientFhirIdToAppointments: Map<String, List<EpicAppointment>>,
+        useEHRFallback: Boolean = true
     ): List<Appointment> {
         // grab all Epic schedule providers and departments
         val allProviders = patientFhirIdToAppointments.values.flatten().map { it.providers }.flatten()
@@ -285,14 +300,22 @@ class EpicAppointmentService(
         )
         // use FHIR id (if found), otherwise Identifier
         val provToParticipant = provToSystem.keys.associateWith { provider ->
-            val system = provToSystem[provider]
-            if (provSystemToFhirID.containsKey(system)) {
-                provSystemToFhirID[system]
-            } else {
-                logger.info {
-                    "Unable to find Practitioner FHIR ID in Ronin clinical data store, for Epic provider with " +
-                        "Name: ${provider.providerName} and SystemValue: ${system?.queryString}"
+            val systemValue = provToSystem[provider]
+            if (provSystemToFhirID.containsKey(systemValue)) {
+                provSystemToFhirID[systemValue]
+            } else if (useEHRFallback) {
+                // attempt to fall back on EHR search
+                try {
+                    practitionerService.getPractitionerByProvider(tenant, systemValue!!.value).id!!.value
+                } catch (e: Exception) {
+                    logger.info {
+                        "Unable to find Practitioner FHIR ID in Ronin clinical data store, for Epic provider with " +
+                            "Name: ${provider.providerName} and SystemValue: ${systemValue?.queryString}"
+                    }
+                    // default value
+                    provToIdentifier[provider]
                 }
+            } else {
                 provToIdentifier[provider]
             }
         }

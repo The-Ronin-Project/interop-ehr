@@ -21,7 +21,8 @@ interface AppointmentService : FHIRService<Appointment> {
         patientFHIRId: String,
         startDate: LocalDate,
         endDate: LocalDate,
-        patientMRN: String? = null
+        patientMRN: String? = null,
+        useEHRFallback: Boolean = true
     ): List<Appointment>
 
     /**

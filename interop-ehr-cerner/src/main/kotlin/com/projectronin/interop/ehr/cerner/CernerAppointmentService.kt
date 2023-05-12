@@ -28,7 +28,8 @@ class CernerAppointmentService(
         patientFHIRId: String,
         startDate: LocalDate,
         endDate: LocalDate,
-        patientMRN: String? // unused for cerner
+        patientMRN: String?, // unused for cerner
+        useEHRFallback: Boolean // unused for cerner
     ): List<Appointment> {
         val parameters = mapOf(
             "patient" to patientFHIRId,
