@@ -17,6 +17,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
+import com.projectronin.interop.fhir.r4.datatype.primitive.PositiveInt
+import com.projectronin.interop.fhir.r4.datatype.primitive.UnsignedInt
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Appointment
@@ -235,12 +237,12 @@ class RoninAppointmentTest {
             appointmentType = CodeableConcept(text = "appointment type".asFHIR()),
             reasonCode = listOf(CodeableConcept(text = "reason code".asFHIR())),
             reasonReference = listOf(Reference(display = "reason reference".asFHIR())),
-            priority = 1.asFHIR(),
+            priority = UnsignedInt(1),
             description = "appointment test".asFHIR(),
             supportingInformation = listOf(Reference(display = "supporting info".asFHIR())),
             start = Instant("2017-01-01T00:00:00Z"),
             end = Instant("2017-01-01T01:00:00Z"),
-            minutesDuration = 15.asFHIR(),
+            minutesDuration = PositiveInt(15),
             slot = listOf(Reference(display = "slot".asFHIR())),
             created = DateTime("2021-11-16"),
             comment = "comment".asFHIR(),
@@ -345,12 +347,12 @@ class RoninAppointmentTest {
         assertEquals(CodeableConcept(text = "appointment type".asFHIR()), transformed.appointmentType)
         assertEquals(listOf(CodeableConcept(text = "reason code".asFHIR())), transformed.reasonCode)
         assertEquals(listOf(Reference(display = "reason reference".asFHIR())), transformed.reasonReference)
-        assertEquals(1.asFHIR(), transformed.priority)
+        assertEquals(UnsignedInt(1), transformed.priority)
         assertEquals("appointment test".asFHIR(), transformed.description)
         assertEquals(listOf(Reference(display = "supporting info".asFHIR())), transformed.supportingInformation)
         assertEquals(Instant(value = "2017-01-01T00:00:00Z"), transformed.start)
         assertEquals(Instant(value = "2017-01-01T01:00:00Z"), transformed.end)
-        assertEquals(15.asFHIR(), transformed.minutesDuration)
+        assertEquals(PositiveInt(15), transformed.minutesDuration)
         assertEquals(listOf(Reference(display = "slot".asFHIR())), transformed.slot)
         assertEquals(DateTime(value = "2021-11-16"), transformed.created)
         assertEquals("patient instruction".asFHIR(), transformed.patientInstruction)

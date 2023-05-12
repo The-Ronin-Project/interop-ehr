@@ -22,10 +22,10 @@ import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
-import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRInteger
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
+import com.projectronin.interop.fhir.r4.datatype.primitive.PositiveInt
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.resource.Participant
@@ -453,6 +453,7 @@ class EpicAppointmentService(
                         status = Code(ParticipationStatus.ACCEPTED.code)
                     )
                 }
+
                 is String -> {
                     Participant(
                         actor = Reference(
@@ -463,6 +464,7 @@ class EpicAppointmentService(
                         status = Code(ParticipationStatus.ACCEPTED.code)
                     )
                 }
+
                 else -> {
                     null
                 }
@@ -474,6 +476,7 @@ class EpicAppointmentService(
                 null -> {
                     null
                 }
+
                 else -> {
                     Participant(
                         actor = Reference(
@@ -523,7 +526,7 @@ class EpicAppointmentService(
             supportingInformation = emptyList(),
             start = Instant(transformedStartInstant.toString()),
             end = Instant(transformedEndInstant.toString()),
-            minutesDuration = FHIRInteger(appointmentDuration.toInt()),
+            minutesDuration = PositiveInt(appointmentDuration.toInt()),
             slot = emptyList(),
             created = null,
             comment = appointmentNotes.joinToString(separator = "/n")
