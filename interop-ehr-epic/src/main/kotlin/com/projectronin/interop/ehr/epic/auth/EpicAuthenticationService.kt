@@ -64,23 +64,18 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
 
         logger.debug { "Calling authentication for $authURL, JTI $jti" }
         val response = runBlocking {
-            try {
-                val httpResponse: HttpResponse = client.request("Epic Authentication: ${tenant.name}", authURL) { url ->
-                    submitForm(
-                        url = url,
-                        formParameters = Parameters.build {
-                            append("grant_type", "client_credentials")
-                            append("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-                            append("client_assertion", token)
-                        },
-                        encodeInQuery = false
-                    )
-                }
-                httpResponse.body<EpicAuthentication>()
-            } catch (e: Exception) {
-                logger.error(e) { "Authentication for $authURL, JTI $jti, failed with exception $e" }
-                throw e
+            val httpResponse: HttpResponse = client.request("Epic Authentication: ${tenant.name}", authURL) { url ->
+                submitForm(
+                    url = url,
+                    formParameters = Parameters.build {
+                        append("grant_type", "client_credentials")
+                        append("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                        append("client_assertion", token)
+                    },
+                    encodeInQuery = false
+                )
             }
+            httpResponse.body<EpicAuthentication>()
         }
         logger.info { "Call for ${tenant.mnemonic} successfully authenticated" }
         logger.debug { "Completed authentication for $authURL, JTI $jti" }
