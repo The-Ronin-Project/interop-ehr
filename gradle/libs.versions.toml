@@ -1,7 +1,7 @@
 [libraries]
 commons-text = "org.apache.commons:commons-text:1.10.0"
 
-dd-trace-api = "com.datadoghq:dd-trace-api:1.13.0"
+dd-trace-api = "com.datadoghq:dd-trace-api:1.14.0"
 
 interop-common = "com.projectronin.interop:interop-common:3.6.0"
 interop-commonHttp = "com.projectronin.interop:interop-common-http:3.6.0"
