@@ -25,7 +25,7 @@ mockwebserver = "com.squareup.okhttp3:mockwebserver:4.11.0"
 mysql-connector-java = "com.mysql:mysql-connector-j:8.0.33"
 opentracing-api = "io.opentracing:opentracing-api:0.33.0"
 opentracing-util = "io.opentracing:opentracing-util:0.33.0"
-swagger-annotations = "io.swagger.core.v3:swagger-annotations:2.2.9"
+swagger-annotations = "io.swagger.core.v3:swagger-annotations:2.2.10"
 testcontainers-mysql = "org.testcontainers:mysql:1.18.1"
 
 [bundles]
