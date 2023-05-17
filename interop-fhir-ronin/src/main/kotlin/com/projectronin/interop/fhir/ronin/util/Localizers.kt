@@ -23,7 +23,11 @@ fun Reference.localizeReference(tenant: Tenant): Reference {
         // Should we localize if there's a history?
         val (_, _, _, type, fhirId, history) = matchResult.destructured
         return copy(
-            reference = FHIRString("$type/${fhirId.localize(tenant)}$history", id, extension),
+            reference = FHIRString(
+                "$type/${fhirId.localize(tenant)}$history",
+                reference?.id,
+                reference?.extension ?: listOf()
+            ),
             type = Uri(type, extension = dataAuthorityExtension)
         )
     } ?: return this

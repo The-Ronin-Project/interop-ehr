@@ -2738,7 +2738,7 @@ class LocalizerTest {
         val expectedReference = Reference(
             id = "12345".asFHIR(),
             extension = nonLocalizableExtensions,
-            reference = FHIRString("Patient/test-123", id = "12345".asFHIR(), extension = nonLocalizableExtensions),
+            reference = FHIRString("Patient/test-123"),
             type = Uri("Patient", extension = dataAuthorityExtension),
             identifier = Identifier(value = "123".asFHIR()),
             display = "Patient 123".asFHIR()

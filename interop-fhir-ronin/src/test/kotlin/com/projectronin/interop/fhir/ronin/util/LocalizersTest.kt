@@ -4,6 +4,7 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.Reference
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -129,11 +130,51 @@ class LocalizersTest {
         )
         val localized = reference.localizeReference(tenant)
         assertEquals(
-            "StructureDefinition/test-c8973a22-2b5b-4e76-9c66-00639c99e61b",
-            localized.reference?.value
+            FHIRString("StructureDefinition/test-c8973a22-2b5b-4e76-9c66-00639c99e61b"),
+            localized.reference
         )
-        assertEquals(reference.id, localized.reference?.id)
-        assertEquals(reference.extension, localized.reference?.extension)
+        assertEquals(reference.id, localized.id)
+        assertEquals(reference.extension, localized.extension)
+        assertEquals(localized.type?.extension, dataAuthorityExtension) // checking just for fun
+    }
+
+    @Test
+    fun `localized reference includes prior reference id and extensions`() {
+        val reference = Reference(
+            id = FHIRString("id"),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://localhost/extension"),
+                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                )
+            ),
+            reference = FHIRString(
+                "Patient/1234",
+                FHIRString("id123"),
+                listOf(
+                    Extension(
+                        url = Uri("http://localhost/reference-extension"),
+                        value = DynamicValue(DynamicValueType.BOOLEAN, FHIRBoolean.TRUE)
+                    )
+                )
+            )
+        )
+        val localized = reference.localizeReference(tenant)
+        assertEquals(
+            FHIRString(
+                "Patient/test-1234",
+                FHIRString("id123"),
+                listOf(
+                    Extension(
+                        url = Uri("http://localhost/reference-extension"),
+                        value = DynamicValue(DynamicValueType.BOOLEAN, FHIRBoolean.TRUE)
+                    )
+                )
+            ),
+            localized.reference
+        )
+        assertEquals(reference.id, localized.id)
+        assertEquals(reference.extension, localized.extension)
         assertEquals(localized.type?.extension, dataAuthorityExtension) // checking just for fun
     }
 }
