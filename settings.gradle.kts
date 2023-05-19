@@ -4,6 +4,7 @@ include("interop-ehr-liquibase")
 include("interop-tenant")
 include("interop-ehr")
 include("interop-fhir-ronin")
+include("interop-fhir-ronin-generators")
 
 include("interop-ehr-epic")
 include("interop-ehr-cerner")

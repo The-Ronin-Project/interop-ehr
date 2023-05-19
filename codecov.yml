@@ -33,6 +33,11 @@ coverage:
         threshold: 1%
         flags:
           - ehr-cerner
+      fhir-ronin-generators:
+        target: auto
+        threshold: 1%
+        flags:
+          - fhir-ronin-generators
 
     patch:
       tenant:
@@ -65,6 +70,12 @@ coverage:
         base: auto
         flags:
           - ehr-cerner
+      fhir-ronin-generators:
+        target: 80
+        threshold: 1%
+        base: auto
+        flags:
+          - fhir-ronin-generators
 
 comment:
   layout: "reach, diff, flags, files"
@@ -95,4 +106,8 @@ flags:
   ehr-cerner:
     paths:
       - interop-ehr-cerner/
+    carryforward: true
+  fhir-ronin-generators:
+    paths:
+      - interop-fhir-ronin-generators/
     carryforward: true
