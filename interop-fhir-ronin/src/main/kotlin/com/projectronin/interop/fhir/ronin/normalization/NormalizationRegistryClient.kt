@@ -36,6 +36,12 @@ class NormalizationRegistryClient(
      * Returns a [Pair] with the transformed [Coding] as the first and an [Extension] as the second,
      * or null if no such mapping could be found. The [Extension] represents the original value before mapping.
      * Calling this will reload the [NormalizationRegistryCache] if necessary.
+     * @param tenant the current [Tenant], or null to match all tenants.
+     * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
+     * @param coding a FHIR [Coding] to be mapped. value and system must not be null.
+     * @param profileUrl the URL of an [RCDM](https://supreme-garbanzo-99254d0f.pages.github.io/ig/Ronin-Implementation-Guide-Home-List-Profiles.html)
+     * or FHIR profile, which you can find listed in the RCDM and in enum class [RoninProfile](com.projectronin.interop.fhir.ronin.normalization.RoninProfile),
+     * or null to match any element of the type [elementName].
      */
     fun getConceptMapping(
         tenant: Tenant,
@@ -51,6 +57,11 @@ class NormalizationRegistryClient(
      * Returns a [Pair] with the transformed [Coding] as the first and an [Extension] as the second,
      * or null if no such mapping could be found. The [Extension] represents the original value before mapping.
      * Calling this will reload the [NormalizationRegistryCache] if necessary.
+     * @param tenant the current [Tenant], or null to match all tenants.
+     * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
+     * @param coding a FHIR [Coding] to be mapped. value and system must not be null.
+     * @param enumClass a class that enumerates the values the caller can expect as return values from this concept map.
+     * @param profileUrl URL of an RCDM or FHIR profile, or null to match any element of the type [elementName].
      */
     fun <T : CodedEnum<T>> getConceptMappingForEnum(
         tenant: Tenant,
@@ -200,6 +211,9 @@ class NormalizationRegistryClient(
     /**
      * Returns a [List] or null if no such value set could be found.
      * Calling this will reload the [NormalizationRegistryCache] if necessary.
+     * @param tenant the current [Tenant], or null to match all tenants.
+     * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
+     * @param profileUrl URL of an RCDM or FHIR profile, or null to match any element of the type [elementName].
      */
     fun getValueSet(
         tenant: Tenant,
@@ -211,17 +225,11 @@ class NormalizationRegistryClient(
         )
     }
 
-    /**
-     * Get a "universal" Ronin value set independent of specific tenants.  Throws [MissingNormalizationContentException] if the value set cannot be loaded.
-     */
     fun getRequiredValueSet(elementName: String, profileUrl: String? = null): List<Coding> {
         return getValueSet(elementName, profileUrl).takeIf { it.isNotEmpty() }
             ?: throw MissingNormalizationContentException("Required value set for $profileUrl and $elementName not found")
     }
 
-    /**
-     * Get a "universal" Ronin value set independent of specific tenants.
-     */
     fun getValueSet(
         elementName: String,
         profileUrl: String? = null
@@ -231,6 +239,12 @@ class NormalizationRegistryClient(
         )
     }
 
+    /**
+     * Get a tenant-specific Ronin value set.
+     * @param mnemonic 8-character identifier for the tenant.
+     * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
+     * @param profileUrl URL of an RCDM or FHIR profile, or null to match any element of the type [elementName].
+     */
     private fun getValueSetRegistryItem(
         mnemonic: String,
         elementName: String,
