@@ -7,8 +7,10 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.Reference
+import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
@@ -19,6 +21,7 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -50,6 +53,10 @@ class BaseRoninVitalSignTest {
     fun `validate fails if no vital signs category`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -122,6 +129,10 @@ class BaseRoninVitalSignTest {
     fun `validate fails if invalid effective type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -194,6 +205,10 @@ class BaseRoninVitalSignTest {
     fun `validate checks R4 profile`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -276,6 +291,10 @@ class BaseRoninVitalSignTest {
     fun `validate fails if subject is not a Patient`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -347,6 +366,10 @@ class BaseRoninVitalSignTest {
     fun `validate fails if more than 1 entry in coding list for code when Observation type is a vital sign`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -418,6 +441,10 @@ class BaseRoninVitalSignTest {
     fun `validate succeeds`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -481,6 +508,10 @@ class BaseRoninVitalSignTest {
     fun `validate fails if subject type is not found`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -542,7 +573,7 @@ class BaseRoninVitalSignTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Observation.subject.",
+                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Observation.subject.type",
             exception.message
         )
     }
@@ -551,6 +582,10 @@ class BaseRoninVitalSignTest {
     fun `validate fails without subject type having data authority extension identifier`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(

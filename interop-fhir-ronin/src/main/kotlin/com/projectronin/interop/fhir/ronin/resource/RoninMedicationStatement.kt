@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.resource
 
 import com.projectronin.interop.fhir.r4.resource.MedicationStatement
 import com.projectronin.interop.fhir.r4.validate.resource.R4MedicationStatementValidator
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -24,9 +25,12 @@ class RoninMedicationStatement(normalizer: Normalizer, localizer: Localizer) :
         normalizer,
         localizer
     ) {
+    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val profileVersion = 2
 
     override fun validate(element: MedicationStatement, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
             containedResourcePresent(element.contained, parentContext, validation)
 
@@ -35,7 +39,11 @@ class RoninMedicationStatement(normalizer: Normalizer, localizer: Localizer) :
 
             // check that subject reference has type and the extension is the data authority extension identifier
             ifNotNull(element.subject) {
-                requireDataAuthorityExtensionIdentifier(element.subject, LocationContext(MedicationStatement::subject), validation)
+                requireDataAuthorityExtensionIdentifier(
+                    element.subject,
+                    LocationContext(MedicationStatement::subject),
+                    validation
+                )
             }
         }
     }

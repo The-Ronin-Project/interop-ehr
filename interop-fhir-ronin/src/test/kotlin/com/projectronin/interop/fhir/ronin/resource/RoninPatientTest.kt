@@ -46,6 +46,7 @@ import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.util.dataAbsentReasonExtension
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -116,6 +117,7 @@ class RoninPatientTest {
     fun `validate checks ronin identifiers`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_MRN,
@@ -145,6 +147,7 @@ class RoninPatientTest {
     fun `validate fails for no MRN identifier`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -182,6 +185,7 @@ class RoninPatientTest {
     fun `validate fails for wrong type on MRN identifier`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -224,6 +228,7 @@ class RoninPatientTest {
     fun `validate fails for no value on MRN identifier`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -263,6 +268,7 @@ class RoninPatientTest {
     fun `validate fails for no birth date`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -305,6 +311,7 @@ class RoninPatientTest {
     fun `validate fails for no name`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -348,6 +355,7 @@ class RoninPatientTest {
     fun `validate fails for null or empty name`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -391,6 +399,7 @@ class RoninPatientTest {
     fun `validate pass with only family name`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -425,6 +434,7 @@ class RoninPatientTest {
     fun `validate pass with only given name`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -459,6 +469,7 @@ class RoninPatientTest {
     fun `validate pass with only multiple given names`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -493,6 +504,7 @@ class RoninPatientTest {
     fun `validate pass with no name and data absent reason`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -537,6 +549,7 @@ class RoninPatientTest {
     fun `validate fails with name and data absent reason`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -591,6 +604,7 @@ class RoninPatientTest {
     fun `validate fails for no gender`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -633,6 +647,7 @@ class RoninPatientTest {
     fun `validate fails for gender with data absent reason`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -677,6 +692,7 @@ class RoninPatientTest {
     fun `validate fails for missing identifier system`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -698,7 +714,7 @@ class RoninPatientTest {
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
                     value = "EHR Data Authority".asFHIR()
                 ),
-                Identifier(type = CodeableConcepts.RONIN_MRN, system = null, value = "missing system".asFHIR())
+                Identifier(system = null, value = "missing system".asFHIR())
             ),
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
@@ -711,7 +727,51 @@ class RoninPatientTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: system is a required element @ Patient.identifier[4].system",
+                "ERROR RONIN_PAT_006: Identifier system or data absent reason is required @ Patient.identifier[4].system",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails for identifier system with no value`() {
+        val patient = Patient(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_MRN,
+                    system = CodeSystem.RONIN_MRN.uri,
+                    value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                ),
+                Identifier(system = Uri(null), value = "missing system".asFHIR())
+            ),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05")
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPatient.validate(patient, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_PAT_006: Identifier system or data absent reason is required @ Patient.identifier[4].system",
             exception.message
         )
     }
@@ -720,6 +780,7 @@ class RoninPatientTest {
     fun `validate fails for missing identifier value`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -763,6 +824,7 @@ class RoninPatientTest {
     fun `validate checks R4 profile`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -816,6 +878,7 @@ class RoninPatientTest {
     fun `validates patient with minimum attributes`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -903,7 +966,8 @@ class RoninPatientTest {
         val patient = Patient(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("https://www.hl7.org/fhir/patient"))
+                profile = listOf(Canonical("https://www.hl7.org/fhir/patient")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -951,7 +1015,7 @@ class RoninPatientTest {
         assertEquals("Patient", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
@@ -1039,9 +1103,61 @@ class RoninPatientTest {
     }
 
     @Test
+    fun `transform adds data absent reason extension when identifier does not have a system value`() {
+        val identifiers = identifierList + Identifier(system = null, value = "something".asFHIR())
+        val patient = Patient(
+            id = Id("12345"),
+            meta = Meta(source = Uri("fake-source-fake-url")),
+            identifier = identifiers,
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05")
+        )
+
+        every { mockIdentifierService.getMRNIdentifier(tenant, identifiers) } returns identifierList[0]
+
+        val (transformed, validation) = roninPatient.transform(patient, tenant)
+        validation.alertIfErrors()
+        transformed!!
+        assertEquals(
+            listOf(
+                identifierList.first(),
+                Identifier(
+                    system = Uri(value = null, extension = dataAbsentReasonExtension),
+                    value = "something".asFHIR(),
+                    id = null,
+                    extension = emptyList()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_MRN,
+                    system = CodeSystem.RONIN_MRN.uri,
+                    value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            transformed.identifier
+        )
+    }
+
+    @Test
     fun `transforms patient with minimum attributes`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             identifier = identifierList,
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
@@ -1060,7 +1176,7 @@ class RoninPatientTest {
         assertEquals("Patient", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)
@@ -1127,9 +1243,65 @@ class RoninPatientTest {
     }
 
     @Test
+    fun `validate checks meta`() {
+        val patient = Patient(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_MRN,
+                    system = CodeSystem.RONIN_MRN.uri,
+                    value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                ),
+                Identifier(
+                    use = IdentifierUse.USUAL.asCode(),
+                    system = Uri("urn:oid:2.16.840.1.113883.4.1"),
+                    value = FHIRString(
+                        value = null,
+                        extension = listOf(
+                            Extension(
+                                url = Uri("http://hl7.org/fhir/StructureDefinition/rendered-value"),
+                                value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234".asFHIR())
+                            )
+                        )
+                    )
+                )
+            ),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05")
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPatient.validate(patient, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ Patient.meta",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate succeeds for identifier with value extension`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -1195,6 +1367,7 @@ class RoninPatientTest {
 
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             identifier = identifiers,
             name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
             gender = AdministrativeGender.FEMALE.asCode(),
@@ -1213,7 +1386,7 @@ class RoninPatientTest {
         assertEquals("Patient", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)
@@ -1269,6 +1442,7 @@ class RoninPatientTest {
     fun `validate passes if 1 of many names has official use`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -1307,6 +1481,7 @@ class RoninPatientTest {
     fun `validate fails if no name has official use`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -1353,6 +1528,7 @@ class RoninPatientTest {
     fun `validate fails for invalid birth date`() {
         val patient = Patient(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,

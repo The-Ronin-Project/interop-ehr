@@ -71,6 +71,21 @@ class RoninConditionProblemsAndHealthConcernsTest {
         display = "Nausea, vomiting and diarrhea".asFHIR()
     )
     private val problemCodingList = listOf(problemCoding)
+    private val conditionCodeExtension = Extension(
+        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceConditionCode"),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            value = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = Uri("http://snomed.info/sct"),
+                        code = Code("2919008"),
+                        display = "Nausea, vomiting and diarrhea".asFHIR()
+                    )
+                )
+            )
+        )
+    )
     private val profile = RoninConditionProblemsAndHealthConcerns(normalizer, localizer)
 
     @Test
@@ -252,10 +267,18 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate checks ronin identifiers`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             code = CodeableConcept(
                 coding = problemCodingList
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Condition", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Condition", extension = dataAuthorityExtension)
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -285,6 +308,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails without subject reference not having element type`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -330,7 +358,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Condition.subject.",
+                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Condition.subject.type",
             exception.message
         )
     }
@@ -339,6 +367,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails without subject reference having data authority extension identifier`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -393,6 +426,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails with incorrect category code with correct system, wrong code for problem-list-item`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -446,6 +484,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails with incorrect code with correct system, wrong code for health-concern`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -500,6 +543,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails if code coding is empty`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -546,6 +594,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails if no code`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -596,6 +649,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails if not a qualifying category and no code coding`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -641,6 +699,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate checks R4 profile`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -704,6 +767,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails with missing code coding code`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -754,6 +822,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails with missing code coding system - no code matches the value set`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -810,6 +883,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails with missing code coding display`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -857,9 +935,66 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
+    fun `validate checks meta`() {
+        val condition = Condition(
+            id = Id("12345"),
+            extension = listOf(conditionCodeExtension),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = problemCodingList
+            ),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
+                            code = Code("health-concern")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            profile.validate(condition, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ Condition.meta",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate succeeds with health-concern`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -903,6 +1038,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate succeeds with problem-list-item`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -1015,7 +1155,8 @@ class RoninConditionProblemsAndHealthConcernsTest {
         val condition = Condition(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner"))
+                profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -1146,7 +1287,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
         assertEquals("Condition", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)), source = Uri("source")),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
@@ -1161,7 +1302,8 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 Extension(
                     url = Uri("http://localhost/extension"),
                     value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                ),
+                conditionCodeExtension
             ),
             transformed.extension
         )
@@ -1341,6 +1483,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `transforms condition with only required attributes`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             identifier = listOf(
                 Identifier(value = "id".asFHIR())
             ),
@@ -1367,14 +1510,14 @@ class RoninConditionProblemsAndHealthConcernsTest {
         assertEquals("Condition", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
         assertNull(transformed.text)
         assertEquals(listOf<ContainedResource>(), transformed.contained)
-        assertEquals(listOf<Extension>(), transformed.extension)
+        assertEquals(listOf(conditionCodeExtension), transformed.extension)
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
@@ -1443,6 +1586,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate succeeds with multiple categories`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -1490,6 +1638,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails if no subject`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -1539,6 +1692,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails if subject has no reference attribute`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -1560,7 +1718,10 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 coding = problemCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(display = "something".asFHIR(), type = Uri("Condition", extension = dataAuthorityExtension)),
+            subject = Reference(
+                display = "something".asFHIR(),
+                type = Uri("Condition", extension = dataAuthorityExtension)
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -1588,6 +1749,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails if subject reference is wrong type`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -1609,7 +1775,10 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 coding = problemCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(reference = "Condition/12345".asFHIR(), type = Uri("Condition", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Condition/12345".asFHIR(),
+                type = Uri("Condition", extension = dataAuthorityExtension)
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -1637,6 +1806,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails if bad clinicalStatus`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -1707,6 +1881,11 @@ class RoninConditionProblemsAndHealthConcernsTest {
     fun `validate fails if bad verificationStatus`() {
         val condition = Condition(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(conditionCodeExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -1728,7 +1907,10 @@ class RoninConditionProblemsAndHealthConcernsTest {
                 coding = problemCodingList,
                 text = "code".asFHIR()
             ),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(

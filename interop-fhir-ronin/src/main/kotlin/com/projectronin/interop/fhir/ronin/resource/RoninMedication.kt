@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.resource
 
 import com.projectronin.interop.fhir.r4.resource.Medication
 import com.projectronin.interop.fhir.r4.validate.resource.R4MedicationValidator
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -28,11 +29,14 @@ class RoninMedication(
         normalizer,
         localizer
     ) {
+    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val profileVersion = 2
 
     private val requiredCodeError = RequiredFieldError(Medication::code)
 
     override fun validateRonin(element: Medication, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
 
             containedResourcePresent(element.contained, parentContext, validation)

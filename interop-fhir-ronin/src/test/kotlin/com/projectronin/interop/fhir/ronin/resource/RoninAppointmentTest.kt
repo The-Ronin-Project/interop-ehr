@@ -91,6 +91,7 @@ class RoninAppointmentTest {
     fun `validate checks ronin identifiers`() {
         val appointment = Appointment(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
             extension = listOf(statusExtension("cancelled")),
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
@@ -118,6 +119,7 @@ class RoninAppointmentTest {
     fun `validate checks R4 profile`() {
         val appointment = Appointment(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -168,9 +170,52 @@ class RoninAppointmentTest {
     }
 
     @Test
+    fun `validate checks meta`() {
+        val appointment = Appointment(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(statusExtension("cancelled")),
+            status = AppointmentStatus.CANCELLED.asCode(),
+            participant = listOf(
+                Participant(
+                    actor = Reference(display = "actor".asFHIR()),
+                    status = ParticipationStatus.ACCEPTED.asCode()
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninAppointment.validate(appointment, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ Appointment.meta",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate succeeds`() {
         val appointment = Appointment(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -206,7 +251,8 @@ class RoninAppointmentTest {
         val appointment = Appointment(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/appointment.html"))
+                profile = listOf(Canonical("http://hl7.org/fhir/R4/appointment.html")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -276,7 +322,7 @@ class RoninAppointmentTest {
         assertEquals("Appointment", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
@@ -373,6 +419,7 @@ class RoninAppointmentTest {
     fun `transform appointment with only required attributes`() {
         val appointment = Appointment(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
@@ -401,7 +448,7 @@ class RoninAppointmentTest {
         assertEquals("Appointment", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)
@@ -507,6 +554,7 @@ class RoninAppointmentTest {
     @Test
     fun `validate fails for appointment with missing identifiers`() {
         val appointment = Appointment(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
             identifier = listOf(Identifier(value = "id".asFHIR())),
             extension = listOf(statusExtension("cancelled")),
             status = AppointmentStatus.CANCELLED.asCode(),
@@ -535,6 +583,7 @@ class RoninAppointmentTest {
     fun `validate fails for appointment with wrong status for missing start and end for participant`() {
         val appointment = Appointment(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -582,6 +631,7 @@ class RoninAppointmentTest {
     fun `validate fails for appointment with wrong status for cancelationReason`() {
         val appointment = Appointment(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -628,6 +678,7 @@ class RoninAppointmentTest {
     fun `validate fails for appointment missing status source extension`() {
         val appointment = Appointment(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -674,6 +725,7 @@ class RoninAppointmentTest {
     fun `validate fails for appointment with wrong URL in status source extension`() {
         val appointment = Appointment(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -724,6 +776,7 @@ class RoninAppointmentTest {
     fun `validate fails for appointment with missing URL in status source extension`() {
         val appointment = Appointment(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -779,6 +832,7 @@ class RoninAppointmentTest {
     fun `validate fails for appointment with right URL and wrong data type in status source extension`() {
         val appointment = Appointment(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -829,6 +883,7 @@ class RoninAppointmentTest {
     fun `transform succeeds for appointment status - when concept map returns a good value`() {
         val appointment = Appointment(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,

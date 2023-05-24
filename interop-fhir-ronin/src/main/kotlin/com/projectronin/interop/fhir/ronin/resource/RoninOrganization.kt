@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.resource
 
 import com.projectronin.interop.fhir.r4.resource.Organization
 import com.projectronin.interop.fhir.r4.validate.resource.R4OrganizationValidator
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -19,12 +20,15 @@ import org.springframework.stereotype.Component
 @Component
 class RoninOrganization(normalizer: Normalizer, localizer: Localizer) :
     USCoreBasedProfile<Organization>(R4OrganizationValidator, RoninProfile.ORGANIZATION.value, normalizer, localizer) {
+    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val profileVersion = 2
 
     private val requiredActiveFieldError = RequiredFieldError(Organization::active)
     private val requiredNameFieldError = RequiredFieldError(Organization::name)
 
     override fun validateRonin(element: Organization, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
             containedResourcePresent(element.contained, parentContext, validation)
         }

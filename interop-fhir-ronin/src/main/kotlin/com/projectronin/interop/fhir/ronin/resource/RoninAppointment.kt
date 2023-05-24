@@ -4,6 +4,7 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.validate.resource.R4AppointmentValidator
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.error.ConceptMapInvalidValueSetError
 import com.projectronin.interop.fhir.ronin.error.FailedConceptMapLookupError
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
@@ -27,8 +28,14 @@ import org.springframework.stereotype.Component
  * Validator and Transformer for the Ronin Appointment profile.
  */
 @Component
-class RoninAppointment(private val registryClient: NormalizationRegistryClient, normalizer: Normalizer, localizer: Localizer) :
+class RoninAppointment(
+    private val registryClient: NormalizationRegistryClient,
+    normalizer: Normalizer,
+    localizer: Localizer
+) :
     USCoreBasedProfile<Appointment>(R4AppointmentValidator, RoninProfile.APPOINTMENT.value, normalizer, localizer) {
+    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val profileVersion = 2
 
     private val requiredAppointmentExtensionError = FHIRError(
         code = "RONIN_APPT_001",
@@ -45,6 +52,7 @@ class RoninAppointment(private val registryClient: NormalizationRegistryClient, 
 
     override fun validateRonin(element: Appointment, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
             containedResourcePresent(element.contained, parentContext, validation)
             // null status is checked by R4ContactPointValidator

@@ -54,7 +54,8 @@ class RoninMedicationTest {
     }
     private val vitaminD = "11253"
     private val medicationCode = Code(vitaminD)
-    private val medicationCoding = Coding(system = CodeSystem.RXNORM.uri, code = medicationCode, display = "Vitamin D".asFHIR())
+    private val medicationCoding =
+        Coding(system = CodeSystem.RXNORM.uri, code = medicationCode, display = "Vitamin D".asFHIR())
     private val medicationCodingList = listOf(medicationCoding)
     private val roninMedication = RoninMedication(normalizer, localizer)
 
@@ -66,6 +67,7 @@ class RoninMedicationTest {
     @Test
     fun `validate - fails if missing identifiers`() {
         val medication = Medication(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
             code = CodeableConcept(
                 text = "b".asFHIR(),
                 coding = medicationCodingList
@@ -88,6 +90,7 @@ class RoninMedicationTest {
     @Test
     fun `validate - fails if missing required code attribute`() {
         val medication = Medication(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -121,6 +124,7 @@ class RoninMedicationTest {
     @Test
     fun `validate - fails if no code-coding has all required attributes - missing values`() {
         val medication = Medication(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -170,6 +174,7 @@ class RoninMedicationTest {
 
         val medication = Medication(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -253,6 +258,7 @@ class RoninMedicationTest {
 
         val medication = Medication(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -337,6 +343,7 @@ class RoninMedicationTest {
         // all attributes are correct
 
         val medication = Medication(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -394,6 +401,7 @@ class RoninMedicationTest {
     @Test
     fun `validate - fails if status does not use required valueset`() {
         val medication = Medication(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -432,6 +440,7 @@ class RoninMedicationTest {
     @Test
     fun `validate - fails for any ingredient missing an item`() {
         val medication = Medication(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -479,8 +488,47 @@ class RoninMedicationTest {
     }
 
     @Test
+    fun `validate checks meta`() {
+        val medication = Medication(
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                text = "b".asFHIR(),
+                coding = medicationCodingList
+            ),
+            ingredient = listOf()
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedication.validate(medication, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ Medication.meta",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate - succeeds with empty ingredient list`() {
         val medication = Medication(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -511,6 +559,7 @@ class RoninMedicationTest {
     @Test
     fun `validate - succeeds with just required attributes`() {
         val medication = Medication(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -541,6 +590,7 @@ class RoninMedicationTest {
     fun `transform - succeeds with just required attributes`() {
         val medication = Medication(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             code = CodeableConcept(
                 text = "b".asFHIR(),
                 coding = medicationCodingList
@@ -581,7 +631,8 @@ class RoninMedicationTest {
         val medication = Medication(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/Medication.html"))
+                profile = listOf(Canonical("http://hl7.org/fhir/R4/Medication.html")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -727,7 +778,8 @@ class RoninMedicationTest {
         val medication = Medication(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/Medication.html"))
+                profile = listOf(Canonical("http://hl7.org/fhir/R4/Medication.html")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -900,6 +952,7 @@ class RoninMedicationTest {
         // all attributes are correct
 
         val medication = Medication(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,

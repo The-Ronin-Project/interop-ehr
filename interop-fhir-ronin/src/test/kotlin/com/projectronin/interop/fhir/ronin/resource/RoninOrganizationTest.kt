@@ -65,6 +65,7 @@ class RoninOrganizationTest {
     fun `validate fails without ronin identifiers`() {
         val organization = Organization(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
             name = "Organization Name".asFHIR(),
             active = true.asFHIR()
         )
@@ -85,6 +86,7 @@ class RoninOrganizationTest {
     @Test
     fun `validate fails with no organization name provided`() {
         val organization = Organization(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
             id = Id("12345"),
             identifier = listOf(
                 Identifier(
@@ -120,6 +122,7 @@ class RoninOrganizationTest {
     fun `validate fails with no organization active provided`() {
         val organization = Organization(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -154,6 +157,7 @@ class RoninOrganizationTest {
     fun `validate against R4 profile for organization`() {
         val organization = Organization(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -209,9 +213,46 @@ class RoninOrganizationTest {
     }
 
     @Test
+    fun `validate checks meta`() {
+        val organization = Organization(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            name = "Organization name".asFHIR(),
+            active = true.asFHIR()
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninOrganization.validate(organization, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ Organization.meta",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate is successful with name and active`() {
         val organization = Organization(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -241,7 +282,8 @@ class RoninOrganizationTest {
         val organization = Organization(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/organization.html"))
+                profile = listOf(Canonical("http://hl7.org/fhir/R4/organization.html")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -331,7 +373,7 @@ class RoninOrganizationTest {
         assertEquals("Organization", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
@@ -465,6 +507,7 @@ class RoninOrganizationTest {
     fun `transform organization with only required attributes`() {
         val organization = Organization(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             name = "Organization name".asFHIR(),
             active = true.asFHIR()
         )
@@ -477,7 +520,7 @@ class RoninOrganizationTest {
         assertEquals("Organization", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)

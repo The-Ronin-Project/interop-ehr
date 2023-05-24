@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.resource
 
 import com.projectronin.interop.fhir.r4.resource.CarePlan
 import com.projectronin.interop.fhir.r4.validate.resource.R4CarePlanValidator
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -20,10 +21,14 @@ import org.springframework.stereotype.Component
 @Component
 class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
     BaseRoninProfile<CarePlan>(R4CarePlanValidator, RoninProfile.CARE_PLAN.value, normalizer, localizer) {
+    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val profileVersion = 4
 
     private val requireCategoryError = RequiredFieldError(CarePlan::category)
+
     override fun validate(element: CarePlan, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, validation)
             containedResourcePresent(element.contained, parentContext, validation)
 
@@ -31,8 +36,6 @@ class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
             ifNotNull(element.subject) {
                 requireDataAuthorityExtensionIdentifier(element.subject, LocationContext(CarePlan::subject), validation)
             }
-
-            checkTrue(element.category.isNotEmpty(), requireCategoryError, parentContext)
 
             // subject required is validated in R4
             validateReference(element.subject, listOf("Patient"), LocationContext(CarePlan::subject), validation)

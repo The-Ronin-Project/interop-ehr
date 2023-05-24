@@ -8,6 +8,7 @@ import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.error.RoninInvalidDynamicValueError
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
@@ -32,9 +33,12 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
         normalizer,
         localizer
     ) {
+    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val profileVersion = 2
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCategories = listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("laboratory")))
+    override val qualifyingCategories =
+        listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("laboratory")))
 
     // Reference checks - override BaseRoninObservation value lists as needed for RoninLaboratoryResult
     override val validDerivedFromValues = listOf(

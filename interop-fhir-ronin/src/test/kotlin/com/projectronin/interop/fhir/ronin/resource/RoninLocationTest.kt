@@ -88,6 +88,7 @@ class RoninLocationTest {
     fun `validate checks ronin identifiers`() {
         val location = Location(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
             name = "Name".asFHIR()
         )
 
@@ -108,6 +109,7 @@ class RoninLocationTest {
     fun `validate succeeds for no name with data absent extension`() {
         val location = Location(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -143,6 +145,7 @@ class RoninLocationTest {
     fun `validate fails for no name and no data absent extension`() {
         val location = Location(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -177,6 +180,7 @@ class RoninLocationTest {
     fun `validate fails for name and data absent extension both present`() {
         val location = Location(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -220,6 +224,7 @@ class RoninLocationTest {
     fun `validate checks R4 profile`() {
         val location = Location(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -263,9 +268,45 @@ class RoninLocationTest {
     }
 
     @Test
+    fun `validate checks meta`() {
+        val location = Location(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            name = "My Office".asFHIR()
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninLocation.validate(location, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ Location.meta",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate succeeds with name provided`() {
         val location = Location(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -386,7 +427,8 @@ class RoninLocationTest {
         val location = Location(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("https://www.hl7.org/fhir/location"))
+                profile = listOf(Canonical("https://www.hl7.org/fhir/location")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -430,7 +472,7 @@ class RoninLocationTest {
         assertEquals("Location", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
@@ -501,6 +543,7 @@ class RoninLocationTest {
     fun `transforms location with only required attributes`() {
         val location = Location(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             name = "Name".asFHIR()
         )
 
@@ -511,7 +554,7 @@ class RoninLocationTest {
         assertEquals("Location", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)
@@ -562,6 +605,7 @@ class RoninLocationTest {
     fun `transforms location when no name is provided`() {
         val location = Location(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -595,6 +639,7 @@ class RoninLocationTest {
     fun `transforms location when empty name is provided`() {
         val location = Location(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -639,6 +684,7 @@ class RoninLocationTest {
         )
         val location = Location(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             name = name
         )
 
@@ -649,7 +695,7 @@ class RoninLocationTest {
         assertEquals("Location", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)
@@ -707,6 +753,7 @@ class RoninLocationTest {
         )
         val location = Location(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -748,6 +795,7 @@ class RoninLocationTest {
         )
         val location = Location(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -804,6 +852,7 @@ class RoninLocationTest {
     fun `validate fails with bad status`() {
         val location = Location(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -840,6 +889,7 @@ class RoninLocationTest {
     fun `validate fails with bad mode`() {
         val location = Location(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,

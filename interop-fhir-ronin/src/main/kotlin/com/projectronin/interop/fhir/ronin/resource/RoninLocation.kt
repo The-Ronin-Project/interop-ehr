@@ -4,6 +4,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.hasDataAbsentReason
@@ -28,9 +29,12 @@ class RoninLocation(
     localizer: Localizer,
     private val contactPoint: RoninContactPoint
 ) : USCoreBasedProfile<Location>(R4LocationValidator, RoninProfile.LOCATION.value, normalizer, localizer) {
+    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val profileVersion = 2
 
     override fun validateRonin(element: Location, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, validation)
             containedResourcePresent(element.contained, parentContext, validation)
 

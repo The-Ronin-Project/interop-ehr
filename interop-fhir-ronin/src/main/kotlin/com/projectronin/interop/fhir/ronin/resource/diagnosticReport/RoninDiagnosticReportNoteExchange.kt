@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.resource.diagnosticReport
 
 import com.projectronin.interop.fhir.r4.resource.DiagnosticReport
 import com.projectronin.interop.fhir.r4.validate.resource.R4DiagnosticReportValidator
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -25,6 +26,8 @@ class RoninDiagnosticReportNoteExchange(normalizer: Normalizer, localizer: Local
         normalizer,
         localizer
     ) {
+    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val profileVersion = 2
 
     private val requiredCategoryFieldError = RequiredFieldError(DiagnosticReport::category)
     private val requiredSubjectFieldError = RequiredFieldError(DiagnosticReport::subject)
@@ -37,7 +40,12 @@ class RoninDiagnosticReportNoteExchange(normalizer: Normalizer, localizer: Local
             checkTrue(element.category.isNotEmpty(), requiredCategoryFieldError, parentContext)
 
             checkNotNull(element.subject, requiredSubjectFieldError, parentContext)
-            validateReference(element.subject, listOf("Patient"), LocationContext(DiagnosticReport::subject), validation)
+            validateReference(
+                element.subject,
+                listOf("Patient"),
+                LocationContext(DiagnosticReport::subject),
+                validation
+            )
 
             // code and status field checks are done by R4DiagnosticReportValidator
         }

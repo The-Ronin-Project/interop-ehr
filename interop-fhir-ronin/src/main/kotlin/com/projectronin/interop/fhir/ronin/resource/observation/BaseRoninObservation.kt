@@ -93,6 +93,7 @@ abstract class BaseRoninObservation(
      */
     override fun validateRonin(element: Observation, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, validation)
 
             containedResourcePresent(element.contained, parentContext, validation)
@@ -104,7 +105,11 @@ abstract class BaseRoninObservation(
             validateReference(element.subject, validSubjectValues, LocationContext(Observation::subject), validation)
             // check that subject reference has type and the extension is the data authority extension identifier
             ifNotNull(element.subject) {
-                requireDataAuthorityExtensionIdentifier(element.subject, LocationContext(Observation::subject), validation)
+                requireDataAuthorityExtensionIdentifier(
+                    element.subject,
+                    LocationContext(Observation::subject),
+                    validation
+                )
             }
 
             validateReferenceList(
@@ -175,7 +180,7 @@ abstract class BaseRoninObservation(
                 FHIRError(
                     code = "RONIN_OBS_002",
                     severity = ValidationIssueSeverity.ERROR,
-                    description = "Must match this system|code: ${ qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" } }",
+                    description = "Must match this system|code: ${qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }}",
                     location = LocationContext(Observation::category)
                 ),
                 parentContext
@@ -186,7 +191,7 @@ abstract class BaseRoninObservation(
                 FHIRError(
                     code = "RONIN_OBS_003",
                     severity = ValidationIssueSeverity.ERROR,
-                    description = "Must match this system|code: ${ qualifyingCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" } }",
+                    description = "Must match this system|code: ${qualifyingCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }}",
                     location = LocationContext(Observation::code)
                 ),
                 parentContext

@@ -88,6 +88,10 @@ class RoninDiagnosticReportLaboratoryTest {
     fun `validate fails without ronin identifiers`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                source = Uri("source")
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -151,6 +155,10 @@ class RoninDiagnosticReportLaboratoryTest {
     fun `validate fails with no subject provided`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -196,6 +204,10 @@ class RoninDiagnosticReportLaboratoryTest {
     fun `validate fails with no subject type provided`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -233,7 +245,7 @@ class RoninDiagnosticReportLaboratoryTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ DiagnosticReport.subject.",
+                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ DiagnosticReport.subject.type",
             exception.message
         )
     }
@@ -242,6 +254,10 @@ class RoninDiagnosticReportLaboratoryTest {
     fun `validate fails with subject type but no data authority extension identifier`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -289,6 +305,10 @@ class RoninDiagnosticReportLaboratoryTest {
     fun `validate fails with no category provided`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -330,6 +350,10 @@ class RoninDiagnosticReportLaboratoryTest {
     fun `validate fails with wrong category code provided`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -380,6 +404,10 @@ class RoninDiagnosticReportLaboratoryTest {
     fun `validate fails with wrong category system provided`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -431,6 +459,10 @@ class RoninDiagnosticReportLaboratoryTest {
     fun `validate against R4 profile for DiagnosticReport with missing attributes`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -501,9 +533,64 @@ class RoninDiagnosticReportLaboratoryTest {
     }
 
     @Test
+    fun `validate checks meta`() {
+        val dxReport = DiagnosticReport(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                            code = Code("LAB")
+                        )
+                    )
+                )
+            ),
+            code = CodeableConcept(text = "dx report".asFHIR()),
+            status = Code("registered"),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                display = "display".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ DiagnosticReport.meta",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate is successful with required attributes`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -548,7 +635,8 @@ class RoninDiagnosticReportLaboratoryTest {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/diagnosticreport.html"))
+                profile = listOf(Canonical("http://hl7.org/fhir/R4/diagnosticreport.html")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -626,7 +714,7 @@ class RoninDiagnosticReportLaboratoryTest {
         assertEquals("DiagnosticReport", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)), source = Uri("source")),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
@@ -785,6 +873,7 @@ class RoninDiagnosticReportLaboratoryTest {
     fun `transform diagnostic report with only required attributes`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -807,7 +896,7 @@ class RoninDiagnosticReportLaboratoryTest {
         assertEquals("DiagnosticReport", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)
@@ -882,6 +971,10 @@ class RoninDiagnosticReportLaboratoryTest {
     fun `validate fails with missing reference attribute`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -923,7 +1016,7 @@ class RoninDiagnosticReportLaboratoryTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ DiagnosticReport.subject.",
+                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ DiagnosticReport.subject.type",
             exception.message
         )
     }
@@ -932,6 +1025,10 @@ class RoninDiagnosticReportLaboratoryTest {
     fun `validate fails with wrong reference type`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,

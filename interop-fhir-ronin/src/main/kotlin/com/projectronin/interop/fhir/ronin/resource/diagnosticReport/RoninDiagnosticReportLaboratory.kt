@@ -5,6 +5,7 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.DiagnosticReport
 import com.projectronin.interop.fhir.r4.validate.resource.R4DiagnosticReportValidator
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -31,9 +32,12 @@ class RoninDiagnosticReportLaboratory(normalizer: Normalizer, localizer: Localiz
         normalizer,
         localizer
     ) {
+    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val profileVersion = 2
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCategories = listOf(Coding(system = CodeSystem.DIAGNOSTIC_REPORT_LABORATORY.uri, code = Code("LAB")))
+    override val qualifyingCategories =
+        listOf(Coding(system = CodeSystem.DIAGNOSTIC_REPORT_LABORATORY.uri, code = Code("LAB")))
 
     private val requiredIdError = RequiredFieldError(DiagnosticReport::id)
     private val requiredSubjectFieldError = RequiredFieldError(DiagnosticReport::subject)
@@ -58,7 +62,12 @@ class RoninDiagnosticReportLaboratory(normalizer: Normalizer, localizer: Localiz
             )
 
             checkNotNull(element.subject, requiredSubjectFieldError, parentContext)
-            validateReference(element.subject, listOf("Patient"), LocationContext(DiagnosticReport::subject), validation)
+            validateReference(
+                element.subject,
+                listOf("Patient"),
+                LocationContext(DiagnosticReport::subject),
+                validation
+            )
 
             // code and status field checks are done by R4DiagnosticReportValidator
         }

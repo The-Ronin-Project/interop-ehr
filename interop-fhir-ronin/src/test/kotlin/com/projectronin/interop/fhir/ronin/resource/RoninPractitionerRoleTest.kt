@@ -67,6 +67,7 @@ class RoninPractitionerRoleTest {
     fun `validate checks ronin identifiers`() {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
             identifier = listOf(),
             practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
             organization = Reference(reference = "Organization/5678".asFHIR())
@@ -89,6 +90,7 @@ class RoninPractitionerRoleTest {
     fun `validate fails for no practitioner`() {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -125,6 +127,7 @@ class RoninPractitionerRoleTest {
     fun `validate fails for no telecom value`() {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -162,6 +165,7 @@ class RoninPractitionerRoleTest {
     fun `validate fails for multiple invalid telecoms`() {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -204,6 +208,7 @@ class RoninPractitionerRoleTest {
     fun `validate checks R4 profile`() {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -253,9 +258,46 @@ class RoninPractitionerRoleTest {
     }
 
     @Test
+    fun `validate checks meta`() {
+        val practitionerRole = PractitionerRole(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+            organization = Reference(reference = "Organization/5678".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ PractitionerRole.meta",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate succeeds`() {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -293,7 +335,8 @@ class RoninPractitionerRoleTest {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner-role"))
+                profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner-role")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -319,7 +362,7 @@ class RoninPractitionerRoleTest {
         assertEquals("PractitionerRole", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
@@ -375,7 +418,8 @@ class RoninPractitionerRoleTest {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner-role"))
+                profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner-role")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -416,7 +460,7 @@ class RoninPractitionerRoleTest {
         assertEquals("PractitionerRole", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
@@ -490,6 +534,7 @@ class RoninPractitionerRoleTest {
     fun `transforms practitioner role with only required attributes`() {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
             organization = Reference(reference = "Organization/5678".asFHIR())
         )
@@ -501,7 +546,7 @@ class RoninPractitionerRoleTest {
         assertEquals("PractitionerRole", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)
@@ -549,6 +594,7 @@ class RoninPractitionerRoleTest {
     fun `transforms practitioner role with all telecoms filtered`() {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
             organization = Reference(reference = "Organization/5678".asFHIR()),
             telecom = listOf(ContactPoint(id = "first".asFHIR()), ContactPoint(id = "second".asFHIR()))
@@ -561,7 +607,7 @@ class RoninPractitionerRoleTest {
         assertEquals("PractitionerRole", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)
@@ -609,6 +655,7 @@ class RoninPractitionerRoleTest {
     fun `transforms practitioner role with some telecoms filtered`() {
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
             organization = Reference(reference = "Organization/5678".asFHIR()),
             telecom = listOf(
@@ -626,7 +673,7 @@ class RoninPractitionerRoleTest {
         assertEquals("PractitionerRole", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)

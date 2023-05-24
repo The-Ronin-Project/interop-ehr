@@ -248,6 +248,10 @@ class RoninBloodPressureTest {
     fun `validate checks ronin identifiers`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             code = CodeableConcept(
@@ -269,7 +273,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -293,6 +300,10 @@ class RoninBloodPressureTest {
     fun `validate fails if non-blood pressure code`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             identifier = listOf(
@@ -388,6 +399,10 @@ class RoninBloodPressureTest {
     fun `validate fails if no components and no data absent reason for blood pressure`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -425,7 +440,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -448,6 +466,10 @@ class RoninBloodPressureTest {
     fun `validate succeeds if no components and data absent reason is provided`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             identifier = listOf(
@@ -486,7 +508,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -500,6 +525,10 @@ class RoninBloodPressureTest {
     fun `validate fails if systolic quantity and systolic data absent reason are both provided`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -537,7 +566,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -592,6 +624,10 @@ class RoninBloodPressureTest {
     fun `validate succeeds if systolic quantity has data absent reason instead of value`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -670,6 +706,10 @@ class RoninBloodPressureTest {
     fun `validate fails if components include conflicting systolic quantity values`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -707,7 +747,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -768,6 +811,10 @@ class RoninBloodPressureTest {
     fun `validate fails if no systolic quantity value`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -805,7 +852,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -858,6 +908,10 @@ class RoninBloodPressureTest {
     fun `validate fails if no systolic quantity unit`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -895,7 +949,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -948,6 +1005,10 @@ class RoninBloodPressureTest {
     fun `validate fails if systolic quantity system is not UCUM`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -985,7 +1046,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1039,6 +1103,10 @@ class RoninBloodPressureTest {
     fun `validate fails if no systolic quantity code`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -1076,7 +1144,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1129,6 +1200,10 @@ class RoninBloodPressureTest {
     fun `validate fails if systolic quantity code is outside the required value set`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -1223,6 +1298,10 @@ class RoninBloodPressureTest {
     fun `validate fails if diastolic quantity and diastolic data absent reason are both provided`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -1260,7 +1339,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1315,6 +1397,10 @@ class RoninBloodPressureTest {
     fun `validate succeeds if diastolic quantity has data absent reason instead of value`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -1352,7 +1438,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1390,6 +1479,10 @@ class RoninBloodPressureTest {
     fun `validate fails if components include conflicting diastolic quantity values`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -1491,6 +1584,10 @@ class RoninBloodPressureTest {
     fun `validate fails if no diastolic quantity value`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -1528,7 +1625,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1581,6 +1681,10 @@ class RoninBloodPressureTest {
     fun `validate fails if no diastolic quantity unit`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -1618,7 +1722,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1671,6 +1778,10 @@ class RoninBloodPressureTest {
     fun `validate fails if diastolic quantity system is not UCUM`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -1765,6 +1876,10 @@ class RoninBloodPressureTest {
     fun `validate fails if no diastolic quantity code`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -1802,7 +1917,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1855,6 +1973,10 @@ class RoninBloodPressureTest {
     fun `validate fails if diastolic quantity code is outside the required value set`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -1892,7 +2014,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1946,6 +2071,10 @@ class RoninBloodPressureTest {
     fun `validate checks US Core vital signs profile`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -1983,7 +2112,10 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -2037,6 +2169,10 @@ class RoninBloodPressureTest {
     fun `validate fails with subject but no type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -2119,7 +2255,7 @@ class RoninBloodPressureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Observation.subject.",
+                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Observation.subject.type",
             exception.message
         )
     }
@@ -2128,6 +2264,10 @@ class RoninBloodPressureTest {
     fun `validate fails with subject and type but no data authority reference extension`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -2216,7 +2356,7 @@ class RoninBloodPressureTest {
     }
 
     @Test
-    fun `validate succeeds`() {
+    fun `validate checks meta`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
@@ -2256,7 +2396,108 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            component = listOf(
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = systolicCoding,
+                        text = "Systolic".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 110.0),
+                            unit = "mm[Hg]".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("mm[Hg]")
+                        )
+                    )
+                ),
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = diastolicCoding,
+                        text = "Diastolic".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 70.0),
+                            unit = "mm[Hg]".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("mm[Hg]")
+                        )
+                    )
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninBloodPressure.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ Observation.meta",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate succeeds`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        display = "Blood Pressure".asFHIR(),
+                        code = bloodPressureCode
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = vitalSignsCategory
+                        )
+                    )
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -2357,7 +2598,8 @@ class RoninBloodPressureTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(
-                profile = listOf(Canonical("https://www.hl7.org/fhir/observation"))
+                profile = listOf(Canonical("https://www.hl7.org/fhir/observation")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -2399,7 +2641,10 @@ class RoninBloodPressureTest {
                 ),
                 text = "Blood Pressure".asFHIR()
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             focus = listOf(Reference(display = "focus".asFHIR())),
             encounter = Reference(reference = "Encounter/1234".asFHIR()),
             effective = DynamicValue(
@@ -2466,7 +2711,13 @@ class RoninBloodPressureTest {
         transformed!!
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("123"), transformed.id)
-        assertEquals(Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value))), transformed.meta)
+        assertEquals(
+            Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
+            transformed.meta
+        )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
@@ -2639,6 +2890,7 @@ class RoninBloodPressureTest {
     fun `transforms observation with only required attributes`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(source = Uri("source")),
             status = ObservationStatus.AMENDED.asCode(),
             code = CodeableConcept(
                 coding = listOf(
@@ -2674,7 +2926,13 @@ class RoninBloodPressureTest {
         transformed!!
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("123"), transformed.id)
-        assertEquals(Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value))), transformed.meta)
+        assertEquals(
+            Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
+            transformed.meta
+        )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
         assertNull(transformed.text)
@@ -2767,6 +3025,7 @@ class RoninBloodPressureTest {
     fun `transform inherits R4 validation`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(source = Uri("source")),
             status = Code("bad-status"),
             code = CodeableConcept(
                 coding = listOf(
@@ -2788,7 +3047,10 @@ class RoninBloodPressureTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -2811,6 +3073,10 @@ class RoninBloodPressureTest {
     fun `validate fails if invalid basedOn reference resource type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -2877,6 +3143,10 @@ class RoninBloodPressureTest {
     fun `validate fails if invalid derivedFrom reference resource type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -2916,7 +3186,10 @@ class RoninBloodPressureTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -2940,6 +3213,10 @@ class RoninBloodPressureTest {
     fun `validate fails if invalid hasMember reference resource type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -2979,7 +3256,10 @@ class RoninBloodPressureTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -3003,6 +3283,10 @@ class RoninBloodPressureTest {
     fun `validate fails if invalid partOf reference resource type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -3069,6 +3353,10 @@ class RoninBloodPressureTest {
     fun `validate fails if invalid systolic code`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -3169,6 +3457,10 @@ class RoninBloodPressureTest {
     fun `validate fails if invalid diastolic code`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)),
+                source = Uri("source")
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(

@@ -4,6 +4,7 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
 import com.projectronin.interop.fhir.ronin.util.validateReference
@@ -33,14 +34,27 @@ abstract class BaseRoninCondition(
 
     private val requiredCodeError = RequiredFieldError(Condition::code)
 
+    private val requiredConditionExtension = RequiredFieldError(Condition::extension)
+    private val requiredConditionCodeExtension = FHIRError(
+        code = "RONIN_CND_001",
+        description = "Condition extension requires code extension",
+        severity = ValidationIssueSeverity.ERROR,
+        location = LocationContext(Condition::extension)
+    )
+
     override fun validateRonin(element: Condition, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, validation)
             containedResourcePresent(element.contained, parentContext, validation)
 
             // check that subject reference has type and the extension is the data authority extension identifier
             ifNotNull(element.subject) {
-                requireDataAuthorityExtensionIdentifier(element.subject, LocationContext(Condition::subject), validation)
+                requireDataAuthorityExtensionIdentifier(
+                    element.subject,
+                    LocationContext(Condition::subject),
+                    validation
+                )
             }
 
             checkTrue(
@@ -65,6 +79,15 @@ abstract class BaseRoninCondition(
 
             // subject required is validated in R4
             validateReference(element.subject, listOf("Patient"), LocationContext(Condition::subject), validation)
+
+            checkNotNull(element.extension, requiredConditionExtension, parentContext)
+            checkTrue(
+                element.extension.any {
+                    it.url == RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri
+                },
+                requiredConditionCodeExtension,
+                parentContext
+            )
         }
     }
 

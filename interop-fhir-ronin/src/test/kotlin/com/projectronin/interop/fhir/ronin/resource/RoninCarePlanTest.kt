@@ -64,47 +64,10 @@ class RoninCarePlanTest {
     private val roninCarePlan = RoninCarePlan(normalizer, localizer)
 
     @Test
-    fun `validation fails without category`() {
-        val carePlan = CarePlan(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            status = RequestStatus.DRAFT.asCode(),
-            intent = CarePlanIntent.OPTION.asCode(),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
-
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninCarePlan.validate(carePlan, null).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: category is a required element @ CarePlan.category",
-            exception.message
-        )
-    }
-
-    @Test
     fun `validation fails without subject`() {
         val carePlan = CarePlan(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -155,6 +118,7 @@ class RoninCarePlanTest {
     fun `validation fails with no subject`() {
         val carePlan = CarePlan(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -201,6 +165,7 @@ class RoninCarePlanTest {
     fun `validate fails with subject but no type`() {
         val carePlan = CarePlan(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -240,7 +205,7 @@ class RoninCarePlanTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ CarePlan.subject.",
+                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ CarePlan.subject.type",
             exception.message
         )
     }
@@ -249,6 +214,7 @@ class RoninCarePlanTest {
     fun `validate fails with subject and type but no data authority reference extension`() {
         val carePlan = CarePlan(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -294,7 +260,7 @@ class RoninCarePlanTest {
     }
 
     @Test
-    fun `validate profile - succeeds`() {
+    fun `validate checks meta`() {
         val carePlan = CarePlan(
             id = Id("12345"),
             identifier = listOf(
@@ -326,8 +292,61 @@ class RoninCarePlanTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
+        )
 
+        val exception = assertThrows<IllegalArgumentException> {
+            roninCarePlan.validate(carePlan, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ CarePlan.meta",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate profile - succeeds`() {
+        val carePlan = CarePlan(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "Data Authority Identifier.asFHIR".asFHIR()
+                )
+            ),
+            status = RequestStatus.DRAFT.asCode(),
+            intent = CarePlanIntent.OPTION.asCode(),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                            code = Code("assess-plan")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
         )
 
         roninCarePlan.validate(carePlan, null).alertIfErrors()
@@ -338,7 +357,8 @@ class RoninCarePlanTest {
         val carePlan = CarePlan(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/encounter.html"))
+                profile = listOf(Canonical("http://hl7.org/fhir/R4/encounter.html")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -509,7 +529,7 @@ class RoninCarePlanTest {
         assertEquals("CarePlan", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
@@ -740,11 +760,12 @@ class RoninCarePlanTest {
     }
 
     @Test
-    fun `transform fails with activity with both a reference and detail`() {
+    fun `validate fails with activity with both a reference and detail`() {
         val carePlan = CarePlan(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/encounter.html"))
+                profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -802,7 +823,10 @@ class RoninCarePlanTest {
             ),
             title = "CarePlan Title".asFHIR(),
             description = "CarePlan Description".asFHIR(),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             encounter = Reference(reference = "reference".asFHIR()),
             period = Period(start = DateTime("2021"), end = DateTime("2022")),
             created = DateTime("2022"),
@@ -913,7 +937,10 @@ class RoninCarePlanTest {
                         scheduled = DynamicValue(DynamicValueType.STRING, "Value".asFHIR()),
                         location = Reference(reference = "DEF123".asFHIR()),
                         performer = listOf(Reference(reference = "GHI123".asFHIR())),
-                        product = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "product".asFHIR())),
+                        product = DynamicValue(
+                            DynamicValueType.CODEABLE_CONCEPT,
+                            CodeableConcept(text = "product".asFHIR())
+                        ),
                         dailyAmount = SimpleQuantity(value = Decimal(1.1)),
                         quantity = SimpleQuantity(value = Decimal(2.2)),
                         description = "Description".asFHIR()
@@ -937,6 +964,7 @@ class RoninCarePlanTest {
     fun `transforms care-plan activity with reference instead of detail`() {
         val carePlan = CarePlan(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             status = RequestStatus.DRAFT.asCode(),
             intent = CarePlanIntent.OPTION.asCode(),
             category = listOf(
@@ -994,7 +1022,7 @@ class RoninCarePlanTest {
         assertEquals("CarePlan", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)
@@ -1051,6 +1079,7 @@ class RoninCarePlanTest {
     fun `transform care-plan with only required attributes`() {
         val carePlan = CarePlan(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             status = RequestStatus.DRAFT.asCode(),
             intent = CarePlanIntent.OPTION.asCode(),
             category = listOf(
@@ -1063,7 +1092,10 @@ class RoninCarePlanTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
 
         )
 
@@ -1074,7 +1106,7 @@ class RoninCarePlanTest {
         assertEquals("CarePlan", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)
@@ -1145,7 +1177,10 @@ class RoninCarePlanTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
 
         )
 
@@ -1168,7 +1203,10 @@ class RoninCarePlanTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
 
         )
 
@@ -1203,6 +1241,7 @@ class RoninCarePlanTest {
     fun `validate fails with missing subject reference attribute`() {
         val carePlan = CarePlan(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1232,7 +1271,10 @@ class RoninCarePlanTest {
                     )
                 )
             ),
-            subject = Reference(display = "display".asFHIR(), type = Uri("CarePlan", extension = dataAuthorityExtension))
+            subject = Reference(
+                display = "display".asFHIR(),
+                type = Uri("CarePlan", extension = dataAuthorityExtension)
+            )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -1250,6 +1292,7 @@ class RoninCarePlanTest {
     fun `validate fails with wrong subject reference type`() {
         val carePlan = CarePlan(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1279,7 +1322,10 @@ class RoninCarePlanTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Condition/12345".asFHIR(), type = Uri("Condition", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Condition/12345".asFHIR(),
+                type = Uri("Condition", extension = dataAuthorityExtension)
+            )
         )
 
         val exception = assertThrows<IllegalArgumentException> {

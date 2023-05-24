@@ -30,7 +30,6 @@ import com.projectronin.interop.fhir.r4.valueset.DocumentRelationshipType
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
-import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -64,6 +63,23 @@ class RoninDocumentReferenceTest {
     private val docTypeCoding =
         Coding(system = CodeSystem.LOINC.uri, code = adhdPlanTypeCode, display = "ADHD action plan".asFHIR())
     private val docTypeCodingList = listOf(docTypeCoding)
+    private val documentReferenceExtension = listOf(
+        Extension(
+            url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceDocumentReferenceType"),
+            value = DynamicValue(
+                type = DynamicValueType.CODEABLE_CONCEPT,
+                value = CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = Uri("http://loinc.org"),
+                            code = Code("74155-3"),
+                            display = "ADHD action plan".asFHIR()
+                        )
+                    )
+                )
+            )
+        )
+    )
     private val docStatusSystem = Uri("http://hl7.org/fhir/document-reference-status")
     private val statusCurrentCoding =
         Coding(system = docStatusSystem, code = DocumentReferenceStatus.CURRENT.asCode(), display = "Current".asFHIR())
@@ -78,15 +94,8 @@ class RoninDocumentReferenceTest {
         display = "Entered in Error".asFHIR()
     )
     private val statusCodingList = listOf(statusCurrentCoding, statusSupsersededCoding, statusErrorCoding)
-    private val normRegistryClient = mockk<NormalizationRegistryClient> {
-        every {
-            getRequiredValueSet("DocumentReference.status", RoninProfile.DOCUMENT_REFERENCE.value)
-        } returns statusCodingList
-        every {
-            getRequiredValueSet("DocumentReference.type", RoninProfile.DOCUMENT_REFERENCE.value)
-        } returns docTypeCodingList
-    }
-    private val roninDocumentReference = RoninDocumentReference(normalizer, localizer, normRegistryClient)
+
+    private val roninDocumentReference = RoninDocumentReference(normalizer, localizer)
 
     @Test
     fun `always qualifies`() {
@@ -105,6 +114,8 @@ class RoninDocumentReferenceTest {
     @Test
     fun `validate - fails if missing identifiers`() {
         val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
             type = CodeableConcept(
                 coding = docTypeCodingList
             ),
@@ -144,6 +155,8 @@ class RoninDocumentReferenceTest {
     @Test
     fun `validate - fails if missing category`() {
         val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -187,6 +200,8 @@ class RoninDocumentReferenceTest {
     @Test
     fun `validate - fails if status does not use required valueset`() {
         val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -231,6 +246,8 @@ class RoninDocumentReferenceTest {
     @Test
     fun `validate - fails if category does not use required code`() {
         val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -285,6 +302,8 @@ class RoninDocumentReferenceTest {
     @Test
     fun `validate - fails if category does not use required system`() {
         val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -342,6 +361,8 @@ class RoninDocumentReferenceTest {
         // all attributes are correct
 
         val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -385,8 +406,55 @@ class RoninDocumentReferenceTest {
     }
 
     @Test
+    fun `validate checks meta`() {
+        val documentReference = DocumentReference(
+            extension = documentReferenceExtension,
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            type = CodeableConcept(
+                coding = docTypeCodingList
+            ),
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            category = listOf(CodeableConcept(coding = categoryCodingList)),
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                )
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ DocumentReference.meta",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate - succeeds with just required attributes`() {
         val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -420,9 +488,53 @@ class RoninDocumentReferenceTest {
     }
 
     @Test
+    fun `transform - succeeds and adds sourceDocumentReferenceType extension with just required attributes`() {
+        val documentReference = DocumentReference(
+            id = Id("12345"),
+            meta = Meta(source = Uri("fake-source-fake-url")),
+            type = CodeableConcept(
+                coding = docTypeCodingList
+            ),
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            category = listOf(CodeableConcept(coding = categoryCodingList)),
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                )
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR())
+        )
+
+        val (transformed, validation) = roninDocumentReference.transform(documentReference, tenant)
+        validation.alertIfErrors()
+        transformed!!
+        assertEquals(
+            listOf(
+                Extension(
+                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceDocumentReferenceType"),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODEABLE_CONCEPT,
+                        value = CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = Uri("http://loinc.org"),
+                                    code = Code("74155-3"),
+                                    display = "ADHD action plan".asFHIR()
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            transformed.extension
+        )
+    }
+
+    @Test
     fun `transform - succeeds with just required attributes`() {
         val documentReference = DocumentReference(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             type = CodeableConcept(
                 coding = docTypeCodingList
             ),
@@ -442,6 +554,33 @@ class RoninDocumentReferenceTest {
         transformed!!
         assertEquals(Id("12345"), transformed.id)
         assertEquals(3, transformed.identifier.size)
+        assertEquals(
+            Meta(
+                source = Uri("source"),
+                profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value))
+            ),
+            transformed.meta
+        )
+        assertEquals(
+            listOf(
+                Extension(
+                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceDocumentReferenceType"),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODEABLE_CONCEPT,
+                        value = CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = Uri("http://loinc.org"),
+                                    code = Code("74155-3"),
+                                    display = "ADHD action plan".asFHIR()
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            transformed.extension
+        )
         assertEquals(
             listOf(
                 Identifier(
@@ -471,7 +610,8 @@ class RoninDocumentReferenceTest {
         val documentReference = DocumentReference(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/DocumentReference.html"))
+                profile = listOf(Canonical("http://hl7.org/fhir/R4/DocumentReference.html")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -595,7 +735,10 @@ class RoninDocumentReferenceTest {
                 )
             ),
             status = null,
-            type = null
+            type = CodeableConcept(
+                coding = docTypeCodingList,
+                text = "code".asFHIR()
+            )
         )
         val (transformed, _) = roninDocumentReference.transform(documentReference, tenant)
         assertNull(transformed)
@@ -605,6 +748,8 @@ class RoninDocumentReferenceTest {
     fun `validate fails if no subject`() {
         val documentReference = DocumentReference(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -655,6 +800,8 @@ class RoninDocumentReferenceTest {
     fun `validate fails if subject has no reference attribute`() {
         val documentReference = DocumentReference(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -704,6 +851,8 @@ class RoninDocumentReferenceTest {
     @Test
     fun `validate fails if subject reference is wrong type`() {
         val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
             id = Id("12345"),
             identifier = listOf(
                 Identifier(
@@ -753,12 +902,10 @@ class RoninDocumentReferenceTest {
 
     @Test
     fun `validate fails if content has no attachment`() {
-        DocumentReference(
-            status = null
-
-        )
         val documentReference = DocumentReference(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -801,6 +948,142 @@ class RoninDocumentReferenceTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: attachment is a required element @ DocumentReference.content[0].attachment",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails for no type`() {
+        val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            category = listOf(CodeableConcept(coding = categoryCodingList)),
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                )
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: type is a required element @ DocumentReference.type",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails for type with no coding`() {
+        val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            type = CodeableConcept(
+                text = "code".asFHIR()
+            ),
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            category = listOf(CodeableConcept(coding = categoryCodingList)),
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                )
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DOCREF_002: One, and only one, coding entry is allowed for type @ DocumentReference.type.coding",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails for type with multiple coding`() {
+        val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            type = CodeableConcept(
+                coding = docTypeCodingList + docTypeCodingList,
+                text = "code".asFHIR()
+            ),
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            category = listOf(CodeableConcept(coding = categoryCodingList)),
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                )
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DOCREF_002: One, and only one, coding entry is allowed for type @ DocumentReference.type.coding",
             exception.message
         )
     }

@@ -68,7 +68,9 @@ class RoninMedicationStatementTest {
 
     @Test
     fun `validates Ronin identifiers`() {
-        val medicationStatement = MedicationStatement()
+        val medicationStatement = MedicationStatement(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_STATEMENT.value)), source = Uri("source"))
+        )
 
         mockkObject(R4MedicationStatementValidator)
         every {
@@ -93,6 +95,7 @@ class RoninMedicationStatementTest {
     @Test
     fun `validates R4 profile`() {
         val medicationStatement = MedicationStatement(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_STATEMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -139,6 +142,7 @@ class RoninMedicationStatementTest {
     @Test
     fun `validate fails with subject but no type`() {
         val medicationStatement = MedicationStatement(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_STATEMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -170,7 +174,7 @@ class RoninMedicationStatementTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ MedicationStatement.subject.",
+                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ MedicationStatement.subject.type",
             exception.message
         )
     }
@@ -178,6 +182,7 @@ class RoninMedicationStatementTest {
     @Test
     fun `validate fails with subject and type but no data authority reference extension`() {
         val medicationStatement = MedicationStatement(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_STATEMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -215,7 +220,7 @@ class RoninMedicationStatementTest {
     }
 
     @Test
-    fun `validate succeeds`() {
+    fun `validate checks meta`() {
         val medicationStatement = MedicationStatement(
             identifier = listOf(
                 Identifier(
@@ -239,7 +244,53 @@ class RoninMedicationStatementTest {
                 type = DynamicValueType.CODEABLE_CONCEPT,
                 value = CodeableConcept()
             ),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ MedicationStatement.meta",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate succeeds`() {
+        val medicationStatement = MedicationStatement(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_STATEMENT.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = MedicationStatementStatus.ACTIVE.asCode(),
+            medication = DynamicValue(
+                type = DynamicValueType.CODEABLE_CONCEPT,
+                value = CodeableConcept()
+            ),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
         )
 
         roninMedicationStatement.validate(medicationStatement, null).alertIfErrors()
@@ -250,7 +301,8 @@ class RoninMedicationStatementTest {
         val medicationStatement = MedicationStatement(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/medicationstatement.html"))
+                profile = listOf(Canonical("http://hl7.org/fhir/R4/medicationstatement.html")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -354,12 +406,17 @@ class RoninMedicationStatementTest {
     fun `transform succeeds with just required attributes`() {
         val medicationStatement = MedicationStatement(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             status = MedicationStatementStatus.ACTIVE.asCode(),
             medication = DynamicValue(
                 type = DynamicValueType.CODEABLE_CONCEPT,
                 value = CodeableConcept(text = "medication".asFHIR())
             ),
-            subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 value = DateTime("1905-08-23")
@@ -402,12 +459,17 @@ class RoninMedicationStatementTest {
         fun testMedication(type: DynamicValueType, value: Any) {
             val medicationStatement = MedicationStatement(
                 id = Id("12345"),
+                meta = Meta(source = Uri("source")),
                 status = MedicationStatementStatus.ACTIVE.asCode(),
                 medication = DynamicValue(
                     type = type,
                     value = value
                 ),
-                subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+                subject = Reference(
+                    display = "subject".asFHIR(),
+                    reference = "Patient/1234".asFHIR(),
+                    type = Uri("Patient", extension = dataAuthorityExtension)
+                ),
                 effective = DynamicValue(
                     type = DynamicValueType.DATE_TIME,
                     value = DateTime("1905-08-23")
@@ -427,12 +489,17 @@ class RoninMedicationStatementTest {
         fun testMedication(type: DynamicValueType, value: Any) {
             val medicationStatement = MedicationStatement(
                 id = Id("12345"),
+                meta = Meta(source = Uri("source")),
                 status = MedicationStatementStatus.ACTIVE.asCode(),
                 medication = DynamicValue(
                     type = DynamicValueType.CODEABLE_CONCEPT,
                     value = CodeableConcept(text = "codeableConcep".asFHIR())
                 ),
-                subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+                subject = Reference(
+                    display = "subject".asFHIR(),
+                    reference = "Patient/1234".asFHIR(),
+                    type = Uri("Patient", extension = dataAuthorityExtension)
+                ),
                 effective = DynamicValue(
                     type = type,
                     value = value
@@ -457,6 +524,7 @@ class RoninMedicationStatementTest {
     @Test
     fun `validate fails with missing subject reference attribute`() {
         val medicationStatement = MedicationStatement(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_STATEMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(value = "id".asFHIR()),
                 Identifier(
@@ -501,6 +569,7 @@ class RoninMedicationStatementTest {
     @Test
     fun `validate fails with wrong subject reference type`() {
         val medicationStatement = MedicationStatement(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_STATEMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(value = "id".asFHIR()),
                 Identifier(
@@ -524,7 +593,10 @@ class RoninMedicationStatementTest {
                 type = DynamicValueType.CODEABLE_CONCEPT,
                 value = CodeableConcept(text = "medication".asFHIR())
             ),
-            subject = Reference(reference = "Condition/12345".asFHIR(), type = Uri("", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Condition/12345".asFHIR(),
+                type = Uri("", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 value = DateTime("1905-08-23")
@@ -545,6 +617,7 @@ class RoninMedicationStatementTest {
     @Test
     fun `validate fails with missing subject`() {
         val medicationStatement = MedicationStatement(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_STATEMENT.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(value = "id".asFHIR()),
                 Identifier(

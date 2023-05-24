@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.resource.observation
 
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
@@ -17,6 +18,9 @@ import org.springframework.stereotype.Component
 @Component
 class RoninObservation(normalizer: Normalizer, localizer: Localizer) :
     BaseRoninObservation(R4ObservationValidator, RoninProfile.OBSERVATION.value, normalizer, localizer) {
+    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val profileVersion = 4
+
     /**
      * Any Observation resource qualifies for [RoninObservation].
      */

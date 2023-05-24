@@ -14,6 +14,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Resource
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
@@ -24,6 +25,7 @@ import com.projectronin.interop.fhir.validate.ProfileValidator
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
+import com.projectronin.interop.fhir.validate.append
 
 /**
  * Base class capable of handling common tasks associated to Ronin profiles.
@@ -34,6 +36,8 @@ abstract class BaseRoninProfile<T : Resource<T>>(
     normalizer: Normalizer,
     localizer: Localizer
 ) : BaseProfile<T>(extendedProfile, normalizer, localizer) {
+    abstract val rcdmVersion: RCDMVersion
+    abstract val profileVersion: Int
 
     private val requiredTenantIdentifierError = FHIRError(
         code = "RONIN_TNNT_ID_001",
@@ -109,8 +113,17 @@ abstract class BaseRoninProfile<T : Resource<T>>(
         code = "RONIN_REQ_REF_TYPE_001",
         severity = ValidationIssueSeverity.ERROR,
         description = "Attribute Type is required for the reference",
-        location = LocationContext("", "")
+        location = LocationContext("", "type")
     )
+
+    private val requiredMeta = RequiredFieldError(LocationContext("", "meta"))
+    private val requiredMetaProfile = FHIRError(
+        code = "RONIN_META_001",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "No profiles found for expected type `$profile`",
+        location = LocationContext(Meta::profile)
+    )
+    private val requiredMetaSource = RequiredFieldError(Meta::source)
 
     /**
      * When the [Coding] list for a [CodeableConcept] contains no [Coding] that passes validation for the Ronin profile.
@@ -139,6 +152,25 @@ abstract class BaseRoninProfile<T : Resource<T>>(
         val roninProfile = listOf(Canonical(this@BaseRoninProfile.profile))
 
         return this?.copy(profile = roninProfile) ?: Meta(profile = roninProfile)
+    }
+
+    /**
+     * Validates the supplied [meta] contains the required elements for all Ronin profiles.
+     */
+    protected fun requireMeta(
+        meta: Meta?,
+        parentContext: LocationContext,
+        validation: Validation
+    ) {
+        validation.apply {
+            checkNotNull(meta, requiredMeta, parentContext)
+
+            ifNotNull(meta) {
+                val metaContext = parentContext.append(LocationContext("", "meta"))
+                checkTrue(meta.profile.contains(Canonical(profile)), requiredMetaProfile, metaContext)
+                checkNotNull(meta.source, requiredMetaSource, metaContext)
+            }
+        }
     }
 
     /**
@@ -206,7 +238,9 @@ abstract class BaseRoninProfile<T : Resource<T>>(
     ) {
         validation.apply {
             checkTrue(containedResource.isEmpty(), containedResourcePresentWarning, parentContext)
-            if (containedResource.isNotEmpty()) { logger.warn { "contained resource found @ $parentContext" } }
+            if (containedResource.isNotEmpty()) {
+                logger.warn { "contained resource found @ $parentContext" }
+            }
         }
     }
 

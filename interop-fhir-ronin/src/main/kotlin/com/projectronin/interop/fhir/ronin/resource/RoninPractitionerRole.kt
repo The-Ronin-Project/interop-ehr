@@ -3,6 +3,7 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.resource.PractitionerRole
 import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerRoleValidator
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -27,10 +28,14 @@ class RoninPractitionerRole(normalizer: Normalizer, localizer: Localizer) : USCo
     normalizer,
     localizer
 ) {
+    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val profileVersion = 2
+
     private val requiredPractitionerError = RequiredFieldError(PractitionerRole::practitioner)
 
     override fun validateRonin(element: PractitionerRole, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
             containedResourcePresent(element.contained, parentContext, validation)
 

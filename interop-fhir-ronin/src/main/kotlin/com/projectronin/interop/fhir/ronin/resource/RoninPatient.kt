@@ -13,6 +13,7 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.NameUse
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.hasDataAbsentReason
 import com.projectronin.interop.fhir.ronin.localization.Localizer
@@ -20,6 +21,7 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.toFhirIdentifier
+import com.projectronin.interop.fhir.ronin.util.dataAbsentReasonExtension
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityIdentifier
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
 import com.projectronin.interop.fhir.validate.FHIRError
@@ -41,6 +43,8 @@ class RoninPatient(
     normalizer: Normalizer,
     localizer: Localizer
 ) : USCoreBasedProfile<Patient>(R4PatientValidator, RoninProfile.PATIENT.value, normalizer, localizer) {
+    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val profileVersion = 3
 
     private val requiredBirthDateError = RequiredFieldError(Patient::birthDate)
 
@@ -74,9 +78,16 @@ class RoninPatient(
         description = "A name for official use must be present",
         location = LocationContext(Patient::name)
     )
+    private val requiredIdentifierSystemValueError = FHIRError(
+        code = "RONIN_PAT_006",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Identifier system or data absent reason is required",
+        location = LocationContext(Identifier::system)
+    )
 
     override fun validateRonin(element: Patient, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
             containedResourcePresent(element.contained, parentContext, validation)
 
@@ -89,6 +100,15 @@ class RoninPatient(
                 }
 
                 checkNotNull(mrnIdentifier.value, requiredMRNIdentifierValueError, parentContext)
+            }
+
+            element.identifier.forEachIndexed { index, identifier ->
+                val context = parentContext.append(LocationContext("", "identifier[$index]"))
+                checkTrue(
+                    identifier.system?.value != null || identifier.system.hasDataAbsentReason(),
+                    requiredIdentifierSystemValueError,
+                    context
+                )
             }
 
             checkNotNull(element.birthDate, requiredBirthDateError, parentContext)
@@ -122,7 +142,6 @@ class RoninPatient(
         location = LocationContext(Patient::name)
     )
 
-    private val requiredIdentifierSystemError = RequiredFieldError(Identifier::system)
     private val requiredIdentifierValueError = RequiredFieldError(Identifier::value)
 
     override fun validateUSCore(element: Patient, parentContext: LocationContext, validation: Validation) {
@@ -142,7 +161,7 @@ class RoninPatient(
             // A patient identifier is also required, but Ronin has already checked for a MRN, so we will bypass the checks here.
             element.identifier.forEachIndexed { index, identifier ->
                 val currentContext = parentContext.append(LocationContext("Patient", "identifier[$index]"))
-                checkNotNull(identifier.system, requiredIdentifierSystemError, currentContext)
+                // system is checked by Ronin
                 checkNotNull(identifier.value, requiredIdentifierValueError, currentContext)
             }
 
@@ -183,10 +202,15 @@ class RoninPatient(
             Pair(normalized.telecom, validation)
         }
 
+        val normalizedIdentifiers = normalizeIdentifierSystems(normalized.identifier)
+
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             gender = gender,
-            identifier = normalized.identifier + tenant.toFhirIdentifier() + getRoninIdentifiers(normalized, tenant) + dataAuthorityIdentifier,
+            identifier = normalizedIdentifiers + tenant.toFhirIdentifier() + getRoninIdentifiers(
+                normalized,
+                tenant
+            ) + dataAuthorityIdentifier,
             maritalStatus = maritalStatus,
             telecom = contactPointTransformed.first ?: emptyList()
         )
@@ -217,5 +241,19 @@ class RoninPatient(
             // We will handle this during validation.
         }
         return roninIdentifiers
+    }
+
+    private fun normalizeIdentifierSystems(identifiers: List<Identifier>): List<Identifier> {
+        return identifiers.map {
+            if (it.system?.value == null) {
+                updateIdentifierWithDAR(it)
+            } else {
+                it
+            }
+        }
+    }
+
+    private fun updateIdentifierWithDAR(identifier: Identifier): Identifier {
+        return identifier.copy(system = Uri(value = null, extension = dataAbsentReasonExtension))
     }
 }

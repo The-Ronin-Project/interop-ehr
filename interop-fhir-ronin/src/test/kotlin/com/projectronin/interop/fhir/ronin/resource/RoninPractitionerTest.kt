@@ -68,6 +68,7 @@ class RoninPractitionerTest {
     fun `validate checks ronin identifiers`() {
         val practitioner = Practitioner(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
             name = listOf(HumanName(family = "Doe".asFHIR()))
         )
 
@@ -88,6 +89,7 @@ class RoninPractitionerTest {
     fun `validate fails if no name`() {
         val practitioner = Practitioner(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -123,6 +125,7 @@ class RoninPractitionerTest {
     fun `validate fails if no family name`() {
         val practitioner = Practitioner(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -158,6 +161,7 @@ class RoninPractitionerTest {
     fun `validate fails for multiple names with no family name`() {
         val practitioner = Practitioner(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -198,6 +202,7 @@ class RoninPractitionerTest {
     fun `validate checks R4 profile`() {
         val practitioner = Practitioner(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -246,9 +251,45 @@ class RoninPractitionerTest {
     }
 
     @Test
+    fun `validate checks meta`() {
+        val practitioner = Practitioner(
+            id = Id("12345"),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            name = listOf(HumanName(family = "Doe".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninPractitioner.validate(practitioner, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ Practitioner.meta",
+            exception.message
+        )
+    }
+
+    @Test
     fun `validate succeeds`() {
         val practitioner = Practitioner(
             id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -285,7 +326,8 @@ class RoninPractitionerTest {
         val practitioner = Practitioner(
             id = Id("12345"),
             meta = Meta(
-                profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner"))
+                profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner")),
+                source = Uri("source")
             ),
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
@@ -322,7 +364,7 @@ class RoninPractitionerTest {
         assertEquals("Practitioner", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
             transformed.meta
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
@@ -392,6 +434,7 @@ class RoninPractitionerTest {
     fun `transforms practitioner with only required attributes`() {
         val practitioner = Practitioner(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             name = listOf(HumanName(family = "Doe".asFHIR()))
         )
 
@@ -402,7 +445,7 @@ class RoninPractitionerTest {
         assertEquals("Practitioner", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value))),
+            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
             transformed.meta
         )
         assertNull(transformed.implicitRules)

@@ -1,21 +1,26 @@
 package com.projectronin.interop.fhir.ronin.resource
 
 import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
 import com.projectronin.interop.fhir.r4.validate.resource.R4DocumentReferenceValidator
+import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
-import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.validateCodeInValueSet
 import com.projectronin.interop.fhir.ronin.util.validateReference
+import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
+import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
+import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
 
@@ -25,8 +30,7 @@ import org.springframework.stereotype.Component
 @Component
 class RoninDocumentReference(
     normalizer: Normalizer,
-    localizer: Localizer,
-    private val registryClient: NormalizationRegistryClient
+    localizer: Localizer
 ) :
     USCoreBasedProfile<DocumentReference>(
         R4DocumentReferenceValidator,
@@ -34,6 +38,8 @@ class RoninDocumentReference(
         normalizer,
         localizer
     ) {
+    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val profileVersion = 3
 
     // From http://hl7.org/fhir/us/core/STU5.0.1/ValueSet-us-core-documentreference-category.html
     private val usCoreDocumentReferenceCategoryValueSet = listOf(
@@ -42,11 +48,45 @@ class RoninDocumentReference(
 
     private val requiredCategoryError = RequiredFieldError(DocumentReference::category)
     private val requiredSubjectError = RequiredFieldError(DocumentReference::subject)
+    private val requiredExtensionError = RequiredFieldError(DocumentReference::extension)
+    private val requiredTypeError = RequiredFieldError(DocumentReference::type)
+
+    private val requiredDocumentReferenceTypeExtension = FHIRError(
+        code = "RONIN_DOCREF_001",
+        description = "Document Reference extension requires type extension",
+        severity = ValidationIssueSeverity.ERROR,
+        location = LocationContext(DocumentReference::extension)
+    )
+    private val requiredCodingSize = FHIRError(
+        code = "RONIN_DOCREF_002",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "One, and only one, coding entry is allowed for type",
+        location = LocationContext(CodeableConcept::coding)
+    )
 
     override fun validateRonin(element: DocumentReference, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
             containedResourcePresent(element.contained, parentContext, validation)
+
+            checkNotNull(element.extension, requiredExtensionError, parentContext)
+            checkTrue(
+                element.extension.any {
+                    it.url == RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE.uri
+                },
+                requiredDocumentReferenceTypeExtension,
+                parentContext
+            )
+
+            checkNotNull(element.type, requiredTypeError, parentContext)
+            ifNotNull(element.type) {
+                checkTrue(
+                    element.type!!.coding.size == 1, // coding is required
+                    requiredCodingSize,
+                    parentContext.append(LocationContext(DocumentReference::type))
+                )
+            }
             validateReference(
                 element.subject,
                 listOf("Patient"),
@@ -81,8 +121,15 @@ class RoninDocumentReference(
         parentContext: LocationContext,
         tenant: Tenant
     ): Pair<DocumentReference?, Validation> {
+        // TODO: RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE, check concept maps for code
+        val tenantSourceTypeExtension = getExtensionOrEmptyList(
+            RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE,
+            normalized.type
+        )
+
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
+            extension = normalized.extension + tenantSourceTypeExtension,
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
 

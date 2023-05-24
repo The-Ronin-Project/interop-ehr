@@ -8,7 +8,9 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Reference
+import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
@@ -19,6 +21,7 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -148,6 +151,7 @@ class RoninObservationTest {
     fun `validate fails with code coding being empty`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -180,7 +184,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -198,6 +205,7 @@ class RoninObservationTest {
     fun `validate fails with code coding display missing`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -236,7 +244,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -254,6 +265,7 @@ class RoninObservationTest {
     fun `validate fails with code coding system missing`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -293,7 +305,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -311,6 +326,7 @@ class RoninObservationTest {
     fun `validate fails with code coding code missing`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -350,7 +366,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -368,6 +387,7 @@ class RoninObservationTest {
     fun `validate succeeds if more than 1 entry in coding list for code when Observation type is not known`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -416,7 +436,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
         )
 
         roninObservation.validate(observation, null).alertIfErrors()
@@ -525,6 +548,7 @@ class RoninObservationTest {
     fun `validate succeeds with no category`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -555,7 +579,11 @@ class RoninObservationTest {
             ),
             category = listOf(CodeableConcept(coding = listOf())),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -569,6 +597,7 @@ class RoninObservationTest {
     fun `validate fails if no subject`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -632,6 +661,7 @@ class RoninObservationTest {
     fun `validate fails if subject is not a Patient or Location`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -673,7 +703,10 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Organization/123".asFHIR(), type = Uri("Something", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Organization/123".asFHIR(),
+                type = Uri("Something", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -695,6 +728,7 @@ class RoninObservationTest {
     fun `validate fails if invalid effective type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -732,7 +766,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.BOOLEAN,
                 value = true
@@ -754,6 +791,7 @@ class RoninObservationTest {
     fun `validate fails if invalid author data type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -791,7 +829,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -829,6 +870,7 @@ class RoninObservationTest {
     fun `validate fails if invalid author reference resource type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -866,7 +908,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -898,6 +943,7 @@ class RoninObservationTest {
     fun `validate fails if invalid basedOn reference resource type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -939,7 +985,10 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -964,6 +1013,7 @@ class RoninObservationTest {
     fun `validate fails if invalid derivedFrom reference resource type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1005,7 +1055,10 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1029,6 +1082,7 @@ class RoninObservationTest {
     fun `validate fails if invalid hasMember reference resource type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1070,7 +1124,10 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1093,6 +1150,7 @@ class RoninObservationTest {
     fun `validate fails if invalid partOf reference resource type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1134,7 +1192,10 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1158,6 +1219,7 @@ class RoninObservationTest {
     fun `validate fails if invalid performer reference resource type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1199,7 +1261,10 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1223,6 +1288,7 @@ class RoninObservationTest {
     fun `validate checks R4 profile`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1260,7 +1326,11 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1293,6 +1363,7 @@ class RoninObservationTest {
     fun `validate fails with subject but no type`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1345,7 +1416,7 @@ class RoninObservationTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Observation.subject.",
+                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Observation.subject.type",
             exception.message
         )
     }
@@ -1354,6 +1425,7 @@ class RoninObservationTest {
     fun `validate fails with subject and type but no data authority reference extension`() {
         val observation = Observation(
             id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1393,7 +1465,11 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient")),
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient")
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1412,7 +1488,7 @@ class RoninObservationTest {
     }
 
     @Test
-    fun `validate succeeds`() {
+    fun `validate checks meta`() {
         val observation = Observation(
             id = Id("123"),
             identifier = listOf(
@@ -1454,7 +1530,77 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninObservation.validate(observation, null).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: meta is a required element @ Observation.meta",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate succeeds`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
+                text = "any-text".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = Uri("some-system")
+                    )
+                )
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("any-code")
+                        )
+                    )
+                )
+            ),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
