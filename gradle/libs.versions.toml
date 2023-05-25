@@ -11,8 +11,8 @@ interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.7.0"
 interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.2.0"
 interop-fhir-generators = "com.projectronin.interop.fhir:interop-fhir-generators:8.2.0"
 
-interop-publishers-aidbox = "com.projectronin.interop.publish:interop-aidbox:8.0.0"
-interop-publishers-datalake = "com.projectronin.interop.publish:interop-datalake:8.0.0"
+interop-publishers-aidbox = "com.projectronin.interop.publish:interop-aidbox:8.1.0"
+interop-publishers-datalake = "com.projectronin.interop.publish:interop-datalake:8.1.0"
 
 interop-validation-client = "com.projectronin.interop.validation:interop-validation-client:2.0.0"
 
