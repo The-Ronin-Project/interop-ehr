@@ -34,6 +34,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.ByteArrayOutputStream
 import java.io.PrintStream
+import java.time.LocalDateTime
 
 class BaseRoninProfileTest {
     private val tenant = mockk<Tenant> {
@@ -694,7 +695,8 @@ class BaseRoninProfileTest {
         override fun transformInternal(
             normalized: Location,
             parentContext: LocationContext,
-            tenant: Tenant
+            tenant: Tenant,
+            forceCacheReloadTS: LocalDateTime?
         ): Pair<Location?, Validation> {
             val tenantSourceCodeExtension = getExtensionOrEmptyList(
                 RoninExtension.RONIN_CONCEPT_MAP_SCHEMA,

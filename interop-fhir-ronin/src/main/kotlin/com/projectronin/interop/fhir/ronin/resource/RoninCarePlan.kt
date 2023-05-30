@@ -14,6 +14,7 @@ import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 /**
  * Validator and Transformer for the Ronin Care Plan profile.
@@ -49,7 +50,8 @@ class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
     override fun transformInternal(
         normalized: CarePlan,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<CarePlan?, Validation> {
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),

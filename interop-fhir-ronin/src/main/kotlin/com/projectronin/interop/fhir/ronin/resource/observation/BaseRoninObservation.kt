@@ -19,6 +19,7 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
+import java.time.LocalDateTime
 
 /**
  * Base class capable of handling common tasks associated to Ronin Observation profiles.
@@ -204,7 +205,8 @@ abstract class BaseRoninObservation(
     override fun transformInternal(
         normalized: Observation,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<Observation?, Validation> {
         val validation = validation {
             checkNotNull(normalized.id, requiredIdError, parentContext)

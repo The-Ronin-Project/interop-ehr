@@ -18,6 +18,7 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 /**
  * Validator and Transformer for a list of ContactPoint elements in Patient, Practitioner, or Organization.
@@ -110,7 +111,8 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
         element: List<ContactPoint>,
         tenant: Tenant,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
+        forceCacheReloadTS: LocalDateTime? = null
     ): Pair<List<ContactPoint>?, Validation> {
         val systemMapName = RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "ContactPoint.system")
         val useMapName = RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "ContactPoint.use")
@@ -121,7 +123,9 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                     tenant,
                     "${parentContext.element}.telecom.system",
                     RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.system", systemValue),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    null,
+                    forceCacheReloadTS
                 )
                 validation.apply {
                     checkNotNull(
@@ -150,7 +154,9 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                     tenant,
                     "${parentContext.element}.telecom.use",
                     RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.use", useValue),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    null,
+                    forceCacheReloadTS
                 )
                 validation.apply {
                     checkNotNull(

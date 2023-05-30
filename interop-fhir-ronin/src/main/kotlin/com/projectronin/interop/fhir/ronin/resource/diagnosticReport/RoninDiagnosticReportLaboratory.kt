@@ -20,6 +20,7 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 /**
  * Validator and Transformer for the Ronin Diagnostic Report Laboratory profile.
@@ -76,7 +77,8 @@ class RoninDiagnosticReportLaboratory(normalizer: Normalizer, localizer: Localiz
     override fun transformInternal(
         normalized: DiagnosticReport,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<DiagnosticReport?, Validation> {
         val validation = validation {
             checkNotNull(normalized.id, requiredIdError, parentContext)

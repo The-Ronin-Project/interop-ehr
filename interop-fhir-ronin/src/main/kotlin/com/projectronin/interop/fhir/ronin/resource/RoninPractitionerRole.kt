@@ -17,6 +17,7 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 /**
  * Validator and Transformer for the Ronin [OncologyPractitionerRole](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-practitionerrole.html) profile.
@@ -71,7 +72,8 @@ class RoninPractitionerRole(normalizer: Normalizer, localizer: Localizer) : USCo
     override fun transformInternal(
         normalized: PractitionerRole,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<PractitionerRole?, Validation> {
         val validation = Validation()
 

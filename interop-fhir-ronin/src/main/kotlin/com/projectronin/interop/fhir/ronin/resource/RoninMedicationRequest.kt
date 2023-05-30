@@ -14,6 +14,7 @@ import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 /**
  * Validator and transformer for the Ronin Medication Request profile
@@ -69,7 +70,8 @@ class RoninMedicationRequest(normalizer: Normalizer, localizer: Localizer) :
     override fun transformInternal(
         normalized: MedicationRequest,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<MedicationRequest?, Validation> {
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),

@@ -23,6 +23,7 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 /**
  * Validator and transformer for the Ronin Document Reference profile
@@ -119,7 +120,8 @@ class RoninDocumentReference(
     override fun transformInternal(
         normalized: DocumentReference,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<DocumentReference?, Validation> {
         // TODO: RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE, check concept maps for code
         val tenantSourceTypeExtension = getExtensionOrEmptyList(

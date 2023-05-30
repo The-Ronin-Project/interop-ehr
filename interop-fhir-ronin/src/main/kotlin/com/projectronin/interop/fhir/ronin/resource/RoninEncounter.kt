@@ -19,6 +19,7 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 /**
  * Validator and Transformer for the Ronin Encounter profile.
@@ -131,7 +132,8 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
     override fun transformInternal(
         normalized: Encounter,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<Encounter?, Validation> {
         // TODO: The following are pending 3.20.0 updates. Review and implement the below based off the notes provided there.
         // TODO: RoninExtension.TENANT_SOURCE_ENCOUNTER_TYPE

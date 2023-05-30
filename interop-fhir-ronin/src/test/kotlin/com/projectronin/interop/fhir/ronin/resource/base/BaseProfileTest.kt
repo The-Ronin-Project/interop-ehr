@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.fail
 import org.junit.jupiter.api.Test
+import java.time.LocalDateTime
 
 class BaseProfileTest {
     private val tenant = mockk<Tenant> {
@@ -34,7 +35,8 @@ class BaseProfileTest {
             override fun transformInternal(
                 normalized: Location,
                 parentContext: LocationContext,
-                tenant: Tenant
+                tenant: Tenant,
+                forceCacheReloadTS: LocalDateTime?
             ): Pair<Location?, Validation> {
                 return Pair(normalized, Validation())
             }
@@ -55,7 +57,8 @@ class BaseProfileTest {
             override fun transformInternal(
                 normalized: Location,
                 parentContext: LocationContext,
-                tenant: Tenant
+                tenant: Tenant,
+                forceCacheReloadTS: LocalDateTime?
             ): Pair<Location?, Validation> {
                 return Pair(null, Validation())
             }
@@ -76,7 +79,8 @@ class BaseProfileTest {
             override fun transformInternal(
                 normalized: Location,
                 parentContext: LocationContext,
-                tenant: Tenant
+                tenant: Tenant,
+                forceCacheReloadTS: LocalDateTime?
             ): Pair<Location?, Validation> {
                 val validation = validation {
                     checkNotNull(null, RequiredFieldError(Location::id), parentContext)
@@ -101,7 +105,8 @@ class BaseProfileTest {
             override fun transformInternal(
                 normalized: Location,
                 parentContext: LocationContext,
-                tenant: Tenant
+                tenant: Tenant,
+                forceCacheReloadTS: LocalDateTime?
             ): Pair<Location?, Validation> {
                 return Pair(normalized, Validation())
             }
@@ -122,7 +127,8 @@ class BaseProfileTest {
             override fun transformInternal(
                 normalized: Location,
                 parentContext: LocationContext,
-                tenant: Tenant
+                tenant: Tenant,
+                forceCacheReloadTS: LocalDateTime?
             ): Pair<Location?, Validation> {
                 val validation = validation {
                     checkNotNull(null, RequiredFieldError(Location::id), parentContext)
@@ -147,7 +153,8 @@ class BaseProfileTest {
             override fun transformInternal(
                 normalized: Location,
                 parentContext: LocationContext,
-                tenant: Tenant
+                tenant: Tenant,
+                forceCacheReloadTS: LocalDateTime?
             ): Pair<Location?, Validation> {
                 return Pair(normalized, Validation())
             }

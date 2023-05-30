@@ -19,6 +19,7 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 /**
  * Validator and Transformer for the Ronin Location profile.
@@ -84,7 +85,8 @@ class RoninLocation(
     override fun transformInternal(
         normalized: Location,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<Location?, Validation> {
         val validation = Validation()
 
@@ -100,7 +102,7 @@ class RoninLocation(
         }
 
         val contactPointTransformed = if (normalized.telecom.isNotEmpty()) {
-            contactPoint.transform(normalized.telecom, tenant, LocationContext(Location::class), validation)
+            contactPoint.transform(normalized.telecom, tenant, LocationContext(Location::class), validation, forceCacheReloadTS)
         } else {
             Pair(normalized.telecom, validation)
         }

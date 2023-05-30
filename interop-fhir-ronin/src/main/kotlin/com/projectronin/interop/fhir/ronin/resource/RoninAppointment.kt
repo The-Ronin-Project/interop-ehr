@@ -23,6 +23,7 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 /**
  * Validator and Transformer for the Ronin Appointment profile.
@@ -83,7 +84,8 @@ class RoninAppointment(
     override fun transformInternal(
         normalized: Appointment,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<Appointment?, Validation> {
         val validation = Validation()
 
@@ -92,7 +94,9 @@ class RoninAppointment(
                 tenant,
                 "Appointment.status",
                 RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "Appointment.status", statusValue),
-                AppointmentStatus::class
+                AppointmentStatus::class,
+                null,
+                forceCacheReloadTS
             )
             validation.apply {
                 checkNotNull(

@@ -15,6 +15,7 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 /**
  * Validator and Transformer for the Ronin Practitioner profile.
@@ -58,7 +59,8 @@ class RoninPractitioner(normalizer: Normalizer, localizer: Localizer) :
     override fun transformInternal(
         normalized: Practitioner,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<Practitioner?, Validation> {
         // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG re: extension, concept maps for telecom.status
         // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG re: extension, concept maps for telecom.use

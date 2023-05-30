@@ -17,6 +17,7 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 @Component
 class RoninConditionProblemsAndHealthConcerns(
@@ -46,7 +47,8 @@ class RoninConditionProblemsAndHealthConcerns(
     override fun transformInternal(
         normalized: Condition,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<Condition?, Validation> {
         val validation = validation {
             checkNotNull(normalized.id, requiredIdError, parentContext)

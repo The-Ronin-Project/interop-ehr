@@ -8,9 +8,10 @@ import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.tenant.config.model.Tenant
+import java.time.LocalDateTime
 
 /**
- * Base class for supporting resources with multiple profiles. Ex: [RoninObservations], [RoninConditions].
+ * Base class for supporting resources with multiple profiles.
  *
  * When determining the correct profile to use with a resource, the full list of [potentialProfiles] is evaluated
  * to see which of the profiles fits the attributes of the resource. Ex: Observation body weight vs. lab results.
@@ -33,7 +34,8 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
     override fun transformInternal(
         normalized: T,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<T?, Validation> {
         val validation = Validation()
 

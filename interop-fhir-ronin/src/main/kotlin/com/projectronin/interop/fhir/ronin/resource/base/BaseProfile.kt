@@ -12,6 +12,7 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import mu.KotlinLogging
+import java.time.LocalDateTime
 
 abstract class BaseProfile<T : Resource<T>>(
     extendedProfile: ProfileValidator<T>? = null,
@@ -30,7 +31,8 @@ abstract class BaseProfile<T : Resource<T>>(
     abstract fun transformInternal(
         normalized: T,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime? = null
     ): Pair<T?, Validation>
 
     /**
@@ -44,7 +46,7 @@ abstract class BaseProfile<T : Resource<T>>(
         validation.merge(validate(resource, parentContext))
     }
 
-    override fun transform(original: T, tenant: Tenant): Pair<T?, Validation> {
+    override fun transform(original: T, tenant: Tenant, forceCacheReloadTS: LocalDateTime?): Pair<T?, Validation> {
         val currentContext = LocationContext(original::class)
 
         val validation = validation {

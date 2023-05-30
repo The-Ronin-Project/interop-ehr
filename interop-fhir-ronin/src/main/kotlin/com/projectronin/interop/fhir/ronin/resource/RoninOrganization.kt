@@ -13,6 +13,7 @@ import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 /**
  * Validator and Transformer for the Ronin Organization profile.
@@ -47,7 +48,8 @@ class RoninOrganization(normalizer: Normalizer, localizer: Localizer) :
     override fun transformInternal(
         normalized: Organization,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<Organization?, Validation> {
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),

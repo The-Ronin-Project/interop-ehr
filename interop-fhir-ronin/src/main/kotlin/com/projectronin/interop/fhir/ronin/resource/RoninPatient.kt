@@ -32,6 +32,7 @@ import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 /**
  * Validator and Transformer for the Ronin Patient profile.
@@ -179,7 +180,8 @@ class RoninPatient(
     override fun transformInternal(
         normalized: Patient,
         parentContext: LocationContext,
-        tenant: Tenant
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
     ): Pair<Patient?, Validation> {
         val maritalStatus = normalized.maritalStatus ?: CodeableConcept(
             coding = listOf(
@@ -197,7 +199,7 @@ class RoninPatient(
         )
         val validation = Validation()
         val contactPointTransformed = if (normalized.telecom.isNotEmpty()) {
-            contactPoint.transform(normalized.telecom, tenant, LocationContext(Patient::class), validation)
+            contactPoint.transform(normalized.telecom, tenant, LocationContext(Patient::class), validation, forceCacheReloadTS)
         } else {
             Pair(normalized.telecom, validation)
         }
