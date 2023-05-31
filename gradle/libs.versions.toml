@@ -28,7 +28,7 @@ opentracing-api = "io.opentracing:opentracing-api:0.33.0"
 opentracing-util = "io.opentracing:opentracing-util:0.33.0"
 ronin-test-data-generator = "com.projectronin.test:ronin-test-data-generator:0.0.2"
 swagger-annotations = "io.swagger.core.v3:swagger-annotations:2.2.10"
-testcontainers-mysql = "org.testcontainers:mysql:1.18.1"
+testcontainers-mysql = "org.testcontainers:mysql:1.18.2"
 
 [bundles]
 test-mysql = ["mysql-connector-java", "testcontainers-mysql"]
