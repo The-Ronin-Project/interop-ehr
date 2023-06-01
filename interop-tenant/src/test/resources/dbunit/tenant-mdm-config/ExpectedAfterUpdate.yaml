@@ -1,0 +1,29 @@
+io_ehr:
+  - io_ehr_id: 101
+    name: "EPIC"
+    client_id: "12345"
+    public_key: "public"
+    private_key: "private"
+
+io_tenant:
+  - io_tenant_id: 1001
+    mnemonic: "apposnd"
+    full_name: "Epic AppOrchard Sandbox"
+    timezone: "America/New_York"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+  - io_tenant_id: 1002
+    mnemonic: "apposnd2"
+    full_name: "Epic Alternate Sandbox"
+    timezone: "America/Chicago"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+
+io_tenant_mdm_config:
+  - io_tenant_id: 1001
+    mdm_document_type_id: "54321"
+    provider_identifier_system: "system2"
+    receiving_system: "application2"
+

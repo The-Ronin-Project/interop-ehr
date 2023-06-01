@@ -3,13 +3,16 @@ commons-text = "org.apache.commons:commons-text:1.10.0"
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.1.6"
 dd-trace-api = "com.datadoghq:dd-trace-api:1.14.0"
 
+hapi-hl7v2-251 = "ca.uhn.hapi:hapi-structures-v251:2.3"
+hapi-hl7v2-base = "ca.uhn.hapi:hapi-base:2.3"
+
 interop-common = "com.projectronin.interop:interop-common:3.9.0"
 interop-commonHttp = "com.projectronin.interop:interop-common-http:3.9.0"
 interop-commonJackson = "com.projectronin.interop:interop-common-jackson:3.9.0"
 interop-commonKtorm = "com.projectronin.interop:interop-common-ktorm:3.9.0"
 interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.9.0"
-interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.2.0"
-interop-fhir-generators = "com.projectronin.interop.fhir:interop-fhir-generators:8.2.0"
+interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.2.1"
+interop-fhir-generators = "com.projectronin.interop.fhir:interop-fhir-generators:8.2.1"
 
 interop-publishers-aidbox = "com.projectronin.interop.publish:interop-aidbox:8.1.0"
 interop-publishers-datalake = "com.projectronin.interop.publish:interop-datalake:8.1.0"
@@ -32,3 +35,4 @@ testcontainers-mysql = "org.testcontainers:mysql:1.18.2"
 
 [bundles]
 test-mysql = ["mysql-connector-java", "testcontainers-mysql"]
+hl7v2 = ["hapi-hl7v2-251", "hapi-hl7v2-base"]

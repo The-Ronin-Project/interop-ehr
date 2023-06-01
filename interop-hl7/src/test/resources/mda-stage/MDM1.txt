@@ -1,0 +1,22 @@
+MSH|^~\&|RONIN||TenantApplication||20230526054354.202+0000||MDM^T02^MDM_T02|101|T|2.5.1
+EVN|T02|20230526054352
+PID|||0282273^^^MRN||Patient^TestEdit||19911120|F|||1016 Nowher Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowhers Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowher Place04/4/2019test10:45^^Houston^TX^77030^US~1016 NowherS Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowhe Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowherr Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowherrs Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowhers Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowher Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowhers Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowher Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowhers Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowher Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowhers Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowher Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowhers Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowher Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowhers Place04/4/2019test10:45^^Houston^TX^77030^US~1016 Nowhers Place04/4/2019test10:45^^Houston^TX^77032^US~1016 Nowher Place04/4/2019test10:45^^Houston^TX^77032^US~1016 Nowhers Place04/4/2019test10:45^^Houston^TX^77032^US~1016 Nowher Place04/4/2019test10:45^^Houston^TX^77032^US~1016 Nowhers Place04/4/2019test10:45^^Houston^TX^77032^US~1016 Nowher Place04/4/2019test10:45^^Houston^TX^77032^US~1016 Nowhers Place04/4/2019test10:45^^Houston^TX^77032^US~1016 Nowher Place04/4/2019test10:45^^Houston^TX^77032^US~1016 Nowhers Place04/4/2019test10:45^^Houston^TX^77032^US~1016 Nowher Place^^Houston^TX^77032^US~1016 Nowhere Place^^Houston^TX^77032^US~1016 Nowhere Place^^Houston^TX^77032^US||12^PRN~324-564-7891^ORN
+PV1||U
+TXA|1|3000326|TX|20230526054352|14571^Boruta^David||||^Project^Ronin|||^^RoninNote202305260543542020000-101|||||IP|U|UN
+OBX|1|TX|||MON 05/15/23 9:35 AM CDT
+OBX|2|TX|||Lauren DUMMY
+OBX|3|TX||| 37 y.o MRN: 282273
+OBX|4|TX|||-Bloating
+OBX|5|TX
+OBX|6|TX||| Bloating
+OBX|7|TX
+OBX|8|TX||| Frequency: Often
+OBX|9|TX
+OBX|10|TX||| Severity: Moderate
+OBX|11|TX
+OBX|12|TX||| New problem: Yes
+OBX|13|TX
+OBX|14|TX||| Interferes with eating or drinking: Yes
+OBX|15|TX
+OBX|16|TX|||Patient also wrote in:
+OBX|17|TX|||I'm taking medicine but I need more prilosec

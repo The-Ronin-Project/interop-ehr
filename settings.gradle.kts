@@ -8,6 +8,7 @@ include("interop-fhir-ronin-generators")
 
 include("interop-ehr-epic")
 include("interop-ehr-cerner")
+include("interop-hl7")
 
 for (project in rootProject.children) {
     project.buildFileName = "${project.name}.gradle.kts"

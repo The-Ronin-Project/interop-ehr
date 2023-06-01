@@ -1,0 +1,39 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-mdm-config-create
+      author: Sam Felt
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - tableExists:
+                tableName: io_tenant_mdm_config
+      changes:
+        - createTable:
+            tableName: io_tenant_mdm_config
+            columns:
+              - column:
+                  name: io_tenant_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    references: io_tenant(io_tenant_id)
+                    foreignKeyName: fk_io_tenant_mdm_config_io_tenant
+                    unique: true
+                    uniqueConstraintName: uk_fk_io_tenant_mdm_config_io_tenant
+                    primaryKey: true
+                    primaryKeyName: pk_io_tenant_mdm_config
+              - column:
+                  name: mdm_document_type_id
+                  type: java.sql.Types.VARCHAR(256)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: provider_identifier_system
+                  type: java.sql.Types.VARCHAR(256)
+                  constraints:
+                    nullable: true
+              - column:
+                  name: receiving_system
+                  type: java.sql.Types.VARCHAR(256)
+                  constraints:
+                    nullable: true

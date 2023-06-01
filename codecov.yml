@@ -38,6 +38,11 @@ coverage:
         threshold: 1%
         flags:
           - fhir-ronin-generators
+      hl7:
+        target: auto
+        threshold: 1%
+        flags:
+          - hl7
 
     patch:
       tenant:
@@ -76,6 +81,12 @@ coverage:
         base: auto
         flags:
           - fhir-ronin-generators
+      hl7:
+        target: 80
+        threshold: 1%
+        base: auto
+        flags:
+          - hl7
 
 comment:
   layout: "reach, diff, flags, files"
@@ -110,4 +121,7 @@ flags:
   fhir-ronin-generators:
     paths:
       - interop-fhir-ronin-generators/
+  hl7:
+    paths:
+      - interop-hl7/
     carryforward: true

@@ -1,0 +1,129 @@
+{
+  "meta" : {
+    "profile" : [ "http://projectronin.io/fhir/StructureDefinition/ronin-practitioner" ],
+    "lastUpdated" : "2023-05-26T02:17:21.044470Z",
+    "versionId" : "2508321",
+    "extension" : [
+      {
+        "url" : "ex:createdAt",
+        "valueInstant" : "2023-05-26T02:17:21.044470Z"
+      }
+    ]
+  },
+  "name" : [
+    {
+      "use" : "usual",
+      "text" : "David M Boruta, MD",
+      "given" : [ "David", "M" ],
+      "family" : "Boruta"
+    }
+  ],
+  "resourceType" : "Practitioner",
+  "active" : true,
+  "communication" : [
+    {
+      "text" : "English",
+      "coding" : [
+        {
+          "code" : "en",
+          "system" : "urn:oid:2.16.840.1.113883.6.99",
+          "display" : "English"
+        }
+      ]
+    }
+  ],
+  "id" : "mdaoc-eY3YrR-6z9u4mWKT1iu1HQQ3",
+  "identifier" : [
+    {
+      "use" : "usual",
+      "type" : {
+        "text" : "NPI"
+      },
+      "value" : "1699729236",
+      "system" : "http://hl7.org/fhir/sid/us-npi"
+    }, {
+      "use" : "usual",
+      "type" : {
+        "text" : "MDACC"
+      },
+      "value" : "14571",
+      "system" : "urn:oid:1.2.840.114350.1.13.412.3.7.5.737384.6"
+    }, {
+      "use" : "usual",
+      "type" : {
+        "text" : "EPIC"
+      },
+      "value" : "207VX0201X",
+      "system" : "urn:oid:1.2.840.114350.1.13.412.3.7.5.737384.7"
+    }, {
+      "use" : "usual",
+      "type" : {
+        "text" : "NPI"
+      },
+      "value" : "1699729236",
+      "system" : "urn:oid:1.2.840.114350.1.13.412.3.7.5.737384.60"
+    }, {
+      "use" : "usual",
+      "type" : {
+        "text" : "EMPLID"
+      },
+      "value" : "260432",
+      "system" : "urn:oid:1.2.840.114350.1.13.412.3.7.5.737384.126"
+    }, {
+      "use" : "usual",
+      "type" : {
+        "text" : "INTERNAL"
+      },
+      "value" : "  132888",
+      "system" : "urn:oid:1.2.840.114350.1.13.412.3.7.2.836982"
+    }, {
+      "use" : "usual",
+      "type" : {
+        "text" : "EXTERNAL"
+      },
+      "value" : "132888",
+      "system" : "urn:oid:1.2.840.114350.1.13.412.3.7.2.836982"
+    }, {
+      "type" : {
+        "text" : "Ronin-specified Tenant Identifier",
+        "coding" : [
+          {
+            "code" : "TID",
+            "system" : "http://projectronin.com/id/tenantId",
+            "display" : "Ronin-specified Tenant Identifier"
+          }
+        ]
+      },
+      "value" : "mdaoc",
+      "system" : "http://projectronin.com/id/tenantId"
+    }, {
+      "type" : {
+        "text" : "FHIR Identifier",
+        "coding" : [
+          {
+            "code" : "FHIR ID",
+            "system" : "http://projectronin.com/id/fhir",
+            "display" : "FHIR Identifier"
+          }
+        ]
+      },
+      "value" : "eY3YrR-6z9u4mWKT1iu1HQQ3",
+      "system" : "http://projectronin.com/id/fhir"
+    }
+  ],
+  "qualification" : [
+    {
+      "code" : {
+        "text" : "MD",
+        "coding" : [
+          {
+            "code" : "11",
+            "system" : "urn:oid:1.2.840.114350.1.13.412.3.7.4.836982.6000",
+            "display" : "MD"
+          }
+        ]
+      }
+    }
+  ],
+  "gender" : "male"
+}

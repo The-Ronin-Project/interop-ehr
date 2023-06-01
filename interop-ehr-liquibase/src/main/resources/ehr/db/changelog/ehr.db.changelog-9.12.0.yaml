@@ -1,0 +1,3 @@
+databaseChangeLog:
+  - include:
+      file: ehr/db/changelog/tenant-mdm-config/io_tenant_mdm_config-01.yaml
