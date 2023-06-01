@@ -18,13 +18,13 @@ class EpicHealthCheckService(
 
     override fun healthCheck(tenant: Tenant): Boolean {
         try {
-            authorizationService.getAuthentication(tenant)
+            authorizationService.getAuthentication(tenant, true)
         } catch (e: Exception) {
             logger.debug(e) { "Failed authorization health check for ${tenant.mnemonic}" }
             return false
         }
         try {
-            patientService.findPatient(tenant, LocalDate.now(), "Health", "Check")
+            patientService.findPatient(tenant, LocalDate.now(), "Health", "Check", true)
         } catch (e: Exception) {
             logger.debug(e) { "Failed Patient search health check for ${tenant.mnemonic}" }
             return false

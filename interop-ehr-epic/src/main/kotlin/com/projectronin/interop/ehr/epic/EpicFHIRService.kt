@@ -28,8 +28,12 @@ abstract class EpicFHIRService<T : Resource<T>>(val epicClient: EpicClient) : FH
         }
     }
 
-    internal fun getResourceListFromSearch(tenant: Tenant, parameters: Map<String, Any?>): List<T> {
-        return getBundleWithPaging(tenant, parameters).entry.mapNotNull { it.resource }
+    internal fun getResourceListFromSearch(
+        tenant: Tenant,
+        parameters: Map<String, Any?>,
+        disableRetry: Boolean = false
+    ): List<T> {
+        return getBundleWithPaging(tenant, parameters, disableRetry).entry.mapNotNull { it.resource }
             .filterIsInstance(fhirResourceType)
     }
 
@@ -46,7 +50,8 @@ abstract class EpicFHIRService<T : Resource<T>>(val epicClient: EpicClient) : FH
      */
     internal fun getBundleWithPaging(
         tenant: Tenant,
-        parameters: Map<String, Any?>
+        parameters: Map<String, Any?>,
+        disableRetry: Boolean = false
     ): Bundle {
         logger.info { "Get started for ${tenant.mnemonic}" }
 
@@ -58,9 +63,9 @@ abstract class EpicFHIRService<T : Resource<T>>(val epicClient: EpicClient) : FH
             val bundle = runBlocking {
                 val httpResponse =
                     if (nextURL == null) {
-                        epicClient.get(tenant, fhirURLSearchPart, standardizedParameters)
+                        epicClient.get(tenant, fhirURLSearchPart, standardizedParameters, disableRetry)
                     } else {
-                        epicClient.get(tenant, nextURL!!)
+                        epicClient.get(tenant, nextURL!!, disableRetry = disableRetry)
                     }
                 httpResponse.body<Bundle>()
             }

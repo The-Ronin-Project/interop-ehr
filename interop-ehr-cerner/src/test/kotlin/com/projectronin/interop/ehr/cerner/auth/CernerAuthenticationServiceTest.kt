@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.cerner.auth
 
+import com.projectronin.interop.common.http.NO_RETRY_HEADER
 import com.projectronin.interop.common.http.exceptions.RequestFailureException
 import com.projectronin.interop.common.http.exceptions.ServerFailureException
 import com.projectronin.interop.ehr.cerner.CernerFHIRService
@@ -186,6 +187,66 @@ class CernerAuthenticationServiceTest {
         assertTrue(scope.contains("system/Write.write"))
         assertTrue(scope.contains("system/ReadAndWrite.read"))
         assertTrue(scope.contains("system/ReadAndWrite.write"))
+    }
+
+    @Test
+    fun `sends retry header when true`() {
+        val responseJson = """
+            |{
+            |    "access_token": "accesstoken",
+            |    "scope": "system/Read.read",
+            |    "token_type": "Bearer",
+            |    "expires_in": 570
+            |}}
+        """.trimMargin()
+        mockWebServer.enqueue(MockResponse().setBody(responseJson).setHeader("Content-Type", "application/json"))
+
+        every { applicationContext.getBeansOfType<CernerFHIRService<*>>() } returns mapOf("CernerReadService" to ReadService())
+
+        runBlocking { authenticationService.getAuthentication(tenant, true) }
+        val recordedRequest = mockWebServer.takeRequest()
+
+        assertEquals("true", recordedRequest.headers.get(NO_RETRY_HEADER))
+    }
+
+    @Test
+    fun `sends retry header when false`() {
+        val responseJson = """
+            |{
+            |    "access_token": "accesstoken",
+            |    "scope": "system/Read.read",
+            |    "token_type": "Bearer",
+            |    "expires_in": 570
+            |}}
+        """.trimMargin()
+        mockWebServer.enqueue(MockResponse().setBody(responseJson).setHeader("Content-Type", "application/json"))
+
+        every { applicationContext.getBeansOfType<CernerFHIRService<*>>() } returns mapOf("CernerReadService" to ReadService())
+
+        runBlocking { authenticationService.getAuthentication(tenant, false) }
+        val recordedRequest = mockWebServer.takeRequest()
+
+        assertEquals("false", recordedRequest.headers.get(NO_RETRY_HEADER))
+    }
+
+    @Test
+    fun `sends retry header when not provided`() {
+        val responseJson = """
+            |{
+            |    "access_token": "accesstoken",
+            |    "scope": "system/Read.read",
+            |    "token_type": "Bearer",
+            |    "expires_in": 570
+            |}}
+        """.trimMargin()
+        mockWebServer.enqueue(MockResponse().setBody(responseJson).setHeader("Content-Type", "application/json"))
+
+        every { applicationContext.getBeansOfType<CernerFHIRService<*>>() } returns mapOf("CernerReadService" to ReadService())
+
+        runBlocking { authenticationService.getAuthentication(tenant) }
+        val recordedRequest = mockWebServer.takeRequest()
+
+        assertEquals("false", recordedRequest.headers.get(NO_RETRY_HEADER))
     }
 
     private fun getScopeFromRequest(request: RecordedRequest): String? {

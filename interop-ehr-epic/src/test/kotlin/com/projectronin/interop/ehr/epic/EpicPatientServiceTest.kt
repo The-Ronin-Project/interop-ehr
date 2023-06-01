@@ -611,4 +611,93 @@ class EpicPatientServiceTest {
 
         assertEquals("No FHIR ID found for patient", exception.message)
     }
+
+    @Test
+    fun `find patient works with disable retry set to true`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Patient",
+                mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "2015-01-01", "_count" to 50),
+                true
+            )
+        } returns ehrResponse
+
+        val bundle = EpicPatientService(epicClient, 100, aidboxClient).findPatient(
+            tenant,
+            LocalDate.of(2015, 1, 1),
+            "givenName",
+            "familyName",
+            true
+        )
+        assertEquals(validPatientBundle.entry.map { it.resource }.filterIsInstance<Patient>(), bundle)
+    }
+
+    @Test
+    fun `find patient works with disable retry set to false`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Patient",
+                mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "2015-01-01", "_count" to 50),
+                false
+            )
+        } returns ehrResponse
+
+        val bundle = EpicPatientService(epicClient, 100, aidboxClient).findPatient(
+            tenant,
+            LocalDate.of(2015, 1, 1),
+            "givenName",
+            "familyName",
+            false
+        )
+        assertEquals(validPatientBundle.entry.map { it.resource }.filterIsInstance<Patient>(), bundle)
+    }
+
+    @Test
+    fun `find patient works with disable retry not provided`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Patient",
+                mapOf("given" to "givenName", "family" to "familyName", "birthdate" to "2015-01-01", "_count" to 50),
+                false
+            )
+        } returns ehrResponse
+
+        val bundle = EpicPatientService(epicClient, 100, aidboxClient).findPatient(
+            tenant,
+            LocalDate.of(2015, 1, 1),
+            "givenName",
+            "familyName"
+        )
+        assertEquals(validPatientBundle.entry.map { it.resource }.filterIsInstance<Patient>(), bundle)
+    }
 }

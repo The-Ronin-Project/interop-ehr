@@ -61,7 +61,12 @@ class CernerPatientServiceTest {
             cernerClient.get(
                 tenant,
                 "/Patient",
-                mapOf("given" to "givenName", "family:exact" to "familyName", "birthdate" to "2015-01-01", "_count" to 20)
+                mapOf(
+                    "given" to "givenName",
+                    "family:exact" to "familyName",
+                    "birthdate" to "2015-01-01",
+                    "_count" to 20
+                )
             )
         } returns ehrResponse
 
@@ -473,5 +478,115 @@ class CernerPatientServiceTest {
         )
 
         assertEquals(0, response.size)
+    }
+
+    @Test
+    fun `findPatient supports disable retry being true`() {
+        val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
+
+        val tenant = createTestTenant(
+            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+            authEndpoint = "https://example.org",
+            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            mrnSystem = mrnSystem
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "/Patient",
+                mapOf(
+                    "given" to "givenName",
+                    "family:exact" to "familyName",
+                    "birthdate" to "2015-01-01",
+                    "_count" to 20
+                ),
+                true
+            )
+        } returns ehrResponse
+
+        val bundle = CernerPatientService(cernerClient, aidboxClient).findPatient(
+            tenant,
+            LocalDate.of(2015, 1, 1),
+            "givenName",
+            "familyName",
+            true
+        )
+        assertEquals(validPatientBundle.entry.map { it.resource }.filterIsInstance<Patient>(), bundle)
+    }
+
+    @Test
+    fun `findPatient supports disable retry being false`() {
+        val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
+
+        val tenant = createTestTenant(
+            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+            authEndpoint = "https://example.org",
+            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            mrnSystem = mrnSystem
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "/Patient",
+                mapOf(
+                    "given" to "givenName",
+                    "family:exact" to "familyName",
+                    "birthdate" to "2015-01-01",
+                    "_count" to 20
+                ),
+                false
+            )
+        } returns ehrResponse
+
+        val bundle = CernerPatientService(cernerClient, aidboxClient).findPatient(
+            tenant,
+            LocalDate.of(2015, 1, 1),
+            "givenName",
+            "familyName",
+            false
+        )
+        assertEquals(validPatientBundle.entry.map { it.resource }.filterIsInstance<Patient>(), bundle)
+    }
+
+    @Test
+    fun `findPatient supports disable retry being not set`() {
+        val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
+
+        val tenant = createTestTenant(
+            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+            authEndpoint = "https://example.org",
+            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            mrnSystem = mrnSystem
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "/Patient",
+                mapOf(
+                    "given" to "givenName",
+                    "family:exact" to "familyName",
+                    "birthdate" to "2015-01-01",
+                    "_count" to 20
+                ),
+                false
+            )
+        } returns ehrResponse
+
+        val bundle = CernerPatientService(cernerClient, aidboxClient).findPatient(
+            tenant,
+            LocalDate.of(2015, 1, 1),
+            "givenName",
+            "familyName"
+        )
+        assertEquals(validPatientBundle.entry.map { it.resource }.filterIsInstance<Patient>(), bundle)
     }
 }

@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.epic.auth
 
+import com.projectronin.interop.common.http.NO_RETRY_HEADER
 import com.projectronin.interop.common.http.exceptions.ServerFailureException
 import com.projectronin.interop.ehr.epic.createTestTenant
 import com.projectronin.interop.ehr.epic.getClient
@@ -234,5 +235,125 @@ class EpicAuthenticationServiceTest {
         val actualRequestBody = actualRequest.body.readUtf8()
         // Check just a portion of the actual request as the end will be different with each encoding
         assertEquals(expectedRequestBody, actualRequestBody.take(expectedRequestBody.length))
+    }
+
+    @Test
+    fun `sends retry header when disable retry is true`() {
+        // Set up mock web service
+        val responseJson = """
+            |{
+            |  "access_token": "i82fGhXNxmidCt0OdjYttm2x0cOKU1ZbN6Y_-zBvt2kw3xn-MY3gY4lOXPee6iKPw3JncYBT1Y-kdPpBYl-lsmUlA4x5dUVC1qbjEi1OHfe_Oa-VRUAeabnMLjYgKI7b",
+            |  "token_type": "bearer",
+            |  "expires_in": 3600,
+            |  "scope": "Patient.read Patient.search"
+            |}
+        """.trimMargin()
+
+        mockWebServer.enqueue(MockResponse().setBody(responseJson).setHeader("Content-Type", "application/json"))
+        mockWebServer.start()
+
+        val tenant =
+            createTestTenant(
+                clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                authEndpoint = "${mockWebServer.url("/interconnect-aocurprd-oauth")}/oauth2/token",
+                privateKey = testPrivateKey,
+                tenantMnemonic = "TestTenant"
+            )
+
+        // Execute test
+        val authentication = authenticationService.getAuthentication(tenant, true)!!
+
+        // Validate Response
+        assertEquals("Patient.read Patient.search", authentication.scope)
+        assertNotNull(authentication.expiresAt)
+        assertEquals("bearer", authentication.tokenType)
+        assertEquals(
+            "i82fGhXNxmidCt0OdjYttm2x0cOKU1ZbN6Y_-zBvt2kw3xn-MY3gY4lOXPee6iKPw3JncYBT1Y-kdPpBYl-lsmUlA4x5dUVC1qbjEi1OHfe_Oa-VRUAeabnMLjYgKI7b",
+            authentication.accessToken
+        )
+
+        // Validate Request
+        val actualRequest = mockWebServer.takeRequest()
+        assertEquals("true", actualRequest.headers[NO_RETRY_HEADER])
+    }
+
+    @Test
+    fun `sends retry header when disable retry is false`() {
+        // Set up mock web service
+        val responseJson = """
+            |{
+            |  "access_token": "i82fGhXNxmidCt0OdjYttm2x0cOKU1ZbN6Y_-zBvt2kw3xn-MY3gY4lOXPee6iKPw3JncYBT1Y-kdPpBYl-lsmUlA4x5dUVC1qbjEi1OHfe_Oa-VRUAeabnMLjYgKI7b",
+            |  "token_type": "bearer",
+            |  "expires_in": 3600,
+            |  "scope": "Patient.read Patient.search"
+            |}
+        """.trimMargin()
+
+        mockWebServer.enqueue(MockResponse().setBody(responseJson).setHeader("Content-Type", "application/json"))
+        mockWebServer.start()
+
+        val tenant =
+            createTestTenant(
+                clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                authEndpoint = "${mockWebServer.url("/interconnect-aocurprd-oauth")}/oauth2/token",
+                privateKey = testPrivateKey,
+                tenantMnemonic = "TestTenant"
+            )
+
+        // Execute test
+        val authentication = authenticationService.getAuthentication(tenant, false)!!
+
+        // Validate Response
+        assertEquals("Patient.read Patient.search", authentication.scope)
+        assertNotNull(authentication.expiresAt)
+        assertEquals("bearer", authentication.tokenType)
+        assertEquals(
+            "i82fGhXNxmidCt0OdjYttm2x0cOKU1ZbN6Y_-zBvt2kw3xn-MY3gY4lOXPee6iKPw3JncYBT1Y-kdPpBYl-lsmUlA4x5dUVC1qbjEi1OHfe_Oa-VRUAeabnMLjYgKI7b",
+            authentication.accessToken
+        )
+
+        // Validate Request
+        val actualRequest = mockWebServer.takeRequest()
+        assertEquals("false", actualRequest.headers[NO_RETRY_HEADER])
+    }
+
+    @Test
+    fun `sends retry header when disable retry is not set`() {
+        // Set up mock web service
+        val responseJson = """
+            |{
+            |  "access_token": "i82fGhXNxmidCt0OdjYttm2x0cOKU1ZbN6Y_-zBvt2kw3xn-MY3gY4lOXPee6iKPw3JncYBT1Y-kdPpBYl-lsmUlA4x5dUVC1qbjEi1OHfe_Oa-VRUAeabnMLjYgKI7b",
+            |  "token_type": "bearer",
+            |  "expires_in": 3600,
+            |  "scope": "Patient.read Patient.search"
+            |}
+        """.trimMargin()
+
+        mockWebServer.enqueue(MockResponse().setBody(responseJson).setHeader("Content-Type", "application/json"))
+        mockWebServer.start()
+
+        val tenant =
+            createTestTenant(
+                clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                authEndpoint = "${mockWebServer.url("/interconnect-aocurprd-oauth")}/oauth2/token",
+                privateKey = testPrivateKey,
+                tenantMnemonic = "TestTenant"
+            )
+
+        // Execute test
+        val authentication = authenticationService.getAuthentication(tenant)!!
+
+        // Validate Response
+        assertEquals("Patient.read Patient.search", authentication.scope)
+        assertNotNull(authentication.expiresAt)
+        assertEquals("bearer", authentication.tokenType)
+        assertEquals(
+            "i82fGhXNxmidCt0OdjYttm2x0cOKU1ZbN6Y_-zBvt2kw3xn-MY3gY4lOXPee6iKPw3JncYBT1Y-kdPpBYl-lsmUlA4x5dUVC1qbjEi1OHfe_Oa-VRUAeabnMLjYgKI7b",
+            authentication.accessToken
+        )
+
+        // Validate Request
+        val actualRequest = mockWebServer.takeRequest()
+        assertEquals("false", actualRequest.headers[NO_RETRY_HEADER])
     }
 }

@@ -32,14 +32,19 @@ abstract class CernerFHIRService<T : Resource<T>>(val cernerClient: CernerClient
         }
     }
 
-    internal fun getResourceListFromSearch(tenant: Tenant, parameters: Map<String, Any?>): List<T> {
-        return getBundleWithPaging(tenant, parameters).entry.mapNotNull { it.resource }
+    internal fun getResourceListFromSearch(
+        tenant: Tenant,
+        parameters: Map<String, Any?>,
+        disableRetry: Boolean = false
+    ): List<T> {
+        return getBundleWithPaging(tenant, parameters, disableRetry).entry.mapNotNull { it.resource }
             .filterIsInstance(fhirResourceType)
     }
 
     internal fun getBundleWithPaging(
         tenant: Tenant,
-        parameters: Map<String, Any?>
+        parameters: Map<String, Any?>,
+        disableRetry: Boolean = false
     ): Bundle {
         logger.info { "Get started for ${tenant.mnemonic}" }
 
@@ -51,9 +56,9 @@ abstract class CernerFHIRService<T : Resource<T>>(val cernerClient: CernerClient
             val bundle = runBlocking {
                 val httpResponse =
                     if (nextURL == null) {
-                        cernerClient.get(tenant, fhirURLSearchPart, standardizedParameters)
+                        cernerClient.get(tenant, fhirURLSearchPart, standardizedParameters, disableRetry)
                     } else {
-                        cernerClient.get(tenant, nextURL!!)
+                        cernerClient.get(tenant, nextURL!!, disableRetry = disableRetry)
                     }
                 httpResponse.body<Bundle>()
             }

@@ -19,16 +19,28 @@ import java.time.format.DateTimeFormatter
 import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
 
 @Component
-class CernerPatientService(cernerClient: CernerClient, private val aidboxPatientService: AidboxPatientService) : PatientService, CernerFHIRService<Patient>(cernerClient) {
+class CernerPatientService(cernerClient: CernerClient, private val aidboxPatientService: AidboxPatientService) :
+    PatientService, CernerFHIRService<Patient>(cernerClient) {
     override val fhirURLSearchPart = "/Patient"
     override val fhirResourceType = Patient::class.java
     private val logger = KotlinLogging.logger { }
 
+    @Trace
     override fun findPatient(
         tenant: Tenant,
         birthDate: LocalDate,
         givenName: String,
         familyName: String
+    ): List<Patient> {
+        return findPatient(tenant, birthDate, givenName, familyName, false)
+    }
+
+    internal fun findPatient(
+        tenant: Tenant,
+        birthDate: LocalDate,
+        givenName: String,
+        familyName: String,
+        disableRetry: Boolean
     ): List<Patient> {
         logger.info { "Patient search started for ${tenant.mnemonic}" }
 
@@ -37,7 +49,7 @@ class CernerPatientService(cernerClient: CernerClient, private val aidboxPatient
             "family:exact" to familyName,
             "birthdate" to DateTimeFormatter.ofPattern("yyyy-MM-dd").format(birthDate)
         )
-        val patientList = getResourceListFromSearch(tenant, parameters)
+        val patientList = getResourceListFromSearch(tenant, parameters, disableRetry)
 
         logger.info { "Patient search completed for ${tenant.mnemonic}" }
         return patientList

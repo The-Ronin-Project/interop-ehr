@@ -28,21 +28,21 @@ class EpicHealthCheckServiceTest {
 
     @Test
     fun `authentication fails`() {
-        every { authenticationService.getAuthentication(tenant) } throws Exception()
+        every { authenticationService.getAuthentication(tenant, true) } throws Exception()
         assertFalse(healthCheckService.healthCheck(tenant))
     }
 
     @Test
     fun `patient service fails`() {
-        every { authenticationService.getAuthentication(tenant) } returns mockk()
-        every { patientService.findPatient(tenant, any(), "Health", "Check") } throws Exception()
+        every { authenticationService.getAuthentication(tenant, true) } returns mockk()
+        every { patientService.findPatient(tenant, any(), "Health", "Check", true) } throws Exception()
         assertFalse(healthCheckService.healthCheck(tenant))
     }
 
     @Test
     fun `health check works`() {
-        every { authenticationService.getAuthentication(tenant) } returns mockk()
-        every { patientService.findPatient(tenant, any(), "Health", "Check") } returns mockk()
+        every { authenticationService.getAuthentication(tenant, true) } returns mockk()
+        every { patientService.findPatient(tenant, any(), "Health", "Check", true) } returns mockk()
         assertTrue(healthCheckService.healthCheck(tenant))
     }
 

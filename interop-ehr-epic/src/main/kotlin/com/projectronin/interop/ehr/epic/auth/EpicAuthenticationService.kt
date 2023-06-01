@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr.epic.auth
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import com.projectronin.interop.common.auth.Authentication
+import com.projectronin.interop.common.http.NO_RETRY_HEADER
 import com.projectronin.interop.common.http.request
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.auth.AuthenticationService
@@ -11,6 +12,7 @@ import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.forms.submitForm
+import io.ktor.client.request.headers
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.Parameters
 import kotlinx.coroutines.runBlocking
@@ -32,7 +34,7 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
 
     override val vendorType = VendorType.EPIC
 
-    override fun getAuthentication(tenant: Tenant): Authentication? {
+    override fun getAuthentication(tenant: Tenant, disableRetry: Boolean): Authentication? {
         val jti = UUID.randomUUID().toString()
         val vendor = tenant.vendorAs<Epic>()
         val authURL = vendor.authenticationConfig.authEndpoint
@@ -47,10 +49,10 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
         val privateKeySpec = PKCS8EncodedKeySpec(
             Base64.getDecoder().decode(
                 // Remove any Key formatting before decoding
-                vendor.authenticationConfig.privateKey?.replace("-----BEGIN PRIVATE KEY-----", "")
-                    ?.replace("-----END PRIVATE KEY-----", "")
-                    ?.replace(" ", "")
-                    ?.replace(System.lineSeparator(), "")
+                vendor.authenticationConfig.privateKey.replace("-----BEGIN PRIVATE KEY-----", "")
+                    .replace("-----END PRIVATE KEY-----", "")
+                    .replace(" ", "")
+                    .replace(System.lineSeparator(), "")
             )
         )
         val privateKeyInstance = KeyFactory.getInstance("RSA").generatePrivate(privateKeySpec)
@@ -73,7 +75,11 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
                         append("client_assertion", token)
                     },
                     encodeInQuery = false
-                )
+                ) {
+                    headers {
+                        append(NO_RETRY_HEADER, "$disableRetry")
+                    }
+                }
             }
             httpResponse.body<EpicAuthentication>()
         }

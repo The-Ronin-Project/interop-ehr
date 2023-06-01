@@ -41,6 +41,16 @@ class EpicPatientService(
         givenName: String,
         familyName: String
     ): List<Patient> {
+        return findPatient(tenant, birthDate, givenName, familyName, false)
+    }
+
+    internal fun findPatient(
+        tenant: Tenant,
+        birthDate: LocalDate,
+        givenName: String,
+        familyName: String,
+        disableRetry: Boolean
+    ): List<Patient> {
         logger.info { "Patient search started for ${tenant.mnemonic}" }
 
         val parameters = mapOf(
@@ -48,7 +58,7 @@ class EpicPatientService(
             "family" to familyName,
             "birthdate" to DateTimeFormatter.ofPattern("yyyy-MM-dd").format(birthDate)
         )
-        val patientList = getResourceListFromSearch(tenant, parameters)
+        val patientList = getResourceListFromSearch(tenant, parameters, disableRetry)
 
         logger.info { "Patient search completed for ${tenant.mnemonic}" }
         return patientList

@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.cerner.client
 
 import com.projectronin.interop.common.http.FhirJson
+import com.projectronin.interop.common.http.NO_RETRY_HEADER
 import com.projectronin.interop.common.http.request
 import com.projectronin.interop.datalake.DatalakePublishService
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
@@ -29,7 +30,12 @@ class CernerClient(
 ) : EHRClient(client, authenticationBroker, datalakePublishService) {
     private val logger = KotlinLogging.logger { }
 
-    override suspend fun getImpl(tenant: Tenant, urlPart: String, parameters: Map<String, Any?>): HttpResponse {
+    override suspend fun getImpl(
+        tenant: Tenant,
+        urlPart: String,
+        parameters: Map<String, Any?>,
+        disableRetry: Boolean
+    ): HttpResponse {
         logger.debug { "Started GET call to tenant: ${tenant.mnemonic}" }
 
         val authentication = authenticationBroker.getAuthentication(tenant)
@@ -45,6 +51,7 @@ class CernerClient(
             get(requestedUrl) {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+                    append(NO_RETRY_HEADER, "$disableRetry")
                 }
                 accept(ContentType.Application.Json)
                 url {
@@ -72,7 +79,12 @@ class CernerClient(
         return response
     }
 
-    override suspend fun postImpl(tenant: Tenant, urlPart: String, requestBody: Any, parameters: Map<String, Any?>): HttpResponse {
+    override suspend fun postImpl(
+        tenant: Tenant,
+        urlPart: String,
+        requestBody: Any,
+        parameters: Map<String, Any?>
+    ): HttpResponse {
         logger.debug { "Started POST call to tenant: ${tenant.mnemonic}" }
 
         val authentication = authenticationBroker.getAuthentication(tenant)

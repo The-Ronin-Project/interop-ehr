@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.cerner.auth
 
 import com.projectronin.interop.common.auth.Authentication
+import com.projectronin.interop.common.http.NO_RETRY_HEADER
 import com.projectronin.interop.common.http.request
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.auth.AuthenticationService
@@ -23,7 +24,8 @@ import org.springframework.stereotype.Component
 import java.util.Base64
 
 @Component
-class CernerAuthenticationService(private val client: HttpClient, private val applicationContext: ApplicationContext) : AuthenticationService {
+class CernerAuthenticationService(private val client: HttpClient, private val applicationContext: ApplicationContext) :
+    AuthenticationService {
     private val logger = KotlinLogging.logger { }
     override val vendorType = VendorType.CERNER
 
@@ -45,7 +47,7 @@ class CernerAuthenticationService(private val client: HttpClient, private val ap
         scopes.joinToString(separator = " ")
     }
 
-    override fun getAuthentication(tenant: Tenant): Authentication? {
+    override fun getAuthentication(tenant: Tenant, disableRetry: Boolean): Authentication? {
         val vendor = tenant.vendorAs<Cerner>()
         val authURL = vendor.authenticationConfig.authEndpoint
         val clientIdWithSecret = "${vendor.authenticationConfig.accountId}:${vendor.authenticationConfig.secret}"
@@ -57,6 +59,7 @@ class CernerAuthenticationService(private val client: HttpClient, private val ap
                     headers {
                         append(HttpHeaders.ContentType, "application/x-www-form-urlencoded")
                         append(HttpHeaders.Authorization, "Basic $encodedSecret")
+                        append(NO_RETRY_HEADER, "$disableRetry")
                     }
                     setBody(
                         FormDataContent(

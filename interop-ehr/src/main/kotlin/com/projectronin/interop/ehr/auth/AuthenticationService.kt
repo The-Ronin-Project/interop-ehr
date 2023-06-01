@@ -14,7 +14,7 @@ interface AuthenticationService {
     val vendorType: VendorType
 
     /**
-     * Retrieves an [Authentication] for the provided [Tenant].
+     * Retrieves an [Authentication] for the provided [Tenant]. If [disableRetry] is true, then only a single attempt will be made to retrieve an Authentication.
      */
-    fun getAuthentication(tenant: Tenant): Authentication?
+    fun getAuthentication(tenant: Tenant, disableRetry: Boolean = false): Authentication?
 }

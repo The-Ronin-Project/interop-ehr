@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.client
 
+import com.projectronin.interop.common.http.NO_RETRY_HEADER
 import com.projectronin.interop.common.http.request
 import com.projectronin.interop.datalake.DatalakePublishService
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
@@ -30,9 +31,10 @@ abstract class EHRClient(
     suspend fun get(
         tenant: Tenant,
         urlPart: String,
-        parameters: Map<String, Any?> = mapOf()
+        parameters: Map<String, Any?> = mapOf(),
+        disableRetry: Boolean = false
     ): EHRResponse {
-        return publishAndReturn(getImpl(tenant, urlPart, parameters), tenant)
+        return publishAndReturn(getImpl(tenant, urlPart, parameters, disableRetry), tenant, disableRetry)
     }
 
     suspend fun post(
@@ -97,7 +99,8 @@ abstract class EHRClient(
     protected open suspend fun getImpl(
         tenant: Tenant,
         urlPart: String,
-        parameters: Map<String, Any?> = mapOf()
+        parameters: Map<String, Any?> = mapOf(),
+        disableRetry: Boolean = false
     ): HttpResponse {
         logger.debug { "Started GET call to tenant: ${tenant.mnemonic}" }
 
@@ -116,6 +119,7 @@ abstract class EHRClient(
             get(url) {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+                    append(NO_RETRY_HEADER, "$disableRetry")
                 }
                 accept(ContentType.Application.Json)
                 parameters.map {
@@ -137,7 +141,15 @@ abstract class EHRClient(
         return response
     }
 
-    private suspend fun publishAndReturn(response: HttpResponse, tenant: Tenant): EHRResponse {
+    private suspend fun publishAndReturn(
+        response: HttpResponse,
+        tenant: Tenant,
+        disablePublication: Boolean = false
+    ): EHRResponse {
+        if (disablePublication) {
+            return EHRResponse(response, "")
+        }
+
         // publish all responses to datalake
         val transactionURL = datalakeService.publishRawData(
             tenant.mnemonic,
