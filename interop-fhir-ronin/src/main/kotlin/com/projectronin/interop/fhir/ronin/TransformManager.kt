@@ -1,5 +1,6 @@
 package com.projectronin.interop.fhir.ronin
 
+import com.projectronin.interop.common.logmarkers.LogMarkers
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.validation.ValidationClient
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -26,8 +27,8 @@ class TransformManager(private val validationClient: ValidationClient) {
         if (validation.hasIssues()) {
             // If we did not get back a transformed resource, we need to report out against the original.
             val reportedResource = transformed ?: resource
-            logger.info { "Failed to transform ${resource.resourceType}" }
-            validation.issues().forEach { logger.info { it } } // makes mirth debugging much easier
+            logger.warn(LogMarkers.VALIDATION_ISSUE) { "Failed to transform ${resource.resourceType}" }
+            validation.issues().forEach { logger.warn { it } } // makes mirth debugging much easier
             validationClient.reportIssues(validation, reportedResource, tenant)
         }
 
