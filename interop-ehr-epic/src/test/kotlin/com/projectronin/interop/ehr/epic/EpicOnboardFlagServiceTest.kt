@@ -1,6 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
-import com.projectronin.interop.aidbox.PatientService
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.interop.ehr.epic.apporchard.model.PatientFlag
 import com.projectronin.interop.ehr.epic.apporchard.model.SetPatientFlagRequest
 import com.projectronin.interop.ehr.epic.apporchard.model.SetPatientFlagResponse
@@ -10,6 +10,7 @@ import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
@@ -27,7 +28,7 @@ class EpicOnboardFlagServiceTest {
     private lateinit var onboardFlagService: EpicOnboardFlagService
     private lateinit var epicClient: EpicClient
     private lateinit var identifierService: EpicIdentifierService
-    private lateinit var aidboxPatientService: PatientService
+    private lateinit var ehrDataAuthorityClient: EHRDataAuthorityClient
     private lateinit var httpResponse: HttpResponse
     private lateinit var ehrResponse: EHRResponse
     private lateinit var tenant: Tenant
@@ -38,8 +39,8 @@ class EpicOnboardFlagServiceTest {
         httpResponse = mockk()
         ehrResponse = EHRResponse(httpResponse, "12345")
         identifierService = mockk()
-        aidboxPatientService = mockk()
-        onboardFlagService = EpicOnboardFlagService(epicClient, identifierService, aidboxPatientService)
+        ehrDataAuthorityClient = mockk()
+        onboardFlagService = EpicOnboardFlagService(epicClient, identifierService, ehrDataAuthorityClient)
         tenant = createTestTenant(
             "https://example.org",
             patientOnboardedFlagId = "flagType",
@@ -69,7 +70,7 @@ class EpicOnboardFlagServiceTest {
         val patient = mockk<Patient> {
             every { identifier } returns listOf(patientMRN)
         }
-        every { aidboxPatientService.getPatientByFHIRId("mnemonic", "fhirId") } returns patient
+        coEvery { ehrDataAuthorityClient.getResource("mnemonic", "Patient", "fhirId".localize(tenant)) } returns patient
         every { identifierService.getMRNIdentifier(tenant, listOf(patientMRN)) } returns patientMRN
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<SetPatientFlagResponse>() } returns setPatientResponse
@@ -99,7 +100,7 @@ class EpicOnboardFlagServiceTest {
         val patient = mockk<Patient> {
             every { identifier } returns listOf(patientMRN)
         }
-        every { aidboxPatientService.getPatientByFHIRId("mnemonic", "fhirId") } returns patient
+        coEvery { ehrDataAuthorityClient.getResource("mnemonic", "Patient", "fhirId".localize(tenant)) } returns patient
         every { identifierService.getMRNIdentifier(tenant, listOf(patientMRN)) } returns patientMRN
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<SetPatientFlagResponse>() } returns setPatientResponse

@@ -1,9 +1,12 @@
 package com.projectronin.interop.ehr.epic
 
-import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchResponse
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.outputs.EHRResponse
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
@@ -26,11 +29,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
-import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
+import com.projectronin.ehr.dataauthority.models.Identifier as EHRDAIdentifier
 
 class EpicPatientServiceTest {
     private lateinit var epicClient: EpicClient
-    private lateinit var aidboxClient: AidboxPatientService
+    private lateinit var ehrdaClient: EHRDataAuthorityClient
     private lateinit var httpResponse: HttpResponse
     private lateinit var ehrResponse: EHRResponse
     private val validPatientBundle = readResource<Bundle>("/ExamplePatientBundle.json")
@@ -39,7 +42,7 @@ class EpicPatientServiceTest {
     @BeforeEach
     fun initTest() {
         epicClient = mockk()
-        aidboxClient = mockk()
+        ehrdaClient = mockk()
         httpResponse = mockk()
         ehrResponse = EHRResponse(httpResponse, "12345")
     }
@@ -63,7 +66,7 @@ class EpicPatientServiceTest {
             )
         } returns ehrResponse
 
-        val bundle = EpicPatientService(epicClient, 100, aidboxClient).findPatient(
+        val bundle = EpicPatientService(epicClient, 100, ehrdaClient).findPatient(
             tenant,
             LocalDate.of(2015, 1, 1),
             "givenName",
@@ -84,7 +87,7 @@ class EpicPatientServiceTest {
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Patient>(TypeInfo(Patient::class, Patient::class.java)) } returns fakePat
         coEvery { epicClient.get(tenant, "/api/FHIR/R4/Patient/FHIRID") } returns ehrResponse
-        val actual = EpicPatientService(epicClient, 100, aidboxClient).getPatient(tenant, "FHIRID")
+        val actual = EpicPatientService(epicClient, 100, ehrdaClient).getPatient(tenant, "FHIRID")
         assertEquals(fakePat, actual)
     }
 
@@ -110,7 +113,7 @@ class EpicPatientServiceTest {
             )
         } returns ehrResponse
 
-        val resultPatientsByKey = EpicPatientService(epicClient, 100, aidboxClient).findPatientsById(
+        val resultPatientsByKey = EpicPatientService(epicClient, 100, ehrdaClient).findPatientsById(
             tenant,
             mapOf(
                 "patient#1" to Identifier(
@@ -166,7 +169,7 @@ class EpicPatientServiceTest {
             )
         } returns ehrResponse
 
-        val resultPatientsByKey = EpicPatientService(epicClient, 100, aidboxClient).findPatientsById(
+        val resultPatientsByKey = EpicPatientService(epicClient, 100, ehrdaClient).findPatientsById(
             tenant,
             mapOf(
                 "patient#1" to Identifier(
@@ -202,7 +205,7 @@ class EpicPatientServiceTest {
             )
         } returns ehrResponse
 
-        val resultPatientsByKey = EpicPatientService(epicClient, 100, aidboxClient).findPatientsById(
+        val resultPatientsByKey = EpicPatientService(epicClient, 100, ehrdaClient).findPatientsById(
             tenant,
             mapOf(
                 "patient#1" to Identifier(
@@ -245,7 +248,7 @@ class EpicPatientServiceTest {
             )
         } returns ehrResponse
 
-        val resultPatientsByKey = EpicPatientService(epicClient, 100, aidboxClient).findPatientsById(
+        val resultPatientsByKey = EpicPatientService(epicClient, 100, ehrdaClient).findPatientsById(
             tenant,
             mapOf(
                 "goodIdentifier" to Identifier(
@@ -285,7 +288,7 @@ class EpicPatientServiceTest {
             )
         } returns ehrResponse
 
-        val resultPatientsByKey = EpicPatientService(epicClient, 100, aidboxClient).findPatientsById(
+        val resultPatientsByKey = EpicPatientService(epicClient, 100, ehrdaClient).findPatientsById(
             tenant,
             mapOf(
                 "patient#1" to Identifier(
@@ -344,7 +347,7 @@ class EpicPatientServiceTest {
             )
         } returns EHRResponse(httpResponse2, "67890")
 
-        val resultPatientsByKey = EpicPatientService(epicClient, 2, aidboxClient).findPatientsById(
+        val resultPatientsByKey = EpicPatientService(epicClient, 2, ehrdaClient).findPatientsById(
             tenant,
             mapOf(
                 "patient#1" to Identifier(
@@ -371,7 +374,7 @@ class EpicPatientServiceTest {
     }
 
     @Test
-    fun `getPatientsFHIRIds works with patient in aidbox`() {
+    fun `getPatientsFHIRIds works with patient in ehrda`() {
         val mrn = "MRN"
         val fhirID = "FHIRID"
         val mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
@@ -384,15 +387,28 @@ class EpicPatientServiceTest {
             mrnSystem = mrnSystem,
             internalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
         )
-
-        every {
-            aidboxClient.getPatientFHIRIds(
-                tenant.mnemonic,
-                mapOf(mrn to SystemValue(mrn, mrnSystem))
+        val mockResponse = mockk<IdentifierSearchResponse> {
+            every { foundResources } returns listOf(
+                mockk {
+                    every { searchedIdentifier.value } returns mrn
+                    every { identifiers } returns listOf(
+                        mockk {
+                            every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                            every { value } returns fhirID
+                        }
+                    )
+                }
             )
-        } returns mapOf(mrn to fhirID)
+        }
+        coEvery {
+            ehrdaClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem))
+            )
+        } returns listOf(mockResponse)
 
-        val response = EpicPatientService(epicClient, 100, aidboxClient).getPatientsFHIRIds(
+        val response = EpicPatientService(epicClient, 100, ehrdaClient).getPatientsFHIRIds(
             tenant,
             mrnSystem,
             listOf(mrn)
@@ -402,7 +418,7 @@ class EpicPatientServiceTest {
     }
 
     @Test
-    fun `getPatientFHIRId works with patient in aidbox`() {
+    fun `getPatientFHIRId works with patient in ehrda`() {
         val mrn = "MRN"
         val fhirID = "FHIRID"
         val mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
@@ -416,14 +432,28 @@ class EpicPatientServiceTest {
             internalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
         )
 
-        every {
-            aidboxClient.getPatientFHIRIds(
-                tenant.mnemonic,
-                mapOf(mrn to SystemValue(mrn, mrnSystem))
+        val mockResponse = mockk<IdentifierSearchResponse> {
+            every { foundResources } returns listOf(
+                mockk {
+                    every { searchedIdentifier.value } returns mrn
+                    every { identifiers } returns listOf(
+                        mockk {
+                            every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                            every { value } returns fhirID
+                        }
+                    )
+                }
             )
-        } returns mapOf(mrn to fhirID)
+        }
+        coEvery {
+            ehrdaClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem))
+            )
+        } returns listOf(mockResponse)
 
-        val response = EpicPatientService(epicClient, 100, aidboxClient).getPatientFHIRId(
+        val response = EpicPatientService(epicClient, 100, ehrdaClient).getPatientFHIRId(
             tenant,
             mrn
         )
@@ -432,12 +462,12 @@ class EpicPatientServiceTest {
     }
 
     @Test
-    fun `getPatientsFHIRIds works with patient not in aidbox`() {
+    fun `getPatientsFHIRIds works with patient not in ehrda`() {
         val mrn = "MRN"
         val fhirID = "FHIRID"
         val mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
 
-        val epicPatientService = spyk(EpicPatientService(epicClient, 100, aidboxClient))
+        val epicPatientService = spyk(EpicPatientService(epicClient, 100, ehrdaClient))
 
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
@@ -448,12 +478,13 @@ class EpicPatientServiceTest {
             internalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
         )
 
-        every {
-            aidboxClient.getPatientFHIRIds(
-                tenant.mnemonic,
-                mapOf(mrn to SystemValue(mrn, mrnSystem))
+        coEvery {
+            ehrdaClient.getResourceIdentifiers(
+                any(),
+                any(),
+                any()
             )
-        } returns mapOf()
+        } returns listOf()
 
         every {
             epicPatientService.findPatientsById(
@@ -472,7 +503,7 @@ class EpicPatientServiceTest {
     }
 
     @Test
-    fun `getPatientsFHIRIds works with a mix of patients in and out of aidbox`() {
+    fun `getPatientsFHIRIds works with a mix of patients in and out of ehrda`() {
         val mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
         val aidBoxMRN1 = "AB_MRN1"
         val aidBoxMRN2 = "AB_MRN2"
@@ -483,7 +514,7 @@ class EpicPatientServiceTest {
         val ehrFhirId1 = "EHRFHIR1"
         val ehrFhirId2 = "EHRFHIR2"
 
-        val epicPatientService = spyk(EpicPatientService(epicClient, 100, aidboxClient))
+        val epicPatientService = spyk(EpicPatientService(epicClient, 100, ehrdaClient))
 
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
@@ -494,20 +525,53 @@ class EpicPatientServiceTest {
             internalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
         )
 
-        every {
-            aidboxClient.getPatientFHIRIds(
+        val mockResponse1 = mockk<IdentifierSearchResponse> {
+            every { foundResources } returns listOf(
+                mockk {
+                    every { identifiers } returns listOf(
+                        mockk {
+                            every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                            every { value } returns aidBoxFhirId1
+                        }
+                    )
+                }
+            )
+            every { searchedIdentifier.value } returns aidBoxMRN1
+        }
+        val mockResponse2 = mockk<IdentifierSearchResponse> {
+            every { foundResources } returns listOf(
+                mockk {
+                    every { identifiers } returns listOf(
+                        mockk {
+                            every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                            every { value } returns aidBoxFhirId2
+                        }
+                    )
+                }
+            )
+            every { searchedIdentifier.value } returns aidBoxMRN2
+        }
+        val mockResponse3 = mockk<IdentifierSearchResponse> {
+            every { foundResources } returns listOf()
+            every { searchedIdentifier.value } returns ehrMRN1
+        }
+        val mockResponse4 = mockk<IdentifierSearchResponse> {
+            every { foundResources } returns listOf()
+            every { searchedIdentifier.value } returns ehrMRN2
+        }
+
+        coEvery {
+            ehrdaClient.getResourceIdentifiers(
                 tenant.mnemonic,
-                mapOf(
-                    aidBoxMRN1 to SystemValue(aidBoxMRN1, mrnSystem),
-                    aidBoxMRN2 to SystemValue(aidBoxMRN2, mrnSystem),
-                    ehrMRN1 to SystemValue(ehrMRN1, mrnSystem),
-                    ehrMRN2 to SystemValue(ehrMRN2, mrnSystem)
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(
+                    EHRDAIdentifier(value = aidBoxMRN1, system = mrnSystem),
+                    EHRDAIdentifier(value = aidBoxMRN2, system = mrnSystem),
+                    EHRDAIdentifier(value = ehrMRN1, system = mrnSystem),
+                    EHRDAIdentifier(value = ehrMRN2, system = mrnSystem)
                 )
             )
-        } returns mapOf(
-            aidBoxMRN1 to aidBoxFhirId1,
-            aidBoxMRN2 to aidBoxFhirId2
-        )
+        } returns listOf(mockResponse1, mockResponse2, mockResponse3, mockResponse4)
 
         every {
             epicPatientService.findPatientsById(
@@ -542,7 +606,7 @@ class EpicPatientServiceTest {
         val mrn = "MRN"
         val mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
 
-        val epicPatientService = spyk(EpicPatientService(epicClient, 100, aidboxClient))
+        val epicPatientService = spyk(EpicPatientService(epicClient, 100, ehrdaClient))
 
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
@@ -552,13 +616,20 @@ class EpicPatientServiceTest {
             mrnSystem = mrnSystem,
             internalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
         )
+        val mockResponse = mockk<IdentifierSearchResponse> {
+            every { foundResources } returns listOf()
+            every { searchedIdentifier.value } returns mrn
+        }
 
-        every {
-            aidboxClient.getPatientFHIRIds(
+        coEvery {
+            ehrdaClient.getResourceIdentifiers(
                 tenant.mnemonic,
-                mapOf(mrn to SystemValue(mrn, mrnSystem))
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(
+                    EHRDAIdentifier(value = mrn, system = mrnSystem)
+                )
             )
-        } returns mapOf()
+        } returns listOf(mockResponse)
 
         every {
             epicPatientService.findPatientsById(
@@ -581,7 +652,7 @@ class EpicPatientServiceTest {
         val mrn = "MRN"
         val mrnSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.5.737384.14"
 
-        val epicPatientService = spyk(EpicPatientService(epicClient, 100, aidboxClient))
+        val epicPatientService = spyk(EpicPatientService(epicClient, 100, ehrdaClient))
 
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
@@ -592,12 +663,20 @@ class EpicPatientServiceTest {
             internalSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.698084"
         )
 
-        every {
-            aidboxClient.getPatientFHIRIds(
+        val mockResponse = mockk<IdentifierSearchResponse> {
+            every { foundResources } returns listOf()
+            every { searchedIdentifier.value } returns mrn
+        }
+
+        coEvery {
+            ehrdaClient.getResourceIdentifiers(
                 tenant.mnemonic,
-                mapOf(mrn to SystemValue(mrn, mrnSystem))
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(
+                    EHRDAIdentifier(value = mrn, system = mrnSystem)
+                )
             )
-        } returns mapOf()
+        } returns listOf(mockResponse)
 
         every {
             epicPatientService.findPatientsById(
@@ -632,7 +711,7 @@ class EpicPatientServiceTest {
             )
         } returns ehrResponse
 
-        val bundle = EpicPatientService(epicClient, 100, aidboxClient).findPatient(
+        val bundle = EpicPatientService(epicClient, 100, ehrdaClient).findPatient(
             tenant,
             LocalDate.of(2015, 1, 1),
             "givenName",
@@ -662,7 +741,7 @@ class EpicPatientServiceTest {
             )
         } returns ehrResponse
 
-        val bundle = EpicPatientService(epicClient, 100, aidboxClient).findPatient(
+        val bundle = EpicPatientService(epicClient, 100, ehrdaClient).findPatient(
             tenant,
             LocalDate.of(2015, 1, 1),
             "givenName",
@@ -692,7 +771,7 @@ class EpicPatientServiceTest {
             )
         } returns ehrResponse
 
-        val bundle = EpicPatientService(epicClient, 100, aidboxClient).findPatient(
+        val bundle = EpicPatientService(epicClient, 100, ehrdaClient).findPatient(
             tenant,
             LocalDate.of(2015, 1, 1),
             "givenName",

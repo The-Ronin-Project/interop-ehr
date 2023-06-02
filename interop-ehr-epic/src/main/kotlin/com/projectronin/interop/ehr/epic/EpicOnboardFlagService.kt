@@ -1,23 +1,25 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.interop.ehr.OnboardFlagService
 import com.projectronin.interop.ehr.epic.apporchard.model.PatientFlag
 import com.projectronin.interop.ehr.epic.apporchard.model.SetPatientFlagRequest
 import com.projectronin.interop.ehr.epic.apporchard.model.SetPatientFlagResponse
 import com.projectronin.interop.ehr.epic.apporchard.model.exceptions.AppOrchardError
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
-import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
 
 @Component
 class EpicOnboardFlagService(
     private val epicClient: EpicClient,
     private val identifierService: EpicIdentifierService,
-    private val aidboxPatientService: AidboxPatientService
+    private val ehrDataAuthorityClient: EHRDataAuthorityClient
 ) : OnboardFlagService {
     private val apiEndpoint = "/api/epic/2011/Billing/Patient/SetPatientFlag/Billing/Patient/Flag"
     private val logger = KotlinLogging.logger { }
@@ -27,7 +29,13 @@ class EpicOnboardFlagService(
         val epicTenant = tenant.vendorAs<Epic>()
         val flagType = epicTenant.patientOnboardedFlagId
             ?: throw IllegalStateException("Tenant ${tenant.mnemonic} is missing patient onboarding flag configuration")
-        val patient = aidboxPatientService.getPatientByFHIRId(tenant.mnemonic, patientFhirID)
+        val patient = runBlocking {
+            ehrDataAuthorityClient.getResource(
+                tenant.mnemonic,
+                "Patient",
+                patientFhirID.localize(tenant)
+            ) as Patient
+        }
         val patientMRNIdentifier = identifierService.getMRNIdentifier(tenant, patient.identifier)
 
         val flag = PatientFlag(

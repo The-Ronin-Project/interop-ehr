@@ -1,7 +1,8 @@
 package com.projectronin.interop.ehr.cerner
 
-import com.projectronin.interop.aidbox.PatientService
-import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
+import com.projectronin.ehr.dataauthority.models.Identifier
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
 import com.projectronin.interop.ehr.AppointmentService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
@@ -11,13 +12,14 @@ import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.resource.Participant
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.tenant.config.model.Tenant
+import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 @Component
 class CernerAppointmentService(
     cernerClient: CernerClient,
-    private val aidboxPatientService: PatientService,
+    private val ehrdaClient: EHRDataAuthorityClient,
     private val cernerPatientService: CernerPatientService
 ) : AppointmentService, CernerFHIRService<Appointment>(cernerClient) {
     override val fhirURLSearchPart = "/Appointment"
@@ -79,18 +81,21 @@ class CernerAppointmentService(
         // distinct ensures if the same patient is in multiple appointments we're only going to operate on them once
         val patientFhirIds = patientReferences.map { it.removePrefix("Patient/") }.distinct()
 
-        // lookup the fhir IDs found in the appointments against Aidbox and filter out the existing patients
-        val newPatientFHIRIds = patientFhirIds.run {
-            val aidboxPatientSearchMap = this.associateWith {
-                SystemValue(
-                    system = CodeSystem.RONIN_FHIR_ID.uri.value!!,
-                    value = it
-                )
-            }
+        // lookup the fhir IDs found in the appointments against EHRDA and filter out the existing patients
+        val newPatientFHIRIds = runBlocking {
             val foundFhirIds =
-                aidboxPatientService.getPatientFHIRIds(tenant.mnemonic, aidboxPatientSearchMap).keys.toList()
+                ehrdaClient.getResourceIdentifiers(
+                    tenant.mnemonic,
+                    IdentifierSearchableResourceTypes.Patient,
+                    patientFhirIds.map {
+                        Identifier(
+                            system = CodeSystem.RONIN_FHIR_ID.uri.value!!,
+                            value = it
+                        )
+                    }
+                ).map { it.searchedIdentifier.value }
             // we want the ones we didn't find
-            this - foundFhirIds.toSet()
+            patientFhirIds - foundFhirIds.toSet()
         }
 
         return newPatientFHIRIds.map {

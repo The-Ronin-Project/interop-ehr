@@ -27,7 +27,7 @@ interface PatientService : FHIRService<Patient> {
     fun getPatient(tenant: Tenant, patientFHIRID: String): Patient
 
     /**
-     * Finds FHIR ID (non-localized) for a patient, based on an Identifier value. Searches Aidbox first before querying
+     * Finds FHIR ID (non-localized) for a patient, based on an Identifier value. Searches EHRDA first before querying
      * the EHR. Implementations of this interface must 'know' the correct identifier system to apply to this value.
      */
     fun getPatientFHIRId(

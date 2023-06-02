@@ -1,6 +1,8 @@
 package com.projectronin.interop.ehr.cerner
 
-import com.projectronin.interop.aidbox.PatientService
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchResponse
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.ehr.cerner.client.RepeatingParameter
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
@@ -26,7 +28,7 @@ import java.time.LocalDate
 
 class CernerAppointmentServiceTest {
     private lateinit var cernerClient: CernerClient
-    private lateinit var aidboxPatientService: PatientService
+    private lateinit var ehrDataAuthorityClient: EHRDataAuthorityClient
     private lateinit var cernerPatientService: CernerPatientService
     private lateinit var appointmentService: CernerAppointmentService
     private lateinit var httpResponse: HttpResponse
@@ -37,11 +39,11 @@ class CernerAppointmentServiceTest {
     @BeforeEach
     fun initTest() {
         cernerClient = mockk()
-        aidboxPatientService = mockk()
+        ehrDataAuthorityClient = mockk()
         httpResponse = mockk()
         ehrResponse = EHRResponse(httpResponse, "12345")
         cernerPatientService = mockk()
-        appointmentService = CernerAppointmentService(cernerClient, aidboxPatientService, cernerPatientService)
+        appointmentService = CernerAppointmentService(cernerClient, ehrDataAuthorityClient, cernerPatientService)
         tenant = createTestTenant(
             clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
             authEndpoint = "https://example.org",
@@ -89,12 +91,15 @@ class CernerAppointmentServiceTest {
                 )
             )
         } returns ehrResponse
-        every {
-            aidboxPatientService.getPatientFHIRIds<String>(
-                tenant.mnemonic,
-                any()
-            )
-        } returns mapOf("12724066" to "12724066")
+        val mockResponse = listOf<IdentifierSearchResponse>(
+            mockk {
+                every { searchedIdentifier.value } returns "12724066"
+                every { foundResources } returns listOf(mockk())
+            }
+        )
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(tenant.mnemonic, IdentifierSearchableResourceTypes.Patient, any())
+        } returns mockResponse
         val response = appointmentService.findProviderAppointments(
             tenant = tenant,
             providerIDs = listOf(
@@ -123,7 +128,9 @@ class CernerAppointmentServiceTest {
                 )
             )
         } returns ehrResponse
-        every { aidboxPatientService.getPatientFHIRIds<String>(tenant.mnemonic, any()) } returns emptyMap()
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(tenant.mnemonic, IdentifierSearchableResourceTypes.Patient, any())
+        } returns emptyList()
         every { cernerPatientService.getPatient(tenant, "12724066") } returns mockk()
         val response = appointmentService.findProviderAppointments(
             tenant = tenant,
@@ -153,12 +160,15 @@ class CernerAppointmentServiceTest {
                 )
             )
         } returns ehrResponse
-        every {
-            aidboxPatientService.getPatientFHIRIds<String>(
-                tenant.mnemonic,
-                any()
-            )
-        } returns mapOf("12724066" to "12724066")
+        val mockResponse = listOf<IdentifierSearchResponse>(
+            mockk {
+                every { searchedIdentifier.value } returns "12724066"
+                every { foundResources } returns listOf(mockk())
+            }
+        )
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(tenant.mnemonic, IdentifierSearchableResourceTypes.Patient, any())
+        } returns mockResponse
         val response = appointmentService.findLocationAppointments(
             tenant = tenant,
             locationFHIRIds = listOf("loc123", "loc345"),
@@ -199,12 +209,15 @@ class CernerAppointmentServiceTest {
                 )
             )
         } returns ehrResponse
-        every {
-            aidboxPatientService.getPatientFHIRIds<String>(
-                tenant.mnemonic,
-                any()
-            )
-        } returns mapOf("12724066" to "12724066")
+        val mockResponse = listOf<IdentifierSearchResponse>(
+            mockk {
+                every { searchedIdentifier.value } returns "12724066"
+                every { foundResources } returns listOf(mockk())
+            }
+        )
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(tenant.mnemonic, IdentifierSearchableResourceTypes.Patient, any())
+        } returns mockResponse
         assertThrows<NullPointerException> {
             appointmentService.findLocationAppointments(
                 tenant = tenant,

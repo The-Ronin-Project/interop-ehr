@@ -1,9 +1,11 @@
 package com.projectronin.interop.ehr.cerner
 
-import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
+import com.projectronin.interop.ehr.util.associateFHIRId
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
@@ -16,11 +18,10 @@ import mu.KotlinLogging
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
+import com.projectronin.ehr.dataauthority.models.Identifier as EHRDAIdentifier
 
 @Component
-class CernerPatientService(cernerClient: CernerClient, private val aidboxPatientService: AidboxPatientService) :
-    PatientService, CernerFHIRService<Patient>(cernerClient) {
+class CernerPatientService(cernerClient: CernerClient, private val ehrDataAuthorityClient: EHRDataAuthorityClient) : PatientService, CernerFHIRService<Patient>(cernerClient) {
     override val fhirURLSearchPart = "/Patient"
     override val fhirResourceType = Patient::class.java
     private val logger = KotlinLogging.logger { }
@@ -121,17 +122,19 @@ class CernerPatientService(cernerClient: CernerClient, private val aidboxPatient
         patientIDSystem: String,
         patientIDValues: List<String>
     ): Map<String, GetFHIRIDResponse> {
-        // Try the list of patients against Aidbox first
-        val aidboxResponse = aidboxPatientService.getPatientFHIRIds(
-            tenantMnemonic = tenant.mnemonic,
-            patientIDValues.associateWith { SystemValue(it, patientIDSystem) }
-        ).mapValues { GetFHIRIDResponse(it.value) }
-
-        // Search for any patients that weren't in Aidbox in the EHR.  If there aren't any, return the Aidbox patients.
-        val ehrPatientIDValues = patientIDValues.filterNot { patientID ->
-            aidboxResponse.keys.contains(patientID)
+        // Try the list of patients against EHRDA first
+        val ehrdaResponse = runBlocking {
+            ehrDataAuthorityClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Patient,
+                patientIDValues.map { EHRDAIdentifier(patientIDSystem, it) }
+            ).associateFHIRId().map { (key, value) -> key.value to GetFHIRIDResponse(value) }.toMap()
         }
-        if (ehrPatientIDValues.isEmpty()) return aidboxResponse
+        // Search for any patients that weren't in EHRDA in the EHR.  If there aren't any, return the EHRDA patients.
+        val ehrPatientIDValues = patientIDValues.filterNot { patientID ->
+            ehrdaResponse.keys.contains(patientID)
+        }
+        if (ehrPatientIDValues.isEmpty()) return ehrdaResponse
 
         val ehrResponse = findPatientsById(
             tenant = tenant,
@@ -140,7 +143,7 @@ class CernerPatientService(cernerClient: CernerClient, private val aidboxPatient
             it.value.id == null
         }.mapValues { GetFHIRIDResponse(it.value.id!!.value!!, it.value) }
 
-        return aidboxResponse + ehrResponse
+        return ehrdaResponse + ehrResponse
     }
 
     data class SystemValueIdentifier(val systemText: String?, val value: String?)

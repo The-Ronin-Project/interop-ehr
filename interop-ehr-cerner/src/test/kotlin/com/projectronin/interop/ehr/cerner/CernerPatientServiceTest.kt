@@ -1,8 +1,11 @@
 package com.projectronin.interop.ehr.cerner
 
-import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchResponse
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.ehr.outputs.EHRResponse
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
@@ -25,11 +28,11 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
-import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
+import com.projectronin.ehr.dataauthority.models.Identifier as EHRDAIdentifier
 
 class CernerPatientServiceTest {
     private lateinit var cernerClient: CernerClient
-    private lateinit var aidboxClient: AidboxPatientService
+    private lateinit var ehrDataAuthorityClient: EHRDataAuthorityClient
     private lateinit var httpResponse: HttpResponse
     private lateinit var ehrResponse: EHRResponse
 
@@ -39,7 +42,7 @@ class CernerPatientServiceTest {
     @BeforeEach
     fun initTest() {
         cernerClient = mockk()
-        aidboxClient = mockk()
+        ehrDataAuthorityClient = mockk()
         httpResponse = mockk()
         ehrResponse = EHRResponse(httpResponse, "12345")
     }
@@ -70,7 +73,7 @@ class CernerPatientServiceTest {
             )
         } returns ehrResponse
 
-        val bundle = CernerPatientService(cernerClient, aidboxClient).findPatient(
+        val bundle = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatient(
             tenant,
             LocalDate.of(2015, 1, 1),
             "givenName",
@@ -90,7 +93,7 @@ class CernerPatientServiceTest {
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Patient>(TypeInfo(Patient::class, Patient::class.java)) } returns fakePat
         coEvery { cernerClient.get(tenant, "/Patient/FHIRID") } returns ehrResponse
-        val actual = CernerPatientService(cernerClient, aidboxClient).getPatient(tenant, "FHIRID")
+        val actual = CernerPatientService(cernerClient, ehrDataAuthorityClient).getPatient(tenant, "FHIRID")
         assertEquals(fakePat, actual)
     }
 
@@ -117,7 +120,7 @@ class CernerPatientServiceTest {
             )
         } returns ehrResponse
 
-        val resultPatientsByKey = CernerPatientService(cernerClient, aidboxClient).findPatientsById(
+        val resultPatientsByKey = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
             tenant,
             mapOf(
                 "patient#1" to Identifier(
@@ -173,7 +176,7 @@ class CernerPatientServiceTest {
             )
         } returns ehrResponse
 
-        val resultPatientsByKey = CernerPatientService(cernerClient, aidboxClient).findPatientsById(
+        val resultPatientsByKey = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
             tenant,
             mapOf(
                 "patient#1" to Identifier(
@@ -215,7 +218,7 @@ class CernerPatientServiceTest {
             )
         } returns ehrResponse
 
-        val resultPatientsByKey = CernerPatientService(cernerClient, aidboxClient).findPatientsById(
+        val resultPatientsByKey = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
             tenant,
             mapOf(
                 "patient#1" to Identifier(
@@ -251,7 +254,7 @@ class CernerPatientServiceTest {
             )
         } returns ehrResponse
 
-        val resultPatientsByKey = CernerPatientService(cernerClient, aidboxClient).findPatientsById(
+        val resultPatientsByKey = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
             tenant,
             mapOf(
                 "goodIdentifier" to Identifier(
@@ -279,7 +282,7 @@ class CernerPatientServiceTest {
             mrnSystem = mrnSystem
         )
         assertThrows<java.lang.NullPointerException> {
-            CernerPatientService(cernerClient, aidboxClient).findPatientsById(
+            CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
                 tenant,
                 mapOf(
                     "badIdentifier" to Identifier(value = null, system = Uri("Test"))
@@ -289,7 +292,7 @@ class CernerPatientServiceTest {
     }
 
     @Test
-    fun `getPatientsFHIRIds works with patient in aidbox`() {
+    fun `getPatientsFHIRIds works with patient in ehrda`() {
         val mrn = "MRN"
         val fhirID = "FHIRID"
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
@@ -299,15 +302,31 @@ class CernerPatientServiceTest {
             authEndpoint = "https://example.org",
             secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
         )
+        val mockResponse = listOf<IdentifierSearchResponse>(
+            mockk {
+                every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
+                every { foundResources } returns listOf(
+                    mockk {
+                        every { identifiers } returns listOf(
+                            mockk {
+                                every { value } returns fhirID
+                                every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                            }
 
-        every {
-            aidboxClient.getPatientFHIRIds(
+                        )
+                    }
+                )
+            }
+        )
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
-                mapOf(mrn to SystemValue(mrn, mrnSystem))
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem))
             )
-        } returns mapOf(mrn to fhirID)
+        } returns mockResponse
 
-        val response = CernerPatientService(cernerClient, aidboxClient).getPatientsFHIRIds(
+        val response = CernerPatientService(cernerClient, ehrDataAuthorityClient).getPatientsFHIRIds(
             tenant,
             mrnSystem,
             listOf(mrn)
@@ -317,7 +336,7 @@ class CernerPatientServiceTest {
     }
 
     @Test
-    fun `getPatientFHIRId works with patient in aidbox`() {
+    fun `getPatientFHIRId works with patient in ehrda`() {
         val mrn = "MRN"
         val fhirID = "FHIRID"
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
@@ -329,14 +348,31 @@ class CernerPatientServiceTest {
             mrnSystem = mrnSystem
         )
 
-        every {
-            aidboxClient.getPatientFHIRIds(
-                tenant.mnemonic,
-                mapOf(mrn to SystemValue(mrn, mrnSystem))
-            )
-        } returns mapOf(mrn to fhirID)
+        val mockResponse = listOf<IdentifierSearchResponse>(
+            mockk {
+                every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
+                every { foundResources } returns listOf(
+                    mockk {
+                        every { identifiers } returns listOf(
+                            mockk {
+                                every { value } returns fhirID
+                                every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                            }
 
-        val response = CernerPatientService(cernerClient, aidboxClient).getPatientFHIRId(
+                        )
+                    }
+                )
+            }
+        )
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem))
+            )
+        } returns mockResponse
+
+        val response = CernerPatientService(cernerClient, ehrDataAuthorityClient).getPatientFHIRId(
             tenant,
             mrn
         )
@@ -345,25 +381,31 @@ class CernerPatientServiceTest {
     }
 
     @Test
-    fun `getPatientsFHIRIds works with patient not in aidbox`() {
+    fun `getPatientsFHIRIds works with patient not in ehrda`() {
         val mrn = "MRN"
         val fhirID = "FHIRID"
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
 
-        val epicPatientService = spyk(CernerPatientService(cernerClient, aidboxClient))
+        val epicPatientService = spyk(CernerPatientService(cernerClient, ehrDataAuthorityClient))
 
         val tenant = createTestTenant(
             clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
             authEndpoint = "https://example.org",
             secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
         )
-
-        every {
-            aidboxClient.getPatientFHIRIds(
+        val mockResponse = listOf<IdentifierSearchResponse>(
+            mockk {
+                every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
+                every { foundResources } returns listOf()
+            }
+        )
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
-                mapOf(mrn to SystemValue(mrn, mrnSystem))
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem))
             )
-        } returns mapOf()
+        } returns mockResponse
 
         every {
             epicPatientService.findPatientsById(
@@ -382,7 +424,7 @@ class CernerPatientServiceTest {
     }
 
     @Test
-    fun `getPatientsFHIRIds works with a mix of patients in and out of aidbox`() {
+    fun `getPatientsFHIRIds works with a mix of patients in and out of ehrda`() {
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
         val aidBoxMRN1 = "AB_MRN1"
         val aidBoxMRN2 = "AB_MRN2"
@@ -393,28 +435,68 @@ class CernerPatientServiceTest {
         val ehrFhirId1 = "EHRFHIR1"
         val ehrFhirId2 = "EHRFHIR2"
 
-        val epicPatientService = spyk(CernerPatientService(cernerClient, aidboxClient))
+        val epicPatientService = spyk(CernerPatientService(cernerClient, ehrDataAuthorityClient))
 
         val tenant = createTestTenant(
             clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
             authEndpoint = "https://example.org",
             secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
         )
+        val searchId1 = EHRDAIdentifier(value = aidBoxMRN1, system = mrnSystem)
+        val searchId2 = EHRDAIdentifier(value = aidBoxMRN2, system = mrnSystem)
+        val searchId3 = EHRDAIdentifier(value = ehrMRN1, system = mrnSystem)
+        val searchId4 = EHRDAIdentifier(value = ehrMRN2, system = mrnSystem)
+        val mockResponse1 = listOf<IdentifierSearchResponse>(
+            mockk {
+                every { searchedIdentifier } returns searchId1
+                every { foundResources } returns listOf(
+                    mockk {
+                        every { identifiers } returns listOf(
+                            mockk {
+                                every { value } returns aidBoxFhirId1
+                                every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                            }
 
-        every {
-            aidboxClient.getPatientFHIRIds(
-                tenant.mnemonic,
-                mapOf(
-                    aidBoxMRN1 to SystemValue(aidBoxMRN1, mrnSystem),
-                    aidBoxMRN2 to SystemValue(aidBoxMRN2, mrnSystem),
-                    ehrMRN1 to SystemValue(ehrMRN1, mrnSystem),
-                    ehrMRN2 to SystemValue(ehrMRN2, mrnSystem)
+                        )
+                    }
                 )
-            )
-        } returns mapOf(
-            aidBoxMRN1 to aidBoxFhirId1,
-            aidBoxMRN2 to aidBoxFhirId2
+            }
         )
+        val mockResponse2 = listOf<IdentifierSearchResponse>(
+            mockk {
+                every { searchedIdentifier } returns searchId2
+                every { foundResources } returns listOf(
+                    mockk {
+                        every { identifiers } returns listOf(
+                            mockk {
+                                every { value } returns aidBoxFhirId2
+                                every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                            }
+
+                        )
+                    }
+                )
+            }
+        )
+        val mockResponse3 = listOf<IdentifierSearchResponse>(
+            mockk {
+                every { searchedIdentifier } returns searchId3
+                every { foundResources } returns listOf()
+            }
+        )
+        val mockResponse4 = listOf<IdentifierSearchResponse>(
+            mockk {
+                every { searchedIdentifier } returns searchId4
+                every { foundResources } returns listOf()
+            }
+        )
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(searchId1, searchId2, searchId3, searchId4)
+            )
+        } returns mockResponse1 + mockResponse2 + mockResponse3 + mockResponse4
 
         every {
             epicPatientService.findPatientsById(
@@ -449,7 +531,7 @@ class CernerPatientServiceTest {
         val mrn = "MRN"
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
 
-        val epicPatientService = spyk(CernerPatientService(cernerClient, aidboxClient))
+        val epicPatientService = spyk(CernerPatientService(cernerClient, ehrDataAuthorityClient))
 
         val tenant = createTestTenant(
             clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
@@ -457,12 +539,19 @@ class CernerPatientServiceTest {
             secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
         )
 
-        every {
-            aidboxClient.getPatientFHIRIds(
+        val mockResponse = listOf<IdentifierSearchResponse>(
+            mockk {
+                every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
+                every { foundResources } returns listOf()
+            }
+        )
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
-                mapOf(mrn to SystemValue(mrn, mrnSystem))
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem))
             )
-        } returns mapOf()
+        } returns mockResponse
 
         every {
             epicPatientService.findPatientsById(
@@ -507,7 +596,7 @@ class CernerPatientServiceTest {
             )
         } returns ehrResponse
 
-        val bundle = CernerPatientService(cernerClient, aidboxClient).findPatient(
+        val bundle = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatient(
             tenant,
             LocalDate.of(2015, 1, 1),
             "givenName",
@@ -544,7 +633,7 @@ class CernerPatientServiceTest {
             )
         } returns ehrResponse
 
-        val bundle = CernerPatientService(cernerClient, aidboxClient).findPatient(
+        val bundle = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatient(
             tenant,
             LocalDate.of(2015, 1, 1),
             "givenName",
@@ -581,7 +670,7 @@ class CernerPatientServiceTest {
             )
         } returns ehrResponse
 
-        val bundle = CernerPatientService(cernerClient, aidboxClient).findPatient(
+        val bundle = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatient(
             tenant,
             LocalDate.of(2015, 1, 1),
             "givenName",

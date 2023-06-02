@@ -1,9 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
-import com.projectronin.interop.aidbox.LocationService
-import com.projectronin.interop.aidbox.PatientService
-import com.projectronin.interop.aidbox.PractitionerService
-import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
 import com.projectronin.interop.ehr.AppointmentService
 import com.projectronin.interop.ehr.epic.apporchard.model.EpicAppointment
 import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
@@ -17,6 +15,7 @@ import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.outputs.AppointmentsWithNewPatients
 import com.projectronin.interop.ehr.outputs.addMetaSource
+import com.projectronin.interop.ehr.util.associateFHIRId
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
@@ -29,6 +28,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.PositiveInt
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.resource.Participant
+import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
 import com.projectronin.interop.fhir.ronin.util.localize
@@ -42,6 +42,7 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
+import com.projectronin.ehr.dataauthority.models.Identifier as EHRDAIdentifier
 import java.time.Instant as JavaInstant
 
 /**
@@ -54,9 +55,7 @@ class EpicAppointmentService(
     private val locationService: EpicLocationService,
     private val practitionerService: EpicPractitionerService,
     private val identifierService: EpicIdentifierService,
-    private val aidboxPractitionerService: PractitionerService,
-    private val aidboxLocationService: LocationService,
-    private val aidboxPatientService: PatientService,
+    private val ehrdaClient: EHRDataAuthorityClient,
     @Value("\${epic.fhir.batchSize:5}") private val batchSize: Int,
     @Value("\${epic.api.useFhirAPI:false}") private val useFhirAPI: Boolean
 ) : AppointmentService, EpicFHIRService<Appointment>(epicClient) {
@@ -76,7 +75,7 @@ class EpicAppointmentService(
         startDate: LocalDate,
         endDate: LocalDate,
         patientMRN: String?, // leverage the MRN if we already have it to avoid unnecessary calls to external systems
-        useEHRFallback: Boolean // if true, reaches out to EHR for any missing data in Aidbox
+        useEHRFallback: Boolean // if true, reaches out to EHR for any missing data in EHRDA
     ): List<Appointment> {
         logger.info { "Patient appointment search started for ${tenant.mnemonic}" }
 
@@ -102,16 +101,24 @@ class EpicAppointmentService(
                     )
                 ).appointments
             }
-            appointments?.let { transformEpicAppointments(tenant, mapOf(patientFHIRId to it), useEHRFallback) } ?: emptyList()
+            appointments?.let { transformEpicAppointments(tenant, mapOf(patientFHIRId to it), useEHRFallback) }
+                ?: emptyList()
         }
     }
 
     private fun getPatientMRN(tenant: Tenant, patientFHIRId: String): String? {
-        // try aidbox first
-        val patient =
-            runCatching { aidboxPatientService.getPatientByUDPId(tenant.mnemonic, patientFHIRId.localize(tenant)) }
+        // try ehrda first
+        val patient = runBlocking {
+            runCatching {
+                ehrdaClient.getResource(
+                    tenant.mnemonic,
+                    "Patient",
+                    patientFHIRId.localize(tenant)
+                ) as Patient
+            }
                 // try EHR next
                 .getOrElse { patientService.getPatient(tenant, patientFHIRId) }
+        }
         return identifierService.getMRNIdentifier(tenant, patient.identifier).value?.value
     }
 
@@ -121,8 +128,18 @@ class EpicAppointmentService(
         startDate: LocalDate,
         endDate: LocalDate
     ): AppointmentsWithNewPatients {
-        val searchMap = locationFHIRIds.map { SystemValue(value = it, system = CodeSystem.RONIN_FHIR_ID.uri.value!!) }
-        val limitedLocationList = aidboxLocationService.getAllLocationIdentifiers(tenant.mnemonic, searchMap)
+        val limitedLocationList = runBlocking {
+            ehrdaClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Location,
+                locationFHIRIds.map {
+                    EHRDAIdentifier(
+                        value = it,
+                        system = CodeSystem.RONIN_FHIR_ID.uri.value!!
+                    )
+                }
+            ).mapNotNull { it.foundResources.firstOrNull() }
+        }
         val identifiers = limitedLocationList.flatMap { it.identifiers }.toMutableList()
 
         val missingLocationList = locationFHIRIds.filter { fhirID ->
@@ -130,14 +147,22 @@ class EpicAppointmentService(
         }
 
         if (missingLocationList.isNotEmpty()) {
-            logger.warn { "Some locations not found in Aidbox, starting search in EHR" }
-            identifiers += locationService.getLocationsByFHIRId(tenant, missingLocationList).flatMap { it.value.identifier }
+            logger.warn { "Some locations not found in EHRDA, starting search in EHR" }
+            identifiers += locationService.getLocationsByFHIRId(tenant, missingLocationList)
+                .flatMap { locationEntry ->
+                    locationEntry.value.identifier.map {
+                        EHRDAIdentifier(
+                            it.system!!.value!!,
+                            it.value!!.value!!
+                        )
+                    }
+                }
         }
         val departmentList =
-            identifiers.filter { it.system?.value == tenant.vendorAs<Epic>().departmentInternalSystem && it.value?.value != null }
+            identifiers.filter { it.system == tenant.vendorAs<Epic>().departmentInternalSystem }
         val request = GetProviderAppointmentRequest(
             userID = tenant.vendorAs<Epic>().ehrUserId,
-            departments = departmentList.map { IDType(id = it.value!!.value!!, type = "Internal") },
+            departments = departmentList.map { IDType(id = it.value, type = "Internal") },
             startDate = dateFormat.format(startDate),
             endDate = dateFormat.format(endDate)
         )
@@ -245,7 +270,7 @@ class EpicAppointmentService(
                 val parameters = mapOf(
                     "patient" to patient.key,
                     "identifier" to appointments.joinToString(separator = ",") { appointment ->
-                        SystemValue(appointment.id, tenant.vendorAs<Epic>().encounterCSNSystem).queryString
+                        "${tenant.vendorAs<Epic>().encounterCSNSystem}|${appointment.id}"
                     }
                 )
                 appointmentsToReturn.addAll(
@@ -261,7 +286,7 @@ class EpicAppointmentService(
     /***
      *  Transforms the [EpicAppointment] in [patientFhirIdToAppointments] into R4 [Appointment]s.
      *  The Epic appointment provider participants (Epic department or Epic provider)
-     *  are looked up in Aidbox to find the FHIR id (FHIR Location or FHIR Practitioner) for participant references.
+     *  are looked up in EHRDA to find the FHIR id (FHIR Location or FHIR Practitioner) for participant references.
      *  When a FHIR id is found, for Location or Practitioner, populate the R4 Appointment.participant.reference.
      *  For Practitioner only, if the FHIR id is not found, populate the R4 Appointment.participant.identifer.
      */
@@ -291,13 +316,16 @@ class EpicAppointmentService(
         val provToSystem = provToIdentifier.filter { (_, identifier) ->
             identifier?.value != null && identifier.system?.value != null
         }.mapValues { (_, identifier) ->
-            SystemValue(identifier!!.value!!.value!!, identifier.system!!.value!!)
+            EHRDAIdentifier(value = identifier!!.value!!.value!!, system = identifier.system!!.value!!)
         }
-        // aidbox lookup for Practitioner FHIR id
-        val provSystemToFhirID = aidboxPractitionerService.getPractitionerFHIRIds(
-            tenant.mnemonic,
-            provToSystem.values.distinct().associateWith { it }
-        )
+        // ehrda lookup for Practitioner FHIR id
+        val provSystemToFhirID = runBlocking {
+            ehrdaClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Practitioner,
+                provToSystem.values.distinct()
+            ).associateFHIRId()
+        }
         // use FHIR id (if found), otherwise Identifier
         val provToParticipant = provToSystem.keys.associateWith { provider ->
             val systemValue = provToSystem[provider]
@@ -310,7 +338,7 @@ class EpicAppointmentService(
                 } catch (e: Exception) {
                     logger.info {
                         "Unable to find Practitioner FHIR ID in Ronin clinical data store, for Epic provider with " +
-                            "Name: ${provider.providerName} and SystemValue: ${systemValue?.queryString}"
+                            "Name: ${provider.providerName} and Token: $systemValue"
                     }
                     // default value
                     provToIdentifier[provider]
@@ -334,17 +362,20 @@ class EpicAppointmentService(
                 null
             }
         }.filterNot { it.value == null }
-        // associate Identifier with SystemValue for lookup in aidbox
+        // associate Identifier with SystemValue for lookup in ehrda
         val deptToSystem = deptToIdentifier.filter { (_, identifier) ->
             identifier?.value != null && identifier.system?.value != null
         }.mapValues { (_, identifier) ->
-            SystemValue(identifier!!.value!!.value!!, identifier.system!!.value!!)
+            EHRDAIdentifier(value = identifier!!.value!!.value!!, system = identifier.system!!.value!!)
         }
-        // aidbox lookup for Location FHIR id
-        val deptSystemToFhirID = aidboxLocationService.getLocationFHIRIds(
-            tenant.mnemonic,
-            deptToSystem.values.distinct().associateWith { it }
-        )
+        // ehrda lookup for Location FHIR id
+        val deptSystemToFhirID = runBlocking {
+            ehrdaClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Location,
+                deptToSystem.values.distinct()
+            ).associateFHIRId()
+        }
         // use FHIR id (if found), otherwise null to omit that Location
         val deptToParticipant = deptToSystem.keys.associateWith { provider ->
             val system = deptToSystem[provider]
@@ -353,7 +384,7 @@ class EpicAppointmentService(
             } else {
                 logger.info {
                     "Unable to find Location FHIR ID in Ronin clinical data store, for Epic department with " +
-                        "Name: ${provider.departmentName} and SystemValue: ${system?.queryString}"
+                        "Name: ${provider.departmentName} and Token: $system"
                 }
                 null
             }

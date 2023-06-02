@@ -14,7 +14,7 @@ interface AppointmentService : FHIRService<Appointment> {
     /**
      * Finds the appointments at a given [tenant] for a patient identified by the [patientFHIRId] between
      * the [startDate] and [endDate] from an EHR tenant. Optionally takes a [patientMRN] if available,
-     * to save on unnecessary calls to Aidbox.
+     * to save on unnecessary calls to EHRDA.
      */
     fun findPatientAppointments(
         tenant: Tenant,

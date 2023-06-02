@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.MessageService
 import com.projectronin.interop.ehr.epic.apporchard.model.SendMessageRecipient
@@ -9,6 +10,8 @@ import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
 import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
+import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.tenant.config.ProviderPoolService
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
@@ -17,7 +20,6 @@ import io.opentracing.util.GlobalTracer
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
-import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
 
 /**
  * Service for facilitating sending messages to Epic.
@@ -28,7 +30,7 @@ import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
 class EpicMessageService(
     private val epicClient: EpicClient,
     private val providerPoolService: ProviderPoolService,
-    private val patientService: AidboxPatientService,
+    private val ehrDataAuthorityClient: EHRDataAuthorityClient,
     private val identifierService: EpicIdentifierService
 ) :
     MessageService {
@@ -41,9 +43,16 @@ class EpicMessageService(
         if (vendor !is Epic) throw IllegalStateException("Tenant is not Epic vendor: ${tenant.mnemonic}")
         logger.info { "SendMessage started for ${tenant.mnemonic}" }
 
-        val patient = patientService.getPatientByFHIRId(tenant.mnemonic, messageInput.patientFHIRID)
+        val patient = runBlocking {
+            ehrDataAuthorityClient.getResource(
+                tenant.mnemonic,
+                "Patient",
+                messageInput.patientFHIRID.localize(tenant)
+            ) as Patient
+        }
         val mrn = identifierService.getMRNIdentifier(tenant, patient.identifier)
-        val mrnValue = mrn.value?.value ?: throw VendorIdentifierNotFoundException("Failed to find a value on Patient's MRN")
+        val mrnValue =
+            mrn.value?.value ?: throw VendorIdentifierNotFoundException("Failed to find a value on Patient's MRN")
 
         val sendMessageRequest =
             translateMessageInput(messageInput, vendor.ehrUserId, vendor.messageType, tenant, mrnValue)

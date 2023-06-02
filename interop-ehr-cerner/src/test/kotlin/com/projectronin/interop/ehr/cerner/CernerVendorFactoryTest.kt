@@ -49,7 +49,7 @@ class CernerVendorFactoryTest {
     @Test
     fun `is all wired for spring`() {
         @Configuration
-        @ComponentScan("com.projectronin.interop")
+        @ComponentScan("com.projectronin.interop", "com.projectronin.ehr")
         class TestConfig() {
             @Bean
             @Qualifier("ehr")

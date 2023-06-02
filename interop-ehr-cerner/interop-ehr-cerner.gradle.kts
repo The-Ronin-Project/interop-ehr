@@ -5,8 +5,8 @@ plugins {
 
 dependencies {
     implementation(libs.dd.trace.api)
-
-    implementation(libs.interop.publishers.aidbox)
+    implementation(libs.ehrda.client)
+    implementation(libs.ehrda.models)
     implementation(libs.interop.common)
     implementation(libs.interop.commonHttp)
     implementation(libs.interop.commonJackson)

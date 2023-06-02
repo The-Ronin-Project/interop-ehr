@@ -1,10 +1,8 @@
 package com.projectronin.interop.ehr.epic
 
-import com.projectronin.interop.aidbox.LocationService
-import com.projectronin.interop.aidbox.PatientService
-import com.projectronin.interop.aidbox.PractitionerService
-import com.projectronin.interop.aidbox.model.AidboxIdentifiers
-import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchResponse
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
 import com.projectronin.interop.common.http.throwExceptionFromHttpStatus
 import com.projectronin.interop.ehr.epic.apporchard.model.EpicAppointment
 import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
@@ -17,6 +15,7 @@ import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
@@ -30,6 +29,7 @@ import com.projectronin.interop.fhir.r4.resource.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.r4.valueset.BundleType
+import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.stu3.resource.STU3Bundle
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -51,6 +51,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.time.LocalDate
+import com.projectronin.ehr.dataauthority.models.Identifier as EHRDAIdentifier
 
 class EpicAppointmentServiceTest {
     private lateinit var epicClient: EpicClient
@@ -58,9 +59,7 @@ class EpicAppointmentServiceTest {
     private lateinit var identifierService: EpicIdentifierService
     private lateinit var locationService: EpicLocationService
     private lateinit var practitionerService: EpicPractitionerService
-    private lateinit var aidboxPractitionerService: PractitionerService
-    private lateinit var aidboxPatientService: PatientService
-    private lateinit var aidboxLocationService: LocationService
+    private lateinit var ehrDataAuthorityClient: EHRDataAuthorityClient
     private lateinit var httpResponse: HttpResponse
     private lateinit var ehrResponse: EHRResponse
 
@@ -280,9 +279,7 @@ class EpicAppointmentServiceTest {
         ehrResponse = EHRResponse(httpResponse, "12345")
         patientService = mockk()
         identifierService = mockk()
-        aidboxPractitionerService = mockk()
-        aidboxLocationService = mockk()
-        aidboxPatientService = mockk()
+        ehrDataAuthorityClient = mockk()
         locationService = mockk()
         practitionerService = mockk()
     }
@@ -316,9 +313,7 @@ class EpicAppointmentServiceTest {
             locationService,
             practitionerService,
             identifierService,
-            aidboxPractitionerService,
-            aidboxLocationService,
-            aidboxPatientService,
+            ehrDataAuthorityClient,
             5,
             true
         ).findPatientAppointments(
@@ -352,9 +347,7 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 true
             )
@@ -470,9 +463,7 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 true
             )
@@ -585,9 +576,7 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 true
             )
@@ -633,9 +622,7 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 true
             )
@@ -676,9 +663,7 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 true
             )
@@ -794,9 +779,7 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 true
             )
@@ -863,9 +846,7 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 true
             )
@@ -929,12 +910,13 @@ class EpicAppointmentServiceTest {
         )
         val existingIdentifiers = mockk<List<Identifier>> {}
 
-        every {
-            aidboxPatientService.getPatientByUDPId(
-                tenantMnemonic = tenant.mnemonic,
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                tenant.mnemonic,
+                "Patient",
                 "TEST_TENANT-E5597"
             )
-        } returns mockk {
+        } returns mockk<Patient> {
             every { identifier } returns existingIdentifiers
         }
 
@@ -971,9 +953,7 @@ class EpicAppointmentServiceTest {
             locationService,
             practitionerService,
             identifierService,
-            aidboxPractitionerService,
-            aidboxLocationService,
-            aidboxPatientService,
+            ehrDataAuthorityClient,
             5,
             false
         ).findPatientAppointments(
@@ -995,12 +975,13 @@ class EpicAppointmentServiceTest {
         )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every {
-            aidboxPatientService.getPatientByUDPId(
-                tenantMnemonic = tenant.mnemonic,
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                tenant.mnemonic,
+                "Patient",
                 "TEST_TENANT-E5597"
             )
-        } returns mockk {
+        } returns mockk<Patient> {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1038,15 +1019,14 @@ class EpicAppointmentServiceTest {
                 every { system } returns null
             }
         }
-        val mockProvSystemValues: Map<ScheduleProviderReturnWithTime, SystemValue> = mockk {
-            every { size } returns 0
-        }
-        every {
-            aidboxPractitionerService.getPractitionerFHIRIds(
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
-                mockProvSystemValues
+                IdentifierSearchableResourceTypes.Practitioner,
+                any()
             )
-        } returns emptyMap()
+        } returns emptyList()
+
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
 
         val response = EpicAppointmentService(
@@ -1055,9 +1035,7 @@ class EpicAppointmentServiceTest {
             locationService,
             practitionerService,
             identifierService,
-            aidboxPractitionerService,
-            aidboxLocationService,
-            aidboxPatientService,
+            ehrDataAuthorityClient,
             5,
             false
         ).findPatientAppointments(
@@ -1088,12 +1066,13 @@ class EpicAppointmentServiceTest {
         )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every {
-            aidboxPatientService.getPatientByUDPId(
-                tenantMnemonic = tenant.mnemonic,
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                tenant.mnemonic,
+                "Patient",
                 "TEST_TENANT-E5597"
             )
-        } returns mockk {
+        } returns mockk<Patient> {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1131,12 +1110,13 @@ class EpicAppointmentServiceTest {
                 every { system } returns Uri("System1")
             }
         }
-        every {
-            aidboxPractitionerService.getPractitionerFHIRIds(
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
-                any<Map<ScheduleProviderReturnWithTime, SystemValue>>()
+                IdentifierSearchableResourceTypes.Practitioner,
+                any()
             )
-        } returns emptyMap()
+        } returns emptyList()
 
         every { practitionerService.getPractitionerByProvider(any(), any()).id!!.value } returns "PractFHIRID1"
         mockEpicDepartmentsToFhirLocations(tenant, allProviders)
@@ -1147,9 +1127,7 @@ class EpicAppointmentServiceTest {
             locationService,
             practitionerService,
             identifierService,
-            aidboxPractitionerService,
-            aidboxLocationService,
-            aidboxPatientService,
+            ehrDataAuthorityClient,
             5,
             false
         ).findPatientAppointments(
@@ -1180,12 +1158,13 @@ class EpicAppointmentServiceTest {
         )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every {
-            aidboxPatientService.getPatientByUDPId(
-                tenantMnemonic = tenant.mnemonic,
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                tenant.mnemonic,
+                "Patient",
                 "TEST_TENANT-E5597"
             )
-        } returns mockk {
+        } returns mockk<Patient> {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1227,15 +1206,13 @@ class EpicAppointmentServiceTest {
                 every { system } returns null
             }
         }
-        val mockLocationSystemValues: Map<ScheduleProviderReturnWithTime, SystemValue> = mockk {
-            every { size } returns 0
-        }
-        every {
-            aidboxLocationService.getLocationFHIRIds(
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
-                mockLocationSystemValues
+                IdentifierSearchableResourceTypes.Location,
+                any()
             )
-        } returns emptyMap()
+        } returns emptyList()
 
         val response = EpicAppointmentService(
             epicClient,
@@ -1243,9 +1220,7 @@ class EpicAppointmentServiceTest {
             locationService,
             practitionerService,
             identifierService,
-            aidboxPractitionerService,
-            aidboxLocationService,
-            aidboxPatientService,
+            ehrDataAuthorityClient,
             5,
             false
         ).findPatientAppointments(
@@ -1276,12 +1251,13 @@ class EpicAppointmentServiceTest {
         )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every {
-            aidboxPatientService.getPatientByUDPId(
-                tenantMnemonic = tenant.mnemonic,
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                tenant.mnemonic,
+                "Patient",
                 "TEST_TENANT-E5597"
             )
-        } returns mockk {
+        } returns mockk<Patient> {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1319,9 +1295,7 @@ class EpicAppointmentServiceTest {
             locationService,
             practitionerService,
             identifierService,
-            aidboxPractitionerService,
-            aidboxLocationService,
-            aidboxPatientService,
+            ehrDataAuthorityClient,
             5,
             false
         ).findPatientAppointments(
@@ -1378,7 +1352,7 @@ class EpicAppointmentServiceTest {
     }
 
     @Test
-    fun `findPatientAppointments - no practitioners found in aidbox - providers use identifier instead of reference`() {
+    fun `findPatientAppointments - no practitioners found in ehrda - providers use identifier instead of reference`() {
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
             "https://example.org",
@@ -1387,12 +1361,13 @@ class EpicAppointmentServiceTest {
         )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every {
-            aidboxPatientService.getPatientByUDPId(
-                tenantMnemonic = tenant.mnemonic,
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                tenant.mnemonic,
+                "Patient",
                 "TEST_TENANT-E5597"
             )
-        } returns mockk {
+        } returns mockk<Patient> {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1430,9 +1405,7 @@ class EpicAppointmentServiceTest {
             locationService,
             practitionerService,
             identifierService,
-            aidboxPractitionerService,
-            aidboxLocationService,
-            aidboxPatientService,
+            ehrDataAuthorityClient,
             5,
             false
         ).findPatientAppointments(
@@ -1489,7 +1462,7 @@ class EpicAppointmentServiceTest {
     }
 
     @Test
-    fun `findPatientAppointments - no locations found in aidbox - locations are not added to participants`() {
+    fun `findPatientAppointments - no locations found in ehrda - locations are not added to participants`() {
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
             "https://example.org",
@@ -1498,12 +1471,13 @@ class EpicAppointmentServiceTest {
         )
         val epicVendor = tenant.vendorAs<Epic>()
         val existingIdentifiers = mockk<List<Identifier>> {}
-        every {
-            aidboxPatientService.getPatientByUDPId(
-                tenantMnemonic = tenant.mnemonic,
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                tenant.mnemonic,
+                "Patient",
                 "TEST_TENANT-E5597"
             )
-        } returns mockk {
+        } returns mockk<Patient> {
             every { identifier } returns existingIdentifiers
         }
         every { identifierService.getMRNIdentifier(tenant, existingIdentifiers) } returns mockk {
@@ -1541,9 +1515,7 @@ class EpicAppointmentServiceTest {
             locationService,
             practitionerService,
             identifierService,
-            aidboxPractitionerService,
-            aidboxLocationService,
-            aidboxPatientService,
+            ehrDataAuthorityClient,
             5,
             false
         ).findPatientAppointments(
@@ -1635,9 +1607,7 @@ class EpicAppointmentServiceTest {
             locationService,
             practitionerService,
             identifierService,
-            aidboxPractitionerService,
-            aidboxLocationService,
-            aidboxPatientService,
+            ehrDataAuthorityClient,
             5,
             false
         ).findPatientAppointments(
@@ -1662,7 +1632,13 @@ class EpicAppointmentServiceTest {
         val mockPat = mockk<Patient> {
             every { identifier } returns listOf(mockID)
         }
-        every { aidboxPatientService.getPatientByUDPId("TEST_TENANT", "TEST_TENANT-FHIRID") } returns mockPat
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                "TEST_TENANT",
+                "Patient",
+                "TEST_TENANT-FHIRID"
+            )
+        } returns mockPat
         every { identifierService.getMRNIdentifier(tenant, listOf(mockID)).value } returns null
         val response = EpicAppointmentService(
             epicClient,
@@ -1670,9 +1646,7 @@ class EpicAppointmentServiceTest {
             locationService,
             practitionerService,
             identifierService,
-            aidboxPractitionerService,
-            aidboxLocationService,
-            aidboxPatientService,
+            ehrDataAuthorityClient,
             5,
             false
         ).findPatientAppointments(
@@ -1686,7 +1660,7 @@ class EpicAppointmentServiceTest {
     }
 
     @Test
-    fun `findPatientAppointmentsByMRN no MRN no aidbox test`() {
+    fun `findPatientAppointmentsByMRN no MRN no ehrda test`() {
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
             "https://example.org",
@@ -1697,8 +1671,14 @@ class EpicAppointmentServiceTest {
         val mockPat = mockk<Patient> {
             every { identifier } returns listOf(mockID)
         }
-        every { aidboxPatientService.getPatientByUDPId("TEST_TENANT", "TEST_TENANT-FHIRID") } throws Exception()
-        every { patientService.getPatient(tenant, "FHIRID") } returns mockPat
+        coEvery {
+            ehrDataAuthorityClient.getResource(
+                "TEST_TENANT",
+                "Patient",
+                "TEST_TENANT-FHIRID"
+            )
+        } returns mockPat
+        every { patientService.getPatient(tenant, "FHIRID") } throws Exception()
         every { identifierService.getMRNIdentifier(tenant, listOf(mockID)).value } returns null
         val response = EpicAppointmentService(
             epicClient,
@@ -1706,9 +1686,7 @@ class EpicAppointmentServiceTest {
             locationService,
             practitionerService,
             identifierService,
-            aidboxPractitionerService,
-            aidboxLocationService,
-            aidboxPatientService,
+            ehrDataAuthorityClient,
             5,
             false
         ).findPatientAppointments(
@@ -1737,9 +1715,7 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 false
             )
@@ -1829,27 +1805,33 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 false
             )
         )
-
-        // Identifier service
-        every {
-            aidboxLocationService.getAllLocationIdentifiers(
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
                 "TEST_TENANT",
-                any()
+                IdentifierSearchableResourceTypes.Location,
+                listOf(EHRDAIdentifier(CodeSystem.RONIN_FHIR_ID.uri.value!!, "FHIRID1"))
             )
         } returns listOf(
-            AidboxIdentifiers(
-                "FHIRID1",
-                listOf(Identifier(value = "E100".asFHIR(), system = Uri("internalDepartmentSystem")))
-            )
+            mockk {
+                every { searchedIdentifier.value } returns "val1"
+                every { foundResources } returns listOf(
+                    mockk {
+                        every { udpId } returns "FHIRID1"
+                        every { identifiers } returns listOf(
+                            mockk {
+                                every { value } returns "E100"
+                                every { system } returns "internalDepartmentSystem"
+                            }
+                        )
+                    }
+                )
+            }
         )
-
         // GetAppointments request
         mockkStatic(HttpResponse::throwExceptionFromHttpStatus)
         justRun { httpResponse.throwExceptionFromHttpStatus("GetAppointments", providerAppointmentSearchUrlPart) }
@@ -1920,19 +1902,18 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 false
             )
         )
 
         // Identifier service
-        every {
-            aidboxLocationService.getAllLocationIdentifiers(
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
                 "TEST_TENANT",
-                any()
+                IdentifierSearchableResourceTypes.Location,
+                listOf(EHRDAIdentifier(CodeSystem.RONIN_FHIR_ID.uri.value!!, "FHIRID1"))
             )
         } returns listOf()
 
@@ -2019,9 +2000,7 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 false
             )
@@ -2122,9 +2101,7 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 false
             )
@@ -2352,9 +2329,7 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 false
             )
@@ -2563,7 +2538,6 @@ class EpicAppointmentServiceTest {
             "TEST_TENANT"
         )
         val epicVendor = tenant.vendorAs<Epic>()
-
         val epicAppointmentService = spyk(
             EpicAppointmentService(
                 epicClient,
@@ -2571,9 +2545,7 @@ class EpicAppointmentServiceTest {
                 locationService,
                 practitionerService,
                 identifierService,
-                aidboxPractitionerService,
-                aidboxLocationService,
-                aidboxPatientService,
+                ehrDataAuthorityClient,
                 5,
                 false
             )
@@ -2707,9 +2679,7 @@ class EpicAppointmentServiceTest {
             locationService,
             practitionerService,
             identifierService,
-            aidboxPractitionerService,
-            aidboxLocationService,
-            aidboxPatientService,
+            ehrDataAuthorityClient,
             5,
             false
         )
@@ -2727,9 +2697,7 @@ class EpicAppointmentServiceTest {
             locationService,
             practitionerService,
             identifierService,
-            aidboxPractitionerService,
-            aidboxLocationService,
-            aidboxPatientService,
+            ehrDataAuthorityClient,
             5,
             false
         )
@@ -2756,8 +2724,8 @@ class EpicAppointmentServiceTest {
                 )
             }
         }
-        val mockProviderQuery = mutableMapOf<SystemValue, SystemValue>()
-        val mockPractitionerFhirIDsResult = mutableMapOf<SystemValue, String>()
+        val mockProviderQuery = mutableListOf<EHRDAIdentifier>()
+        val mockPractitionerFhirIDsResult = mutableListOf<IdentifierSearchResponse>()
         val mockPractitionerFhirIDs = mutableMapOf<ScheduleProviderReturnWithTime, String>()
         mockProviderIDs.entries.forEach { mapEntry ->
             every { identifierService.getPractitionerIdentifier(tenant, mapEntry.value) } returns mockk {
@@ -2765,20 +2733,36 @@ class EpicAppointmentServiceTest {
                 every { system } returns Uri(epicVendor.practitionerProviderSystem)
             }
             val mockSystemValue =
-                SystemValue(mapEntry.value.first().value!!.value!!, epicVendor.practitionerProviderSystem)
-            if (!mockProviderQuery.keys.contains(mockSystemValue)) {
-                mockProviderQuery[mockSystemValue] = mockSystemValue
+                EHRDAIdentifier(value = mapEntry.value.first().value!!.value!!, system = epicVendor.practitionerProviderSystem)
+            if (!mockProviderQuery.contains(mockSystemValue)) {
+                mockProviderQuery.add(mockSystemValue)
             }
             if (fhirIDsMockResult == null) {
                 val mockFhirID = "${mapEntry.key.providerName.replace("[^a-zA-Z0-9]".toRegex(), "")}-fhir-id"
-                mockPractitionerFhirIDsResult[mockSystemValue] = mockFhirID
+                mockPractitionerFhirIDsResult.add(
+                    mockk {
+                        every { foundResources } returns listOf(
+                            mockk {
+                                every { searchedIdentifier } returns mockSystemValue
+                                every { udpId } returns mockFhirID.localize(tenant)
+                                every { identifiers } returns listOf(
+                                    mockk {
+                                        every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                                        every { value } returns mockFhirID
+                                    }
+                                )
+                            }
+                        )
+                    }
+                )
                 mockPractitionerFhirIDs[mapEntry.key] = mockFhirID
             }
         }
         val fhirIDsReturn = fhirIDsMockResult ?: mockPractitionerFhirIDs
-        every {
-            aidboxPractitionerService.getPractitionerFHIRIds(
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Practitioner,
                 mockProviderQuery
             )
         } returns mockPractitionerFhirIDsResult
@@ -2804,8 +2788,8 @@ class EpicAppointmentServiceTest {
                 )
             }
         }
-        val mockLocationQuery = mutableMapOf<SystemValue, SystemValue>()
-        val mockLocationFhirIDsResult = mutableMapOf<SystemValue, String>()
+        val mockLocationQuery = mutableListOf<EHRDAIdentifier>()
+        val mockLocationFhirIDsResult = mutableListOf<IdentifierSearchResponse>()
         val mockLocationFhirIDs = mutableMapOf<ScheduleProviderReturnWithTime, String>()
         mockDepartmentIDs.entries.forEach { mapEntry ->
             every { identifierService.getLocationIdentifier(tenant, mapEntry.value) } returns mockk {
@@ -2813,23 +2797,40 @@ class EpicAppointmentServiceTest {
                 every { system } returns Uri(epicVendor.departmentInternalSystem)
             }
             val mockSystemValue =
-                SystemValue(mapEntry.value.first().value!!.value!!, epicVendor.departmentInternalSystem)
-            if (!mockLocationQuery.keys.contains(mockSystemValue)) {
-                mockLocationQuery[mockSystemValue] = mockSystemValue
+                EHRDAIdentifier(value = mapEntry.value.first().value!!.value!!, system = epicVendor.departmentInternalSystem)
+            if (!mockLocationQuery.contains(mockSystemValue)) {
+                mockLocationQuery.add(mockSystemValue)
                 if (fhirIDsMockResult == null) {
                     val mockFhirID = "${mapEntry.key.departmentName.replace("[^a-zA-Z0-9]".toRegex(), "")}-fhir-id"
-                    mockLocationFhirIDsResult[mockSystemValue] = mockFhirID
+                    mockLocationFhirIDsResult.add(
+                        mockk {
+                            every { foundResources } returns listOf(
+                                mockk {
+                                    every { searchedIdentifier } returns mockSystemValue
+                                    every { udpId } returns mockFhirID.localize(tenant)
+                                    every { identifiers } returns listOf(
+                                        mockk {
+                                            every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                                            every { value } returns mockFhirID
+                                        }
+                                    )
+                                }
+                            )
+                        }
+                    )
                     mockLocationFhirIDs[mapEntry.key] = mockFhirID
                 }
             }
         }
         val fhirIDsReturn = fhirIDsMockResult ?: mockLocationFhirIDs
-        every {
-            aidboxLocationService.getLocationFHIRIds(
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Location,
                 mockLocationQuery
             )
         } returns mockLocationFhirIDsResult
+
         return fhirIDsReturn
     }
 }

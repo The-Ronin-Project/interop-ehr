@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.epic.apporchard.model.IDType
 import com.projectronin.interop.ehr.epic.apporchard.model.SendMessageRecipient
@@ -17,6 +18,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.tenant.config.ProviderPoolService
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
@@ -35,14 +37,13 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
-import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
 
 class EpicMessageServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var httpResponse: HttpResponse
     private lateinit var ehrResponse: EHRResponse
     private lateinit var providerPoolService: ProviderPoolService
-    private lateinit var aidboxPatientService: AidboxPatientService
+    private lateinit var ehrDataAuthorityClient: EHRDataAuthorityClient
     private lateinit var identifierService: EpicIdentifierService
     private lateinit var span: Span
     private val testPrivateKey = this::class.java.getResource("/TestPrivateKey.txt")!!.readText()
@@ -52,7 +53,7 @@ class EpicMessageServiceTest {
         epicClient = mockk()
         httpResponse = mockk()
         ehrResponse = EHRResponse(httpResponse, "12345")
-        aidboxPatientService = mockk()
+        ehrDataAuthorityClient = mockk()
         identifierService = mockk()
         providerPoolService = mockk()
 
@@ -72,7 +73,7 @@ class EpicMessageServiceTest {
             every { identifier } returns mockIdentifierList
         }
 
-        every { aidboxPatientService.getPatientByFHIRId(any(), any()) } returns mockPatient
+        coEvery { ehrDataAuthorityClient.getResource(any(), any(), any()) } returns mockPatient
         every { identifierService.getMRNIdentifier(any(), mockIdentifierList) } returns mockIdentifier
     }
 
@@ -125,14 +126,15 @@ class EpicMessageServiceTest {
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
-        val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
-            tenant,
-            EHRMessageInput(
-                "Message Text",
-                "fhirId1",
-                recipientsList
+        val messageId =
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text",
+                    "fhirId1",
+                    recipientsList
+                )
             )
-        )
 
         assertEquals("130375", messageId)
     }
@@ -181,14 +183,15 @@ class EpicMessageServiceTest {
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
-        val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
-            tenant,
-            EHRMessageInput(
-                "Message Text\nLine 2\n\nLine 4",
-                "fhirId1",
-                recipientsList
+        val messageId =
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text\nLine 2\n\nLine 4",
+                    "fhirId1",
+                    recipientsList
+                )
             )
-        )
 
         assertEquals("130375", messageId)
     }
@@ -237,14 +240,15 @@ class EpicMessageServiceTest {
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
-        val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
-            tenant,
-            EHRMessageInput(
-                "Message Text\r\nLine 2\r\n\r\nLine 4",
-                "fhirId1",
-                recipientsList
+        val messageId =
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text\r\nLine 2\r\n\r\nLine 4",
+                    "fhirId1",
+                    recipientsList
+                )
             )
-        )
 
         assertEquals("130375", messageId)
     }
@@ -293,14 +297,15 @@ class EpicMessageServiceTest {
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
-        val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
-            tenant,
-            EHRMessageInput(
-                "Message Text\r\nLine 2\n\nLine 4",
-                "fhirId1",
-                recipientsList
+        val messageId =
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text\r\nLine 2\n\nLine 4",
+                    "fhirId1",
+                    recipientsList
+                )
             )
-        )
 
         assertEquals("130375", messageId)
     }
@@ -360,10 +365,11 @@ class EpicMessageServiceTest {
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
-        val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
-            tenant,
-            EHRMessageInput(messageInput, "fhirId1", recipientsList)
-        )
+        val messageId =
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
+                tenant,
+                EHRMessageInput(messageInput, "fhirId1", recipientsList)
+            )
 
         assertEquals("130375", messageId)
     }
@@ -423,10 +429,11 @@ class EpicMessageServiceTest {
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
-        val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
-            tenant,
-            EHRMessageInput(messageInput, "fhirId1", recipientsList)
-        )
+        val messageId =
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
+                tenant,
+                EHRMessageInput(messageInput, "fhirId1", recipientsList)
+            )
 
         assertEquals("130375", messageId)
     }
@@ -486,10 +493,11 @@ class EpicMessageServiceTest {
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
-        val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
-            tenant,
-            EHRMessageInput(messageInput, "fhirId1", recipientsList)
-        )
+        val messageId =
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
+                tenant,
+                EHRMessageInput(messageInput, "fhirId1", recipientsList)
+            )
 
         assertEquals("130375", messageId)
     }
@@ -540,14 +548,15 @@ class EpicMessageServiceTest {
             providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID"))
         } returns mapOf("CorrectID" to "PoolID")
 
-        val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
-            tenant,
-            EHRMessageInput(
-                "Message Text",
-                "fhirId1",
-                recipientsList
+        val messageId =
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text",
+                    "fhirId1",
+                    recipientsList
+                )
             )
-        )
 
         assertEquals("130375", messageId)
     }
@@ -594,7 +603,7 @@ class EpicMessageServiceTest {
         )
 
         assertThrows<ClassCastException> {
-            EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
                 tenant,
                 EHRMessageInput(
                     "Message Text",
@@ -647,7 +656,7 @@ class EpicMessageServiceTest {
         )
 
         assertThrows<VendorIdentifierNotFoundException> {
-            EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
                 tenant,
                 EHRMessageInput(
                     "Message Text",
@@ -700,7 +709,7 @@ class EpicMessageServiceTest {
         )
 
         assertThrows<VendorIdentifierNotFoundException> {
-            EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
                 tenant,
                 EHRMessageInput(
                     "Message Text",
@@ -747,7 +756,7 @@ class EpicMessageServiceTest {
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
         assertThrows<Exception> {
-            EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
                 tenant,
                 EHRMessageInput(
                     "Message Text",
@@ -802,14 +811,15 @@ class EpicMessageServiceTest {
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
-        val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
-            tenant,
-            EHRMessageInput(
-                "Message Text",
-                "fhirId1",
-                recipientsList
+        val messageId =
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text",
+                    "fhirId1",
+                    recipientsList
+                )
             )
-        )
 
         assertEquals("130375", messageId)
 
@@ -866,14 +876,15 @@ class EpicMessageServiceTest {
             )
         } returns mapOf("CorrectID" to "PoolID")
 
-        val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
-            tenant,
-            EHRMessageInput(
-                "Message Text",
-                "fhirId1",
-                recipientsList
+        val messageId =
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text",
+                    "fhirId1",
+                    recipientsList
+                )
             )
-        )
 
         assertEquals("130375", messageId)
 
@@ -937,14 +948,15 @@ class EpicMessageServiceTest {
             )
         } returns mapOf("CorrectID2" to "PoolID")
 
-        val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
-            tenant,
-            EHRMessageInput(
-                "Message Text",
-                "fhirId1",
-                recipientsList
+        val messageId =
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text",
+                    "fhirId1",
+                    recipientsList
+                )
             )
-        )
 
         assertEquals("130375", messageId)
 
@@ -1000,14 +1012,15 @@ class EpicMessageServiceTest {
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
-        val messageId = EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
-            tenant,
-            EHRMessageInput(
-                "Message Text",
-                "fhirId1",
-                recipientsList
+        val messageId =
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text",
+                    "fhirId1",
+                    recipientsList
+                )
             )
-        )
 
         assertEquals("130375", messageId)
 
@@ -1015,7 +1028,7 @@ class EpicMessageServiceTest {
     }
 
     @Test
-    fun `ensure aidbox bad mrn fails`() {
+    fun `ensure ehrda bad mrn fails`() {
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
             "https://example.org",
@@ -1033,7 +1046,7 @@ class EpicMessageServiceTest {
             every { identifier } returns mockIdentifierList
         }
 
-        every { aidboxPatientService.getPatientByFHIRId("TEST_TENANT", "badId") } returns mockPatient
+        coEvery { ehrDataAuthorityClient.getResource("TEST_TENANT", "Patient", "badId".localize(tenant)) } returns mockPatient
         every { identifierService.getMRNIdentifier(tenant, mockIdentifierList) } returns mockIdentifier
 
         val recipientsList = listOf(
@@ -1046,7 +1059,7 @@ class EpicMessageServiceTest {
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
         assertThrows<VendorIdentifierNotFoundException> {
-            EpicMessageService(epicClient, providerPoolService, aidboxPatientService, identifierService).sendMessage(
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
                 tenant,
                 EHRMessageInput(
                     "Message Text",

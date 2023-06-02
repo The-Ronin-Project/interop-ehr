@@ -1,10 +1,12 @@
 package com.projectronin.interop.ehr.epic
 
-import com.projectronin.interop.aidbox.model.SystemValue
+import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
+import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
+import com.projectronin.interop.ehr.util.associateFHIRId
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
@@ -18,7 +20,7 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
-import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
+import com.projectronin.ehr.dataauthority.models.Identifier as EHRDAIdentifier
 
 /**
  * Service providing access to patients within Epic.
@@ -27,7 +29,7 @@ import com.projectronin.interop.aidbox.PatientService as AidboxPatientService
 class EpicPatientService(
     epicClient: EpicClient,
     @Value("\${epic.fhir.batchSize:5}") private val batchSize: Int,
-    private val aidboxPatientService: AidboxPatientService
+    private val ehrdaClient: EHRDataAuthorityClient
 ) : PatientService,
     EpicFHIRService<Patient>(epicClient) {
     override val fhirURLSearchPart = "/api/FHIR/R4/Patient"
@@ -134,17 +136,19 @@ class EpicPatientService(
         patientIDSystem: String,
         patientIDValues: List<String>
     ): Map<String, GetFHIRIDResponse> {
-        // Try the list of patients against Aidbox first
-        val aidboxResponse = aidboxPatientService.getPatientFHIRIds(
-            tenantMnemonic = tenant.mnemonic,
-            patientIDValues.associateWith { SystemValue(it, patientIDSystem) }
-        ).mapValues { GetFHIRIDResponse(it.value) }
-
-        // Search for any patients that weren't in Aidbox in the EHR.  If there aren't any, return the Aidbox patients.
-        val ehrPatientIDValues = patientIDValues.filterNot { patientID ->
-            aidboxResponse.keys.contains(patientID)
+        // Try the list of patients against EHRDA first
+        val ehrdaResponse = runBlocking {
+            ehrdaClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Patient,
+                patientIDValues.map { EHRDAIdentifier(value = it, system = patientIDSystem) }
+            ).associateFHIRId().map { (key, value) -> key.value to GetFHIRIDResponse(value) }.toMap()
         }
-        if (ehrPatientIDValues.isEmpty()) return aidboxResponse
+        // Search for any patients that weren't in EHRDA in the EHR.  If there aren't any, return the EHRDA patients.
+        val ehrPatientIDValues = patientIDValues.filterNot { patientID ->
+            ehrdaResponse.keys.contains(patientID)
+        }
+        if (ehrPatientIDValues.isEmpty()) return ehrdaResponse
 
         val ehrResponse = findPatientsById(
             tenant = tenant,
@@ -153,7 +157,7 @@ class EpicPatientService(
             it.value.id == null
         }.mapValues { GetFHIRIDResponse(it.value.id!!.value!!, it.value) }
 
-        return aidboxResponse + ehrResponse
+        return ehrdaResponse + ehrResponse
     }
 
     data class SystemValueIdentifier(val systemText: String?, val value: String?)

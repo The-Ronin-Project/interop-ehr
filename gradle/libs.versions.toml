@@ -3,6 +3,8 @@ commons-text = "org.apache.commons:commons-text:1.10.0"
 caffeine = "com.github.ben-manes.caffeine:caffeine:3.1.6"
 dd-trace-api = "com.datadoghq:dd-trace-api:1.14.0"
 
+ehrda-client = "com.projectronin.ehr:ehr-data-authority-client:1.0.0"
+ehrda-models = "com.projectronin.ehr:ehr-data-authority-models:1.0.0"
 hapi-hl7v2-251 = "ca.uhn.hapi:hapi-structures-v251:2.3"
 hapi-hl7v2-base = "ca.uhn.hapi:hapi-base:2.3"
 
@@ -14,7 +16,6 @@ interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.9.1"
 interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.2.1"
 interop-fhir-generators = "com.projectronin.interop.fhir:interop-fhir-generators:8.2.1"
 
-interop-publishers-aidbox = "com.projectronin.interop.publish:interop-aidbox:8.1.0"
 interop-publishers-datalake = "com.projectronin.interop.publish:interop-datalake:8.1.0"
 
 interop-validation-client = "com.projectronin.interop.validation:interop-validation-client:2.0.0"
@@ -31,7 +32,7 @@ opentracing-api = "io.opentracing:opentracing-api:0.33.0"
 opentracing-util = "io.opentracing:opentracing-util:0.33.0"
 ronin-test-data-generator = "com.projectronin.test:ronin-test-data-generator:0.0.2"
 swagger-annotations = "io.swagger.core.v3:swagger-annotations:2.2.10"
-testcontainers-mysql = "org.testcontainers:mysql:1.18.2"
+testcontainers-mysql = "org.testcontainers:mysql:1.18.3"
 
 [bundles]
 test-mysql = ["mysql-connector-java", "testcontainers-mysql"]
