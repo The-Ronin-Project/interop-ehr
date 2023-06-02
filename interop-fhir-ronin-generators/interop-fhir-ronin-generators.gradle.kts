@@ -7,6 +7,7 @@ dependencies {
     implementation("org.springframework:spring-context")
     implementation(project(":interop-tenant"))
     implementation(project(":interop-ehr"))
+    implementation(project(":interop-fhir-ronin"))
 
     implementation(libs.interop.common)
     implementation(libs.interop.commonJackson)
