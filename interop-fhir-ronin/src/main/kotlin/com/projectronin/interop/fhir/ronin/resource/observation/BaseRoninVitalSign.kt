@@ -10,6 +10,7 @@ import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.ronin.error.RoninInvalidDynamicValueError
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.InvalidValueSetError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -25,11 +26,26 @@ abstract class BaseRoninVitalSign(
     extendedProfile: ProfileValidator<Observation>,
     profile: String,
     normalizer: Normalizer,
-    localizer: Localizer
-) : BaseRoninObservation(extendedProfile, profile, normalizer, localizer) {
+    localizer: Localizer,
+    protected val registryClient: NormalizationRegistryClient
+) :
+    BaseRoninObservation(
+        extendedProfile,
+        profile,
+        normalizer,
+        localizer
+    ) {
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
     override val qualifyingCategories = listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("vital-signs")))
+
+    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
+    override val qualifyingCodes: List<Coding> by lazy {
+        registryClient.getRequiredValueSet(
+            "Observation.code",
+            profile
+        )
+    }
 
     // Quantity unit codes - subclasses may override to modify validation logic for quantity units like "cm" "kg"
     open val validQuantityCodes: List<String> = emptyList()

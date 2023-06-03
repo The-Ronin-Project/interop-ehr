@@ -109,7 +109,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter).alertIfErrors()
         }
 
         assertEquals(
@@ -155,7 +155,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter).alertIfErrors()
         }
 
         assertEquals(
@@ -199,7 +199,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter).alertIfErrors()
         }
 
         assertEquals(
@@ -238,7 +238,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter).alertIfErrors()
         }
 
         assertEquals(
@@ -282,7 +282,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter).alertIfErrors()
         }
 
         assertEquals(
@@ -328,7 +328,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter).alertIfErrors()
         }
 
         assertEquals(
@@ -370,7 +370,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter).alertIfErrors()
         }
 
         assertEquals(
@@ -412,7 +412,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter).alertIfErrors()
         }
 
         assertEquals(
@@ -456,7 +456,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter).alertIfErrors()
         }
 
         assertEquals(
@@ -507,7 +507,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter).alertIfErrors()
         }
 
         assertEquals(
@@ -550,7 +550,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter).alertIfErrors()
         }
 
         assertEquals(
@@ -593,7 +593,7 @@ class RoninEncounterTest {
 
         )
 
-        roninEncounter.validate(encounter, null).alertIfErrors()
+        roninEncounter.validate(encounter).alertIfErrors()
     }
 
     @Test
@@ -1283,7 +1283,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter).alertIfErrors()
         }
 
         assertEquals(
@@ -1326,7 +1326,7 @@ class RoninEncounterTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter, null).alertIfErrors()
+            roninEncounter.validate(encounter).alertIfErrors()
         }
 
         assertEquals(

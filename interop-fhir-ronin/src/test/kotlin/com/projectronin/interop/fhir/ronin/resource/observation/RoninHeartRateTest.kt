@@ -54,12 +54,77 @@ class RoninHeartRateTest {
         every { mnemonic } returns "test"
     }
     private val heartRateCode = Code("8867-4")
-    private val heartRateCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = heartRateCode))
+    private val heartRateCoding = Coding(system = CodeSystem.LOINC.uri, code = heartRateCode)
+    private val heartRateCodingList = listOf(heartRateCoding)
+    private val heartRateCodingDisplay = Coding(system = CodeSystem.LOINC.uri, code = heartRateCode, display = "Heart Rate".asFHIR())
+    private val heartRateCodingDisplayList = listOf(heartRateCodingDisplay)
+    private val heartRateConceptDisplay = CodeableConcept(coding = heartRateCodingDisplayList)
+    private val heartRateConcept = CodeableConcept(coding = heartRateCodingList)
+
+    private val vitalSignsCategoryCode = Code("vital-signs")
+    private val vitalSignsCategoryCoding = Coding(
+        system = CodeSystem.OBSERVATION_CATEGORY.uri,
+        code = vitalSignsCategoryCode
+    )
+    private val vitalSignsCategoryCodingList = listOf(vitalSignsCategoryCoding)
+    private val vitalSignsCategoryConcept = CodeableConcept(coding = vitalSignsCategoryCodingList)
+    private val vitalSignsCategoryConceptList = listOf(vitalSignsCategoryConcept)
+
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_HEART_RATE.value)
+        } returns heartRateCodingList
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.category",
+                vitalSignsCategoryCoding,
+                RoninProfile.OBSERVATION_HEART_RATE.value
+            )?.first
+        } returns vitalSignsCategoryCoding
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.category",
+                Coding(
+                    system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                    code = null
+                ),
+                RoninProfile.OBSERVATION_HEART_RATE.value
+            )
+        } returns null
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                heartRateCoding,
+                RoninProfile.OBSERVATION_HEART_RATE.value
+            )?.first
         } returns heartRateCoding
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                Coding(
+                    system = CodeSystem.UCUM.uri,
+                    code = heartRateCode
+                ),
+                RoninProfile.OBSERVATION_HEART_RATE.value
+            )
+        } returns null
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                Coding(
+                    system = CodeSystem.LOINC.uri,
+                    code = Code("1234")
+                ),
+                RoninProfile.OBSERVATION_HEART_RATE.value
+            )
+        } returns null
     }
+
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
     }
@@ -67,7 +132,6 @@ class RoninHeartRateTest {
         every { localize(any(), tenant) } answers { firstArg() }
     }
     private val roninHeartRate = RoninHeartRate(normalizer, localizer, normRegistryClient)
-    private val vitalSignsCategory = Code("vital-signs")
 
     @Test
     fun `does not qualify when no category`() {
@@ -93,16 +157,7 @@ class RoninHeartRateTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -115,21 +170,12 @@ class RoninHeartRateTest {
     }
 
     @Test
-    fun `does not qualify when no coding`() {
+    fun `does not qualify when no code coding`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -142,21 +188,12 @@ class RoninHeartRateTest {
     }
 
     @Test
-    fun `does not qualify when coding code not for heart rate`() {
+    fun `does not qualify when code coding code not for heart rate`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -169,21 +206,12 @@ class RoninHeartRateTest {
     }
 
     @Test
-    fun `does not qualify when coding code is for heart rate but wrong system`() {
+    fun `does not qualify when code coding code is for heart rate but wrong system`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -208,29 +236,13 @@ class RoninHeartRateTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = heartRateCode
-                    )
-                )
-            )
+            code = heartRateConcept
         )
 
         assertTrue(roninHeartRate.qualifies(observation))
@@ -243,25 +255,8 @@ class RoninHeartRateTest {
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION_HEART_RATE.value)), source = Uri("source")),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Heart Rate".asFHIR(),
-                        code = heartRateCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            code = heartRateConceptDisplay,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -274,7 +269,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -319,16 +314,7 @@ class RoninHeartRateTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -341,7 +327,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -375,25 +361,8 @@ class RoninHeartRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Heart Rate".asFHIR(),
-                        code = heartRateCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            code = heartRateConceptDisplay,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -414,7 +383,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -447,25 +416,8 @@ class RoninHeartRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Heart Rate".asFHIR(),
-                        code = heartRateCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            code = heartRateConceptDisplay,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -486,7 +438,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -519,25 +471,8 @@ class RoninHeartRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Heart Rate".asFHIR(),
-                        code = heartRateCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            code = heartRateConceptDisplay,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -559,7 +494,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -592,25 +527,8 @@ class RoninHeartRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Heart Rate".asFHIR(),
-                        code = heartRateCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            code = heartRateConceptDisplay,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -631,7 +549,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -664,25 +582,8 @@ class RoninHeartRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Heart Rate".asFHIR(),
-                        code = heartRateCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            code = heartRateConceptDisplay,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -704,7 +605,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -737,15 +638,7 @@ class RoninHeartRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Heart Rate".asFHIR(),
-                        code = heartRateCode
-                    )
-                )
-            ),
+            code = heartRateConceptDisplay,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -777,7 +670,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -811,25 +704,8 @@ class RoninHeartRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Heart Rate".asFHIR(),
-                        code = heartRateCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            code = heartRateConceptDisplay,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -847,7 +723,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -880,25 +756,8 @@ class RoninHeartRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Heart Rate".asFHIR(),
-                        code = heartRateCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            code = heartRateConceptDisplay,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -920,7 +779,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -966,7 +825,7 @@ class RoninHeartRateTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -992,7 +851,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1025,25 +884,8 @@ class RoninHeartRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Heart Rate".asFHIR(),
-                        code = heartRateCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            code = heartRateConceptDisplay,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1064,7 +906,7 @@ class RoninHeartRateTest {
             )
         )
 
-        roninHeartRate.validate(observation, null).alertIfErrors()
+        roninHeartRate.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -1083,24 +925,8 @@ class RoninHeartRateTest {
                     value = "test".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = heartRateCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            code = heartRateConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1153,16 +979,7 @@ class RoninHeartRateTest {
             basedOn = listOf(Reference(reference = "CarePlan/1234".asFHIR())),
             partOf = listOf(Reference(reference = "MedicationStatement/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -1274,16 +1091,7 @@ class RoninHeartRateTest {
         assertEquals(listOf(Reference(reference = "MedicationStatement/1234".asFHIR())), transformed.partOf)
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
-            listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            vitalSignsCategoryConceptList,
             transformed.category
         )
         assertEquals(
@@ -1373,16 +1181,7 @@ class RoninHeartRateTest {
                 ),
                 text = "Heart Rate".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -1438,16 +1237,7 @@ class RoninHeartRateTest {
         assertEquals(listOf<Reference>(), transformed.partOf)
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
-            listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            vitalSignsCategoryConceptList,
             transformed.category
         )
         assertEquals(
@@ -1502,25 +1292,8 @@ class RoninHeartRateTest {
             id = Id("123"),
             meta = Meta(source = Uri("source")),
             status = Code("bad-status"),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Heart Rate".asFHIR(),
-                        code = heartRateCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            code = heartRateConceptDisplay,
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -1578,16 +1351,7 @@ class RoninHeartRateTest {
                 ),
                 text = "Heart Rate".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -1601,7 +1365,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1645,16 +1409,7 @@ class RoninHeartRateTest {
                 ),
                 text = "Heart Rate".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -1668,7 +1423,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1712,16 +1467,7 @@ class RoninHeartRateTest {
                 ),
                 text = "Heart Rate".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -1735,7 +1481,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1779,16 +1525,7 @@ class RoninHeartRateTest {
                 ),
                 text = "Heart Rate".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -1802,7 +1539,7 @@ class RoninHeartRateTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninHeartRate.validate(observation, null).alertIfErrors()
+            roninHeartRate.validate(observation).alertIfErrors()
         }
 
         assertEquals(

@@ -71,7 +71,7 @@ class RoninOrganizationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninOrganization.validate(organization, null).alertIfErrors()
+            roninOrganization.validate(organization).alertIfErrors()
         }
 
         assertEquals(
@@ -109,7 +109,7 @@ class RoninOrganizationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninOrganization.validate(organization, null).alertIfErrors()
+            roninOrganization.validate(organization).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -144,7 +144,7 @@ class RoninOrganizationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninOrganization.validate(organization, null).alertIfErrors()
+            roninOrganization.validate(organization).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -199,7 +199,7 @@ class RoninOrganizationTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninOrganization.validate(organization, null).alertIfErrors()
+            roninOrganization.validate(organization).alertIfErrors()
         }
 
         assertEquals(
@@ -238,7 +238,7 @@ class RoninOrganizationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninOrganization.validate(organization, null).alertIfErrors()
+            roninOrganization.validate(organization).alertIfErrors()
         }
 
         assertEquals(
@@ -274,7 +274,7 @@ class RoninOrganizationTest {
             active = true.asFHIR()
         )
 
-        roninOrganization.validate(organization, null).alertIfErrors()
+        roninOrganization.validate(organization).alertIfErrors()
     }
 
     @Test

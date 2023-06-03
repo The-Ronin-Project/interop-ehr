@@ -75,7 +75,7 @@ class RoninMedicationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedication.validate(medication, null).alertIfErrors()
+            roninMedication.validate(medication).alertIfErrors()
         }
 
         assertEquals(
@@ -111,7 +111,7 @@ class RoninMedicationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedication.validate(medication, null).alertIfErrors()
+            roninMedication.validate(medication).alertIfErrors()
         }
 
         assertEquals(
@@ -157,7 +157,7 @@ class RoninMedicationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedication.validate(medication, null).alertIfErrors()
+            roninMedication.validate(medication).alertIfErrors()
         }
 
         assertEquals(
@@ -248,7 +248,7 @@ class RoninMedicationTest {
         )
 
         // validation
-        roninMedication.validate(transformed, null).alertIfErrors()
+        roninMedication.validate(transformed).alertIfErrors()
     }
 
     @Test
@@ -334,7 +334,7 @@ class RoninMedicationTest {
         )
 
         // validation
-        roninMedication.validate(transformed, null).alertIfErrors()
+        roninMedication.validate(transformed).alertIfErrors()
     }
 
     @Test
@@ -388,7 +388,7 @@ class RoninMedicationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedication.validate(medication, null).alertIfErrors()
+            roninMedication.validate(medication).alertIfErrors()
         }
 
         assertEquals(
@@ -427,7 +427,7 @@ class RoninMedicationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedication.validate(medication, null).alertIfErrors()
+            roninMedication.validate(medication).alertIfErrors()
         }
 
         assertEquals(
@@ -476,7 +476,7 @@ class RoninMedicationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedication.validate(medication, null).alertIfErrors()
+            roninMedication.validate(medication).alertIfErrors()
         }
 
         assertEquals(
@@ -515,7 +515,7 @@ class RoninMedicationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedication.validate(medication, null).alertIfErrors()
+            roninMedication.validate(medication).alertIfErrors()
         }
 
         assertEquals(
@@ -553,7 +553,7 @@ class RoninMedicationTest {
             ingredient = listOf()
         )
 
-        roninMedication.validate(medication, null).alertIfErrors()
+        roninMedication.validate(medication).alertIfErrors()
     }
 
     @Test
@@ -583,7 +583,7 @@ class RoninMedicationTest {
             )
         )
 
-        roninMedication.validate(medication, null).alertIfErrors()
+        roninMedication.validate(medication).alertIfErrors()
     }
 
     @Test
@@ -770,7 +770,7 @@ class RoninMedicationTest {
         assertEquals(medication.batch, transformed.batch)
 
         // validation
-        roninMedication.validate(transformed, null).alertIfErrors()
+        roninMedication.validate(transformed).alertIfErrors()
     }
 
     @Test
@@ -917,7 +917,7 @@ class RoninMedicationTest {
         assertEquals(medication.batch, transformed.batch)
 
         // validation
-        roninMedication.validate(transformed, null).alertIfErrors()
+        roninMedication.validate(transformed).alertIfErrors()
     }
 
     @Test
@@ -996,6 +996,6 @@ class RoninMedicationTest {
             )
         )
 
-        roninMedication.validate(medication, null).alertIfErrors()
+        roninMedication.validate(medication).alertIfErrors()
     }
 }

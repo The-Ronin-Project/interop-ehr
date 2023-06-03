@@ -140,7 +140,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(
@@ -187,7 +187,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(
@@ -233,7 +233,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(
@@ -289,7 +289,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(
@@ -345,7 +345,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(
@@ -395,7 +395,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(
@@ -440,7 +440,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(
@@ -484,7 +484,7 @@ class RoninDocumentReferenceTest {
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
         )
-        roninDocumentReference.validate(documentReference, null).alertIfErrors()
+        roninDocumentReference.validate(documentReference).alertIfErrors()
     }
 
     @Test
@@ -716,7 +716,7 @@ class RoninDocumentReferenceTest {
         assertEquals(documentReference.context, transformed.context)
 
         // validation
-        roninDocumentReference.validate(transformed, null).alertIfErrors()
+        roninDocumentReference.validate(transformed).alertIfErrors()
     }
 
     @Test
@@ -786,7 +786,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(
@@ -838,7 +838,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(
@@ -890,7 +890,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(
@@ -942,7 +942,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(
@@ -985,7 +985,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(
@@ -1031,7 +1031,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(
@@ -1078,7 +1078,7 @@ class RoninDocumentReferenceTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference, null).alertIfErrors()
+            roninDocumentReference.validate(documentReference).alertIfErrors()
         }
 
         assertEquals(

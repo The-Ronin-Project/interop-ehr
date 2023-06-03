@@ -47,9 +47,10 @@ class NormalizationRegistryClient(
     private var registryLastUpdated = LocalDateTime.MIN
 
     /**
+     * Get a concept map from the DataNormalizationRegistry.
      * Returns a [Pair] with the transformed [Coding] as the first and an [Extension] as the second,
      * or null if no such mapping could be found. The [Extension] represents the original value before mapping.
-     * @param tenant the current [Tenant], or null to match all tenants.
+     * @param tenant the [Tenant] this ConceptMap applies to.
      * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
      * @param coding a FHIR [Coding] to be mapped. value and system must not be null.
      * @param profileUrl the URL of an [RCDM](https://supreme-garbanzo-99254d0f.pages.github.io/ig/Ronin-Implementation-Guide-Home-List-Profiles.html)
@@ -74,9 +75,10 @@ class NormalizationRegistryClient(
     }
 
     /**
+     * Get a concept map from the DataNormalizationRegistry whose result matches an enum class.
      * Returns a [Pair] with the transformed [Coding] as the first and an [Extension] as the second,
      * or null if no such mapping could be found. The [Extension] represents the original value before mapping.
-     * @param tenant the current [Tenant], or null to match all tenants.
+     * @param tenant the [Tenant] this ConceptMap applies to
      * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
      * @param coding a FHIR [Coding] to be mapped. value and system must not be null.
      * @param enumClass a class that enumerates the values the caller can expect as return values from this concept map.
@@ -236,6 +238,7 @@ class NormalizationRegistryClient(
         }
 
     /**
+     * Get a value set from the DataNormalizationRegistry.
      * Returns a [List] or null if no such value set could be found.
      * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
      * @param profileUrl URL of an RCDM or FHIR profile

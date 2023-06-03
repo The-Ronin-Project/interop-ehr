@@ -1,6 +1,5 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
-import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
@@ -21,24 +20,17 @@ import java.time.LocalDateTime
 class RoninHeartRate(
     normalizer: Normalizer,
     localizer: Localizer,
-    private val registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient
 ) :
     BaseRoninVitalSign(
         R4ObservationValidator,
         RoninProfile.OBSERVATION_HEART_RATE.value,
         normalizer,
-        localizer
+        localizer,
+        registryClient
     ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
-
-    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCodes: List<Coding> by lazy {
-        registryClient.getRequiredValueSet(
-            "Observation.code",
-            profile
-        )
-    }
 
     // Quantity unit codes - from [USCore Vitals Common](http://hl7.org/fhir/R4/valueset-ucum-vitals-common.html)
     override val validQuantityCodes = listOf("/min")

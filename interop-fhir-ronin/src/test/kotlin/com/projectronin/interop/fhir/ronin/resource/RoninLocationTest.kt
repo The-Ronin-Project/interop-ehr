@@ -93,7 +93,7 @@ class RoninLocationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninLocation.validate(location, null).alertIfErrors()
+            roninLocation.validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -138,7 +138,7 @@ class RoninLocationTest {
             )
         )
 
-        roninLocation.validate(location, null).alertIfErrors()
+        roninLocation.validate(location).alertIfErrors()
     }
 
     @Test
@@ -166,7 +166,7 @@ class RoninLocationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninLocation.validate(location, null).alertIfErrors()
+            roninLocation.validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -210,7 +210,7 @@ class RoninLocationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninLocation.validate(location, null).alertIfErrors()
+            roninLocation.validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -255,7 +255,7 @@ class RoninLocationTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninLocation.validate(location, null).alertIfErrors()
+            roninLocation.validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -292,7 +292,7 @@ class RoninLocationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninLocation.validate(location, null).alertIfErrors()
+            roninLocation.validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -327,7 +327,7 @@ class RoninLocationTest {
             name = "My Office".asFHIR()
         )
 
-        roninLocation.validate(location, null).alertIfErrors()
+        roninLocation.validate(location).alertIfErrors()
     }
 
     @Test
@@ -632,7 +632,7 @@ class RoninLocationTest {
             "Unnamed Location".asFHIR(),
             transformed.name
         )
-        roninLocation.validate(transformed, null).alertIfErrors()
+        roninLocation.validate(transformed).alertIfErrors()
     }
 
     @Test
@@ -667,7 +667,7 @@ class RoninLocationTest {
             "Unnamed Location".asFHIR(),
             transformed.name
         )
-        roninLocation.validate(transformed, null).alertIfErrors()
+        roninLocation.validate(transformed).alertIfErrors()
     }
 
     @Test
@@ -781,7 +781,7 @@ class RoninLocationTest {
             FHIRString("Unnamed Location", nameId, nameExtensions),
             transformed.name
         )
-        roninLocation.validate(transformed, null).alertIfErrors()
+        roninLocation.validate(transformed).alertIfErrors()
     }
 
     @Test
@@ -823,7 +823,7 @@ class RoninLocationTest {
             FHIRString("Unnamed Location", nameId, nameExtensions),
             transformed.name
         )
-        roninLocation.validate(transformed, null).alertIfErrors()
+        roninLocation.validate(transformed).alertIfErrors()
     }
 
     private fun systemExtension(value: String) = Extension(
@@ -875,7 +875,7 @@ class RoninLocationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninLocation.validate(location, null).alertIfErrors()
+            roninLocation.validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -912,7 +912,7 @@ class RoninLocationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninLocation.validate(location, null).alertIfErrors()
+            roninLocation.validate(location).alertIfErrors()
         }
 
         assertEquals(

@@ -42,7 +42,7 @@ class BaseValidatorTest {
 
         val location = mockk<Location>()
 
-        val validation = validator.validate(location, null)
+        val validation = validator.validate(location)
         assertNotNull(validation)
 
         verify { location wasNot Called }
@@ -59,7 +59,7 @@ class BaseValidatorTest {
             every { validate(R4LocationValidator, eq(LocationContext(Location::class))) } returns Validation()
         }
 
-        val validation = validator.validate(location, null)
+        val validation = validator.validate(location)
         assertNotNull(validation)
 
         verify { location.validate(R4LocationValidator, eq(LocationContext(Location::class))) }

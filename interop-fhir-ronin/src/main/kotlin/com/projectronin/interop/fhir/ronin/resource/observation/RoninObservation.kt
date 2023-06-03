@@ -16,8 +16,16 @@ import org.springframework.stereotype.Component
  * [Ronin Model](https://supreme-garbanzo-99254d0f.pages.github.io/ig/Ronin-Implementation-Guide-Home-List-Profiles-Ronin-Observation.html)
  */
 @Component
-class RoninObservation(normalizer: Normalizer, localizer: Localizer) :
-    BaseRoninObservation(R4ObservationValidator, RoninProfile.OBSERVATION.value, normalizer, localizer) {
+class RoninObservation(
+    normalizer: Normalizer,
+    localizer: Localizer
+) :
+    BaseRoninObservation(
+        R4ObservationValidator,
+        RoninProfile.OBSERVATION.value,
+        normalizer,
+        localizer
+    ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 4
 

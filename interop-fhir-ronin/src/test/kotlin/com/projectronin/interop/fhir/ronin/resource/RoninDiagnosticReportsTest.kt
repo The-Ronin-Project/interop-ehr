@@ -48,7 +48,7 @@ class RoninDiagnosticReportsTest {
         every { profile1.validate(dxReport, LocationContext(DiagnosticReport::class)) } returns Validation()
         every { profile2.qualifies(dxReport) } returns false
 
-        roninDiagnosticReports.validate(dxReport, null).alertIfErrors()
+        roninDiagnosticReports.validate(dxReport).alertIfErrors()
     }
 
     @Test
@@ -59,7 +59,7 @@ class RoninDiagnosticReportsTest {
         every { normalizer.normalize(original, tenant) } returns original
 
         val roninDxReport = mockk<DiagnosticReport> {
-            every { id } returns Id("1234")
+            every { id } returns Id("test-1234")
         }
         every { localizer.localize(roninDxReport, tenant) } returns roninDxReport
 

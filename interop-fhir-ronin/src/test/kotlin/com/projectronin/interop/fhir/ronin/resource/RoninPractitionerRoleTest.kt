@@ -74,7 +74,7 @@ class RoninPractitionerRoleTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+            roninPractitionerRole.validate(practitionerRole).alertIfErrors()
         }
 
         assertEquals(
@@ -113,7 +113,7 @@ class RoninPractitionerRoleTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+            roninPractitionerRole.validate(practitionerRole).alertIfErrors()
         }
 
         assertEquals(
@@ -151,7 +151,7 @@ class RoninPractitionerRoleTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+            roninPractitionerRole.validate(practitionerRole).alertIfErrors()
         }
 
         assertEquals(
@@ -193,7 +193,7 @@ class RoninPractitionerRoleTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+            roninPractitionerRole.validate(practitionerRole).alertIfErrors()
         }
 
         assertEquals(
@@ -245,7 +245,7 @@ class RoninPractitionerRoleTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+            roninPractitionerRole.validate(practitionerRole).alertIfErrors()
         }
 
         assertEquals(
@@ -283,7 +283,7 @@ class RoninPractitionerRoleTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+            roninPractitionerRole.validate(practitionerRole).alertIfErrors()
         }
 
         assertEquals(
@@ -319,7 +319,7 @@ class RoninPractitionerRoleTest {
             organization = Reference(reference = "Organization/5678".asFHIR())
         )
 
-        roninPractitionerRole.validate(practitionerRole, null).alertIfErrors()
+        roninPractitionerRole.validate(practitionerRole).alertIfErrors()
     }
 
     @Test

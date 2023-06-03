@@ -112,7 +112,7 @@ class RoninDiagnosticReportLaboratoryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+            roninDiagnosticReport.validate(dxReport).alertIfErrors()
         }
 
         assertEquals(
@@ -191,7 +191,7 @@ class RoninDiagnosticReportLaboratoryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+            roninDiagnosticReport.validate(dxReport).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -241,7 +241,7 @@ class RoninDiagnosticReportLaboratoryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+            roninDiagnosticReport.validate(dxReport).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -291,7 +291,7 @@ class RoninDiagnosticReportLaboratoryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+            roninDiagnosticReport.validate(dxReport).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -336,7 +336,7 @@ class RoninDiagnosticReportLaboratoryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+            roninDiagnosticReport.validate(dxReport).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -391,7 +391,7 @@ class RoninDiagnosticReportLaboratoryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+            roninDiagnosticReport.validate(dxReport).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -445,7 +445,7 @@ class RoninDiagnosticReportLaboratoryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+            roninDiagnosticReport.validate(dxReport).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -519,7 +519,7 @@ class RoninDiagnosticReportLaboratoryTest {
         }
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+            roninDiagnosticReport.validate(dxReport).alertIfErrors()
         }
 
         assertEquals(
@@ -573,7 +573,7 @@ class RoninDiagnosticReportLaboratoryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+            roninDiagnosticReport.validate(dxReport).alertIfErrors()
         }
 
         assertEquals(
@@ -627,7 +627,7 @@ class RoninDiagnosticReportLaboratoryTest {
             )
         )
 
-        roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+        roninDiagnosticReport.validate(dxReport).alertIfErrors()
     }
 
     @Test
@@ -1012,7 +1012,7 @@ class RoninDiagnosticReportLaboratoryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+            roninDiagnosticReport.validate(dxReport).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -1065,7 +1065,7 @@ class RoninDiagnosticReportLaboratoryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport, null).alertIfErrors()
+            roninDiagnosticReport.validate(dxReport).alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +

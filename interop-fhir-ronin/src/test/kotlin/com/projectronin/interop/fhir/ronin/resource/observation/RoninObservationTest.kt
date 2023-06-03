@@ -191,7 +191,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -251,7 +251,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -312,7 +312,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -373,7 +373,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -442,7 +442,7 @@ class RoninObservationTest {
             )
         )
 
-        roninObservation.validate(observation, null).alertIfErrors()
+        roninObservation.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -590,7 +590,7 @@ class RoninObservationTest {
             )
         )
 
-        roninObservation.validate(observation, null).alertIfErrors()
+        roninObservation.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -647,7 +647,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -714,7 +714,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -777,7 +777,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -856,7 +856,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -928,7 +928,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -997,7 +997,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1067,7 +1067,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1136,7 +1136,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1204,7 +1204,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1273,7 +1273,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1347,7 +1347,7 @@ class RoninObservationTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1411,7 +1411,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1477,7 +1477,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1542,7 +1542,7 @@ class RoninObservationTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninObservation.validate(observation, null).alertIfErrors()
+            roninObservation.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1607,6 +1607,6 @@ class RoninObservationTest {
             )
         )
 
-        roninObservation.validate(observation, null).alertIfErrors()
+        roninObservation.validate(observation).alertIfErrors()
     }
 }

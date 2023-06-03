@@ -104,7 +104,7 @@ class RoninCarePlanTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninCarePlan.validate(carePlan, null).alertIfErrors()
+            roninCarePlan.validate(carePlan).alertIfErrors()
         }
 
         assertEquals(
@@ -151,7 +151,7 @@ class RoninCarePlanTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninCarePlan.validate(carePlan, null).alertIfErrors()
+            roninCarePlan.validate(carePlan).alertIfErrors()
         }
 
         assertEquals(
@@ -200,7 +200,7 @@ class RoninCarePlanTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninCarePlan.validate(carePlan, null).alertIfErrors()
+            roninCarePlan.validate(carePlan).alertIfErrors()
         }
 
         assertEquals(
@@ -249,7 +249,7 @@ class RoninCarePlanTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninCarePlan.validate(carePlan, null).alertIfErrors()
+            roninCarePlan.validate(carePlan).alertIfErrors()
         }
 
         assertEquals(
@@ -299,7 +299,7 @@ class RoninCarePlanTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninCarePlan.validate(carePlan, null).alertIfErrors()
+            roninCarePlan.validate(carePlan).alertIfErrors()
         }
 
         assertEquals(
@@ -349,7 +349,7 @@ class RoninCarePlanTest {
             )
         )
 
-        roninCarePlan.validate(carePlan, null).alertIfErrors()
+        roninCarePlan.validate(carePlan).alertIfErrors()
     }
 
     @Test
@@ -950,7 +950,7 @@ class RoninCarePlanTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninCarePlan.validate(carePlan, null).alertIfErrors()
+            roninCarePlan.validate(carePlan).alertIfErrors()
         }
 
         assertEquals(
@@ -1278,7 +1278,7 @@ class RoninCarePlanTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninCarePlan.validate(carePlan, null).alertIfErrors()
+            roninCarePlan.validate(carePlan).alertIfErrors()
         }
 
         assertEquals(
@@ -1329,7 +1329,7 @@ class RoninCarePlanTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninCarePlan.validate(carePlan, null).alertIfErrors()
+            roninCarePlan.validate(carePlan).alertIfErrors()
         }
 
         assertEquals(

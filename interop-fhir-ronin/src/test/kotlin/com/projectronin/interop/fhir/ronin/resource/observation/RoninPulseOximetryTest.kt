@@ -53,10 +53,10 @@ class RoninPulseOximetryTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
-    private val pulseOxCode = Code("59408-5")
-    private val pulseOximetryCoding = listOf(
-        Coding(system = CodeSystem.LOINC.uri, code = pulseOxCode)
-    )
+    private val pulseOximetryCode = Code("59408-5")
+    private val pulseOximetryCoding = Coding(system = CodeSystem.LOINC.uri, code = pulseOximetryCode)
+    private val pulseOximetryCodingList = listOf(pulseOximetryCoding)
+    private val pulseOximetryConcept = CodeableConcept(coding = pulseOximetryCodingList)
     private val flowRateCoding = listOf(
         Coding(system = CodeSystem.LOINC.uri, code = Code("3151-8"))
     )
@@ -64,10 +64,19 @@ class RoninPulseOximetryTest {
         Coding(system = CodeSystem.LOINC.uri, code = Code("3150-0"))
     )
 
+    private val vitalSignsCategoryCode = Code("vital-signs")
+    private val vitalSignsCategoryCoding = Coding(
+        system = CodeSystem.OBSERVATION_CATEGORY.uri,
+        code = vitalSignsCategoryCode
+    )
+    private val vitalSignsCategoryCodingList = listOf(vitalSignsCategoryCoding)
+    private val vitalSignsCategoryConcept = CodeableConcept(coding = vitalSignsCategoryCodingList)
+    private val vitalSignsCategoryConceptList = listOf(vitalSignsCategoryConcept)
+
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_PULSE_OXIMETRY.value)
-        } returns pulseOximetryCoding
+        } returns pulseOximetryCodingList
         every {
             getRequiredValueSet("Observation.component:FlowRate.code", RoninProfile.OBSERVATION_PULSE_OXIMETRY.value)
         } returns flowRateCoding
@@ -77,6 +86,77 @@ class RoninPulseOximetryTest {
                 RoninProfile.OBSERVATION_PULSE_OXIMETRY.value
             )
         } returns concentrationCoding
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.category",
+                vitalSignsCategoryCoding,
+                RoninProfile.OBSERVATION_PULSE_OXIMETRY.value
+            )?.first
+        } returns vitalSignsCategoryCoding
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.category",
+                Coding(
+                    system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                    code = null
+                ),
+                RoninProfile.OBSERVATION_PULSE_OXIMETRY.value
+            )
+        } returns null
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                pulseOximetryCoding,
+                RoninProfile.OBSERVATION_PULSE_OXIMETRY.value
+            )?.first
+        } returns pulseOximetryCoding
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                Coding(
+                    system = Uri("faulty"),
+                    code = pulseOximetryCode
+                ),
+                RoninProfile.OBSERVATION_PULSE_OXIMETRY.value
+            )
+        } returns null
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                Coding(
+                    system = CodeSystem.LOINC.uri,
+                    code = Code("8867-4")
+                ),
+                RoninProfile.OBSERVATION_PULSE_OXIMETRY.value
+            )
+        } returns null
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                Coding(
+                    system = CodeSystem.LOINC.uri,
+                    code = vitalSignsCategoryCode
+                ),
+                RoninProfile.OBSERVATION_PULSE_OXIMETRY.value
+            )
+        } returns null
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                Coding(
+                    system = CodeSystem.LOINC.uri,
+                    code = Code("13245")
+                ),
+                RoninProfile.OBSERVATION_PULSE_OXIMETRY.value
+            )
+        } returns null
     }
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
@@ -85,7 +165,6 @@ class RoninPulseOximetryTest {
         every { localize(any(), tenant) } answers { firstArg() }
     }
     private val roninPulseOximetry = RoninPulseOximetry(normalizer, localizer, normRegistryClient)
-    private val vitalSignsCategory = Code("vital-signs")
 
     @Test
     fun `does not qualify when no category`() {
@@ -111,16 +190,7 @@ class RoninPulseOximetryTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -133,21 +203,12 @@ class RoninPulseOximetryTest {
     }
 
     @Test
-    fun `does not qualify when no coding`() {
+    fun `does not qualify when no code coding`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -160,21 +221,12 @@ class RoninPulseOximetryTest {
     }
 
     @Test
-    fun `does not qualify when coding is present, but no entries match either pulse oximetry or oxygen saturation`() {
+    fun `does not qualify when code coding is present, but no entries match pulse oximetry`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -188,7 +240,7 @@ class RoninPulseOximetryTest {
                     ),
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        code = vitalSignsCategory
+                        code = vitalSignsCategoryCode
                     )
                 )
             )
@@ -198,21 +250,12 @@ class RoninPulseOximetryTest {
     }
 
     @Test
-    fun `does not qualify when wrong system for code`() {
+    fun `does not qualify when wrong system for code coding`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -222,7 +265,7 @@ class RoninPulseOximetryTest {
                 coding = listOf(
                     Coding(
                         system = Uri("faulty"),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             )
@@ -232,21 +275,12 @@ class RoninPulseOximetryTest {
     }
 
     @Test
-    fun `does not qualify when coding code present for oxygen saturation, but not pulse oximetry`() {
+    fun `does not qualify when components are good, with bad code coding code`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -259,6 +293,38 @@ class RoninPulseOximetryTest {
                         code = Code("13245")
                     )
                 )
+            ),
+            component = listOf(
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = flowRateCoding,
+                        text = "Flow Rate".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 110.0),
+                            unit = "L/min".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("L/min")
+                        )
+                    )
+                ),
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = concentrationCoding,
+                        text = "Concentration".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 70.0),
+                            unit = "%".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("%")
+                        )
+                    )
+                )
             )
         )
 
@@ -266,21 +332,12 @@ class RoninPulseOximetryTest {
     }
 
     @Test
-    fun `does not qualify when both coding codes are present, but wrong system for pulse oximetry`() {
+    fun `does not qualify when components are good, with bad code coding system`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -290,7 +347,39 @@ class RoninPulseOximetryTest {
                 coding = listOf(
                     Coding(
                         system = Uri("faulty"),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
+                    )
+                )
+            ),
+            component = listOf(
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = flowRateCoding,
+                        text = "Flow Rate".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 110.0),
+                            unit = "L/min".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("L/min")
+                        )
+                    )
+                ),
+                ObservationComponent(
+                    code = CodeableConcept(
+                        coding = concentrationCoding,
+                        text = "Concentration".asFHIR()
+                    ),
+                    value = DynamicValue(
+                        DynamicValueType.QUANTITY,
+                        Quantity(
+                            value = Decimal(value = 70.0),
+                            unit = "%".asFHIR(),
+                            system = CodeSystem.UCUM.uri,
+                            code = Code("%")
+                        )
                     )
                 )
             )
@@ -305,16 +394,7 @@ class RoninPulseOximetryTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -324,7 +404,7 @@ class RoninPulseOximetryTest {
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             )
@@ -348,20 +428,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -374,7 +445,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -422,16 +493,7 @@ class RoninPulseOximetryTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -476,7 +538,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -517,20 +579,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -543,7 +596,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -586,20 +639,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -611,7 +655,7 @@ class RoninPulseOximetryTest {
             )
         )
 
-        roninPulseOximetry.validate(observation, null).alertIfErrors()
+        roninPulseOximetry.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -645,20 +689,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -704,7 +739,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -745,20 +780,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -794,7 +820,7 @@ class RoninPulseOximetryTest {
             )
         )
 
-        roninPulseOximetry.validate(observation, null).alertIfErrors()
+        roninPulseOximetry.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -828,20 +854,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -893,7 +910,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -934,20 +951,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -991,7 +999,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1032,20 +1040,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1089,7 +1088,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1130,20 +1129,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1188,7 +1178,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1229,20 +1219,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1286,7 +1267,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1327,20 +1308,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1385,7 +1357,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1426,20 +1398,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1485,7 +1448,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1526,20 +1489,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1575,7 +1529,7 @@ class RoninPulseOximetryTest {
             )
         )
 
-        roninPulseOximetry.validate(observation, null).alertIfErrors()
+        roninPulseOximetry.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -1609,20 +1563,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1674,7 +1619,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1715,20 +1660,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1772,7 +1708,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1813,20 +1749,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1870,7 +1797,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1911,20 +1838,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1969,7 +1887,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -2010,20 +1928,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -2067,7 +1976,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -2108,20 +2017,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -2166,7 +2066,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -2207,7 +2107,7 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
@@ -2265,7 +2165,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -2306,20 +2206,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -2360,7 +2251,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -2401,20 +2292,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -2459,7 +2341,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -2496,7 +2378,7 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
@@ -2505,7 +2387,7 @@ class RoninPulseOximetryTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -2554,7 +2436,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -2595,20 +2477,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -2652,7 +2525,7 @@ class RoninPulseOximetryTest {
             )
         )
 
-        roninPulseOximetry.validate(observation, null).alertIfErrors()
+        roninPulseOximetry.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -2676,20 +2549,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -2742,22 +2606,13 @@ class RoninPulseOximetryTest {
             basedOn = listOf(Reference(reference = "CarePlan/1234".asFHIR())),
             partOf = listOf(Reference(reference = "MedicationStatement/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()
@@ -2886,16 +2741,7 @@ class RoninPulseOximetryTest {
         assertEquals(listOf(Reference(reference = "MedicationStatement/1234".asFHIR())), transformed.partOf)
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
-            listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            vitalSignsCategoryConceptList,
             transformed.category
         )
         assertEquals(
@@ -2904,7 +2750,7 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()
@@ -3004,21 +2850,12 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -3074,16 +2911,7 @@ class RoninPulseOximetryTest {
         assertEquals(listOf<Reference>(), transformed.partOf)
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
-            listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            vitalSignsCategoryConceptList,
             transformed.category
         )
         assertEquals(
@@ -3092,7 +2920,7 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()
@@ -3143,20 +2971,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -3212,21 +3031,12 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -3240,7 +3050,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3282,21 +3092,12 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -3310,7 +3111,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3352,21 +3153,12 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 ),
                 text = "Pulse Oximetry".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -3380,7 +3172,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3422,20 +3214,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -3485,7 +3268,7 @@ class RoninPulseOximetryTest {
             )
         )
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3526,20 +3309,11 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -3589,7 +3363,7 @@ class RoninPulseOximetryTest {
             )
         )
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3630,7 +3404,7 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
@@ -3639,7 +3413,7 @@ class RoninPulseOximetryTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -3696,7 +3470,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3737,7 +3511,7 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
@@ -3746,7 +3520,7 @@ class RoninPulseOximetryTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -3803,7 +3577,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3844,7 +3618,7 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
@@ -3853,7 +3627,7 @@ class RoninPulseOximetryTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -3911,7 +3685,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3952,7 +3726,7 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
@@ -3961,7 +3735,7 @@ class RoninPulseOximetryTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -4018,7 +3792,7 @@ class RoninPulseOximetryTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -4059,7 +3833,7 @@ class RoninPulseOximetryTest {
                     Coding(
                         system = CodeSystem.LOINC.uri,
                         display = "Pulse Oximetry".asFHIR(),
-                        code = pulseOxCode
+                        code = pulseOximetryCode
                     )
                 )
             ),
@@ -4068,7 +3842,7 @@ class RoninPulseOximetryTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -4125,7 +3899,7 @@ class RoninPulseOximetryTest {
             )
         )
         val exception = assertThrows<IllegalArgumentException> {
-            roninPulseOximetry.validate(observation, null).alertIfErrors()
+            roninPulseOximetry.validate(observation).alertIfErrors()
         }
 
         assertEquals(

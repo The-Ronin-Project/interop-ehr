@@ -73,7 +73,7 @@ class RoninPractitionerTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPractitioner.validate(practitioner, null).alertIfErrors()
+            roninPractitioner.validate(practitioner).alertIfErrors()
         }
 
         assertEquals(
@@ -111,7 +111,7 @@ class RoninPractitionerTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPractitioner.validate(practitioner, null).alertIfErrors()
+            roninPractitioner.validate(practitioner).alertIfErrors()
         }
 
         assertEquals(
@@ -147,7 +147,7 @@ class RoninPractitionerTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPractitioner.validate(practitioner, null).alertIfErrors()
+            roninPractitioner.validate(practitioner).alertIfErrors()
         }
 
         assertEquals(
@@ -187,7 +187,7 @@ class RoninPractitionerTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPractitioner.validate(practitioner, null).alertIfErrors()
+            roninPractitioner.validate(practitioner).alertIfErrors()
         }
 
         assertEquals(
@@ -238,7 +238,7 @@ class RoninPractitionerTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPractitioner.validate(practitioner, null).alertIfErrors()
+            roninPractitioner.validate(practitioner).alertIfErrors()
         }
 
         assertEquals(
@@ -275,7 +275,7 @@ class RoninPractitionerTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPractitioner.validate(practitioner, null).alertIfErrors()
+            roninPractitioner.validate(practitioner).alertIfErrors()
         }
 
         assertEquals(
@@ -310,7 +310,7 @@ class RoninPractitionerTest {
             name = listOf(HumanName(family = "Doe".asFHIR()))
         )
 
-        roninPractitioner.validate(practitioner, null).alertIfErrors()
+        roninPractitioner.validate(practitioner).alertIfErrors()
     }
 
     @Test

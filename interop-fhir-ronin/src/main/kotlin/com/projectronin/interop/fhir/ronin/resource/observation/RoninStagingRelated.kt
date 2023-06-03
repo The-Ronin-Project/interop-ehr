@@ -36,12 +36,14 @@ class RoninStagingRelated(
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 1
 
+    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
     override val qualifyingCodes: List<Coding> by lazy {
         registryClient.getRequiredValueSet(
             "Observation.code",
-            RoninProfile.OBSERVATION_STAGING_RELATED.value
+            profile
         )
     }
+
     override val validDerivedFromValues = listOf(
         "DocumentReference",
         "ImagingStudy",
@@ -64,7 +66,6 @@ class RoninStagingRelated(
         listOf("Patient", "Practitioner", "PractitionerRole", "RelatedPerson", "Organization", "CareTeam")
 
     private val requiredIdError = RequiredFieldError(Observation::id)
-    private val requiredCategoryError = RequiredFieldError(Observation::category)
     private val singleObservationCodeError = FHIRError(
         code = "RONIN_STAGING_OBS_001",
         severity = ValidationIssueSeverity.ERROR,
@@ -97,6 +98,7 @@ class RoninStagingRelated(
                 parentContext
             )
         }
+        // category non-null - validated by R4ObservationValidator
     }
 
     override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {

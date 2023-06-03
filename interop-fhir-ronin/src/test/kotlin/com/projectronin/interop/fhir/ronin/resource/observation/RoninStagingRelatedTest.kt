@@ -60,13 +60,50 @@ class RoninStagingRelatedTest {
     }
 
     private val stagingRelatedCode = Code("some-code")
-    private val stagingRelatedCoding = listOf(Coding(system = Uri("some-system-uri"), code = stagingRelatedCode))
+    private val stagingRelatedCoding = Coding(
+        system = Uri("some-system-uri"),
+        code = stagingRelatedCode
+    )
+    private val stagingRelatedCodingList = listOf(stagingRelatedCoding)
+    private val stagingRelatedConcept = CodeableConcept(coding = stagingRelatedCodingList)
+    private val stagingRelatedConceptList = listOf(stagingRelatedConcept)
+
+    private val stagingRelatedCodingDisplay = Coding(
+        system = Uri("some-system-uri"),
+        code = stagingRelatedCode,
+        display = "some-display".asFHIR()
+    )
+    private val stagingRelatedCodingDisplayList = listOf(stagingRelatedCodingDisplay)
+    private val stagingRelatedConceptDisplay = CodeableConcept(coding = stagingRelatedCodingDisplayList)
+
+    private val vitalSignsCategoryCode = Code("vital-signs")
+    private val vitalSignsCategoryCoding = Coding(
+        system = CodeSystem.OBSERVATION_CATEGORY.uri,
+        code = vitalSignsCategoryCode
+    )
 
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_STAGING_RELATED.value)
-        } returns stagingRelatedCoding
+        } returns stagingRelatedCodingDisplayList
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.category",
+                vitalSignsCategoryCoding,
+                RoninProfile.OBSERVATION_BODY_WEIGHT.value
+            )?.first
+        } returns vitalSignsCategoryCoding
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                stagingRelatedCodingDisplay,
+                RoninProfile.OBSERVATION_STAGING_RELATED.value
+            )?.first
+        } returns stagingRelatedCodingDisplay
     }
+
     private val roninStagingRelated = RoninStagingRelated(normalizer, localizer, normRegistryClient)
 
     @Test
@@ -80,16 +117,7 @@ class RoninStagingRelatedTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
-            code = CodeableConcept(
-                text = "fake text".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            )
+            code = stagingRelatedConceptDisplay
         )
 
         assertFalse(roninStagingRelated.qualifies(observation))
@@ -106,16 +134,7 @@ class RoninStagingRelatedTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
-            code = CodeableConcept(
-                text = "fake text".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            )
+            code = stagingRelatedConceptDisplay
         )
 
         assertFalse(roninStagingRelated.qualifies(observation))
@@ -126,15 +145,7 @@ class RoninStagingRelatedTest {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-uri")
-                        )
-                    )
-                )
-            ),
+            category = stagingRelatedConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -155,34 +166,17 @@ class RoninStagingRelatedTest {
                 source = Uri("source")
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-uri")
-                        )
-                    )
-                )
-            ),
+            category = stagingRelatedConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
-            code = CodeableConcept(
-                text = "fake text".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            )
+            code = stagingRelatedConceptDisplay
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation, null).alertIfErrors()
+            roninStagingRelated.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -226,20 +220,11 @@ class RoninStagingRelatedTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
-            code = CodeableConcept(
-                text = "fake text".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            )
+            code = stagingRelatedConceptDisplay
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation, null).alertIfErrors()
+            roninStagingRelated.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -281,20 +266,11 @@ class RoninStagingRelatedTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
-            code = CodeableConcept(
-                text = "fake text".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            )
+            code = stagingRelatedConceptDisplay
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation, null).alertIfErrors()
+            roninStagingRelated.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -330,15 +306,7 @@ class RoninStagingRelatedTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-uri")
-                        )
-                    )
-                )
-            ),
+            category = stagingRelatedConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -348,7 +316,7 @@ class RoninStagingRelatedTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation, null).alertIfErrors()
+            roninStagingRelated.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -418,7 +386,7 @@ class RoninStagingRelatedTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation, null).alertIfErrors()
+            roninStagingRelated.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -454,15 +422,7 @@ class RoninStagingRelatedTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-uri")
-                        )
-                    )
-                )
-            ),
+            category = stagingRelatedConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -474,7 +434,7 @@ class RoninStagingRelatedTest {
             )
         )
         val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation, null).alertIfErrors()
+            roninStagingRelated.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -503,15 +463,7 @@ class RoninStagingRelatedTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-uri")
-                        )
-                    )
-                )
-            ),
+            category = stagingRelatedConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -548,30 +500,13 @@ class RoninStagingRelatedTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-uri")
-                        )
-                    )
-                )
-            ),
+            category = stagingRelatedConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
-            code = CodeableConcept(
-                text = "fake text".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            )
+            code = stagingRelatedConceptDisplay
         )
 
         val (transformed, _) = roninStagingRelated.transform(observation, tenant)
@@ -600,15 +535,7 @@ class RoninStagingRelatedTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-uri")
-                        )
-                    )
-                )
-            ),
+            category = stagingRelatedConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -645,25 +572,8 @@ class RoninStagingRelatedTest {
             basedOn = listOf(Reference(reference = "ServiceRequest/1234".asFHIR())),
             partOf = listOf(Reference(reference = "ImagingStudy/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-uri")
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(
-                text = "fake text".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            ),
+            category = stagingRelatedConceptList,
+            code = stagingRelatedConceptDisplay,
             subject = localizeReferenceTest(mockReference), // check that it transforms
             focus = listOf(Reference(display = "focus".asFHIR())),
             encounter = Reference(reference = "Encounter/1234".asFHIR()),
@@ -725,16 +635,7 @@ class RoninStagingRelatedTest {
                     url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
                     value = DynamicValue(
                         DynamicValueType.CODEABLE_CONCEPT,
-                        CodeableConcept(
-                            text = "fake text".asFHIR(),
-                            coding = listOf(
-                                Coding(
-                                    code = Code("some-code"),
-                                    display = "some-display".asFHIR(),
-                                    system = Uri("some-system-uri")
-                                )
-                            )
-                        )
+                        stagingRelatedConceptDisplay
                     )
                 )
             ),
@@ -774,28 +675,11 @@ class RoninStagingRelatedTest {
         assertEquals(listOf(Reference(reference = "ImagingStudy/1234".asFHIR())), transformed.partOf)
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
-            listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-uri")
-                        )
-                    )
-                )
-            ),
+            stagingRelatedConceptList,
             transformed.category
         )
         assertEquals(
-            CodeableConcept(
-                text = "fake text".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            ),
+            stagingRelatedConceptDisplay,
             transformed.code
         )
         assertEquals(
@@ -1113,7 +997,7 @@ class RoninStagingRelatedTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation, null).alertIfErrors()
+            roninStagingRelated.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1178,7 +1062,7 @@ class RoninStagingRelatedTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation, null).alertIfErrors()
+            roninStagingRelated.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1240,7 +1124,7 @@ class RoninStagingRelatedTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation, null).alertIfErrors()
+            roninStagingRelated.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1302,7 +1186,7 @@ class RoninStagingRelatedTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation, null).alertIfErrors()
+            roninStagingRelated.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1362,7 +1246,7 @@ class RoninStagingRelatedTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation, null).alertIfErrors()
+            roninStagingRelated.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1425,6 +1309,6 @@ class RoninStagingRelatedTest {
             performer = listOf(Reference(reference = "Patient/1234".asFHIR()))
         )
 
-        roninStagingRelated.validate(observation, null).alertIfErrors()
+        roninStagingRelated.validate(observation).alertIfErrors()
     }
 }

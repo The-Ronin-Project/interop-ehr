@@ -131,7 +131,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -171,7 +171,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -214,7 +214,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -253,7 +253,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -297,7 +297,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -340,7 +340,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -384,7 +384,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -427,7 +427,7 @@ class RoninPatientTest {
             birthDate = Date("1975-07-05")
         )
 
-        roninPatient.validate(patient, null).alertIfErrors()
+        roninPatient.validate(patient).alertIfErrors()
     }
 
     @Test
@@ -462,7 +462,7 @@ class RoninPatientTest {
             birthDate = Date("1975-07-05")
         )
 
-        roninPatient.validate(patient, null).alertIfErrors()
+        roninPatient.validate(patient).alertIfErrors()
     }
 
     @Test
@@ -497,7 +497,7 @@ class RoninPatientTest {
             birthDate = Date("1975-07-05")
         )
 
-        roninPatient.validate(patient, null).alertIfErrors()
+        roninPatient.validate(patient).alertIfErrors()
     }
 
     @Test
@@ -542,7 +542,7 @@ class RoninPatientTest {
             birthDate = Date("1975-07-05")
         )
 
-        roninPatient.validate(patient, null).alertIfErrors()
+        roninPatient.validate(patient).alertIfErrors()
     }
 
     @Test
@@ -589,7 +589,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -633,7 +633,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -678,7 +678,7 @@ class RoninPatientTest {
             birthDate = Date("1975-07-05")
         )
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -722,7 +722,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -766,7 +766,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -810,7 +810,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -862,7 +862,7 @@ class RoninPatientTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -906,7 +906,7 @@ class RoninPatientTest {
             birthDate = Date("1975-07-05")
         )
 
-        roninPatient.validate(patient, null).alertIfErrors()
+        roninPatient.validate(patient).alertIfErrors()
     }
 
     @Test
@@ -1287,7 +1287,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -1342,7 +1342,7 @@ class RoninPatientTest {
             birthDate = Date("1975-07-05")
         )
 
-        roninPatient.validate(patient, null).alertIfErrors()
+        roninPatient.validate(patient).alertIfErrors()
     }
 
     @Test
@@ -1474,7 +1474,7 @@ class RoninPatientTest {
             birthDate = Date("1975-07-05")
         )
 
-        roninPatient.validate(patient, null).alertIfErrors()
+        roninPatient.validate(patient).alertIfErrors()
     }
 
     @Test
@@ -1514,7 +1514,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(
@@ -1557,7 +1557,7 @@ class RoninPatientTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninPatient.validate(patient, null).alertIfErrors()
+            roninPatient.validate(patient).alertIfErrors()
         }
 
         assertEquals(

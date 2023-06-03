@@ -97,7 +97,7 @@ class RoninMedicationRequestTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
         }
 
         assertEquals(
@@ -142,7 +142,7 @@ class RoninMedicationRequestTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
         }
 
         assertEquals(
@@ -200,7 +200,7 @@ class RoninMedicationRequestTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
         }
 
         assertEquals(
@@ -243,7 +243,7 @@ class RoninMedicationRequestTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
         }
 
         assertEquals(
@@ -284,7 +284,7 @@ class RoninMedicationRequestTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
         }
 
         assertEquals(
@@ -327,7 +327,7 @@ class RoninMedicationRequestTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
         }
 
         assertEquals(
@@ -370,7 +370,7 @@ class RoninMedicationRequestTest {
             requester = Reference(reference = "Practitioner/1234".asFHIR())
         )
 
-        roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+        roninMedicationRequest.validate(medicationRequest).alertIfErrors()
     }
 
     @Test
@@ -680,7 +680,7 @@ class RoninMedicationRequestTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
         }
 
         assertEquals(
@@ -723,7 +723,7 @@ class RoninMedicationRequestTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
         }
 
         assertEquals(
@@ -763,7 +763,7 @@ class RoninMedicationRequestTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
         }
 
         assertEquals(
@@ -806,7 +806,7 @@ class RoninMedicationRequestTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
         }
 
         assertEquals(
@@ -849,7 +849,7 @@ class RoninMedicationRequestTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
         }
 
         assertEquals(
@@ -893,7 +893,7 @@ class RoninMedicationRequestTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
         }
 
         assertEquals(
@@ -935,7 +935,7 @@ class RoninMedicationRequestTest {
             priority = Code("bad")
         )
         val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest, null).alertIfErrors()
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
         }
 
         assertEquals(

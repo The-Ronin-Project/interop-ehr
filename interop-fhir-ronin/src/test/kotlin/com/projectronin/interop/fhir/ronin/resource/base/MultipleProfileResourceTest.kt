@@ -113,7 +113,7 @@ class MultipleProfileResourceTest {
         val location = mockk<Location>()
 
         every { testProfile1.qualifies(location) } returns true
-        every { testProfile1.validate(location, eq(LocationContext(Location::class))) } returns Validation()
+        every { testProfile1.validate(location, LocationContext(Location::class)) } returns Validation()
 
         every { testProfile2.qualifies(location) } returns false
         every { testProfile3.qualifies(location) } returns false
@@ -150,7 +150,6 @@ class MultipleProfileResourceTest {
         val location = Location(id = Id("1234"))
         val transformedLocation = Location(id = Id("test-1234"))
 
-        every { testProfile1.qualifies(location) } returns true
         every {
             testProfile1.transformInternal(
                 location,
@@ -159,8 +158,9 @@ class MultipleProfileResourceTest {
             )
         } returns Pair(transformedLocation, Validation())
 
+        every { testProfile1.qualifies(location) } returns true
         every { testProfile1.qualifies(transformedLocation) } returns true
-        every { testProfile1.validate(transformedLocation, eq(LocationContext(Location::class))) } returns Validation()
+        every { testProfile1.validate(transformedLocation, LocationContext(Location::class)) } returns Validation()
 
         every { testProfile2.qualifies(location) } returns false
         every { testProfile2.qualifies(transformedLocation) } returns false

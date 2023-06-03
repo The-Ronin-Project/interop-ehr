@@ -29,7 +29,11 @@ class RoninConditionsTest {
 
     @Test
     fun `always qualifies`() {
-        assertTrue(roninConditions.qualifies(Condition(subject = Reference(display = "reference".asFHIR()))))
+        assertTrue(
+            roninConditions.qualifies(
+                Condition(subject = Reference(display = "reference".asFHIR()))
+            )
+        )
     }
 
     @Test
@@ -40,7 +44,7 @@ class RoninConditionsTest {
         every { profile1.validate(condition, LocationContext(Condition::class)) } returns Validation()
         every { profile2.qualifies(condition) } returns false
 
-        roninConditions.validate(condition, null).alertIfErrors()
+        roninConditions.validate(condition).alertIfErrors()
     }
 
     @Test
@@ -51,7 +55,7 @@ class RoninConditionsTest {
         every { normalizer.normalize(original, tenant) } returns original
 
         val roninCondition = mockk<Condition> {
-            every { id } returns Id("1234")
+            every { id } returns Id("test-1234")
         }
         every { localizer.localize(roninCondition, tenant) } returns roninCondition
 

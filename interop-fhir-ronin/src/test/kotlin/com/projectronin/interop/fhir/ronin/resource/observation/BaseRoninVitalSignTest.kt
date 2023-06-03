@@ -21,6 +21,7 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.util.asCode
@@ -46,8 +47,20 @@ class BaseRoninVitalSignTest {
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
-    private val roninVitalSign = RoninBodyHeight(normalizer, localizer)
     private val bodyHeightCode = Code("8302-2")
+    private val bodyHeightCoding = listOf(
+        Coding(
+            system = CodeSystem.LOINC.uri,
+            display = "Body Height".asFHIR(),
+            code = bodyHeightCode
+        )
+    )
+    private val normRegistryClient = mockk<NormalizationRegistryClient> {
+        every {
+            getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_HEIGHT.value)
+        } returns bodyHeightCoding
+    }
+    private val roninVitalSign = RoninBodyHeight(normalizer, localizer, normRegistryClient)
 
     @Test
     fun `validate fails if no vital signs category`() {
@@ -76,13 +89,7 @@ class BaseRoninVitalSignTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyHeightCode
-                    )
-                )
+                coding = bodyHeightCoding
             ),
             category = listOf(
                 CodeableConcept(
@@ -152,13 +159,7 @@ class BaseRoninVitalSignTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyHeightCode
-                    )
-                )
+                coding = bodyHeightCoding
             ),
             category = listOf(
                 CodeableConcept(
@@ -190,7 +191,7 @@ class BaseRoninVitalSignTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninVitalSign.validate(observation, null).alertIfErrors()
+            roninVitalSign.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -228,13 +229,7 @@ class BaseRoninVitalSignTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyHeightCode
-                    )
-                )
+                coding = bodyHeightCoding
             ),
             category = listOf(
                 CodeableConcept(
@@ -275,7 +270,7 @@ class BaseRoninVitalSignTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninVitalSign.validate(observation, null).alertIfErrors()
+            roninVitalSign.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -314,13 +309,7 @@ class BaseRoninVitalSignTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyHeightCode
-                    )
-                )
+                coding = bodyHeightCoding
             ),
             category = listOf(
                 CodeableConcept(
@@ -352,7 +341,7 @@ class BaseRoninVitalSignTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninVitalSign.validate(observation, null).alertIfErrors()
+            roninVitalSign.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -426,7 +415,7 @@ class BaseRoninVitalSignTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninVitalSign.validate(observation, null).alertIfErrors()
+            roninVitalSign.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -464,13 +453,7 @@ class BaseRoninVitalSignTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyHeightCode
-                    )
-                )
+                coding = bodyHeightCoding
             ),
             category = listOf(
                 CodeableConcept(
@@ -501,7 +484,7 @@ class BaseRoninVitalSignTest {
             )
         )
 
-        roninVitalSign.validate(observation, null).alertIfErrors()
+        roninVitalSign.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -531,13 +514,7 @@ class BaseRoninVitalSignTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyHeightCode
-                    )
-                )
+                coding = bodyHeightCoding
             ),
             category = listOf(
                 CodeableConcept(
@@ -568,7 +545,7 @@ class BaseRoninVitalSignTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninVitalSign.validate(observation, null).alertIfErrors()
+            roninVitalSign.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -605,13 +582,7 @@ class BaseRoninVitalSignTest {
                 )
             ),
             code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyHeightCode
-                    )
-                )
+                coding = bodyHeightCoding
             ),
             category = listOf(
                 CodeableConcept(
@@ -643,7 +614,7 @@ class BaseRoninVitalSignTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninVitalSign.validate(observation, null).alertIfErrors()
+            roninVitalSign.validate(observation).alertIfErrors()
         }
 
         assertEquals(

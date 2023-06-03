@@ -103,7 +103,7 @@ class RoninAppointmentTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninAppointment.validate(appointment, null).alertIfErrors()
+            roninAppointment.validate(appointment).alertIfErrors()
         }
 
         assertEquals(
@@ -157,7 +157,7 @@ class RoninAppointmentTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninAppointment.validate(appointment, null).alertIfErrors()
+            roninAppointment.validate(appointment).alertIfErrors()
         }
 
         assertEquals(
@@ -201,7 +201,7 @@ class RoninAppointmentTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninAppointment.validate(appointment, null).alertIfErrors()
+            roninAppointment.validate(appointment).alertIfErrors()
         }
 
         assertEquals(
@@ -243,7 +243,7 @@ class RoninAppointmentTest {
             )
         )
 
-        roninAppointment.validate(appointment, null).alertIfErrors()
+        roninAppointment.validate(appointment).alertIfErrors()
     }
 
     @Test

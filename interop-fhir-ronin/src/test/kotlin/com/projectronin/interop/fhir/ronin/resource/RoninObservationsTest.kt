@@ -109,7 +109,7 @@ class RoninObservationsTest {
         every { laboratoryResult.qualifies(observation) } returns false
         every { stagingRelated.qualifies(observation) } returns false
 
-        roninObservations.validate(observation, null).alertIfErrors()
+        roninObservations.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -120,7 +120,7 @@ class RoninObservationsTest {
         every { normalizer.normalize(original, tenant) } returns original
 
         val roninObservation = mockk<Observation> {
-            every { id } returns Id("1234")
+            every { id } returns Id("test-1234")
         }
         every { localizer.localize(roninObservation, tenant) } returns roninObservation
 
@@ -130,6 +130,7 @@ class RoninObservationsTest {
             roninObservation,
             Validation()
         )
+
         every { bodyMassIndex.qualifies(original) } returns false
         every { bodySurfaceArea.qualifies(original) } returns false
         every { bodyTemperature.qualifies(original) } returns false

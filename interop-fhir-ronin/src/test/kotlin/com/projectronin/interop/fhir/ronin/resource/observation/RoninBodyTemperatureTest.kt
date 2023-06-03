@@ -54,12 +54,74 @@ class RoninBodyTemperatureTest {
         every { mnemonic } returns "test"
     }
     private val bodyTemperatureCode = Code("8310-5")
-    private val bodyTemperatureCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = bodyTemperatureCode))
+    private val bodyTemperatureCoding = Coding(system = CodeSystem.LOINC.uri, code = bodyTemperatureCode)
+    private val bodyTemperatureCodingList = listOf(bodyTemperatureCoding)
+    private val bodyTemperatureConcept = CodeableConcept(coding = bodyTemperatureCodingList)
+
+    private val vitalSignsCategoryCode = Code("vital-signs")
+    private val vitalSignsCategoryCoding = Coding(
+        system = CodeSystem.OBSERVATION_CATEGORY.uri,
+        code = vitalSignsCategoryCode
+    )
+    private val vitalSignsCategoryCodingList = listOf(vitalSignsCategoryCoding)
+    private val vitalSignsCategoryConcept = CodeableConcept(coding = vitalSignsCategoryCodingList)
+    private val vitalSignsCategoryConceptList = listOf(vitalSignsCategoryConcept)
+
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_TEMPERATURE.value)
+        } returns bodyTemperatureCodingList
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.category",
+                vitalSignsCategoryCoding,
+                RoninProfile.OBSERVATION_BODY_TEMPERATURE.value
+            )?.first
+        } returns vitalSignsCategoryCoding
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.category",
+                Coding(
+                    system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                    code = null
+                ),
+                RoninProfile.OBSERVATION_BODY_TEMPERATURE.value
+            )
+        } returns null
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                bodyTemperatureCoding,
+                RoninProfile.OBSERVATION_BODY_TEMPERATURE.value
+            )?.first
         } returns bodyTemperatureCoding
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                Coding(
+                    system = CodeSystem.LOINC.uri,
+                    code = Code("1234")
+                ),
+                RoninProfile.OBSERVATION_BODY_TEMPERATURE.value
+            )
+        } returns null
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                Coding(
+                    system = CodeSystem.UCUM.uri,
+                    code = bodyTemperatureCode
+                ),
+                RoninProfile.OBSERVATION_BODY_TEMPERATURE.value
+            )
+        } returns null
     }
+
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
     }
@@ -67,7 +129,6 @@ class RoninBodyTemperatureTest {
         every { localize(any(), tenant) } answers { firstArg() }
     }
     private val roninBodyTemperature = RoninBodyTemperature(normalizer, localizer, normRegistryClient)
-    private val vitalSignsCategory = Code("vital-signs")
 
     @Test
     fun `does not qualify when no category`() {
@@ -93,16 +154,7 @@ class RoninBodyTemperatureTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -115,21 +167,12 @@ class RoninBodyTemperatureTest {
     }
 
     @Test
-    fun `does not qualify when no coding`() {
+    fun `does not qualify when no code coding`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -142,21 +185,12 @@ class RoninBodyTemperatureTest {
     }
 
     @Test
-    fun `does not qualify when coding code not for body temperature`() {
+    fun `does not qualify when code coding code not for body temperature`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -169,21 +203,12 @@ class RoninBodyTemperatureTest {
     }
 
     @Test
-    fun `does not qualify when coding code is for body temperature but wrong system`() {
+    fun `does not qualify when code coding code is for body temperature but wrong system`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -208,32 +233,17 @@ class RoninBodyTemperatureTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = bodyTemperatureCode
-                    )
-                )
-            )
+            code = bodyTemperatureConcept
         )
 
-        assertTrue(roninBodyTemperature.qualifies(observation))
+        val qualified = roninBodyTemperature.qualifies(observation)
+        assertTrue(qualified)
     }
 
     @Test
@@ -255,16 +265,7 @@ class RoninBodyTemperatureTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -277,7 +278,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -325,16 +326,7 @@ class RoninBodyTemperatureTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -347,7 +339,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -392,16 +384,7 @@ class RoninBodyTemperatureTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -422,7 +405,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -467,16 +450,7 @@ class RoninBodyTemperatureTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -497,7 +471,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -542,16 +516,7 @@ class RoninBodyTemperatureTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -573,7 +538,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -618,16 +583,7 @@ class RoninBodyTemperatureTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -648,7 +604,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -693,16 +649,7 @@ class RoninBodyTemperatureTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -724,7 +671,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -800,7 +747,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -846,16 +793,7 @@ class RoninBodyTemperatureTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -873,7 +811,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -918,16 +856,7 @@ class RoninBodyTemperatureTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -949,7 +878,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -995,7 +924,7 @@ class RoninBodyTemperatureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -1021,7 +950,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1066,16 +995,7 @@ class RoninBodyTemperatureTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1096,7 +1016,7 @@ class RoninBodyTemperatureTest {
             )
         )
 
-        roninBodyTemperature.validate(observation, null).alertIfErrors()
+        roninBodyTemperature.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -1115,24 +1035,8 @@ class RoninBodyTemperatureTest {
                     value = "test".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = bodyTemperatureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            code = bodyTemperatureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1185,16 +1089,7 @@ class RoninBodyTemperatureTest {
             basedOn = listOf(Reference(reference = "CarePlan/1234".asFHIR())),
             partOf = listOf(Reference(reference = "MedicationStatement/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -1307,16 +1202,7 @@ class RoninBodyTemperatureTest {
         assertEquals(listOf(Reference(reference = "MedicationStatement/1234".asFHIR())), transformed.partOf)
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
-            listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            vitalSignsCategoryConceptList,
             transformed.category
         )
         assertEquals(
@@ -1406,16 +1292,7 @@ class RoninBodyTemperatureTest {
                 ),
                 text = "Body Temp".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = localizeReferenceTest(mockReference), // check that it transforms
             effective = DynamicValue(
@@ -1464,16 +1341,7 @@ class RoninBodyTemperatureTest {
         assertEquals(listOf<Reference>(), transformed.partOf)
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
-            listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            vitalSignsCategoryConceptList,
             transformed.category
         )
         assertEquals(
@@ -1537,16 +1405,7 @@ class RoninBodyTemperatureTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -1607,16 +1466,7 @@ class RoninBodyTemperatureTest {
                 ),
                 text = "Body Temp".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -1630,7 +1480,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1677,16 +1527,7 @@ class RoninBodyTemperatureTest {
                 ),
                 text = "Body Temp".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -1700,7 +1541,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1747,16 +1588,7 @@ class RoninBodyTemperatureTest {
                 ),
                 text = "Body Temp".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -1770,7 +1602,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1817,16 +1649,7 @@ class RoninBodyTemperatureTest {
                 ),
                 text = "Body Temp".asFHIR()
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -1840,7 +1663,7 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation, null).alertIfErrors()
+            roninBodyTemperature.validate(observation).alertIfErrors()
         }
 
         assertEquals(

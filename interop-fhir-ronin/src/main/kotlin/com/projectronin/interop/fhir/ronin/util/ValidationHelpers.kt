@@ -108,7 +108,7 @@ fun List<CodeableConcept>?.validateCodeInValueSet(
 
 /**
  * Check whether any CodeableConcept within a list of CodeableConcept
- * contains a Coding that matches a Coding from the input [qualifyingList] of Coding
+ * contains a Coding that matches a Coding from the input [qualifyList] of Coding
  */
 fun List<CodeableConcept>?.qualifiesForValueSet(qualifyList: List<Coding>): Boolean {
     this?.let { conceptList ->
@@ -120,7 +120,7 @@ fun List<CodeableConcept>?.qualifiesForValueSet(qualifyList: List<Coding>): Bool
 }
 
 /**
- * Check whether a CodeableConcept contains a Coding that matches a Coding from the input [qualifyingList] of Coding
+ * Check whether a CodeableConcept contains a Coding that matches a Coding from the input [qualifyList] of Coding
  */
 fun CodeableConcept?.qualifiesForValueSet(qualifyList: List<Coding>): Boolean {
     this?.let { concept ->

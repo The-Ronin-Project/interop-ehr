@@ -9,6 +9,7 @@ import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -21,12 +22,17 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
 @Component
-class RoninBodyWeight(normalizer: Normalizer, localizer: Localizer) :
+class RoninBodyWeight(
+    normalizer: Normalizer,
+    localizer: Localizer,
+    registryClient: NormalizationRegistryClient
+) :
     BaseRoninVitalSign(
         R4ObservationValidator,
         RoninProfile.OBSERVATION_BODY_WEIGHT.value,
         normalizer,
-        localizer
+        localizer,
+        registryClient
     ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2

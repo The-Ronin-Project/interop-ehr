@@ -29,6 +29,8 @@ abstract class USCoreBasedProfile<T : Resource<T>>(
 
     /**
      * Validates both Ronin and USCore against their respective rules.
+     * Supply [tenant] for a MultipleProfileResource in the RCDM model
+     * (Observation, Condition, DiagnosticReport...) otherwise omit [tenant].
      */
     override fun validate(element: T, parentContext: LocationContext, validation: Validation) {
         validateRonin(element, parentContext, validation)

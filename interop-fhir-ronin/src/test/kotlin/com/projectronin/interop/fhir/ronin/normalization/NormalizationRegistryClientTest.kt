@@ -402,7 +402,6 @@ class NormalizationRegistryClientTest {
                 }
             )
         }
-
         val mockkSet2 = mockk<ValueSet> {
             every { expansion?.contains } returns listOf(
                 mockk {

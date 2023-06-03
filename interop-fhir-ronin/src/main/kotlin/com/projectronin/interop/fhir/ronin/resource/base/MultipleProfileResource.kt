@@ -11,7 +11,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import java.time.LocalDateTime
 
 /**
- * Base class for supporting resources with multiple profiles.
+ * Base class for supporting resources with multiple profiles. Ex: RoninObservations, RoninConditions.
  *
  * When determining the correct profile to use with a resource, the full list of [potentialProfiles] is evaluated
  * to see which of the profiles fits the attributes of the resource. Ex: Observation body weight vs. lab results.
@@ -69,7 +69,9 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
     )
 
     /**
-     * Retrieves the qualified profile for the [resource]. If no profiles or multiple profiles qualify, an error will be added to the [validation].
+     * Retrieves the qualified profile for the [resource]. If no profiles,
+     * or multiple profiles qualify, the default profile is used and an error
+     * is added to the [validation]. See notes on ProfileQualifier qualifies().
      */
     private fun getQualifiedProfile(
         resource: T,

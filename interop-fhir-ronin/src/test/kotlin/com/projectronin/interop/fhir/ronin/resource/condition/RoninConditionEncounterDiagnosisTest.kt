@@ -228,7 +228,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -290,7 +290,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -353,7 +353,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -407,7 +407,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -460,7 +460,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -518,7 +518,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -576,7 +576,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -634,7 +634,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -691,7 +691,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -757,7 +757,7 @@ class RoninConditionEncounterDiagnosisTest {
         }
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -812,7 +812,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -868,7 +868,7 @@ class RoninConditionEncounterDiagnosisTest {
             )
         )
 
-        profile.validate(condition, null).alertIfErrors()
+        profile.validate(condition).alertIfErrors()
     }
 
     @Test
@@ -1390,7 +1390,7 @@ class RoninConditionEncounterDiagnosisTest {
             )
         )
 
-        profile.validate(condition, null).alertIfErrors()
+        profile.validate(condition).alertIfErrors()
     }
 
     // Note: This test may be temporary while we are waiting on concept mapping data.
@@ -1440,7 +1440,7 @@ class RoninConditionEncounterDiagnosisTest {
             )
         )
 
-        profile.validate(condition, null).alertIfErrors()
+        profile.validate(condition).alertIfErrors()
     }
 
     @Test
@@ -1487,7 +1487,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -1544,7 +1544,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -1601,7 +1601,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -1676,7 +1676,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(
@@ -1751,7 +1751,7 @@ class RoninConditionEncounterDiagnosisTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition, null).alertIfErrors()
+            profile.validate(condition).alertIfErrors()
         }
 
         assertEquals(

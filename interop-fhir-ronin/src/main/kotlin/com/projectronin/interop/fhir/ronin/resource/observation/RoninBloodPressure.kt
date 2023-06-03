@@ -24,24 +24,17 @@ import java.time.LocalDateTime
 class RoninBloodPressure(
     normalizer: Normalizer,
     localizer: Localizer,
-    private val registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient
 ) :
     BaseRoninVitalSign(
         R4ObservationValidator,
         RoninProfile.OBSERVATION_BLOOD_PRESSURE.value,
         normalizer,
-        localizer
+        localizer,
+        registryClient
     ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 3
-
-    // Load the qualifying codes from the value set. These are required to process.
-    override val qualifyingCodes: List<Coding> by lazy {
-        registryClient.getRequiredValueSet(
-            "Observation.code",
-            profile
-        )
-    }
 
     // Multipart qualifying codes for RoninBloodPressure
     private val validSystolicCodes: List<Coding> by lazy {

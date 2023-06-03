@@ -280,7 +280,7 @@ abstract class BaseRoninProfile<T : Resource<T>>(
                 parentContext
             )
             ifNotNull(referenceType) {
-                val dataAuthExtensionIdentifier = referenceType?.extension
+                val dataAuthExtensionIdentifier = referenceType.extension
                 checkTrue(
                     dataAuthExtensionIdentifier == dataAuthorityExtension,
                     requiredDataAuthorityExtensionIdentifier,

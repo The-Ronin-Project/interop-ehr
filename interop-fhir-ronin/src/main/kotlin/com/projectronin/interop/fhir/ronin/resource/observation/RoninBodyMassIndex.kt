@@ -1,6 +1,5 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
-import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
@@ -27,16 +26,11 @@ class RoninBodyMassIndex(
         R4ObservationValidator,
         RoninProfile.OBSERVATION_BODY_MASS_INDEX.value,
         normalizer,
-        localizer
+        localizer,
+        registryClient
     ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
-
-    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCodes: List<Coding> = registryClient.getValueSet(
-        "Observation.code",
-        profile
-    )
 
     // Quantity unit codes
     override val validQuantityCodes = listOf("kg/m2")

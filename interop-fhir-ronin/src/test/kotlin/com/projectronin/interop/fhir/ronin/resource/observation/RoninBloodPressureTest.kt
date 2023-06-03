@@ -54,19 +54,80 @@ class RoninBloodPressureTest {
         every { mnemonic } returns "test"
     }
     private val bloodPressureCode = Code("85354-9")
-    private val bloodPressureCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = bloodPressureCode))
+    private val bloodPressureCoding = Coding(system = CodeSystem.LOINC.uri, code = bloodPressureCode)
+    private val bloodPressureCodingList = listOf(bloodPressureCoding)
+    private val bloodPressureConcept = CodeableConcept(coding = bloodPressureCodingList)
     private val systolicCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8480-6")))
     private val diastolicCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8462-4")))
+
+    private val vitalSignsCategoryCode = Code("vital-signs")
+    private val vitalSignsCategoryCoding = Coding(
+        system = CodeSystem.OBSERVATION_CATEGORY.uri,
+        code = vitalSignsCategoryCode
+    )
+    private val vitalSignsCategoryCodingList = listOf(vitalSignsCategoryCoding)
+    private val vitalSignsCategoryConcept = CodeableConcept(coding = vitalSignsCategoryCodingList)
+    private val vitalSignsCategoryConceptList = listOf(vitalSignsCategoryConcept)
+
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)
-        } returns bloodPressureCoding
+        } returns bloodPressureCodingList
         every {
             getRequiredValueSet("Observation.component:systolic.code", RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)
         } returns systolicCoding
         every {
             getRequiredValueSet("Observation.component:diastolic.code", RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)
         } returns diastolicCoding
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.category",
+                vitalSignsCategoryCoding,
+                RoninProfile.OBSERVATION_BLOOD_PRESSURE.value
+            )?.first
+        } returns vitalSignsCategoryCoding
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.category",
+                Coding(
+                    system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                    code = null
+                ),
+                RoninProfile.OBSERVATION_BLOOD_PRESSURE.value
+            )
+        } returns null
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                bloodPressureCoding,
+                RoninProfile.OBSERVATION_BLOOD_PRESSURE.value
+            )?.first
+        } returns bloodPressureCoding
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                Coding(
+                    system = CodeSystem.UCUM.uri,
+                    code = bloodPressureCode
+                ),
+                RoninProfile.OBSERVATION_BLOOD_PRESSURE.value
+            )
+        } returns null
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                Coding(
+                    system = CodeSystem.LOINC.uri,
+                    code = Code("1234")
+                ),
+                RoninProfile.OBSERVATION_BLOOD_PRESSURE.value
+            )
+        } returns null
     }
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
@@ -75,7 +136,6 @@ class RoninBloodPressureTest {
         every { localize(any(), tenant) } answers { firstArg() }
     }
     private val roninBloodPressure = RoninBloodPressure(normalizer, localizer, normRegistryClient)
-    private val vitalSignsCategory = Code("vital-signs")
 
     @Test
     fun `does not qualify when no category`() {
@@ -101,16 +161,7 @@ class RoninBloodPressureTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -123,21 +174,12 @@ class RoninBloodPressureTest {
     }
 
     @Test
-    fun `does not qualify when no coding`() {
+    fun `does not qualify when no code coding`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -150,48 +192,37 @@ class RoninBloodPressureTest {
     }
 
     @Test
-    fun `does not qualify when coding code not for blood pressure`() {
+    fun `does not qualify when code coding code not for blood pressure`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
             ),
-            code = CodeableConcept(coding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("1234"))))
+            code = CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        system = CodeSystem.LOINC.uri,
+                        code = Code("1234")
+                    )
+                )
+            )
         )
 
         assertFalse(roninBloodPressure.qualifies(observation))
     }
 
     @Test
-    fun `does not qualify when coding code is for blood pressure but wrong system`() {
+    fun `does not qualify when code coding code is for blood pressure but wrong system`() {
         val observation = Observation(
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -216,29 +247,13 @@ class RoninBloodPressureTest {
             id = Id("123"),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = bloodPressureCode
-                    )
-                )
-            )
+            code = bloodPressureConcept
         )
 
         assertTrue(roninBloodPressure.qualifies(observation))
@@ -268,7 +283,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -284,7 +299,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -337,7 +352,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -385,7 +400,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -435,7 +450,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -451,7 +466,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -503,7 +518,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -518,7 +533,7 @@ class RoninBloodPressureTest {
             )
         )
 
-        roninBloodPressure.validate(observation, null).alertIfErrors()
+        roninBloodPressure.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -561,7 +576,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -610,7 +625,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -660,7 +675,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -699,7 +714,7 @@ class RoninBloodPressureTest {
             )
         )
 
-        roninBloodPressure.validate(observation, null).alertIfErrors()
+        roninBloodPressure.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -742,7 +757,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -797,7 +812,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -847,7 +862,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -894,7 +909,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -944,7 +959,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -991,7 +1006,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1041,7 +1056,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -1089,7 +1104,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1139,7 +1154,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -1186,7 +1201,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1236,7 +1251,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -1284,7 +1299,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1334,7 +1349,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -1383,7 +1398,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1433,7 +1448,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -1472,7 +1487,7 @@ class RoninBloodPressureTest {
             )
         )
 
-        roninBloodPressure.validate(observation, null).alertIfErrors()
+        roninBloodPressure.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -1515,7 +1530,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -1570,7 +1585,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1620,7 +1635,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -1667,7 +1682,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1717,7 +1732,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -1764,7 +1779,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1814,7 +1829,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -1862,7 +1877,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -1912,7 +1927,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -1959,7 +1974,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -2009,7 +2024,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -2057,7 +2072,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -2155,7 +2170,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -2205,7 +2220,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -2250,7 +2265,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -2300,7 +2315,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -2345,7 +2360,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -2391,7 +2406,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -2439,7 +2454,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -2489,7 +2504,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -2536,7 +2551,7 @@ class RoninBloodPressureTest {
             )
         )
 
-        roninBloodPressure.validate(observation, null).alertIfErrors()
+        roninBloodPressure.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -2568,7 +2583,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -2626,7 +2641,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -2776,7 +2791,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -2907,7 +2922,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -2968,7 +2983,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -3041,7 +3056,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -3110,7 +3125,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -3128,7 +3143,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3180,7 +3195,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -3198,7 +3213,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3250,7 +3265,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -3268,7 +3283,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3320,7 +3335,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -3338,7 +3353,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3389,7 +3404,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -3443,7 +3458,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3493,7 +3508,7 @@ class RoninBloodPressureTest {
                     coding = listOf(
                         Coding(
                             system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategory
+                            code = vitalSignsCategoryCode
                         )
                     )
                 )
@@ -3547,7 +3562,7 @@ class RoninBloodPressureTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            roninBloodPressure.validate(observation, null).alertIfErrors()
+            roninBloodPressure.validate(observation).alertIfErrors()
         }
 
         assertEquals(
@@ -3555,5 +3570,32 @@ class RoninBloodPressureTest {
                 "ERROR USCORE_BPOBS_002: Must match this system|code: http://loinc.org|8462-4 @ Observation.component:diastolic.code",
             exception.message
         )
+    }
+
+    @Test
+    fun `does not qualify when no category coding code`() {
+        val observation = Observation(
+            id = Id("123"),
+            status = ObservationStatus.AMENDED.asCode(),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = null
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/1234".asFHIR()),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            code = CodeableConcept(text = "code".asFHIR())
+        )
+
+        assertFalse(roninBloodPressure.qualifies(observation))
     }
 }

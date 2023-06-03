@@ -84,7 +84,7 @@ class BaseRoninProfileTest {
         every { location.identifier } returns listOf(validFhirIdentifier, validDataAuthorityIdentifier)
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -103,7 +103,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -122,7 +122,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -137,7 +137,7 @@ class BaseRoninProfileTest {
         every { location.identifier } returns listOf(validTenantIdentifier, validDataAuthorityIdentifier)
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -156,7 +156,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -175,7 +175,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -190,7 +190,7 @@ class BaseRoninProfileTest {
         every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -209,7 +209,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -228,7 +228,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -246,7 +246,7 @@ class BaseRoninProfileTest {
             validDataAuthorityIdentifier
         )
 
-        TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+        TestProfile(normalizer, localizer).validate(location).alertIfErrors()
     }
 
     @Test
@@ -351,7 +351,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -378,7 +378,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -405,7 +405,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -437,7 +437,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -475,7 +475,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -507,7 +507,7 @@ class BaseRoninProfileTest {
             )
         )
 
-        TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+        TestProfile(normalizer, localizer).validate(location).alertIfErrors()
     }
 
     @Test
@@ -533,7 +533,7 @@ class BaseRoninProfileTest {
             )
         )
 
-        TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+        TestProfile(normalizer, localizer).validate(location).alertIfErrors()
     }
 
     @Test
@@ -561,7 +561,7 @@ class BaseRoninProfileTest {
         )
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -584,7 +584,7 @@ class BaseRoninProfileTest {
         )
         every { location.contained } returns listOf(ContainedResource("Patient"))
 
-        TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+        TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         val output = outputStream.toString()
         assertTrue(output.contains("contained resource found @ Location"))
         System.setOut(out)
@@ -617,7 +617,7 @@ class BaseRoninProfileTest {
         every { location.meta } returns null
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -637,7 +637,7 @@ class BaseRoninProfileTest {
         every { location.meta } returns Meta(profile = listOf(), source = Uri("source"))
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -657,7 +657,7 @@ class BaseRoninProfileTest {
         every { location.meta } returns Meta(profile = listOf(Canonical("other-profile")), source = Uri("source"))
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(
@@ -677,7 +677,7 @@ class BaseRoninProfileTest {
         every { location.meta } returns Meta(profile = listOf(Canonical("profile")))
 
         val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location, null).alertIfErrors()
+            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
 
         assertEquals(

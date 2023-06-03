@@ -10,7 +10,6 @@ import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.BaseRoninProfile
 import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.LocationContext
-import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
@@ -24,8 +23,6 @@ class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
     BaseRoninProfile<CarePlan>(R4CarePlanValidator, RoninProfile.CARE_PLAN.value, normalizer, localizer) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 4
-
-    private val requireCategoryError = RequiredFieldError(CarePlan::category)
 
     override fun validate(element: CarePlan, parentContext: LocationContext, validation: Validation) {
         validation.apply {
