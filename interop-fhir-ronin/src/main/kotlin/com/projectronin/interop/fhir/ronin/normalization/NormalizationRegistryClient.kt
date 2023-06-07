@@ -253,7 +253,6 @@ class NormalizationRegistryClient(
             elementName = elementName,
             profileUrl = profileUrl
         )
-        getValueSetItem(cacheKey, forceCacheReloadTS)
         return getValueSetRegistryItemValues(
             getValueSetItem(cacheKey, forceCacheReloadTS)
         )

@@ -319,13 +319,18 @@ class EpicAppointmentService(
             EHRDAIdentifier(value = identifier!!.value!!.value!!, system = identifier.system!!.value!!)
         }
         // ehrda lookup for Practitioner FHIR id
-        val provSystemToFhirID = runBlocking {
-            ehrdaClient.getResourceIdentifiers(
-                tenant.mnemonic,
-                IdentifierSearchableResourceTypes.Practitioner,
-                provToSystem.values.distinct()
-            ).associateFHIRId()
+        val provSystemToFhirID = if (provToSystem.values.isNotEmpty()) {
+            runBlocking {
+                ehrdaClient.getResourceIdentifiers(
+                    tenant.mnemonic,
+                    IdentifierSearchableResourceTypes.Practitioner,
+                    provToSystem.values.distinct()
+                ).associateFHIRId()
+            }
+        } else {
+            emptyMap()
         }
+
         // use FHIR id (if found), otherwise Identifier
         val provToParticipant = provToSystem.keys.associateWith { provider ->
             val systemValue = provToSystem[provider]
@@ -350,14 +355,15 @@ class EpicAppointmentService(
 
         // get department Identifiers
         val deptToIdentifier = allProviders.associateWith { provider ->
-            val deptIdentifier =
+            val deptIdentifier = kotlin.runCatching {
                 identifierService.getLocationIdentifier(tenant, provider.departmentIDs.map { it.toIdentifier() })
-            if (deptIdentifier.system?.value != null && deptIdentifier.value?.value != null) {
+            }.getOrNull()
+            if (deptIdentifier?.system?.value != null && deptIdentifier.value?.value != null) {
                 deptIdentifier
             } else {
                 logger.info {
                     "Missing identifier data in Epic appointment provider with Name: ${provider.departmentName}: " +
-                        "System: ${deptIdentifier.system?.value} Value: ${deptIdentifier.value}"
+                        "System: ${deptIdentifier?.system?.value} Value: ${deptIdentifier?.value}"
                 }
                 null
             }
@@ -369,12 +375,16 @@ class EpicAppointmentService(
             EHRDAIdentifier(value = identifier!!.value!!.value!!, system = identifier.system!!.value!!)
         }
         // ehrda lookup for Location FHIR id
-        val deptSystemToFhirID = runBlocking {
-            ehrdaClient.getResourceIdentifiers(
-                tenant.mnemonic,
-                IdentifierSearchableResourceTypes.Location,
-                deptToSystem.values.distinct()
-            ).associateFHIRId()
+        val deptSystemToFhirID = if (deptToSystem.values.isNotEmpty()) {
+            runBlocking {
+                ehrdaClient.getResourceIdentifiers(
+                    tenant.mnemonic,
+                    IdentifierSearchableResourceTypes.Location,
+                    deptToSystem.values.distinct()
+                ).associateFHIRId()
+            }
+        } else {
+            emptyMap()
         }
         // use FHIR id (if found), otherwise null to omit that Location
         val deptToParticipant = deptToSystem.keys.associateWith { provider ->
