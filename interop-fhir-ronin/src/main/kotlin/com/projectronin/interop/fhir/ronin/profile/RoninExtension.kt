@@ -14,6 +14,8 @@ enum class RoninExtension(val value: String) {
     TENANT_SOURCE_TELECOM_SYSTEM("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem"),
     TENANT_SOURCE_TELECOM_USE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomUse"),
     TENANT_SOURCE_ENCOUNTER_CLASS("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceEncounterClass"),
+
+    @Deprecated("As of RCDM v3.20.0")
     TENANT_SOURCE_ENCOUNTER_TYPE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceEncounterType"),
     TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceDocumentReferenceType");
 

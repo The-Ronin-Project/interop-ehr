@@ -378,4 +378,22 @@ abstract class BaseRoninProfile<T : Resource<T>>(
             )
         } ?: emptyList()
     }
+
+    /**
+     * Creates an [Extension] list using the supplied [url] and [Coding] object. Supports the calling transform
+     * by checking input for nulls and returning a list or emptyList. This supports simpler list arithmetic in the caller.
+     */
+    protected fun getExtensionOrEmptyList(url: RoninExtension, coding: Coding?): List<Extension> {
+        return coding?.let {
+            listOf(
+                Extension(
+                    url = Uri(url.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODING,
+                        value = coding
+                    )
+                )
+            )
+        } ?: emptyList()
+    }
 }

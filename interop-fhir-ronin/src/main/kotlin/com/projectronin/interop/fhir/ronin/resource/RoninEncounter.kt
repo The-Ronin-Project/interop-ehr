@@ -1,6 +1,5 @@
 package com.projectronin.interop.fhir.ronin.resource
 
-import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.fhir.r4.validate.resource.R4EncounterValidator
@@ -8,6 +7,7 @@ import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.validateReference
@@ -32,8 +32,8 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
         normalizer,
         localizer
     ) {
-    override val rcdmVersion = RCDMVersion.V3_19_0
-    override val profileVersion = 3
+    override val rcdmVersion = RCDMVersion.V3_20_0
+    override val profileVersion = 4
 
     private val requiredSubjectError = RequiredFieldError(Encounter::subject)
 
@@ -46,24 +46,6 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
         description = "Encounter requires source class extension",
         severity = ValidationIssueSeverity.ERROR,
         location = LocationContext(Encounter::extension)
-    )
-    private val requiredExtensionTypeError = FHIRError(
-        code = "RONIN_ENC_002",
-        description = "Encounter requires source type extension",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Encounter::extension)
-    )
-    private val requiredTypeSize = FHIRError(
-        code = "RONIN_ENC_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Must have one, and only one, type",
-        location = LocationContext(Encounter::type)
-    )
-    private val requiredCodingSize = FHIRError(
-        code = "RONIN_ENC_004",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "One, and only one, coding entry is allowed for type",
-        location = LocationContext(CodeableConcept::coding)
     )
 
     override fun validateRonin(element: Encounter, parentContext: LocationContext, validation: Validation) {
@@ -81,39 +63,23 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
                 )
             }
 
-            // TODO: Corrections for the below will come with the next profile update on RCDM 3.20.0, so leaving these commented out
-            // See https://projectronin.slack.com/archives/C03RGK7PZU3/p1684879867024799
-
-            // checkNotNull(element.extension, requiredExtensionError, parentContext)
-            // checkTrue(
-            //     element.extension.any {
-            //         it.url == RoninExtension.TENANT_SOURCE_ENCOUNTER_CLASS.uri
-            //     },
-            //     requiredExtensionClassError,
-            //     parentContext
-            // )
-            // checkTrue(
-            //     element.extension.any {
-            //         it.url == RoninExtension.TENANT_SOURCE_ENCOUNTER_TYPE.uri
-            //     },
-            //     requiredExtensionTypeError,
-            //     parentContext
-            // )
-
-            if (element.type.size == 1) {
-                checkTrue(
-                    element.type[0].coding.size == 1,
-                    requiredCodingSize,
-                    parentContext.append(LocationContext("Encounter", "type[0]"))
-                )
-            } else {
-                checkTrue(false, requiredTypeSize, parentContext)
-            }
+            checkNotNull(element.extension, requiredExtensionError, parentContext)
+            checkTrue(
+                element.extension.any {
+                    it.url == RoninExtension.TENANT_SOURCE_ENCOUNTER_CLASS.uri
+                },
+                requiredExtensionClassError,
+                parentContext
+            )
         }
     }
 
+    private val requiredTypeError = RequiredFieldError(Encounter::type)
+
     override fun validateUSCore(element: Encounter, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            checkTrue(element.type.isNotEmpty(), requiredTypeError, parentContext)
+
             checkNotNull(element.subject, requiredSubjectError, parentContext)
             validateReference(element.subject, listOf("Patient"), LocationContext(Encounter::subject), validation)
 
@@ -135,15 +101,12 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
     ): Pair<Encounter?, Validation> {
-        // TODO: The following are pending 3.20.0 updates. Review and implement the below based off the notes provided there.
-        // TODO: RoninExtension.TENANT_SOURCE_ENCOUNTER_TYPE
-        // TODO: Check concept maps for type code
-        // TODO: RoninExtension.TENANT_SOURCE_ENCOUNTER_CLASS
         // TODO: Check concept maps for class code
+        val classExtension = getExtensionOrEmptyList(RoninExtension.TENANT_SOURCE_ENCOUNTER_CLASS, normalized.`class`)
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            extension = normalized.extension,
+            extension = normalized.extension + classExtension,
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
         return Pair(transformed, Validation())

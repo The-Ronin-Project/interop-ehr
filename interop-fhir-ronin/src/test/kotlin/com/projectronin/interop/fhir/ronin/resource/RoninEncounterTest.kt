@@ -44,7 +44,6 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
-import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -64,18 +63,15 @@ class RoninEncounterTest {
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
-    private val encounterTypeExtension = Extension(
-        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceEncounterType"),
-        value = DynamicValue(
-            type = DynamicValueType.CODEABLE_CONCEPT,
-            value = CodeableConcept(coding = listOf(Coding(code = Code("code"))))
-        )
-    )
     private val encounterClassExtension = Extension(
         url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceEncounterClass"),
         value = DynamicValue(
-            type = DynamicValueType.CODEABLE_CONCEPT,
-            value = Coding(code = Code("OBSENC"))
+            type = DynamicValueType.CODING,
+            value = Coding(
+                system = Uri("http://terminology.hl7.org/CodeSystem/v3-ActCode"),
+                code = Code("AMB"),
+                display = "ambulatory".asFHIR()
+            )
         )
     )
     private val roninEncounter = RoninEncounter(normalizer, localizer)
@@ -97,7 +93,7 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
+            extension = listOf(encounterClassExtension),
             status = EncounterStatus.CANCELLED.asCode(),
             `class` = Coding(code = Code("OBSENC")),
             type = listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))),
@@ -126,7 +122,7 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
+            extension = listOf(encounterClassExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -170,7 +166,7 @@ class RoninEncounterTest {
     fun `validate - checks R4 profile - fails if status does not use required valueset`() {
         val encounter = Encounter(
             meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
+            extension = listOf(encounterClassExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -214,7 +210,7 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
+            extension = listOf(encounterClassExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -253,7 +249,7 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
+            extension = listOf(encounterClassExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -287,7 +283,7 @@ class RoninEncounterTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_ENC_003: Must have one, and only one, type @ Encounter.type",
+                "ERROR REQ_FIELD: type is a required element @ Encounter.type",
             exception.message
         )
     }
@@ -297,7 +293,7 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
+            extension = listOf(encounterClassExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -344,7 +340,7 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
+            extension = listOf(encounterClassExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -381,147 +377,10 @@ class RoninEncounterTest {
     }
 
     @Test
-    fun `validate - fails if type null`() {
-        val encounter = Encounter(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            status = EncounterStatus.CANCELLED.asCode(),
-            `class` = Coding(code = Code("OBSENC")),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            )
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_ENC_003: Must have one, and only one, type @ Encounter.type",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails type with no coding`() {
-        val encounter = Encounter(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            status = EncounterStatus.CANCELLED.asCode(),
-            `class` = Coding(code = Code("OBSENC")),
-            type = listOf(CodeableConcept()),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            )
-
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_ENC_004: One, and only one, coding entry is allowed for type @ Encounter.type[0].coding",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails type with multiple codings`() {
-        val encounter = Encounter(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            status = EncounterStatus.CANCELLED.asCode(),
-            `class` = Coding(code = Code("OBSENC")),
-            type = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(code = Code("coding1")),
-                        Coding(code = Code("coding2"))
-                    )
-                )
-            ),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            )
-
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninEncounter.validate(encounter).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_ENC_004: One, and only one, coding entry is allowed for type @ Encounter.type[0].coding",
-            exception.message
-        )
-    }
-
-    @Test
     fun `validate checks meta`() {
         val encounter = Encounter(
             id = Id("12345"),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
+            extension = listOf(encounterClassExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -565,7 +424,7 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
+            extension = listOf(encounterClassExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -844,7 +703,8 @@ class RoninEncounterTest {
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),
                     value = DynamicValue(DynamicValueType.STRING, "value")
-                )
+                ),
+                encounterClassExtension
             ),
             transformed.extension
         )
@@ -1124,9 +984,8 @@ class RoninEncounterTest {
         assertEquals(Reference(reference = "Encounter/super".asFHIR()), transformed.partOf)
     }
 
-    @Disabled("Pending details of how to create these extensions")
     @Test
-    fun `transform encounter adds class and type extensions with only required attributes`() {
+    fun `transform encounter adds class extension with only required attributes`() {
         val encounter = Encounter(
             id = Id("12345"),
             meta = Meta(source = Uri("fake-source-fake-url")),
@@ -1143,16 +1002,11 @@ class RoninEncounterTest {
         validation.alertIfErrors()
 
         transformed!!
-        // TODO: Set correct extension values
         assertEquals(
             listOf(
                 Extension(
-                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceEncounterType"),
-                    value = null
-                ),
-                Extension(
                     url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceEncounterClass"),
-                    value = null
+                    value = DynamicValue(DynamicValueType.CODING, Coding(code = Code("OBSENC")))
                 )
             ),
             transformed.extension
@@ -1255,7 +1109,7 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
+            extension = listOf(encounterClassExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1298,7 +1152,7 @@ class RoninEncounterTest {
         val encounter = Encounter(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
-            extension = listOf(encounterTypeExtension, encounterClassExtension),
+            extension = listOf(encounterClassExtension),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
