@@ -1,4 +1,4 @@
-package com.interop.ehr.hl7
+package com.projectronin.interop.ehr.hl7
 
 import ca.uhn.hl7v2.model.Varies
 import ca.uhn.hl7v2.model.v251.datatype.TX
@@ -8,13 +8,14 @@ import ca.uhn.hl7v2.model.v251.segment.PID
 import ca.uhn.hl7v2.model.v251.segment.PV1
 import ca.uhn.hl7v2.model.v251.segment.TXA
 import com.interop.ehr.hl7.fhir.converters.datatypes.toFormattedDate
-import com.interop.ehr.hl7.fhir.converters.datatypes.toHL7Code
-import com.interop.ehr.hl7.fhir.converters.datatypes.toPID3
-import com.interop.ehr.hl7.fhir.converters.resources.getNote
-import com.interop.ehr.hl7.fhir.converters.resources.getParentNoteID
-import com.interop.ehr.hl7.fhir.converters.resources.toAvailableStatus
-import com.interop.ehr.hl7.fhir.converters.resources.toCompleteStatus
-import com.interop.ehr.hl7.fhir.converters.resources.toConfidentialityStatus
+import com.projectronin.interop.ehr.hl7.converters.datatypes.toFormattedDate
+import com.projectronin.interop.ehr.hl7.converters.datatypes.toHL7Code
+import com.projectronin.interop.ehr.hl7.converters.datatypes.toPID3
+import com.projectronin.interop.ehr.hl7.converters.resources.getNote
+import com.projectronin.interop.ehr.hl7.converters.resources.getParentNoteID
+import com.projectronin.interop.ehr.hl7.converters.resources.toAvailableStatus
+import com.projectronin.interop.ehr.hl7.converters.resources.toCompleteStatus
+import com.projectronin.interop.ehr.hl7.converters.resources.toConfidentialityStatus
 import com.projectronin.interop.fhir.r4.datatype.primitive.asEnum
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
 import com.projectronin.interop.fhir.r4.resource.Patient

@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr.epic
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.datalake.DatalakePublishService
 import com.projectronin.interop.datalake.oci.client.OCIClient
+import com.projectronin.interop.queue.QueueService
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
@@ -27,6 +28,7 @@ class EpicVendorFactoryTest {
     private val medicationService = mockk<EpicMedicationService>()
     private val medicationStatementService = mockk<EpicMedicationStatementService>()
     private val medicationRequestService = mockk<EpicMedicationRequestService>()
+    private val noteService = mockk<EpicNoteService>()
     private val organizationService = mockk<EpicOrganizationService>()
     private val encounterService = mockk<EpicEncounterService>()
     private val onboardFlagService = mockk<EpicOnboardFlagService>()
@@ -46,6 +48,7 @@ class EpicVendorFactoryTest {
             medicationService = medicationService,
             medicationStatementService = medicationStatementService,
             medicationRequestService = medicationRequestService,
+            noteService = noteService,
             organizationService = organizationService,
             onboardFlagService = onboardFlagService,
             encounterService = encounterService,
@@ -68,6 +71,9 @@ class EpicVendorFactoryTest {
             @Bean
             @Qualifier("datalake")
             fun datalakePublishService(): DatalakePublishService = mockk()
+
+            @Bean
+            fun queueService(): QueueService = mockk()
 
             fun taskExecutor(): ThreadPoolTaskExecutor = mockk(relaxed = true)
         }
@@ -151,5 +157,10 @@ class EpicVendorFactoryTest {
     @Test
     fun `returns HealthCheckService`() {
         assertEquals(healthCheckService, vendorFactory.healthCheckService)
+    }
+
+    @Test
+    fun `returns NoteService`() {
+        assertEquals(noteService, vendorFactory.noteService)
     }
 }

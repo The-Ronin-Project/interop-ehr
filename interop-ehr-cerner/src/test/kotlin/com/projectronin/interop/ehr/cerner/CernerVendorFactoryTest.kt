@@ -142,4 +142,9 @@ class CernerVendorFactoryTest {
     fun `returns NotImplementedError for OnboardFlagService`() {
         assertThrows<NotImplementedError> { vendorFactory.onboardFlagService }
     }
+
+    @Test
+    fun `returns NotImplementedError for NoteService`() {
+        assertThrows<NotImplementedError> { vendorFactory.noteService }
+    }
 }

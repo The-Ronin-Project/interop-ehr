@@ -1,4 +1,4 @@
-package com.interop.ehr.hl7.fhir.converters.resources
+package com.projectronin.interop.ehr.hl7.converters.resources
 
 import com.projectronin.interop.fhir.r4.datatype.primitive.asEnum
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
@@ -18,7 +18,7 @@ fun DocumentReference.getNote(): String {
 fun DocumentReference.toCompleteStatus(): String =
     when (this.docStatus.asEnum<CompositionStatus>()) {
         CompositionStatus.PRELIMINARY -> "IP"
-        else -> "DO"
+        else -> "AU"
     }
 
 fun DocumentReference.toConfidentialityStatus(): String = "U"

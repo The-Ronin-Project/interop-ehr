@@ -1,10 +1,10 @@
-package com.interop.ehr.hl7.tenant
+package com.projectronin.interop.ehr.hl7.tenant
 
 import ca.uhn.hl7v2.DefaultHapiContext
-import com.interop.ehr.hl7.MDMConfigService
-import com.interop.ehr.hl7.MDMService
 import com.projectronin.interop.common.jackson.JacksonUtil
 import com.projectronin.interop.common.vendor.VendorType
+import com.projectronin.interop.ehr.hl7.MDMConfigService
+import com.projectronin.interop.ehr.hl7.MDMService
 import com.projectronin.interop.fhir.r4.datatype.Attachment
 import com.projectronin.interop.fhir.r4.datatype.primitive.Base64Binary
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code

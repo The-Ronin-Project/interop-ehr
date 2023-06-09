@@ -19,6 +19,7 @@ class EpicVendorFactory(
     override val medicationStatementService: EpicMedicationStatementService,
     override val medicationRequestService: EpicMedicationRequestService,
     override val messageService: EpicMessageService,
+    override val noteService: EpicNoteService,
     override val observationService: EpicObservationService,
     override val onboardFlagService: EpicOnboardFlagService,
     override val organizationService: EpicOrganizationService,

@@ -1,4 +1,4 @@
-package com.interop.ehr.hl7
+package com.projectronin.interop.ehr.hl7
 
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.common.vendor.VendorType

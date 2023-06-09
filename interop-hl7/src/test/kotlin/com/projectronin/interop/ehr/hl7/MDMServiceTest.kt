@@ -1,4 +1,4 @@
-package com.interop.ehr.hl7
+package com.projectronin.interop.ehr.hl7
 
 import ca.uhn.hl7v2.model.v251.datatype.TX
 import ca.uhn.hl7v2.util.Terser
@@ -83,7 +83,7 @@ class MDMServiceTest {
         assertEquals("Project", message.txa.originatorCodeName.first().familyName.surname.value)
         assertEquals("Ronin", message.txa.originatorCodeName.first().givenName.value)
         assertTrue(message.txa.uniqueDocumentNumber.universalID.value.startsWith("Ronin"))
-        assertEquals("DO", message.txa.documentCompletionStatus.value)
+        assertEquals("AU", message.txa.documentCompletionStatus.value)
         assertEquals("U", message.txa.documentConfidentialityStatus.value)
         assertEquals("AV", message.txa.documentAvailabilityStatus.value)
     }

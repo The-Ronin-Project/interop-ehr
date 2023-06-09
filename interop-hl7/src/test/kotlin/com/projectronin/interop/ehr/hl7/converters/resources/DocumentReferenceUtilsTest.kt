@@ -1,4 +1,4 @@
-package com.interop.ehr.hl7.fhir.converters.resources
+package com.projectronin.interop.ehr.hl7.converters.resources
 
 import com.projectronin.interop.fhir.r4.datatype.Attachment
 import com.projectronin.interop.fhir.r4.datatype.Reference
@@ -46,7 +46,7 @@ class DocumentReferenceUtilsTest {
 
     @Test
     fun `toCompleteStatus status works`() {
-        assertEquals("DO", completedDocument.toCompleteStatus())
+        assertEquals("AU", completedDocument.toCompleteStatus())
         assertEquals("IP", inProgressDocument.toCompleteStatus())
     }
 

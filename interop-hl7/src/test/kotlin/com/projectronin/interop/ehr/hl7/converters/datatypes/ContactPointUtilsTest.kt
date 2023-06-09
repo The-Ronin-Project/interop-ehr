@@ -1,4 +1,4 @@
-package com.interop.ehr.hl7.fhir.converters.datatypes
+package com.projectronin.interop.ehr.hl7.converters.datatypes
 
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import org.junit.jupiter.api.Assertions.assertEquals

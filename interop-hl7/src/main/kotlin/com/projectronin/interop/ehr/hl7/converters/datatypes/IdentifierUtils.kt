@@ -1,4 +1,4 @@
-package com.interop.ehr.hl7.fhir.converters.datatypes
+package com.projectronin.interop.ehr.hl7.converters.datatypes
 
 import ca.uhn.hl7v2.model.Message
 import ca.uhn.hl7v2.model.v251.datatype.CX

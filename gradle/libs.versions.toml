@@ -18,6 +18,8 @@ interop-fhir-generators = "com.projectronin.interop.fhir:interop-fhir-generators
 
 interop-publishers-datalake = "com.projectronin.interop.publish:interop-datalake:8.1.1"
 
+interop-queue-api = "com.projectronin.interop.queue:interop-queue:2.0.0"
+
 interop-validation-client = "com.projectronin.interop.validation:interop-validation-client:2.0.0"
 
 jackson-databind = "com.fasterxml.jackson.core:jackson-databind:2.15.2"
