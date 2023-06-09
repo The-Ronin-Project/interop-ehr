@@ -24,6 +24,7 @@ class CernerVendorFactory(
     override val patientService: CernerPatientService,
     override val practitionerService: CernerPractitionerService,
     override val observationService: CernerObservationService,
+    override val organizationService: OrganizationService,
     override val medicationService: CernerMedicationService,
     override val medicationRequestService: CernerMedicationRequestService
 ) : VendorFactory {
@@ -31,8 +32,7 @@ class CernerVendorFactory(
 
     override val practitionerRoleService: PractitionerRoleService
         get() = TODO("Not yet implemented")
-    override val organizationService: OrganizationService
-        get() = TODO("Not yet implemented")
+
     override val onboardFlagService: OnboardFlagService
         get() = TODO("Not yet implemented")
 

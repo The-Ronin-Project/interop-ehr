@@ -9,7 +9,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 interface OrganizationService : FHIRService<Organization> {
 
     /**
-     * Finds a list of [Organizations] by FHIRId for a [tenant]
+     * Finds a list of [Organization]s by FHIRId for a [tenant]
      */
     fun findOrganizationsByFHIRId(
         tenant: Tenant,

@@ -20,6 +20,7 @@ class CernerVendorFactoryTest {
     private val practitionerService = mockk<CernerPractitionerService>()
     private val conditionService = mockk<CernerConditionService>()
     private val locationService = mockk<CernerLocationService>()
+    private val healthCheckService = mockk<CernerHealthCheckService>()
     private val identifierService = mockk<CernerIdentifierService>()
     private val messageService = mockk<CernerMessageService>()
     private val medicationStatementService = mockk<CernerMedicationStatementService>()
@@ -27,7 +28,7 @@ class CernerVendorFactoryTest {
     private val medicationRequestService = mockk<CernerMedicationRequestService>()
     private val encounterService = mockk<CernerEncounterService>()
     private val observationService = mockk<CernerObservationService>()
-    private val healthCheckService = mockk<CernerHealthCheckService>()
+    private val organizationService = mockk<CernerOrganizationService>()
 
     private val vendorFactory =
         CernerVendorFactory(
@@ -36,14 +37,15 @@ class CernerVendorFactoryTest {
             appointmentService = appointmentService,
             conditionService = conditionService,
             locationService = locationService,
+            healthCheckService = healthCheckService,
             identifierService = identifierService,
             messageService = messageService,
             medicationStatementService = medicationStatementService,
             encounterService = encounterService,
             observationService = observationService,
+            organizationService = organizationService,
             medicationRequestService = medicationRequestService,
-            medicationService = medicationService,
-            healthCheckService = healthCheckService
+            medicationService = medicationService
         )
 
     @Test
@@ -114,6 +116,11 @@ class CernerVendorFactoryTest {
     }
 
     @Test
+    fun `returns OrganizationService`() {
+        assertEquals(organizationService, vendorFactory.organizationService)
+    }
+
+    @Test
     fun `returns MedicationService`() {
         assertEquals(medicationService, vendorFactory.medicationService)
     }
@@ -131,11 +138,6 @@ class CernerVendorFactoryTest {
     @Test
     fun `returns HealthCheckService`() {
         assertEquals(healthCheckService, vendorFactory.healthCheckService)
-    }
-
-    @Test
-    fun `returns NotImplementedError for OrganizationService`() {
-        assertThrows<NotImplementedError> { vendorFactory.organizationService }
     }
 
     @Test
