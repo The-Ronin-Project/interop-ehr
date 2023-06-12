@@ -1,4 +1,5 @@
 [libraries]
+caffeine = "com.github.ben-manes.caffeine:caffeine:3.1.6"
 commons-text = "org.apache.commons:commons-text:1.10.0"
 
 dd-trace-api = "com.datadoghq:dd-trace-api:1.13.0"
