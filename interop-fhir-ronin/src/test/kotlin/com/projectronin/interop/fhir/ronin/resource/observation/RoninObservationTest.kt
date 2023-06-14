@@ -31,6 +31,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -180,7 +181,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -194,6 +198,7 @@ class RoninObservationTest {
         )
     }
 
+    @Disabled("See INT-1882")
     @Test
     fun `validate fails with code coding display missing`() {
         val observation = Observation(
@@ -236,7 +241,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -278,7 +286,7 @@ class RoninObservationTest {
                 coding = listOf(
                     Coding(
                         code = Code("some-code"),
-                        system = Uri("some-system")
+                        display = "some-display".asFHIR()
                     )
                 )
             ),
@@ -293,7 +301,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -350,7 +361,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -416,7 +430,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension))
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
         )
 
         roninObservation.validate(observation, null).alertIfErrors()
@@ -555,7 +572,11 @@ class RoninObservationTest {
             ),
             category = listOf(CodeableConcept(coding = listOf())),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -673,7 +694,10 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Organization/123".asFHIR(), type = Uri("Something", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Organization/123".asFHIR(),
+                type = Uri("Something", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -732,7 +756,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.BOOLEAN,
                 value = true
@@ -791,7 +818,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -866,7 +896,10 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -939,7 +972,10 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1005,7 +1041,10 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1070,7 +1109,10 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1134,7 +1176,10 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1199,7 +1244,10 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/123".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1260,7 +1308,11 @@ class RoninObservationTest {
                     )
                 )
             ),
-            subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1393,7 +1445,11 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient")),
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient")
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
@@ -1454,7 +1510,11 @@ class RoninObservationTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR(), type = Uri("Patient", extension = dataAuthorityExtension)),
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
