@@ -8,7 +8,6 @@ import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
-import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
 import com.projectronin.interop.fhir.validate.FHIRError
@@ -25,13 +24,14 @@ import java.time.LocalDateTime
 class RoninStagingRelated(
     normalizer: Normalizer,
     localizer: Localizer,
-    private val registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient
 ) :
-    BaseRoninObservation(
+    BaseRoninProfileObservation(
         R4ObservationValidator,
         RoninProfile.OBSERVATION_STAGING_RELATED.value,
         normalizer,
-        localizer
+        localizer,
+        registryClient
     ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 1
@@ -134,14 +134,8 @@ class RoninStagingRelated(
             checkNotNull(normalized.id, requiredIdError, parentContext)
         }
 
-        val tenantSourceCodeExtension = getExtensionOrEmptyList(
-            RoninExtension.TENANT_SOURCE_OBSERVATION_CODE,
-            normalized.code
-        )
-
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            extension = normalized.extension + tenantSourceCodeExtension,
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
         return Pair(transformed, validation)

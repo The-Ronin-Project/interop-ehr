@@ -7,6 +7,7 @@ import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
+import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import java.time.LocalDateTime
 
@@ -31,24 +32,6 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
         qualifiedProfile?.let { validation.merge(it.validate(element, parentContext)) }
     }
 
-    override fun transformInternal(
-        normalized: T,
-        parentContext: LocationContext,
-        tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
-    ): Pair<T?, Validation> {
-        val validation = Validation()
-
-        val qualifiedProfile = getQualifiedProfile(normalized, parentContext, validation)
-        val response = qualifiedProfile?.transformInternal(normalized, parentContext, tenant)
-
-        val transformed = response?.let {
-            validation.merge(it.second)
-            it.first
-        }
-        return Pair(transformed, validation)
-    }
-
     private val noProfilesError = FHIRError(
         code = "RONIN_PROFILE_001",
         severity = ValidationIssueSeverity.ERROR,
@@ -69,9 +52,13 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
     )
 
     /**
-     * Retrieves the qualified profile for the [resource]. If no profiles,
-     * or multiple profiles qualify, the default profile is used and an error
-     * is added to the [validation]. See notes on ProfileQualifier qualifies().
+     * Retrieves the qualified profile for the [resource]. transform() and
+     * validate() each call getQualifiedProfile() to select a profile to use.
+     *
+     * getQualifiedProfile() calls qualifies() on every profile in the
+     * MultipleProfileResource. 1 match is expected, >1 matches are an error,
+     * 0 matches selects the default profile and warns; if no default profile,
+     * 0 matches is an error. Warnings or errors are added to the [validation].
      */
     private fun getQualifiedProfile(
         resource: T,
@@ -98,5 +85,23 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
                 null
             }
         }
+    }
+
+    override fun transformInternal(
+        normalized: T,
+        parentContext: LocationContext,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
+    ): Pair<T?, Validation> {
+        val validation = Validation()
+
+        val qualified = getQualifiedProfile(normalized, parentContext, validation)
+        val response = qualified?.transformInternal(normalized, parentContext, tenant)
+
+        val transformed = response?.let {
+            validation.merge(it.second)
+            it.first
+        }
+        return Pair(transformed, validation)
     }
 }

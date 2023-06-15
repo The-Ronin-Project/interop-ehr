@@ -23,6 +23,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -128,7 +129,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "abc")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("phone"), systemExtension("abc"))
         }
@@ -169,7 +171,7 @@ class RoninContactPointTest {
     }
 
     @Test
-    fun `transform fails for telecom system - when concept map has no match`() {
+    fun `transform for telecom system - when concept map has no match - and source code is not in enum`() {
         registryClient = mockk {
             every {
                 getConceptMappingForEnum(
@@ -179,7 +181,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "xyz")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns null
         }
@@ -188,6 +191,11 @@ class RoninContactPointTest {
 
         val transformResult =
             roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        assertNotNull(transformResult.first)
+        assertEquals(
+            Code(value = "xyz"),
+            transformResult.first?.first()?.system
+        )
         val exception = assertThrows<IllegalArgumentException> {
             transformResult.second.alertIfErrors()
         }
@@ -200,7 +208,7 @@ class RoninContactPointTest {
     }
 
     @Test
-    fun `transform fails for telecom system - when concept map gives a result not in required value set`() {
+    fun `transform for telecom system - when concept map has a match - and the match is not in enum`() {
         registryClient = mockk {
             every {
                 getConceptMappingForEnum(
@@ -210,15 +218,21 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "xyz")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(useCoding("postal"), useExtension("xyz"))
+            } returns Pair(systemCoding("postal"), systemExtension("xyz"))
         }
         roninContactPoint = RoninContactPoint(registryClient)
         val telecom = listOf(ContactPoint(system = Code("xyz"), value = "8675309".asFHIR()))
 
         val transformResult =
             roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        assertNotNull(transformResult.first)
+        assertEquals(
+            Code(value = "postal", extension = listOf(systemExtension("xyz"))),
+            transformResult.first?.first()?.system
+        )
         val exception = assertThrows<IllegalArgumentException> {
             transformResult.second.alertIfErrors()
         }
@@ -226,6 +240,45 @@ class RoninContactPointTest {
             "Encountered validation error(s):\n" +
                 "ERROR INV_CONMAP_VALUE_SET: http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem " +
                 "mapped 'xyz' to 'postal' which is outside of required value set @ Patient.telecom[0].system",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `transform for telecom system - when concept map has no match - and source code is in enum`() {
+        registryClient = mockk {
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient.telecom.system",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
+                        code = Code(value = "phone")
+                    ),
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
+                )
+            } returns null
+        }
+        roninContactPoint = RoninContactPoint(registryClient)
+        val telecom = listOf(ContactPoint(system = Code("phone"), value = "8675309".asFHIR()))
+
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+
+        assertNotNull(transformResult.first)
+        assertEquals(
+            Code(value = "phone"),
+            transformResult.first?.first()?.system
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            transformResult.second.alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'phone' " +
+                "has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem " +
+                "@ Patient.telecom[0].system",
             exception.message
         )
     }
@@ -241,7 +294,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("phone"), systemExtension(""))
         }
@@ -291,7 +345,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
@@ -302,7 +357,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "planet")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns Pair(useCoding("home"), useExtension("planet"))
             every {
@@ -313,7 +369,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "uvw")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns null
             every {
@@ -324,7 +381,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "def")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns null
             every {
@@ -335,7 +393,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns null
         }
@@ -373,7 +432,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
@@ -384,7 +444,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "abc")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns null
             every {
@@ -395,7 +456,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns null
             every {
@@ -406,7 +468,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "xyz")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns null
         }
@@ -443,7 +506,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
@@ -454,7 +518,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "telephone")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("phone"), systemExtension("telephone"))
             every {
@@ -465,7 +530,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "phone")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("phone"), systemExtension("phone"))
         }
@@ -548,7 +614,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "phone")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("phone"), systemExtension("phone"))
             every {
@@ -559,7 +626,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "def")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns Pair(useCoding("home"), useExtension("def"))
         }
@@ -620,7 +688,7 @@ class RoninContactPointTest {
     }
 
     @Test
-    fun `transform fails for telecom use - when concept map has no match`() {
+    fun `transform for telecom use - when concept map has no match - and source code is not in enum`() {
         registryClient = mockk {
             every {
                 getConceptMappingForEnum(
@@ -630,7 +698,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
@@ -641,7 +710,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "xyz")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns null
         }
@@ -650,6 +720,11 @@ class RoninContactPointTest {
 
         val transformResult =
             roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        assertNotNull(transformResult.first)
+        assertEquals(
+            Code(value = "xyz"),
+            transformResult.first?.first()?.use
+        )
         val exception = assertThrows<IllegalArgumentException> {
             transformResult.second.alertIfErrors()
         }
@@ -662,7 +737,7 @@ class RoninContactPointTest {
     }
 
     @Test
-    fun `transform fails for telecom use - when concept map gives a result not in required value set`() {
+    fun `transform for telecom use - when concept map has a match - and the match is not in enum`() {
         registryClient = mockk {
             every {
                 getConceptMappingForEnum(
@@ -672,7 +747,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
@@ -683,7 +759,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "xyz")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns Pair(useCoding("postal"), useExtension("xyz"))
         }
@@ -692,6 +769,11 @@ class RoninContactPointTest {
 
         val transformResult =
             roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        assertNotNull(transformResult.first)
+        assertEquals(
+            Code(value = "postal", extension = listOf(useExtension("xyz"))),
+            transformResult.first?.first()?.use
+        )
         val exception = assertThrows<IllegalArgumentException> {
             transformResult.second.alertIfErrors()
         }
@@ -699,6 +781,57 @@ class RoninContactPointTest {
             "Encountered validation error(s):\n" +
                 "ERROR INV_CONMAP_VALUE_SET: http://projectronin.io/fhir/CodeSystem/test/ContactPointUse " +
                 "mapped 'xyz' to 'postal' which is outside of required value set @ Patient.telecom[0].use",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `transform for telecom use - when concept map has no match - and source code is in enum`() {
+        registryClient = mockk {
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient.telecom.system",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
+                        code = Code(value = "email")
+                    ),
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
+                )
+            } returns Pair(systemCoding("email"), systemExtension("email"))
+            every {
+                getConceptMappingForEnum(
+                    tenant,
+                    "Patient.telecom.use",
+                    Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
+                        code = Code(value = "home")
+                    ),
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
+                )
+            } returns null
+        }
+        roninContactPoint = RoninContactPoint(registryClient)
+        val telecom = listOf(ContactPoint(system = Code("email"), value = "8675309".asFHIR(), use = Code("home")))
+
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+
+        assertNotNull(transformResult.first)
+        assertEquals(
+            Code(value = "home"),
+            transformResult.first?.first()?.use
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            transformResult.second.alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'home' " +
+                "has no target defined in http://projectronin.io/fhir/CodeSystem/test/ContactPointUse " +
+                "@ Patient.telecom[0].use",
             exception.message
         )
     }
@@ -714,7 +847,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
@@ -725,7 +859,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns Pair(useCoding("home"), useExtension(""))
         }
@@ -796,7 +931,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
@@ -807,7 +943,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "planet")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns Pair(useCoding("home"), useExtension("planet"))
             every {
@@ -818,7 +955,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "uvw")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns null
             every {
@@ -829,7 +967,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "def")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns null
             every {
@@ -840,7 +979,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns null
         }
@@ -878,7 +1018,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
@@ -889,7 +1030,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "planet")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns Pair(useCoding("abc"), useExtension("planet"))
             every {
@@ -900,7 +1042,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "city")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns Pair(useCoding("def"), useExtension("city"))
             every {
@@ -911,7 +1054,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "villa")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns null
             every {
@@ -922,7 +1066,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "home")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns Pair(useCoding("home"), useExtension("home"))
             every {
@@ -933,7 +1078,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "work")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns Pair(useCoding("work"), useExtension("work"))
         }
@@ -976,7 +1122,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"),
                         code = Code(value = "email")
                     ),
-                    ContactPointSystem::class
+                    ContactPointSystem::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
             } returns Pair(systemCoding("email"), systemExtension("email"))
             every {
@@ -987,7 +1134,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "planet")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns Pair(useCoding("home"), useExtension("planet"))
             every {
@@ -998,7 +1146,8 @@ class RoninContactPointTest {
                         system = Uri("http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"),
                         code = Code(value = "city")
                     ),
-                    ContactPointUse::class
+                    ContactPointUse::class,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
             } returns Pair(useCoding("home"), useExtension("city"))
         }

@@ -30,6 +30,7 @@ import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
@@ -54,12 +55,37 @@ class RoninRespiratoryRateTest {
         every { mnemonic } returns "test"
     }
     private val respiratoryRateCode = Code("9279-1")
-    private val respiratoryRateCoding = Coding(system = CodeSystem.LOINC.uri, code = respiratoryRateCode)
+    private val respiratoryRateCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Respiratory Rate".asFHIR(),
+        code = respiratoryRateCode
+    )
     private val respiratoryRateCodingList = listOf(respiratoryRateCoding)
-    private val respiratoryRateCodingDisplay = Coding(system = CodeSystem.LOINC.uri, code = respiratoryRateCode, display = "Respiratory Rate".asFHIR())
-    private val respiratoryRateCodingDisplayList = listOf(respiratoryRateCodingDisplay)
-    private val respiratoryRateConceptDisplay = CodeableConcept(coding = respiratoryRateCodingDisplayList)
-    private val respiratoryRateConcept = CodeableConcept(coding = respiratoryRateCodingList)
+    private val respiratoryRateConcept = CodeableConcept(
+        text = "Respiratory Rate".asFHIR(),
+        coding = respiratoryRateCodingList
+    )
+
+    private val tenantRespiratoryRateCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Respiratory Rate".asFHIR(),
+        code = Code("bad-body-height")
+    )
+    private val tenantRespiratoryRateConcept = CodeableConcept(
+        text = "Tenant Respiratory Rate".asFHIR(),
+        coding = listOf(tenantRespiratoryRateCoding)
+    )
+    private val mappedTenantRespiratoryRateConcept = CodeableConcept(
+        text = "Respiratory Rate".asFHIR(),
+        coding = respiratoryRateCodingList
+    )
+    private val tenantRespiratoryRateSourceExtension = Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            tenantRespiratoryRateConcept
+        )
+    )
 
     private val vitalSignsCategoryCode = Code("vital-signs")
     private val vitalSignsCategoryCoding = Coding(
@@ -70,6 +96,9 @@ class RoninRespiratoryRateTest {
     private val vitalSignsCategoryConcept = CodeableConcept(coding = vitalSignsCategoryCodingList)
     private val vitalSignsCategoryConceptList = listOf(vitalSignsCategoryConcept)
 
+    // In this registry:
+    // Raw tenantRespiratoryRateCoding is successfully mapped to respiratoryRateCoding.
+    // Raw respiratoryRateCoding is not mapped, so triggers a concept mapping error.
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_RESPIRATORY_RATE.value)
@@ -77,50 +106,43 @@ class RoninRespiratoryRateTest {
         every {
             getConceptMapping(
                 tenant,
-                "Observation.category",
-                vitalSignsCategoryCoding,
-                RoninProfile.OBSERVATION_RESPIRATORY_RATE.value
-            )?.first
-        } returns vitalSignsCategoryCoding
-        every {
-            getConceptMapping(
-                tenant,
-                "Observation.category",
-                Coding(
-                    system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                    code = null
-                ),
-                RoninProfile.OBSERVATION_RESPIRATORY_RATE.value
+                "Observation.code",
+                respiratoryRateConcept
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                respiratoryRateCoding,
-                RoninProfile.OBSERVATION_RESPIRATORY_RATE.value
-            )?.first
-        } returns respiratoryRateCoding
+                tenantRespiratoryRateConcept
+            )
+        } returns Pair(respiratoryRateConcept, tenantRespiratoryRateSourceExtension)
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                Coding(
-                    system = CodeSystem.UCUM.uri,
-                    code = respiratoryRateCode
-                ),
-                RoninProfile.OBSERVATION_RESPIRATORY_RATE.value
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.UCUM.uri,
+                            code = respiratoryRateCode
+                        )
+                    )
+                )
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                Coding(
-                    system = CodeSystem.LOINC.uri,
-                    code = Code("1234")
-                ),
-                RoninProfile.OBSERVATION_RESPIRATORY_RATE.value
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.LOINC.uri,
+                            code = Code("1234")
+                        )
+                    )
+                )
             )
         } returns null
     }
@@ -145,7 +167,7 @@ class RoninRespiratoryRateTest {
                 type = DynamicValueType.DATE_TIME,
                 "2022-01-01T00:00:00Z"
             ),
-            code = CodeableConcept(text = "vital sign".asFHIR())
+            code = respiratoryRateConcept
         )
 
         assertFalse(roninRespiratoryRate.qualifies(observation))
@@ -258,7 +280,8 @@ class RoninRespiratoryRateTest {
             ),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -311,6 +334,7 @@ class RoninRespiratoryRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantRespiratoryRateSourceExtension),
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -369,7 +393,8 @@ class RoninRespiratoryRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -427,7 +452,8 @@ class RoninRespiratoryRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -485,7 +511,8 @@ class RoninRespiratoryRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -544,7 +571,8 @@ class RoninRespiratoryRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -602,7 +630,8 @@ class RoninRespiratoryRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -661,7 +690,8 @@ class RoninRespiratoryRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -730,7 +760,8 @@ class RoninRespiratoryRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
@@ -785,7 +816,8 @@ class RoninRespiratoryRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -840,6 +872,7 @@ class RoninRespiratoryRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantRespiratoryRateSourceExtension),
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -916,7 +949,8 @@ class RoninRespiratoryRateTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -957,7 +991,7 @@ class RoninRespiratoryRateTest {
                     value = "test".asFHIR()
                 )
             ),
-            code = respiratoryRateConcept,
+            code = tenantRespiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -984,7 +1018,7 @@ class RoninRespiratoryRateTest {
     }
 
     @Test
-    fun `transforms observation with all attributes`() {
+    fun `transforms observation with all attributes - maps Observation code`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(
@@ -1012,7 +1046,7 @@ class RoninRespiratoryRateTest {
             partOf = listOf(Reference(reference = "MedicationStatement/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
             category = vitalSignsCategoryConceptList,
-            code = respiratoryRateConceptDisplay,
+            code = tenantRespiratoryRateConcept,
             subject = localizeReferenceTest(mockReference), // check that it transforms
             focus = listOf(Reference(display = "focus".asFHIR())),
             encounter = Reference(reference = "Encounter/1234".asFHIR()),
@@ -1073,7 +1107,8 @@ class RoninRespiratoryRateTest {
                 Extension(
                     url = Uri("http://localhost/extension"),
                     value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                ),
+                tenantRespiratoryRateSourceExtension
             ),
             transformed.extension
         )
@@ -1115,7 +1150,7 @@ class RoninRespiratoryRateTest {
             transformed.category
         )
         assertEquals(
-            respiratoryRateConceptDisplay,
+            mappedTenantRespiratoryRateConcept,
             transformed.code
         )
         assertEquals(
@@ -1177,12 +1212,12 @@ class RoninRespiratoryRateTest {
     }
 
     @Test
-    fun `transforms observation with only required attributes`() {
+    fun `transforms observation with only required attributes - maps Observation code`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(source = Uri("source")),
             status = ObservationStatus.AMENDED.asCode(),
-            code = respiratoryRateConceptDisplay,
+            code = tenantRespiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1210,7 +1245,7 @@ class RoninRespiratoryRateTest {
         assertNull(transformed.language)
         assertNull(transformed.text)
         assertEquals(listOf<ContainedResource>(), transformed.contained)
-        assertEquals(listOf<Extension>(), transformed.extension)
+        assertEquals(listOf(tenantRespiratoryRateSourceExtension), transformed.extension)
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
@@ -1240,7 +1275,7 @@ class RoninRespiratoryRateTest {
             transformed.category
         )
         assertEquals(
-            respiratoryRateConceptDisplay,
+            mappedTenantRespiratoryRateConcept,
             transformed.code
         )
         assertEquals(
@@ -1277,12 +1312,48 @@ class RoninRespiratoryRateTest {
     }
 
     @Test
+    fun `transforms observation with only required attributes - fails if no concept map entry`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(source = Uri("source")),
+            status = ObservationStatus.AMENDED.asCode(),
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
+            category = vitalSignsCategoryConceptList,
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            )
+        )
+
+        val (transformed, validation) = roninRespiratoryRate.transform(observation, tenant)
+
+        val exception = assertThrows<java.lang.IllegalArgumentException> {
+            validation.alertIfErrors()
+        }
+        assertNull(transformed)
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value '9279-1' " +
+                "has no target defined in any Observation.code concept map for tenant 'test' " +
+                "@ Observation.code",
+            exception.message
+        )
+    }
+
+    @Test
     fun `transform inherits R4 validation`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(source = Uri("source")),
             status = Code("bad-status"),
-            code = respiratoryRateConceptDisplay,
+            code = tenantRespiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1334,7 +1405,8 @@ class RoninRespiratoryRateTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1386,7 +1458,8 @@ class RoninRespiratoryRateTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1438,7 +1511,8 @@ class RoninRespiratoryRateTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1490,7 +1564,8 @@ class RoninRespiratoryRateTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = respiratoryRateConceptDisplay,
+            extension = listOf(tenantRespiratoryRateSourceExtension),
+            code = respiratoryRateConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(

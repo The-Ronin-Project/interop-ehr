@@ -30,6 +30,7 @@ import com.projectronin.interop.fhir.r4.valueset.DocumentRelationshipType
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -1084,6 +1085,180 @@ class RoninDocumentReferenceTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_DOCREF_002: One, and only one, coding entry is allowed for type @ DocumentReference.type.coding",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if source document reference type extension is missing`() {
+        val documentReference = DocumentReference(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            type = CodeableConcept(
+                coding = docTypeCodingList,
+                text = "code".asFHIR()
+            ),
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = categoryCodingList
+                )
+            ),
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDocumentReference.validate(documentReference).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DOCREF_001: Tenant source Document Reference extension is missing or invalid @ DocumentReference.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if source document reference type extension has a bad url`() {
+        val documentReference = DocumentReference(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(
+                Extension(
+                    url = Uri(RoninExtension.TENANT_SOURCE_CONDITION_CODE.value),
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = docTypeCodingList,
+                            text = "code".asFHIR()
+                        )
+                    )
+                )
+            ),
+            type = CodeableConcept(
+                coding = docTypeCodingList,
+                text = "code".asFHIR()
+            ),
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = categoryCodingList
+                )
+            ),
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDocumentReference.validate(documentReference).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DOCREF_001: Tenant source Document Reference extension is missing or invalid @ DocumentReference.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if source document reference type extension has the wrong datatype`() {
+        val documentReference = DocumentReference(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(
+                Extension(
+                    url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+                    value = DynamicValue(
+                        DynamicValueType.CODING,
+                        docTypeCoding
+                    )
+                )
+            ),
+            type = CodeableConcept(
+                coding = docTypeCodingList,
+                text = "code".asFHIR()
+            ),
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            category = listOf(
+                CodeableConcept(
+                    coding = categoryCodingList
+                )
+            ),
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDocumentReference.validate(documentReference).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DOCREF_001: Tenant source Document Reference extension is missing or invalid @ DocumentReference.extension",
             exception.message
         )
     }

@@ -13,7 +13,7 @@ import com.projectronin.interop.fhir.ronin.error.RoninInvalidDynamicValueError
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
-import com.projectronin.interop.fhir.ronin.profile.RoninExtension
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.hasDayFormat
 import com.projectronin.interop.fhir.validate.FHIRError
@@ -27,12 +27,17 @@ import org.springframework.stereotype.Component
 import java.time.LocalDateTime
 
 @Component
-class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
-    BaseRoninObservation(
+class RoninLaboratoryResult(
+    normalizer: Normalizer,
+    localizer: Localizer,
+    registryClient: NormalizationRegistryClient
+) :
+    BaseRoninProfileObservation(
         R4ObservationValidator,
         RoninProfile.OBSERVATION_LABORATORY_RESULT.value,
         normalizer,
-        localizer
+        localizer,
+        registryClient
     ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
@@ -40,6 +45,14 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
     override val qualifyingCategories =
         listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("laboratory")))
+
+    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
+    override val qualifyingCodes: List<Coding> by lazy {
+        registryClient.getRequiredValueSet(
+            "Observation.code",
+            profile
+        )
+    }
 
     // Reference checks - override BaseRoninObservation value lists as needed for RoninLaboratoryResult
     override val validDerivedFromValues = listOf(
@@ -213,16 +226,10 @@ class RoninLaboratoryResult(normalizer: Normalizer, localizer: Localizer) :
             checkNotNull(normalized.id, requiredIdError, parentContext)
         }
 
-        val tenantSourceCodeExtension = getExtensionOrEmptyList(
-            RoninExtension.TENANT_SOURCE_OBSERVATION_CODE,
-            normalized.code
-        )
-
         // TODO: specimen - requires url == http://projectronin.io/fhir/StructureDefinition/ronin-specimen
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            extension = normalized.extension + tenantSourceCodeExtension,
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
         return Pair(transformed, validation)

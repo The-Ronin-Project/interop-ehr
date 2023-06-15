@@ -1,5 +1,6 @@
 package com.projectronin.interop.fhir.ronin.resource
 
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.fhir.r4.validate.resource.R4EncounterValidator
@@ -40,10 +41,9 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
     private val requiredIdentifierSystemError = RequiredFieldError(Identifier::system)
     private val requiredIdentifierValueError = RequiredFieldError(Identifier::value)
 
-    private val requiredExtensionError = RequiredFieldError(Encounter::extension)
     private val requiredExtensionClassError = FHIRError(
         code = "RONIN_ENC_001",
-        description = "Encounter requires source class extension",
+        description = "Tenant source encounter class extension is missing or invalid",
         severity = ValidationIssueSeverity.ERROR,
         location = LocationContext(Encounter::extension)
     )
@@ -63,10 +63,10 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
                 )
             }
 
-            checkNotNull(element.extension, requiredExtensionError, parentContext)
             checkTrue(
                 element.extension.any {
-                    it.url == RoninExtension.TENANT_SOURCE_ENCOUNTER_CLASS.uri
+                    it.url == RoninExtension.TENANT_SOURCE_ENCOUNTER_CLASS.uri &&
+                        it.value?.type == DynamicValueType.CODING
                 },
                 requiredExtensionClassError,
                 parentContext
@@ -95,18 +95,28 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
         }
     }
 
+    override fun mapInternal(
+        normalized: Encounter,
+        parentContext: LocationContext,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
+    ): Pair<Encounter, Validation> {
+        // TODO: Check concept maps for class code
+        val classExtension = getExtensionOrEmptyList(RoninExtension.TENANT_SOURCE_ENCOUNTER_CLASS, normalized.`class`)
+        val mapped = normalized.copy(
+            extension = normalized.extension + classExtension
+        )
+        return Pair(mapped, Validation())
+    }
+
     override fun transformInternal(
         normalized: Encounter,
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
     ): Pair<Encounter?, Validation> {
-        // TODO: Check concept maps for class code
-        val classExtension = getExtensionOrEmptyList(RoninExtension.TENANT_SOURCE_ENCOUNTER_CLASS, normalized.`class`)
-
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            extension = normalized.extension + classExtension,
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
         return Pair(transformed, Validation())

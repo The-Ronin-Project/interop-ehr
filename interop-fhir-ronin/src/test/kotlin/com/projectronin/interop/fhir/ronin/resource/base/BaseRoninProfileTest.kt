@@ -252,6 +252,7 @@ class BaseRoninProfileTest {
     @Test
     fun `sets profile on meta transform for null meta`() {
         val profile = object : TestProfile(normalizer, localizer) {
+            override fun validateRonin(element: Location, parentContext: LocationContext, validation: Validation) {}
             fun transformMeta(meta: Meta?): Meta {
                 return meta.transform()
             }
@@ -264,6 +265,7 @@ class BaseRoninProfileTest {
     @Test
     fun `sets profile on meta transform for non-null meta`() {
         val profile = object : TestProfile(normalizer, localizer) {
+            override fun validateRonin(element: Location, parentContext: LocationContext, validation: Validation) {}
             fun transformMeta(meta: Meta?): Meta {
                 return meta.transform()
             }
@@ -705,7 +707,7 @@ class BaseRoninProfileTest {
             return Pair(normalized.copy(extension = tenantSourceCodeExtension), Validation())
         }
 
-        override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
+        override fun validateRonin(element: Location, parentContext: LocationContext, validation: Validation) {
             validation.apply {
                 requireMeta(element.meta, parentContext, validation)
                 requireRoninIdentifiers(element.identifier, parentContext, validation)

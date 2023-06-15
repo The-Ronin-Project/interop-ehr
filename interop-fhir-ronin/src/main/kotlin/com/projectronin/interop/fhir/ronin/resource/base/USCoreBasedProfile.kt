@@ -17,20 +17,14 @@ abstract class USCoreBasedProfile<T : Resource<T>>(
     localizer: Localizer
 ) :
     BaseRoninProfile<T>(extendedProfile, profile, normalizer, localizer) {
-    /**
-     * Validates the [element] against Ronin's rules.
-     */
-    abstract fun validateRonin(element: T, parentContext: LocationContext, validation: Validation)
 
     /**
-     * Validates the [element] against US Core's rules.
+     * Validates the [element] against [USCore](https://build.fhir.org/ig/HL7/US-Core/profiles-and-extensions.html)
      */
     abstract fun validateUSCore(element: T, parentContext: LocationContext, validation: Validation)
 
     /**
      * Validates both Ronin and USCore against their respective rules.
-     * Supply [tenant] for a MultipleProfileResource in the RCDM model
-     * (Observation, Condition, DiagnosticReport...) otherwise omit [tenant].
      */
     override fun validate(element: T, parentContext: LocationContext, validation: Validation) {
         validateRonin(element, parentContext, validation)

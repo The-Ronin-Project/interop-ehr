@@ -16,8 +16,8 @@ import java.time.LocalDateTime
 
 abstract class BaseProfile<T : Resource<T>>(
     extendedProfile: ProfileValidator<T>? = null,
-    private val normalizer: Normalizer,
-    private val localizer: Localizer
+    protected val normalizer: Normalizer,
+    protected val localizer: Localizer
 ) : BaseValidator<T>(extendedProfile), ProfileTransformer<T>, ProfileQualifier<T> {
     protected val logger = KotlinLogging.logger(this::class.java.name)
 
@@ -34,6 +34,20 @@ abstract class BaseProfile<T : Resource<T>>(
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime? = null
     ): Pair<T?, Validation>
+
+    /**
+     * Access the DataNormalizationRegistry to concept map any Code, Coding, or
+     * CodeableConcept attributes in the [normalized] element based off [tenant]
+     * prior to any other actions in transform(). Validation reports any errors.
+     */
+    open fun mapInternal(
+        normalized: T,
+        parentContext: LocationContext,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime? = null
+    ): Pair<T?, Validation> {
+        return Pair(normalized, Validation())
+    }
 
     /**
      * Validates the [resource] for the [validation].
@@ -59,15 +73,16 @@ abstract class BaseProfile<T : Resource<T>>(
 
         val normalized = normalizer.normalize(original, tenant)
 
-        val (transformed, transformValidation) = transformInternal(normalized, currentContext, tenant)
-        validation.merge(transformValidation)
+        val (mapped, mappingValidation) = mapInternal(normalized, currentContext, tenant)
+        validation.merge(mappingValidation)
 
-        val localizedTransform = transformed?.let { localizer.localize(transformed, tenant) }
-        localizedTransform?.let {
-            validateTransformation(it, currentContext, validation)
-        }
+        val (transformed, transformValidation) = mapped?.let { transformInternal(mapped, currentContext, tenant) } ?: Pair(null, null)
+        transformValidation?.let { validation.merge(transformValidation) }
 
-        val successfullyTransformed = if (validation.hasErrors()) null else localizedTransform
-        return Pair(successfullyTransformed, validation)
+        val localized = transformed?.let { localizer.localize(transformed, tenant) }
+        localized?.let { validateTransformation(localized, currentContext, validation) }
+
+        val validated = if (validation.hasErrors()) null else localized
+        return Pair(validated, validation)
     }
 }

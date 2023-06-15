@@ -63,15 +63,16 @@ class RoninEncounterTest {
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
+    private val encounterCoding = Coding(
+        system = Uri("http://terminology.hl7.org/CodeSystem/v3-ActCode"),
+        code = Code("AMB"),
+        display = "ambulatory".asFHIR()
+    )
     private val encounterClassExtension = Extension(
         url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceEncounterClass"),
         value = DynamicValue(
             type = DynamicValueType.CODING,
-            value = Coding(
-                system = Uri("http://terminology.hl7.org/CodeSystem/v3-ActCode"),
-                code = Code("AMB"),
-                display = "ambulatory".asFHIR()
-            )
+            value = encounterCoding
         )
     )
     private val roninEncounter = RoninEncounter(normalizer, localizer)
@@ -1186,6 +1187,132 @@ class RoninEncounterTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Encounter.subject",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails if missing required source code extension`() {
+        val encounter = Encounter(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = EncounterStatus.CANCELLED.asCode(),
+            `class` = Coding(code = Code("OBSENC")),
+            type = listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninEncounter.validate(encounter).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_ENC_001: Tenant source encounter class extension is missing or invalid @ Encounter.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails if source code extension has wrong url`() {
+        val encounter = Encounter(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = EncounterStatus.CANCELLED.asCode(),
+            `class` = Coding(code = Code("OBSENC")),
+            type = listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninEncounter.validate(encounter).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_ENC_001: Tenant source encounter class extension is missing or invalid @ Encounter.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails if source code extension has wrong datatype`() {
+        val encounter = Encounter(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.ENCOUNTER.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = EncounterStatus.CANCELLED.asCode(),
+            `class` = Coding(code = Code("OBSENC")),
+            type = listOf(CodeableConcept(coding = listOf(Coding(code = Code("code"))))),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninEncounter.validate(encounter).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_ENC_001: Tenant source encounter class extension is missing or invalid @ Encounter.extension",
             exception.message
         )
     }

@@ -3,6 +3,7 @@ package com.projectronin.interop.fhir.ronin.resource.diagnosticReport
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.r4.resource.DiagnosticReport
+import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
@@ -11,6 +12,9 @@ import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
+import com.projectronin.interop.fhir.validate.validation
+import com.projectronin.interop.tenant.config.model.Tenant
+import java.time.LocalDateTime
 
 /**
  * Base class capable of handling common tasks associated to Ronin Condition profiles.
@@ -51,5 +55,25 @@ abstract class BaseRoninDiagnosticReport(
         validation.apply {
             checkNotNull(element.code, requiredCodeError, parentContext)
         }
+    }
+
+    private val requiredIdError = RequiredFieldError(DiagnosticReport::id)
+
+    override fun transformInternal(
+        normalized: DiagnosticReport,
+        parentContext: LocationContext,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
+    ): Pair<DiagnosticReport?, Validation> {
+        val validation = validation {
+            checkNotNull(normalized.id, requiredIdError, parentContext)
+        }
+
+        val transformed = normalized.copy(
+            meta = normalized.meta.transform(),
+            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
+        )
+
+        return Pair(transformed, validation)
     }
 }

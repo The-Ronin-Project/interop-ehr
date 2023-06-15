@@ -172,6 +172,42 @@ class MultipleProfileResourceTest {
         assertEquals(transformedLocation, transformed)
     }
 
+    @Test
+    fun `transform with no qualifying profiles and default profile`() {
+        val original = mockk<Observation> {
+            every { id } returns Id("1234")
+        }
+        every { normalizer.normalize(original, tenant) } returns original
+
+        val roninObservation = mockk<Observation> {
+            every { id } returns Id("test-1234")
+        }
+        every { localizer.localize(roninObservation, tenant) } returns roninObservation
+
+        val profile1 = mockk<BaseProfile<Observation>>()
+        val profile2 = mockk<BaseProfile<Observation>>()
+        val profile3 = mockk<RoninObservation>()
+        val roninObservations = TestProfileWithDefault(normalizer, localizer, listOf(profile1, profile2), profile3)
+
+        every { profile1.qualifies(original) } returns false
+        every { profile2.qualifies(original) } returns false
+        every { profile3.qualifies(original) } returns true
+        every { profile3.transformInternal(original, LocationContext(Observation::class), tenant) } returns Pair(
+            roninObservation,
+            Validation()
+        )
+        every { profile1.qualifies(roninObservation) } returns false
+        every { profile2.qualifies(roninObservation) } returns false
+        every { profile3.qualifies(roninObservation) } returns true
+        every { profile3.validate(roninObservation, LocationContext(Observation::class)) } returns Validation()
+
+        val (transformed, validation) = roninObservations.transform(original, tenant)
+        validation.alertIfErrors()
+
+        transformed!!
+        assertEquals(roninObservation, transformed)
+    }
+
     private class TestMultipleProfileResource(
         normalizer: Normalizer,
         localizer: Localizer,

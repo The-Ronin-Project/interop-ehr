@@ -20,20 +20,21 @@ import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 
 /**
- * Base class capable of handling common tasks associated to Ronin Observation profiles.
+ * Base class capable of handling common tasks associated to Vital Sign profiles
  */
 abstract class BaseRoninVitalSign(
     extendedProfile: ProfileValidator<Observation>,
     profile: String,
     normalizer: Normalizer,
     localizer: Localizer,
-    protected val registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient
 ) :
-    BaseRoninObservation(
+    BaseRoninProfileObservation(
         extendedProfile,
         profile,
         normalizer,
-        localizer
+        localizer,
+        registryClient
     ) {
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry

@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import com.projectronin.interop.common.enums.CodedEnum
 import com.projectronin.interop.common.jackson.JacksonUtil
 import com.projectronin.interop.datalake.oci.client.OCIClient
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
@@ -27,12 +28,14 @@ import kotlin.reflect.KClass
  * 1. All value sets entries will have a profile URL and a null tenant.
  * 2. All concept maps will have a tenant.
  * 3. Some concept maps might not have a profile URL.
+ * 4. When multiple concept maps match an elementName (Ex: Observation.code)
+ *    merge element lists from all matches into 1 concept map and use that.
  */
 
 @Component
 class NormalizationRegistryClient(
     private val ociClient: OCIClient,
-    @Value("\${oci.infx.registry.file:DataNormalizationRegistry/v2/registry.json}")
+    @Value("\${oci.infx.registry.file:DataNormalizationRegistry/v3/registry.json}")
     private val registryFileName: String,
     @Value("\${oci.infx.registry.refresh.hours:12}")
     private val defaultReloadHours: String = "12" // use string to prevent issues
@@ -47,94 +50,195 @@ class NormalizationRegistryClient(
     private var registryLastUpdated = LocalDateTime.MIN
 
     /**
-     * Get a concept map from the DataNormalizationRegistry.
-     * Returns a [Pair] with the transformed [Coding] as the first and an [Extension] as the second,
+     * Get a CodeableConcept mapping from the DataNormalizationRegistry.
+     * The input CodeableConcept.coding value and system values must not be null.
+     * Return a [Pair] with the transformed [CodeableConcept] as the first and a CodeableConcept [Extension] as the second,
      * or null if no such mapping could be found. The [Extension] represents the original value before mapping.
-     * @param tenant the [Tenant] this ConceptMap applies to.
-     * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
-     * @param coding a FHIR [Coding] to be mapped. value and system must not be null.
-     * @param profileUrl the URL of an [RCDM](https://supreme-garbanzo-99254d0f.pages.github.io/ig/Ronin-Implementation-Guide-Home-List-Profiles.html)
-     * or FHIR profile, which you can find listed in the RCDM and in enum class [RoninProfile](com.projectronin.interop.fhir.ronin.normalization.RoninProfile),
+     */
+    fun getConceptMapping(
+        tenant: Tenant,
+        elementName: String,
+        codeableConcept: CodeableConcept,
+        forceCacheReloadTS: LocalDateTime? = null
+    ): Pair<CodeableConcept, Extension>? {
+        val cacheKey = CacheKey(
+            registryType = NormalizationRegistryItem.RegistryType.ConceptMap,
+            elementName = elementName,
+            tenantId = tenant.mnemonic
+        )
+        val registryItem = getConceptMapItem(cacheKey, forceCacheReloadTS)
+        return registryItem?.let { codeableConcept.getConceptMapping(registryItem) }
+    }
+
+    /**
+     * Get a Coding mapping from the DataNormalizationRegistry.
+     * The input Coding value and system must not be null.
+     * Return a [Pair] with the transformed [Coding] as the first and a Coding [Extension] as the second,
      * or null to match any element of the type [elementName].
      */
     fun getConceptMapping(
         tenant: Tenant,
         elementName: String,
         coding: Coding,
-        profileUrl: String? = null,
         forceCacheReloadTS: LocalDateTime? = null
     ): Pair<Coding, Extension>? {
         val cacheKey = CacheKey(
             registryType = NormalizationRegistryItem.RegistryType.ConceptMap,
             elementName = elementName,
-            tenantId = tenant.mnemonic,
-            profileUrl = profileUrl
+            tenantId = tenant.mnemonic
         )
-        val registryItem = getConceptMapItem(cacheKey, forceCacheReloadTS) ?: return null
-        return getConceptMapping(registryItem, coding)
+        val registryItem = getConceptMapItem(cacheKey, forceCacheReloadTS)
+        return registryItem?.let { coding.getConceptMapping(registryItem) }
     }
 
     /**
      * Get a concept map from the DataNormalizationRegistry whose result matches an enum class.
      * Returns a [Pair] with the transformed [Coding] as the first and an [Extension] as the second,
      * or null if no such mapping could be found. The [Extension] represents the original value before mapping.
-     * @param tenant the [Tenant] this ConceptMap applies to
-     * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
-     * @param coding a FHIR [Coding] to be mapped. value and system must not be null.
-     * @param enumClass a class that enumerates the values the caller can expect as return values from this concept map.
-     * @param profileUrl URL of an RCDM or FHIR profile, or null to match any element of the type [elementName].
+     * The enum class enumerates the values the caller can expect as return values from this concept map.
+     * If there is no concept map found, but the input Coding.code value is correct for the enumClass,
+     * return the input [Coding] with a source [Extension] using the enumExtensionUrl provided by the caller.
      */
     fun <T : CodedEnum<T>> getConceptMappingForEnum(
         tenant: Tenant,
         elementName: String,
         coding: Coding,
         enumClass: KClass<T>,
-        profileUrl: String? = null,
+        enumExtensionUrl: String,
         forceCacheReloadTS: LocalDateTime? = null
     ): Pair<Coding, Extension>? {
         val cacheKey = CacheKey(
             registryType = NormalizationRegistryItem.RegistryType.ConceptMap,
             elementName = elementName,
-            tenantId = tenant.mnemonic,
+            tenantId = tenant.mnemonic
+        )
+        val registryItem = getConceptMapItem(cacheKey, forceCacheReloadTS)
+        val codedEnum = enumClass.java.enumConstants.find { it.code == coding.code?.value }
+        return codedEnum?.let {
+            Pair(coding, createCodingExtension(enumExtensionUrl, coding))
+        } ?: registryItem?.let { coding.getConceptMapping(registryItem) }
+    }
+
+    /**
+     * Get a value set from the DataNormalizationRegistry.
+     * Returns a [List] or null if no such value set could be found.
+     * @param elementName the name of the element being mapped, i.e.
+     *        "Appointment.status" or "Patient.telecom.use".
+     * @param profileUrl URL of an RCDM or FHIR profile
+     */
+    fun getValueSet(
+        elementName: String,
+        profileUrl: String,
+        forceCacheReloadTS: LocalDateTime? = null
+    ): List<Coding> {
+        val cacheKey = CacheKey(
+            registryType = NormalizationRegistryItem.RegistryType.ValueSet,
+            elementName = elementName,
             profileUrl = profileUrl
         )
-        val registryItem = getConceptMapItem(cacheKey, forceCacheReloadTS) ?: return null
-        val codedEnum = enumClass.java.enumConstants.find { it.code == coding.code?.value }
-        return codedEnum?.let { Pair(coding, createExtension(registryItem, coding)) } ?: getConceptMapping(
-            registryItem,
-            coding
+        return getValueSetRegistryItemValues(
+            getValueSetItem(cacheKey, forceCacheReloadTS)
         )
     }
 
-    private fun getConceptMapping(conceptMapItem: ConceptMapItem, coding: Coding): Pair<Coding, Extension>? {
-        val sourceVal = coding.code?.value ?: return null
-        val sourceSystem = coding.system?.value ?: return null
-        val tenantAgnosticSourceSystem = getTenantAgnosticCodeSystem(sourceSystem)
-        val target = conceptMapItem.map?.get(SourceKey(sourceVal, tenantAgnosticSourceSystem)) ?: return null
+    /**
+     * Get a value set from the DataNormalizationRegistry, when that value set
+     * is required (not preferred or example) for that element, per the profile.
+     * @param elementName the name of the element being mapped, i.e.
+     *        "Appointment.status" or "Patient.telecom.use".
+     * @param profileUrl URL of an RCDM or FHIR profile
+     * @throws MissingNormalizationContentException if value set is not found.
+     */
+    fun getRequiredValueSet(
+        elementName: String,
+        profileUrl: String,
+        forceCacheReloadTS: LocalDateTime? = null
+    ): List<Coding> {
+        return getValueSet(elementName, profileUrl, forceCacheReloadTS).takeIf { it.isNotEmpty() }
+            ?: throw MissingNormalizationContentException("Required value set for $profileUrl and $elementName not found")
+    }
+
+    /**
+     * Find a CodeableConcept mapping in the DataNormalizationRegistry that
+     * matches the Coding entries in the input CodeableConcept. The match is on
+     * system and value; other Coding attributes are ignored. Coding lists that
+     * match must contain the same system and value pairs, but in any order.
+     *
+     * When a match is found, the returned CodeableConcept will contain Coding
+     * entry(ies) with these 4 attributes only: system, code, display, version.
+     * These attributes come from the group.source, target.code, target.display,
+     * and group.targetVersion values from the DataNormalizationRegistry.
+     * also see readGroupElementCode()
+     */
+    private fun CodeableConcept.getConceptMapping(conceptMapItem: ConceptMapItem): Pair<CodeableConcept, Extension>? {
+        val sourceKeys = this.coding.map {
+            val sourceVal = it.code?.value ?: return null
+            val sourceSystem = it.system?.value ?: return null
+            SourceKey(sourceVal, sourceSystem)
+        }.toSet()
+        val target = conceptMapItem.map[SourceConcept(sourceKeys)] ?: return null
+
+        // if elementName is a CodeableConcept datatype: expect 1+ target.element
         return Pair(
-            coding.copy(
-                system = Uri(target.system),
-                code = Code(target.value),
-                display = target.display.asFHIR(),
-                version = target.version.asFHIR()
+            this.copy(
+                text = target.text?.asFHIR(),
+                coding = target.element.map {
+                    Coding(
+                        system = Uri(it.system),
+                        code = Code(it.value),
+                        display = it.display.asFHIR(),
+                        version = it.version.asFHIR()
+                    )
+                }
             ),
-            createExtension(conceptMapItem, coding)
+            createCodeableConceptExtension(conceptMapItem, this)
         )
     }
 
-    private fun createExtension(conceptMapItem: ConceptMapItem, coding: Coding) = Extension(
+    /**
+     * Find a Coding mapping in the DataNormalizationRegistry that matches the
+     * input Coding system and value. Matching ignores other attributes.
+     *
+     * When a match is found, the returned Coding will contain these attributes
+     * only: system, code, display, version.These attributes come from the
+     * group.source, target.code, target.display, and group.targetVersion
+     * values from the DataNormalizationRegistry.
+     */
+    private fun Coding.getConceptMapping(conceptMapItem: ConceptMapItem): Pair<Coding, Extension>? {
+        val sourceVal = this.code?.value ?: return null
+        val sourceSystem = this.system?.value ?: return null
+        val agnosticSourceSystem = getTenantAgnosticCodeSystem(sourceSystem)
+        val sourceKey = setOf(SourceKey(sourceVal, agnosticSourceSystem))
+        val target = conceptMapItem.map[SourceConcept(sourceKey)] ?: return null
+
+        // if elementName is a Code or Coding datatype: expect 1 target.element
+        return target.element.first().let {
+            Pair(
+                Coding(
+                    system = Uri(it.system),
+                    code = Code(it.value),
+                    display = it.display.asFHIR(),
+                    version = it.version.asFHIR()
+                ),
+                createCodingExtension(conceptMapItem, this)
+            )
+        }
+    }
+
+    private fun createCodeableConceptExtension(conceptMapItem: ConceptMapItem, codeableConcept: CodeableConcept) = Extension(
+        url = Uri(conceptMapItem.source_extension_url),
+        value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = codeableConcept)
+    )
+
+    private fun createCodingExtension(conceptMapItem: ConceptMapItem, coding: Coding) = Extension(
         url = Uri(conceptMapItem.source_extension_url),
         value = DynamicValue(type = DynamicValueType.CODING, value = coding)
     )
 
-    // checks if the cached item needs a reload. Also reloads registry if needed
-    private fun reloadNeeded(key: CacheKey, forceCacheReloadTS: LocalDateTime?): Boolean {
-        val defaultReloadTime = LocalDateTime.now().minusHours(defaultReloadHours.toLong())
-        if (registryLastUpdated.isBefore(forceCacheReloadTS ?: defaultReloadTime)) {
-            registry = getNewRegistry()
-        }
-        return itemLastUpdated[key]?.isBefore(forceCacheReloadTS ?: defaultReloadTime) ?: true
-    }
+    private fun createCodingExtension(extensionUrl: String, coding: Coding) = Extension(
+        url = Uri(extensionUrl),
+        value = DynamicValue(type = DynamicValueType.CODING, value = coding)
+    )
 
     private fun getConceptMapItem(
         key: CacheKey,
@@ -144,29 +248,105 @@ class NormalizationRegistryClient(
             conceptMapCache.invalidate(key)
         }
 
-        val cachedItem = conceptMapCache.getIfPresent(key) // exact match
-            ?: conceptMapCache.getIfPresent(key.copy(profileUrl = null)) // universal profile
+        val cachedItem = conceptMapCache.getIfPresent(key)
         return if (cachedItem == null) {
             val matchingItems = registry.filter {
                 it.getRegistryItemType() == key.registryType &&
                     it.data_element == key.elementName &&
                     it.tenant_id == key.tenantId
             }
-            // check for exact profile match, then fall back to universal profile
-            val registryItem = matchingItems.find { it.profile_url == key.profileUrl }
-                ?: matchingItems.find { it.profile_url == null }
-
-            registryItem?.let {
-                val conceptMapItem =
-                    ConceptMapItem(map = getConceptMapData(it.filename), source_extension_url = it.source_extension_url)
-                val newKey = key.copy(profileUrl = registryItem.profile_url)
-                itemLastUpdated[newKey] = LocalDateTime.now()
-                conceptMapCache.put(newKey, conceptMapItem)
-                conceptMapItem
+            if (matchingItems.isEmpty()) {
+                null
+            } else {
+                val concatenated = ConceptMapItem(
+                    matchingItems.map { item ->
+                        getConceptMapData(item.filename).entries
+                    }.flatten().associate { it.toPair() },
+                    matchingItems.map { it.source_extension_url }
+                        .distinct().singleOrNull()
+                        ?: throw MissingNormalizationContentException(
+                            "Concept map(s) for tenant '${matchingItems.first().tenant_id}' and ${matchingItems.first().data_element} have missing or inconsistent source extension URLs"
+                        )
+                )
+                itemLastUpdated[key] = LocalDateTime.now()
+                conceptMapCache.put(key, concatenated)
+                concatenated
             }
         } else {
             cachedItem
         }
+    }
+
+    private fun getTenantAgnosticCodeSystem(system: String): String =
+        if (RoninConceptMap.CODE_SYSTEMS.isMappedUri(system)) {
+            RoninConceptMap.CODE_SYSTEMS.toTenantAgnosticUri(system)
+        } else {
+            system
+        }
+
+    /**
+     * Read a ConceptMap group.element.code value into a SourceConcept so that
+     * we can match it against the Coding entries from a source CodeableConcept.
+     * group.element.code may be a simple code value, but for maps of
+     * CodeableConcept to CodeableConcept it will have a complex format, i.e.
+     * ```
+     * {[{a, b, c, d}], e}
+     * {[{a, b, c}, {f, g, h}], e}
+     * ```
+     */
+    private fun readGroupElementCode(
+        groupElementCode: String,
+        tenantAgnosticSourceSystem: String
+    ): SourceConcept {
+        // groupElementCode:
+        //   Normal: {[{21704910, Potassium Level, https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72, true}, {2823-3, null, http://loinc.org, false}], Potassium Level}
+        //     Code values are undecorated as received from the source.
+        //     Coding attributes: 0 code, 1 display, 2 system, 3 userSelected
+        //   Staging: {[{SNOMED#246111003, null, http://snomed.info/sct}, {EPIC#42388, anatomic stage/prognostic group, urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - ANATOMIC STAGE/PROGNOSTIC GROUP}
+        //     Code value looks weird. That is expected. See OCI bucket prod-experimentation > psj_data_exploration > observations_from_conditions_stage
+        //     Coding attributes: 0 code, 1 display, 2 system
+
+        if (!groupElementCode.contains('{')) { // an unformatted code value
+            return SourceConcept(
+                element = setOf(
+                    SourceKey(
+                        value = groupElementCode,
+                        system = tenantAgnosticSourceSystem
+                    )
+                )
+            )
+        }
+        val sourceKeyArray = groupElementCode
+            .substring(
+                groupElementCode.indexOf("[") + 1,
+                groupElementCode.indexOf("]")
+            ) // outer []
+            .trim(' ').trim('{').trim('}') // outer {}
+            .split(Regex("}\\s*,\\s*\\{")) // list of Coding
+            .map { coding -> coding.split(",").map { it.trim(' ') } }
+
+        // sourceArrayMap:
+        // 0:
+        //    0: 21704910
+        //    1: Potassium Level
+        //    2: https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72
+        //    3: true
+        // 1:
+        //    0: 2823-3
+        //    1: null
+        //    2: http://loinc.org
+        //    3: false
+        // the returned SourceConcept.element is a Map<SourceKey>
+        //   SourceKey("21704910", "https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72")
+        //   SourceKey("2823-3", "http://loinc.org")
+        return SourceConcept(
+            sourceKeyArray.map {
+                SourceKey(
+                    value = it[0],
+                    system = it[2]
+                )
+            }.toSet()
+        )
     }
 
     private fun getValueSetItem(
@@ -190,6 +370,28 @@ class NormalizationRegistryClient(
         }
     }
 
+    private fun getValueSetRegistryItemValues(valueSetItem: ValueSetItem?): List<Coding> {
+        return valueSetItem?.set?.map {
+            Coding(
+                system = Uri(it.system),
+                code = Code(it.value),
+                display = it.display.asFHIR(),
+                version = it.version.asFHIR()
+            )
+        } ?: emptyList()
+    }
+
+    /**
+     * Checks if the cached item needs a reload. Also reloads registry if needed
+     */
+    private fun reloadNeeded(key: CacheKey, forceCacheReloadTS: LocalDateTime?): Boolean {
+        val defaultReloadTime = LocalDateTime.now().minusHours(defaultReloadHours.toLong())
+        if (registryLastUpdated.isBefore(forceCacheReloadTS ?: defaultReloadTime)) {
+            registry = getNewRegistry()
+        }
+        return itemLastUpdated[key]?.isBefore(forceCacheReloadTS ?: defaultReloadTime) ?: true
+    }
+
     internal fun getNewRegistry(): List<NormalizationRegistryItem> {
         return try {
             registryLastUpdated = LocalDateTime.now()
@@ -204,78 +406,44 @@ class NormalizationRegistryClient(
         }
     }
 
-    internal fun getConceptMapData(filename: String): Map<SourceKey, TargetValue> {
+    internal fun getConceptMapData(filename: String): Map<SourceConcept, TargetConcept> {
         val conceptMap = try {
-            JacksonUtil.readJsonObject(ociClient.getObjectFromINFX(filename)!!, ConceptMap::class)
+            JacksonUtil.readJsonObject(
+                ociClient.getObjectFromINFX(filename)!!,
+                ConceptMap::class
+            )
         } catch (e: Exception) {
             logger.info { e.message }
             return emptyMap()
         }
         // squish ConceptMap into more usable form
-        val mutableMap = mutableMapOf<SourceKey, TargetValue>()
+        val mutableMap = mutableMapOf<SourceConcept, TargetConcept>()
         conceptMap.group.forEach forEachGroup@{ group ->
             val targetSystem = group.target?.value ?: return@forEachGroup
             val sourceSystem = group.source?.value ?: return@forEachGroup
             val targetVersion = group.targetVersion?.value ?: return@forEachGroup
             val agnosticSourceSystem = getTenantAgnosticCodeSystem(sourceSystem)
             group.element?.forEach forEachElement@{ element ->
+                val targetText = element.display?.value ?: return@forEachElement
                 val sourceCode = element.code?.value ?: return@forEachElement
-                // pray that informatics never has multiple target values
-                val targetCode = element.target.first().code?.value ?: return@forEachElement
-                val targetDisplay = element.target.first().display?.value ?: return@forEachElement
-                mutableMap[SourceKey(sourceCode, agnosticSourceSystem)] =
-                    TargetValue(targetCode, targetSystem, targetDisplay, targetVersion)
+                val targetList = element.target.mapNotNull { target ->
+                    target.code?.value?.let { targetCode ->
+                        target.display?.value?.let { targetDisplay ->
+                            TargetValue(
+                                targetCode,
+                                targetSystem,
+                                targetDisplay,
+                                targetVersion
+                            )
+                        }
+                    }
+                }
+                val targetConcept = TargetConcept(targetList, targetText)
+                val sourceConcept = readGroupElementCode(sourceCode, agnosticSourceSystem)
+                mutableMap[sourceConcept] = targetConcept
             }
         }
         return mutableMap
-    }
-
-    private fun getTenantAgnosticCodeSystem(system: String): String =
-        if (RoninConceptMap.CODE_SYSTEMS.isMappedUri(system)) {
-            RoninConceptMap.CODE_SYSTEMS.toTenantAgnosticUri(system)
-        } else {
-            system
-        }
-
-    /**
-     * Get a value set from the DataNormalizationRegistry.
-     * Returns a [List] or null if no such value set could be found.
-     * @param elementName the name of the element being mapped, i.e. "Appointment.status" or "Patient.telecom.use".
-     * @param profileUrl URL of an RCDM or FHIR profile
-     */
-    fun getValueSet(
-        elementName: String,
-        profileUrl: String,
-        forceCacheReloadTS: LocalDateTime? = null
-    ): List<Coding> {
-        val cacheKey = CacheKey(
-            registryType = NormalizationRegistryItem.RegistryType.ValueSet,
-            elementName = elementName,
-            profileUrl = profileUrl
-        )
-        return getValueSetRegistryItemValues(
-            getValueSetItem(cacheKey, forceCacheReloadTS)
-        )
-    }
-
-    fun getRequiredValueSet(
-        elementName: String,
-        profileUrl: String,
-        forceCacheReloadTS: LocalDateTime? = null
-    ): List<Coding> {
-        return getValueSet(elementName, profileUrl, forceCacheReloadTS).takeIf { it.isNotEmpty() }
-            ?: throw MissingNormalizationContentException("Required value set for $profileUrl and $elementName not found")
-    }
-
-    private fun getValueSetRegistryItemValues(valueSetItem: ValueSetItem?): List<Coding> {
-        return valueSetItem?.set?.map {
-            Coding(
-                system = Uri(it.system),
-                code = Code(it.value),
-                display = it.display.asFHIR(),
-                version = it.version.asFHIR()
-            )
-        } ?: emptyList()
     }
 
     internal fun getValueSetData(filename: String): List<TargetValue> {
@@ -303,8 +471,8 @@ class NormalizationRegistryClient(
 internal data class CacheKey(
     val registryType: NormalizationRegistryItem.RegistryType,
     val elementName: String,
-    val tenantId: String? = null,
-    val profileUrl: String? = null
+    val tenantId: String? = null, // non-null for ConceptMap
+    val profileUrl: String? = null // null for ConceptMap
 )
 
 internal data class NormalizationRegistryItem(
@@ -337,8 +505,8 @@ internal data class NormalizationRegistryItem(
 }
 
 internal data class ConceptMapItem(
-    val map: Map<SourceKey, TargetValue>?,
-    val source_extension_url: String?
+    val map: Map<SourceConcept, TargetConcept>,
+    val source_extension_url: String // non-null for ConceptMap
 )
 
 internal data class ValueSetItem(
@@ -347,3 +515,5 @@ internal data class ValueSetItem(
 
 internal data class SourceKey(val value: String, val system: String)
 internal data class TargetValue(val value: String, val system: String, val display: String, val version: String)
+internal data class SourceConcept(val element: Set<SourceKey>)
+internal data class TargetConcept(val element: List<TargetValue>, val text: String? = null)

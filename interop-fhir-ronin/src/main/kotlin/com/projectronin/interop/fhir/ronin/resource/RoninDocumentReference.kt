@@ -3,6 +3,7 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
 import com.projectronin.interop.fhir.r4.validate.resource.R4DocumentReferenceValidator
@@ -54,7 +55,7 @@ class RoninDocumentReference(
 
     private val requiredDocumentReferenceTypeExtension = FHIRError(
         code = "RONIN_DOCREF_001",
-        description = "Document Reference extension requires type extension",
+        description = "Tenant source Document Reference extension is missing or invalid",
         severity = ValidationIssueSeverity.ERROR,
         location = LocationContext(DocumentReference::extension)
     )
@@ -74,7 +75,8 @@ class RoninDocumentReference(
             checkNotNull(element.extension, requiredExtensionError, parentContext)
             checkTrue(
                 element.extension.any {
-                    it.url == RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE.uri
+                    it.url == RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE.uri &&
+                        it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 requiredDocumentReferenceTypeExtension,
                 parentContext
@@ -117,21 +119,32 @@ class RoninDocumentReference(
         }
     }
 
+    override fun mapInternal(
+        normalized: DocumentReference,
+        parentContext: LocationContext,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
+    ): Pair<DocumentReference, Validation> {
+        // TODO: apply concept maps to get DocumentReference.type and extension
+        val tenantSourceTypeExtension = getExtensionOrEmptyList(
+            RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE,
+            normalized.type
+        )
+
+        val mapped = normalized.copy(
+            extension = normalized.extension + tenantSourceTypeExtension
+        )
+        return Pair(mapped, Validation())
+    }
+
     override fun transformInternal(
         normalized: DocumentReference,
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
     ): Pair<DocumentReference?, Validation> {
-        // TODO: RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE, check concept maps for code
-        val tenantSourceTypeExtension = getExtensionOrEmptyList(
-            RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE,
-            normalized.type
-        )
-
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            extension = normalized.extension + tenantSourceTypeExtension,
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
 

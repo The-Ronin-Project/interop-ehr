@@ -24,7 +24,7 @@ class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 4
 
-    override fun validate(element: CarePlan, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(element: CarePlan, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, validation)

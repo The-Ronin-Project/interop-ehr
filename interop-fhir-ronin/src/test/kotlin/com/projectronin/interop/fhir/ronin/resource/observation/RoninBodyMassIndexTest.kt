@@ -30,6 +30,7 @@ import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
@@ -61,9 +62,37 @@ class RoninBodyMassIndexTest {
     }
 
     private val bodyMassIndexCode = Code("39156-5")
-    private val bodyMassIndexCoding = Coding(system = CodeSystem.LOINC.uri, code = bodyMassIndexCode)
+    private val bodyMassIndexCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Body Mass Index".asFHIR(),
+        code = bodyMassIndexCode
+    )
     private val bodyMassIndexCodingList = listOf(bodyMassIndexCoding)
-    private val bodyMassIndexConcept = CodeableConcept(coding = bodyMassIndexCodingList)
+    private val bodyMassIndexConcept = CodeableConcept(
+        text = "Body Mass Index".asFHIR(),
+        coding = bodyMassIndexCodingList
+    )
+
+    private val tenantBodyMassIndexCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Tenant Body Mass Index".asFHIR(),
+        code = Code("bad-body-mass-index")
+    )
+    private val tenantBodyMassIndexConcept = CodeableConcept(
+        text = "Tenant Body Mass Index".asFHIR(),
+        coding = listOf(tenantBodyMassIndexCoding)
+    )
+    private val mappedTenantBodyMassIndexConcept = CodeableConcept(
+        text = "Body Mass Index".asFHIR(),
+        coding = bodyMassIndexCodingList
+    )
+    private val tenantBodyMassIndexSourceExtension = Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            tenantBodyMassIndexConcept
+        )
+    )
 
     private val vitalSignsCategoryCode = Code("vital-signs")
     private val vitalSignsCategoryCoding = Coding(
@@ -74,6 +103,9 @@ class RoninBodyMassIndexTest {
     private val vitalSignsCategoryConcept = CodeableConcept(coding = vitalSignsCategoryCodingList)
     private val vitalSignsCategoryConceptList = listOf(vitalSignsCategoryConcept)
 
+    // In this registry:
+    // Raw tenantBodyMassIndexCoding is successfully mapped to bodyMassIndexCoding.
+    // Raw bodyMassIndexCoding is not mapped, so triggers a concept mapping error.
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_MASS_INDEX.value)
@@ -81,50 +113,43 @@ class RoninBodyMassIndexTest {
         every {
             getConceptMapping(
                 tenant,
-                "Observation.category",
-                vitalSignsCategoryCoding,
-                RoninProfile.OBSERVATION_BODY_MASS_INDEX.value
-            )?.first
-        } returns vitalSignsCategoryCoding
-        every {
-            getConceptMapping(
-                tenant,
-                "Observation.category",
-                Coding(
-                    system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                    code = null
-                ),
-                RoninProfile.OBSERVATION_BODY_MASS_INDEX.value
+                "Observation.code",
+                bodyMassIndexConcept
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                bodyMassIndexCoding,
-                RoninProfile.OBSERVATION_BODY_MASS_INDEX.value
-            )?.first
-        } returns bodyMassIndexCoding
+                tenantBodyMassIndexConcept
+            )
+        } returns Pair(bodyMassIndexConcept, tenantBodyMassIndexSourceExtension)
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                Coding(
-                    system = CodeSystem.UCUM.uri,
-                    code = bodyMassIndexCode
-                ),
-                RoninProfile.OBSERVATION_BODY_MASS_INDEX.value
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.UCUM.uri,
+                            code = bodyMassIndexCode
+                        )
+                    )
+                )
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                Coding(
-                    system = CodeSystem.LOINC.uri,
-                    code = Code("1234")
-                ),
-                RoninProfile.OBSERVATION_BODY_MASS_INDEX.value
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.LOINC.uri,
+                            code = Code("1234")
+                        )
+                    )
+                )
             )
         } returns null
     }
@@ -261,15 +286,8 @@ class RoninBodyMassIndexTest {
             ),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
@@ -321,11 +339,12 @@ class RoninBodyMassIndexTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
+                        display = "Body Mass Index".asFHIR(),
                         code = Code("wrong-code")
                     )
                 )
@@ -378,15 +397,8 @@ class RoninBodyMassIndexTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
@@ -443,15 +455,8 @@ class RoninBodyMassIndexTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
@@ -508,15 +513,8 @@ class RoninBodyMassIndexTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
@@ -574,15 +572,8 @@ class RoninBodyMassIndexTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
@@ -639,15 +630,8 @@ class RoninBodyMassIndexTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
@@ -705,15 +689,8 @@ class RoninBodyMassIndexTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -781,15 +758,8 @@ class RoninBodyMassIndexTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR()
@@ -846,15 +816,8 @@ class RoninBodyMassIndexTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
@@ -908,15 +871,8 @@ class RoninBodyMassIndexTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -983,15 +939,8 @@ class RoninBodyMassIndexTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
@@ -1031,7 +980,7 @@ class RoninBodyMassIndexTest {
                     value = "test".asFHIR()
                 )
             ),
-            code = bodyMassIndexConcept,
+            code = tenantBodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
@@ -1054,7 +1003,7 @@ class RoninBodyMassIndexTest {
     }
 
     @Test
-    fun `transforms observation with all attributes`() {
+    fun `transforms observation with all attributes - maps Observation code`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(
@@ -1082,16 +1031,7 @@ class RoninBodyMassIndexTest {
             partOf = listOf(Reference(reference = "MedicationStatement/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
             category = vitalSignsCategoryConceptList,
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            code = tenantBodyMassIndexConcept,
             subject = localizeReferenceTest(mockReference), // check that it transforms
             focus = listOf(Reference(display = "focus".asFHIR())),
             encounter = Reference(reference = "Encounter/1234".asFHIR()),
@@ -1152,7 +1092,8 @@ class RoninBodyMassIndexTest {
                 Extension(
                     url = Uri("http://localhost/extension"),
                     value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                ),
+                tenantBodyMassIndexSourceExtension
             ),
             transformed.extension
         )
@@ -1194,16 +1135,7 @@ class RoninBodyMassIndexTest {
             transformed.category
         )
         assertEquals(
-            CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            mappedTenantBodyMassIndexConcept,
             transformed.code
         )
         assertEquals(
@@ -1265,21 +1197,12 @@ class RoninBodyMassIndexTest {
     }
 
     @Test
-    fun `transforms observation with only required attributes`() {
+    fun `transforms observation with only required attributes - maps Observation code`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(source = Uri("source")),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            code = tenantBodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1306,7 +1229,10 @@ class RoninBodyMassIndexTest {
         assertNull(transformed.language)
         assertNull(transformed.text)
         assertEquals(listOf<ContainedResource>(), transformed.contained)
-        assertEquals(listOf<Extension>(), transformed.extension)
+        assertEquals(
+            listOf(tenantBodyMassIndexSourceExtension),
+            transformed.extension
+        )
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
@@ -1336,16 +1262,7 @@ class RoninBodyMassIndexTest {
             transformed.category
         )
         assertEquals(
-            CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            mappedTenantBodyMassIndexConcept,
             transformed.code
         )
         assertEquals(
@@ -1381,20 +1298,47 @@ class RoninBodyMassIndexTest {
     }
 
     @Test
+    fun `transforms observation with only required attributes - fails if no concept map entry`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(source = Uri("source")),
+            status = ObservationStatus.AMENDED.asCode(),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
+            category = vitalSignsCategoryConceptList,
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            )
+        )
+
+        val (transformed, validation) = roninBodyMassIndex.transform(observation, tenant)
+
+        val exception = assertThrows<java.lang.IllegalArgumentException> {
+            validation.alertIfErrors()
+        }
+        assertNull(transformed)
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value '39156-5' " +
+                "has no target defined in any Observation.code concept map for tenant 'test' " +
+                "@ Observation.code",
+            exception.message
+        )
+    }
+
+    @Test
     fun `transform inherits R4 validation`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(source = Uri("source")),
             status = Code("bad-status"),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                )
-            ),
+            code = tenantBodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1445,16 +1389,8 @@ class RoninBodyMassIndexTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1506,16 +1442,8 @@ class RoninBodyMassIndexTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1567,16 +1495,8 @@ class RoninBodyMassIndexTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1628,16 +1548,8 @@ class RoninBodyMassIndexTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodyMassIndexCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            extension = listOf(tenantBodyMassIndexSourceExtension),
+            code = bodyMassIndexConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(

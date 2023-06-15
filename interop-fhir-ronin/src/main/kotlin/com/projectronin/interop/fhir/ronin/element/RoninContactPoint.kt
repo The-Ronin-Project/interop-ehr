@@ -124,7 +124,7 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                     "${parentContext.element}.telecom.system",
                     RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.system", systemValue),
                     ContactPointSystem::class,
-                    null,
+                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
                     forceCacheReloadTS
                 )
                 validation.apply {
@@ -135,7 +135,7 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                     )
                 }
                 if (systemPair == null) {
-                    null
+                    telecom.system
                 } else {
                     val systemTarget = systemPair.first.code?.value
                     validation.apply {
@@ -155,7 +155,7 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                     "${parentContext.element}.telecom.use",
                     RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.use", useValue),
                     ContactPointUse::class,
-                    null,
+                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value,
                     forceCacheReloadTS
                 )
                 validation.apply {
@@ -166,7 +166,7 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                     )
                 }
                 if (usePair == null) {
-                    null
+                    telecom.use
                 } else {
                     val useTarget = usePair.first.code?.value
                     validation.apply {

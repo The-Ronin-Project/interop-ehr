@@ -1,7 +1,9 @@
 package com.projectronin.interop.fhir.ronin.resource.condition
 
 import com.projectronin.interop.fhir.r4.datatype.Coding
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.resource.Condition
+import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
@@ -14,6 +16,9 @@ import com.projectronin.interop.fhir.validate.ProfileValidator
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
+import com.projectronin.interop.fhir.validate.validation
+import com.projectronin.interop.tenant.config.model.Tenant
+import java.time.LocalDateTime
 
 /**
  * Base class capable of handling common tasks associated to Ronin Condition profiles.
@@ -34,10 +39,9 @@ abstract class BaseRoninCondition(
 
     private val requiredCodeError = RequiredFieldError(Condition::code)
 
-    private val requiredConditionExtension = RequiredFieldError(Condition::extension)
     private val requiredConditionCodeExtension = FHIRError(
         code = "RONIN_CND_001",
-        description = "Condition extension requires code extension",
+        description = "Tenant source condition code extension is missing or invalid",
         severity = ValidationIssueSeverity.ERROR,
         location = LocationContext(Condition::extension)
     )
@@ -80,10 +84,10 @@ abstract class BaseRoninCondition(
             // subject required is validated in R4
             validateReference(element.subject, listOf("Patient"), LocationContext(Condition::subject), validation)
 
-            checkNotNull(element.extension, requiredConditionExtension, parentContext)
             checkTrue(
                 element.extension.any {
-                    it.url == RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri
+                    it.url == RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri &&
+                        it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 requiredConditionCodeExtension,
                 parentContext
@@ -92,4 +96,43 @@ abstract class BaseRoninCondition(
     }
 
     override fun validateUSCore(element: Condition, parentContext: LocationContext, validation: Validation) {}
+
+    override fun mapInternal(
+        normalized: Condition,
+        parentContext: LocationContext,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
+    ): Pair<Condition, Validation> {
+        val validation = Validation()
+
+        // TODO: apply concept maps to get Condition.code and extension
+        val tenantSourceConditionCode = getExtensionOrEmptyList(
+            RoninExtension.TENANT_SOURCE_CONDITION_CODE,
+            normalized.code
+        )
+
+        val mapped = normalized.copy(
+            extension = normalized.extension + tenantSourceConditionCode
+        )
+        return Pair(mapped, validation)
+    }
+
+    private val requiredIdError = RequiredFieldError(Condition::id)
+
+    override fun transformInternal(
+        normalized: Condition,
+        parentContext: LocationContext,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
+    ): Pair<Condition?, Validation> {
+        val validation = validation {
+            checkNotNull(normalized.id, requiredIdError, parentContext)
+        }
+
+        val transformed = normalized.copy(
+            meta = normalized.meta.transform(),
+            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
+        )
+        return Pair(transformed, validation)
+    }
 }

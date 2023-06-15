@@ -126,6 +126,15 @@ abstract class BaseRoninProfile<T : Resource<T>>(
     private val requiredMetaSource = RequiredFieldError(Meta::source)
 
     /**
+     * Validates the [element] against Ronin's rules.
+     */
+    abstract fun validateRonin(element: T, parentContext: LocationContext, validation: Validation)
+
+    override fun validate(element: T, parentContext: LocationContext, validation: Validation) {
+        validateRonin(element, parentContext, validation)
+    }
+
+    /**
      * When the [Coding] list for a [CodeableConcept] contains no [Coding] that passes validation for the Ronin profile.
      */
     fun roninInvalidCodingError(field: String) = FHIRError(

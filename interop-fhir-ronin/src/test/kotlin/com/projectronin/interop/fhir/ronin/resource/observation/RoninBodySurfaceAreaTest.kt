@@ -30,6 +30,7 @@ import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
@@ -61,9 +62,37 @@ class RoninBodySurfaceAreaTest {
     }
 
     private val bodySurfaceAreaCode = Code("3140-1")
-    private val bodySurfaceAreaCoding = Coding(system = CodeSystem.LOINC.uri, code = bodySurfaceAreaCode)
+    private val bodySurfaceAreaCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Body Surface Area".asFHIR(),
+        code = bodySurfaceAreaCode
+    )
     private val bodySurfaceAreaCodingList = listOf(bodySurfaceAreaCoding)
-    private val bodySurfaceAreaConcept = CodeableConcept(coding = bodySurfaceAreaCodingList)
+    private val bodySurfaceAreaConcept = CodeableConcept(
+        text = "Body Surface Area".asFHIR(),
+        coding = bodySurfaceAreaCodingList
+    )
+
+    private val tenantBodySurfaceAreaCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Bad Surface Area".asFHIR(),
+        code = Code("bad-body-surface-area")
+    )
+    private val tenantBodySurfaceAreaConcept = CodeableConcept(
+        text = "Tenant Body Surface Area".asFHIR(),
+        coding = listOf(tenantBodySurfaceAreaCoding)
+    )
+    private val mappedTenantBodySurfaceAreaConcept = CodeableConcept(
+        text = "Body Surface Area".asFHIR(),
+        coding = bodySurfaceAreaCodingList
+    )
+    private val tenantBodySurfaceAreaSourceExtension = Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            tenantBodySurfaceAreaConcept
+        )
+    )
 
     private val vitalSignsCategoryCode = Code("vital-signs")
     private val vitalSignsCategoryCoding = Coding(
@@ -74,6 +103,9 @@ class RoninBodySurfaceAreaTest {
     private val vitalSignsCategoryConcept = CodeableConcept(coding = vitalSignsCategoryCodingList)
     private val vitalSignsCategoryConceptList = listOf(vitalSignsCategoryConcept)
 
+    // In this registry:
+    // Raw tenantBodySurfaceAreaCoding is successfully mapped to bodySurfaceAreaCoding.
+    // Raw bodySurfaceAreaCoding is not mapped, so triggers a concept mapping error.
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value)
@@ -81,50 +113,43 @@ class RoninBodySurfaceAreaTest {
         every {
             getConceptMapping(
                 tenant,
-                "Observation.category",
-                vitalSignsCategoryCoding,
-                RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value
-            )?.first
-        } returns vitalSignsCategoryCoding
-        every {
-            getConceptMapping(
-                tenant,
-                "Observation.category",
-                Coding(
-                    system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                    code = null
-                ),
-                RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value
+                "Observation.code",
+                bodySurfaceAreaConcept
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                bodySurfaceAreaCoding,
-                RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value
-            )?.first
-        } returns bodySurfaceAreaCoding
+                tenantBodySurfaceAreaConcept
+            )
+        } returns Pair(bodySurfaceAreaConcept, tenantBodySurfaceAreaSourceExtension)
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                Coding(
-                    system = CodeSystem.UCUM.uri,
-                    code = bodySurfaceAreaCode
-                ),
-                RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.UCUM.uri,
+                            code = bodySurfaceAreaCode
+                        )
+                    )
+                )
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                Coding(
-                    system = CodeSystem.LOINC.uri,
-                    code = Code("1234")
-                ),
-                RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.LOINC.uri,
+                            code = Code("1234")
+                        )
+                    )
+                )
             )
         } returns null
     }
@@ -261,15 +286,8 @@ class RoninBodySurfaceAreaTest {
             ),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -322,11 +340,12 @@ class RoninBodySurfaceAreaTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
                         system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
+                        display = "Body Surface Area".asFHIR(),
                         code = Code("wrong-code")
                     )
                 )
@@ -380,15 +399,8 @@ class RoninBodySurfaceAreaTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -446,15 +458,8 @@ class RoninBodySurfaceAreaTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -512,15 +517,8 @@ class RoninBodySurfaceAreaTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -579,15 +577,8 @@ class RoninBodySurfaceAreaTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -645,15 +636,8 @@ class RoninBodySurfaceAreaTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -712,15 +696,8 @@ class RoninBodySurfaceAreaTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -785,15 +762,8 @@ class RoninBodySurfaceAreaTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -861,15 +831,8 @@ class RoninBodySurfaceAreaTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -920,15 +883,8 @@ class RoninBodySurfaceAreaTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
@@ -983,15 +939,8 @@ class RoninBodySurfaceAreaTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -1040,7 +989,7 @@ class RoninBodySurfaceAreaTest {
                     value = "test".asFHIR()
                 )
             ),
-            code = bodySurfaceAreaConcept,
+            code = tenantBodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -1067,7 +1016,7 @@ class RoninBodySurfaceAreaTest {
     }
 
     @Test
-    fun `transforms observation with all attributes`() {
+    fun `transforms observation with all attributes - maps Observation code`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(
@@ -1095,16 +1044,7 @@ class RoninBodySurfaceAreaTest {
             partOf = listOf(Reference(reference = "MedicationStatement/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
             category = vitalSignsCategoryConceptList,
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            code = tenantBodySurfaceAreaConcept,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1169,7 +1109,8 @@ class RoninBodySurfaceAreaTest {
                 Extension(
                     url = Uri("http://localhost/extension"),
                     value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                ),
+                tenantBodySurfaceAreaSourceExtension
             ),
             transformed.extension
         )
@@ -1211,16 +1152,7 @@ class RoninBodySurfaceAreaTest {
             transformed.category
         )
         assertEquals(
-            CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            mappedTenantBodySurfaceAreaConcept,
             transformed.code
         )
         assertEquals(
@@ -1282,21 +1214,12 @@ class RoninBodySurfaceAreaTest {
     }
 
     @Test
-    fun `transforms observation with only required attributes`() {
+    fun `transforms observation with only required attributes - maps Observation code`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(source = Uri("source")),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            code = tenantBodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = localizeReferenceTest(mockReference), // check that it transforms
@@ -1320,7 +1243,10 @@ class RoninBodySurfaceAreaTest {
         assertNull(transformed.language)
         assertNull(transformed.text)
         assertEquals(listOf<ContainedResource>(), transformed.contained)
-        assertEquals(listOf<Extension>(), transformed.extension)
+        assertEquals(
+            listOf(tenantBodySurfaceAreaSourceExtension),
+            transformed.extension
+        )
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
@@ -1350,16 +1276,7 @@ class RoninBodySurfaceAreaTest {
             transformed.category
         )
         assertEquals(
-            CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            mappedTenantBodySurfaceAreaConcept,
             transformed.code
         )
         assertEquals(
@@ -1396,20 +1313,44 @@ class RoninBodySurfaceAreaTest {
     }
 
     @Test
+    fun `transforms observation with only required attributes - fails if no concept map entry`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(source = Uri("source")),
+            status = ObservationStatus.AMENDED.asCode(),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
+            category = vitalSignsCategoryConceptList,
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = localizeReferenceTest(mockReference), // check that it transforms
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            )
+        )
+
+        val (transformed, validation) = roninBodySurfaceArea.transform(observation, tenant)
+
+        val exception = assertThrows<java.lang.IllegalArgumentException> {
+            validation.alertIfErrors()
+        }
+        assertNull(transformed)
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value '3140-1' " +
+                "has no target defined in any Observation.code concept map for tenant 'test' " +
+                "@ Observation.code",
+            exception.message
+        )
+    }
+
+    @Test
     fun `transform inherits R4 validation`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(source = Uri("source")),
             status = Code("bad-status"),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                )
-            ),
+            code = tenantBodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1461,16 +1402,8 @@ class RoninBodySurfaceAreaTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1522,16 +1455,8 @@ class RoninBodySurfaceAreaTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1583,16 +1508,8 @@ class RoninBodySurfaceAreaTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1644,16 +1561,8 @@ class RoninBodySurfaceAreaTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Height".asFHIR(),
-                        code = bodySurfaceAreaCode
-                    )
-                ),
-                text = "Body Height".asFHIR()
-            ),
+            extension = listOf(tenantBodySurfaceAreaSourceExtension),
+            code = bodySurfaceAreaConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(

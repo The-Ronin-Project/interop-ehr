@@ -56,15 +56,23 @@ class RoninPractitioner(normalizer: Normalizer, localizer: Localizer) :
         }
     }
 
+    override fun mapInternal(
+        normalized: Practitioner,
+        parentContext: LocationContext,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
+    ): Pair<Practitioner, Validation> {
+        // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG re: extension, concept maps for telecom.status
+        // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG re: extension, concept maps for telecom.use
+        return Pair(normalized, Validation())
+    }
+
     override fun transformInternal(
         normalized: Practitioner,
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
     ): Pair<Practitioner?, Validation> {
-        // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG re: extension, concept maps for telecom.status
-        // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG re: extension, concept maps for telecom.use
-
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)

@@ -59,6 +59,19 @@ class RoninMedicationTest {
     private val medicationCodingList = listOf(medicationCoding)
     private val roninMedication = RoninMedication(normalizer, localizer)
 
+    private val tenantSourceCodeExtensionB = listOf(
+        Extension(
+            url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+            value = DynamicValue(
+                DynamicValueType.CODEABLE_CONCEPT,
+                CodeableConcept(
+                    text = "b".asFHIR(),
+                    coding = medicationCodingList
+                )
+            )
+        )
+    )
+
     @Test
     fun `always qualifies`() {
         assertTrue(roninMedication.qualifies(Medication()))
@@ -68,6 +81,7 @@ class RoninMedicationTest {
     fun `validate - fails if missing identifiers`() {
         val medication = Medication(
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
+            extension = tenantSourceCodeExtensionB,
             code = CodeableConcept(
                 text = "b".asFHIR(),
                 coding = medicationCodingList
@@ -107,7 +121,8 @@ class RoninMedicationTest {
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
                     value = "EHR Data Authority".asFHIR()
                 )
-            )
+            ),
+            extension = tenantSourceCodeExtensionB
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -142,6 +157,7 @@ class RoninMedicationTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = tenantSourceCodeExtensionB,
             code = CodeableConcept(
                 text = "k".asFHIR(),
                 coding = listOf(
@@ -168,10 +184,27 @@ class RoninMedicationTest {
     }
 
     @Test
-    fun `transform and validate - succeeds - code is missing the text attribute - no userSelected coding - missing text`() {
+    fun `transform - succeeds - code is missing the text attribute - no userSelected coding - missing text`() {
         // except for the test case details,
         // all attributes are correct
 
+        val specialCode = CodeableConcept(
+            coding = listOf(
+                Coding(
+                    system = Uri("b"),
+                    code = Code("b"),
+                    version = "1.0.0".asFHIR(),
+                    display = "b".asFHIR()
+                ),
+                Coding(
+                    system = Uri("i"),
+                    code = Code("i"),
+                    version = "1.0.1".asFHIR(),
+                    display = "i".asFHIR()
+                ),
+                medicationCoding
+            )
+        )
         val medication = Medication(
             id = Id("12345"),
             meta = Meta(source = Uri("source")),
@@ -192,23 +225,7 @@ class RoninMedicationTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("b"),
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    ),
-                    Coding(
-                        system = Uri("i"),
-                        code = Code("i"),
-                        version = "1.0.1".asFHIR(),
-                        display = "i".asFHIR()
-                    ),
-                    medicationCoding
-                )
-            )
+            code = specialCode
         )
 
         // transformation
@@ -217,45 +234,46 @@ class RoninMedicationTest {
 
         transformed!!
         assertEquals(
-            medication.extension + Extension(
-                url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
-                value = DynamicValue(
-                    DynamicValueType.CODEABLE_CONCEPT,
-                    medication.code!!
+            medication.extension + listOf(
+                Extension(
+                    url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        specialCode
+                    )
                 )
             ),
             transformed.extension
         )
         assertEquals(
-            CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("b"),
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    ),
-                    Coding(
-                        system = Uri("i"),
-                        code = Code("i"),
-                        version = "1.0.1".asFHIR(),
-                        display = "i".asFHIR()
-                    ),
-                    medicationCoding
-                )
-            ),
+            specialCode,
             transformed.code
         )
-
-        // validation
-        roninMedication.validate(transformed).alertIfErrors()
     }
 
     @Test
-    fun `transform and validate - succeeds - code has an empty-valued text attribute - no userSelected coding - empty-valued text`() {
+    fun `transform - succeeds - code has an empty-valued text attribute - no userSelected coding - empty-valued text`() {
         // except for the test case details,
         // all attributes are correct
 
+        val specialCode = CodeableConcept(
+            text = "".asFHIR(),
+            coding = listOf(
+                Coding(
+                    system = Uri("b"),
+                    code = Code("b"),
+                    version = "1.0.0".asFHIR(),
+                    display = "b".asFHIR()
+                ),
+                Coding(
+                    system = Uri("i"),
+                    code = Code("i"),
+                    version = "1.0.1".asFHIR(),
+                    display = "i".asFHIR()
+                ),
+                medicationCoding
+            )
+        )
         val medication = Medication(
             id = Id("12345"),
             meta = Meta(source = Uri("source")),
@@ -276,24 +294,7 @@ class RoninMedicationTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                text = "".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = Uri("b"),
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    ),
-                    Coding(
-                        system = Uri("i"),
-                        code = Code("i"),
-                        version = "1.0.1".asFHIR(),
-                        display = "i".asFHIR()
-                    ),
-                    medicationCoding
-                )
-            )
+            code = specialCode
         )
 
         // transformation
@@ -302,45 +303,53 @@ class RoninMedicationTest {
 
         transformed!!
         assertEquals(
-            medication.extension + Extension(
-                url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
-                value = DynamicValue(
-                    DynamicValueType.CODEABLE_CONCEPT,
-                    medication.code!!
+            medication.extension + listOf(
+                Extension(
+                    url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        specialCode
+                    )
                 )
             ),
             transformed.extension
         )
         assertEquals(
-            CodeableConcept(
-                text = "".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = Uri("b"),
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    ),
-                    Coding(
-                        system = Uri("i"),
-                        code = Code("i"),
-                        version = "1.0.1".asFHIR(),
-                        display = "i".asFHIR()
-                    ),
-                    medicationCoding
-                )
-            ),
+            specialCode,
             transformed.code
         )
-
-        // validation
-        roninMedication.validate(transformed).alertIfErrors()
     }
 
     @Test
     fun `validate - error - more than 1 userSelected entry`() {
         // except for the test case details,
         // all attributes are correct
+
+        val specialCode = CodeableConcept(
+            text = "".asFHIR(),
+            coding = listOf(
+                Coding(
+                    system = CodeSystem.RXNORM.uri,
+                    code = Code("b"),
+                    version = "1.0.0".asFHIR(),
+                    display = "b".asFHIR()
+                ),
+                Coding(
+                    system = CodeSystem.RXNORM.uri,
+                    code = medicationCode,
+                    version = "1.0.0".asFHIR(),
+                    display = "e".asFHIR(),
+                    userSelected = FHIRBoolean.TRUE
+                ),
+                Coding(
+                    system = CodeSystem.RXNORM.uri,
+                    code = medicationCode,
+                    version = "1.0.1".asFHIR(),
+                    display = "i".asFHIR(),
+                    userSelected = FHIRBoolean.TRUE
+                )
+            )
+        )
 
         val medication = Medication(
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
@@ -361,30 +370,8 @@ class RoninMedicationTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    ),
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = medicationCode,
-                        version = "1.0.0".asFHIR(),
-                        display = "e".asFHIR(),
-                        userSelected = FHIRBoolean.TRUE
-                    ),
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = medicationCode,
-                        version = "1.0.1".asFHIR(),
-                        display = "i".asFHIR(),
-                        userSelected = FHIRBoolean.TRUE
-                    )
-                )
-            )
+            extension = tenantSourceCodeExtensionB,
+            code = specialCode
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -419,6 +406,7 @@ class RoninMedicationTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = tenantSourceCodeExtensionB,
             code = CodeableConcept(
                 text = "b".asFHIR(),
                 coding = medicationCodingList
@@ -458,6 +446,7 @@ class RoninMedicationTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = tenantSourceCodeExtensionB,
             code = CodeableConcept(
                 text = "b".asFHIR(),
                 coding = medicationCodingList
@@ -507,6 +496,7 @@ class RoninMedicationTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = tenantSourceCodeExtensionB,
             code = CodeableConcept(
                 text = "b".asFHIR(),
                 coding = medicationCodingList
@@ -546,6 +536,7 @@ class RoninMedicationTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = tenantSourceCodeExtensionB,
             code = CodeableConcept(
                 text = "b".asFHIR(),
                 coding = medicationCodingList
@@ -577,6 +568,7 @@ class RoninMedicationTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = tenantSourceCodeExtensionB,
             code = CodeableConcept(
                 text = "b".asFHIR(),
                 coding = medicationCodingList
@@ -623,6 +615,7 @@ class RoninMedicationTest {
             ),
             transformed.identifier
         )
+        // &&& extension
         assertEquals(medication.code, transformed.code)
     }
 
@@ -719,19 +712,7 @@ class RoninMedicationTest {
         assertEquals(medication.text, transformed.text)
         assertEquals(medication.contained, transformed.contained)
         assertEquals(
-            (
-                medication.extension +
-                    Extension(
-                        url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
-                        value = DynamicValue(
-                            DynamicValueType.CODEABLE_CONCEPT,
-                            CodeableConcept(
-                                text = "b".asFHIR(),
-                                coding = medicationCodingList
-                            )
-                        )
-                    )
-                ),
+            medication.extension + tenantSourceCodeExtensionB,
             transformed.extension
         )
         assertEquals(medication.modifierExtension, transformed.modifierExtension)
@@ -869,19 +850,7 @@ class RoninMedicationTest {
         assertEquals(medication.text, transformed.text)
         assertEquals(medication.contained, transformed.contained)
         assertEquals(
-            (
-                medication.extension +
-                    Extension(
-                        url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
-                        value = DynamicValue(
-                            DynamicValueType.CODEABLE_CONCEPT,
-                            CodeableConcept(
-                                text = "b".asFHIR(),
-                                coding = medicationCodingList
-                            )
-                        )
-                    )
-                ),
+            medication.extension + tenantSourceCodeExtensionB,
             transformed.extension
         )
         assertEquals(medication.modifierExtension, transformed.modifierExtension)
@@ -970,6 +939,7 @@ class RoninMedicationTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = tenantSourceCodeExtensionB,
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -997,5 +967,140 @@ class RoninMedicationTest {
         )
 
         roninMedication.validate(medication).alertIfErrors()
+    }
+
+    @Test
+    fun `validate - fails if missing required source code extension`() {
+        val medication = Medication(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                text = "b".asFHIR(),
+                coding = medicationCodingList
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedication.validate(medication).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_MED_001: Tenant source medication code extension is missing or invalid @ Medication.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails if source code extension has wrong url`() {
+        val medication = Medication(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(
+                Extension(
+                    url = Uri(RoninExtension.TENANT_SOURCE_CONDITION_CODE.value),
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "b".asFHIR(),
+                            coding = medicationCodingList
+                        )
+                    )
+                )
+            ),
+            code = CodeableConcept(
+                text = "b".asFHIR(),
+                coding = medicationCodingList
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedication.validate(medication).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_MED_001: Tenant source medication code extension is missing or invalid @ Medication.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails if source code extension has wrong datatype`() {
+        val medication = Medication(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(
+                Extension(
+                    url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+                    value = DynamicValue(
+                        DynamicValueType.CODING,
+                        medicationCoding
+                    )
+                )
+            ),
+            code = CodeableConcept(
+                text = "b".asFHIR(),
+                coding = medicationCodingList
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedication.validate(medication).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_MED_001: Tenant source medication code extension is missing or invalid @ Medication.extension",
+            exception.message
+        )
     }
 }

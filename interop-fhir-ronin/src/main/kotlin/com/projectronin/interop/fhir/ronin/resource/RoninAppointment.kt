@@ -14,7 +14,7 @@ import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryCl
 import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
-import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
+import com.projectronin.interop.fhir.ronin.resource.base.BaseRoninProfile
 import com.projectronin.interop.fhir.ronin.util.getCodedEnumOrNull
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -34,7 +34,7 @@ class RoninAppointment(
     normalizer: Normalizer,
     localizer: Localizer
 ) :
-    USCoreBasedProfile<Appointment>(R4AppointmentValidator, RoninProfile.APPOINTMENT.value, normalizer, localizer) {
+    BaseRoninProfile<Appointment>(R4AppointmentValidator, RoninProfile.APPOINTMENT.value, normalizer, localizer) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
 
@@ -76,28 +76,25 @@ class RoninAppointment(
         }
     }
 
-    /**
-     * There is [no USCore profile for Appointment](https://build.fhir.org/ig/HL7/US-Core/profiles-and-extensions.html)
-     */
-    override fun validateUSCore(element: Appointment, parentContext: LocationContext, validation: Validation) {}
-
-    override fun transformInternal(
+    override fun mapInternal(
         normalized: Appointment,
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
-    ): Pair<Appointment?, Validation> {
+    ): Pair<Appointment, Validation> {
         val validation = Validation()
 
+        // Appointment.status is a single Code
         val mappedStatusPair = normalized.status?.value?.let { statusValue ->
             val statusPair = registryClient.getConceptMappingForEnum(
                 tenant,
                 "Appointment.status",
                 RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "Appointment.status", statusValue),
                 AppointmentStatus::class,
-                null,
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
                 forceCacheReloadTS
             )
+            // validate the mapping we got, use statusValue to report issues
             validation.apply {
                 checkNotNull(
                     statusPair,
@@ -126,14 +123,27 @@ class RoninAppointment(
             }
             statusPair
         }
-        val statusValue = mappedStatusPair?.first?.code
-        val statusExtension = mappedStatusPair?.let { listOf(mappedStatusPair.second) } ?: emptyList()
+
+        val mapped = mappedStatusPair?.let {
+            normalized.copy(
+                status = it.first.code,
+                extension = normalized.extension + it.second
+            )
+        } ?: normalized
+        return Pair(mapped, validation)
+    }
+
+    override fun transformInternal(
+        normalized: Appointment,
+        parentContext: LocationContext,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
+    ): Pair<Appointment?, Validation> {
+        val validation = Validation()
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant),
-            extension = normalized.extension + statusExtension,
-            status = statusValue
+            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
         return Pair(transformed, validation)
     }

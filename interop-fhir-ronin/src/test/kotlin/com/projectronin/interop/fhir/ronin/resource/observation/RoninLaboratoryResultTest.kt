@@ -31,6 +31,7 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
@@ -60,18 +61,6 @@ class RoninLaboratoryResultTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
-    private val laboratoryCategoryCode = Code("laboratory")
-    private val laboratoryCategoryCoding = listOf(
-        Coding(
-            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-            code = laboratoryCategoryCode
-        )
-    )
-    private val laboratoryCategoryConcept = CodeableConcept(coding = laboratoryCategoryCoding)
-    private val laboratoryCategoryConceptList = listOf(laboratoryCategoryConcept)
-
-    private val laboratoryCodeConcept = CodeableConcept(text = "lab".asFHIR())
-
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
     }
@@ -79,7 +68,81 @@ class RoninLaboratoryResultTest {
         every { localize(any(), tenant) } answers { firstArg() }
     }
 
-    private val roninLaboratoryResult = RoninLaboratoryResult(normalizer, localizer)
+    private val laboratoryCategoryCode = Code("laboratory")
+    private val laboratoryCategoryCoding = Coding(
+        system = CodeSystem.OBSERVATION_CATEGORY.uri,
+        code = laboratoryCategoryCode
+    )
+    private val laboratoryCategoryCodingList = listOf(laboratoryCategoryCoding)
+    private val laboratoryCategoryConcept = CodeableConcept(coding = laboratoryCategoryCodingList)
+    private val laboratoryCategoryConceptList = listOf(laboratoryCategoryConcept)
+
+    private val laboratoryCodeCoding = Coding(
+        code = Code("some-code"),
+        display = "some-display".asFHIR(),
+        system = CodeSystem.LOINC.uri
+    )
+    private val laboratoryCodeCodingList = listOf(laboratoryCodeCoding)
+    private val laboratoryCodeConcept = CodeableConcept(
+        text = "Laboratory Result".asFHIR(),
+        coding = laboratoryCodeCodingList
+    )
+
+    private val tenantLaboratoryResultCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Laboratory Result".asFHIR(),
+        code = Code("bad-lab-code")
+    )
+    private val tenantLaboratoryResultConcept = CodeableConcept(
+        text = "Tenant Laboratory Result".asFHIR(),
+        coding = listOf(tenantLaboratoryResultCoding)
+    )
+    private val mappedTenantLaboratoryResultConcept = CodeableConcept(
+        text = "Laboratory Result".asFHIR(),
+        coding = laboratoryCodeCodingList
+    )
+    private val tenantLaboratoryResultSourceExtension = Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            tenantLaboratoryResultConcept
+        )
+    )
+
+    // In this registry:
+    // Raw tenantLaboratoryResultCoding is successfully mapped to laboratoryCodeCoding.
+    // Raw laboratoryCodeCoding is not mapped, so triggers a concept mapping error.
+    private val registryClient = mockk<NormalizationRegistryClient> {
+        every {
+            getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_LABORATORY_RESULT.value)
+        } returns laboratoryCodeCodingList
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                laboratoryCodeConcept
+            )
+        } returns null
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                tenantLaboratoryResultConcept
+            )
+        } returns Pair(laboratoryCodeConcept, tenantLaboratoryResultSourceExtension)
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                CodeableConcept(
+                    text = "laboratory".asFHIR(),
+                    coding = listOf()
+                )
+            )
+        } returns null
+    }
+
+    private val roninLaboratoryResult = RoninLaboratoryResult(normalizer, localizer, registryClient)
 
     @Test
     fun `does not qualify when no category`() {
@@ -204,6 +267,7 @@ class RoninLaboratoryResultTest {
             ),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -261,6 +325,7 @@ class RoninLaboratoryResultTest {
             ),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -317,6 +382,7 @@ class RoninLaboratoryResultTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -382,6 +448,7 @@ class RoninLaboratoryResultTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -446,6 +513,7 @@ class RoninLaboratoryResultTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -511,6 +579,7 @@ class RoninLaboratoryResultTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -563,6 +632,7 @@ class RoninLaboratoryResultTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -618,6 +688,7 @@ class RoninLaboratoryResultTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -678,6 +749,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -758,24 +830,13 @@ class RoninLaboratoryResultTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
-                    Coding(
-                        code = Code("some-code-1"),
-                        display = "some-display-1".asFHIR(),
-                        system = CodeSystem.LOINC.uri
-                    ),
-                    Coding(
-                        code = Code("some-code-2"),
-                        display = "some-display-2".asFHIR(),
-                        system = CodeSystem.LOINC.uri
-                    ),
-                    Coding(
-                        code = Code("some-code-3"),
-                        display = "some-display-3".asFHIR(),
-                        system = CodeSystem.LOINC.uri
-                    )
+                    laboratoryCodeCoding,
+                    laboratoryCodeCoding,
+                    laboratoryCodeCoding
                 )
             ),
             category = laboratoryCategoryConceptList,
@@ -818,6 +879,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -895,6 +957,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -955,6 +1018,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -1019,6 +1083,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -1077,16 +1142,7 @@ class RoninLaboratoryResultTest {
                     value = "test".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                text = "laboratory".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system")
-                    )
-                )
-            ),
+            code = tenantLaboratoryResultConcept,
             category = laboratoryCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -1202,7 +1258,7 @@ class RoninLaboratoryResultTest {
     }
 
     @Test
-    fun `transforms observation with all attributes`() {
+    fun `transforms observation with all attributes - maps Observation code`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(
@@ -1213,6 +1269,12 @@ class RoninLaboratoryResultTest {
             language = Code("en-US"),
             text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://localhost/extension"),
+                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                )
+            ),
             modifierExtension = listOf(
                 Extension(
                     url = Uri("http://localhost/modifier-extension"),
@@ -1224,16 +1286,7 @@ class RoninLaboratoryResultTest {
             partOf = listOf(Reference(reference = "Immunization/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
             category = laboratoryCategoryConceptList,
-            code = CodeableConcept(
-                text = "laboratory".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = CodeSystem.LOINC.uri
-                    )
-                )
-            ),
+            code = tenantLaboratoryResultConcept,
             subject = localizeReferenceTest(mockReference), // check that it transforms
             focus = listOf(Reference(display = "focus".asFHIR())),
             encounter = Reference(reference = "Encounter/1234".asFHIR()),
@@ -1292,21 +1345,10 @@ class RoninLaboratoryResultTest {
         assertEquals(
             listOf(
                 Extension(
-                    url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
-                    value = DynamicValue(
-                        DynamicValueType.CODEABLE_CONCEPT,
-                        CodeableConcept(
-                            text = "laboratory".asFHIR(),
-                            coding = listOf(
-                                Coding(
-                                    code = Code("some-code"),
-                                    display = "some-display".asFHIR(),
-                                    system = CodeSystem.LOINC.uri
-                                )
-                            )
-                        )
-                    )
-                )
+                    url = Uri("http://localhost/extension"),
+                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                ),
+                tenantLaboratoryResultSourceExtension
             ),
             transformed.extension
         )
@@ -1348,16 +1390,7 @@ class RoninLaboratoryResultTest {
             transformed.category
         )
         assertEquals(
-            CodeableConcept(
-                text = "laboratory".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = CodeSystem.LOINC.uri
-                    )
-                )
-            ),
+            mappedTenantLaboratoryResultConcept,
             transformed.code
         )
         assertEquals(
@@ -1419,21 +1452,12 @@ class RoninLaboratoryResultTest {
     }
 
     @Test
-    fun `transforms observation with only required attributes`() {
+    fun `transforms observation with only required attributes - maps Observation code`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(source = Uri("source")),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                text = "laboratory".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = CodeSystem.LOINC.uri
-                    )
-                )
-            ),
+            code = tenantLaboratoryResultConcept,
             category = laboratoryCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1453,24 +1477,7 @@ class RoninLaboratoryResultTest {
         transformed!!
         assertEquals("Observation", transformed.resourceType)
         assertEquals(
-            listOf(
-                Extension(
-                    url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
-                    value = DynamicValue(
-                        DynamicValueType.CODEABLE_CONCEPT,
-                        CodeableConcept(
-                            text = "laboratory".asFHIR(),
-                            coding = listOf(
-                                Coding(
-                                    code = Code("some-code"),
-                                    display = "some-display".asFHIR(),
-                                    system = CodeSystem.LOINC.uri
-                                )
-                            )
-                        )
-                    )
-                )
-            ),
+            listOf(tenantLaboratoryResultSourceExtension),
             transformed.extension
         )
         assertEquals(Id("123"), transformed.id)
@@ -1511,16 +1518,7 @@ class RoninLaboratoryResultTest {
             transformed.category
         )
         assertEquals(
-            CodeableConcept(
-                text = "laboratory".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = CodeSystem.LOINC.uri
-                    )
-                )
-            ),
+            mappedTenantLaboratoryResultConcept,
             transformed.code
         )
         assertEquals(
@@ -1557,21 +1555,49 @@ class RoninLaboratoryResultTest {
     }
 
     @Test
+    fun `transforms observation with only required attributes - fails if no concept map entry`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(source = Uri("source")),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = laboratoryCodeConcept,
+            category = laboratoryCategoryConceptList,
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            )
+        )
+
+        val (transformed, validation) = roninLaboratoryResult.transform(observation, tenant)
+
+        val exception = assertThrows<java.lang.IllegalArgumentException> {
+            validation.alertIfErrors()
+        }
+        assertNull(transformed)
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' " +
+                "has no target defined in any Observation.code concept map for tenant 'test' " +
+                "@ Observation.code\n" +
+                "ERROR RONIN_OBS_004: Tenant source observation code extension i" +
+                "s missing or invalid @ Observation.extension",
+            exception.message
+        )
+    }
+
+    @Test
     fun `transform inherits R4 validation`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(source = Uri("source")),
             status = Code("bad-status"),
-            code = CodeableConcept(
-                text = "laboratory".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = CodeSystem.LOINC.uri
-                    )
-                )
-            ),
+            code = tenantLaboratoryResultConcept,
             category = laboratoryCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1623,6 +1649,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -1659,7 +1686,8 @@ class RoninLaboratoryResultTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_LABOBS_001: Code system must be LOINC @ Observation.code",
+                "ERROR RONIN_LABOBS_001: Code system must be LOINC @ Observation.code\n" +
+                "ERROR RONIN_OBS_003: Must match this system|code: http://loinc.org|some-code @ Observation.code",
             exception.message
         )
     }
@@ -1690,6 +1718,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -1757,6 +1786,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -1824,6 +1854,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -1892,6 +1923,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -1963,6 +1995,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -2026,6 +2059,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -2086,6 +2120,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -2154,6 +2189,7 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantLaboratoryResultSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -2178,5 +2214,230 @@ class RoninLaboratoryResultTest {
         )
 
         roninLaboratoryResult.validate(observation).alertIfErrors()
+    }
+
+    @Test
+    fun `validate - fails if missing required source code extension`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_LABORATORY_RESULT.value)),
+                source = Uri("source")
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            category = laboratoryCategoryConceptList,
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01"
+            ),
+            value = DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
+                    system = CodeSystem.UCUM.uri,
+                    code = Code("kg")
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninLaboratoryResult.validate(observation).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_OBS_004: Tenant source observation code extension is missing or invalid @ Observation.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails if source code extension has wrong url`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_LABORATORY_RESULT.value)),
+                source = Uri("source")
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(
+                Extension(
+                    url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "b".asFHIR(),
+                            coding = laboratoryCodeCodingList
+                        )
+                    )
+                )
+            ),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            category = laboratoryCategoryConceptList,
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01"
+            ),
+            value = DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
+                    system = CodeSystem.UCUM.uri,
+                    code = Code("kg")
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninLaboratoryResult.validate(observation).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_OBS_004: Tenant source observation code extension is missing or invalid @ Observation.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails if source code extension has wrong datatype`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_LABORATORY_RESULT.value)),
+                source = Uri("source")
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(
+                Extension(
+                    url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+                    value = DynamicValue(
+                        DynamicValueType.CODING,
+                        laboratoryCodeCodingList
+                    )
+                )
+            ),
+            code = CodeableConcept(
+                text = "laboratory".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = CodeSystem.LOINC.uri
+                    )
+                )
+            ),
+            category = laboratoryCategoryConceptList,
+            subject = Reference(
+                display = "subject".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01"
+            ),
+            value = DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(68.04),
+                    unit = "kg".asFHIR(),
+                    system = CodeSystem.UCUM.uri,
+                    code = Code("kg")
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninLaboratoryResult.validate(observation).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_OBS_004: Tenant source observation code extension is missing or invalid @ Observation.extension",
+            exception.message
+        )
     }
 }

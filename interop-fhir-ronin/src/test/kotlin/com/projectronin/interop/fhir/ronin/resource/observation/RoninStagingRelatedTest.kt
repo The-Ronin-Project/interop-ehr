@@ -62,46 +62,68 @@ class RoninStagingRelatedTest {
     private val stagingRelatedCode = Code("some-code")
     private val stagingRelatedCoding = Coding(
         system = Uri("some-system-uri"),
-        code = stagingRelatedCode
-    )
-    private val stagingRelatedCodingList = listOf(stagingRelatedCoding)
-    private val stagingRelatedConcept = CodeableConcept(coding = stagingRelatedCodingList)
-    private val stagingRelatedConceptList = listOf(stagingRelatedConcept)
-
-    private val stagingRelatedCodingDisplay = Coding(
-        system = Uri("some-system-uri"),
         code = stagingRelatedCode,
         display = "some-display".asFHIR()
     )
-    private val stagingRelatedCodingDisplayList = listOf(stagingRelatedCodingDisplay)
-    private val stagingRelatedConceptDisplay = CodeableConcept(coding = stagingRelatedCodingDisplayList)
+    private val stagingRelatedCodingList = listOf(stagingRelatedCoding)
+    private val stagingRelatedConcept = CodeableConcept(
+        text = "Staging Related".asFHIR(),
+        coding = stagingRelatedCodingList
+    )
+    private val stagingRelatedConceptList = listOf(stagingRelatedConcept)
 
-    private val vitalSignsCategoryCode = Code("vital-signs")
-    private val vitalSignsCategoryCoding = Coding(
-        system = CodeSystem.OBSERVATION_CATEGORY.uri,
-        code = vitalSignsCategoryCode
+    private val tenantStagingRelatedCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Staging Related".asFHIR(),
+        code = Code("bad-body-height")
+    )
+    private val tenantStagingRelatedConcept = CodeableConcept(
+        text = "Tenant Staging Related".asFHIR(),
+        coding = listOf(tenantStagingRelatedCoding)
+    )
+    private val mappedTenantStagingRelatedConcept = CodeableConcept(
+        text = "Staging Related".asFHIR(),
+        coding = stagingRelatedCodingList
+    )
+    private val tenantStagingRelatedSourceExtension = Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            tenantStagingRelatedConcept
+        )
     )
 
+    // In this registry:
+    // Raw tenantStagingRelatedCoding is successfully mapped to stagingRelatedCoding.
+    // Raw stagingRelatedCoding is not mapped, so triggers a concept mapping error.
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_STAGING_RELATED.value)
-        } returns stagingRelatedCodingDisplayList
-        every {
-            getConceptMapping(
-                tenant,
-                "Observation.category",
-                vitalSignsCategoryCoding,
-                RoninProfile.OBSERVATION_BODY_WEIGHT.value
-            )?.first
-        } returns vitalSignsCategoryCoding
+        } returns stagingRelatedCodingList
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                stagingRelatedCodingDisplay,
-                RoninProfile.OBSERVATION_STAGING_RELATED.value
-            )?.first
-        } returns stagingRelatedCodingDisplay
+                stagingRelatedConcept
+            )
+        } returns null
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                tenantStagingRelatedConcept
+            )
+        } returns Pair(stagingRelatedConcept, tenantStagingRelatedSourceExtension)
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.code",
+                CodeableConcept(
+                    text = "fake text".asFHIR(),
+                    coding = listOf()
+                )
+            )
+        } returns null
     }
 
     private val roninStagingRelated = RoninStagingRelated(normalizer, localizer, normRegistryClient)
@@ -117,7 +139,7 @@ class RoninStagingRelatedTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
-            code = stagingRelatedConceptDisplay
+            code = stagingRelatedConcept
         )
 
         assertFalse(roninStagingRelated.qualifies(observation))
@@ -134,7 +156,7 @@ class RoninStagingRelatedTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
-            code = stagingRelatedConceptDisplay
+            code = stagingRelatedConcept
         )
 
         assertFalse(roninStagingRelated.qualifies(observation))
@@ -172,7 +194,8 @@ class RoninStagingRelatedTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
-            code = stagingRelatedConceptDisplay
+            extension = listOf(tenantStagingRelatedSourceExtension),
+            code = stagingRelatedConcept
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -220,7 +243,8 @@ class RoninStagingRelatedTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
-            code = stagingRelatedConceptDisplay
+            extension = listOf(tenantStagingRelatedSourceExtension),
+            code = stagingRelatedConcept
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -266,7 +290,8 @@ class RoninStagingRelatedTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
-            code = stagingRelatedConceptDisplay
+            extension = listOf(tenantStagingRelatedSourceExtension),
+            code = stagingRelatedConcept
         )
 
         val exception = assertThrows<IllegalArgumentException> {
@@ -354,19 +379,12 @@ class RoninStagingRelatedTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            extension = listOf(tenantStagingRelatedSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    ),
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
+                    stagingRelatedCoding,
+                    stagingRelatedCoding
                 )
             ),
             category = listOf(
@@ -428,6 +446,7 @@ class RoninStagingRelatedTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
+            extension = listOf(tenantStagingRelatedSourceExtension),
             code = CodeableConcept(
                 text = "fake text".asFHIR(),
                 coding = listOf()
@@ -469,6 +488,7 @@ class RoninStagingRelatedTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
+            extension = listOf(tenantStagingRelatedSourceExtension),
             code = CodeableConcept(
                 text = "fake text".asFHIR(),
                 coding = listOf()
@@ -506,7 +526,8 @@ class RoninStagingRelatedTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
 
-            code = stagingRelatedConceptDisplay
+            extension = listOf(tenantStagingRelatedSourceExtension),
+            code = stagingRelatedConcept
         )
 
         val (transformed, _) = roninStagingRelated.transform(observation, tenant)
@@ -560,6 +581,12 @@ class RoninStagingRelatedTest {
             language = Code("en-US"),
             text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
             contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://localhost/extension"),
+                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                )
+            ),
             modifierExtension = listOf(
                 Extension(
                     url = Uri("http://localhost/modifier-extension"),
@@ -573,7 +600,7 @@ class RoninStagingRelatedTest {
             partOf = listOf(Reference(reference = "ImagingStudy/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
             category = stagingRelatedConceptList,
-            code = stagingRelatedConceptDisplay,
+            code = tenantStagingRelatedConcept,
             subject = localizeReferenceTest(mockReference), // check that it transforms
             focus = listOf(Reference(display = "focus".asFHIR())),
             encounter = Reference(reference = "Encounter/1234".asFHIR()),
@@ -632,12 +659,10 @@ class RoninStagingRelatedTest {
         assertEquals(
             listOf(
                 Extension(
-                    url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
-                    value = DynamicValue(
-                        DynamicValueType.CODEABLE_CONCEPT,
-                        stagingRelatedConceptDisplay
-                    )
-                )
+                    url = Uri("http://localhost/extension"),
+                    value = DynamicValue(DynamicValueType.STRING, "Value")
+                ),
+                tenantStagingRelatedSourceExtension
             ),
             transformed.extension
         )
@@ -679,7 +704,7 @@ class RoninStagingRelatedTest {
             transformed.category
         )
         assertEquals(
-            stagingRelatedConceptDisplay,
+            mappedTenantStagingRelatedConcept,
             transformed.code
         )
         assertEquals(
@@ -741,7 +766,7 @@ class RoninStagingRelatedTest {
     }
 
     @Test
-    fun `transforms observation with only required attributes`() {
+    fun `transforms observation with only required attributes - maps Observation code`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(source = Uri("source")),
@@ -756,15 +781,7 @@ class RoninStagingRelatedTest {
                     )
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            ),
+            code = tenantStagingRelatedConcept,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -779,23 +796,7 @@ class RoninStagingRelatedTest {
         transformed!!
         assertEquals("Observation", transformed.resourceType)
         assertEquals(
-            listOf(
-                Extension(
-                    url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
-                    value = DynamicValue(
-                        DynamicValueType.CODEABLE_CONCEPT,
-                        CodeableConcept(
-                            coding = listOf(
-                                Coding(
-                                    code = Code("some-code"),
-                                    display = "some-display".asFHIR(),
-                                    system = Uri("some-system-uri")
-                                )
-                            )
-                        )
-                    )
-                )
-            ),
+            listOf(tenantStagingRelatedSourceExtension),
             transformed.extension
         )
         assertEquals(Id("123"), transformed.id)
@@ -845,15 +846,7 @@ class RoninStagingRelatedTest {
             transformed.category
         )
         assertEquals(
-            CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            ),
+            mappedTenantStagingRelatedConcept,
             transformed.code
         )
         assertEquals(
@@ -883,6 +876,47 @@ class RoninStagingRelatedTest {
     }
 
     @Test
+    fun `transforms observation with only required attributes - fails when no concept map`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(source = Uri("source")),
+            status = ObservationStatus.AMENDED.asCode(),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = Uri("something-system"),
+                            code = Code("could-be-any-code")
+                        )
+                    )
+                )
+            ),
+            extension = listOf(tenantStagingRelatedSourceExtension),
+            code = stagingRelatedConcept,
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR())
+        )
+
+        val (transformed, validation) = roninStagingRelated.transform(observation, tenant)
+
+        val exception = assertThrows<java.lang.IllegalArgumentException> {
+            validation.alertIfErrors()
+        }
+        assertNull(transformed)
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' " +
+                "has no target defined in any Observation.code concept map for tenant 'test' " +
+                "@ Observation.code",
+            exception.message
+        )
+    }
+
+    @Test
     fun `transform inherits R4 validation`() {
         val observation = Observation(
             id = Id("123"),
@@ -905,25 +939,8 @@ class RoninStagingRelatedTest {
                 )
             ),
             status = Code("bad-status"),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-here"),
-                            code = Code("some-code")
-                        )
-                    )
-                )
-            ),
+            code = tenantStagingRelatedConcept,
+            category = stagingRelatedConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -970,25 +987,9 @@ class RoninStagingRelatedTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-here"),
-                            code = Code("some-code")
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantStagingRelatedSourceExtension),
+            code = stagingRelatedConcept,
+            category = stagingRelatedConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Practitioner/1234".asFHIR(),
@@ -1033,25 +1034,9 @@ class RoninStagingRelatedTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-here"),
-                            code = Code("some-code")
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantStagingRelatedSourceExtension),
+            code = stagingRelatedConcept,
+            category = stagingRelatedConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
@@ -1098,25 +1083,9 @@ class RoninStagingRelatedTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-here"),
-                            code = Code("some-code")
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantStagingRelatedSourceExtension),
+            code = stagingRelatedConcept,
+            category = stagingRelatedConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(reference = "Patient/1234".asFHIR()),
 
@@ -1160,25 +1129,9 @@ class RoninStagingRelatedTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-here"),
-                            code = Code("some-code")
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantStagingRelatedSourceExtension),
+            code = stagingRelatedConcept,
+            category = stagingRelatedConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient")),
 
@@ -1218,25 +1171,9 @@ class RoninStagingRelatedTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-here"),
-                            code = Code("some-code")
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantStagingRelatedSourceExtension),
+            code = stagingRelatedConcept,
+            category = stagingRelatedConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
@@ -1282,25 +1219,9 @@ class RoninStagingRelatedTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        code = Code("some-code"),
-                        display = "some-display".asFHIR(),
-                        system = Uri("some-system-uri")
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("some-system-here"),
-                            code = Code("some-code")
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantStagingRelatedSourceExtension),
+            code = stagingRelatedConcept,
+            category = stagingRelatedConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),

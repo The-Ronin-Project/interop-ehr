@@ -6,6 +6,7 @@ import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
+import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Quantity
@@ -22,6 +23,7 @@ import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.util.asCode
@@ -53,6 +55,17 @@ class BaseRoninVitalSignTest {
             system = CodeSystem.LOINC.uri,
             display = "Body Height".asFHIR(),
             code = bodyHeightCode
+        )
+    )
+    private val bodyHeightConcept = CodeableConcept(
+        text = "Body Height".asFHIR(),
+        coding = bodyHeightCoding
+    )
+    private val codeSourceExtension = Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            bodyHeightConcept
         )
     )
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
@@ -88,9 +101,8 @@ class BaseRoninVitalSignTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = bodyHeightCoding
-            ),
+            extension = listOf(codeSourceExtension),
+            code = bodyHeightConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -158,9 +170,8 @@ class BaseRoninVitalSignTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = bodyHeightCoding
-            ),
+            extension = listOf(codeSourceExtension),
+            code = bodyHeightConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -228,9 +239,8 @@ class BaseRoninVitalSignTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = bodyHeightCoding
-            ),
+            extension = listOf(codeSourceExtension),
+            code = bodyHeightConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -308,9 +318,8 @@ class BaseRoninVitalSignTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = bodyHeightCoding
-            ),
+            extension = listOf(codeSourceExtension),
+            code = bodyHeightConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -378,6 +387,7 @@ class BaseRoninVitalSignTest {
                 )
             ),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            extension = listOf(codeSourceExtension),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -452,9 +462,8 @@ class BaseRoninVitalSignTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = bodyHeightCoding
-            ),
+            extension = listOf(codeSourceExtension),
+            code = bodyHeightConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -513,9 +522,8 @@ class BaseRoninVitalSignTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = bodyHeightCoding
-            ),
+            extension = listOf(codeSourceExtension),
+            code = bodyHeightConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -581,9 +589,8 @@ class BaseRoninVitalSignTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = bodyHeightCoding
-            ),
+            extension = listOf(codeSourceExtension),
+            code = bodyHeightConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(

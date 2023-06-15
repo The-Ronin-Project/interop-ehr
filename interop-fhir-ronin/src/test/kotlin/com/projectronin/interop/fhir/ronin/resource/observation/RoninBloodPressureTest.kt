@@ -30,6 +30,7 @@ import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
@@ -54,9 +55,38 @@ class RoninBloodPressureTest {
         every { mnemonic } returns "test"
     }
     private val bloodPressureCode = Code("85354-9")
-    private val bloodPressureCoding = Coding(system = CodeSystem.LOINC.uri, code = bloodPressureCode)
+    private val bloodPressureCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Blood Pressure".asFHIR(),
+        code = bloodPressureCode
+    )
     private val bloodPressureCodingList = listOf(bloodPressureCoding)
-    private val bloodPressureConcept = CodeableConcept(coding = bloodPressureCodingList)
+    private val bloodPressureConcept = CodeableConcept(
+        text = "Blood Pressure".asFHIR(),
+        coding = bloodPressureCodingList
+    )
+
+    private val tenantBloodPressureCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Bad Blood Pressure".asFHIR(),
+        code = Code("bad-blood-pressure")
+    )
+    private val tenantBloodPressureConcept = CodeableConcept(
+        text = "Tenant Blood Pressure".asFHIR(),
+        coding = listOf(tenantBloodPressureCoding)
+    )
+    private val mappedTenantBloodPressureConcept = CodeableConcept(
+        text = "Blood Pressure".asFHIR(),
+        coding = bloodPressureCodingList
+    )
+    private val tenantBloodPressureSourceExtension = Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            tenantBloodPressureConcept
+        )
+    )
+
     private val systolicCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8480-6")))
     private val diastolicCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8462-4")))
 
@@ -69,6 +99,9 @@ class RoninBloodPressureTest {
     private val vitalSignsCategoryConcept = CodeableConcept(coding = vitalSignsCategoryCodingList)
     private val vitalSignsCategoryConceptList = listOf(vitalSignsCategoryConcept)
 
+    // In this registry:
+    // Raw tenantBloodPressureCoding is successfully mapped to bloodPressureCoding.
+    // Raw bloodPressureCoding is not mapped, so triggers a concept mapping error.
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)
@@ -82,50 +115,43 @@ class RoninBloodPressureTest {
         every {
             getConceptMapping(
                 tenant,
-                "Observation.category",
-                vitalSignsCategoryCoding,
-                RoninProfile.OBSERVATION_BLOOD_PRESSURE.value
-            )?.first
-        } returns vitalSignsCategoryCoding
-        every {
-            getConceptMapping(
-                tenant,
-                "Observation.category",
-                Coding(
-                    system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                    code = null
-                ),
-                RoninProfile.OBSERVATION_BLOOD_PRESSURE.value
+                "Observation.code",
+                bloodPressureConcept
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                bloodPressureCoding,
-                RoninProfile.OBSERVATION_BLOOD_PRESSURE.value
-            )?.first
-        } returns bloodPressureCoding
+                tenantBloodPressureConcept
+            )
+        } returns Pair(bloodPressureConcept, tenantBloodPressureSourceExtension)
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                Coding(
-                    system = CodeSystem.UCUM.uri,
-                    code = bloodPressureCode
-                ),
-                RoninProfile.OBSERVATION_BLOOD_PRESSURE.value
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.UCUM.uri,
+                            code = bloodPressureCode
+                        )
+                    )
+                )
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                Coding(
-                    system = CodeSystem.LOINC.uri,
-                    code = Code("1234")
-                ),
-                RoninProfile.OBSERVATION_BLOOD_PRESSURE.value
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.LOINC.uri,
+                            code = Code("1234")
+                        )
+                    )
+                )
             )
         } returns null
     }
@@ -269,25 +295,9 @@ class RoninBloodPressureTest {
             ),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -338,6 +348,7 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantBloodPressureSourceExtension),
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -347,16 +358,7 @@ class RoninBloodPressureTest {
                     )
                 )
             ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -436,25 +438,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -504,25 +490,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -562,25 +532,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -661,25 +615,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -743,25 +681,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -848,25 +770,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -945,25 +851,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -1042,25 +932,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -1140,25 +1014,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -1237,25 +1095,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -1335,25 +1177,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -1434,25 +1260,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -1516,25 +1326,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -1621,25 +1415,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -1718,25 +1496,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -1815,25 +1577,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -1913,25 +1659,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -2010,25 +1740,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -2108,15 +1822,8 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -2206,25 +1913,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -2301,25 +1992,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient")),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -2392,25 +2067,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -2490,25 +2149,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -2570,24 +2213,8 @@ class RoninBloodPressureTest {
                     value = "test".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            code = tenantBloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
                 type = DynamicValueType.DATE_TIME,
@@ -2609,7 +2236,7 @@ class RoninBloodPressureTest {
     }
 
     @Test
-    fun `transforms observation with all attributes`() {
+    fun `transforms observation with all attributes - maps Observation code`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(
@@ -2636,26 +2263,8 @@ class RoninBloodPressureTest {
             basedOn = listOf(Reference(reference = "CarePlan/1234".asFHIR())),
             partOf = listOf(Reference(reference = "MedicationStatement/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                ),
-                text = "Blood Pressure".asFHIR()
-            ),
+            category = vitalSignsCategoryConceptList,
+            code = tenantBloodPressureConcept,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -2745,7 +2354,8 @@ class RoninBloodPressureTest {
                 Extension(
                     url = Uri("http://localhost/extension"),
                     value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                ),
+                tenantBloodPressureSourceExtension
             ),
             transformed.extension
         )
@@ -2786,29 +2396,11 @@ class RoninBloodPressureTest {
         )
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
-            listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            vitalSignsCategoryConceptList,
             transformed.category
         )
         assertEquals(
-            CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                ),
-                text = "Blood Pressure".asFHIR()
-            ),
+            mappedTenantBloodPressureConcept,
             transformed.code
         )
         assertEquals(
@@ -2902,31 +2494,13 @@ class RoninBloodPressureTest {
     }
 
     @Test
-    fun `transforms observation with only required attributes`() {
+    fun `transforms observation with only required attributes - maps Observation code`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(source = Uri("source")),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                ),
-                text = "Blood Pressure".asFHIR()
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            code = tenantBloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = localizeReferenceTest(mockReference), // check transform
             effective = DynamicValue(
@@ -2952,7 +2526,10 @@ class RoninBloodPressureTest {
         assertNull(transformed.language)
         assertNull(transformed.text)
         assertEquals(listOf<ContainedResource>(), transformed.contained)
-        assertEquals(listOf<Extension>(), transformed.extension)
+        assertEquals(
+            listOf(tenantBloodPressureSourceExtension),
+            transformed.extension
+        )
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
@@ -2978,29 +2555,11 @@ class RoninBloodPressureTest {
         assertEquals(listOf<Reference>(), transformed.partOf)
         assertEquals(ObservationStatus.AMENDED.asCode(), transformed.status)
         assertEquals(
-            listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            vitalSignsCategoryConceptList,
             transformed.category
         )
         assertEquals(
-            CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                ),
-                text = "Blood Pressure".asFHIR()
-            ),
+            mappedTenantBloodPressureConcept,
             transformed.code
         )
         assertEquals(
@@ -3037,30 +2596,45 @@ class RoninBloodPressureTest {
     }
 
     @Test
+    fun `transforms observation with only required attributes - fails if no concept map entry`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(source = Uri("source")),
+            status = ObservationStatus.AMENDED.asCode(),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = localizeReferenceTest(mockReference), // check transform
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            )
+        )
+
+        val (transformed, validation) = roninBloodPressure.transform(observation, tenant)
+
+        val exception = assertThrows<java.lang.IllegalArgumentException> {
+            validation.alertIfErrors()
+        }
+        assertNull(transformed)
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value '85354-9' " +
+                "has no target defined in any Observation.code concept map for tenant 'test' " +
+                "@ Observation.code",
+            exception.message
+        )
+    }
+
+    @Test
     fun `transform inherits R4 validation`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(source = Uri("source")),
             status = Code("bad-status"),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            code = tenantBloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
@@ -3110,26 +2684,9 @@ class RoninBloodPressureTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                ),
-                text = "Blood Pressure".asFHIR()
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -3180,26 +2737,9 @@ class RoninBloodPressureTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                ),
-                text = "Blood Pressure".asFHIR()
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -3250,26 +2790,9 @@ class RoninBloodPressureTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                ),
-                text = "Blood Pressure".asFHIR()
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -3320,26 +2843,9 @@ class RoninBloodPressureTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                ),
-                text = "Blood Pressure".asFHIR()
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/123".asFHIR(),
@@ -3390,25 +2896,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -3494,25 +2984,9 @@ class RoninBloodPressureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Blood Pressure".asFHIR(),
-                        code = bloodPressureCode
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = vitalSignsCategoryCode
-                        )
-                    )
-                )
-            ),
+            extension = listOf(tenantBloodPressureSourceExtension),
+            code = bloodPressureConcept,
+            category = vitalSignsCategoryConceptList,
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)

@@ -6,7 +6,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.DiagnosticReport
 import com.projectronin.interop.fhir.r4.validate.resource.R4DiagnosticReportValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
-import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
@@ -18,9 +17,7 @@ import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import com.projectronin.interop.fhir.validate.validation
-import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
 
 /**
  * Validator and Transformer for the Ronin Diagnostic Report Laboratory profile.
@@ -40,7 +37,6 @@ class RoninDiagnosticReportLaboratory(normalizer: Normalizer, localizer: Localiz
     override val qualifyingCategories =
         listOf(Coding(system = CodeSystem.DIAGNOSTIC_REPORT_LABORATORY.uri, code = Code("LAB")))
 
-    private val requiredIdError = RequiredFieldError(DiagnosticReport::id)
     private val requiredSubjectFieldError = RequiredFieldError(DiagnosticReport::subject)
     private val requiredCategoryFieldError = RequiredFieldError(DiagnosticReport::category)
 
@@ -72,23 +68,5 @@ class RoninDiagnosticReportLaboratory(normalizer: Normalizer, localizer: Localiz
 
             // code and status field checks are done by R4DiagnosticReportValidator
         }
-    }
-
-    override fun transformInternal(
-        normalized: DiagnosticReport,
-        parentContext: LocationContext,
-        tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
-    ): Pair<DiagnosticReport?, Validation> {
-        val validation = validation {
-            checkNotNull(normalized.id, requiredIdError, parentContext)
-        }
-
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
-        )
-
-        return Pair(transformed, validation)
     }
 }

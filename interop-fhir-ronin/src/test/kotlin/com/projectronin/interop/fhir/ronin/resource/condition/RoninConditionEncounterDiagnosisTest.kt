@@ -29,6 +29,7 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4ConditionValidator
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
@@ -1757,6 +1758,204 @@ class RoninConditionEncounterDiagnosisTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR INV_VALUE_SET: 'bad' is outside of required value set @ Condition.verificationStatus",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails if missing required source code extension`() {
+        val condition = Condition(
+            id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value)),
+                source = Uri("source")
+            ),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Condition", extension = dataAuthorityExtension)
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            ),
+            code = CodeableConcept(
+                coding = diagnosisCodingList,
+                text = "code".asFHIR()
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            profile.validate(condition).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_CND_001: Tenant source condition code extension is missing or invalid @ Condition.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails if source code extension has wrong url`() {
+        val condition = Condition(
+            id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(
+                Extension(
+                    url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        value = CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = Uri("http://snomed.info/sct"),
+                                    code = Code("1023001"),
+                                    display = "Apnea".asFHIR()
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Condition", extension = dataAuthorityExtension)
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            ),
+            code = CodeableConcept(
+                coding = diagnosisCodingList,
+                text = "code".asFHIR()
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            profile.validate(condition).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_CND_001: Tenant source condition code extension is missing or invalid @ Condition.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails if source code extension has wrong datatype`() {
+        val condition = Condition(
+            id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value)),
+                source = Uri("source")
+            ),
+            extension = listOf(
+                Extension(
+                    url = Uri(RoninExtension.TENANT_SOURCE_CONDITION_CODE.value),
+                    value = DynamicValue(
+                        DynamicValueType.CODING,
+                        value = Coding(
+                            system = Uri("http://snomed.info/sct"),
+                            code = Code("1023001"),
+                            display = "Apnea".asFHIR()
+                        )
+                    )
+                )
+            ),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri("Condition", extension = dataAuthorityExtension)
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            ),
+            code = CodeableConcept(
+                coding = diagnosisCodingList,
+                text = "code".asFHIR()
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            profile.validate(condition).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_CND_001: Tenant source condition code extension is missing or invalid @ Condition.extension",
             exception.message
         )
     }

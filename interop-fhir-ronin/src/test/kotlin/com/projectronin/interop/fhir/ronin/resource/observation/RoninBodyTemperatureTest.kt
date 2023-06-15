@@ -30,6 +30,7 @@ import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
@@ -54,9 +55,37 @@ class RoninBodyTemperatureTest {
         every { mnemonic } returns "test"
     }
     private val bodyTemperatureCode = Code("8310-5")
-    private val bodyTemperatureCoding = Coding(system = CodeSystem.LOINC.uri, code = bodyTemperatureCode)
+    private val bodyTemperatureCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Body Temp".asFHIR(),
+        code = bodyTemperatureCode
+    )
     private val bodyTemperatureCodingList = listOf(bodyTemperatureCoding)
-    private val bodyTemperatureConcept = CodeableConcept(coding = bodyTemperatureCodingList)
+    private val bodyTemperatureConcept = CodeableConcept(
+        text = "Body Temp".asFHIR(),
+        coding = bodyTemperatureCodingList
+    )
+
+    private val tenantBodyTemperatureCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Bad Body Temp".asFHIR(),
+        code = Code("bad-body-temp")
+    )
+    private val tenantBodyTemperatureConcept = CodeableConcept(
+        text = "Tenant Body Temp".asFHIR(),
+        coding = listOf(tenantBodyTemperatureCoding)
+    )
+    private val mappedTenantBodyTemperatureConcept = CodeableConcept(
+        text = "Body Temp".asFHIR(),
+        coding = bodyTemperatureCodingList
+    )
+    private val tenantBodyTemperatureSourceExtension = Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            tenantBodyTemperatureConcept
+        )
+    )
 
     private val vitalSignsCategoryCode = Code("vital-signs")
     private val vitalSignsCategoryCoding = Coding(
@@ -67,6 +96,9 @@ class RoninBodyTemperatureTest {
     private val vitalSignsCategoryConcept = CodeableConcept(coding = vitalSignsCategoryCodingList)
     private val vitalSignsCategoryConceptList = listOf(vitalSignsCategoryConcept)
 
+    // In this registry:
+    // Raw tenantTemperatureAreaCoding is successfully mapped to bodyTemperatureCoding.
+    // Raw bodyTemperatureCoding is not mapped, so triggers a concept mapping error.
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_TEMPERATURE.value)
@@ -74,50 +106,43 @@ class RoninBodyTemperatureTest {
         every {
             getConceptMapping(
                 tenant,
-                "Observation.category",
-                vitalSignsCategoryCoding,
-                RoninProfile.OBSERVATION_BODY_TEMPERATURE.value
-            )?.first
-        } returns vitalSignsCategoryCoding
-        every {
-            getConceptMapping(
-                tenant,
-                "Observation.category",
-                Coding(
-                    system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                    code = null
-                ),
-                RoninProfile.OBSERVATION_BODY_TEMPERATURE.value
+                "Observation.code",
+                bodyTemperatureConcept
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                bodyTemperatureCoding,
-                RoninProfile.OBSERVATION_BODY_TEMPERATURE.value
-            )?.first
-        } returns bodyTemperatureCoding
+                tenantBodyTemperatureConcept
+            )
+        } returns Pair(bodyTemperatureConcept, tenantBodyTemperatureSourceExtension)
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                Coding(
-                    system = CodeSystem.LOINC.uri,
-                    code = Code("1234")
-                ),
-                RoninProfile.OBSERVATION_BODY_TEMPERATURE.value
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.LOINC.uri,
+                            code = Code("1234")
+                        )
+                    )
+                )
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                Coding(
-                    system = CodeSystem.UCUM.uri,
-                    code = bodyTemperatureCode
-                ),
-                RoninProfile.OBSERVATION_BODY_TEMPERATURE.value
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.UCUM.uri,
+                            code = bodyTemperatureCode
+                        )
+                    )
+                )
             )
         } returns null
     }
@@ -256,15 +281,8 @@ class RoninBodyTemperatureTest {
             ),
             status = ObservationStatus.AMENDED.asCode(),
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -317,6 +335,7 @@ class RoninBodyTemperatureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
             code = CodeableConcept(
                 coding = listOf(
                     Coding(
@@ -375,15 +394,8 @@ class RoninBodyTemperatureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -441,15 +453,8 @@ class RoninBodyTemperatureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -507,15 +512,8 @@ class RoninBodyTemperatureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -574,15 +572,8 @@ class RoninBodyTemperatureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -640,15 +631,8 @@ class RoninBodyTemperatureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -707,15 +691,8 @@ class RoninBodyTemperatureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -784,15 +761,8 @@ class RoninBodyTemperatureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR()),
             effective = DynamicValue(
@@ -847,15 +817,8 @@ class RoninBodyTemperatureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -910,15 +873,8 @@ class RoninBodyTemperatureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -986,15 +942,8 @@ class RoninBodyTemperatureTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                )
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -1035,7 +984,7 @@ class RoninBodyTemperatureTest {
                     value = "test".asFHIR()
                 )
             ),
-            code = bodyTemperatureConcept,
+            code = tenantBodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             subject = Reference(
                 display = "subject".asFHIR(),
@@ -1062,7 +1011,7 @@ class RoninBodyTemperatureTest {
     }
 
     @Test
-    fun `transforms observation with all attributes`() {
+    fun `transforms observation with all attributes - maps Observation code`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(
@@ -1090,16 +1039,7 @@ class RoninBodyTemperatureTest {
             partOf = listOf(Reference(reference = "MedicationStatement/1234".asFHIR())),
             status = ObservationStatus.AMENDED.asCode(),
             category = vitalSignsCategoryConceptList,
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                ),
-                text = "Body Temp".asFHIR()
-            ),
+            code = tenantBodyTemperatureConcept,
             subject = Reference(
                 display = "subject".asFHIR(),
                 reference = "Patient/1234".asFHIR(),
@@ -1164,7 +1104,8 @@ class RoninBodyTemperatureTest {
                 Extension(
                     url = Uri("http://localhost/extension"),
                     value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                ),
+                tenantBodyTemperatureSourceExtension
             ),
             transformed.extension
         )
@@ -1206,16 +1147,7 @@ class RoninBodyTemperatureTest {
             transformed.category
         )
         assertEquals(
-            CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                ),
-                text = "Body Temp".asFHIR()
-            ),
+            mappedTenantBodyTemperatureConcept,
             transformed.code
         )
         assertEquals(
@@ -1277,21 +1209,12 @@ class RoninBodyTemperatureTest {
     }
 
     @Test
-    fun `transforms observation with only required attributes`() {
+    fun `transforms observation with only required attributess - maps Observation code`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(source = Uri("source")),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                ),
-                text = "Body Temp".asFHIR()
-            ),
+            code = tenantBodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = localizeReferenceTest(mockReference), // check that it transforms
@@ -1315,7 +1238,7 @@ class RoninBodyTemperatureTest {
         assertNull(transformed.language)
         assertNull(transformed.text)
         assertEquals(listOf<ContainedResource>(), transformed.contained)
-        assertEquals(listOf<Extension>(), transformed.extension)
+        assertEquals(listOf(tenantBodyTemperatureSourceExtension), transformed.extension)
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
@@ -1345,16 +1268,7 @@ class RoninBodyTemperatureTest {
             transformed.category
         )
         assertEquals(
-            CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                ),
-                text = "Body Temp".asFHIR()
-            ),
+            mappedTenantBodyTemperatureConcept,
             transformed.code
         )
         assertEquals(
@@ -1391,20 +1305,43 @@ class RoninBodyTemperatureTest {
     }
 
     @Test
+    fun `transforms observation with only required attributess - fails if no concept map entry`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(source = Uri("source")),
+            status = ObservationStatus.AMENDED.asCode(),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
+            category = vitalSignsCategoryConceptList,
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = localizeReferenceTest(mockReference), // check that it transforms
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            )
+        )
+
+        val (transformed, validation) = roninBodyTemperature.transform(observation, tenant)
+        val exception = assertThrows<java.lang.IllegalArgumentException> {
+            validation.alertIfErrors()
+        }
+        assertNull(transformed)
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value '8310-5' " +
+                "has no target defined in any Observation.code concept map for tenant 'test' " +
+                "@ Observation.code",
+            exception.message
+        )
+    }
+
+    @Test
     fun `transform inherits R4 validation`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(source = Uri("source")),
             status = Code("bad-status"),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                )
-            ),
+            code = tenantBodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1456,16 +1393,8 @@ class RoninBodyTemperatureTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                ),
-                text = "Body Temp".asFHIR()
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1517,16 +1446,8 @@ class RoninBodyTemperatureTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                ),
-                text = "Body Temp".asFHIR()
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1578,16 +1499,8 @@ class RoninBodyTemperatureTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                ),
-                text = "Body Temp".asFHIR()
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
@@ -1639,16 +1552,8 @@ class RoninBodyTemperatureTest {
                 )
             ),
             status = ObservationStatus.AMENDED.asCode(),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Body Temp".asFHIR(),
-                        code = bodyTemperatureCode
-                    )
-                ),
-                text = "Body Temp".asFHIR()
-            ),
+            extension = listOf(tenantBodyTemperatureSourceExtension),
+            code = bodyTemperatureConcept,
             category = vitalSignsCategoryConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(

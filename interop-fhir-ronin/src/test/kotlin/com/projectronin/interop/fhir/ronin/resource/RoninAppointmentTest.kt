@@ -31,6 +31,7 @@ import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -311,7 +312,8 @@ class RoninAppointmentTest {
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
                     code = Code(value = "cancelled")
                 ),
-                AppointmentStatus::class
+                AppointmentStatus::class,
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
         } returns Pair(statusCoding("cancelled"), statusExtension("cancelled"))
 
@@ -437,7 +439,8 @@ class RoninAppointmentTest {
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
                     code = Code(value = "cancelled")
                 ),
-                AppointmentStatus::class
+                AppointmentStatus::class,
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
         } returns Pair(statusCoding("cancelled"), statusExtension("cancelled"))
 
@@ -543,7 +546,8 @@ class RoninAppointmentTest {
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
                     code = Code(value = "cancelled")
                 ),
-                AppointmentStatus::class
+                AppointmentStatus::class,
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
         } returns Pair(statusCoding("cancelled"), statusExtension("cancelled"))
 
@@ -919,7 +923,8 @@ class RoninAppointmentTest {
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
                     code = Code(value = "abc")
                 ),
-                AppointmentStatus::class
+                AppointmentStatus::class,
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
         } returns Pair(statusCoding("cancelled"), statusExtension("abc"))
 
@@ -949,9 +954,10 @@ class RoninAppointmentTest {
     }
 
     @Test
-    fun `transform fails for appointment status - when concept map has no match`() {
+    fun `transform fails for appointment status - when concept map has no match - and source code is not in enum`() {
         val appointment = Appointment(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -986,26 +992,34 @@ class RoninAppointmentTest {
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
                     code = Code(value = "xyz")
                 ),
-                AppointmentStatus::class
+                AppointmentStatus::class,
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
         } returns null
 
-        val pair = roninAppointment.transformInternal(appointment, LocationContext(Appointment::class), tenant)
+        val pair = roninAppointment.transform(appointment, tenant)
         val exception = assertThrows<IllegalArgumentException> {
             pair.second.alertIfErrors()
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'xyz' has no target defined in " +
-                "http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus @ Appointment.status",
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'xyz' has no target " +
+                "defined in http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus " +
+                "@ Appointment.status\n" +
+                "ERROR RONIN_APPT_001: Appointment extension list may not be empty @ Appointment.status\n" +
+                "ERROR INV_VALUE_SET: 'xyz' is outside of required value set @ Appointment.status",
             exception.message
         )
     }
 
     @Test
-    fun `transform fails for appointment status - when concept map gives a result not in required value set`() {
+    fun `transform fails for appointment status - when concept map has no match - and source code is in enum`() {
+        // see NormalizationRegistryClientTest @Test
+        // fun `getConceptMappingForEnum with no matching registry - and source value is good for enum - returns enum as Coding`()
+
         val appointment = Appointment(
             id = Id("12345"),
+            meta = Meta(source = Uri("source")),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1023,7 +1037,7 @@ class RoninAppointmentTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            status = Code(value = "xyz"),
+            status = Code(value = "cancelled"),
             participant = listOf(
                 Participant(
                     actor = Reference(display = "actor".asFHIR()),
@@ -1031,76 +1045,52 @@ class RoninAppointmentTest {
                 )
             )
         )
+        val sourceCoding = Coding(
+            system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+            code = Code(value = "cancelled")
+        )
         every {
             registryClient.getConceptMappingForEnum(
                 tenant,
                 "Appointment.status",
-                Coding(
-                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                    code = Code(value = "xyz")
-                ),
-                AppointmentStatus::class
+                sourceCoding,
+                AppointmentStatus::class,
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
-        } returns Pair(statusCoding("waiting"), statusExtension("xyz"))
+        } returns Pair(
+            Coding(
+                system = Uri("http://projectronin.io/fhir/CodeSystem/AppointmentStatus"),
+                code = Code(value = "cancelled")
+            ),
+            Extension(
+                url = Uri(RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value),
+                value = DynamicValue(
+                    DynamicValueType.CODING,
+                    value = sourceCoding
+                )
+            )
+        )
 
-        val transformResult =
-            roninAppointment.transformInternal(appointment, LocationContext(Appointment::class), tenant)
-        val exception = assertThrows<IllegalArgumentException> {
-            transformResult.second.alertIfErrors()
-        }
+        val (transformed, validation) = roninAppointment.transform(appointment, tenant)
+        validation.alertIfErrors()
 
+        transformed!!
         assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR INV_CONMAP_VALUE_SET: http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus " +
-                "mapped 'xyz' to 'waiting' which is outside of required value set @ Appointment.status",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `transform succeeds for appointment status with empty source value - if empty source value is in concept map`() {
-        val appointment = Appointment(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
+            listOf(
+                Extension(
+                    url = Uri(RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODING,
+                        value = sourceCoding
+                    )
                 )
             ),
-            status = Code(value = ""),
-            participant = listOf(
-                Participant(
-                    actor = Reference(display = "actor".asFHIR()),
-                    status = ParticipationStatus.ACCEPTED.asCode()
-                )
-            )
+            transformed.extension
         )
-
-        every {
-            registryClient.getConceptMappingForEnum(
-                tenant,
-                "Appointment.status",
-                Coding(
-                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
-                    code = Code(value = "")
-                ),
-                AppointmentStatus::class
-            )
-        } returns Pair(statusCoding("booked"), statusExtension(""))
-
-        val (transformed, _) = roninAppointment.transform(appointment, tenant)
-        assertNull(transformed)
+        assertEquals(
+            Code(value = "cancelled"),
+            transformed.status
+        )
     }
 
     @Test
@@ -1142,7 +1132,8 @@ class RoninAppointmentTest {
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
                     code = Code(value = "cancelled")
                 ),
-                AppointmentStatus::class
+                AppointmentStatus::class,
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
         } returns Pair(statusCoding("booked"), statusExtension("cancelled"))
 
@@ -1192,7 +1183,8 @@ class RoninAppointmentTest {
                     system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
                     code = Code(value = "proposed")
                 ),
-                AppointmentStatus::class
+                AppointmentStatus::class,
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
         } returns Pair(statusCoding("waitlist"), statusExtension("proposed"))
 
