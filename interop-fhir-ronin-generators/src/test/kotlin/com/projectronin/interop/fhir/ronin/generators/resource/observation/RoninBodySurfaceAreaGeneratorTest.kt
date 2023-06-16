@@ -69,7 +69,8 @@ class RoninBodySurfaceAreaGeneratorTest {
             subject of rcdmReference("Patient", "678910")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsBodySurfaceAreaJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodySurfaceArea)
+        val roninObsBodySurfaceAreaJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodySurfaceArea)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsBodySurfaceAreaJSON)
@@ -85,7 +86,8 @@ class RoninBodySurfaceAreaGeneratorTest {
             subject of rcdmReference("Patient", "678910")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsBodySurfaceAreaJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodySurfaceArea)
+        val roninObsBodySurfaceAreaJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodySurfaceArea)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsBodySurfaceAreaJSON)
@@ -177,9 +179,9 @@ class RoninBodySurfaceAreaGeneratorTest {
             }
         }
         val validation = roninBodySurfaceArea.validate(bodySurfaceArea, null)
-        assertEquals(validation.hasErrors(), true)
-        assertEquals(validation.issues()[0].code, "RONIN_NOV_CODING_001")
-        assertEquals(validation.issues()[1].code, "RONIN_OBS_003")
-        assertEquals(validation.issues()[2].code, "R4_INV_PRIM")
+        assertTrue(validation.hasErrors())
+
+        val issueCodes = validation.issues().map { it.code }.toSet()
+        assertEquals(setOf("RONIN_OBS_003", "R4_INV_PRIM"), issueCodes)
     }
 }

@@ -69,7 +69,8 @@ class RoninRespiratoryRateGeneratorTest {
             subject of rcdmReference("Patient", "678910")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsRespiratoryRateJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsRespiratoryRate)
+        val roninObsRespiratoryRateJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsRespiratoryRate)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsRespiratoryRateJSON)
@@ -85,7 +86,8 @@ class RoninRespiratoryRateGeneratorTest {
             subject of rcdmReference("Patient", "678910")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsRespiratoryRateJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsRespiratoryRate)
+        val roninObsRespiratoryRateJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsRespiratoryRate)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsRespiratoryRateJSON)
@@ -177,8 +179,9 @@ class RoninRespiratoryRateGeneratorTest {
             }
         }
         val validation = roninRespRate.validate(roninObsRespRate, null)
-        assertEquals(validation.hasErrors(), true)
-        assertEquals(validation.issues()[0].code, "RONIN_NOV_CODING_001")
-        assertEquals(validation.issues()[1].code, "RONIN_OBS_003")
+        assertTrue(validation.hasErrors())
+
+        val issueCodes = validation.issues().map { it.code }.toSet()
+        assertEquals(setOf("RONIN_OBS_003"), issueCodes)
     }
 }
