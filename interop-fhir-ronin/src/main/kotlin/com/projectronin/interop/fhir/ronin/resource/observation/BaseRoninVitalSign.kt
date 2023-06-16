@@ -37,16 +37,7 @@ abstract class BaseRoninVitalSign(
         registryClient
     ) {
 
-    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCategories = listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("vital-signs")))
-
-    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCodes: List<Coding> by lazy {
-        registryClient.getRequiredValueSet(
-            "Observation.code",
-            profile
-        )
-    }
+    override fun qualifyingCategories() = listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("vital-signs")))
 
     // Quantity unit codes - subclasses may override to modify validation logic for quantity units like "cm" "kg"
     open val validQuantityCodes: List<String> = emptyList()

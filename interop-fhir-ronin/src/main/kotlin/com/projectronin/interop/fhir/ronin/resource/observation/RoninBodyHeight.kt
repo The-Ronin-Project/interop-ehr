@@ -1,8 +1,5 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
-import com.projectronin.interop.fhir.r4.CodeSystem
-import com.projectronin.interop.fhir.r4.datatype.Coding
-import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
@@ -36,9 +33,6 @@ class RoninBodyHeight(
     ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
-
-    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCodes = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8302-2")))
 
     // Quantity unit codes - [USCore Body Length Units](http://hl7.org/fhir/R4/valueset-ucum-bodylength.html)
     override val validQuantityCodes = listOf("cm", "[in_i]")

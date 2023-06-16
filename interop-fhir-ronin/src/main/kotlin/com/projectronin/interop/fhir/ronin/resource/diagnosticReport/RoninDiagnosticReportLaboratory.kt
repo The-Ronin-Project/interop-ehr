@@ -33,8 +33,7 @@ class RoninDiagnosticReportLaboratory(normalizer: Normalizer, localizer: Localiz
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
 
-    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCategories =
+    override fun qualifyingCategories() =
         listOf(Coding(system = CodeSystem.DIAGNOSTIC_REPORT_LABORATORY.uri, code = Code("LAB")))
 
     private val requiredSubjectFieldError = RequiredFieldError(DiagnosticReport::subject)
@@ -46,12 +45,12 @@ class RoninDiagnosticReportLaboratory(normalizer: Normalizer, localizer: Localiz
         validation.apply {
             checkTrue(element.category.isNotEmpty(), requiredCategoryFieldError, parentContext)
             checkTrue(
-                element.category.qualifiesForValueSet(qualifyingCategories),
+                element.category.qualifiesForValueSet(qualifyingCategories()),
                 FHIRError(
                     code = "USCORE_DX_RPT_001",
                     severity = ValidationIssueSeverity.ERROR,
                     description = "Must match this system|code: ${
-                    qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                    qualifyingCategories().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                     }",
                     location = LocationContext(DiagnosticReport::category)
                 ),

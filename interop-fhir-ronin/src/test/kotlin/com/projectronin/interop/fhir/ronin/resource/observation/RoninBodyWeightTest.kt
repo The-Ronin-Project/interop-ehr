@@ -108,6 +108,9 @@ class RoninBodyWeightTest {
     // Raw bodyWeightCoding is not mapped, so triggers a concept mapping error.
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
+            getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_WEIGHT.value)
+        } returns bodyWeightCodingList
+        every {
             getConceptMapping(
                 tenant,
                 "Observation.code",

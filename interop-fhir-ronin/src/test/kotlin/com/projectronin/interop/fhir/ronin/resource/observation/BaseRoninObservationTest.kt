@@ -18,7 +18,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Observation
-import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -28,18 +27,14 @@ import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
-import com.projectronin.interop.fhir.validate.RequiredFieldError
-import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
-import io.mockk.mockkObject
-import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class BaseRoninVitalSignTest {
+class BaseRoninObservationTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
@@ -50,33 +45,68 @@ class BaseRoninVitalSignTest {
         every { localize(any(), tenant) } answers { firstArg() }
     }
     private val bodyHeightCode = Code("8302-2")
-    private val bodyHeightCoding = listOf(
-        Coding(
-            system = CodeSystem.LOINC.uri,
-            display = "Body Height".asFHIR(),
-            code = bodyHeightCode
-        )
+    private val bodyHeightCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Body Height".asFHIR(),
+        code = bodyHeightCode
     )
-    private val bodyHeightConcept = CodeableConcept(
-        text = "Body Height".asFHIR(),
-        coding = bodyHeightCoding
+    private val bodyHeightCodingList = listOf(bodyHeightCoding)
+    private val tenantBodyHeightCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Body Height".asFHIR(),
+        code = Code("bad-body-height")
     )
-    private val codeSourceExtension = Extension(
+    private val tenantBodyHeightConcept = CodeableConcept(
+        text = "Tenant Body Height".asFHIR(),
+        coding = listOf(tenantBodyHeightCoding)
+    )
+    private val tenantBodyHeightSourceExtension = Extension(
         url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
         value = DynamicValue(
             DynamicValueType.CODEABLE_CONCEPT,
-            bodyHeightConcept
+            tenantBodyHeightConcept
         )
     )
+    private val stagingRelatedCode = Code("some-code")
+    private val stagingRelatedCoding = Coding(
+        system = Uri("some-system-uri"),
+        code = stagingRelatedCode,
+        display = "some-display".asFHIR()
+    )
+    private val stagingRelatedCodingList = listOf(stagingRelatedCoding)
+    private val tenantStagingRelatedCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        display = "Staging Related".asFHIR(),
+        code = Code("bad-body-height")
+    )
+    private val tenantStagingRelatedConcept = CodeableConcept(
+        text = "Tenant Staging Related".asFHIR(),
+        coding = listOf(tenantStagingRelatedCoding)
+    )
+    private val mappedTenantStagingRelatedConcept = CodeableConcept(
+        text = "Staging Related".asFHIR(),
+        coding = stagingRelatedCodingList
+    )
+    private val tenantStagingRelatedSourceExtension = Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            tenantStagingRelatedConcept
+        )
+    )
+
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_HEIGHT.value)
-        } returns bodyHeightCoding
+        } returns bodyHeightCodingList
+        every {
+            getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_STAGING_RELATED.value)
+        } returns stagingRelatedCodingList
     }
     private val roninVitalSign = RoninBodyHeight(normalizer, localizer, normRegistryClient)
 
     @Test
-    fun `validate fails if invalid effective type`() {
+    fun `validate fails if category is invalid`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(
@@ -101,241 +131,208 @@ class BaseRoninVitalSignTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            extension = listOf(codeSourceExtension),
-            code = bodyHeightConcept,
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = Code("vital-signs")
-                        )
-                    )
-                )
-            ),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            ),
-            effective = DynamicValue(
-                type = DynamicValueType.BOOLEAN,
-                value = true
-            ),
-            value = DynamicValue(
-                DynamicValueType.QUANTITY,
-                Quantity(
-                    value = Decimal(182.88),
-                    unit = "cm".asFHIR(),
-                    system = CodeSystem.UCUM.uri,
-                    code = Code("cm")
-                )
-            )
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninVitalSign.validate(observation).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_DYN_VAL: Ronin Vital Sign profile restricts effective to one of: DateTime, Period @ Observation.effective\n" +
-                "ERROR INV_DYN_VAL: effective can only be one of the following: DateTime, Period, Timing, Instant @ Observation.effective",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate checks R4 profile`() {
-        val observation = Observation(
-            id = Id("123"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
-                source = Uri("source")
-            ),
-            status = ObservationStatus.AMENDED.asCode(),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            extension = listOf(codeSourceExtension),
-            code = bodyHeightConcept,
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = Code("vital-signs")
-                        )
-                    )
-                )
-            ),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            ),
-            effective = DynamicValue(
-                type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
-            ),
-            value = DynamicValue(
-                DynamicValueType.QUANTITY,
-                Quantity(
-                    value = Decimal(182.88),
-                    unit = "cm".asFHIR(),
-                    system = CodeSystem.UCUM.uri,
-                    code = Code("cm")
-                )
-            )
-        )
-
-        mockkObject(R4ObservationValidator)
-        every { R4ObservationValidator.validate(observation, LocationContext(Observation::class)) } returns validation {
-            checkNotNull(
-                null,
-                RequiredFieldError(Observation::basedOn),
-                LocationContext(Observation::class)
-            )
-        }
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninVitalSign.validate(observation).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: basedOn is a required element @ Observation.basedOn",
-            exception.message
-        )
-
-        unmockkObject(R4ObservationValidator)
-    }
-
-    @Test
-    fun `validate fails if subject is not a Patient`() {
-        val observation = Observation(
-            id = Id("123"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
-                source = Uri("source")
-            ),
-            status = ObservationStatus.AMENDED.asCode(),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            extension = listOf(codeSourceExtension),
-            code = bodyHeightConcept,
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = Code("vital-signs")
-                        )
-                    )
-                )
-            ),
-            subject = Reference(
-                reference = "Organization/1234".asFHIR(),
-                type = Uri("something-here", extension = dataAuthorityExtension)
-            ),
-            effective = DynamicValue(
-                type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
-            ),
-            value = DynamicValue(
-                DynamicValueType.QUANTITY,
-                Quantity(
-                    value = Decimal(182.88),
-                    unit = "cm".asFHIR(),
-                    system = CodeSystem.UCUM.uri,
-                    code = Code("cm")
-                )
-            )
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninVitalSign.validate(observation).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Observation.subject",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails if more than 1 entry in coding list for code when Observation type is a vital sign`() {
-        val observation = Observation(
-            id = Id("123"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
-                source = Uri("source")
-            ),
-            status = ObservationStatus.AMENDED.asCode(),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            extension = listOf(codeSourceExtension),
+            extension = listOf(tenantBodyHeightSourceExtension),
             code = CodeableConcept(
-                text = "laboratory".asFHIR(),
+                coding = bodyHeightCodingList
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("not-a-vital-sign")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            value = DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(182.88),
+                    unit = "cm".asFHIR(),
+                    system = CodeSystem.UCUM.uri,
+                    code = Code("cm")
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninVitalSign.validate(observation, LocationContext(Observation::class)).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_OBS_002: Must match this system|code: " +
+                "http://terminology.hl7.org/CodeSystem/observation-category|vital-signs @ Observation.category",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails if no category`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
+                source = Uri("source")
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(tenantBodyHeightSourceExtension),
+            code = CodeableConcept(
+                coding = bodyHeightCodingList
+            ),
+            category = emptyList(),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            value = DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(182.88),
+                    unit = "cm".asFHIR(),
+                    system = CodeSystem.UCUM.uri,
+                    code = Code("cm")
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninVitalSign.validate(observation, LocationContext(Observation::class)).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_OBS_002: Must match this system|code: " +
+                "http://terminology.hl7.org/CodeSystem/observation-category|vital-signs @ Observation.category",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate succeeds when a category list is defined and the supplied category matches`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
+                source = Uri("source")
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(tenantBodyHeightSourceExtension),
+            code = CodeableConcept(
+                coding = bodyHeightCodingList
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                            code = Code("any")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            effective = DynamicValue(
+                type = DynamicValueType.DATE_TIME,
+                "2022-01-01T00:00:00Z"
+            ),
+            value = DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(182.88),
+                    unit = "cm".asFHIR(),
+                    system = CodeSystem.UCUM.uri,
+                    code = Code("cm")
+                )
+            )
+        )
+
+        val testRoninVitalSign = TestRoninBodyHeight(normalizer, localizer, normRegistryClient)
+        testRoninVitalSign.validate(observation).alertIfErrors()
+    }
+
+    @Test
+    fun `validate succeeds when qualifying category list is defined as empty - everything validates`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_STAGING_RELATED.value)),
+                source = Uri("source")
+            ),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = CodeableConcept(
                 coding = listOf(
                     Coding(
-                        code = Code("some-code-1"),
-                        display = "some-display-1".asFHIR(),
-                        system = CodeSystem.LOINC.uri
-                    ),
-                    Coding(
-                        code = Code("some-code-2"),
-                        display = "some-display-2".asFHIR(),
-                        system = CodeSystem.LOINC.uri
-                    ),
-                    Coding(
-                        code = Code("some-code-3"),
-                        display = "some-display-3".asFHIR(),
-                        system = CodeSystem.LOINC.uri
+                        code = Code("some-code"),
+                        display = "some-display".asFHIR(),
+                        system = Uri("some-system-uri")
                     )
                 )
             ),
@@ -343,32 +340,27 @@ class BaseRoninVitalSignTest {
                 CodeableConcept(
                     coding = listOf(
                         Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = Code("vital-signs")
+                            system = Uri("some-system-here"),
+                            code = Code("some-code")
                         )
                     )
                 )
             ),
+            extension = listOf(tenantBodyHeightSourceExtension),
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
-            )
+            ),
+            performer = listOf(Reference(reference = "Patient/1234".asFHIR()))
         )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninVitalSign.validate(observation).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_OBS_003: Must match this system|code: http://loinc.org|8302-2 @ Observation.code\n" +
-                "ERROR RONIN_VSOBS_001: Coding list must contain exactly 1 entry @ Observation.code",
-            exception.message
-        )
+        val roninStagingObservation = RoninStagingRelated(normalizer, localizer, normRegistryClient)
+        roninStagingObservation.validate(observation).alertIfErrors()
     }
 
     @Test
-    fun `validate succeeds`() {
+    fun `validate fails when a non-empty category list is defined and the supplied category does not match`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(
@@ -393,8 +385,10 @@ class BaseRoninVitalSignTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            extension = listOf(codeSourceExtension),
-            code = bodyHeightConcept,
+            extension = listOf(tenantBodyHeightSourceExtension),
+            code = CodeableConcept(
+                coding = bodyHeightCodingList
+            ),
             category = listOf(
                 CodeableConcept(
                     coding = listOf(
@@ -424,141 +418,39 @@ class BaseRoninVitalSignTest {
             )
         )
 
-        roninVitalSign.validate(observation).alertIfErrors()
-    }
-
-    @Test
-    fun `validate fails if subject type is not found`() {
-        val observation = Observation(
-            id = Id("123"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
-                source = Uri("source")
-            ),
-            status = ObservationStatus.AMENDED.asCode(),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            extension = listOf(codeSourceExtension),
-            code = bodyHeightConcept,
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = Code("vital-signs")
-                        )
-                    )
-                )
-            ),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR()
-            ),
-            effective = DynamicValue(
-                type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
-            ),
-            value = DynamicValue(
-                DynamicValueType.QUANTITY,
-                Quantity(
-                    value = Decimal(182.88),
-                    unit = "cm".asFHIR(),
-                    system = CodeSystem.UCUM.uri,
-                    code = Code("cm")
-                )
-            )
-        )
-
+        val testRoninVitalSign = TestRoninBodyHeight(normalizer, localizer, normRegistryClient)
         val exception = assertThrows<IllegalArgumentException> {
-            roninVitalSign.validate(observation).alertIfErrors()
+            testRoninVitalSign.validate(observation).alertIfErrors()
         }
-
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Observation.subject.type",
+                "ERROR RONIN_OBS_002: Must match this system|code: " +
+                "http://terminology.hl7.org/CodeSystem/observation-category|any, " +
+                "http://terminology.hl7.org/CodeSystem/observation-category|bae " +
+                "@ Observation.category",
             exception.message
         )
     }
 
-    @Test
-    fun `validate fails without subject type having data authority extension identifier`() {
-        val observation = Observation(
-            id = Id("123"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_HEIGHT.value)),
-                source = Uri("source")
+    class TestRoninBodyHeight(
+        normalizer: Normalizer,
+        localizer: Localizer,
+        registryClient: NormalizationRegistryClient
+    ) :
+        RoninBodyHeight(
+            normalizer,
+            localizer,
+            registryClient
+        ) {
+        override fun qualifyingCategories() = listOf(
+            Coding(
+                system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                code = Code("any")
             ),
-            status = ObservationStatus.AMENDED.asCode(),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            extension = listOf(codeSourceExtension),
-            code = bodyHeightConcept,
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
-                            code = Code("vital-signs")
-                        )
-                    )
-                )
-            ),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("something-here")
-            ),
-            effective = DynamicValue(
-                type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
-            ),
-            value = DynamicValue(
-                DynamicValueType.QUANTITY,
-                Quantity(
-                    value = Decimal(182.88),
-                    unit = "cm".asFHIR(),
-                    system = CodeSystem.UCUM.uri,
-                    code = Code("cm")
-                )
+            Coding(
+                system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                code = Code("bae")
             )
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninVitalSign.validate(observation).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_DAUTH_EX_001: Data Authority extension identifier is required for reference @ Observation.subject.type.extension",
-            exception.message
         )
     }
 }

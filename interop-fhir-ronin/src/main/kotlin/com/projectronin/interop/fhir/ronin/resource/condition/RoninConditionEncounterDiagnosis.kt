@@ -26,8 +26,7 @@ class RoninConditionEncounterDiagnosis(
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 3
 
-    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCategories =
+    override fun qualifyingCategories() =
         listOf(Coding(system = CodeSystem.CONDITION_CATEGORY.uri, code = Code("encounter-diagnosis")))
 
     private val requiredIdError = RequiredFieldError(Condition::id)

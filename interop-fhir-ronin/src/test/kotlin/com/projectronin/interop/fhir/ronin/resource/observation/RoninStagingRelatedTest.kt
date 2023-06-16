@@ -242,7 +242,6 @@ class RoninStagingRelatedTest {
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
-
             extension = listOf(tenantStagingRelatedSourceExtension),
             code = stagingRelatedConcept
         )
@@ -336,7 +335,7 @@ class RoninStagingRelatedTest {
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
-
+            extension = listOf(tenantStagingRelatedSourceExtension),
             code = null
         )
 
@@ -445,7 +444,6 @@ class RoninStagingRelatedTest {
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
-
             extension = listOf(tenantStagingRelatedSourceExtension),
             code = CodeableConcept(
                 text = "fake text".asFHIR(),
@@ -459,8 +457,8 @@ class RoninStagingRelatedTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Observation.code\n" +
-                "ERROR RONIN_STAGING_OBS_001: Coding list must contain exactly 1 entry @ Observation.code\n" +
-                "ERROR RONIN_OBS_003: Must match this system|code: some-system-uri|some-code @ Observation.code",
+                "ERROR RONIN_OBS_003: Must match this system|code: some-system-uri|some-code @ Observation.code\n" +
+                "ERROR RONIN_STAGING_OBS_001: Coding list must contain exactly 1 entry @ Observation.code",
             exception.message
         )
     }
@@ -1231,5 +1229,167 @@ class RoninStagingRelatedTest {
         )
 
         roninStagingRelated.validate(observation).alertIfErrors()
+    }
+
+    @Test
+    fun `validate - fails if missing required source code extension`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_STAGING_RELATED.value)),
+                source = Uri("source")
+            ),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            code = stagingRelatedConcept,
+            category = stagingRelatedConceptList,
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            performer = listOf(Reference(reference = "Patient/1234".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninStagingRelated.validate(observation).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_OBS_004: Tenant source observation code extension is missing or invalid @ Observation.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails if source code extension has wrong url`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_STAGING_RELATED.value)),
+                source = Uri("source")
+            ),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            extension = listOf(
+                Extension(
+                    url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "b".asFHIR(),
+                            coding = stagingRelatedCodingList
+                        )
+                    )
+                )
+            ),
+            code = stagingRelatedConcept,
+            category = stagingRelatedConceptList,
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            performer = listOf(Reference(reference = "Patient/1234".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninStagingRelated.validate(observation).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_OBS_004: Tenant source observation code extension is missing or invalid @ Observation.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails if source code extension has wrong datatype`() {
+        val observation = Observation(
+            id = Id("123"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.OBSERVATION_STAGING_RELATED.value)),
+                source = Uri("source")
+            ),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "123".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = ObservationStatus.AMENDED.asCode(),
+            extension = listOf(
+                Extension(
+                    url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
+                    value = DynamicValue(
+                        DynamicValueType.CODING,
+                        stagingRelatedCodingList
+                    )
+                )
+            ),
+            code = stagingRelatedConcept,
+            category = stagingRelatedConceptList,
+            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            performer = listOf(Reference(reference = "Patient/1234".asFHIR()))
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninStagingRelated.validate(observation).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_OBS_004: Tenant source observation code extension is missing or invalid @ Observation.extension",
+            exception.message
+        )
     }
 }

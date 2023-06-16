@@ -8,6 +8,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.ronin.generators.util.generateCode
+import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateSubject
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
@@ -22,6 +23,7 @@ fun rcdmObservationStagingRelated(tenant: String, block: ObservationGenerator.()
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.OBSERVATION_STAGING_RELATED, tenant) {}
         identifier of identifier.generate() + rcdmIdentifiers(tenant, identifier)
+        extension of generateExtension(extension.generate(), tenantSourceExtension)
         category of listOf(
             codeableConcept {
                 coding of stagingRelatedCategory

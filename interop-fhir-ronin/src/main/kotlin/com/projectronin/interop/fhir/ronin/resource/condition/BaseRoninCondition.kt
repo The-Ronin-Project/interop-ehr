@@ -31,10 +31,10 @@ abstract class BaseRoninCondition(
 ) : USCoreBasedProfile<Condition>(extendedProfile, profile, normalizer, localizer) {
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    open val qualifyingCategories: List<Coding> = emptyList()
+    open fun qualifyingCategories(): List<Coding> = emptyList()
 
     override fun qualifies(resource: Condition): Boolean {
-        return resource.category.qualifiesForValueSet(qualifyingCategories)
+        return resource.category.qualifiesForValueSet(qualifyingCategories())
     }
 
     private val requiredCodeError = RequiredFieldError(Condition::code)
@@ -62,12 +62,12 @@ abstract class BaseRoninCondition(
             }
 
             checkTrue(
-                element.category.qualifiesForValueSet(qualifyingCategories),
+                element.category.qualifiesForValueSet(qualifyingCategories()),
                 FHIRError(
                     code = "RONIN_CND_001",
                     severity = ValidationIssueSeverity.ERROR,
                     description = "Must match this system|code: ${
-                    qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                    qualifyingCategories().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                     }",
                     location = LocationContext(Condition::category)
                 ),

@@ -35,8 +35,7 @@ class bodyHeight(
     localizer,
     registryClient
 ) {
-    override val qualifyingCodes: List<Coding>
-        get() = possibleBodyHeightCodes
+    override fun qualifyingCodes(): List<Coding> = possibleBodyHeightCodes
 }
 class RoninBodyHeightGeneratorTest {
     private lateinit var roninBodyHeight: RoninBodyHeight

@@ -115,7 +115,7 @@ class RoninStagingRelatedGeneratorTest {
         assertNull(roninObsStagingRelated.language)
         assertNull(roninObsStagingRelated.text)
         assertEquals(0, roninObsStagingRelated.contained.size)
-        assertEquals(0, roninObsStagingRelated.extension.size)
+        assertEquals(1, roninObsStagingRelated.extension.size)
         assertEquals(0, roninObsStagingRelated.modifierExtension.size)
         assertTrue(roninObsStagingRelated.identifier.size >= 3)
         assertTrue(roninObsStagingRelated.identifier.any { it.value == "fake-tenant".asFHIR() })

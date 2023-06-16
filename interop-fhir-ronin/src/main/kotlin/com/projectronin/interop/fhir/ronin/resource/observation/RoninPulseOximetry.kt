@@ -37,18 +37,14 @@ class RoninPulseOximetry(
     override val profileVersion = 2
 
     // Multipart qualifying codes for RoninPulseOximetry
-    private val qualifyingFlowRateCodes: List<Coding> by lazy {
-        registryClient.getRequiredValueSet(
-            "Observation.component:FlowRate.code",
-            profile
-        )
-    }
-    private val qualifyingConcentrationCodes: List<Coding> by lazy {
-        registryClient.getRequiredValueSet(
-            "Observation.component:Concentration.code",
-            profile
-        )
-    }
+    fun qualifyingFlowRateCodes(): List<Coding> = registryClient.getRequiredValueSet(
+        "Observation.component:FlowRate.code",
+        profile
+    )
+    fun qualifyingConcentrationCodes(): List<Coding> = registryClient.getRequiredValueSet(
+        "Observation.component:Concentration.code",
+        profile
+    )
 
     // Quantity unit codes - [US Core Pulse Oximetry](http://hl7.org/fhir/us/core/STU5.0.1/StructureDefinition-us-core-pulse-oximetry.html)
     private val validFlowRateCodes = listOf("L/min")
@@ -81,10 +77,10 @@ class RoninPulseOximetry(
         if (element.dataAbsentReason == null) {
             val components = element.component
             val flowRate = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(qualifyingFlowRateCodes) } ?: false
+                comp.code?.coding?.any { it.isInValueSet(qualifyingFlowRateCodes()) } ?: false
             }
             val concentration = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(qualifyingConcentrationCodes) } ?: false
+                comp.code?.coding?.any { it.isInValueSet(qualifyingConcentrationCodes()) } ?: false
             }
 
             if (flowRate.size == 1) {
@@ -112,7 +108,7 @@ class RoninPulseOximetry(
                         code = "RONIN_PXOBS_004",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        qualifyingFlowRateCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        qualifyingFlowRateCodes().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
                         location = flowRateCodeContext
                     ),
@@ -136,7 +132,7 @@ class RoninPulseOximetry(
                         code = "RONIN_PXOBS_005",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        qualifyingConcentrationCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        qualifyingConcentrationCodes().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
                         location = concentrationCodeContext
                     ),

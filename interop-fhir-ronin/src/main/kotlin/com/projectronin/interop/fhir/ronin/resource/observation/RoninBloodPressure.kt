@@ -37,18 +37,14 @@ class RoninBloodPressure(
     override val profileVersion = 3
 
     // Multipart qualifying codes for RoninBloodPressure
-    private val validSystolicCodes: List<Coding> by lazy {
-        registryClient.getRequiredValueSet(
-            "Observation.component:systolic.code",
-            profile
-        )
-    }
-    private val validDiastolicCodes: List<Coding> by lazy {
-        registryClient.getRequiredValueSet(
-            "Observation.component:diastolic.code",
-            profile
-        )
-    }
+    fun validSystolicCodes(): List<Coding> = registryClient.getRequiredValueSet(
+        "Observation.component:systolic.code",
+        profile
+    )
+    fun validDiastolicCodes(): List<Coding> = registryClient.getRequiredValueSet(
+        "Observation.component:diastolic.code",
+        profile
+    )
 
     // Quantity unit codes - [USCore Blood Pressure Units](http://hl7.org/fhir/us/core/STU5.0.1/StructureDefinition-us-core-blood-pressure.html)
     override val validQuantityCodes = listOf("mm[Hg]")
@@ -63,10 +59,10 @@ class RoninBloodPressure(
         if (element.dataAbsentReason == null) {
             val components = element.component
             val systolic = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(validSystolicCodes) } ?: false
+                comp.code?.coding?.any { it.isInValueSet(validSystolicCodes()) } ?: false
             }
             val diastolic = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(validDiastolicCodes) } ?: false
+                comp.code?.coding?.any { it.isInValueSet(validDiastolicCodes()) } ?: false
             }
 
             if (systolic.size == 1) {
@@ -94,7 +90,7 @@ class RoninBloodPressure(
                         code = "USCORE_BPOBS_001",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        validSystolicCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        validSystolicCodes().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
                         location = componentSystolicCodeContext
                     ),
@@ -118,7 +114,7 @@ class RoninBloodPressure(
                         code = "USCORE_BPOBS_002",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        validDiastolicCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        validDiastolicCodes().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
                         location = componentDiastolicCodeContext
                     ),

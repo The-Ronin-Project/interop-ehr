@@ -23,7 +23,7 @@ abstract class BaseRoninProfileObservation(
     profile: String,
     normalizer: Normalizer,
     localizer: Localizer,
-    private val registryClient: NormalizationRegistryClient
+    protected val registryClient: NormalizationRegistryClient
 ) :
     BaseRoninObservation(
         extendedProfile,
@@ -31,6 +31,11 @@ abstract class BaseRoninProfileObservation(
         normalizer,
         localizer
     ) {
+
+    override fun qualifyingCodes() = registryClient.getRequiredValueSet(
+        "Observation.code",
+        profile
+    )
 
     private val requiredExtensionCodeError = FHIRError(
         code = "RONIN_OBS_004",

@@ -111,22 +111,14 @@ fun List<CodeableConcept>?.validateCodeInValueSet(
  * contains a Coding that matches a Coding from the input [qualifyList] of Coding
  */
 fun List<CodeableConcept>?.qualifiesForValueSet(qualifyList: List<Coding>): Boolean {
-    this?.let { conceptList ->
-        if (conceptList.isNotEmpty()) {
-            return (qualifyList.isEmpty() || conceptList.any { con -> con.qualifiesForValueSet(qualifyList) })
-        }
-    }
-    return false
+    return qualifyList.isEmpty() || (this?.let { it.any { con -> con.qualifiesForValueSet(qualifyList) } } == true)
 }
 
 /**
  * Check whether a CodeableConcept contains a Coding that matches a Coding from the input [qualifyList] of Coding
  */
 fun CodeableConcept?.qualifiesForValueSet(qualifyList: List<Coding>): Boolean {
-    this?.let { concept ->
-        return (qualifyList.isEmpty() || concept.coding.any { it.isInValueSet(qualifyList) })
-    }
-    return false
+    return qualifyList.isEmpty() || (this?.let { it.coding.any { it.isInValueSet(qualifyList) } } == true)
 }
 
 /**

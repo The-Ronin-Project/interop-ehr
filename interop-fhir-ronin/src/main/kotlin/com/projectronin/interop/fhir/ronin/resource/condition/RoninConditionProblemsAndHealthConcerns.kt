@@ -27,8 +27,7 @@ class RoninConditionProblemsAndHealthConcerns(
     private val qualifyingCodeProblemListItem = Code("problem-list-item")
     private val qualifyingCodeHealthConcerns = Code("health-concern")
 
-    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCategories = listOf(
+    override fun qualifyingCategories() = listOf(
         Coding(system = CodeSystem.CONDITION_CATEGORY.uri, code = qualifyingCodeProblemListItem),
         Coding(system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri, code = qualifyingCodeHealthConcerns)
     )

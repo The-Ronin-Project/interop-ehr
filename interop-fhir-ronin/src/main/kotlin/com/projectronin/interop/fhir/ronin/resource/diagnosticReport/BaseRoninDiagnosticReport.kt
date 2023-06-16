@@ -27,10 +27,10 @@ abstract class BaseRoninDiagnosticReport(
 ) : USCoreBasedProfile<DiagnosticReport>(extendedProfile, profile, normalizer, localizer) {
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    open val qualifyingCategories: List<Coding> = emptyList()
+    open fun qualifyingCategories(): List<Coding> = emptyList()
 
     override fun qualifies(resource: DiagnosticReport): Boolean {
-        return resource.category.qualifiesForValueSet(qualifyingCategories)
+        return resource.category.qualifiesForValueSet(qualifyingCategories())
     }
 
     override fun validateRonin(element: DiagnosticReport, parentContext: LocationContext, validation: Validation) {

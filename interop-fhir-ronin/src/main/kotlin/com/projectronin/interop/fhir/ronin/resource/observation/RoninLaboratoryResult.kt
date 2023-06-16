@@ -42,17 +42,8 @@ class RoninLaboratoryResult(
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
 
-    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCategories =
+    override fun qualifyingCategories() =
         listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("laboratory")))
-
-    // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    override val qualifyingCodes: List<Coding> by lazy {
-        registryClient.getRequiredValueSet(
-            "Observation.code",
-            profile
-        )
-    }
 
     // Reference checks - override BaseRoninObservation value lists as needed for RoninLaboratoryResult
     override val validDerivedFromValues = listOf(

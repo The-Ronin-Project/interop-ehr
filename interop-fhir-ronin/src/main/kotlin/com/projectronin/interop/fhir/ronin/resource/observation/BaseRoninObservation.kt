@@ -32,15 +32,15 @@ abstract class BaseRoninObservation(
 ) : USCoreBasedProfile<Observation>(extendedProfile, profile, normalizer, localizer) {
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    open val qualifyingCategories: List<Coding> = emptyList()
+    open fun qualifyingCategories(): List<Coding> = emptyList()
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    open val qualifyingCodes: List<Coding> = emptyList()
+    open fun qualifyingCodes(): List<Coding> = emptyList()
 
     override fun qualifies(resource: Observation): Boolean {
         return (
-            resource.category.qualifiesForValueSet(qualifyingCategories) &&
-                resource.code.qualifiesForValueSet(qualifyingCodes)
+            resource.category.qualifiesForValueSet(qualifyingCategories()) &&
+                resource.code.qualifiesForValueSet(qualifyingCodes())
             )
     }
 
@@ -177,22 +177,22 @@ abstract class BaseRoninObservation(
     open fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             checkTrue(
-                element.category.qualifiesForValueSet(qualifyingCategories),
+                element.category.qualifiesForValueSet(qualifyingCategories()),
                 FHIRError(
                     code = "RONIN_OBS_002",
                     severity = ValidationIssueSeverity.ERROR,
-                    description = "Must match this system|code: ${qualifyingCategories.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }}",
+                    description = "Must match this system|code: ${qualifyingCategories().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }}",
                     location = LocationContext(Observation::category)
                 ),
                 parentContext
             )
 
             checkTrue(
-                element.code.qualifiesForValueSet(qualifyingCodes),
+                element.code.qualifiesForValueSet(qualifyingCodes()),
                 FHIRError(
                     code = "RONIN_OBS_003",
                     severity = ValidationIssueSeverity.ERROR,
-                    description = "Must match this system|code: ${qualifyingCodes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }}",
+                    description = "Must match this system|code: ${qualifyingCodes().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }}",
                     location = LocationContext(Observation::code)
                 ),
                 parentContext
