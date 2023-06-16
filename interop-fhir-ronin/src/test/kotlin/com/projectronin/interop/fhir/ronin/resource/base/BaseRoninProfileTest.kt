@@ -30,6 +30,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.io.ByteArrayOutputStream
@@ -336,6 +337,7 @@ class BaseRoninProfileTest {
         )
     }
 
+    @Disabled("See INT-1882")
     @Test
     fun `codeable concept contains coding missing display - validation error`() {
         every { location.identifier } returns listOf(

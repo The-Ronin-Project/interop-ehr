@@ -34,6 +34,7 @@ import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -201,6 +202,7 @@ class RoninObservationTest {
         )
     }
 
+    @Disabled("See INT-1882")
     @Test
     fun `validate fails with code coding display missing`() {
         val observation = Observation(
@@ -290,7 +292,7 @@ class RoninObservationTest {
                 coding = listOf(
                     Coding(
                         code = Code("some-code"),
-                        system = Uri("some-system")
+                        display = "some-display".asFHIR()
                     )
                 )
             ),

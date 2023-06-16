@@ -336,7 +336,9 @@ abstract class BaseRoninProfile<T : Resource<T>>(
                 checkTrue(
                     coding.all {
                         // The FHIR spec indicates all strings should contain non-whitespace content, so checking for blank
-                        !it.system?.value.isNullOrBlank() && !it.code?.value.isNullOrBlank() && !it.display?.value.isNullOrBlank()
+                        !it.system?.value.isNullOrBlank() && !it.code?.value.isNullOrBlank()
+                        // TODO: Re-enable after ConceptMapping in place
+                        //  && !it.display?.value.isNullOrBlank()
                     },
                     roninInvalidCodingError(parentFieldName),
                     parentContext
