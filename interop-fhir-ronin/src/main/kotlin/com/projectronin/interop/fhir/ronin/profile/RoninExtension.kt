@@ -17,7 +17,8 @@ enum class RoninExtension(val value: String) {
 
     @Deprecated("As of RCDM v3.20.0")
     TENANT_SOURCE_ENCOUNTER_TYPE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceEncounterType"),
-    TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceDocumentReferenceType");
+    TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceDocumentReferenceType"),
+    RONIN_DATA_AUTHORITY_EXTENSION("http://projectronin.io/fhir/StructureDefinition/Extension/ronin-dataAuthorityIdentifier");
 
     val uri = Uri(value)
 }

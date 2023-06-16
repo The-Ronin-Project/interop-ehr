@@ -1,7 +1,6 @@
 package com.projectronin.interop.fhir.ronin.generators.resource
 
 import com.projectronin.interop.fhir.generators.datatypes.identifier
-import com.projectronin.interop.fhir.generators.datatypes.name
 import com.projectronin.interop.fhir.generators.resources.PatientGenerator
 import com.projectronin.interop.fhir.generators.resources.patient
 import com.projectronin.interop.fhir.r4.CodeSystem

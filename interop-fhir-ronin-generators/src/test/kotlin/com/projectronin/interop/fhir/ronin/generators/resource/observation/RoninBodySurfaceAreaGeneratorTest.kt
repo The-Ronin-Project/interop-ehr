@@ -1,0 +1,185 @@
+package com.projectronin.interop.fhir.ronin.generators.resource.observation
+
+import com.projectronin.interop.common.jackson.JacksonManager
+import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
+import com.projectronin.interop.fhir.generators.datatypes.coding
+import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
+import com.projectronin.interop.fhir.ronin.localization.Localizer
+import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.resource.observation.RoninBodySurfaceArea
+import com.projectronin.interop.tenant.config.model.Tenant
+import io.mockk.every
+import io.mockk.mockk
+import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.Test
+
+class RoninBodySurfaceAreaGeneratorTest {
+    private lateinit var roninBodySurfaceArea: RoninBodySurfaceArea
+    private lateinit var registry: NormalizationRegistryClient
+    private val tenant = mockk<Tenant> {
+        every { mnemonic } returns "test"
+    }
+
+    @BeforeEach
+    fun setup() {
+        val normalizer: Normalizer = mockk {
+            every { normalize(any(), tenant) } answers { firstArg() }
+        }
+        val localizer: Localizer = mockk {
+            every { localize(any(), tenant) } answers { firstArg() }
+        }
+        registry = mockk<NormalizationRegistryClient> {
+            every {
+                getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value)
+            } returns possibleBodySurfaceAreaCodes
+        }
+        roninBodySurfaceArea = RoninBodySurfaceArea(normalizer, localizer, registry)
+    }
+
+    @Test
+    fun `example use for roninObservationBodySurfaceArea`() {
+        // Create BodySurfaceArea Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
+        val roninObsBodySurfaceArea = rcdmObservationBodySurfaceArea("fake-tenant") {
+            // if you want to test for a specific status
+            status of Code("registered")
+            // test for a new or different code
+            code of codeableConcept {
+                coding of listOf(
+                    coding {
+                        system of "http://loinc.org"
+                        version of "0.01"
+                        code of Code("123456")
+                        display of "New Body Surface code"
+                    }
+                )
+                text of "New Body Surface code" // text is kept if provided otherwise only a code.coding is generated
+            }
+            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
+            subject of rcdmReference("Patient", "678910")
+        }
+        // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
+        val roninObsBodySurfaceAreaJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodySurfaceArea)
+
+        // Uncomment to take a peek at the JSON
+        // println(roninObsBodySurfaceAreaJSON)
+        assertNotNull(roninObsBodySurfaceAreaJSON)
+    }
+
+    @Test
+    fun `example use for roninObservationBodySurfaceArea - missing required fields generated`() {
+        // Create BodySurfaceArea Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
+        val roninObsBodySurfaceArea = rcdmObservationBodySurfaceArea("fake-tenant") {
+            // status, code and category required and will be generated
+            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
+            subject of rcdmReference("Patient", "678910")
+        }
+        // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
+        val roninObsBodySurfaceAreaJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodySurfaceArea)
+
+        // Uncomment to take a peek at the JSON
+        // println(roninObsBodySurfaceAreaJSON)
+        assertNotNull(roninObsBodySurfaceAreaJSON)
+        assertNotNull(roninObsBodySurfaceArea.meta)
+        assertEquals(
+            roninObsBodySurfaceArea.meta!!.profile[0].value,
+            RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value
+        )
+        assertNotNull(roninObsBodySurfaceArea.status)
+        assertEquals(1, roninObsBodySurfaceArea.category.size)
+        assertNotNull(roninObsBodySurfaceArea.code)
+        assertNotNull(roninObsBodySurfaceArea.subject)
+        assertNotNull(roninObsBodySurfaceArea.subject?.type?.extension)
+        assertEquals("vital-signs", roninObsBodySurfaceArea.category[0].coding[0].code?.value)
+        assertEquals(CodeSystem.OBSERVATION_CATEGORY.uri, roninObsBodySurfaceArea.category[0].coding[0].system)
+        assertNotNull(roninObsBodySurfaceArea.status)
+        assertNotNull(roninObsBodySurfaceArea.code?.coding?.get(0)?.code?.value)
+    }
+
+    @Test
+    fun `generates valid roninObservationBodySurfaceArea Observation`() {
+        val roninObsSurfaceArea = rcdmObservationBodySurfaceArea("fake-tenant") {}
+        assertNull(roninObsSurfaceArea.id)
+        assertNotNull(roninObsSurfaceArea.meta)
+        assertEquals(
+            roninObsSurfaceArea.meta!!.profile[0].value,
+            RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value
+        )
+        assertNull(roninObsSurfaceArea.implicitRules)
+        assertNull(roninObsSurfaceArea.language)
+        assertNull(roninObsSurfaceArea.text)
+        assertEquals(0, roninObsSurfaceArea.contained.size)
+        assertEquals(1, roninObsSurfaceArea.extension.size)
+        assertEquals(0, roninObsSurfaceArea.modifierExtension.size)
+        assertTrue(roninObsSurfaceArea.identifier.size >= 3)
+        assertTrue(roninObsSurfaceArea.identifier.any { it.value == "fake-tenant".asFHIR() })
+        assertTrue(roninObsSurfaceArea.identifier.any { it.value == "EHR Data Authority".asFHIR() })
+        assertTrue(roninObsSurfaceArea.identifier.any { it.system == CodeSystem.RONIN_FHIR_ID.uri })
+        assertNotNull(roninObsSurfaceArea.status)
+        assertEquals(1, roninObsSurfaceArea.category.size)
+        assertNotNull(roninObsSurfaceArea.code)
+        assertNotNull(roninObsSurfaceArea.subject)
+        assertNotNull(roninObsSurfaceArea.subject?.type?.extension)
+        assertEquals("vital-signs", roninObsSurfaceArea.category[0].coding[0].code?.value)
+        assertEquals(CodeSystem.OBSERVATION_CATEGORY.uri, roninObsSurfaceArea.category[0].coding[0].system)
+        assertNotNull(roninObsSurfaceArea.status)
+        assertNotNull(roninObsSurfaceArea.code?.coding?.get(0)?.code?.value)
+    }
+
+    @Test
+    fun `validates for rcdmObservationBodySurfaceArea`() {
+        val bodySurfaceArea = rcdmObservationBodySurfaceArea("test") {}
+        val validation = roninBodySurfaceArea.validate(bodySurfaceArea, null)
+        assertEquals(validation.hasErrors(), false)
+    }
+
+    @Test
+    fun `validation for rcdmObservationBodySurfaceArea with existing identifier`() {
+        val bodySurfaceArea = rcdmObservationBodySurfaceArea("test") {
+            identifier of listOf(
+                Identifier(
+                    system = Uri("testsystem"),
+                    value = "tomato".asFHIR()
+                )
+            )
+        }
+        val validation = roninBodySurfaceArea.validate(bodySurfaceArea, null)
+        assertEquals(validation.hasErrors(), false)
+        assertNotNull(bodySurfaceArea.meta)
+        assertNotNull(bodySurfaceArea.identifier)
+        assertEquals(4, bodySurfaceArea.identifier.size)
+        assertNotNull(bodySurfaceArea.status)
+        assertNotNull(bodySurfaceArea.code)
+        assertNotNull(bodySurfaceArea.subject)
+    }
+
+    @Test
+    fun `validation fails for rcdmObservationBodySurfaceArea with bad code`() {
+        val bodySurfaceArea = rcdmObservationBodySurfaceArea("test") {
+            code of codeableConcept {
+                coding of listOf(
+                    coding {
+                        system of "something here"
+                        version of "1000000"
+                        code of Code("some code here")
+                    }
+                )
+            }
+        }
+        val validation = roninBodySurfaceArea.validate(bodySurfaceArea, null)
+        assertEquals(validation.hasErrors(), true)
+        assertEquals(validation.issues()[0].code, "RONIN_NOV_CODING_001")
+        assertEquals(validation.issues()[1].code, "RONIN_OBS_003")
+        assertEquals(validation.issues()[2].code, "R4_INV_PRIM")
+    }
+}
