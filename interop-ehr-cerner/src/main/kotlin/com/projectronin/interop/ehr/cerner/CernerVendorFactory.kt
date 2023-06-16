@@ -3,15 +3,14 @@ package com.projectronin.interop.ehr.cerner
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.NoteService
 import com.projectronin.interop.ehr.OnboardFlagService
-import com.projectronin.interop.ehr.OrganizationService
 import com.projectronin.interop.ehr.PractitionerRoleService
 import com.projectronin.interop.ehr.factory.VendorFactory
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 
 /**
  * Cerner implementation of [VendorFactory]
  */
-@Service
+@Component
 class CernerVendorFactory(
     override val appointmentService: CernerAppointmentService,
     override val conditionService: CernerConditionService,
@@ -24,7 +23,7 @@ class CernerVendorFactory(
     override val patientService: CernerPatientService,
     override val practitionerService: CernerPractitionerService,
     override val observationService: CernerObservationService,
-    override val organizationService: OrganizationService,
+    override val organizationService: CernerOrganizationService,
     override val medicationService: CernerMedicationService,
     override val medicationRequestService: CernerMedicationRequestService
 ) : VendorFactory {
