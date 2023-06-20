@@ -18,6 +18,7 @@ import com.projectronin.interop.ehr.OrganizationService
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.PractitionerRoleService
 import com.projectronin.interop.ehr.PractitionerService
+import com.projectronin.interop.ehr.RequestGroupService
 
 /**
  * Interface defining a factory capable of handling all EHR service implementations for a specific vendor.
@@ -46,4 +47,5 @@ interface VendorFactory {
     val patientService: PatientService
     val practitionerService: PractitionerService
     val practitionerRoleService: PractitionerRoleService
+    val requestGroupService: RequestGroupService
 }
