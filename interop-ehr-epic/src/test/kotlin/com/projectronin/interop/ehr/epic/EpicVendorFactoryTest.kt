@@ -34,6 +34,7 @@ class EpicVendorFactoryTest {
     private val requestGroupService = mockk<EpicRequestGroupService>()
     private val onboardFlagService = mockk<EpicOnboardFlagService>()
     private val healthCheckService = mockk<EpicHealthCheckService>()
+    private val carePlanService = mockk<EpicCarePlanService>()
 
     private val vendorFactory =
         EpicVendorFactory(
@@ -54,7 +55,8 @@ class EpicVendorFactoryTest {
             onboardFlagService = onboardFlagService,
             encounterService = encounterService,
             requestGroupService = requestGroupService,
-            healthCheckService = healthCheckService
+            healthCheckService = healthCheckService,
+            carePlanService = carePlanService
         )
 
     @Test
@@ -169,5 +171,10 @@ class EpicVendorFactoryTest {
     @Test
     fun `returns RequestGroupService`() {
         assertEquals(requestGroupService, vendorFactory.requestGroupService)
+    }
+
+    @Test
+    fun `returns CarePlanService`() {
+        assertEquals(carePlanService, vendorFactory.carePlanService)
     }
 }
