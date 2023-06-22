@@ -47,6 +47,7 @@ class MirthTenantConfigDAO(@Qualifier("ehr") private val database: Database) {
         database.update(MirthTenantConfigDOs) {
             set(it.locationIds, mirthTenantConfigDO.locationIds)
             set(it.loadTimestamp, mirthTenantConfigDO.lastUpdated)
+            set(it.blockedResources, mirthTenantConfigDO.blockedResources)
             where {
                 it.tenantId eq mirthTenantConfigDO.tenant.id
             }
@@ -62,6 +63,7 @@ class MirthTenantConfigDAO(@Qualifier("ehr") private val database: Database) {
             set(it.tenantId, mirthTenantConfigDO.tenant.id)
             set(it.locationIds, mirthTenantConfigDO.locationIds)
             set(it.loadTimestamp, mirthTenantConfigDO.lastUpdated)
+            set(it.blockedResources, mirthTenantConfigDO.blockedResources)
         }
         return getByTenantId(mirthTenantConfigDO.tenant.id)
             // This should be impossible to hit due to DB constraints

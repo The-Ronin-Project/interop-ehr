@@ -20,9 +20,21 @@ io_tenant:
     io_ehr_id: 101
     available_batch_start: "22:00:00"
     available_batch_end: "06:00:00"
+  - io_tenant_id: 1003
+    mnemonic: "apposnd3"
+    full_name: "Epic Unique Sandbox"
+    timezone: "America/Chicago"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
 
 io_mirth_tenant_config:
   - io_tenant_id: 1001
     location_ids: "blah,blegh,blurgh"
+    blocked_resources: "appointment,organization"
   - io_tenant_id: 1002
     location_ids: "blart,bleet,blurt"
+    blocked_resources: "patient,encounter"
+  - io_tenant_id: 1003
+    location_ids: "hgrulb,hgelb,halb"
+

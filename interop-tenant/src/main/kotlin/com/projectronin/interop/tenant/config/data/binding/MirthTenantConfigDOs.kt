@@ -14,4 +14,5 @@ object MirthTenantConfigDOs : Table<MirthTenantConfigDO>("io_mirth_tenant_config
     var tenantId = int("io_tenant_id").references(TenantDOs) { it.tenant }
     val locationIds = varchar("location_ids").bindTo { it.locationIds }
     val loadTimestamp = utcDateTime("load_last_run").bindTo { it.lastUpdated }
+    val blockedResources = varchar("blocked_resources").bindTo { it.blockedResources }
 }

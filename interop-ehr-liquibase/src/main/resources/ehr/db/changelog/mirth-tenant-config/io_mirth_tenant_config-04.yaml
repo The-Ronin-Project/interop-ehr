@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-mirth-tenant-config-add-blocked-resources
+      author: Douglas Doughty
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_mirth_tenant_config
+                columnName: blocked_resources
+      changes:
+        - addColumn:
+            tableName: io_mirth_tenant_config
+            columns:
+              - column:
+                  name: blocked_resources
+                  type: java.sql.Types.VARCHAR(2048)
+                  constraints:
+                    nullable: true
