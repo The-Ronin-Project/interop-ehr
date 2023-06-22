@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
+import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.OnboardFlagService
 import com.projectronin.interop.ehr.epic.apporchard.model.PatientFlag
 import com.projectronin.interop.ehr.epic.apporchard.model.SetPatientFlagRequest
@@ -30,11 +31,11 @@ class EpicOnboardFlagService(
         val flagType = epicTenant.patientOnboardedFlagId
             ?: throw IllegalStateException("Tenant ${tenant.mnemonic} is missing patient onboarding flag configuration")
         val patient = runBlocking {
-            ehrDataAuthorityClient.getResource(
+            ehrDataAuthorityClient.getResourceAs<Patient>(
                 tenant.mnemonic,
                 "Patient",
                 patientFhirID.localize(tenant)
-            ) as Patient
+            ) ?: throw VendorIdentifierNotFoundException("No Patient found for $patientFhirID")
         }
         val patientMRNIdentifier = identifierService.getMRNIdentifier(tenant, patient.identifier)
 

@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
+import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.epic.apporchard.model.PatientFlag
 import com.projectronin.interop.ehr.epic.apporchard.model.SetPatientFlagRequest
 import com.projectronin.interop.ehr.epic.apporchard.model.SetPatientFlagResponse
@@ -70,7 +71,7 @@ class EpicOnboardFlagServiceTest {
         val patient = mockk<Patient> {
             every { identifier } returns listOf(patientMRN)
         }
-        coEvery { ehrDataAuthorityClient.getResource("mnemonic", "Patient", "fhirId".localize(tenant)) } returns patient
+        coEvery { ehrDataAuthorityClient.getResourceAs<Patient>("mnemonic", "Patient", "fhirId".localize(tenant)) } returns patient
         every { identifierService.getMRNIdentifier(tenant, listOf(patientMRN)) } returns patientMRN
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<SetPatientFlagResponse>() } returns setPatientResponse
@@ -100,7 +101,7 @@ class EpicOnboardFlagServiceTest {
         val patient = mockk<Patient> {
             every { identifier } returns listOf(patientMRN)
         }
-        coEvery { ehrDataAuthorityClient.getResource("mnemonic", "Patient", "fhirId".localize(tenant)) } returns patient
+        coEvery { ehrDataAuthorityClient.getResourceAs<Patient>("mnemonic", "Patient", "fhirId".localize(tenant)) } returns patient
         every { identifierService.getMRNIdentifier(tenant, listOf(patientMRN)) } returns patientMRN
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<SetPatientFlagResponse>() } returns setPatientResponse
@@ -120,5 +121,13 @@ class EpicOnboardFlagServiceTest {
 
         val error = assertThrows<AppOrchardError> { (onboardFlagService.setOnboardedFlag(tenant, "fhirId")) }
         assertEquals("Wow, I should really be an http status", error.message)
+    }
+
+    @Test
+    fun `service errors when EHRDA returns no patient`() {
+        coEvery { ehrDataAuthorityClient.getResourceAs<Patient>("mnemonic", "Patient", "fhirId".localize(tenant)) } returns null
+
+        val error = assertThrows<VendorIdentifierNotFoundException> { (onboardFlagService.setOnboardedFlag(tenant, "fhirId")) }
+        assertEquals("No Patient found for fhirId", error.message)
     }
 }

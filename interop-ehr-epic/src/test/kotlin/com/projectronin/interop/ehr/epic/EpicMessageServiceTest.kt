@@ -73,7 +73,7 @@ class EpicMessageServiceTest {
             every { identifier } returns mockIdentifierList
         }
 
-        coEvery { ehrDataAuthorityClient.getResource(any(), any(), any()) } returns mockPatient
+        coEvery { ehrDataAuthorityClient.getResourceAs<Patient>(any(), any(), any()) } returns mockPatient
         every { identifierService.getMRNIdentifier(any(), mockIdentifierList) } returns mockIdentifier
     }
 
@@ -1046,8 +1046,50 @@ class EpicMessageServiceTest {
             every { identifier } returns mockIdentifierList
         }
 
-        coEvery { ehrDataAuthorityClient.getResource("TEST_TENANT", "Patient", "badId".localize(tenant)) } returns mockPatient
+        coEvery { ehrDataAuthorityClient.getResourceAs<Patient>("TEST_TENANT", "Patient", "badId".localize(tenant)) } returns mockPatient
         every { identifierService.getMRNIdentifier(tenant, mockIdentifierList) } returns mockIdentifier
+
+        val recipientsList = listOf(
+            EHRRecipient(
+                "PROV#1",
+                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+            )
+        )
+
+        every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
+
+        assertThrows<VendorIdentifierNotFoundException> {
+            EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
+                tenant,
+                EHRMessageInput(
+                    "Message Text",
+                    "badId",
+                    recipientsList
+                )
+            )
+        }
+    }
+
+    @Test
+    fun `ensure ehrda missing patient fails`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            testPrivateKey,
+            "TEST_TENANT",
+            "Test Tenant",
+            "USER#1",
+            "Symptom Alert"
+        )
+        val mockIdentifier = mockk<Identifier> {
+            every { value } returns null
+        }
+        val mockIdentifierList = listOf(mockIdentifier)
+        val mockPatient = mockk<Patient> {
+            every { identifier } returns mockIdentifierList
+        }
+
+        coEvery { ehrDataAuthorityClient.getResourceAs<Patient>("TEST_TENANT", "Patient", "badId".localize(tenant)) } returns null
 
         val recipientsList = listOf(
             EHRRecipient(

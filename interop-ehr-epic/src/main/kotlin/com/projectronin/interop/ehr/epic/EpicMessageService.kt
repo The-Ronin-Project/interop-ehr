@@ -44,11 +44,11 @@ class EpicMessageService(
         logger.info { "SendMessage started for ${tenant.mnemonic}" }
 
         val patient = runBlocking {
-            ehrDataAuthorityClient.getResource(
+            ehrDataAuthorityClient.getResourceAs<Patient>(
                 tenant.mnemonic,
                 "Patient",
                 messageInput.patientFHIRID.localize(tenant)
-            ) as Patient
+            ) ?: throw VendorIdentifierNotFoundException("No Patient found for ${messageInput.patientFHIRID}")
         }
         val mrn = identifierService.getMRNIdentifier(tenant, patient.identifier)
         val mrnValue =
