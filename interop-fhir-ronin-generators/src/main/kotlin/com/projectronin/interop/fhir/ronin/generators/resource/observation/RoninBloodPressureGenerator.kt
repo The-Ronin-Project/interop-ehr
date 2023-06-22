@@ -17,7 +17,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.resource.ObservationComponent
-import com.projectronin.interop.fhir.ronin.generators.util.generateCode
+import com.projectronin.interop.fhir.ronin.generators.util.generateCodeableConcept
 import com.projectronin.interop.fhir.ronin.generators.util.generateEffectiveDateTime
 import com.projectronin.interop.fhir.ronin.generators.util.generateSubject
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
@@ -36,7 +36,7 @@ fun rcdmObservationBloodPressure(tenant: String, block: ObservationGenerator.() 
         extension of tenantBloodPressureSourceExtension
         identifier of identifier.generate() + rcdmIdentifiers(tenant, identifier)
         category of listOf(codeableConcept { coding of vitalSignsCategory })
-        code of generateCode(code.generate(), possibleBloodPressureCodes.random())
+        code of generateCodeableConcept(code.generate(), possibleBloodPressureCodes.random())
         effective of generateEffectiveDateTime(effective.generate(), possibleDateTime)
         subject of generateSubject(subject.generate(), subjectReferenceOptions)
         component of bloodPressureComponent

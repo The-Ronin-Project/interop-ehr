@@ -4,12 +4,12 @@ import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 
-fun generateCode(code: CodeableConcept, possibleCodes: Coding): CodeableConcept {
-    if (code.coding.isEmpty()) {
+fun generateCodeableConcept(codeableconcept: CodeableConcept, possibleCodes: Coding): CodeableConcept {
+    if (codeableconcept.coding.isEmpty()) {
         return codeableConcept {
             coding of listOf(possibleCodes)
-            text of code.text
+            text of codeableconcept.text
         }
     }
-    return code
+    return codeableconcept
 }

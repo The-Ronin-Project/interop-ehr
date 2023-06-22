@@ -15,7 +15,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Observation
-import com.projectronin.interop.fhir.ronin.generators.util.generateCode
+import com.projectronin.interop.fhir.ronin.generators.util.generateCodeableConcept
 import com.projectronin.interop.fhir.ronin.generators.util.generateSubject
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
@@ -36,7 +36,7 @@ fun rcdmObservation(tenant: String, block: ObservationGenerator.() -> Unit): Obs
                 coding of observationCategory
             }
         )
-        code of generateCode(code.generate(), observationCode.random())
+        code of generateCodeableConcept(code.generate(), observationCode.random())
         subject of generateSubject(subject.generate(), subjectBaseReferenceOptions)
     }
 }

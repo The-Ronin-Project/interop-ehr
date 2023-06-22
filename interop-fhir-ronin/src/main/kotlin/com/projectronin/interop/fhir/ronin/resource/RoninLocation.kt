@@ -2,7 +2,6 @@ package com.projectronin.interop.fhir.ronin.resource
 
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.resource.Location
-import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
@@ -53,7 +52,7 @@ class RoninLocation(
         code = "RONIN_LOC_001",
         severity = ValidationIssueSeverity.ERROR,
         description = "Either Location.name SHALL be present or a Data Absent Reason Extension SHALL be present.",
-        location = LocationContext(Patient::name)
+        location = LocationContext(Location::name)
     )
 
     override fun validateUSCore(element: Location, parentContext: LocationContext, validation: Validation) {

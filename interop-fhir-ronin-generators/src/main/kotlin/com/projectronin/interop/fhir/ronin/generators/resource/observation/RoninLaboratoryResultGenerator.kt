@@ -12,7 +12,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Observation
-import com.projectronin.interop.fhir.ronin.generators.util.generateCode
+import com.projectronin.interop.fhir.ronin.generators.util.generateCodeableConcept
 import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateSubject
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
@@ -34,7 +34,7 @@ fun rcdmObservationLaboratoryResult(tenant: String, block: ObservationGenerator.
                 coding of laboratoryCategory
             }
         )
-        code of generateCode(code.generate(), possibleLaboratoryResultCodes.random())
+        code of generateCodeableConcept(code.generate(), possibleLaboratoryResultCodes.random())
         subject of generateSubject(subject.generate(), subjectReferenceOptions)
         value of valueQuantity
     }

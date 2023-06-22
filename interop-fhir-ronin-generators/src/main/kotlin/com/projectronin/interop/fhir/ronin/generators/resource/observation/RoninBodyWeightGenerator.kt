@@ -6,7 +6,7 @@ import com.projectronin.interop.fhir.generators.resources.ObservationGenerator
 import com.projectronin.interop.fhir.generators.resources.observation
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Observation
-import com.projectronin.interop.fhir.ronin.generators.util.generateCode
+import com.projectronin.interop.fhir.ronin.generators.util.generateCodeableConcept
 import com.projectronin.interop.fhir.ronin.generators.util.generateEffectiveDateTime
 import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateSubject
@@ -25,7 +25,7 @@ fun rcdmObservationBodyWeight(tenant: String, block: ObservationGenerator.() -> 
         extension of generateExtension(extension.generate(), tenantSourceExtension)
         identifier of identifier.generate() + rcdmIdentifiers(tenant, identifier)
         category of listOf(codeableConcept { coding of vitalSignsCategory })
-        code of generateCode(code.generate(), possibleBodyWeightCodes.random())
+        code of generateCodeableConcept(code.generate(), possibleBodyWeightCodes.random())
         subject of generateSubject(subject.generate(), subjectReferenceOptions)
         effective of generateEffectiveDateTime(effective.generate(), possibleDateTime)
     }

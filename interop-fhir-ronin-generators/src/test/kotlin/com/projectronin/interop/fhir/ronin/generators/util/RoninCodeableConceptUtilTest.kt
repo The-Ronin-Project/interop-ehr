@@ -8,11 +8,10 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class RoninObservationCodeUtilTest {
-
     @Test
     fun `generate code if none is provided`() {
         val code = codeableConcept { listOf(coding {}) }
-        val roninCode = generateCode(code, possibleCodes.random())
+        val roninCode = generateCodeableConcept(code, possibleCodes.random())
         assertTrue(possibleCodes.contains(roninCode.coding.first()))
     }
 
@@ -27,7 +26,7 @@ class RoninObservationCodeUtilTest {
                 }
             )
         }
-        val roninCode = generateCode(providedCode, possibleCodes.random())
+        val roninCode = generateCodeableConcept(providedCode, possibleCodes.random())
         assertEquals(providedCode, roninCode)
     }
 }

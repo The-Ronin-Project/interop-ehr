@@ -15,7 +15,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.resource.ObservationComponent
-import com.projectronin.interop.fhir.ronin.generators.util.generateCode
+import com.projectronin.interop.fhir.ronin.generators.util.generateCodeableConcept
 import com.projectronin.interop.fhir.ronin.generators.util.generateEffectiveDateTime
 import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateSubject
@@ -34,7 +34,7 @@ fun rcdmObservationPulseOximetry(tenant: String, block: ObservationGenerator.() 
         extension of generateExtension(extension.generate(), tenantSourceExtension)
         identifier of identifier.generate() + rcdmIdentifiers(tenant, identifier)
         category of listOf(codeableConcept { coding of vitalSignsCategory })
-        code of generateCode(code.generate(), possiblePulseOximetryCodes.random())
+        code of generateCodeableConcept(code.generate(), possiblePulseOximetryCodes.random())
         subject of generateSubject(subject.generate(), subjectReferenceOptions)
         effective of generateEffectiveDateTime(effective.generate(), possibleDateTime)
         value of valueQuantity
