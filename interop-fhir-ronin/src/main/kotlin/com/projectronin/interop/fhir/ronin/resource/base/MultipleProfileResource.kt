@@ -7,7 +7,6 @@ import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
-import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import java.time.LocalDateTime
 
@@ -76,6 +75,7 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
                 )
                 defaultProfile
             }
+
             else -> {
                 validation.checkTrue(
                     false,
@@ -85,6 +85,24 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
                 null
             }
         }
+    }
+
+    override fun mapInternal(
+        normalized: T,
+        parentContext: LocationContext,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
+    ): Pair<T?, Validation> {
+        val validation = Validation()
+
+        val qualified = getQualifiedProfile(normalized, parentContext, validation)
+        val response = qualified?.mapInternal(normalized, parentContext, tenant)
+
+        val mapped = response?.let {
+            validation.merge(it.second)
+            it.first
+        }
+        return Pair(mapped, validation)
     }
 
     override fun transformInternal(

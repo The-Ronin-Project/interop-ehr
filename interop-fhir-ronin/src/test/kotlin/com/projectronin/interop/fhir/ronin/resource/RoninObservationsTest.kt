@@ -3,8 +3,13 @@ package com.projectronin.interop.fhir.ronin.resource
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
+import com.projectronin.interop.fhir.r4.datatype.DynamicValue
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
+import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
@@ -35,6 +40,10 @@ class RoninObservationsTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
+    private val extension1 = Extension(
+        url = Uri("http://example.com/extension"),
+        value = DynamicValue(DynamicValueType.STRING, FHIRString("value"))
+    )
     private val normalizer = mockk<Normalizer>()
     private val localizer = mockk<Localizer>()
     private val bodyHeight = mockk<RoninBodyHeight>()
@@ -119,15 +128,21 @@ class RoninObservationsTest {
         }
         every { normalizer.normalize(original, tenant) } returns original
 
+        val mappedObservation = mockk<Observation> {
+            every { id } returns Id("1234")
+            every { extension } returns listOf(extension1)
+        }
+
         val roninObservation = mockk<Observation> {
             every { id } returns Id("test-1234")
+            every { extension } returns listOf(extension1)
         }
         every { localizer.localize(roninObservation, tenant) } returns roninObservation
 
         every { bodyHeight.qualifies(original) } returns false
         every { bodyWeight.qualifies(original) } returns true
-        every { bodyWeight.transformInternal(original, LocationContext(Observation::class), tenant) } returns Pair(
-            roninObservation,
+        every { bodyWeight.mapInternal(original, LocationContext(Observation::class), tenant) } returns Pair(
+            mappedObservation,
             Validation()
         )
 
@@ -140,6 +155,29 @@ class RoninObservationsTest {
         every { pulseOximetry.qualifies(original) } returns false
         every { laboratoryResult.qualifies(original) } returns false
         every { stagingRelated.qualifies(original) } returns false
+
+        every { bodyHeight.qualifies(mappedObservation) } returns false
+        every { bodyWeight.qualifies(mappedObservation) } returns true
+        every {
+            bodyWeight.transformInternal(
+                mappedObservation,
+                LocationContext(Observation::class),
+                tenant
+            )
+        } returns Pair(
+            roninObservation,
+            Validation()
+        )
+
+        every { bodyMassIndex.qualifies(mappedObservation) } returns false
+        every { bodySurfaceArea.qualifies(mappedObservation) } returns false
+        every { bodyTemperature.qualifies(mappedObservation) } returns false
+        every { bloodPressure.qualifies(mappedObservation) } returns false
+        every { respiratoryRate.qualifies(mappedObservation) } returns false
+        every { heartRate.qualifies(mappedObservation) } returns false
+        every { pulseOximetry.qualifies(mappedObservation) } returns false
+        every { laboratoryResult.qualifies(mappedObservation) } returns false
+        every { stagingRelated.qualifies(mappedObservation) } returns false
 
         every { bodyMassIndex.qualifies(roninObservation) } returns false
         every { bodySurfaceArea.qualifies(roninObservation) } returns false

@@ -1,6 +1,11 @@
 package com.projectronin.interop.fhir.ronin.resource.base
 
+import com.projectronin.interop.fhir.r4.datatype.DynamicValue
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
+import com.projectronin.interop.fhir.r4.datatype.Extension
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.ronin.localization.Localizer
@@ -23,6 +28,10 @@ class MultipleProfileResourceTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
+    private val extension1 = Extension(
+        url = Uri("http://example.com/extension"),
+        value = DynamicValue(DynamicValueType.STRING, FHIRString("value"))
+    )
 
     private lateinit var normalizer: Normalizer
     private lateinit var localizer: Localizer
@@ -148,24 +157,31 @@ class MultipleProfileResourceTest {
     @Test
     fun `transform with single qualifying profile`() {
         val location = Location(id = Id("1234"))
-        val transformedLocation = Location(id = Id("test-1234"))
+        val mappedLocation = Location(id = Id("1234"), extension = listOf(extension1))
+        val transformedLocation = Location(id = Id("test-1234"), extension = listOf(extension1))
 
         every {
+            testProfile1.mapInternal(location, any(), tenant)
+        } returns Pair(mappedLocation, Validation())
+        every {
             testProfile1.transformInternal(
-                location,
+                mappedLocation,
                 any(),
                 tenant
             )
         } returns Pair(transformedLocation, Validation())
 
         every { testProfile1.qualifies(location) } returns true
+        every { testProfile1.qualifies(mappedLocation) } returns true
         every { testProfile1.qualifies(transformedLocation) } returns true
         every { testProfile1.validate(transformedLocation, LocationContext(Location::class)) } returns Validation()
 
         every { testProfile2.qualifies(location) } returns false
+        every { testProfile2.qualifies(mappedLocation) } returns false
         every { testProfile2.qualifies(transformedLocation) } returns false
 
         every { testProfile3.qualifies(location) } returns false
+        every { testProfile3.qualifies(mappedLocation) } returns false
         every { testProfile3.qualifies(transformedLocation) } returns false
 
         val (transformed, _) = profile.transform(location, tenant)
@@ -179,8 +195,13 @@ class MultipleProfileResourceTest {
         }
         every { normalizer.normalize(original, tenant) } returns original
 
+        val mappedObservation = mockk<Observation> {
+            every { id } returns Id("1234")
+            every { extension } returns listOf(extension1)
+        }
         val roninObservation = mockk<Observation> {
             every { id } returns Id("test-1234")
+            every { extension } returns listOf(extension1)
         }
         every { localizer.localize(roninObservation, tenant) } returns roninObservation
 
@@ -192,7 +213,23 @@ class MultipleProfileResourceTest {
         every { profile1.qualifies(original) } returns false
         every { profile2.qualifies(original) } returns false
         every { profile3.qualifies(original) } returns true
-        every { profile3.transformInternal(original, LocationContext(Observation::class), tenant) } returns Pair(
+
+        every { profile3.mapInternal(original, LocationContext(Observation::class), tenant) } returns Pair(
+            mappedObservation,
+            Validation()
+        )
+
+        every { profile1.qualifies(mappedObservation) } returns false
+        every { profile2.qualifies(mappedObservation) } returns false
+        every { profile3.qualifies(mappedObservation) } returns true
+
+        every {
+            profile3.transformInternal(
+                mappedObservation,
+                LocationContext(Observation::class),
+                tenant
+            )
+        } returns Pair(
             roninObservation,
             Validation()
         )
