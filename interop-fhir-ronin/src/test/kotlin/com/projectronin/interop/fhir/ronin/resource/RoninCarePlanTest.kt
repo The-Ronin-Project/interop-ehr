@@ -467,12 +467,12 @@ class RoninCarePlanTest {
                             )
                         ),
                         kind = Code("Appointment"),
-                        instantiatesCanonical = listOf<Canonical>(
+                        instantiatesCanonical = listOf(
                             Canonical(
                                 value = "canonical"
                             )
                         ),
-                        instantiatesUri = Uri("uri"),
+                        instantiatesUri = listOf(Uri("uri")),
                         code = CodeableConcept(
                             coding = listOf(
                                 Coding(
@@ -702,12 +702,12 @@ class RoninCarePlanTest {
                             )
                         ),
                         kind = Code("Appointment"),
-                        instantiatesCanonical = listOf<Canonical>(
+                        instantiatesCanonical = listOf(
                             Canonical(
                                 value = "canonical"
                             )
                         ),
-                        instantiatesUri = Uri("uri"),
+                        instantiatesUri = listOf(Uri("uri")),
                         code = CodeableConcept(
                             coding = listOf(
                                 Coding(
@@ -894,12 +894,12 @@ class RoninCarePlanTest {
                             )
                         ),
                         kind = Code("Appointment"),
-                        instantiatesCanonical = listOf<Canonical>(
+                        instantiatesCanonical = listOf(
                             Canonical(
                                 value = "canonical"
                             )
                         ),
-                        instantiatesUri = Uri("uri"),
+                        instantiatesUri = listOf(Uri("uri")),
                         code = CodeableConcept(
                             coding = listOf(
                                 Coding(
