@@ -1,7 +1,0 @@
-databaseChangeLog:
-  - changeSet:
-      id: io-tenant-blocked-resource-drop-table
-      author: Douglas Doughty
-      changes:
-        - dropTable:
-            tableName: io_tenant_blocked_resource

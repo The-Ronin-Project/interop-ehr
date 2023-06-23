@@ -1,5 +1,3 @@
 databaseChangeLog:
   - include:
-      file: ehr/db/changelog/tenant-blocked-resource/io_tenant_blocked_resource-02.yaml
-  - include:
       file: ehr/db/changelog/mirth-tenant-config/io_mirth_tenant_config-04.yaml

@@ -1,3 +1,0 @@
-databaseChangeLog:
-  - include:
-      file: ehr/db/changelog/tenant-blocked-resource/io_tenant_blocked_resource-01.yaml
