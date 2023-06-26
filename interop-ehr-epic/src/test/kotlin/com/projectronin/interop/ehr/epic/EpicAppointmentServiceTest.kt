@@ -37,12 +37,14 @@ import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
+import io.mockk.Called
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.justRun
 import io.mockk.mockk
 import io.mockk.mockkStatic
 import io.mockk.spyk
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNull
@@ -880,15 +882,6 @@ class EpicAppointmentServiceTest {
             )
         } returns ehrResponse
 
-        // Patient service request
-        every {
-            patientService.getPatientsFHIRIds(
-                tenant = tenant,
-                patientIDSystem = tenant.vendorAs<Epic>().patientInternalSystem,
-                patientIDValues = listOf()
-            )
-        } returns mapOf()
-
         val response = epicAppointmentService.findProviderAppointments(
             tenant,
             listOf(goodProviderFHIRIdentifier),
@@ -897,6 +890,8 @@ class EpicAppointmentServiceTest {
         )
 
         assertEquals(0, response.appointments.size)
+
+        verify { patientService wasNot Called }
     }
 
     @Test
@@ -1984,6 +1979,85 @@ class EpicAppointmentServiceTest {
     }
 
     @Test
+    fun `findLocationAppointments - ensure provider appointments handles no appointments found`() {
+        val tenant = createTestTenant(
+            clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            serviceEndpoint = "https://example.org",
+            privateKey = testPrivateKey,
+            tenantMnemonic = "TEST_TENANT",
+            internalId = 1,
+            departmentInternalSystem = "internalDepartmentSystem"
+        )
+
+        val epicAppointmentService = spyk(
+            EpicAppointmentService(
+                epicClient,
+                patientService,
+                locationService,
+                practitionerService,
+                identifierService,
+                ehrDataAuthorityClient,
+                5,
+                true
+            )
+        )
+
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
+                "TEST_TENANT",
+                IdentifierSearchableResourceTypes.Location,
+                listOf(EHRDAIdentifier(CodeSystem.RONIN_FHIR_ID.uri.value!!, "FHIRID1"))
+            )
+        } returns listOf(
+            mockk {
+                every { searchedIdentifier.value } returns "val1"
+                every { foundResources } returns listOf(
+                    mockk {
+                        every { udpId } returns "FHIRID1"
+                        every { identifiers } returns listOf(
+                            mockk {
+                                every { value } returns "E100"
+                                every { system } returns "internalDepartmentSystem"
+                            }
+                        )
+                    }
+                )
+            }
+        )
+
+        // GetAppointments request
+        mockkStatic(HttpResponse::throwExceptionFromHttpStatus)
+        justRun { httpResponse.throwExceptionFromHttpStatus("GetAppointments", providerAppointmentSearchUrlPart) }
+        coEvery { httpResponse.body<GetAppointmentsResponse>() } returns GetAppointmentsResponse(
+            appointments = listOf(),
+            error = null
+        )
+        coEvery {
+            epicClient.post(
+                tenant,
+                "/api/epic/2013/Scheduling/Provider/GetProviderAppointments/Scheduling/Provider/Appointments",
+                GetProviderAppointmentRequest(
+                    userID = "ehrUserId",
+                    departments = listOf(IDType("E100", "Internal")),
+                    startDate = "01/01/2015",
+                    endDate = "11/01/2015"
+                )
+            )
+        } returns ehrResponse
+
+        val response = epicAppointmentService.findLocationAppointments(
+            tenant,
+            listOf("FHIRID1"),
+            LocalDate.of(2015, 1, 1),
+            LocalDate.of(2015, 11, 1)
+        )
+
+        assertEquals(0, response.appointments.size)
+
+        verify { patientService wasNot Called }
+    }
+
+    @Test
     fun `findProviderAppointments - detailed test - allows duplicates when same practitioners and locations appear in 1 appointment`() {
         val tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
@@ -2733,7 +2807,10 @@ class EpicAppointmentServiceTest {
                 every { system } returns Uri(epicVendor.practitionerProviderSystem)
             }
             val mockSystemValue =
-                EHRDAIdentifier(value = mapEntry.value.first().value!!.value!!, system = epicVendor.practitionerProviderSystem)
+                EHRDAIdentifier(
+                    value = mapEntry.value.first().value!!.value!!,
+                    system = epicVendor.practitionerProviderSystem
+                )
             if (!mockProviderQuery.contains(mockSystemValue)) {
                 mockProviderQuery.add(mockSystemValue)
             }
@@ -2797,7 +2874,10 @@ class EpicAppointmentServiceTest {
                 every { system } returns Uri(epicVendor.departmentInternalSystem)
             }
             val mockSystemValue =
-                EHRDAIdentifier(value = mapEntry.value.first().value!!.value!!, system = epicVendor.departmentInternalSystem)
+                EHRDAIdentifier(
+                    value = mapEntry.value.first().value!!.value!!,
+                    system = epicVendor.departmentInternalSystem
+                )
             if (!mockLocationQuery.contains(mockSystemValue)) {
                 mockLocationQuery.add(mockSystemValue)
                 if (fhirIDsMockResult == null) {

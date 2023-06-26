@@ -209,16 +209,20 @@ class EpicAppointmentService(
         request: GetProviderAppointmentRequest
     ): AppointmentsWithNewPatients {
         val getAppointmentsResponse = findAppointments(tenant, providerAppointmentSearchUrlPart, request)
+        val appointments = getAppointmentsResponse.errorOrAppointments()
+        if (appointments.isEmpty()) {
+            return AppointmentsWithNewPatients(emptyList(), emptyList())
+        }
 
         // Get list of patient FHIR IDs
         val patientFhirIdResponse = patientService.getPatientsFHIRIds(
             tenant,
             tenant.vendorAs<Epic>().patientInternalSystem,
-            getAppointmentsResponse.errorOrAppointments().map { it.patientId!! }.toSet()
+            appointments.map { it.patientId!! }.toSet()
                 .toList() // Make Id list unique
         )
 
-        val patientFhirIdToAppointments = getAppointmentsResponse.errorOrAppointments().filter {
+        val patientFhirIdToAppointments = appointments.filter {
             val patient = patientFhirIdResponse[it.patientId]
             if (patient == null) {
                 logger.warn { "FHIR ID not found for patient ${it.patientId}" }
