@@ -15,9 +15,11 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.http.HttpStatusCode
+import io.mockk.Called
 import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -98,7 +100,11 @@ class CernerAppointmentServiceTest {
             }
         )
         coEvery {
-            ehrDataAuthorityClient.getResourceIdentifiers(tenant.mnemonic, IdentifierSearchableResourceTypes.Patient, any())
+            ehrDataAuthorityClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Patient,
+                any()
+            )
         } returns mockResponse
         val response = appointmentService.findProviderAppointments(
             tenant = tenant,
@@ -129,7 +135,11 @@ class CernerAppointmentServiceTest {
             )
         } returns ehrResponse
         coEvery {
-            ehrDataAuthorityClient.getResourceIdentifiers(tenant.mnemonic, IdentifierSearchableResourceTypes.Patient, any())
+            ehrDataAuthorityClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Patient,
+                any()
+            )
         } returns emptyList()
         every { cernerPatientService.getPatient(tenant, "12724066") } returns mockk()
         val response = appointmentService.findProviderAppointments(
@@ -143,6 +153,39 @@ class CernerAppointmentServiceTest {
         )
         assertEquals(1, response.appointments.size)
         assertEquals(1, response.newPatients?.size)
+    }
+
+    @Test
+    fun `findProviderAppointments - works when no appointments found`() {
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns mockk(relaxed = true) {
+            every { entry } returns emptyList()
+        }
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "/Appointment",
+                mapOf(
+                    "practitioner" to "prac123,prac345",
+                    "date" to RepeatingParameter(listOf("ge2023-01-03T00:00:00-06:00", "lt2023-01-08T00:00:00-06:00")),
+                    "_count" to 20
+                )
+            )
+        } returns ehrResponse
+
+        val response = appointmentService.findProviderAppointments(
+            tenant = tenant,
+            providerIDs = listOf(
+                FHIRIdentifiers(id = Id("prac123"), identifiers = emptyList()),
+                FHIRIdentifiers(id = Id("prac345"), identifiers = emptyList())
+            ),
+            startDate = LocalDate.of(2023, 1, 3),
+            endDate = LocalDate.of(2023, 1, 7)
+        )
+        assertEquals(0, response.appointments.size)
+        assertEquals(0, response.newPatients?.size)
+
+        verify { ehrDataAuthorityClient wasNot Called }
     }
 
     @Test
@@ -167,7 +210,11 @@ class CernerAppointmentServiceTest {
             }
         )
         coEvery {
-            ehrDataAuthorityClient.getResourceIdentifiers(tenant.mnemonic, IdentifierSearchableResourceTypes.Patient, any())
+            ehrDataAuthorityClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Patient,
+                any()
+            )
         } returns mockResponse
         val response = appointmentService.findLocationAppointments(
             tenant = tenant,
@@ -216,7 +263,11 @@ class CernerAppointmentServiceTest {
             }
         )
         coEvery {
-            ehrDataAuthorityClient.getResourceIdentifiers(tenant.mnemonic, IdentifierSearchableResourceTypes.Patient, any())
+            ehrDataAuthorityClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Patient,
+                any()
+            )
         } returns mockResponse
         assertThrows<NullPointerException> {
             appointmentService.findLocationAppointments(
@@ -251,6 +302,36 @@ class CernerAppointmentServiceTest {
                 endDate = LocalDate.of(2023, 1, 7)
             )
         }
+    }
+
+    @Test
+    fun `findLocationAppointments - works when no appointments found`() {
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns mockk(relaxed = true) {
+            every { entry } returns emptyList()
+        }
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "/Appointment",
+                mapOf(
+                    "location" to "loc123,loc345",
+                    "date" to RepeatingParameter(listOf("ge2023-01-03T00:00:00-06:00", "lt2023-01-08T00:00:00-06:00")),
+                    "_count" to 20
+                )
+            )
+        } returns ehrResponse
+
+        val response = appointmentService.findLocationAppointments(
+            tenant = tenant,
+            locationFHIRIds = listOf("loc123", "loc345"),
+            startDate = LocalDate.of(2023, 1, 3),
+            endDate = LocalDate.of(2023, 1, 7)
+        )
+        assertEquals(0, response.appointments.size)
+        assertEquals(0, response.newPatients?.size)
+
+        verify { ehrDataAuthorityClient wasNot Called }
     }
 
     @Test

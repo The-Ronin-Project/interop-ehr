@@ -81,6 +81,10 @@ class CernerAppointmentService(
         // distinct ensures if the same patient is in multiple appointments we're only going to operate on them once
         val patientFhirIds = patientReferences.map { it.removePrefix("Patient/") }.distinct()
 
+        if (patientFhirIds.isEmpty()) {
+            return emptyList()
+        }
+
         // lookup the fhir IDs found in the appointments against EHRDA and filter out the existing patients
         val newPatientFHIRIds = runBlocking {
             val foundFhirIds =
