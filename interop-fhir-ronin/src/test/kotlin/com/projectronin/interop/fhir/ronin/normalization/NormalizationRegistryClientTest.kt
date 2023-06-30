@@ -109,7 +109,7 @@ class NormalizationRegistryClientTest {
                   "element": [
                     {
                       "id": "06c19b8e4718f1bf6e81f992cfc12c1e",
-                      "code": "{[{72166-2, null, http://loinc.org, false}], Tobacco smoking status}",
+                      "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"72166-2\", \"display\": null, \"system\": \"http://loinc.org\"}]}}",
                       "display": "Tobacco smoking status",
                       "target": [
                         {
@@ -123,7 +123,7 @@ class NormalizationRegistryClientTest {
                     },
                     {
                       "id": "64be7ece9ab75a3eff827188c55c64db",
-                      "code": "{[{363905002, Details of alcohol drinking behavior (observable entity), http://snomed.info/sct, false}], Details of alcohol drinking behavior (observable entity)}",
+                      "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"363905002\", \"display\": \"Details of alcohol drinking behavior (observable entity)\", \"system\": \"http://snomed.info/sct\"}]}}",
                       "display": "Details of alcohol drinking behavior (observable entity)",
                       "target": [
                         {
@@ -137,7 +137,7 @@ class NormalizationRegistryClientTest {
                     },
                     {
                       "id": "8015a7419c2d19d6f515ccec9fb86c94",
-                      "code": "{[{88028-6, null, http://loinc.org, null}], Tobacco}",
+                      "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"88028-6\", \"display\": null, \"system\": \"http://loinc.org\"}]}}",
                       "display": "Tobacco",
                       "target": [
                         {
@@ -151,7 +151,7 @@ class NormalizationRegistryClientTest {
                     },
                     {
                       "id": "921618c5505606cff5626f3468d4b396",
-                      "code": "{[{85354-9, Blood pressure panel with all children optional, http://loinc.org, null}], Blood pressure}",
+                      "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"85354-9\", \"display\": \"Blood pressure panel with all children optional\", \"system\": \"http://loinc.org\"}]}}",
                       "display": "Blood pressure",
                       "target": [
                         {
@@ -179,7 +179,7 @@ class NormalizationRegistryClientTest {
                     },
                     {
                       "id": "5aec5a329873f3842748e2beeb69643b",
-                      "code": "{[{21704910, Potassium Level, https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72, true}, {2823-3, null, http://loinc.org, false}], Potassium Level}",
+                      "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"21704910\", \"display\": \"Potassium Level\", \"system\": \"https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72\"},{\"code\": \"2823-3\", \"display\": null, \"system\": \"http://loinc.org\"}]}}",
                       "display": "Potassium Level",
                       "target": [
                         {
@@ -233,7 +233,7 @@ class NormalizationRegistryClientTest {
               "element": [
                 {
                   "id": "195a31953334437c3e8742cd36c8b5a7",
-                  "code": "{[{SNOMED#385355006, null, http://snomed.info/sct}, {EPIC#42394, residual tumor (R), urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - RESIDUAL TUMOR (R)}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#385355006\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42394\", \"display\": \"residual tumor (R)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - RESIDUAL TUMOR (R)",
                   "target": [
                     {
@@ -247,7 +247,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "5c21f8ce34b34b2ad1dbc84c293c68e0",
-                  "code": "{[{SNOMED#385002007, null, http://snomed.info/sct}, {EPIC#42761, Gleason tertiary pattern, urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - GLEASON TERTIARY PATTERN}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#385002007\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42761\", \"display\": \"Gleason tertiary pattern\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - GLEASON TERTIARY PATTERN",
                   "target": [
                     {
@@ -261,7 +261,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "4951ec609b239add67ce50c5740643fd",
-                  "code": "{[{SNOMED#399651003, null, http://snomed.info/sct}, {EPIC#46451, stage date, urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - STAGE DATE}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#399651003\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#46451\", \"display\": \"stage date\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - STAGE DATE",
                   "target": [
                     {
@@ -275,7 +275,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "d2a2fdf0239f391f2b1156ac63df51f4",
-                  "code": "{[{SNOMED#385419004, null, http://snomed.info/sct}, {EPIC#42393, venous invasion (V), urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - VENOUS INVASION (V)}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#385419004\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42393\", \"display\": \"venous invasion (V)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - VENOUS INVASION (V)",
                   "target": [
                     {
@@ -289,7 +289,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "f79339795b4cfb11d85751cbeda0483f",
-                  "code": "{[{SNOMED#384995005, null, http://snomed.info/sct}, {EPIC#42760, Gleason secondary pattern, urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - GLEASON SECONDARY PATTERN}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#384995005\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42760\", \"display\": \"Gleason secondary pattern\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - GLEASON SECONDARY PATTERN",
                   "target": [
                     {
@@ -303,7 +303,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "1258c3fc9f48cf6a60a64ffef8948606",
-                  "code": "{[{SNOMED#384994009, null, http://snomed.info/sct}, {EPIC#42759, Gleason primary pattern, urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - GLEASON PRIMARY PATTERN}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#384994009\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42759\", \"display\": \"Gleason primary pattern\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - GLEASON PRIMARY PATTERN",
                   "target": [
                     {
@@ -317,7 +317,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "7cb1019a0db3479dd40cba16dc5899ab",
-                  "code": "{[{SNOMED#260878002, null, http://snomed.info/sct}, {EPIC#42383, primary tumor (T), urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TNM CLASSIFICATION - AJCC T - PRIMARY TUMOR (T)}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#260878002\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42383\", \"display\": \"primary tumor (T)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TNM CLASSIFICATION - AJCC T - PRIMARY TUMOR (T)",
                   "target": [
                     {
@@ -331,7 +331,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "0b0f965e675ec9b46724ee8ce6a4ec0c",
-                  "code": "{[{SNOMED#263605001, null, http://snomed.info/sct}, {EPIC#42381, tumor size (mm), urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TUMOR SIZE (MM)}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#263605001\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42381\", \"display\": \"tumor size (mm)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TUMOR SIZE (MM)",
                   "target": [
                     {
@@ -345,7 +345,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "8ba61a5649cbd2f326d526acdcc459ff",
-                  "code": " { [ { SNOMED#260767000 ,null , http://snomed.info/sct} ,{EPIC#42384     , regional lymph nodes (N),urn:oid:1.2.840.114350.1.13.297.2.7.2.727688   } ] , FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TNM CLASSIFICATION - AJCC N - REGIONAL LYMPH NODES (N)   }   ",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#260767000\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42384\", \"display\": \"regional lymph nodes (N)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TNM CLASSIFICATION - AJCC N - REGIONAL LYMPH NODES (N)",
                   "target": [
                     {
@@ -359,7 +359,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "24d99f648dcf773d706ec493524ee906",
-                  "code": "{[{SNOMED#260875004, null, http://snomed.info/sct}, {EPIC#42385, distant metastasis (M), urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TNM CLASSIFICATION - AJCC M - DISTANT METASTASIS (M)}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#260875004\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42385\", \"display\": \"distant metastasis (M)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TNM CLASSIFICATION - AJCC M - DISTANT METASTASIS (M)",
                   "target": [
                     {
@@ -373,7 +373,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "c03a8b85e707dfb39c984466273724e8",
-                  "code": "{[{SNOMED#385348009, null, http://snomed.info/sct}, {EPIC#55984, Breslow depth (mm), urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - BRESLOW DEPTH (MM)}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#385348009\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#55984\", \"display\": \"Breslow depth (mm)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - BRESLOW DEPTH (MM)",
                   "target": [
                     {
@@ -387,7 +387,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "939ea57bf2755aa6053b4c514582bfb7",
-                  "code": "{[{SNOMED#385414009, null, http://snomed.info/sct}, {EPIC#42392, lymphatic vessel invasion (L), urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - LYMPHATIC VESSEL INVASION (L)}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#385414009\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42392\", \"display\": \"lymphatic vessel invasion (L)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - LYMPHATIC VESSEL INVASION (L)",
                   "target": [
                     {
@@ -401,7 +401,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "972b1bb1122980f015626063d44c950f",
-                  "code": "{[{EPIC#44065, Clark's level, urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - CLARK'S LEVEL}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"EPIC#44065\", \"display\": \"Clark's level\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - CLARK'S LEVEL",
                   "target": [
                     {
@@ -415,7 +415,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "58ca30808a5de848ab6f0e33f8f5e1e3",
-                  "code": "{[{EPIC#31000073346, WHO/ISUP grade (low/high), urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - WHO/ISUP GRADE (LOW/HIGH)}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"EPIC#31000073346\", \"display\": \"WHO/ISUP grade (low/high)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - WHO/ISUP GRADE (LOW/HIGH)",
                   "target": [
                     {
@@ -429,7 +429,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "827f75db7803e5fc9ba811c19ccf4fbb",
-                  "code": "{[{EPIC#42391, lymph-vascular invasion (LVI), urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - LYMPH-VASCULAR INVASION (LVI)}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"EPIC#42391\", \"display\": \"lymph-vascular invasion (LVI)\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - LYMPH-VASCULAR INVASION (LVI)",
                   "target": [
                     {
@@ -443,7 +443,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "dcc915b3ac8b4b154ccc051847a8db43",
-                  "code": "{[{EPIC#45453, estrogen receptor status, urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - ESTROGEN RECEPTOR STATUS}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"EPIC#45453\", \"display\": \"estrogen receptor status\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - ESTROGEN RECEPTOR STATUS",
                   "target": [
                     {
@@ -457,7 +457,7 @@ class NormalizationRegistryClientTest {
                 },
                 {
                   "id": "fc8e25ae3ed568f4dbf4b5d447452a18",
-                  "code": "{[{SNOMED#246111003, null, http://snomed.info/sct}, {EPIC#42388, anatomic stage/prognostic group, urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - ANATOMIC STAGE/PROGNOSTIC GROUP}",
+                  "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"SNOMED#246111003\", \"display\": null, \"system\": \"http://snomed.info/sct\"},{\"code\": \"EPIC#42388\", \"display\": \"anatomic stage/prognostic group\", \"system\": \"urn:oid:1.2.840.114350.1.13.297.2.7.2.727688\"}]}}",
                   "display": "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - ANATOMIC STAGE/PROGNOSTIC GROUP",
                   "target": [
                     {
@@ -859,6 +859,58 @@ class NormalizationRegistryClientTest {
             client.getRequiredValueSet("Patient.telecom.system", "specialPatient")
         }
         assertEquals("Required value set for specialPatient and Patient.telecom.system not found", exception.message)
+    }
+
+    @Test
+    fun `getConceptMapping for Coding with no system`() {
+        val registry = ConceptMapItem(
+            source_extension_url = "ext-AB",
+            map = mapAB
+        )
+        val key = CacheKey(
+            NormalizationRegistryItem.RegistryType.ConceptMap,
+            "Observation.code",
+            tenant.mnemonic
+        )
+        client.conceptMapCache.put(key, registry)
+        client.itemLastUpdated[key] = LocalDateTime.now()
+
+        val sourceCoding1 = Coding(
+            code = Code("valueA")
+        )
+
+        val mappedResult1 = client.getConceptMapping(
+            tenant,
+            "Observation.code",
+            sourceCoding1
+        )
+        assertNull(mappedResult1)
+    }
+
+    @Test
+    fun `getConceptMapping for Coding with no value`() {
+        val registry = ConceptMapItem(
+            source_extension_url = "ext-AB",
+            map = mapAB
+        )
+        val key = CacheKey(
+            NormalizationRegistryItem.RegistryType.ConceptMap,
+            "Observation.code",
+            tenant.mnemonic
+        )
+        client.conceptMapCache.put(key, registry)
+        client.itemLastUpdated[key] = LocalDateTime.now()
+
+        val sourceCoding1 = Coding(
+            system = Uri("system")
+        )
+
+        val mappedResult1 = client.getConceptMapping(
+            tenant,
+            "Observation.code",
+            sourceCoding1
+        )
+        assertNull(mappedResult1)
     }
 
     @Test
@@ -2791,6 +2843,184 @@ class NormalizationRegistryClientTest {
 
         assertEquals(
             "Concept map(s) for tenant 'test' and Observation.code have missing or inconsistent source extension URLs",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `getConceptMapping for CodeableConcept - group element code with no system`() {
+        val sourceUrl = "tenant-sourceObservationCode"
+        val cmTestRegistry = listOf(
+            NormalizationRegistryItem(
+                data_element = "Observation.code",
+                registry_uuid = "registry-uuid",
+                filename = "file1.json",
+                concept_map_name = "TestObservationsMashup",
+                concept_map_uuid = "TestObservationsMashup-uuid",
+                registry_entry_type = "concept_map",
+                version = "1",
+                source_extension_url = sourceUrl,
+                resource_type = "Observation",
+                tenant_id = "test"
+            )
+        )
+        mockkObject(JacksonUtil)
+        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
+        every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns cmTestRegistry
+        every { ociClient.getObjectFromINFX("file1.json") } returns """
+            {
+              "resourceType": "ConceptMap",
+              "title": "Test Observations Mashup (for Dev Testing ONLY)",
+              "id": "TestObservationsMashup-id",
+              "name": "TestObservationsMashup-name",
+              "contact": [
+                {
+                  "name": "Interops (for Dev Testing ONLY)"
+                }
+              ],
+              "url": "http://projectronin.io/fhir/StructureDefinition/ConceptMap/TestObservationsMashup",
+              "description": "Interops  (for Dev Testing ONLY)",
+              "purpose": "Testing",
+              "publisher": "Project Ronin",
+              "experimental": true,
+              "date": "2023-05-26",
+              "version": 1,
+              "group": [
+                {
+                  "source": "http://projectronin.io/fhir/CodeSystem/test/TestObservationsMashup",
+                  "sourceVersion": "1.0",
+                  "target": "http://loinc.org",
+                  "targetVersion": "0.0.1",
+                  "element": [
+                    {
+                      "id": "06c19b8e4718f1bf6e81f992cfc12c1e",
+                      "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": \"72166-2\", \"display\": null, \"system\": null}]}}",
+                      "display": "Tobacco smoking status",
+                      "target": [
+                        {
+                          "id": "836cc342c39afcc7a8dee6277abc7b75",
+                          "code": "72166-2",
+                          "display": "Tobacco smoking status",
+                          "equivalence": "equivalent",
+                          "comment": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "extension": [
+                {
+                  "url": "http://projectronin.io/fhir/StructureDefinition/Extension/ronin-conceptMapSchema",
+                  "valueString": "1.0.0"
+                }
+              ],
+              "meta": {
+                "lastUpdated": "2023-05-26T12:49:56.285403+00:00"
+              }
+        }
+        """.trimIndent()
+        val concept = CodeableConcept(
+            coding = listOf(
+                Coding(
+                    code = Code(value = "85354-9"),
+                    system = Uri(value = "http://loinc.org")
+                )
+            )
+        )
+        val exception =
+            assertThrows<IllegalStateException> { client.getConceptMapping(tenant, "Observation.code", concept) }
+        assertEquals(
+            """Could not create SourceConcept from {"valueCodeableConcept": {"coding": [{"code": "72166-2", "display": null, "system": null}]}}""",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `getConceptMapping for CodeableConcept - group element code with no code`() {
+        val sourceUrl = "tenant-sourceObservationCode"
+        val cmTestRegistry = listOf(
+            NormalizationRegistryItem(
+                data_element = "Observation.code",
+                registry_uuid = "registry-uuid",
+                filename = "file1.json",
+                concept_map_name = "TestObservationsMashup",
+                concept_map_uuid = "TestObservationsMashup-uuid",
+                registry_entry_type = "concept_map",
+                version = "1",
+                source_extension_url = sourceUrl,
+                resource_type = "Observation",
+                tenant_id = "test"
+            )
+        )
+        mockkObject(JacksonUtil)
+        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
+        every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns cmTestRegistry
+        every { ociClient.getObjectFromINFX("file1.json") } returns """
+            {
+              "resourceType": "ConceptMap",
+              "title": "Test Observations Mashup (for Dev Testing ONLY)",
+              "id": "TestObservationsMashup-id",
+              "name": "TestObservationsMashup-name",
+              "contact": [
+                {
+                  "name": "Interops (for Dev Testing ONLY)"
+                }
+              ],
+              "url": "http://projectronin.io/fhir/StructureDefinition/ConceptMap/TestObservationsMashup",
+              "description": "Interops  (for Dev Testing ONLY)",
+              "purpose": "Testing",
+              "publisher": "Project Ronin",
+              "experimental": true,
+              "date": "2023-05-26",
+              "version": 1,
+              "group": [
+                {
+                  "source": "http://projectronin.io/fhir/CodeSystem/test/TestObservationsMashup",
+                  "sourceVersion": "1.0",
+                  "target": "http://loinc.org",
+                  "targetVersion": "0.0.1",
+                  "element": [
+                    {
+                      "id": "06c19b8e4718f1bf6e81f992cfc12c1e",
+                      "code": "{\"valueCodeableConcept\": {\"coding\": [{\"code\": null, \"display\": null, \"system\": \"system\"}]}}",
+                      "display": "Tobacco smoking status",
+                      "target": [
+                        {
+                          "id": "836cc342c39afcc7a8dee6277abc7b75",
+                          "code": "72166-2",
+                          "display": "Tobacco smoking status",
+                          "equivalence": "equivalent",
+                          "comment": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "extension": [
+                {
+                  "url": "http://projectronin.io/fhir/StructureDefinition/Extension/ronin-conceptMapSchema",
+                  "valueString": "1.0.0"
+                }
+              ],
+              "meta": {
+                "lastUpdated": "2023-05-26T12:49:56.285403+00:00"
+              }
+        }
+        """.trimIndent()
+        val concept = CodeableConcept(
+            coding = listOf(
+                Coding(
+                    code = Code(value = "85354-9"),
+                    system = Uri(value = "http://loinc.org")
+                )
+            )
+        )
+        val exception =
+            assertThrows<IllegalStateException> { client.getConceptMapping(tenant, "Observation.code", concept) }
+        assertEquals(
+            """Could not create SourceConcept from {"valueCodeableConcept": {"coding": [{"code": null, "display": null, "system": "system"}]}}""",
             exception.message
         )
     }

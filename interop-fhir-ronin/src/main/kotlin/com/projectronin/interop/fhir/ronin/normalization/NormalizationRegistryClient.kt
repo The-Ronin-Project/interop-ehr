@@ -1,7 +1,9 @@
 package com.projectronin.interop.fhir.ronin.normalization
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.projectronin.interop.common.enums.CodedEnum
+import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.common.jackson.JacksonUtil
 import com.projectronin.interop.datalake.oci.client.OCIClient
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
@@ -171,12 +173,8 @@ class NormalizationRegistryClient(
      * also see readGroupElementCode()
      */
     private fun CodeableConcept.getConceptMapping(conceptMapItem: ConceptMapItem): Pair<CodeableConcept, Extension>? {
-        val sourceKeys = this.coding.map {
-            val sourceVal = it.code?.value ?: return null
-            val sourceSystem = it.system?.value ?: return null
-            SourceKey(sourceVal, sourceSystem)
-        }.toSet()
-        val target = conceptMapItem.map[SourceConcept(sourceKeys)] ?: return null
+        val sourceConcept = getSourceConcept()
+        val target = conceptMapItem.map[sourceConcept] ?: return null
 
         // if elementName is a CodeableConcept datatype: expect 1+ target.element
         return Pair(
@@ -195,6 +193,13 @@ class NormalizationRegistryClient(
         )
     }
 
+    private fun CodeableConcept.getSourceConcept(): SourceConcept? {
+        val sourceKeys = coding.map {
+            it.getSourceKey() ?: return null
+        }.toSet()
+        return SourceConcept(sourceKeys)
+    }
+
     /**
      * Find a Coding mapping in the DataNormalizationRegistry that matches the
      * input Coding system and value. Matching ignores other attributes.
@@ -205,11 +210,8 @@ class NormalizationRegistryClient(
      * values from the DataNormalizationRegistry.
      */
     private fun Coding.getConceptMapping(conceptMapItem: ConceptMapItem): Pair<Coding, Extension>? {
-        val sourceVal = this.code?.value ?: return null
-        val sourceSystem = this.system?.value ?: return null
-        val agnosticSourceSystem = getTenantAgnosticCodeSystem(sourceSystem)
-        val sourceKey = setOf(SourceKey(sourceVal, agnosticSourceSystem))
-        val target = conceptMapItem.map[SourceConcept(sourceKey)] ?: return null
+        val sourceConcept = getSourceConcept() ?: return null
+        val target = conceptMapItem.map[sourceConcept] ?: return null
 
         // if elementName is a Code or Coding datatype: expect 1 target.element
         return target.element.first().let {
@@ -225,10 +227,20 @@ class NormalizationRegistryClient(
         }
     }
 
-    private fun createCodeableConceptExtension(conceptMapItem: ConceptMapItem, codeableConcept: CodeableConcept) = Extension(
-        url = Uri(conceptMapItem.source_extension_url),
-        value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = codeableConcept)
-    )
+    private fun Coding.getSourceConcept(): SourceConcept? = getSourceKey()?.let { SourceConcept(setOf(it)) }
+
+    private fun Coding.getSourceKey(): SourceKey? {
+        val sourceVal = this.code?.value ?: return null
+        val sourceSystem = this.system?.value ?: return null
+        val agnosticSourceSystem = getTenantAgnosticCodeSystem(sourceSystem)
+        return SourceKey(sourceVal, agnosticSourceSystem)
+    }
+
+    private fun createCodeableConceptExtension(conceptMapItem: ConceptMapItem, codeableConcept: CodeableConcept) =
+        Extension(
+            url = Uri(conceptMapItem.source_extension_url),
+            value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = codeableConcept)
+        )
 
     private fun createCodingExtension(conceptMapItem: ConceptMapItem, coding: Coding) = Extension(
         url = Uri(conceptMapItem.source_extension_url),
@@ -288,66 +300,22 @@ class NormalizationRegistryClient(
      * Read a ConceptMap group.element.code value into a SourceConcept so that
      * we can match it against the Coding entries from a source CodeableConcept.
      * group.element.code may be a simple code value, but for maps of
-     * CodeableConcept to CodeableConcept it will have a complex format, i.e.
-     * ```
-     * {[{a, b, c, d}], e}
-     * {[{a, b, c}, {f, g, h}], e}
-     * ```
+     * CodeableConcept to CodeableConcept it will contain a JSON-representation of the concept.
      */
     private fun readGroupElementCode(
         groupElementCode: String,
         tenantAgnosticSourceSystem: String
     ): SourceConcept {
-        // groupElementCode:
-        //   Normal: {[{21704910, Potassium Level, https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72, true}, {2823-3, null, http://loinc.org, false}], Potassium Level}
-        //     Code values are undecorated as received from the source.
-        //     Coding attributes: 0 code, 1 display, 2 system, 3 userSelected
-        //   Staging: {[{SNOMED#246111003, null, http://snomed.info/sct}, {EPIC#42388, anatomic stage/prognostic group, urn:oid:1.2.840.114350.1.13.297.2.7.2.727688}], FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - ANATOMIC STAGE/PROGNOSTIC GROUP}
-        //     Code value looks weird. That is expected. See OCI bucket prod-experimentation > psj_data_exploration > observations_from_conditions_stage
-        //     Coding attributes: 0 code, 1 display, 2 system
-
-        if (!groupElementCode.contains('{')) { // an unformatted code value
-            return SourceConcept(
-                element = setOf(
-                    SourceKey(
-                        value = groupElementCode,
-                        system = tenantAgnosticSourceSystem
-                    )
-                )
-            )
+        if (!groupElementCode.contains("{")) {
+            return SourceConcept(setOf(SourceKey(groupElementCode, tenantAgnosticSourceSystem)))
         }
-        val sourceKeyArray = groupElementCode
-            .substring(
-                groupElementCode.indexOf("[") + 1,
-                groupElementCode.indexOf("]")
-            ) // outer []
-            .trim(' ').trim('{').trim('}') // outer {}
-            .split(Regex("}\\s*,\\s*\\{")) // list of Coding
-            .map { coding -> coding.split(",").map { it.trim(' ') } }
 
-        // sourceArrayMap:
-        // 0:
-        //    0: 21704910
-        //    1: Potassium Level
-        //    2: https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72
-        //    3: true
-        // 1:
-        //    0: 2823-3
-        //    1: null
-        //    2: http://loinc.org
-        //    3: false
-        // the returned SourceConcept.element is a Map<SourceKey>
-        //   SourceKey("21704910", "https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72")
-        //   SourceKey("2823-3", "http://loinc.org")
-        return SourceConcept(
-            sourceKeyArray.map {
-                SourceKey(
-                    value = it[0],
-                    system = it[2]
-                )
-            }.toSet()
-        )
+        val conceptMapCode = JacksonManager.objectMapper.readValue<ConceptMapCode>(groupElementCode)
+        return conceptMapCode.valueCodeableConcept.getSourceConcept()
+            ?: throw IllegalStateException("Could not create SourceConcept from $groupElementCode")
     }
+
+    private data class ConceptMapCode(val valueCodeableConcept: CodeableConcept)
 
     private fun getValueSetItem(
         key: CacheKey,
