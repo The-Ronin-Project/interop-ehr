@@ -429,7 +429,7 @@ class RoninMedicationRequestTest {
             courseOfTherapyType = CodeableConcept(text = "therapy".asFHIR()),
             insurance = listOf(Reference(reference = "Coverage/1234".asFHIR())),
             note = listOf(Annotation(text = Markdown("note"))),
-            dosageInformation = listOf(Dosage(text = "dosage".asFHIR())),
+            dosageInstruction = listOf(Dosage(text = "dosage".asFHIR())),
             dispenseRequest = DispenseRequest(numberOfRepeatsAllowed = UnsignedInt(2)),
             substitution = Substitution(allowed = DynamicValue(DynamicValueType.BOOLEAN, true)),
             priorPrescription = Reference(reference = "MedicationRequest/1234".asFHIR()),
@@ -527,7 +527,7 @@ class RoninMedicationRequestTest {
         assertEquals(CodeableConcept(text = "therapy".asFHIR()), transformed.courseOfTherapyType)
         assertEquals(listOf(Reference(reference = "Coverage/1234".asFHIR())), transformed.insurance)
         assertEquals(listOf(Annotation(text = Markdown("note"))), transformed.note)
-        assertEquals(listOf(Dosage(text = "dosage".asFHIR())), transformed.dosageInformation)
+        assertEquals(listOf(Dosage(text = "dosage".asFHIR())), transformed.dosageInstruction)
         assertEquals(DispenseRequest(numberOfRepeatsAllowed = UnsignedInt(2)), transformed.dispenseRequest)
         assertEquals(Substitution(allowed = DynamicValue(DynamicValueType.BOOLEAN, true)), transformed.substitution)
         assertEquals(Reference(reference = "MedicationRequest/1234".asFHIR()), transformed.priorPrescription)
@@ -621,7 +621,7 @@ class RoninMedicationRequestTest {
         assertNull(transformed.courseOfTherapyType)
         assertEquals(listOf<Reference>(), transformed.insurance)
         assertEquals(listOf<Annotation>(), transformed.note)
-        assertEquals(listOf<Dosage>(), transformed.dosageInformation)
+        assertEquals(listOf<Dosage>(), transformed.dosageInstruction)
         assertNull(transformed.dispenseRequest)
         assertNull(transformed.substitution)
         assertNull(transformed.priorPrescription)
