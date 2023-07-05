@@ -8,7 +8,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
+import com.projectronin.interop.fhir.ronin.generators.resource.rcdmPatient
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
@@ -48,8 +48,8 @@ class RoninLaboratoryResultGeneratorTest {
 
     @Test
     fun `example use for roninObservationLaboratoryResult`() {
-        // Create LaboratoryResult Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsLaboratoryResult = rcdmObservationLaboratoryResult("fake-tenant") {
+        // Create LaboratoryResult Obs with attributes you need, provide the tenant
+        val roninObsLaboratoryResult = rcdmObservationLaboratoryResult("test") {
             // if you want to test for a specific status
             status of Code("corrected")
             // test for a new or different code
@@ -62,8 +62,6 @@ class RoninLaboratoryResultGeneratorTest {
                     }
                 )
             }
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "678910")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsLaboratoryResultJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsLaboratoryResult)
@@ -74,13 +72,10 @@ class RoninLaboratoryResultGeneratorTest {
     }
 
     @Test
-    fun `example use for roninObservationLaboratoryResult - missing required fields generated`() {
-        // Create LaboratoryResult Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsLaboratoryResult = rcdmObservationLaboratoryResult("fake-tenant") {
-            // status, code and category required and will be generated
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "678910")
-        }
+    fun `example use for rcdmPatient rcdmObservationLaboratoryResult - missing required fields generated`() {
+        // create patient and observation for tenant
+        val rcdmPatient = rcdmPatient("test") {}
+        val roninObsLaboratoryResult = rcdmPatient.rcdmObservationLaboratoryResult {}
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsLaboratoryResultJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsLaboratoryResult)
 
@@ -101,12 +96,16 @@ class RoninLaboratoryResultGeneratorTest {
         assertEquals(CodeSystem.OBSERVATION_CATEGORY.uri, roninObsLaboratoryResult.category[0].coding[0].system)
         assertNotNull(roninObsLaboratoryResult.status)
         assertNotNull(roninObsLaboratoryResult.code?.coding?.get(0)?.code?.value)
+        assertNotNull(roninObsLaboratoryResult.id)
+        val patientFHIRId = roninObsLaboratoryResult.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant = roninObsLaboratoryResult.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        assertEquals("$tenant-$patientFHIRId", roninObsLaboratoryResult.id?.value.toString())
     }
 
     @Test
     fun `generates valid roninObservationLaboratoryResult Observation`() {
-        val roninObsLabResult = rcdmObservationLaboratoryResult("fake-tenant") {}
-        assertNull(roninObsLabResult.id)
+        val roninObsLabResult = rcdmObservationLaboratoryResult("test") {}
+        assertNotNull(roninObsLabResult.id)
         assertNotNull(roninObsLabResult.meta)
         assertEquals(
             roninObsLabResult.meta!!.profile[0].value,
@@ -119,7 +118,7 @@ class RoninLaboratoryResultGeneratorTest {
         assertEquals(1, roninObsLabResult.extension.size)
         assertEquals(0, roninObsLabResult.modifierExtension.size)
         assertTrue(roninObsLabResult.identifier.size >= 3)
-        assertTrue(roninObsLabResult.identifier.any { it.value == "fake-tenant".asFHIR() })
+        assertTrue(roninObsLabResult.identifier.any { it.value == "test".asFHIR() })
         assertTrue(roninObsLabResult.identifier.any { it.value == "EHR Data Authority".asFHIR() })
         assertTrue(roninObsLabResult.identifier.any { it.system == CodeSystem.RONIN_FHIR_ID.uri })
         assertNotNull(roninObsLabResult.status)

@@ -3,6 +3,8 @@ package com.projectronin.interop.fhir.ronin.generators.resource.observation
 import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
 import com.projectronin.interop.fhir.generators.datatypes.coding
+import com.projectronin.interop.fhir.generators.datatypes.reference
+import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Identifier
@@ -10,6 +12,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.fhir.ronin.generators.resource.rcdmPatient
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -60,8 +63,8 @@ class RoninBloodPressureGeneratorTest {
 
     @Test
     fun `example use for roninObservationBloodPressure`() {
-        // Create Blood Pressure Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsBloodPressure = rcdmObservationBloodPressure("fake-tenant") {
+        // Create Blood Pressure Obs with attributes you need, provide the tenant
+        val roninObsBloodPressure = rcdmObservationBloodPressure("test") {
             // if you want to test for a specific status
             status of Code("registered-different")
             // test for a new or different code
@@ -76,8 +79,6 @@ class RoninBloodPressureGeneratorTest {
                 )
                 text of "Respiratory viral pathogens DNA and RNA panel" // text is kept if provided otherwise only a code.coding is generated
             }
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "678910")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsBloodPressureJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBloodPressure)
@@ -88,13 +89,10 @@ class RoninBloodPressureGeneratorTest {
     }
 
     @Test
-    fun `example use for roninObservationBloodPressure - missing required fields generated`() {
-        // Create Blood Pressure Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsBloodPressure = rcdmObservationBloodPressure("fake-tenant") {
-            // status, code and category required and will be generated
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "678910")
-        }
+    fun `example use for rcdmPatient rcdmObservationBloodPressure - missing required fields generated`() {
+        // create patient and observation for tenant
+        val rcdmPatient = rcdmPatient("test") {}
+        val roninObsBloodPressure = rcdmPatient.rcdmObservationBloodPressure {}
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsBloodPressureJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBloodPressure)
 
@@ -115,12 +113,16 @@ class RoninBloodPressureGeneratorTest {
         assertEquals(CodeSystem.OBSERVATION_CATEGORY.uri, roninObsBloodPressure.category[0].coding[0].system)
         assertNotNull(roninObsBloodPressure.status)
         assertNotNull(roninObsBloodPressure.code?.coding?.get(0)?.code?.value)
+        assertNotNull(roninObsBloodPressure.id)
+        val patientFHIRId = roninObsBloodPressure.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant = roninObsBloodPressure.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        assertEquals("$tenant-$patientFHIRId", roninObsBloodPressure.id?.value.toString())
     }
 
     @Test
     fun `generates valid roninObservationBloodPressure Observation`() {
-        val roninObsBloodPressure = rcdmObservationBloodPressure("fake-tenant") {}
-        assertNull(roninObsBloodPressure.id)
+        val roninObsBloodPressure = rcdmObservationBloodPressure("test") {}
+        assertNotNull(roninObsBloodPressure.id)
         assertNotNull(roninObsBloodPressure.meta)
         assertEquals(
             roninObsBloodPressure.meta!!.profile[0].value,
@@ -133,7 +135,7 @@ class RoninBloodPressureGeneratorTest {
         assertEquals(1, roninObsBloodPressure.extension.size)
         assertEquals(0, roninObsBloodPressure.modifierExtension.size)
         assertTrue(roninObsBloodPressure.identifier.size >= 3)
-        assertTrue(roninObsBloodPressure.identifier.any { it.value == "fake-tenant".asFHIR() })
+        assertTrue(roninObsBloodPressure.identifier.any { it.value == "test".asFHIR() })
         assertTrue(roninObsBloodPressure.identifier.any { it.value == "EHR Data Authority".asFHIR() })
         assertTrue(roninObsBloodPressure.identifier.any { it.system == CodeSystem.RONIN_FHIR_ID.uri })
         assertNotNull(roninObsBloodPressure.status)
@@ -149,7 +151,7 @@ class RoninBloodPressureGeneratorTest {
 
     @Test
     fun `roninObservationBloodPressure with params`() {
-        val roninObsBloodPressure = rcdmObservationBloodPressure("fake-tenant") {
+        val roninObsBloodPressure = rcdmObservationBloodPressure("test") {
             id of Id("Id-Id")
             identifier of listOf(
                 Identifier(
@@ -170,9 +172,8 @@ class RoninBloodPressureGeneratorTest {
             code of codeableConcept {
                 text of "fake text goes here"
             }
-            subject of rcdmReference("Patient", "678910")
         }
-        assertEquals("Id-Id", roninObsBloodPressure.id?.value)
+        assertEquals("test-Id-Id", roninObsBloodPressure.id?.value)
         assertEquals(4, roninObsBloodPressure.identifier.size)
         assertTrue(
             roninObsBloodPressure.identifier.contains(
@@ -185,7 +186,7 @@ class RoninBloodPressureGeneratorTest {
         assertEquals("fake-status", roninObsBloodPressure.status?.value)
         assertNotNull(roninObsBloodPressure.category[0].coding[0].system)
         assertEquals("fake text goes here", roninObsBloodPressure.code?.text?.value)
-        assertEquals("Patient/678910", roninObsBloodPressure.subject?.reference?.value)
+        assertTrue(roninObsBloodPressure.subject?.reference?.value?.startsWith("Patient/test-") == true)
     }
 
     @Test
@@ -237,15 +238,85 @@ class RoninBloodPressureGeneratorTest {
             code of codeableConcept {
                 text of "fake text goes here"
             }
-            subject of rcdmReference("Practitioner", "678910")
+            performer of listOf(
+                reference("Location", "789")
+            )
+        }
+        val validation = roninBloodPressure.validate(bpObs, null)
+        assertEquals(validation.hasErrors(), true)
+        assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
+        assertEquals(validation.issues()[0].description, "The referenced resource type was not one of CareTeam, Organization, Patient, Practitioner, PractitionerRole")
+        assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "performer[0]"))
+        assertEquals(validation.issues()[1].code, "INV_VALUE_SET")
+        assertEquals(validation.issues()[1].description, "'fake-status' is outside of required value set")
+        assertEquals(validation.issues()[1].location, LocationContext(element = "Observation", field = "status"))
+    }
+
+    @Test
+    fun `invalid subject input - fails validation`() {
+        val bpObs = rcdmObservationBloodPressure("test") {
+            subject of rcdmReference("Location", "456")
         }
         val validation = roninBloodPressure.validate(bpObs, null)
         assertEquals(validation.hasErrors(), true)
         assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
         assertEquals(validation.issues()[0].description, "The referenced resource type was not Patient")
         assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "subject"))
-        assertEquals(validation.issues()[1].code, "INV_VALUE_SET")
-        assertEquals(validation.issues()[1].description, "'fake-status' is outside of required value set")
-        assertEquals(validation.issues()[1].location, LocationContext(element = "Observation", field = "status"))
+        // ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Observation.subject
+    }
+
+    @Test
+    fun `valid subject input - validation succeeds`() {
+        val bpObs = rcdmObservationBloodPressure("test") {
+            subject of rcdmReference("Patient", "456")
+        }
+        val validation = roninBloodPressure.validate(bpObs, null)
+        assertEquals(validation.hasErrors(), false)
+        assertTrue(bpObs.subject?.reference?.value == "Patient/456")
+    }
+
+    @Test
+    fun `rcdmPatient rcdmObservationBloodPressure validates`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val bpObs = rcdmPatient.rcdmObservationBloodPressure {}
+        val validation = roninBloodPressure.validate(bpObs, null)
+        assertEquals(validation.hasErrors(), false)
+        assertNotNull(bpObs.meta)
+        assertNotNull(bpObs.identifier)
+        assertTrue(bpObs.identifier.size >= 3)
+        assertNotNull(bpObs.status)
+        assertNotNull(bpObs.code)
+        assertNotNull(bpObs.subject?.type?.extension)
+        assertTrue(bpObs.subject?.reference?.value?.split("/")?.first() in subjectBaseReferenceOptions)
+    }
+
+    @Test
+    fun `rcdmPatient rcdmObservationBloodPressure - any subject input - base patient overrides input - validate succeeds`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val bpObs = rcdmPatient.rcdmObservationBloodPressure {
+            subject of rcdmReference("Patient", "456")
+        }
+        val validation = roninBloodPressure.validate(bpObs, null)
+        assertEquals(validation.hasErrors(), false)
+        assertEquals("Patient/${rcdmPatient.id?.value}", bpObs.subject?.reference?.value)
+    }
+
+    @Test
+    fun `rcdmPatient rcdmObservationBloodPressure - fhir id input for both - validate succeeds`() {
+        val rcdmPatient = rcdmPatient("test") { id of "99" }
+        val bpObs = rcdmPatient.rcdmObservationBloodPressure {
+            id of "88"
+        }
+        val validation = roninBloodPressure.validate(bpObs, null)
+        assertEquals(validation.hasErrors(), false)
+        assertEquals(3, bpObs.identifier.size)
+        val values = bpObs.identifier.mapNotNull { it.value }.toSet()
+        assertTrue(values.size == 3)
+        assertTrue(values.contains("88".asFHIR()))
+        assertTrue(values.contains("test".asFHIR()))
+        assertTrue(values.contains("EHR Data Authority".asFHIR()))
+        assertEquals("test-88", bpObs.id?.value)
+        assertEquals("test-99", rcdmPatient.id?.value)
+        assertEquals("Patient/test-99", bpObs.subject?.reference?.value)
     }
 }

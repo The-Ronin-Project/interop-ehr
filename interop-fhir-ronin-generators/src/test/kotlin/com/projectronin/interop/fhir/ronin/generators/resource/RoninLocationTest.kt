@@ -1,6 +1,8 @@
 package com.projectronin.interop.fhir.ronin.generators.resource
 
 import com.projectronin.interop.common.jackson.JacksonManager
+import com.projectronin.interop.fhir.generators.primitives.of
+import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
@@ -46,12 +48,10 @@ class RoninLocationTest {
 
     @Test
     fun `example use for roninLocation`() {
-        // create location resource with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninLocation = rcdmLocation("fake-tenant") {
+        // create location for tenant "test"
+        val roninLocation = rcdmLocation("test") {
             // to test an attribute like status - provide the value
             status of Code("testing-this-status")
-            // same with other attributes
-            // be sure attributes are provided correctly, below contact-point is a list
             telecom of listOf(
                 ContactPoint(
                     value = "123-456-7890".asFHIR()
@@ -69,10 +69,8 @@ class RoninLocationTest {
 
     @Test
     fun `example use for roninLocation - missing required fields generated`() {
-        // create location resource with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninLocation = rcdmLocation("fake-tenant") {
-            // meta, identifiers, name, telecom will all be generated
-        }
+        val roninLocation = rcdmLocation("test") {}
+
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninLocationJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninLocation)
 
@@ -88,6 +86,11 @@ class RoninLocationTest {
         assertNotNull(roninLocation.status)
         assertNotNull(roninLocation.name)
         assertNotNull(roninLocation.telecom)
+        assertNotNull(roninLocation.id)
+        val patientFHIRId = roninLocation.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant = roninLocation.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        assertEquals("$tenant-$patientFHIRId", roninLocation.id?.value.toString())
+        assertEquals("test", tenant)
     }
 
     @Test
@@ -102,6 +105,22 @@ class RoninLocationTest {
         assertEquals(4, location.identifier.size)
         val ids = location.identifier.map { it.id }.toSet()
         assertTrue(ids.contains("ID-Id".asFHIR()))
+    }
+
+    @Test
+    fun `validates with fhir id input`() {
+        val location = rcdmLocation("test") {
+            id of "88"
+        }
+        val validation = roninLocation.validate(location, null)
+        assertEquals(validation.hasErrors(), false)
+        assertEquals(3, location.identifier.size)
+        val values = location.identifier.mapNotNull { it.value }.toSet()
+        assertTrue(values.size == 3)
+        assertTrue(values.contains("88".asFHIR()))
+        assertTrue(values.contains("test".asFHIR()))
+        assertTrue(values.contains("EHR Data Authority".asFHIR()))
+        assertEquals("test-88", location.id?.value)
     }
 
     @Test

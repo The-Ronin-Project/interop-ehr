@@ -8,7 +8,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
+import com.projectronin.interop.fhir.ronin.generators.resource.rcdmPatient
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
@@ -49,8 +49,8 @@ class RoninBodySurfaceAreaGeneratorTest {
 
     @Test
     fun `example use for roninObservationBodySurfaceArea`() {
-        // Create BodySurfaceArea Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsBodySurfaceArea = rcdmObservationBodySurfaceArea("fake-tenant") {
+        // Create BodySurfaceArea Obs with attributes you need, provide the tenant
+        val roninObsBodySurfaceArea = rcdmObservationBodySurfaceArea("test") {
             // if you want to test for a specific status
             status of Code("registered")
             // test for a new or different code
@@ -65,8 +65,6 @@ class RoninBodySurfaceAreaGeneratorTest {
                 )
                 text of "New Body Surface code" // text is kept if provided otherwise only a code.coding is generated
             }
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "678910")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsBodySurfaceAreaJSON =
@@ -78,13 +76,10 @@ class RoninBodySurfaceAreaGeneratorTest {
     }
 
     @Test
-    fun `example use for roninObservationBodySurfaceArea - missing required fields generated`() {
-        // Create BodySurfaceArea Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsBodySurfaceArea = rcdmObservationBodySurfaceArea("fake-tenant") {
-            // status, code and category required and will be generated
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "678910")
-        }
+    fun `example use for rcdmPatient rcdmObservationBodySurfaceArea - missing required fields generated`() {
+        // create patient and observation for tenant
+        val rcdmPatient = rcdmPatient("test") {}
+        val roninObsBodySurfaceArea = rcdmPatient.rcdmObservationBodySurfaceArea {}
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsBodySurfaceAreaJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodySurfaceArea)
@@ -106,12 +101,16 @@ class RoninBodySurfaceAreaGeneratorTest {
         assertEquals(CodeSystem.OBSERVATION_CATEGORY.uri, roninObsBodySurfaceArea.category[0].coding[0].system)
         assertNotNull(roninObsBodySurfaceArea.status)
         assertNotNull(roninObsBodySurfaceArea.code?.coding?.get(0)?.code?.value)
+        assertNotNull(roninObsBodySurfaceArea.id)
+        val patientFHIRId = roninObsBodySurfaceArea.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant = roninObsBodySurfaceArea.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        assertEquals("$tenant-$patientFHIRId", roninObsBodySurfaceArea.id?.value.toString())
     }
 
     @Test
     fun `generates valid roninObservationBodySurfaceArea Observation`() {
-        val roninObsSurfaceArea = rcdmObservationBodySurfaceArea("fake-tenant") {}
-        assertNull(roninObsSurfaceArea.id)
+        val roninObsSurfaceArea = rcdmObservationBodySurfaceArea("test") {}
+        assertNotNull(roninObsSurfaceArea.id)
         assertNotNull(roninObsSurfaceArea.meta)
         assertEquals(
             roninObsSurfaceArea.meta!!.profile[0].value,
@@ -124,7 +123,7 @@ class RoninBodySurfaceAreaGeneratorTest {
         assertEquals(1, roninObsSurfaceArea.extension.size)
         assertEquals(0, roninObsSurfaceArea.modifierExtension.size)
         assertTrue(roninObsSurfaceArea.identifier.size >= 3)
-        assertTrue(roninObsSurfaceArea.identifier.any { it.value == "fake-tenant".asFHIR() })
+        assertTrue(roninObsSurfaceArea.identifier.any { it.value == "test".asFHIR() })
         assertTrue(roninObsSurfaceArea.identifier.any { it.value == "EHR Data Authority".asFHIR() })
         assertTrue(roninObsSurfaceArea.identifier.any { it.system == CodeSystem.RONIN_FHIR_ID.uri })
         assertNotNull(roninObsSurfaceArea.status)

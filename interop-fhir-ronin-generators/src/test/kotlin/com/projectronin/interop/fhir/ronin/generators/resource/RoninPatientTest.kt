@@ -4,6 +4,7 @@ import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundExcept
 import com.projectronin.interop.ehr.IdentifierService
 import com.projectronin.interop.ehr.factory.EHRFactory
 import com.projectronin.interop.fhir.generators.datatypes.IdentifierGenerator
+import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
@@ -11,6 +12,7 @@ import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Patient
@@ -27,8 +29,11 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+
 class RoninPatientTest {
     private lateinit var roninContactPoint: RoninContactPoint
     private lateinit var normalizer: Normalizer
@@ -104,6 +109,27 @@ class RoninPatientTest {
         assertEquals(4, roninPatient1.identifier.size)
         assertNotNull(roninPatient1.name)
         assertNotNull(roninPatient1.telecom)
+        assertNotNull(roninPatient1.id)
+        val patientFHIRId = roninPatient1.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant = roninPatient1.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        assertEquals("$tenant-$patientFHIRId", roninPatient1.id?.value.toString())
+        assertEquals("test", tenant)
+    }
+
+    @Test
+    fun `rcdmPatient with fhir id input - validate succeeds`() {
+        val roninPatient1 = rcdmPatient("test") {
+            id of Id("99")
+        }
+        val validation = roninPatient.validate(roninPatient1, null).hasErrors()
+        assertEquals(validation, false)
+        assertEquals(4, roninPatient1.identifier.size)
+        val values = roninPatient1.identifier.mapNotNull { it.value }.toSet()
+        assertTrue(values.size == 4)
+        assertTrue(values.contains("99".asFHIR()))
+        assertTrue(values.contains("test".asFHIR()))
+        assertTrue(values.contains("EHR Data Authority".asFHIR()))
+        assertEquals("test-99", roninPatient1.id?.value)
     }
 
     @Test
@@ -200,8 +226,8 @@ class RoninPatientTest {
         val roninPatient1 = rcdmPatient("test") {
             name of listOf(testName)
         }
-        val validation = roninPatient.validate(roninPatient1, null).hasErrors()
-        assertEquals(validation, false)
+        val validation = roninPatient.validate(roninPatient1, null)
+        assertEquals(validation.hasErrors(), false)
         assertEquals("official", roninPatient1.name[1].use?.value.toString())
     }
 
@@ -219,8 +245,84 @@ class RoninPatientTest {
         )
         val mrnList = ListDataGenerator(0, IdentifierGenerator()).plus(testMrn).plus(testMrn2)
         val roninMrn = rcdmMrn(mrnList)
-        assertEquals(3, roninMrn.size)
-        assertEquals(CodeSystem.RONIN_MRN.uri, roninMrn[2].system)
-        assertEquals(CodeableConcepts.RONIN_MRN, roninMrn[2].type)
+        assertEquals(1, roninMrn.size)
+        assertEquals(CodeSystem.RONIN_MRN.uri, roninMrn[0].system)
+        assertEquals(CodeableConcepts.RONIN_MRN, roninMrn[0].type)
+    }
+
+    @Test
+    fun `getReferenceData succeeds`() {
+        val rcdmPatient = rcdmPatient("test") { id of "99" }
+        val data = rcdmPatient.referenceData()
+        assertEquals("test", data.tenantId)
+        assertEquals("test-99", data.udpId)
+    }
+
+    @Test
+    fun `getReferenceData fails when no tenant`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val badPatient = rcdmPatient.copy(identifier = emptyList())
+        val exception = assertThrows<IllegalArgumentException> {
+            badPatient.referenceData()
+        }
+        assertEquals("Patient is missing some required data", exception.message)
+    }
+
+    @Test
+    fun `getReferenceData fails when empty tenant`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val fhir = rcdmPatient.identifier.find { it.system == CodeSystem.RONIN_FHIR_ID.uri }!!
+        val mrn = rcdmPatient.identifier.firstOrNull { it.system == CodeSystem.RONIN_MRN.uri }!!
+        val tenant = rcdmPatient.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }!!
+        val badTenant = tenant.copy(value = "".asFHIR())
+        val badPatient = rcdmPatient.copy(identifier = emptyList<Identifier>() + fhir + mrn + badTenant)
+        val exception = assertThrows<IllegalArgumentException> {
+            badPatient.referenceData()
+        }
+        assertEquals("Patient is missing some required data", exception.message)
+    }
+
+    @Test
+    fun `getReferenceData fails when null tenant value`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val fhir = rcdmPatient.identifier.find { it.system == CodeSystem.RONIN_FHIR_ID.uri }!!
+        val mrn = rcdmPatient.identifier.firstOrNull { it.system == CodeSystem.RONIN_MRN.uri }!!
+        val tenant = rcdmPatient.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }!!
+        val badTenant = tenant.copy(value = null)
+        val badPatient = rcdmPatient.copy(identifier = emptyList<Identifier>() + fhir + mrn + badTenant)
+        val exception = assertThrows<IllegalArgumentException> {
+            badPatient.referenceData()
+        }
+        assertEquals("Patient is missing some required data", exception.message)
+    }
+
+    @Test
+    fun `getReferenceData fails when no id`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val badPatient = rcdmPatient.copy(id = null)
+        val exception = assertThrows<IllegalArgumentException> {
+            badPatient.referenceData()
+        }
+        assertEquals("Patient is missing some required data", exception.message)
+    }
+
+    @Test
+    fun `getReferenceData fails when empty id`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val badPatient = rcdmPatient.copy(id = Id(""))
+        val exception = assertThrows<IllegalArgumentException> {
+            badPatient.referenceData()
+        }
+        assertEquals("Patient is missing some required data", exception.message)
+    }
+
+    @Test
+    fun `getReferenceData fails when null id value`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val badPatient = rcdmPatient.copy(id = Id(value = null))
+        val exception = assertThrows<IllegalArgumentException> {
+            badPatient.referenceData()
+        }
+        assertEquals("Patient is missing some required data", exception.message)
     }
 }

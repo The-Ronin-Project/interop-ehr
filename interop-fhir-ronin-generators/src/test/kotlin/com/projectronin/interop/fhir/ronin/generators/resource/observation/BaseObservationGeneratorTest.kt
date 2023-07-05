@@ -3,12 +3,15 @@ package com.projectronin.interop.fhir.ronin.generators.resource.observation
 import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
 import com.projectronin.interop.fhir.generators.datatypes.coding
+import com.projectronin.interop.fhir.generators.datatypes.reference
+import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.fhir.ronin.generators.resource.rcdmPatient
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -44,11 +47,10 @@ class BaseObservationGeneratorTest {
 
     @Test
     fun `example use for roninObservation`() {
-        // Create ronin Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObservation = rcdmObservation("fake-tenant") {
-            // if you want to test for a specific status, generated if not provided
+        // Create roninObs with attributes you need, provide the tenant
+        val roninObservation = rcdmObservation("test") {
+            // to test an attribute like status - provide the value
             status of Code("registered-different")
-            // test for a new or different code, generated if not provided
             code of codeableConcept {
                 coding of listOf(
                     coding {
@@ -60,8 +62,6 @@ class BaseObservationGeneratorTest {
                 )
                 text of "Respiratory viral pathogens DNA and RNA panel" // text is kept if provided otherwise only a code.coding is generated
             }
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910, generated if not provided
-            subject of rcdmReference("Patient", "678910")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObservationJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObservation)
@@ -72,13 +72,11 @@ class BaseObservationGeneratorTest {
     }
 
     @Test
-    fun `example use for roninObservation - missing required fields generated`() {
-        // Create ronin Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObservation = rcdmObservation("fake-tenant") {
-            // status, code and category required and will be generated
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910, generated if not provided
-            subject of rcdmReference("Patient", "678910")
-        }
+    fun `example use for rcdmPatient rcdmObservation - missing required fields generated`() {
+        // create patient and observation for tenant
+        val rcdmPatient = rcdmPatient("test") {}
+        val roninObservation = rcdmPatient.rcdmObservation {}
+
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObservationJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObservation)
 
@@ -95,6 +93,7 @@ class BaseObservationGeneratorTest {
         assertNotNull(roninObservation.code)
         assertNotNull(roninObservation.subject)
         assertNotNull(roninObservation.subject?.type?.extension)
+        assertTrue(roninObservation.subject?.reference?.value?.split("/")?.first() in subjectBaseReferenceOptions)
         assertEquals("social-history", roninObservation.category[0].coding[0].code?.value)
         assertEquals(CodeSystem.OBSERVATION_CATEGORY.uri, roninObservation.category[0].coding[0].system)
         assertNotNull(roninObservation.status)
@@ -103,8 +102,8 @@ class BaseObservationGeneratorTest {
 
     @Test
     fun `generates valid base roninObservation`() {
-        val roninObservation = rcdmObservation("fake-tenant") {}
-        assertNull(roninObservation.id)
+        val roninObservation = rcdmObservation("test") {}
+        assertNotNull(roninObservation.id)
         assertNotNull(roninObservation.meta)
         assertEquals(
             roninObservation.meta!!.profile[0].value,
@@ -117,13 +116,17 @@ class BaseObservationGeneratorTest {
         assertEquals(0, roninObservation.extension.size)
         assertEquals(0, roninObservation.modifierExtension.size)
         assertTrue(roninObservation.identifier.size >= 3)
-        assertTrue(roninObservation.identifier.any { it.value == "fake-tenant".asFHIR() })
+        assertTrue(roninObservation.identifier.any { it.value == "test".asFHIR() })
         assertTrue(roninObservation.identifier.any { it.value == "EHR Data Authority".asFHIR() })
         assertTrue(roninObservation.identifier.any { it.system == CodeSystem.RONIN_FHIR_ID.uri })
+        val patientFHIRId = roninObservation.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant = roninObservation.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        assertEquals("$tenant-$patientFHIRId", roninObservation.id?.value.toString())
+        assertEquals("test", tenant)
         assertNotNull(roninObservation.status)
         assertEquals(1, roninObservation.category.size)
         assertNotNull(roninObservation.code)
-        assertNotNull(roninObservation.subject)
+        assertTrue(roninObservation.subject?.reference?.value?.split("/")?.first() in subjectBaseReferenceOptions)
         assertNotNull(roninObservation.subject?.type?.extension)
         assertEquals("social-history", roninObservation.category[0].coding[0].code?.value)
         assertEquals(CodeSystem.OBSERVATION_CATEGORY.uri, roninObservation.category[0].coding[0].system)
@@ -133,7 +136,7 @@ class BaseObservationGeneratorTest {
 
     @Test
     fun `generates base roninObservation with params`() {
-        val roninObservation = rcdmObservation("fake-tenant") {
+        val roninObservation = rcdmObservation("test") {
             id of Id("Id-Id")
             identifier of listOf(
                 Identifier(
@@ -154,9 +157,8 @@ class BaseObservationGeneratorTest {
             code of codeableConcept {
                 text of "fake text goes here"
             }
-            subject of rcdmReference("Practitioner", "678910")
         }
-        assertEquals("Id-Id", roninObservation.id?.value)
+        assertEquals("test-Id-Id", roninObservation.id?.value)
         assertNotNull(roninObservation.meta)
         assertEquals(
             roninObservation.meta!!.profile[0].value,
@@ -169,14 +171,14 @@ class BaseObservationGeneratorTest {
         assertEquals(0, roninObservation.extension.size)
         assertEquals(0, roninObservation.modifierExtension.size)
         assertTrue(roninObservation.identifier.size >= 3)
-        assertTrue(roninObservation.identifier.any { it.value == "fake-tenant".asFHIR() })
+        assertTrue(roninObservation.identifier.any { it.value == "test".asFHIR() })
         assertTrue(roninObservation.identifier.any { it.value == "EHR Data Authority".asFHIR() })
         assertTrue(roninObservation.identifier.any { it.system == CodeSystem.RONIN_FHIR_ID.uri })
         assertNotNull(roninObservation.status)
         assertEquals(1, roninObservation.category.size)
         assertNotNull(roninObservation.code)
-        assertNotNull(roninObservation.subject)
-        assertEquals("Practitioner/678910", roninObservation.subject?.reference?.value)
+        assertNotNull(roninObservation.subject?.type?.extension)
+        assertTrue(roninObservation.subject?.reference?.value?.split("/")?.first() in subjectBaseReferenceOptions)
         assertNotNull(roninObservation.subject?.type?.extension)
         assertEquals("social-history", roninObservation.category[0].coding[0].code?.value)
         assertEquals(CodeSystem.OBSERVATION_CATEGORY.uri, roninObservation.category[0].coding[0].system)
@@ -194,7 +196,8 @@ class BaseObservationGeneratorTest {
         assertTrue(baseObs.identifier.size >= 3)
         assertNotNull(baseObs.status)
         assertNotNull(baseObs.code)
-        assertNotNull(baseObs.subject)
+        assertNotNull(baseObs.subject?.type?.extension)
+        assertTrue(baseObs.subject?.reference?.value?.split("/")?.first() in subjectBaseReferenceOptions)
     }
 
     @Test
@@ -214,7 +217,8 @@ class BaseObservationGeneratorTest {
         assertEquals(4, baseObs.identifier.size)
         assertNotNull(baseObs.status)
         assertNotNull(baseObs.code)
-        assertNotNull(baseObs.subject)
+        assertNotNull(baseObs.subject?.type?.extension)
+        assertTrue(baseObs.subject?.reference?.value?.split("/")?.first() in subjectBaseReferenceOptions)
     }
 
     @Test
@@ -239,15 +243,84 @@ class BaseObservationGeneratorTest {
             code of codeableConcept {
                 text of "fake text goes here"
             }
-            subject of rcdmReference("Practitioner", "678910")
+            performer of listOf(
+                reference("Location", "789")
+            )
         }
         val validation = roninObs.validate(baseObs, null)
         assertEquals(validation.hasErrors(), true)
         assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
-        assertEquals(validation.issues()[0].description, "The referenced resource type was not one of Patient, Location")
-        assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "subject"))
+        assertEquals(validation.issues()[0].description, "The referenced resource type was not one of CareTeam, Organization, Patient, Practitioner, PractitionerRole")
+        assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "performer[0]"))
         assertEquals(validation.issues()[1].code, "INV_VALUE_SET")
         assertEquals(validation.issues()[1].description, "'fake-status' is outside of required value set")
         assertEquals(validation.issues()[1].location, LocationContext(element = "Observation", field = "status"))
+    }
+
+    @Test
+    fun `valid subject input - validate succeeds`() {
+        val roninObservation = rcdmObservation("test") {
+            subject of rcdmReference("Location", "456")
+        }
+        val validation = roninObs.validate(roninObservation, null)
+        assertEquals(validation.hasErrors(), false)
+        assertEquals("Location/456", roninObservation.subject?.reference?.value)
+    }
+
+    @Test
+    fun `invalid subject input - validate fails`() {
+        val roninObservation = rcdmObservation("test") {
+            subject of rcdmReference("Practitioner", "789")
+        }
+        val validation = roninObs.validate(roninObservation, null)
+        assertEquals(validation.hasErrors(), true)
+        assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
+        assertEquals(validation.issues()[0].description, "The referenced resource type was not one of Patient, Location")
+        assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "subject"))
+    }
+
+    @Test
+    fun `rcdmPatient rcdmObservation validates`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val baseObs = rcdmPatient.rcdmObservation {}
+        val validation = roninObs.validate(baseObs, null)
+        assertEquals(validation.hasErrors(), false)
+        assertNotNull(baseObs.meta)
+        assertNotNull(baseObs.identifier)
+        assertTrue(baseObs.identifier.size >= 3)
+        assertNotNull(baseObs.status)
+        assertNotNull(baseObs.code)
+        assertNotNull(baseObs.subject?.type?.extension)
+        assertTrue(baseObs.subject?.reference?.value?.split("/")?.first() in subjectBaseReferenceOptions)
+    }
+
+    @Test
+    fun `rcdmPatient rcdmObservation - any subject input - base patient overrides input - validate succeeds`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val baseObs = rcdmPatient.rcdmObservation {
+            subject of rcdmReference("Patient", "456")
+        }
+        val validation = roninObs.validate(baseObs, null)
+        assertEquals(validation.hasErrors(), false)
+        assertEquals("Patient/${rcdmPatient.id?.value}", baseObs.subject?.reference?.value)
+    }
+
+    @Test
+    fun `rcdmPatient rcdmObservation - fhir id input for both - validate succeeds`() {
+        val rcdmPatient = rcdmPatient("test") { id of "99" }
+        val baseObs = rcdmPatient.rcdmObservation {
+            id of "88"
+        }
+        val validation = roninObs.validate(baseObs, null)
+        assertEquals(validation.hasErrors(), false)
+        assertEquals(3, baseObs.identifier.size)
+        val values = baseObs.identifier.mapNotNull { it.value }.toSet()
+        assertTrue(values.size == 3)
+        assertTrue(values.contains("88".asFHIR()))
+        assertTrue(values.contains("test".asFHIR()))
+        assertTrue(values.contains("EHR Data Authority".asFHIR()))
+        assertEquals("test-88", baseObs.id?.value)
+        assertEquals("test-99", rcdmPatient.id?.value)
+        assertEquals("Patient/test-99", baseObs.subject?.reference?.value)
     }
 }

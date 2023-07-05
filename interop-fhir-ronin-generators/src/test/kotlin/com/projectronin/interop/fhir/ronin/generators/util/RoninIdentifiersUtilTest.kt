@@ -34,10 +34,10 @@ class RoninIdentifiersUtilTest {
         val testList = ListDataGenerator(3, IdentifierGenerator())
         val identifiers = rcdmIdentifiers("test", testList)
         assertNotNull(identifiers)
-        assertEquals(3, identifiers.size)
-        assertEquals(CodeSystem.RONIN_FHIR_ID.uri, identifiers[0].system)
-        assertEquals(CodeSystem.RONIN_TENANT.uri, identifiers[1].system)
-        assertEquals(CodeSystem.RONIN_DATA_AUTHORITY.uri, identifiers[2].system)
+        assertEquals(6, identifiers.size)
+        assertEquals(CodeSystem.RONIN_FHIR_ID.uri, identifiers[3].system)
+        assertEquals(CodeSystem.RONIN_TENANT.uri, identifiers[4].system)
+        assertEquals(CodeSystem.RONIN_DATA_AUTHORITY.uri, identifiers[5].system)
     }
 
     @Test
@@ -45,8 +45,8 @@ class RoninIdentifiersUtilTest {
         val testList = ListDataGenerator(0, IdentifierGenerator()).plus(roninFhir).plus(dataAuthorityIdentifier)
         val identifiers = rcdmIdentifiers("test", testList)
         assertNotNull(identifiers)
-        assertEquals(1, identifiers.size)
-        assertEquals(CodeSystem.RONIN_TENANT.uri, identifiers[0].system)
+        assertEquals(3, identifiers.size)
+        assertEquals(CodeSystem.RONIN_TENANT.uri, identifiers.last().system)
     }
 
     @Test
@@ -54,23 +54,41 @@ class RoninIdentifiersUtilTest {
         val testList = ListDataGenerator(0, IdentifierGenerator()).plus(roninTenant).plus(roninFhir)
         val identifiers = rcdmIdentifiers("test", testList)
         assertNotNull(identifiers)
-        assertEquals(1, identifiers.size)
-        assertEquals(CodeSystem.RONIN_DATA_AUTHORITY.uri, identifiers[0].system)
+        assertEquals(3, identifiers.size)
+        assertEquals(CodeSystem.RONIN_DATA_AUTHORITY.uri, identifiers.last().system)
     }
 
     @Test
     fun `generates ronin FHIR ID if no FHIR ID`() {
-        val testList = ListDataGenerator(0, IdentifierGenerator()).plus(roninTenant).plus(dataAuthorityIdentifier)
+        val testList = ListDataGenerator(1, IdentifierGenerator()).plus(roninTenant).plus(dataAuthorityIdentifier)
         val identifiers = rcdmIdentifiers("test", testList)
         assertNotNull(identifiers)
-        assertEquals(1, identifiers.size)
-        assertEquals(CodeSystem.RONIN_FHIR_ID.uri, identifiers[0].system)
+        assertEquals(4, identifiers.size)
+        assertEquals(CodeSystem.RONIN_FHIR_ID.uri, identifiers.last().system)
     }
 
     @Test
     fun `generates no IDs if all present`() {
         val testList = ListDataGenerator(0, IdentifierGenerator()).plus(roninTenant).plus(dataAuthorityIdentifier).plus(roninFhir)
         val identifiers = rcdmIdentifiers("test", testList)
-        assertEquals(0, identifiers.size)
+        assertEquals(3, identifiers.size)
+    }
+
+    @Test
+    fun `generates ronin FHIR ID if empty FHIR ID`() {
+        val testList = ListDataGenerator(0, IdentifierGenerator()).plus(roninTenant).plus(dataAuthorityIdentifier)
+        val identifiers = rcdmIdentifiers("test", testList, "")
+        assertNotNull(identifiers)
+        assertEquals(3, identifiers.size)
+        assertEquals(CodeSystem.RONIN_FHIR_ID.uri, identifiers.last().system)
+    }
+
+    @Test
+    fun `generates ronin FHIR ID if null FHIR ID`() {
+        val testList = ListDataGenerator(1, IdentifierGenerator()).plus(roninTenant).plus(dataAuthorityIdentifier)
+        val identifiers = rcdmIdentifiers("test", testList, null)
+        assertNotNull(identifiers)
+        assertEquals(4, identifiers.size)
+        assertEquals(CodeSystem.RONIN_FHIR_ID.uri, identifiers.last().system)
     }
 }

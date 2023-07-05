@@ -1,5 +1,7 @@
 package com.projectronin.interop.fhir.ronin.generators.resource
 
+import com.projectronin.interop.fhir.generators.primitives.CodeGenerator
+import com.projectronin.interop.fhir.generators.primitives.UriGenerator
 import com.projectronin.interop.fhir.generators.primitives.instant
 import com.projectronin.interop.fhir.generators.resources.AppointmentGenerator
 import com.projectronin.interop.fhir.generators.resources.appointment
@@ -13,11 +15,13 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.resource.Participant
+import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.ronin.generators.util.generateCode
-import com.projectronin.interop.fhir.ronin.generators.util.generateParticipant
+import com.projectronin.interop.fhir.ronin.generators.util.generateUdpId
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
+import com.projectronin.interop.fhir.ronin.generators.util.udpIdValue
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 
@@ -25,7 +29,10 @@ fun rcdmAppointment(tenant: String, block: AppointmentGenerator.() -> Unit): App
     return appointment {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.APPOINTMENT, tenant) {}
-        identifier of identifier.generate() + rcdmIdentifiers(tenant, identifier)
+        generateUdpId(id.generate(), tenant).let {
+            id of it
+            identifier of rcdmIdentifiers(tenant, identifier, it.value)
+        }
         status of generateCode(status.generate(), possibleAppointmentStatusCodes.random())
         // the tenantSourceAppointmentStatus must contain the status of the appointment as its code
         extension.plus(tenantSourceAppointmentStatus(status.generate()?.value!!))
@@ -40,7 +47,20 @@ fun rcdmAppointment(tenant: String, block: AppointmentGenerator.() -> Unit): App
                 if (cancelationReason.generate() == null) cancelationReasonCodeableConcept else cancelationReason.generate()
             cancelationReason of cancelationReasonToUse
         }
-        participant of generateParticipant(participant.generate(), appointmentParticipant)
+        participant of rcdmParticipant(participant.generate(), tenant, "Patient")
+    }
+}
+
+fun Patient.rcdmAppointment(block: AppointmentGenerator.() -> Unit): Appointment {
+    val data = this.referenceData()
+    return rcdmAppointment(data.tenantId) {
+        block.invoke(this)
+        participant of rcdmParticipant(
+            participant.generate(),
+            data.tenantId,
+            "Patient",
+            data.udpId
+        )
     }
 }
 
@@ -76,16 +96,14 @@ val cancelationReasonCodeableConcept = CodeableConcept(
     )
 )
 
-val appointmentParticipant = listOf(
-    Participant(
-        status = possibleParticipantStatus.random(),
-        type = listOf(
-            CodeableConcept(
-                coding = listOf(Coding(system = Uri("some-system"), code = Code("some-code")))
-            )
-        ),
-        actor = rcdmReference("Patient", "1234")
-    )
+val participantActorReferenceOptions = listOf(
+    "Patient",
+    "PractitionerRole",
+    "Practitioner",
+    "Location",
+    "RelatedPerson",
+    "Device",
+    "HealthcareService"
 )
 
 fun tenantSourceAppointmentStatus(status: String): Extension {
@@ -99,4 +117,41 @@ fun tenantSourceAppointmentStatus(status: String): Extension {
             )
         )
     )
+}
+
+/**
+ * Generate an appointment participant list. If [participant] is empty,
+ * generate an actor using [type] and [id] (if provided) or using generated
+ * values, and return that as the list. Use [type]/[tenantId]-[id] as the
+ * actor.reference, [type] as actor.type and an EHRDA actor.type.extension.
+ * When [participant] is not empty and a [type] is provided, generate an actor
+ * using [type] and [id] or a generated id, and append it to the [participant].
+ */
+fun rcdmParticipant(
+    participant: List<Participant>,
+    tenantId: String,
+    type: String? = null,
+    id: String? = null
+): List<Participant> {
+    return if (!participant.isEmpty() && type.isNullOrEmpty()) {
+        participant
+    } else {
+        participant + Participant(
+            status = possibleParticipantStatus.random(),
+            type = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = UriGenerator().generate(),
+                            code = CodeGenerator().generate()
+                        )
+                    )
+                )
+            ),
+            actor = rcdmReference(
+                if (type.isNullOrEmpty()) participantActorReferenceOptions.random() else type,
+                if (id.isNullOrEmpty()) udpIdValue(tenantId) else udpIdValue(tenantId, id)
+            )
+        )
+    }
 }

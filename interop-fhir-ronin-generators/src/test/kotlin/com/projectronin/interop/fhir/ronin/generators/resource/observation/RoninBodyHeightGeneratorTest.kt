@@ -9,7 +9,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
+import com.projectronin.interop.fhir.ronin.generators.resource.rcdmPatient
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
@@ -58,8 +58,8 @@ class RoninBodyHeightGeneratorTest {
 
     @Test
     fun `example use for roninObservationBodyHeight`() {
-        // Create BodyHeight Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsBodyHeight = rcdmObservationBodyHeight("fake-tenant") {
+        // Create BodyHeight Obs with attributes you need, provide the tenant
+        val roninObsBodyHeight = rcdmObservationBodyHeight("test") {
             // if you want to test for a specific status
             status of Code("random-status")
             // test for a new or different code
@@ -73,8 +73,6 @@ class RoninBodyHeightGeneratorTest {
                 )
                 text of "Body height special circumstances" // text is kept if provided otherwise only a code.coding is generated
             }
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "12345678")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsBodyHeightJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyHeight)
@@ -85,13 +83,10 @@ class RoninBodyHeightGeneratorTest {
     }
 
     @Test
-    fun `example use for roninObservationBodyHeight - missing required fields generated`() {
-        // Create BodyHeight Obs with Conditions you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsBodyHeight = rcdmObservationBodyHeight("fake-tenant") {
-            // status, code and category required and will be generated
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "678910")
-        }
+    fun `example use for rcdmPatient rcdmObservationBodyHeight - missing required fields generated`() {
+        // create patient and observation for tenant
+        val rcdmPatient = rcdmPatient("test") {}
+        val roninObsBodyHeight = rcdmPatient.rcdmObservationBodyHeight {}
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsBodyHeightJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyHeight)
 
@@ -112,12 +107,16 @@ class RoninBodyHeightGeneratorTest {
         assertEquals(CodeSystem.OBSERVATION_CATEGORY.uri, roninObsBodyHeight.category[0].coding[0].system)
         assertNotNull(roninObsBodyHeight.status)
         assertNotNull(roninObsBodyHeight.code?.coding?.get(0)?.code?.value)
+        assertNotNull(roninObsBodyHeight.id)
+        val patientFHIRId = roninObsBodyHeight.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant = roninObsBodyHeight.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        assertEquals("$tenant-$patientFHIRId", roninObsBodyHeight.id?.value.toString())
     }
 
     @Test
     fun `generates valid roninObservationBodyHeight Observation`() {
-        val roninObsBodyHeight = rcdmObservationBodyHeight("fake-tenant") {}
-        assertNull(roninObsBodyHeight.id)
+        val roninObsBodyHeight = rcdmObservationBodyHeight("test") {}
+        assertNotNull(roninObsBodyHeight.id)
         assertNotNull(roninObsBodyHeight.meta)
         assertEquals(
             roninObsBodyHeight.meta!!.profile[0].value,
@@ -130,7 +129,7 @@ class RoninBodyHeightGeneratorTest {
         assertEquals(1, roninObsBodyHeight.extension.size)
         assertEquals(0, roninObsBodyHeight.modifierExtension.size)
         assertTrue(roninObsBodyHeight.identifier.size >= 3)
-        assertTrue(roninObsBodyHeight.identifier.any { it.value == "fake-tenant".asFHIR() })
+        assertTrue(roninObsBodyHeight.identifier.any { it.value == "test".asFHIR() })
         assertTrue(roninObsBodyHeight.identifier.any { it.value == "EHR Data Authority".asFHIR() })
         assertTrue(roninObsBodyHeight.identifier.any { it.system == CodeSystem.RONIN_FHIR_ID.uri })
         assertNotNull(roninObsBodyHeight.status)

@@ -6,9 +6,8 @@ import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.CodeableConcepts
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.test.data.generator.collection.ListDataGenerator
-import java.util.UUID
 
-fun rcdmIdentifiers(tenantId: String, identifiers: ListDataGenerator<Identifier>): List<Identifier> {
+fun rcdmIdentifiers(tenantId: String, identifiers: ListDataGenerator<Identifier>, udpIdValue: String? = null): List<Identifier> {
     val generatedIdentifiers = identifiers.generate()
     val roninIdentifiers = ListDataGenerator(0, IdentifierGenerator())
 
@@ -16,7 +15,7 @@ fun rcdmIdentifiers(tenantId: String, identifiers: ListDataGenerator<Identifier>
         roninIdentifiers.plus(
             identifier {
                 system of CodeSystem.RONIN_FHIR_ID.uri
-                value of UUID.randomUUID().toString()
+                value of fhirIdValue(udpIdValue, tenantId)
                 type of CodeableConcepts.RONIN_FHIR_ID
             }
         )
@@ -39,5 +38,5 @@ fun rcdmIdentifiers(tenantId: String, identifiers: ListDataGenerator<Identifier>
             }
         )
     }
-    return roninIdentifiers.generate()
+    return generatedIdentifiers + roninIdentifiers.generate()
 }

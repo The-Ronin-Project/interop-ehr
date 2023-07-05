@@ -51,7 +51,7 @@ val encounterDiagnosisCategory =
         code of Code("encounter-diagnosis")
     }
 
-val subjectOptions = listOf(rcdmReference("Patient", "123")).random()
+val subjectOptions = listOf("Patient")
 
 val problemListCategory =
     coding {

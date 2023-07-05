@@ -9,7 +9,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
+import com.projectronin.interop.fhir.ronin.generators.resource.rcdmPatient
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
@@ -68,8 +68,8 @@ class RoninPulseOximetryGeneratorTest {
 
     @Test
     fun `example use for roninObservationPulseOximetry`() {
-        // Create PulseOximetry Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsPulseOximetry = rcdmObservationPulseOximetry("fake-tenant") {
+        // Create PulseOximetry Obs with attributes you need, provide the tenant
+        val roninObsPulseOximetry = rcdmObservationPulseOximetry("test") {
             // if you want to test for a specific status
             status of Code("registered-different")
             // test for a new or different code
@@ -84,8 +84,6 @@ class RoninPulseOximetryGeneratorTest {
                 )
                 text of "Respiratory viral pathogens DNA and RNA panel" // text is kept if provided otherwise only a code.coding is generated
             }
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "678910")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsPulseOximetryJSON =
@@ -97,13 +95,10 @@ class RoninPulseOximetryGeneratorTest {
     }
 
     @Test
-    fun `example use for roninObservationPulseOximetry - missing required fields generated`() {
-        // Create PulseOximetry Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsPulseOximetry = rcdmObservationPulseOximetry("fake-tenant") {
-            // status, code and category required and will be generated
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "678910")
-        }
+    fun `example use for rcdmPatient rcdmObservationPulseOximetry - missing required fields generated`() {
+        // create patient and observation for tenant
+        val rcdmPatient = rcdmPatient("test") {}
+        val roninObsPulseOximetry = rcdmPatient.rcdmObservationPulseOximetry {}
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsPulseOximetryJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsPulseOximetry)
@@ -125,12 +120,16 @@ class RoninPulseOximetryGeneratorTest {
         assertEquals(CodeSystem.OBSERVATION_CATEGORY.uri, roninObsPulseOximetry.category[0].coding[0].system)
         assertNotNull(roninObsPulseOximetry.status)
         assertNotNull(roninObsPulseOximetry.code?.coding?.get(0)?.code?.value)
+        assertNotNull(roninObsPulseOximetry.id)
+        val patientFHIRId = roninObsPulseOximetry.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant = roninObsPulseOximetry.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        assertEquals("$tenant-$patientFHIRId", roninObsPulseOximetry.id?.value.toString())
     }
 
     @Test
     fun `generates valid roninObservationPulseOximetry Observation`() {
-        val roninObsPulseOx = rcdmObservationPulseOximetry("fake-tenant") {}
-        assertNull(roninObsPulseOx.id)
+        val roninObsPulseOx = rcdmObservationPulseOximetry("test") {}
+        assertNotNull(roninObsPulseOx.id)
         assertNotNull(roninObsPulseOx.meta)
         assertEquals(
             roninObsPulseOx.meta!!.profile[0].value,
@@ -143,7 +142,7 @@ class RoninPulseOximetryGeneratorTest {
         assertEquals(1, roninObsPulseOx.extension.size)
         assertEquals(0, roninObsPulseOx.modifierExtension.size)
         assertTrue(roninObsPulseOx.identifier.size >= 3)
-        assertTrue(roninObsPulseOx.identifier.any { it.value == "fake-tenant".asFHIR() })
+        assertTrue(roninObsPulseOx.identifier.any { it.value == "test".asFHIR() })
         assertTrue(roninObsPulseOx.identifier.any { it.value == "EHR Data Authority".asFHIR() })
         assertTrue(roninObsPulseOx.identifier.any { it.system == CodeSystem.RONIN_FHIR_ID.uri })
         assertNotNull(roninObsPulseOx.status)

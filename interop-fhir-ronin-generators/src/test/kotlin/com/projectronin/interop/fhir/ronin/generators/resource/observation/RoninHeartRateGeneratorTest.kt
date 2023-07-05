@@ -8,7 +8,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
+import com.projectronin.interop.fhir.ronin.generators.resource.rcdmPatient
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
@@ -49,8 +49,8 @@ class RoninHeartRateGeneratorTest {
 
     @Test
     fun `example use for roninObservationHeartRate`() {
-        // Create HeartRate Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsHeartRate = rcdmObservationHeartRate("fake-tenant") {
+        // Create HeartRate Obs with attributes you need, provide the tenant
+        val roninObsHeartRate = rcdmObservationHeartRate("test") {
             // if you want to test for a specific status
             status of Code("heart-rate-status")
             // test for a new or different code
@@ -64,8 +64,6 @@ class RoninHeartRateGeneratorTest {
                 )
                 text of "Heart rate special circumstances" // text is kept if provided otherwise only a code.coding is generated
             }
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "678910")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsHeartRateJSON =
@@ -77,13 +75,10 @@ class RoninHeartRateGeneratorTest {
     }
 
     @Test
-    fun `example use for roninObservationHeartRate - missing required fields generated`() {
-        // Create HeartRate Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsHeartRate = rcdmObservationHeartRate("fake-tenant") {
-            // status, code and category required and will be generated
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "678910")
-        }
+    fun `example use for rcdmPatient rcdmObservationHeartRate - missing required fields generated`() {
+        // create patient and observation for tenant
+        val rcdmPatient = rcdmPatient("test") {}
+        val roninObsHeartRate = rcdmPatient.rcdmObservationHeartRate {}
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsHeartRateJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsHeartRate)
@@ -105,12 +100,16 @@ class RoninHeartRateGeneratorTest {
         assertEquals(CodeSystem.OBSERVATION_CATEGORY.uri, roninObsHeartRate.category[0].coding[0].system)
         assertNotNull(roninObsHeartRate.status)
         assertNotNull(roninObsHeartRate.code?.coding?.get(0)?.code?.value)
+        assertNotNull(roninObsHeartRate.id)
+        val patientFHIRId = roninObsHeartRate.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant = roninObsHeartRate.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        assertEquals("$tenant-$patientFHIRId", roninObsHeartRate.id?.value.toString())
     }
 
     @Test
     fun `generates valid roninObservationHeartRate Observation`() {
-        val roninObsHeartRate = rcdmObservationHeartRate("fake-tenant") {}
-        assertNull(roninObsHeartRate.id)
+        val roninObsHeartRate = rcdmObservationHeartRate("test") {}
+        assertNotNull(roninObsHeartRate.id)
         assertNotNull(roninObsHeartRate.meta)
         assertEquals(
             roninObsHeartRate.meta!!.profile[0].value,
@@ -123,7 +122,7 @@ class RoninHeartRateGeneratorTest {
         assertEquals(1, roninObsHeartRate.extension.size)
         assertEquals(0, roninObsHeartRate.modifierExtension.size)
         assertTrue(roninObsHeartRate.identifier.size >= 3)
-        assertTrue(roninObsHeartRate.identifier.any { it.value == "fake-tenant".asFHIR() })
+        assertTrue(roninObsHeartRate.identifier.any { it.value == "test".asFHIR() })
         assertTrue(roninObsHeartRate.identifier.any { it.value == "EHR Data Authority".asFHIR() })
         assertTrue(roninObsHeartRate.identifier.any { it.system == CodeSystem.RONIN_FHIR_ID.uri })
         assertNotNull(roninObsHeartRate.status)

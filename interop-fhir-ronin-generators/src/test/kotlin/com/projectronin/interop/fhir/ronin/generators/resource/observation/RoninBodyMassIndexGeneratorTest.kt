@@ -8,7 +8,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
+import com.projectronin.interop.fhir.ronin.generators.resource.rcdmPatient
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
@@ -51,11 +51,9 @@ class RoninBodyMassIndexGeneratorTest {
 
     @Test
     fun `example use for roninObservationBodyMassIndex`() {
-        // Create BodyMassIndex Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsBodyMassIndex = rcdmObservationBodyMassIndex("fake-tenant") {
-            // if you want to test for a specific status
+        // Create BodyMassIndex Obs with attributes you need, provide the tenant
+        val roninObsBodyMassIndex = rcdmObservationBodyMassIndex("test") {
             status of Code("new-status")
-            // test for a new or different code
             code of codeableConcept {
                 coding of listOf(
                     coding {
@@ -66,8 +64,6 @@ class RoninBodyMassIndexGeneratorTest {
                 )
                 text of "Weight and Height tracking panel" // text is kept if provided otherwise only a code.coding is generated
             }
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "678910")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsBodyMassIndexJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyMassIndex)
@@ -78,13 +74,10 @@ class RoninBodyMassIndexGeneratorTest {
     }
 
     @Test
-    fun `example use for roninObservationBodyMassIndex - missing required fields generated`() {
-        // Create BodyMassIndex Obs with attributes you need, provide the tenant(mda), here "fake-tenant"
-        val roninObsBodyMassIndex = rcdmObservationBodyMassIndex("fake-tenant") {
-            // status, code and category required and will be generated
-            // test for a specific subject / patient - here you pass 'type' of PATIENT and 'id' of 678910
-            subject of rcdmReference("Patient", "678910")
-        }
+    fun `example use for rcdmPatient roninObservationBodyMassIndex - missing required fields generated`() {
+        // create patient and observation for tenant
+        val rcdmPatient = rcdmPatient("test") {}
+        val roninObsBodyMassIndex = rcdmPatient.rcdmObservationBodyMassIndex {}
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsBodyMassIndexJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyMassIndex)
 
@@ -105,12 +98,16 @@ class RoninBodyMassIndexGeneratorTest {
         assertEquals(CodeSystem.OBSERVATION_CATEGORY.uri, roninObsBodyMassIndex.category[0].coding[0].system)
         assertNotNull(roninObsBodyMassIndex.status)
         assertNotNull(roninObsBodyMassIndex.code?.coding?.get(0)?.code?.value)
+        assertNotNull(roninObsBodyMassIndex.id)
+        val patientFHIRId = roninObsBodyMassIndex.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant = roninObsBodyMassIndex.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        assertEquals("$tenant-$patientFHIRId", roninObsBodyMassIndex.id?.value.toString())
     }
 
     @Test
     fun `generates valid roninObservationBodyMassIndex Observation`() {
-        val roninObsBodyMassIndex = rcdmObservationBodyMassIndex("fake-tenant") {}
-        assertNull(roninObsBodyMassIndex.id)
+        val roninObsBodyMassIndex = rcdmObservationBodyMassIndex("test") {}
+        assertNotNull(roninObsBodyMassIndex.id)
         assertNotNull(roninObsBodyMassIndex.meta)
         assertEquals(
             roninObsBodyMassIndex.meta!!.profile[0].value,
@@ -123,7 +120,7 @@ class RoninBodyMassIndexGeneratorTest {
         assertEquals(1, roninObsBodyMassIndex.extension.size)
         assertEquals(0, roninObsBodyMassIndex.modifierExtension.size)
         assertTrue(roninObsBodyMassIndex.identifier.size >= 3)
-        assertTrue(roninObsBodyMassIndex.identifier.any { it.value == "fake-tenant".asFHIR() })
+        assertTrue(roninObsBodyMassIndex.identifier.any { it.value == "test".asFHIR() })
         assertTrue(roninObsBodyMassIndex.identifier.any { it.value == "EHR Data Authority".asFHIR() })
         assertTrue(roninObsBodyMassIndex.identifier.any { it.system == CodeSystem.RONIN_FHIR_ID.uri })
         assertNotNull(roninObsBodyMassIndex.status)
