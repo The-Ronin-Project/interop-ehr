@@ -1,42 +1,79 @@
+[versions]
+caffeine = "3.1.6"
+commons = "1.10.0"
+datadog = "1.16.3"
+
+ehr = "1.2.1"
+hapi = "2.3"
+
+interop-common = "3.9.1"
+interop-fhir = "8.5.0"
+
+interop-gradle = "3.2.0"
+
+interop-publish = "8.1.2"
+interop-queue = "2.0.0"
+interop-validation = "2.0.0"
+
+jackson = "2.15.2"
+kotlinx-coroutines = "1.7.1"
+ktor = "2.3.1"
+ktorm = "3.6.0"
+mockk = "1.13.5"
+mockwebserver = "4.11.0"
+mysql-connector = "8.0.33"
+opentracing = "0.33.0"
+ronin-test = "0.0.2"
+swagger-annotations = "2.2.14"
+testcontainers-mysql = "1.18.3"
+
 [libraries]
-caffeine = "com.github.ben-manes.caffeine:caffeine:3.1.6"
-commons-text = "org.apache.commons:commons-text:1.10.0"
-dd-trace-api = "com.datadoghq:dd-trace-api:1.16.3"
+caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
+commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons" }
+dd-trace-api = { module = "com.datadoghq:dd-trace-api", version.ref = "datadog" }
 
-ehrda-client = "com.projectronin.ehr:ehr-data-authority-client:1.2.1"
-ehrda-models = "com.projectronin.ehr:ehr-data-authority-models:1.2.1"
-hapi-hl7v2-251 = "ca.uhn.hapi:hapi-structures-v251:2.3"
-hapi-hl7v2-base = "ca.uhn.hapi:hapi-base:2.3"
+ehrda-client = { module = "com.projectronin.ehr:ehr-data-authority-client", version.ref = "ehr" }
+ehrda-models = { module = "com.projectronin.ehr:ehr-data-authority-models", version.ref = "ehr" }
+hapi-hl7v2-251 = { module = "ca.uhn.hapi:hapi-structures-v251", version.ref = "hapi" }
+hapi-hl7v2-base = { module = "ca.uhn.hapi:hapi-base", version.ref = "hapi" }
 
-interop-common = "com.projectronin.interop:interop-common:3.9.1"
-interop-commonHttp = "com.projectronin.interop:interop-common-http:3.9.1"
-interop-commonJackson = "com.projectronin.interop:interop-common-jackson:3.9.1"
-interop-commonKtorm = "com.projectronin.interop:interop-common-ktorm:3.9.1"
-interop-commonTestDb = "com.projectronin.interop:interop-common-test-db:3.9.1"
+interop-common = { module = "com.projectronin.interop:interop-common", version.ref = "interop-common" }
+interop-commonHttp = { module = "com.projectronin.interop:interop-common-http", version.ref = "interop-common" }
+interop-commonJackson = { module = "com.projectronin.interop:interop-common-jackson", version.ref = "interop-common" }
+interop-commonKtorm = { module = "com.projectronin.interop:interop-common-ktorm", version.ref = "interop-common" }
+interop-commonTestDb = { module = "com.projectronin.interop:interop-common-test-db", version.ref = "interop-common" }
 
-interop-fhir = "com.projectronin.interop.fhir:interop-fhir:8.5.0"
-interop-fhir-generators = "com.projectronin.interop.fhir:interop-fhir-generators:8.5.0"
+interop-fhir = { module = "com.projectronin.interop.fhir:interop-fhir", version.ref = "interop-fhir" }
+interop-fhir-generators = { module = "com.projectronin.interop.fhir:interop-fhir-generators", version.ref = "interop-fhir" }
 
-interop-publishers-datalake = "com.projectronin.interop.publish:interop-datalake:8.1.2"
+interop-publishers-datalake = { module = "com.projectronin.interop.publish:interop-datalake", version.ref = "interop-publish" }
 
-interop-queue-api = "com.projectronin.interop.queue:interop-queue:2.0.0"
+interop-queue-api = { module = "com.projectronin.interop.queue:interop-queue", version.ref = "interop-queue" }
 
-interop-validation-client = "com.projectronin.interop.validation:interop-validation-client:2.0.0"
+interop-validation-client = { module = "com.projectronin.interop.validation:interop-validation-client", version.ref = "interop-validation" }
 
-jackson-databind = "com.fasterxml.jackson.core:jackson-databind:2.15.2"
-jackson-datatype-jsr310 = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.15.2"
-kotlinx-coroutines-core = "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1"
-ktor-server-auth-jwt = "io.ktor:ktor-server-auth-jwt:2.3.1"
-ktorm-core = "org.ktorm:ktorm-core:3.6.0"
-mockk = "io.mockk:mockk:1.13.5"
-mockwebserver = "com.squareup.okhttp3:mockwebserver:4.11.0"
-mysql-connector-java = "com.mysql:mysql-connector-j:8.0.33"
-opentracing-api = "io.opentracing:opentracing-api:0.33.0"
-opentracing-util = "io.opentracing:opentracing-util:0.33.0"
-ronin-test-data-generator = "com.projectronin.test:ronin-test-data-generator:0.0.2"
-swagger-annotations = "io.swagger.core.v3:swagger-annotations:2.2.14"
-testcontainers-mysql = "org.testcontainers:mysql:1.18.3"
+jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
+jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
+kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
+ktorm-core = { module = "org.ktorm:ktorm-core", version.ref = "ktorm" }
+mockk = { module = "io.mockk:mockk", version.ref = "mockk" }
+mockwebserver = { module = "com.squareup.okhttp3:mockwebserver", version.ref = "mockwebserver" }
+mysql-connector-java = { module = "com.mysql:mysql-connector-j", version.ref = "mysql-connector" }
+opentracing-api = { module = "io.opentracing:opentracing-api", version.ref = "opentracing" }
+opentracing-util = { module = "io.opentracing:opentracing-util", version.ref = "opentracing" }
+ronin-test-data-generator = { module = "com.projectronin.test:ronin-test-data-generator", version.ref = "ronin-test" }
+swagger-annotations = { module = "io.swagger.core.v3:swagger-annotations", version.ref = "swagger-annotations" }
+testcontainers-mysql = { module = "org.testcontainers:mysql", version.ref = "testcontainers-mysql" }
 
 [bundles]
 test-mysql = ["mysql-connector-java", "testcontainers-mysql"]
 hl7v2 = ["hapi-hl7v2-251", "hapi-hl7v2-base"]
+
+[plugins]
+interop-gradle-base = { id = "com.projectronin.interop.gradle.base", version.ref = "interop-gradle" }
+interop-gradle-junit = { id = "com.projectronin.interop.gradle.junit", version.ref = "interop-gradle" }
+interop-gradle-publish = { id = "com.projectronin.interop.gradle.publish", version.ref = "interop-gradle" }
+interop-gradle-spring = { id = "com.projectronin.interop.gradle.spring", version.ref = "interop-gradle" }
+interop-gradle-version = { id = "com.projectronin.interop.gradle.version", version.ref = "interop-gradle" }
+interop-version-catalog = { id = "com.projectronin.interop.gradle.version-catalog-update", version.ref = "interop-gradle" }
