@@ -193,7 +193,6 @@ class RoninStagingRelatedGeneratorTest {
         assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
         assertEquals(validation.issues()[0].description, "The referenced resource type was not one of Patient, Location")
         assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "subject"))
-        // ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Observation.subject
     }
 
     @Test

@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.generators.resource
 
 import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.fhir.generators.datatypes.ParticipantGenerator
+import com.projectronin.interop.fhir.generators.datatypes.reference
 import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
@@ -257,6 +258,84 @@ class RoninAppointmentTest {
         assertTrue(roninParticipant.first().status in possibleParticipantStatus)
         assertTrue(roninParticipant.first().actor?.type?.value in participantActorReferenceOptions)
         assertTrue(roninParticipant.first().actor?.reference?.value?.split("/")?.last()?.startsWith("test-") == true)
+    }
+
+    @Test
+    fun `generate rcdm participant when null is provided`() {
+        val roninParticipant = rcdmParticipant(emptyList(), tenant.mnemonic)
+        assertNotNull(roninParticipant)
+        assertTrue(roninParticipant.first().status in possibleParticipantStatus)
+        assertTrue(roninParticipant.first().actor?.decomposedType() in participantActorReferenceOptions)
+        assertTrue(roninParticipant.first().actor?.decomposedId()?.startsWith("test-") == true)
+    }
+
+    @Test
+    fun `generate rcdm participant when null is provided and a reference type and empty id are input`() {
+        val goodResult = rcdmParticipant(emptyList(), tenant.mnemonic, "Practitioner", "")
+        assertEquals(1, goodResult.first().type.size)
+        assertNotNull(goodResult)
+        assertEquals("Practitioner", goodResult.first().actor?.decomposedType())
+        assertTrue(goodResult.first().actor?.decomposedId()?.startsWith("test-") == true)
+    }
+
+    @Test
+    fun `generate rcdm participant when null is provided and a reference type and id are input`() {
+        val goodResult = rcdmParticipant(emptyList(), tenant.mnemonic, "Practitioner", "1234")
+        assertEquals(1, goodResult.first().type.size)
+        assertNotNull(goodResult)
+        assertEquals("Practitioner", goodResult.first().actor?.decomposedType())
+        assertEquals("test-1234", goodResult.first().actor?.decomposedId())
+    }
+
+    @Test
+    fun `generate rcdm participant when actor is missing valid type and no reference type is input`() {
+        // make a good participant
+        val roninParticipantList = rcdmParticipant(emptyList(), tenant.mnemonic)
+
+        // make a bad participant
+        val roninParticipant = roninParticipantList.first()
+        val badParticipant = roninParticipant.copy(actor = roninParticipant.actor?.copy(reference = "".asFHIR()))
+
+        // generate a good participant on input of the bad participant
+        val goodResult = rcdmParticipant(listOf(badParticipant), tenant.mnemonic)
+        assertEquals(1, goodResult.first().type.size)
+        assertNotNull(goodResult)
+        assertTrue(goodResult.first().actor?.decomposedType() in participantActorReferenceOptions)
+        assertTrue(goodResult.first().actor?.decomposedId()?.startsWith("test-") == true)
+    }
+
+    @Test
+    fun `generate rcdm participant when actor is missing valid type and a reference type and id are input`() {
+        // make a good participant
+        val roninParticipantList = rcdmParticipant(emptyList(), tenant.mnemonic)
+
+        // make a bad participant
+        val roninParticipant = roninParticipantList.first()
+        val badParticipant = roninParticipant.copy(actor = roninParticipant.actor?.copy(reference = "".asFHIR()))
+
+        // generate a good participant on input of the bad participant
+        val goodResult = rcdmParticipant(listOf(badParticipant), tenant.mnemonic, "Practitioner", "1234")
+        assertEquals(1, goodResult.first().type.size)
+        assertNotNull(goodResult)
+        assertEquals("Practitioner", goodResult.first().actor?.decomposedType())
+        assertEquals("test-1234", goodResult.first().actor?.decomposedId())
+    }
+
+    @Test
+    fun `generate rcdm participant when actor is missing valid type and a reference type and empty id are input`() {
+        // make a good participant
+        val roninParticipantList = rcdmParticipant(emptyList(), tenant.mnemonic)
+
+        // make a bad participant
+        val roninParticipant = roninParticipantList.first()
+        val badParticipant = roninParticipant.copy(actor = roninParticipant.actor?.copy(reference = "".asFHIR()))
+
+        // generate a good participant on input of the bad participant
+        val goodResult = rcdmParticipant(listOf(badParticipant), tenant.mnemonic, "Practitioner", "")
+        assertEquals(1, goodResult.first().type.size)
+        assertNotNull(goodResult)
+        assertEquals("Practitioner", goodResult.first().actor?.decomposedType())
+        assertTrue(goodResult.first().actor?.decomposedId()?.startsWith("test-") == true)
     }
 
     @Test

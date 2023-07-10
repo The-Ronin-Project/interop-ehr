@@ -3,6 +3,7 @@ package com.projectronin.interop.fhir.ronin.generators.resource.observation
 import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
 import com.projectronin.interop.fhir.generators.datatypes.coding
+import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code

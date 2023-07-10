@@ -133,10 +133,11 @@ fun rcdmParticipant(
     type: String? = null,
     id: String? = null
 ): List<Participant> {
-    return if (!participant.isEmpty() && type.isNullOrEmpty()) {
-        participant
+    val validList = participant.filter { it.actor?.decomposedType()?.isNotEmpty() == true }
+    return if (!validList.isEmpty() && type.isNullOrEmpty()) {
+        validList
     } else {
-        participant + Participant(
+        validList + Participant(
             status = possibleParticipantStatus.random(),
             type = listOf(
                 CodeableConcept(

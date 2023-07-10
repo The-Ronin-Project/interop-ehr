@@ -3,6 +3,7 @@ package com.projectronin.interop.fhir.ronin.generators.resource.observation
 import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
 import com.projectronin.interop.fhir.generators.datatypes.coding
 import com.projectronin.interop.fhir.generators.primitives.dateTime
+import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.generators.resources.ObservationGenerator
 import com.projectronin.interop.fhir.generators.resources.observation
 import com.projectronin.interop.fhir.r4.CodeSystem

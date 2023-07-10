@@ -1,6 +1,7 @@
 package com.projectronin.interop.fhir.ronin.generators.util
 
 import com.projectronin.interop.fhir.generators.datatypes.coding
+import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
