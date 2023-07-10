@@ -1,58 +1,45 @@
 [versions]
 caffeine = "3.1.6"
 commons = "1.10.0"
-datadog = "1.16.3"
-
+datadog = "1.17.0"
 ehr = "1.2.1"
 hapi = "2.3"
-
 interop-common = "3.9.1"
 interop-fhir = "8.5.0"
-
 interop-gradle = "3.2.0"
-
 interop-publish = "8.1.2"
 interop-queue = "2.0.0"
 interop-validation = "2.0.0"
-
 jackson = "2.15.2"
-kotlinx-coroutines = "1.7.1"
-ktor = "2.3.1"
+kotlinx-coroutines = "1.7.2"
+ktor = "2.3.2"
 ktorm = "3.6.0"
 mockk = "1.13.5"
 mockwebserver = "4.11.0"
 mysql-connector = "8.0.33"
 opentracing = "0.33.0"
 ronin-test = "0.0.2"
-swagger-annotations = "2.2.14"
+swagger-annotations = "2.2.15"
 testcontainers-mysql = "1.18.3"
 
 [libraries]
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons" }
 dd-trace-api = { module = "com.datadoghq:dd-trace-api", version.ref = "datadog" }
-
 ehrda-client = { module = "com.projectronin.ehr:ehr-data-authority-client", version.ref = "ehr" }
 ehrda-models = { module = "com.projectronin.ehr:ehr-data-authority-models", version.ref = "ehr" }
 hapi-hl7v2-251 = { module = "ca.uhn.hapi:hapi-structures-v251", version.ref = "hapi" }
 hapi-hl7v2-base = { module = "ca.uhn.hapi:hapi-base", version.ref = "hapi" }
-
 interop-common = { module = "com.projectronin.interop:interop-common", version.ref = "interop-common" }
 interop-commonHttp = { module = "com.projectronin.interop:interop-common-http", version.ref = "interop-common" }
 interop-commonJackson = { module = "com.projectronin.interop:interop-common-jackson", version.ref = "interop-common" }
 interop-commonKtorm = { module = "com.projectronin.interop:interop-common-ktorm", version.ref = "interop-common" }
 interop-commonTestDb = { module = "com.projectronin.interop:interop-common-test-db", version.ref = "interop-common" }
-
 interop-fhir = { module = "com.projectronin.interop.fhir:interop-fhir", version.ref = "interop-fhir" }
 interop-fhir-generators = { module = "com.projectronin.interop.fhir:interop-fhir-generators", version.ref = "interop-fhir" }
-
 interop-publishers-datalake = { module = "com.projectronin.interop.publish:interop-datalake", version.ref = "interop-publish" }
-
 interop-queue-api = { module = "com.projectronin.interop.queue:interop-queue", version.ref = "interop-queue" }
-
 interop-validation-client = { module = "com.projectronin.interop.validation:interop-validation-client", version.ref = "interop-validation" }
-
-jackson-databind = { module = "com.fasterxml.jackson.core:jackson-databind", version.ref = "jackson" }
 jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
@@ -67,11 +54,16 @@ swagger-annotations = { module = "io.swagger.core.v3:swagger-annotations", versi
 testcontainers-mysql = { module = "org.testcontainers:mysql", version.ref = "testcontainers-mysql" }
 
 [bundles]
-test-mysql = ["mysql-connector-java", "testcontainers-mysql"]
-hl7v2 = ["hapi-hl7v2-251", "hapi-hl7v2-base"]
+hl7v2 = [
+    "hapi-hl7v2-251",
+    "hapi-hl7v2-base",
+]
+test-mysql = [
+    "mysql-connector-java",
+    "testcontainers-mysql",
+]
 
 [plugins]
-interop-gradle-base = { id = "com.projectronin.interop.gradle.base", version.ref = "interop-gradle" }
 interop-gradle-junit = { id = "com.projectronin.interop.gradle.junit", version.ref = "interop-gradle" }
 interop-gradle-publish = { id = "com.projectronin.interop.gradle.publish", version.ref = "interop-gradle" }
 interop-gradle-spring = { id = "com.projectronin.interop.gradle.spring", version.ref = "interop-gradle" }
