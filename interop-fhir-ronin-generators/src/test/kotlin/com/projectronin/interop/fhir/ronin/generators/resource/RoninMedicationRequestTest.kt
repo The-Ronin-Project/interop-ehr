@@ -84,7 +84,7 @@ class RoninMedicationRequestTest {
         assertEquals("Medication", (rcdmMedicationRequest.medication?.value as Reference).decomposedType())
         assertNotNull(rcdmMedicationRequest.subject)
         assertEquals("Patient", rcdmMedicationRequest.subject?.decomposedType())
-        assertNull(rcdmMedicationRequest.encounter) // not null &&&
+        assertNull(rcdmMedicationRequest.encounter)
         assertNotNull(rcdmMedicationRequest.requester)
         assertTrue(rcdmMedicationRequest.requester?.decomposedType() in requesterReferenceOptions)
         assertNull(rcdmMedicationRequest.performer)
