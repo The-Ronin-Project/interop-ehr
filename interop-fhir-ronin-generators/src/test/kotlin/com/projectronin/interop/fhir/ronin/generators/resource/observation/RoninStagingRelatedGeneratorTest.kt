@@ -3,6 +3,7 @@ package com.projectronin.interop.fhir.ronin.generators.resource.observation
 import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
 import com.projectronin.interop.fhir.generators.datatypes.coding
+import com.projectronin.interop.fhir.generators.datatypes.reference
 import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
@@ -221,10 +222,21 @@ class RoninStagingRelatedGeneratorTest {
     }
 
     @Test
-    fun `rcdmPatient rcdmObservationStagingRelated - any subject input - base patient overrides input - validate succeeds`() {
+    fun `rcdmPatient rcdmObservationStagingRelated - valid subject input overrides base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
         val roninObsStagingRelated = rcdmPatient.rcdmObservationStagingRelated {
             subject of rcdmReference("Patient", "456")
+        }
+        val validation = roninStageRelated.validate(roninObsStagingRelated, null)
+        assertEquals(validation.hasErrors(), false)
+        assertEquals("Patient/456", roninObsStagingRelated.subject?.reference?.value)
+    }
+
+    @Test
+    fun `rcdmPatient rcdmObservationStagingRelated - base patient overrides invalid subject input - validate succeeds`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val roninObsStagingRelated = rcdmPatient.rcdmObservationStagingRelated {
+            subject of reference("Patient", "456")
         }
         val validation = roninStageRelated.validate(roninObsStagingRelated, null)
         assertEquals(validation.hasErrors(), false)

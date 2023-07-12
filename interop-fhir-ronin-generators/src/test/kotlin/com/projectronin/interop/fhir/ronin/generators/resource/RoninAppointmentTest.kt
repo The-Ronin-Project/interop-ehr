@@ -256,8 +256,8 @@ class RoninAppointmentTest {
         val roninParticipant = rcdmParticipant(participant.generate(), tenant.mnemonic)
         assertNotNull(roninParticipant)
         assertTrue(roninParticipant.first().status in possibleParticipantStatus)
-        assertTrue(roninParticipant.first().actor?.type?.value in participantActorReferenceOptions)
-        assertTrue(roninParticipant.first().actor?.reference?.value?.split("/")?.last()?.startsWith("test-") == true)
+        assertTrue(roninParticipant.first().actor?.decomposedType() in participantActorReferenceOptions)
+        assertTrue(roninParticipant.first().actor?.decomposedId()?.startsWith("test-") == true)
     }
 
     @Test
@@ -358,7 +358,7 @@ class RoninAppointmentTest {
         assertNotNull(roninParticipant)
         assertTrue(roninParticipant.first().status in possibleParticipantStatus)
         assertTrue(roninParticipant.first().actor?.type?.value in participantActorReferenceOptions)
-        assertTrue(roninParticipant.first().actor?.reference?.value?.split("/")?.last()?.startsWith("test-") == true)
+        assertTrue(roninParticipant.first().actor?.decomposedId()?.startsWith("test-") == true)
     }
 
     @Test
@@ -367,7 +367,7 @@ class RoninAppointmentTest {
         assertNotNull(roninParticipant)
         assertTrue(roninParticipant.first().status in possibleParticipantStatus)
         assertTrue(roninParticipant.first().actor?.type?.value in participantActorReferenceOptions)
-        assertTrue(roninParticipant.first().actor?.reference?.value?.split("/")?.last()?.startsWith("test-") == true)
+        assertTrue(roninParticipant.first().actor?.decomposedId()?.startsWith("test-") == true)
     }
 
     @Test
@@ -376,7 +376,7 @@ class RoninAppointmentTest {
         assertNotNull(roninParticipant)
         assertTrue(roninParticipant.first().status in possibleParticipantStatus)
         assertTrue(roninParticipant.first().actor?.type?.value in participantActorReferenceOptions)
-        assertTrue(roninParticipant.first().actor?.reference?.value?.split("/")?.last()?.startsWith("test-") == true)
+        assertTrue(roninParticipant.first().actor?.decomposedId()?.startsWith("test-") == true)
     }
 
     @Test
@@ -385,7 +385,7 @@ class RoninAppointmentTest {
         assertNotNull(roninParticipant)
         assertTrue(roninParticipant.first().status in possibleParticipantStatus)
         assertTrue(roninParticipant.first().actor?.type?.value in participantActorReferenceOptions)
-        assertTrue(roninParticipant.first().actor?.reference?.value?.split("/")?.last()?.startsWith("test-") == true)
+        assertTrue(roninParticipant.first().actor?.decomposedId()?.startsWith("test-") == true)
     }
 
     @Test
@@ -394,7 +394,7 @@ class RoninAppointmentTest {
         assertNotNull(roninParticipant)
         assertTrue(roninParticipant.first().status in possibleParticipantStatus)
         assertTrue(roninParticipant.first().actor?.type?.value in participantActorReferenceOptions)
-        assertTrue(roninParticipant.first().actor?.reference?.value?.split("/")?.last()?.startsWith("test-") == true)
+        assertTrue(roninParticipant.first().actor?.decomposedId()?.startsWith("test-") == true)
     }
 
     @Test
@@ -403,7 +403,7 @@ class RoninAppointmentTest {
         assertNotNull(roninParticipant)
         assertTrue(roninParticipant.first().status in possibleParticipantStatus)
         assertTrue(roninParticipant.first().actor?.type?.value in participantActorReferenceOptions)
-        assertTrue(roninParticipant.first().actor?.reference?.value?.split("/")?.last()?.startsWith("test-") == true)
+        assertTrue(roninParticipant.first().actor?.decomposedId()?.startsWith("test-") == true)
     }
 
     @Test
@@ -412,6 +412,6 @@ class RoninAppointmentTest {
         assertNotNull(roninParticipant)
         assertTrue(roninParticipant.first().status in possibleParticipantStatus)
         assertTrue(roninParticipant.first().actor?.type?.value in participantActorReferenceOptions)
-        assertTrue(roninParticipant.first().actor?.reference?.value?.split("/")?.last()?.startsWith("test-") == true)
+        assertTrue(roninParticipant.first().actor?.decomposedId()?.startsWith("test-") == true)
     }
 }

@@ -262,7 +262,6 @@ class RoninBloodPressureGeneratorTest {
         assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
         assertEquals(validation.issues()[0].description, "The referenced resource type was not Patient")
         assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "subject"))
-        // ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Observation.subject
     }
 
     @Test
@@ -287,14 +286,25 @@ class RoninBloodPressureGeneratorTest {
         assertNotNull(bpObs.status)
         assertNotNull(bpObs.code)
         assertNotNull(bpObs.subject?.type?.extension)
-        assertTrue(bpObs.subject?.reference?.value?.split("/")?.first() in subjectBaseReferenceOptions)
+        assertEquals("Patient", bpObs.subject?.decomposedType())
     }
 
     @Test
-    fun `rcdmPatient rcdmObservationBloodPressure - any subject input - base patient overrides input - validate succeeds`() {
+    fun `rcdmPatient rcdmObservationBloodPressure - valid subject input overrides base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
         val bpObs = rcdmPatient.rcdmObservationBloodPressure {
             subject of rcdmReference("Patient", "456")
+        }
+        val validation = roninBloodPressure.validate(bpObs, null)
+        assertEquals(validation.hasErrors(), false)
+        assertEquals("Patient/456", bpObs.subject?.reference?.value)
+    }
+
+    @Test
+    fun `rcdmPatient rcdmObservationBloodPressure - base patient overrides invalid subject input - validate succeeds`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val bpObs = rcdmPatient.rcdmObservationBloodPressure {
+            subject of reference("Patient", "456")
         }
         val validation = roninBloodPressure.validate(bpObs, null)
         assertEquals(validation.hasErrors(), false)

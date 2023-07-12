@@ -47,7 +47,7 @@ fun Patient.rcdmObservationBloodPressure(block: ObservationGenerator.() -> Unit)
         block.invoke(this)
         subject of generateReference(
             subject.generate(),
-            subjectBaseReferenceOptions,
+            subjectReferenceOptions,
             data.tenantId,
             "Patient",
             data.udpId

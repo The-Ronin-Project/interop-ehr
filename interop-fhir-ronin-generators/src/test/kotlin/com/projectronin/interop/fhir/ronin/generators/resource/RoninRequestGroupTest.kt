@@ -159,10 +159,21 @@ class RoninRequestGroupTest {
     }
 
     @Test
-    fun `rcdmPatient rcdmRequestGroup - any subject input - base patient overrides input - validate succeeds`() {
+    fun `rcdmPatient rcdmRequestGroup - valid subject input overrides base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
         val requestGroup = rcdmPatient.rcdmRequestGroup {
-            subject of rcdmReference("Device", "456")
+            subject of rcdmReference("Patient", "456")
+        }
+        val validation = rcdmRequestGroup.validate(requestGroup, null)
+        assertEquals(validation.hasErrors(), false)
+        assertEquals("Patient/456", requestGroup.subject?.reference?.value)
+    }
+
+    @Test
+    fun `rcdmPatient rcdmRequestGroup - base patient overrides invalid subject input - validate succeeds`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val requestGroup = rcdmPatient.rcdmRequestGroup {
+            subject of reference("Patient", "456")
         }
         val validation = rcdmRequestGroup.validate(requestGroup, null)
         assertEquals(validation.hasErrors(), false)

@@ -295,10 +295,21 @@ class BaseObservationGeneratorTest {
     }
 
     @Test
-    fun `rcdmPatient rcdmObservation - any subject input - base patient overrides input - validate succeeds`() {
+    fun `rcdmPatient rcdmObservation - valid subject input overrides base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
         val baseObs = rcdmPatient.rcdmObservation {
             subject of rcdmReference("Patient", "456")
+        }
+        val validation = roninObs.validate(baseObs, null)
+        assertEquals(validation.hasErrors(), false)
+        assertEquals("Patient/456", baseObs.subject?.reference?.value)
+    }
+
+    @Test
+    fun `rcdmPatient rcdmObservation - base patient overrides invalid subject input - validate succeeds`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val baseObs = rcdmPatient.rcdmObservation {
+            subject of reference("Patient", "456")
         }
         val validation = roninObs.validate(baseObs, null)
         assertEquals(validation.hasErrors(), false)

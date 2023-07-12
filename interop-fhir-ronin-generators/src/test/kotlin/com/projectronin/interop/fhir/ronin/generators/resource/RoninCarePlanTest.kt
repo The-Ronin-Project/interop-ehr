@@ -1,6 +1,7 @@
 package com.projectronin.interop.fhir.ronin.generators.resource
 
 import com.projectronin.interop.common.jackson.JacksonManager
+import com.projectronin.interop.fhir.generators.datatypes.reference
 import com.projectronin.interop.fhir.generators.primitives.dateTime
 import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.r4.CodeSystem
@@ -159,10 +160,21 @@ class RoninCarePlanTest {
     }
 
     @Test
-    fun `rcdmPatient rcdmCarePlan - any subject input - base patient overrides subject input - validate succeeds`() {
+    fun `rcdmPatient rcdmCarePlan - valid subject input overrides base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
         val carePlan = rcdmPatient.rcdmCarePlan {
             subject of rcdmReference("Patient", "456")
+        }
+        val validation = rcdmCarePlan.validate(carePlan, null)
+        assertEquals(validation.hasErrors(), false)
+        assertEquals("Patient/456", carePlan.subject?.reference?.value)
+    }
+
+    @Test
+    fun `rcdmPatient rcdmCarePlan - base patient overrides invalid subject input - validate succeeds`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val carePlan = rcdmPatient.rcdmCarePlan {
+            subject of reference("Patient", "456")
         }
         val validation = rcdmCarePlan.validate(carePlan, null)
         assertEquals(validation.hasErrors(), false)

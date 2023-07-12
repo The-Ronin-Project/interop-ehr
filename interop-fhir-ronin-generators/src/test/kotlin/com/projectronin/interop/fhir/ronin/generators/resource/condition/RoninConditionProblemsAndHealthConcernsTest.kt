@@ -3,6 +3,7 @@ package com.projectronin.interop.fhir.ronin.generators.resource.condition
 import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
 import com.projectronin.interop.fhir.generators.datatypes.coding
+import com.projectronin.interop.fhir.generators.datatypes.reference
 import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
@@ -170,10 +171,21 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
-    fun `rcdmPatient rcdmConditionProblemsAndHealthConcerns - any subject input - base patient overrides subject input - validate succeeds`() {
+    fun `rcdmPatient rcdmConditionProblemsAndHealthConcerns - valid subject input overrides base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
         val roninCondition = rcdmPatient.rcdmConditionProblemsAndHealthConcerns {
             subject of rcdmReference("Patient", "456")
+        }
+        val validation = roninConditionProblemsAndHealthConcerns.validate(roninCondition, null)
+        assertEquals(validation.hasErrors(), false)
+        assertEquals("Patient/456", roninCondition.subject?.reference?.value)
+    }
+
+    @Test
+    fun `rcdmPatient rcdmConditionProblemsAndHealthConcerns - base patient overrides invalid subject input - validate succeeds`() {
+        val rcdmPatient = rcdmPatient("test") {}
+        val roninCondition = rcdmPatient.rcdmConditionProblemsAndHealthConcerns {
+            subject of reference("Patient", "456")
         }
         val validation = roninConditionProblemsAndHealthConcerns.validate(roninCondition, null)
         assertEquals(validation.hasErrors(), false)
