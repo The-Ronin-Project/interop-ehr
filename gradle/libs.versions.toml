@@ -1,15 +1,15 @@
 [versions]
 caffeine = "3.1.6"
 commons = "1.10.0"
-datadog = "1.17.0"
-ehr = "1.2.1"
+datadog = "1.18.0"
+ehrda = "1.2.2"
 hapi = "2.3"
 interop-common = "3.9.1"
 interop-fhir = "8.6.0"
 interop-gradle = "3.2.0"
 interop-publish = "8.1.2"
 interop-queue = "2.0.0"
-interop-validation = "2.0.0"
+interop-validation = "2.0.1"
 jackson = "2.15.2"
 kotlinx-coroutines = "1.7.2"
 ktor = "2.3.2"
@@ -26,8 +26,8 @@ testcontainers-mysql = "1.18.3"
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons" }
 dd-trace-api = { module = "com.datadoghq:dd-trace-api", version.ref = "datadog" }
-ehrda-client = { module = "com.projectronin.ehr:ehr-data-authority-client", version.ref = "ehr" }
-ehrda-models = { module = "com.projectronin.ehr:ehr-data-authority-models", version.ref = "ehr" }
+ehrda-client = { module = "com.projectronin.ehr:ehr-data-authority-client", version.ref = "ehrda" }
+ehrda-models = { module = "com.projectronin.ehr:ehr-data-authority-models", version.ref = "ehrda" }
 hapi-hl7v2-251 = { module = "ca.uhn.hapi:hapi-structures-v251", version.ref = "hapi" }
 hapi-hl7v2-base = { module = "ca.uhn.hapi:hapi-base", version.ref = "hapi" }
 interop-common = { module = "com.projectronin.interop:interop-common", version.ref = "interop-common" }
