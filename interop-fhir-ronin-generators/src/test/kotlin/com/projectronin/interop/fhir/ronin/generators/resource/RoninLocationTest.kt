@@ -8,6 +8,8 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
+import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -54,7 +56,9 @@ class RoninLocationTest {
             status of Code("testing-this-status")
             telecom of listOf(
                 ContactPoint(
-                    value = "123-456-7890".asFHIR()
+                    value = "123-456-7890".asFHIR(),
+                    system = Code(ContactPointSystem.PHONE.code),
+                    use = Code(ContactPointUse.WORK.code)
                 )
             )
         }

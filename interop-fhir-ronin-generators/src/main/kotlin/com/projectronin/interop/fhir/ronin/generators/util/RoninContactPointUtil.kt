@@ -15,10 +15,21 @@ import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.test.data.generator.collection.ListDataGenerator
 
 fun rcdmContactPoint(tenant: String, contactPoints: ListDataGenerator<ContactPoint>): ListDataGenerator<ContactPoint> {
-    val input = contactPoints.generate()
+    return filterTelecoms(tenant, contactPoints.generate())
+}
+
+fun rcdmOptionalContactPoint(tenant: String, contactPoints: ListDataGenerator<ContactPoint?>): ListDataGenerator<ContactPoint> {
+    return filterTelecoms(tenant, contactPoints.generate().mapNotNull { it })
+}
+
+/**
+ * only set telecoms that have valid system and use values,
+ * if do not have valid system or use, null out the extensions and
+ * do not add it to return list, telecom is not a required field.
+ */
+internal fun filterTelecoms(tenant: String, input: List<ContactPoint>): ListDataGenerator<ContactPoint> {
     val contactPointList = ListDataGenerator(0, ContactPointGenerator())
     input.forEach {
-        // only set telecoms that have valid system and use values, if do not have valid system or use, null out the extensions and do not add it to return list, telecom is not a required field.
         var sysExt = systemExtension(it.system?.value.toString(), tenant)
         var useExt = useExtension(it.use?.value.toString(), tenant)
         if (listOf(it.system?.value, it.use?.value).any { it == null }) {
