@@ -186,7 +186,7 @@ class RoninPatient(
         val maritalStatus = normalized.maritalStatus ?: CodeableConcept(
             coding = listOf(
                 Coding(
-                    system = Uri("http://terminology.hl7.org/CodeSystem/v3-NullFlavor"),
+                    system = CodeSystem.NULL_FLAVOR.uri,
                     code = Code("NI"),
                     display = FHIRString("NoInformation")
                 )
