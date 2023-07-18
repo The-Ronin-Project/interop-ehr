@@ -1,7 +1,7 @@
 [versions]
 caffeine = "3.1.6"
 commons = "1.10.0"
-datadog = "1.18.0"
+datadog = "1.18.1"
 ehrda = "1.2.2"
 hapi = "2.3"
 interop-common = "3.9.1"
