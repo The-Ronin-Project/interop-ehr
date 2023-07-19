@@ -31,6 +31,7 @@ class CernerVendorFactoryTest {
     private val organizationService = mockk<CernerOrganizationService>()
     private val requestGroupService = mockk<CernerRequestGroupService>()
     private val carePlanService = mockk<CernerCarePlanService>()
+    private val documentReferenceService = mockk<CernerDocumentReferenceService>()
 
     private val vendorFactory =
         CernerVendorFactory(
@@ -49,7 +50,8 @@ class CernerVendorFactoryTest {
             medicationRequestService = medicationRequestService,
             medicationService = medicationService,
             requestGroupService = requestGroupService,
-            carePlanService = carePlanService
+            carePlanService = carePlanService,
+            documentReferenceService = documentReferenceService
         )
 
     @Test

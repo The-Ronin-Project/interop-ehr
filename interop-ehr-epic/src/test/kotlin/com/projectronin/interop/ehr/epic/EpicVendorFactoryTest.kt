@@ -35,6 +35,7 @@ class EpicVendorFactoryTest {
     private val onboardFlagService = mockk<EpicOnboardFlagService>()
     private val healthCheckService = mockk<EpicHealthCheckService>()
     private val carePlanService = mockk<EpicCarePlanService>()
+    private val documentReferenceService = mockk<EpicDocumentReferenceService>()
 
     private val vendorFactory =
         EpicVendorFactory(
@@ -56,7 +57,8 @@ class EpicVendorFactoryTest {
             encounterService = encounterService,
             requestGroupService = requestGroupService,
             healthCheckService = healthCheckService,
-            carePlanService = carePlanService
+            carePlanService = carePlanService,
+            documentReferenceService = documentReferenceService
         )
 
     @Test

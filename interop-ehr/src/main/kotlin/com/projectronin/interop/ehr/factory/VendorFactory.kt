@@ -4,6 +4,7 @@ import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.AppointmentService
 import com.projectronin.interop.ehr.CarePlanService
 import com.projectronin.interop.ehr.ConditionService
+import com.projectronin.interop.ehr.DocumentReferenceService
 import com.projectronin.interop.ehr.EncounterService
 import com.projectronin.interop.ehr.HealthCheckService
 import com.projectronin.interop.ehr.IdentifierService
@@ -50,4 +51,5 @@ interface VendorFactory {
     val practitionerRoleService: PractitionerRoleService
     val requestGroupService: RequestGroupService
     val carePlanService: CarePlanService
+    val documentReferenceService: DocumentReferenceService
 }

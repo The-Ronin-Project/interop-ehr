@@ -27,7 +27,8 @@ class EpicVendorFactory(
     override val practitionerService: EpicPractitionerService,
     override val practitionerRoleService: EpicPractitionerRoleService,
     override val requestGroupService: EpicRequestGroupService,
-    override val carePlanService: EpicCarePlanService
+    override val carePlanService: EpicCarePlanService,
+    override val documentReferenceService: EpicDocumentReferenceService
 
 ) : VendorFactory {
     override val vendorType: VendorType
