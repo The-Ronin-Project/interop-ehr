@@ -30,6 +30,7 @@ import com.projectronin.interop.fhir.r4.valueset.DocumentRelationshipType
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.util.asCode
@@ -60,52 +61,73 @@ class RoninDocumentReferenceTest {
             display = "Clinical Note".asFHIR()
         )
     )
-    private val adhdPlanTypeCode = Code("74155-3")
-    private val docTypeCoding =
-        Coding(system = CodeSystem.LOINC.uri, code = adhdPlanTypeCode, display = "ADHD action plan".asFHIR())
-    private val docTypeCodingList = listOf(docTypeCoding)
-    private val documentReferenceExtension = listOf(
-        Extension(
-            url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceDocumentReferenceType"),
-            value = DynamicValue(
-                type = DynamicValueType.CODEABLE_CONCEPT,
-                value = CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://loinc.org"),
-                            code = Code("74155-3"),
-                            display = "ADHD action plan".asFHIR()
-                        )
-                    )
-                )
-            )
+
+    // DocumentReference.type
+    private val docRefTypeCode = Code("74155-3")
+    private val docRefTypeCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        code = docRefTypeCode,
+        display = "ADHD action plan".asFHIR()
+    )
+    private val docRefTypeCodingList = listOf(docRefTypeCoding)
+    private val docRefTypeConcept = CodeableConcept(
+        coding = docRefTypeCodingList,
+        text = "ADHD action plan".asFHIR()
+    )
+
+    // tenant DocumentReference.type
+    private val tenantDocRefTypeCode = Code("Tenant-74155-3")
+    private val tenantDocRefTypeCoding = Coding(
+        system = CodeSystem.LOINC.uri,
+        code = tenantDocRefTypeCode,
+        display = "Tenant action plan".asFHIR()
+    )
+    private val tenantDocRefTypeCodingList = listOf(tenantDocRefTypeCoding)
+    private val tenantDocRefTypeConcept = CodeableConcept(
+        coding = tenantDocRefTypeCodingList,
+        text = "Tenant action plan concept".asFHIR()
+    )
+    private val tenantDocRefTypeExtension = Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE.value),
+        value = DynamicValue(
+            type = DynamicValueType.CODEABLE_CONCEPT,
+            value = tenantDocRefTypeConcept
         )
     )
-    private val docStatusSystem = Uri("http://hl7.org/fhir/document-reference-status")
-    private val statusCurrentCoding =
-        Coding(system = docStatusSystem, code = DocumentReferenceStatus.CURRENT.asCode(), display = "Current".asFHIR())
-    private val statusSupsersededCoding = Coding(
-        system = docStatusSystem,
-        code = DocumentReferenceStatus.SUPERSEDED.asCode(),
-        display = "Superseded".asFHIR()
-    )
-    private val statusErrorCoding = Coding(
-        system = docStatusSystem,
-        code = DocumentReferenceStatus.ENTERED_IN_ERROR.asCode(),
-        display = "Entered in Error".asFHIR()
-    )
-    private val statusCodingList = listOf(statusCurrentCoding, statusSupsersededCoding, statusErrorCoding)
+    private val documentReferenceExtension = listOf(tenantDocRefTypeExtension)
 
-    private val roninDocumentReference = RoninDocumentReference(normalizer, localizer)
+    // registry and profile
+    private val registryClient = mockk<NormalizationRegistryClient> {
+        every {
+            getConceptMapping(
+                tenant,
+                "DocumentReference.type",
+                docRefTypeConcept
+            )
+        } returns null
+        every {
+            getConceptMapping(
+                tenant,
+                "DocumentReference.type",
+                tenantDocRefTypeConcept
+            )
+        } returns Pair(docRefTypeConcept, tenantDocRefTypeExtension)
+        every {
+            getConceptMapping(
+                tenant,
+                "DocumentReference.type",
+                CodeableConcept(text = "bad".asFHIR())
+            )
+        } returns Pair(CodeableConcept(text = "worse".asFHIR()), tenantDocRefTypeExtension)
+    }
+    private val roninDocumentReference = RoninDocumentReference(normalizer, localizer, registryClient)
 
     @Test
     fun `always qualifies`() {
         assertTrue(
             roninDocumentReference.qualifies(
                 DocumentReference(
-                    type = CodeableConcept(
-                        coding = docTypeCodingList
-                    ),
+                    type = docRefTypeConcept,
                     status = DocumentReferenceStatus.CURRENT.asCode()
                 )
             )
@@ -117,9 +139,7 @@ class RoninDocumentReferenceTest {
         val documentReference = DocumentReference(
             meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
             extension = documentReferenceExtension,
-            type = CodeableConcept(
-                coding = docTypeCodingList
-            ),
+            type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             category = listOf(
                 CodeableConcept(
@@ -176,9 +196,7 @@ class RoninDocumentReferenceTest {
                 )
             ),
             status = DocumentReferenceStatus.CURRENT.asCode(),
-            type = CodeableConcept(
-                coding = docTypeCodingList
-            ),
+            type = docRefTypeConcept,
             content = listOf(
                 DocumentReferenceContent(
                     attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
@@ -220,9 +238,7 @@ class RoninDocumentReferenceTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList
-            ),
+            type = docRefTypeConcept,
             status = Code("x"),
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
@@ -266,9 +282,7 @@ class RoninDocumentReferenceTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList
-            ),
+            type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             category = listOf(
                 CodeableConcept(
@@ -322,9 +336,7 @@ class RoninDocumentReferenceTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList
-            ),
+            type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             category = listOf(
                 CodeableConcept(
@@ -381,9 +393,7 @@ class RoninDocumentReferenceTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList
-            ),
+            type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             docStatus = Code("bad"),
@@ -427,9 +437,7 @@ class RoninDocumentReferenceTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList
-            ),
+            type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
@@ -473,9 +481,7 @@ class RoninDocumentReferenceTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList
-            ),
+            type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
@@ -493,9 +499,7 @@ class RoninDocumentReferenceTest {
         val documentReference = DocumentReference(
             id = Id("12345"),
             meta = Meta(source = Uri("fake-source-fake-url")),
-            type = CodeableConcept(
-                coding = docTypeCodingList
-            ),
+            type = tenantDocRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
@@ -510,23 +514,7 @@ class RoninDocumentReferenceTest {
         validation.alertIfErrors()
         transformed!!
         assertEquals(
-            listOf(
-                Extension(
-                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceDocumentReferenceType"),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODEABLE_CONCEPT,
-                        value = CodeableConcept(
-                            coding = listOf(
-                                Coding(
-                                    system = Uri("http://loinc.org"),
-                                    code = Code("74155-3"),
-                                    display = "ADHD action plan".asFHIR()
-                                )
-                            )
-                        )
-                    )
-                )
-            ),
+            documentReferenceExtension,
             transformed.extension
         )
     }
@@ -536,9 +524,7 @@ class RoninDocumentReferenceTest {
         val documentReference = DocumentReference(
             id = Id("12345"),
             meta = Meta(source = Uri("source")),
-            type = CodeableConcept(
-                coding = docTypeCodingList
-            ),
+            type = tenantDocRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
@@ -563,23 +549,7 @@ class RoninDocumentReferenceTest {
             transformed.meta
         )
         assertEquals(
-            listOf(
-                Extension(
-                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceDocumentReferenceType"),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODEABLE_CONCEPT,
-                        value = CodeableConcept(
-                            coding = listOf(
-                                Coding(
-                                    system = Uri("http://loinc.org"),
-                                    code = Code("74155-3"),
-                                    display = "ADHD action plan".asFHIR()
-                                )
-                            )
-                        )
-                    )
-                )
-            ),
+            documentReferenceExtension,
             transformed.extension
         )
         assertEquals(
@@ -602,7 +572,7 @@ class RoninDocumentReferenceTest {
             ),
             transformed.identifier
         )
-        assertEquals(documentReference.type, transformed.type)
+        assertEquals(docRefTypeConcept, transformed.type)
         assertEquals(documentReference.status, transformed.status)
     }
 
@@ -654,9 +624,7 @@ class RoninDocumentReferenceTest {
                 encounter = listOf(Reference(reference = "Enocunter/ABC".asFHIR())),
                 related = listOf(Reference(reference = "DocumentReference/XYZ".asFHIR()))
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList
-            ),
+            type = tenantDocRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
@@ -681,6 +649,10 @@ class RoninDocumentReferenceTest {
         assertEquals(documentReference.language, transformed.language)
         assertEquals(documentReference.text, transformed.text)
         assertEquals(documentReference.contained, transformed.contained)
+        assertEquals(
+            documentReference.extension + documentReferenceExtension,
+            transformed.extension
+        )
         assertEquals(documentReference.modifierExtension, transformed.modifierExtension)
         assertEquals(4, transformed.identifier.size)
         assertEquals(
@@ -704,7 +676,7 @@ class RoninDocumentReferenceTest {
             ),
             transformed.identifier
         )
-        assertEquals(documentReference.type, transformed.type)
+        assertEquals(docRefTypeConcept, transformed.type)
         assertEquals(documentReference.status, transformed.status)
         assertEquals(documentReference.docStatus, transformed.docStatus)
         assertEquals(documentReference.date, transformed.date)
@@ -736,10 +708,7 @@ class RoninDocumentReferenceTest {
                 )
             ),
             status = null,
-            type = CodeableConcept(
-                coding = docTypeCodingList,
-                text = "code".asFHIR()
-            )
+            type = tenantDocRefTypeConcept
         )
         val (transformed, _) = roninDocumentReference.transform(documentReference, tenant)
         assertNull(transformed)
@@ -768,10 +737,7 @@ class RoninDocumentReferenceTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList,
-                text = "code".asFHIR()
-            ),
+            type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             subject = null,
             category = listOf(
@@ -820,10 +786,7 @@ class RoninDocumentReferenceTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList,
-                text = "code".asFHIR()
-            ),
+            type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             subject = Reference(display = "reference".asFHIR()),
             category = listOf(
@@ -872,10 +835,7 @@ class RoninDocumentReferenceTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList,
-                text = "code".asFHIR()
-            ),
+            type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             subject = Reference(reference = "DocumentReference/12345".asFHIR()),
             category = listOf(
@@ -924,10 +884,7 @@ class RoninDocumentReferenceTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList,
-                text = "code".asFHIR()
-            ),
+            type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             category = listOf(
                 CodeableConcept(
@@ -1065,7 +1022,7 @@ class RoninDocumentReferenceTest {
                 )
             ),
             type = CodeableConcept(
-                coding = docTypeCodingList + docTypeCodingList,
+                coding = docRefTypeCodingList + docRefTypeCodingList,
                 text = "code".asFHIR()
             ),
             status = DocumentReferenceStatus.CURRENT.asCode(),
@@ -1111,10 +1068,7 @@ class RoninDocumentReferenceTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList,
-                text = "code".asFHIR()
-            ),
+            type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
@@ -1168,16 +1122,13 @@ class RoninDocumentReferenceTest {
                     value = DynamicValue(
                         DynamicValueType.CODEABLE_CONCEPT,
                         CodeableConcept(
-                            coding = docTypeCodingList,
+                            coding = docRefTypeCodingList,
                             text = "code".asFHIR()
                         )
                     )
                 )
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList,
-                text = "code".asFHIR()
-            ),
+            type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
@@ -1230,14 +1181,11 @@ class RoninDocumentReferenceTest {
                     url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
                     value = DynamicValue(
                         DynamicValueType.CODING,
-                        docTypeCoding
+                        docRefTypeCoding
                     )
                 )
             ),
-            type = CodeableConcept(
-                coding = docTypeCodingList,
-                text = "code".asFHIR()
-            ),
+            type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
             subject = Reference(reference = "Patient/123".asFHIR()),
             category = listOf(
@@ -1259,6 +1207,67 @@ class RoninDocumentReferenceTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_DOCREF_001: Tenant source Document Reference extension is missing or invalid @ DocumentReference.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `transform and validate - fails if concept map has no entry for type`() {
+        val documentReference = DocumentReference(
+            id = Id("12345"),
+            meta = Meta(source = Uri("fake-source-fake-url")),
+            type = docRefTypeConcept,
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            category = listOf(CodeableConcept(coding = categoryCodingList)),
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(
+                        data = Base64Binary("c3po"),
+                        contentType = Code("plain/text")
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR())
+        )
+
+        val (transformed, validation) = roninDocumentReference.transform(documentReference, tenant)
+        assertNull(transformed)
+        val exception = assertThrows<IllegalArgumentException> {
+            validation.alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value '74155-3' has no target defined in " +
+                "any DocumentReference.type concept map for tenant 'test' @ DocumentReference.type\n" +
+                "ERROR RONIN_DOCREF_001: Tenant source Document Reference extension is missing or invalid @ DocumentReference.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `transform and validate - fails if concept map has entry for type, but that entry cannot validate`() {
+        val documentReference = DocumentReference(
+            id = Id("12345"),
+            meta = Meta(source = Uri("fake-source-fake-url")),
+            type = CodeableConcept(text = "bad".asFHIR()),
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            category = listOf(CodeableConcept(coding = categoryCodingList)),
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                )
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR())
+        )
+
+        val (transformed, validation) = roninDocumentReference.transform(documentReference, tenant)
+        assertNull(transformed)
+        val exception = assertThrows<IllegalArgumentException> {
+            validation.alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DOCREF_002: One, and only one, coding entry is allowed for type @ DocumentReference.type.coding",
             exception.message
         )
     }

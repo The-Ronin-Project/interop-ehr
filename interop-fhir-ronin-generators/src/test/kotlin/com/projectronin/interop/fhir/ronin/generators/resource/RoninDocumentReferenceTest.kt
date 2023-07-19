@@ -15,6 +15,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.RoninDocumentReference
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -41,7 +42,8 @@ class RoninDocumentReferenceTest {
         val localizer: Localizer = mockk {
             every { localize(any(), tenant) } answers { firstArg() }
         }
-        rcdmDocumentReference = RoninDocumentReference(normalizer, localizer)
+        val registryClient: NormalizationRegistryClient = mockk()
+        rcdmDocumentReference = RoninDocumentReference(normalizer, localizer, registryClient)
     }
 
     @Test

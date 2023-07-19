@@ -8,9 +8,11 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
 import com.projectronin.interop.fhir.r4.validate.resource.R4DocumentReferenceValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
+import com.projectronin.interop.fhir.ronin.error.FailedConceptMapLookupError
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
@@ -32,7 +34,8 @@ import java.time.LocalDateTime
 @Component
 class RoninDocumentReference(
     normalizer: Normalizer,
-    localizer: Localizer
+    localizer: Localizer,
+    protected val registryClient: NormalizationRegistryClient
 ) :
     USCoreBasedProfile<DocumentReference>(
         R4DocumentReferenceValidator,
@@ -125,16 +128,41 @@ class RoninDocumentReference(
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
     ): Pair<DocumentReference, Validation> {
-        // TODO: apply concept maps to get DocumentReference.type and extension
-        val tenantSourceTypeExtension = getExtensionOrEmptyList(
-            RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE,
-            normalized.type
-        )
+        val validation = Validation()
 
-        val mapped = normalized.copy(
-            extension = normalized.extension + tenantSourceTypeExtension
+        // DocumentReference.type is a single CodeableConcept
+        val mappedTypePair = normalized.type?.let { type ->
+            val typePair = registryClient.getConceptMapping(
+                tenant,
+                "DocumentReference.type",
+                type,
+                forceCacheReloadTS
+            )
+            // validate the mapping we got, use type value to report issues
+            validation.apply {
+                checkNotNull(
+                    typePair,
+                    FailedConceptMapLookupError(
+                        LocationContext(DocumentReference::type),
+                        type.coding.mapNotNull { it.code?.value }
+                            .joinToString(", "),
+                        "any DocumentReference.type concept map for tenant '${tenant.mnemonic}'"
+                    ),
+                    parentContext
+                )
+            }
+            typePair
+        }
+
+        return Pair(
+            mappedTypePair?.let {
+                normalized.copy(
+                    type = it.first,
+                    extension = normalized.extension + it.second
+                )
+            } ?: normalized,
+            validation
         )
-        return Pair(mapped, Validation())
     }
 
     override fun transformInternal(
