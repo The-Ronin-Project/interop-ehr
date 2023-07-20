@@ -34,7 +34,8 @@ class CernerClient(
         tenant: Tenant,
         urlPart: String,
         parameters: Map<String, Any?>,
-        disableRetry: Boolean
+        disableRetry: Boolean,
+        acceptTypeOverride: ContentType
     ): HttpResponse {
         logger.debug { "Started GET call to tenant: ${tenant.mnemonic}" }
 

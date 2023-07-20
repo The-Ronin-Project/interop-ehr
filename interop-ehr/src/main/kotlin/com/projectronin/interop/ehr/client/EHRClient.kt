@@ -32,9 +32,10 @@ abstract class EHRClient(
         tenant: Tenant,
         urlPart: String,
         parameters: Map<String, Any?> = mapOf(),
-        disableRetry: Boolean = false
+        disableRetry: Boolean = false,
+        acceptTypeOverride: ContentType = ContentType.Application.Json
     ): EHRResponse {
-        return publishAndReturn(getImpl(tenant, urlPart, parameters, disableRetry), tenant, disableRetry)
+        return publishAndReturn(getImpl(tenant, urlPart, parameters, disableRetry, acceptTypeOverride), tenant, disableRetry)
     }
 
     suspend fun post(
@@ -100,7 +101,8 @@ abstract class EHRClient(
         tenant: Tenant,
         urlPart: String,
         parameters: Map<String, Any?> = mapOf(),
-        disableRetry: Boolean = false
+        disableRetry: Boolean = false,
+        acceptTypeOverride: ContentType = ContentType.Application.Json
     ): HttpResponse {
         logger.debug { "Started GET call to tenant: ${tenant.mnemonic}" }
 
@@ -121,7 +123,7 @@ abstract class EHRClient(
                     append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
                     append(NO_RETRY_HEADER, "$disableRetry")
                 }
-                accept(ContentType.Application.Json)
+                accept(acceptTypeOverride)
                 parameters.map {
                     val key = it.key
                     val value = it.value
