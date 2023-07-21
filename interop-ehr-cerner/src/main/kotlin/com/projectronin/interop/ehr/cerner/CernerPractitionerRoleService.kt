@@ -16,8 +16,21 @@ class CernerPractitionerRoleService(
     override val fhirURLSearchPart = ""
     override val fhirResourceType = PractitionerRole::class.java
 
+    /**
+     * Cerner does not support PractitionerRole, simply returning an empty role
+     */
     override fun getByID(tenant: Tenant, resourceFHIRId: String): PractitionerRole {
         return PractitionerRole()
+    }
+
+    /**
+     * Cerner does not support PractitionerRole, simply returning an empty-map
+     */
+    override fun getByIDs(
+        tenant: Tenant,
+        resourceFHIRIds: List<String>
+    ): Map<String, PractitionerRole> {
+        return emptyMap()
     }
 
     override fun findPractitionersByLocation(tenant: Tenant, locationIds: List<String>): FindPractitionersResponse {

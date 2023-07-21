@@ -11,22 +11,14 @@ import org.springframework.stereotype.Component
 @Component
 class EpicLocationService(
     epicClient: EpicClient,
-    @Value("\${epic.fhir.batchSize:5}") private val batchSize: Int
-) : LocationService, EpicFHIRService<Location>(epicClient) {
+    @Value("\${epic.fhir.batchSize:10}") private val batchSize: Int
+) : LocationService, EpicFHIRService<Location>(epicClient, batchSize) {
     override val fhirURLSearchPart = "/api/FHIR/R4/Location"
     override val fhirResourceType = Location::class.java
 
-    /**
-     * Returns a Map of FHIR ID to [Location] resource. Requires a list of location FHIR IDs as input
-     */
+    @Deprecated("Use getByIDs")
     @Trace
     override fun getLocationsByFHIRId(tenant: Tenant, locationIds: List<String>): Map<String, Location> {
-        // Epic allows multiple IDs to be searched at once, but limit the max we search at once
-        val chunkedIds = locationIds.toSet().chunked(batchSize)
-        val locations = chunkedIds.map { idSubset ->
-            val parameters = mapOf("_id" to idSubset.joinToString(separator = ","))
-            getResourceListFromSearch(tenant, parameters)
-        }.flatten()
-        return locations.associateBy { it.id!!.value!! }
+        return getByIDs(tenant, locationIds)
     }
 }

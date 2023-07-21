@@ -6,13 +6,15 @@ import com.projectronin.interop.ehr.outputs.FindPractitionersResponse
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 @Component
 class CernerPractitionerService(
     cernerClient: CernerClient,
-    private val practitionerRoleService: CernerPractitionerRoleService
-) : PractitionerService, CernerFHIRService<Practitioner>(cernerClient) {
+    private val practitionerRoleService: CernerPractitionerRoleService,
+    @Value("\${cerner.fhir.batchSize:10}") private val batchSize: Int
+) : PractitionerService, CernerFHIRService<Practitioner>(cernerClient, batchSize) {
     override val fhirURLSearchPart = "/Practitioner"
     override val fhirResourceType = Practitioner::class.java
 

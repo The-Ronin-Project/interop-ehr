@@ -5,6 +5,7 @@ import com.projectronin.interop.common.http.exceptions.ServerFailureException
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.ehr.outputs.FindPractitionersResponse
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Location
@@ -33,8 +34,9 @@ class CernerPractitionerServiceTest {
     private lateinit var ehrResponse: EHRResponse
     private lateinit var pagingHttpResponse: HttpResponse
     private lateinit var tenant: Tenant
-
-    private val validPractitionerPaging = readResource<Bundle>("/ExamplePractitionerBundlePaging.json")
+    private val validPractitionerBundle = readResource<Bundle>("/ExamplePractitionerBundle.json")
+    private val validPractitionerPagingBundle = readResource<Bundle>("/ExamplePractitionerBundlePaging.json")
+    private val batchPractitioners: Int = 3
 
     @BeforeEach
     fun setup() {
@@ -44,7 +46,7 @@ class CernerPractitionerServiceTest {
         pagingHttpResponse = mockk()
         tenant = mockk()
         practitionerRoleService = CernerPractitionerRoleService(cernerClient)
-        practitionerService = CernerPractitionerService(cernerClient, practitionerRoleService)
+        practitionerService = CernerPractitionerService(cernerClient, practitionerRoleService, batchPractitioners)
     }
 
     @Test
@@ -185,7 +187,7 @@ class CernerPractitionerServiceTest {
 
         // Mock response with paging
         every { pagingHttpResponse.status } returns HttpStatusCode.OK
-        coEvery { pagingHttpResponse.body<Bundle>() } returns validPractitionerPaging
+        coEvery { pagingHttpResponse.body<Bundle>() } returns validPractitionerPagingBundle
         coEvery {
             cernerClient.get(
                 tenant,
@@ -235,5 +237,129 @@ class CernerPractitionerServiceTest {
             every { entry } returns entries
             every { link } returns emptyList()
         }
+    }
+
+    @Test
+    fun `getResourceListFromSearch responds`() {
+        val tenant = createTestTenant(
+            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+            authEndpoint = "https://example.org",
+            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+        )
+        val mockPractitioner1 = mockk<Practitioner>(relaxed = true)
+        val mockPractitioner2 = mockk<Practitioner>(relaxed = true)
+        val mockPractitioner3 = mockk<Practitioner>(relaxed = true)
+        coEvery { httpResponse.body<Bundle>() } returns mockBundle(
+            mockPractitioner1,
+            mockPractitioner2,
+            mockPractitioner3
+        )
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "/Practitioner",
+                mapOf(
+                    "_count" to 20,
+                    "_id" to "1,2,3"
+                )
+            )
+        } returns EHRResponse(httpResponse, "/Practitioner?_id=1,2,3")
+        val parameters = mapOf(
+            "_count" to 20,
+            "_id" to "1,2,3"
+        )
+
+        val bundle = practitionerService.getResourceListFromSearch(tenant, parameters)
+        assertEquals(3, bundle.size)
+    }
+
+    @Test
+    fun `getByIDs batches requests by practitionerBatch size`() {
+        // show that a list of 5 IDs is chunked by batchPractitioners value 3
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+
+        val mockPractitioner1 = mockk<Practitioner>(relaxed = true) {
+            every { id } returns Id("1")
+        }
+        val mockPractitioner2 = mockk<Practitioner>(relaxed = true) {
+            every { id } returns Id("2")
+        }
+        val mockPractitioner3 = mockk<Practitioner>(relaxed = true) {
+            every { id } returns Id("3")
+        }
+        coEvery { httpResponse.body<Bundle>() } returns mockBundle(
+            mockPractitioner1,
+            mockPractitioner2,
+            mockPractitioner3
+        )
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "/Practitioner",
+                mapOf(
+                    "_count" to 20,
+                    "_id" to "1,2,3"
+                )
+            )
+        } returns EHRResponse(httpResponse, "/Practitioner?_id=1,2,3")
+
+        val httpResponse2: HttpResponse = mockk()
+        coEvery { httpResponse2.body<Bundle>() } returns validPractitionerBundle
+        every { httpResponse2.status } returns HttpStatusCode.OK
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "/Practitioner",
+                mapOf(
+                    "_count" to 20,
+                    "_id" to "4,5"
+                )
+            )
+        } returns EHRResponse(httpResponse2, "/Practitioner?_id=4,5")
+
+        // batchPractitioners is 3 which chunks the 5 IDs:
+        // IDs 1,2,3 return 3 mocked Practitioners, each having an Id value
+        // IDs 4,5 returns our test resource JSON Bundle with 1 Practitioner
+        val map = practitionerService.getByIDs(
+            tenant,
+            listOf("1", "2", "3", "4", "5")
+        )
+        assertEquals(4, map.size)
+        assertTrue("1" in map.keys)
+        assertTrue("2" in map.keys)
+        assertTrue("3" in map.keys)
+        assertTrue("12793559" in map.keys)
+        assertTrue(validPractitionerBundle.entry.first().resource in map.values)
+    }
+
+    @Test
+    fun `getByIDs propagates exceptions`() {
+        val thrownException = ClientFailureException(HttpStatusCode.NotFound, "Not Found")
+        coEvery { httpResponse.body<Bundle>() } throws thrownException
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "/Practitioner",
+                mapOf(
+                    "_count" to 20,
+                    "_id" to "1,2"
+                )
+            )
+        } returns ehrResponse
+
+        val exception = assertThrows<ClientFailureException> {
+            practitionerService.getByIDs(
+                tenant,
+                listOf("1", "2")
+            )
+        }
+        assertEquals(thrownException, exception)
     }
 }

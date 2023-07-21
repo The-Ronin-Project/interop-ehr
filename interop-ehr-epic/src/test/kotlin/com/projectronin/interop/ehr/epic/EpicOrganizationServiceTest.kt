@@ -27,13 +27,37 @@ internal class EpicOrganizationServiceTest {
         epicClient = mockk()
         httpResponse = mockk()
         ehrResponse = EHRResponse(httpResponse, "12345")
-        organizationService = EpicOrganizationService(epicClient)
+        organizationService = EpicOrganizationService(epicClient, 5)
         tenant = createTestTenant(
             "d45049c3-3441-40ef-ab4d-b9cd86a17225",
             "https://example.org",
             "testPrivateKey",
             "TEST_TENANT"
         )
+    }
+
+    @Test
+    fun `ensure organizations are returned with getByIDs`() {
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validOrganizationResponse
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Organization",
+                mapOf(
+                    "_id" to "e8wMbBzuMGvZrYASWBHiL8w3",
+                    "_count" to 50
+                )
+            )
+        } returns ehrResponse
+
+        val bundle = organizationService.getByIDs(
+            tenant,
+            listOf("e8wMbBzuMGvZrYASWBHiL8w3")
+        ).values.toList()
+
+        val expectedOrganizationBundle = (validOrganizationResponse).entry.map { it.resource }
+        assertEquals(expectedOrganizationBundle, bundle)
     }
 
     @Test

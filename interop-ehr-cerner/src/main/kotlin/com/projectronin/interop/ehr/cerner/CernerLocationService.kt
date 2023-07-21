@@ -11,19 +11,14 @@ import org.springframework.stereotype.Component
 @Component
 class CernerLocationService(
     cernerClient: CernerClient,
-    @Value("\${cerner.fhir.batchSize:5}") private val batchSize: Int
-) : LocationService, CernerFHIRService<Location>(cernerClient) {
+    @Value("\${cerner.fhir.batchSize:10}") private val batchSize: Int
+) : LocationService, CernerFHIRService<Location>(cernerClient, batchSize) {
     override val fhirURLSearchPart = "/Location"
     override val fhirResourceType = Location::class.java
 
+    @Deprecated("Use getByIDs")
     @Trace
     override fun getLocationsByFHIRId(tenant: Tenant, locationIds: List<String>): Map<String, Location> {
-        // cerner also allows multiple ids to be searched, but chunk them out so we don't hit too many at once
-        val chunkedIds = locationIds.toSet().chunked(batchSize)
-        val locations = chunkedIds.map { idSubset ->
-            val parameters = mapOf("_id" to idSubset.joinToString(separator = ","))
-            getResourceListFromSearch(tenant, parameters)
-        }.flatten()
-        return locations.associateBy { it.id!!.value!! }
+        return getByIDs(tenant, locationIds)
     }
 }

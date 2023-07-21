@@ -11,6 +11,7 @@ interface OrganizationService : FHIRService<Organization> {
     /**
      * Finds a list of [Organization]s by FHIRId for a [tenant]
      */
+    @Deprecated("Use getByIDs")
     fun findOrganizationsByFHIRId(
         tenant: Tenant,
         organizationFHIRIds: List<String>

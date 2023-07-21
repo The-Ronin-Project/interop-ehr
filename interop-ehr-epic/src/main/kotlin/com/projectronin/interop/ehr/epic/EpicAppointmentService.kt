@@ -56,9 +56,9 @@ class EpicAppointmentService(
     private val practitionerService: EpicPractitionerService,
     private val identifierService: EpicIdentifierService,
     private val ehrdaClient: EHRDataAuthorityClient,
-    @Value("\${epic.fhir.batchSize:5}") private val batchSize: Int,
+    @Value("\${epic.fhir.batchSize:10}") private val batchSize: Int,
     @Value("\${epic.api.useFhirAPI:false}") private val useFhirAPI: Boolean
-) : AppointmentService, EpicFHIRService<Appointment>(epicClient) {
+) : AppointmentService, EpicFHIRService<Appointment>(epicClient, batchSize) {
     private val logger = KotlinLogging.logger { }
     override val fhirURLSearchPart = "/api/FHIR/STU3/Appointment"
     override val fhirResourceType = Appointment::class.java
@@ -148,7 +148,7 @@ class EpicAppointmentService(
 
         if (missingLocationList.isNotEmpty()) {
             logger.warn { "Some locations not found in EHRDA, starting search in EHR" }
-            identifiers += locationService.getLocationsByFHIRId(tenant, missingLocationList)
+            identifiers += locationService.getByIDs(tenant, missingLocationList)
                 .flatMap { locationEntry ->
                     locationEntry.value.identifier.map {
                         EHRDAIdentifier(

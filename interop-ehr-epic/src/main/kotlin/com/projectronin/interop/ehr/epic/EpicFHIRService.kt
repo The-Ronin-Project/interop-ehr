@@ -15,7 +15,10 @@ import mu.KotlinLogging
 /**
  * Abstract class to simplify Epic services that need to retrieve bundles using paging.
  */
-abstract class EpicFHIRService<T : Resource<T>>(val epicClient: EpicClient) : FHIRService<T> {
+abstract class EpicFHIRService<T : Resource<T>>(
+    val epicClient: EpicClient,
+    private val batchSize: Int = 10
+) : FHIRService<T> {
     private val logger = KotlinLogging.logger { }
     abstract val fhirURLSearchPart: String
     private val standardParameters: Map<String, Any> = mapOf("_count" to 50)
@@ -25,6 +28,18 @@ abstract class EpicFHIRService<T : Resource<T>>(val epicClient: EpicClient) : FH
         return runBlocking {
             epicClient.get(tenant, "$fhirURLSearchPart/$resourceFHIRId")
                 .body(TypeInfo(fhirResourceType.kotlin, fhirResourceType))
+        }
+    }
+
+    @Trace
+    override fun getByIDs(tenant: Tenant, resourceFHIRIds: List<String>): Map<String, T> {
+        return runBlocking {
+            val chunkedIds = resourceFHIRIds.toSet().chunked(batchSize)
+            val resource = chunkedIds.map { idSubset ->
+                val parameters = mapOf("_id" to idSubset.joinToString(","))
+                getResourceListFromSearch(tenant, parameters)
+            }.flatten()
+            resource.associateBy { it.id!!.value!! }
         }
     }
 

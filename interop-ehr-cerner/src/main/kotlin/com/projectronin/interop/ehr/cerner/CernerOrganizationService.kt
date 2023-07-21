@@ -4,6 +4,8 @@ import com.projectronin.interop.ehr.OrganizationService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.fhir.r4.resource.Organization
 import com.projectronin.interop.tenant.config.model.Tenant
+import datadog.trace.api.Trace
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 
 /**
@@ -11,17 +13,18 @@ import org.springframework.stereotype.Component
  */
 @Component
 class CernerOrganizationService(
-    cernerClient: CernerClient
-) : OrganizationService, CernerFHIRService<Organization>(cernerClient) {
+    cernerClient: CernerClient,
+    @Value("\${cerner.fhir.batchSize:10}") private val batchSize: Int
+) : OrganizationService, CernerFHIRService<Organization>(cernerClient, batchSize) {
     override val fhirURLSearchPart = "/Organization"
     override val fhirResourceType = Organization::class.java
 
+    @Deprecated("Use getByIDs")
+    @Trace
     override fun findOrganizationsByFHIRId(
         tenant: Tenant,
         organizationFHIRIds: List<String>
     ): List<Organization> {
-        // Cerner allows searching by multiple _ids at once
-        val parameters = mapOf("_id" to organizationFHIRIds.toSet().joinToString(separator = ","))
-        return getResourceListFromSearch(tenant, parameters)
+        return getByIDs(tenant, organizationFHIRIds).values.toList()
     }
 }

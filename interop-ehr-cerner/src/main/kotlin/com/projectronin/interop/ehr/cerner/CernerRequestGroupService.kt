@@ -18,6 +18,17 @@ class CernerRequestGroupService(
     /**
      * Cerner does not support Request Group, simply returning an empty-map
      */
+    override fun getByIDs(
+        tenant: Tenant,
+        resourceFHIRIds: List<String>
+    ): Map<String, RequestGroup> {
+        return emptyMap()
+    }
+
+    /**
+     * Cerner does not support Request Group, simply returning an empty-map
+     */
+    @Deprecated("Use getByIDs")
     @Trace
     override fun getRequestGroupByFHIRId(
         tenant: Tenant,

@@ -37,6 +37,12 @@ class CernerPractitionerRoleServiceTest {
     }
 
     @Test
+    fun `getByIDs returns empty-map`() {
+        val response = practitionerRoleService.getByIDs(tenant, listOf("12345678", "87654321"))
+        assertEquals(response.size, 0)
+    }
+
+    @Test
     fun `findPractitionersByLocation returns empty result`() {
         val actualResult = practitionerRoleService.findPractitionersByLocation(tenant, listOf("123", "321"))
 

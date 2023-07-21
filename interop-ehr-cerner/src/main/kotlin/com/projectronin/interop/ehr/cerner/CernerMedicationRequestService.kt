@@ -16,6 +16,7 @@ class CernerMedicationRequestService(
     override val fhirURLSearchPart = "/MedicationRequest"
     override val fhirResourceType = MedicationRequest::class.java
 
+    @Deprecated("Use getByID")
     override fun getMedicationRequestById(
         tenant: Tenant,
         medicationRequestId: String

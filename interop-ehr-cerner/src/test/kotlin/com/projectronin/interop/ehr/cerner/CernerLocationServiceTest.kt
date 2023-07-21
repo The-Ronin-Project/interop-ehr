@@ -39,6 +39,69 @@ class CernerLocationServiceTest {
     }
 
     @Test
+    fun `getByIDs - works`() {
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns locationBundle
+        coEvery {
+            cernerClient.get(
+                testTenant,
+                "/Location",
+                mapOf("_id" to "123,456", "_count" to 20)
+            )
+        } returns ehrResponse
+
+        val result = locationService.getByIDs(testTenant, listOf("123,456"))
+        assertEquals(2, result.size)
+    }
+
+    @Test
+    fun `getByIDs - chunked works`() {
+        val smallLocationService = CernerLocationService(cernerClient, 2)
+        val tenant = mockk<Tenant>()
+
+        val location1 = mockk<BundleEntry> {
+            every { resource } returns mockk<Location>(relaxed = true) {
+                every { id!!.value } returns "123"
+            }
+        }
+        val location2 = mockk<BundleEntry> {
+            every { resource } returns mockk<Location>(relaxed = true) {
+                every { id!!.value } returns "456"
+            }
+        }
+
+        val location3 = mockk<BundleEntry> {
+            every { resource } returns mockk<Location>(relaxed = true) {
+                every { id!!.value } returns "789"
+            }
+        }
+        val bundle = mockk<Bundle>(relaxed = true) {
+            every { entry } returns listOf(location1, location2)
+            every { link } returns emptyList()
+        }
+        val bundle2 = mockk<Bundle>(relaxed = true) {
+            every { entry } returns listOf(location3)
+            every { link } returns emptyList()
+        }
+
+        coEvery {
+            cernerClient.get(tenant, "/Location", mapOf("_id" to "123,456", "_count" to 20))
+        } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
+
+        coEvery {
+            cernerClient.get(tenant, "/Location", mapOf("_id" to "789", "_count" to 20))
+        } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle2 }, "67890")
+
+        val response =
+            smallLocationService.getByIDs(tenant, listOf("123", "456", "789"))
+
+        assertEquals(
+            mapOf("123" to location1.resource, "456" to location2.resource, "789" to location3.resource),
+            response
+        )
+    }
+
+    @Test
     fun `getLocationsByFHIRId - works`() {
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns locationBundle

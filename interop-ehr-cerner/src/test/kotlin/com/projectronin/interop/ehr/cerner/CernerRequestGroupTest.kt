@@ -12,8 +12,8 @@ class CernerRequestGroupTest {
     private val tenant = createTestTenant()
 
     @Test
-    fun `getRequestGroupByFHIRId returns empty-map`() {
-        val response = service.getRequestGroupByFHIRId(tenant, listOf("12345678", "87654321"))
+    fun `getByIDs returns empty-map`() {
+        val response = service.getByIDs(tenant, listOf("12345678", "87654321"))
         assertEquals(response.size, 0)
     }
 }

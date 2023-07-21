@@ -4,7 +4,7 @@ import com.projectronin.interop.common.http.exceptions.ClientFailureException
 import com.projectronin.interop.common.http.exceptions.ServerFailureException
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.outputs.EHRResponse
-import com.projectronin.interop.ehr.outputs.FindPractitionersResponse
+import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Practitioner
@@ -18,6 +18,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -29,9 +30,10 @@ class EpicPractitionerServiceTest {
     private lateinit var httpResponse: HttpResponse
     private lateinit var ehrResponse: EHRResponse
     private lateinit var pagingHttpResponse: HttpResponse
+    private lateinit var tenant: Tenant
     private val validPractitionerSearchBundle = readResource<Bundle>("/ExampleFindPractitionersResponse.json")
-    private val pagingPractitionerSearchBundle =
-        readResource<Bundle>("/ExampleFindPractitionersResponseWithPaging.json")
+    private val batchRoles: Int = 1
+    private val batchPractitioners: Int = 3
 
     @BeforeEach
     fun setup() {
@@ -39,219 +41,9 @@ class EpicPractitionerServiceTest {
         httpResponse = mockk()
         ehrResponse = EHRResponse(httpResponse, "12345")
         pagingHttpResponse = mockk()
-        practitionerRoleService = EpicPractitionerRoleService(epicClient, 1)
-        practitionerService = EpicPractitionerService(epicClient, practitionerRoleService, 1)
-    }
-
-    @Test
-    fun `ensure practitioners are returned`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                "testPrivateKey",
-                "TEST_TENANT"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns validPractitionerSearchBundle
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/PractitionerRole",
-                mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03",
-                    "_count" to 50
-                )
-            )
-        } returns ehrResponse
-
-        val bundle =
-            practitionerService.findPractitionersByLocation(
-                tenant,
-                listOf("e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03")
-            )
-        val expected = FindPractitionersResponse(validPractitionerSearchBundle)
-        assertEquals(expected.practitionerRoles, bundle.practitionerRoles)
-        assertEquals(expected.practitioners, bundle.practitioners)
-        assertEquals(expected.locations, bundle.locations)
-        assertEquals(expected.resources, bundle.resources)
-    }
-
-    @Test
-    fun `ensure multiple locations are supported`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                "testPrivateKey",
-                "TEST_TENANT"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns validPractitionerSearchBundle
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/PractitionerRole",
-                mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "abc",
-                    "_count" to 50
-                )
-            )
-        } returns ehrResponse
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/PractitionerRole",
-                mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "123",
-                    "_count" to 50
-                )
-            )
-        } returns ehrResponse
-
-        val bundle =
-            practitionerService.findPractitionersByLocation(
-                tenant,
-                listOf("abc", "123")
-            )
-
-        // 142 = 71 practitioner roles from each of 2 locations, remove duplicates = 71
-        assertEquals(71, bundle.practitionerRoles.size)
-        // 142 becomes 71 total because duplicate practitioners are removed by EpicPractitionerBundle
-        assertEquals(71, bundle.practitioners.size)
-        // 106 becomes 53 total because duplicate practitioner locations are removed by EpicLocationBundle
-        assertEquals(53, bundle.locations.size)
-    }
-
-    @Test
-    fun `ensure multiple locations are supported with batching`() {
-        val batchingPractitionerService = EpicPractitionerService(epicClient, practitionerRoleService, 2)
-
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                "testPrivateKey",
-                "TEST_TENANT"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns validPractitionerSearchBundle
-
-        /*
-        Uncomment when we are no longer forcing batchSize to 1 in EpicPractitioner and remove the two cases below.
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/PractitionerRole",
-                mapOf(
-                    "_include" to "PractitionerRole:practitioner,PractitionerRole:location", "location" to "loc1,loc2"
-                )
-            )
-        } returns ehrResponse
-         */
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/PractitionerRole",
-                mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "loc1",
-                    "_count" to 50
-                )
-            )
-        } returns ehrResponse
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/PractitionerRole",
-                mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "loc2",
-                    "_count" to 50
-                )
-            )
-        } returns ehrResponse
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/PractitionerRole",
-                mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "loc3",
-                    "_count" to 50
-                )
-            )
-        } returns ehrResponse
-
-        val bundle =
-            batchingPractitionerService.findPractitionersByLocation(
-                tenant,
-                listOf("loc1", "loc2", "loc3")
-            )
-
-        // 142 = 71 practitioner roles from each of 3 batch calls, remove duplicates = 71
-        assertEquals(71, bundle.practitionerRoles.size)
-        // 142 becomes 71 total because duplicate practitioners are removed by EpicPractitionerBundle
-        assertEquals(71, bundle.practitioners.size)
-        // 106 becomes 53 total because duplicate practitioner locations are removed by EpicLocationBundle
-        assertEquals(53, bundle.locations.size)
-    }
-
-    @Test
-    fun `ensure paging works`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                "testPrivateKey",
-                "TEST_TENANT"
-            )
-
-        // Mock response with paging
-        every { pagingHttpResponse.status } returns HttpStatusCode.OK
-        coEvery { pagingHttpResponse.body<Bundle>() } returns pagingPractitionerSearchBundle
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/PractitionerRole",
-                mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
-                    "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03",
-                    "_count" to 50
-                )
-            )
-        } returns EHRResponse(pagingHttpResponse, "67890")
-
-        // Mock response without paging
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns validPractitionerSearchBundle
-        coEvery {
-            epicClient.get(
-                tenant,
-                "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole?_include=PractitionerRole:practitioner,PractitionerRole:location&location=e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
-            )
-        } returns ehrResponse
-
-        val bundle =
-            practitionerService.findPractitionersByLocation(
-                tenant,
-                listOf("e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03")
-            )
-
-        // 2 Resources from the first query, 71 from the second, remove duplicates = 71
-        assertEquals(71, bundle.practitionerRoles.size)
-
-        // 2 of the practitioners are duplicates and get filtered out
-        assertEquals(71, bundle.practitioners.size)
-
-        // 2 of the practitioner locations are duplicates and get filtered out
-        assertEquals(53, bundle.locations.size)
+        practitionerRoleService = EpicPractitionerRoleService(epicClient, batchRoles)
+        practitionerService = EpicPractitionerService(epicClient, practitionerRoleService, batchPractitioners)
+        tenant = mockk()
     }
 
     @Test
@@ -368,6 +160,133 @@ class EpicPractitionerServiceTest {
         val exception =
             assertThrows<ServerFailureException> { practitionerService.getPractitionerByProvider(tenant, "ProviderId") }
 
+        assertEquals(thrownException, exception)
+    }
+
+    @Test
+    fun `getResourceListFromSearch responds`() {
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            "testPrivateKey",
+            "TEST_TENANT"
+        )
+        val mockPractitioner1 = mockk<Practitioner>(relaxed = true)
+        val mockPractitioner2 = mockk<Practitioner>(relaxed = true)
+        val mockPractitioner3 = mockk<Practitioner>(relaxed = true)
+        coEvery { httpResponse.body<Bundle>() } returns mockBundle(
+            mockPractitioner1,
+            mockPractitioner2,
+            mockPractitioner3
+        )
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Practitioner",
+                mapOf(
+                    "_id" to "1,2,3",
+                    "_count" to 50
+                )
+            )
+        } returns EHRResponse(httpResponse, "/Practitioner?_id=1,2,3")
+        val parameters = mapOf(
+            "_id" to "1,2,3",
+            "_count" to 50
+        )
+        val bundle = practitionerService.getResourceListFromSearch(tenant, parameters)
+        assertEquals(3, bundle.size)
+    }
+
+    @Test
+    fun `getByIDs batches requests by batchSize`() {
+        // show that a list of 5 IDs is chunked by batchPractitioners value 3
+        val tenant = createTestTenant(
+            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+            "https://example.org",
+            "testPrivateKey",
+            "TEST_TENANT"
+        )
+        val mockPractitioner1 = mockk<Practitioner>(relaxed = true) {
+            every { id } returns Id("1")
+        }
+        val mockPractitioner2 = mockk<Practitioner>(relaxed = true) {
+            every { id } returns Id("2")
+        }
+        val mockPractitioner3 = mockk<Practitioner>(relaxed = true) {
+            every { id } returns Id("3")
+        }
+        coEvery { httpResponse.body<Bundle>() } returns mockBundle(
+            mockPractitioner1,
+            mockPractitioner2,
+            mockPractitioner3
+        )
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Practitioner",
+                mapOf(
+                    "_id" to "1,2,3",
+                    "_count" to 50
+                )
+            )
+        } returns EHRResponse(httpResponse, "/Practitioner?_id=1,2,3")
+        val httpResponse2: HttpResponse = mockk()
+        coEvery { httpResponse2.body<Bundle>() } returns validPractitionerSearchBundle
+        every { httpResponse2.status } returns HttpStatusCode.OK
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Practitioner",
+                mapOf(
+                    "_id" to "4,5",
+                    "_count" to 50
+                )
+            )
+        } returns EHRResponse(httpResponse2, "/Practitioner?_id=4,5")
+
+        // batchPractitioners is 3 which chunks the 5 IDs:
+        // IDs 1,2,3 return 3 mocked Practitioners, each having an Id value
+        // IDs 4,5 returns our test resource JSON Bundle with 71 Practitioners
+        val map = practitionerService.getByIDs(
+            tenant,
+            listOf("1", "2", "3", "4", "5")
+        )
+        assertEquals(74, map.size)
+        assertTrue("1" in map.keys)
+        assertTrue("2" in map.keys)
+        assertTrue("3" in map.keys)
+        assertTrue("e.tz0cM0q4ZzQ2lLNRueTqg3" in map.keys)
+        assertTrue("e2gxs4Fn7l-TbzLO17uxuHw3" in map.keys)
+        assertTrue("eFtrzfZw7Ma4DAGr8wngH0A3" in map.keys)
+        val practitionerList = validPractitionerSearchBundle.entry.filter {
+            it.resource?.resourceType == "Practitioner"
+        }
+        assertTrue(practitionerList.first().resource in map.values)
+        assertTrue(practitionerList.last().resource in map.values)
+    }
+
+    @Test
+    fun `getByIDs propagates exceptions`() {
+        val thrownException = ClientFailureException(HttpStatusCode.NotFound, "Not Found")
+        coEvery { httpResponse.body<Bundle>() } throws thrownException
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Practitioner",
+                mapOf(
+                    "_id" to "1,2",
+                    "_count" to 50
+                )
+            )
+        } returns ehrResponse
+        val exception = assertThrows<ClientFailureException> {
+            practitionerService.getByIDs(
+                tenant,
+                listOf("1", "2")
+            )
+        }
         assertEquals(thrownException, exception)
     }
 

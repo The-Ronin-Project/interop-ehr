@@ -6,4 +6,5 @@ import com.projectronin.interop.tenant.config.model.Tenant
 interface FHIRService<T : Resource<T>> {
     val fhirResourceType: Class<T>
     fun getByID(tenant: Tenant, resourceFHIRId: String): T
+    fun getByIDs(tenant: Tenant, resourceFHIRIds: List<String>): Map<String, T>
 }

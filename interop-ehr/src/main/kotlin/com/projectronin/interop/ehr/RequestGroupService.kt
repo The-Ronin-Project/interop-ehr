@@ -10,5 +10,6 @@ interface RequestGroupService : FHIRService<RequestGroup> {
     /**
      * Finds the [RequestGroup]s associated with the requested [tenant] and FHIR [requestGroupIds].
      */
+    @Deprecated("Use getByIDs")
     fun getRequestGroupByFHIRId(tenant: Tenant, requestGroupIds: List<String>): Map<String, RequestGroup>
 }

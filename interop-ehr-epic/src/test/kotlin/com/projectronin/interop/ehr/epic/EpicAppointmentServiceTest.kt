@@ -1881,7 +1881,7 @@ class EpicAppointmentServiceTest {
     }
 
     @Test
-    fun `findLocationAppointments - fallbacks`() {
+    fun `findLocationAppointments with getByIDs - fallbacks`() {
         val tenant = createTestTenant(
             clientId = "d45049c3-3441-40ef-ab4d-b9cd86a17225",
             serviceEndpoint = "https://example.org",
@@ -1913,7 +1913,7 @@ class EpicAppointmentServiceTest {
         } returns listOf()
 
         every {
-            locationService.getLocationsByFHIRId(any(), any())
+            locationService.getByIDs(any(), any())
         } returns mapOf(
             "FHIRID" to mockk {
                 every { identifier } returns listOf(

@@ -20,11 +20,11 @@ import java.time.format.DateTimeFormatter
 @Component
 class EpicObservationService(
     epicClient: EpicClient,
-    @Value("\${epic.fhir.observation.batchSize:1}") private val batchSize: Int, // This is currently ignored.  See comment below.
+    @Value("\${epic.fhir.batchSize:1}") private val batchSize: Int, // This is currently ignored.  See findObservationsByPatientAndCategory() below.
     private val tenantCodesDAO: TenantCodesDAO,
     @Value("\${epic.fhir.observation.incrementalLoadDays:60}") private val incrementalLoadDays: Int
 ) : ObservationService,
-    EpicFHIRService<Observation>(epicClient) {
+    EpicFHIRService<Observation>(epicClient, batchSize) {
     override val fhirURLSearchPart = "/api/FHIR/R4/Observation"
     override val fhirResourceType = Observation::class.java
     private val dateFormat: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")

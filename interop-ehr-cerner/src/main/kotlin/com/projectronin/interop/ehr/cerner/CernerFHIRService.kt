@@ -14,7 +14,10 @@ import mu.KotlinLogging
 import java.time.LocalDate
 import java.time.LocalDateTime
 
-abstract class CernerFHIRService<T : Resource<T>>(val cernerClient: CernerClient) : FHIRService<T> {
+abstract class CernerFHIRService<T : Resource<T>>(
+    val cernerClient: CernerClient,
+    private val batchSize: Int = 10
+) : FHIRService<T> {
     private val logger = KotlinLogging.logger { }
     abstract val fhirURLSearchPart: String
     private val standardParameters: Map<String, Any> = mapOf("_count" to 20)
@@ -29,6 +32,18 @@ abstract class CernerFHIRService<T : Resource<T>>(val cernerClient: CernerClient
         return runBlocking {
             cernerClient.get(tenant, "$fhirURLSearchPart/$resourceFHIRId")
                 .body(TypeInfo(fhirResourceType.kotlin, fhirResourceType))
+        }
+    }
+
+    @Trace
+    override fun getByIDs(tenant: Tenant, resourceFHIRIds: List<String>): Map<String, T> {
+        return runBlocking {
+            val chunkedIds = resourceFHIRIds.toSet().chunked(batchSize)
+            val resource = chunkedIds.map { idSubset ->
+                val parameters = mapOf("_id" to idSubset.joinToString(","))
+                getResourceListFromSearch(tenant, parameters)
+            }.flatten()
+            resource.associateBy { it.id!!.value!! }
         }
     }
 

@@ -11,20 +11,14 @@ import org.springframework.stereotype.Component
 @Component
 class EpicRequestGroupService(
     epicClient: EpicClient,
-    @Value("\${epic.fhir.batchSize:5}") private val batchSize: Int
-) : RequestGroupService, EpicFHIRService<RequestGroup>(epicClient) {
+    @Value("\${epic.fhir.batchSize:10}") private val batchSize: Int
+) : RequestGroupService, EpicFHIRService<RequestGroup>(epicClient, batchSize) {
     override val fhirURLSearchPart = "/api/FHIR/R4/RequestGroup"
     override val fhirResourceType = RequestGroup::class.java
 
+    @Deprecated("Use getByIDs")
     @Trace
     override fun getRequestGroupByFHIRId(tenant: Tenant, requestGroupIds: List<String>): Map<String, RequestGroup> {
-        val chunkedIds = requestGroupIds.toSet().chunked(batchSize)
-        val requestGroups = chunkedIds.map { ids ->
-            val parameters = mapOf(
-                "_id" to ids.joinToString(separator = ",")
-            )
-            getResourceListFromSearch(tenant, parameters)
-        }.flatten()
-        return requestGroups.associateBy { it.id!!.value!! }
+        return getByIDs(tenant, requestGroupIds)
     }
 }
