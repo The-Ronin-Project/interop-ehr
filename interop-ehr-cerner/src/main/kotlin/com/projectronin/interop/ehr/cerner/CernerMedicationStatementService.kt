@@ -13,17 +13,30 @@ import org.springframework.stereotype.Component
 class CernerMedicationStatementService(
     cernerClient: CernerClient
 ) : MedicationStatementService, CernerFHIRService<MedicationStatement>(cernerClient) {
-    override val fhirURLSearchPart = "/MedicationStatement"
+    override val fhirURLSearchPart = ""
     override val fhirResourceType = MedicationStatement::class.java
 
+    /**
+     * Cerner does not support medication statement, so we return empty objects
+     */
     override fun getMedicationStatementsByPatientFHIRId(
         tenant: Tenant,
         patientFHIRId: String
     ): List<MedicationStatement> {
-        var parameters = mapOf(
-            "patient" to patientFHIRId
-        )
+        return emptyList()
+    }
 
-        return getResourceListFromSearch(tenant, parameters)
+    override fun getByID(
+        tenant: Tenant,
+        resourceFHIRId: String
+    ): MedicationStatement {
+        return MedicationStatement()
+    }
+
+    override fun getByIDs(
+        tenant: Tenant,
+        resourceFHIRIds: List<String>
+    ): Map<String, MedicationStatement> {
+        return emptyMap()
     }
 }
