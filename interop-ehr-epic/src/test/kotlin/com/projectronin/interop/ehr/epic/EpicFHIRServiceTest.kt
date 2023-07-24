@@ -59,6 +59,60 @@ class EpicFHIRServiceTest {
     }
 
     @Test
+    fun `getByIds works`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                "testPrivateKey",
+                "TEST_TENANT"
+            )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns conditionBundle
+        coEvery {
+            epicClient.get(
+                tenant,
+                "url",
+                mapOf(
+                    "_id" to listOf(
+                        "eGVC1DSR9YDJxMi7Th3xbsA3",
+                        "eLn-6z3hP2NJG0T20kjWyGw3",
+                        "ehbL8Q9rn3jAsl6s8yGxC1w3",
+                        "e.3Yf2fdBeJFpNyIZg0GVFg3",
+                        "eqrR1BMfXhGmimr8OUK7PbA3",
+                        "eZ1muPaohtiRvQlo0D-yxEg3",
+                        "e67ikTL29RrR6zDPXYcbWBA3"
+                    ),
+                    "_count" to 50
+                )
+            )
+        } returns ehrResponse
+
+        val service = TestService(epicClient, mapOf())
+        val example = service.getByIDs(
+            tenant,
+            listOf(
+                "eGVC1DSR9YDJxMi7Th3xbsA3",
+                "eLn-6z3hP2NJG0T20kjWyGw3",
+                "ehbL8Q9rn3jAsl6s8yGxC1w3",
+                "e.3Yf2fdBeJFpNyIZg0GVFg3",
+                "eqrR1BMfXhGmimr8OUK7PbA3",
+                "eZ1muPaohtiRvQlo0D-yxEg3",
+                "e67ikTL29RrR6zDPXYcbWBA3"
+            )
+        )
+        assertEquals(7, example.size)
+        assertEquals("eGVC1DSR9YDJxMi7Th3xbsA3", example["eGVC1DSR9YDJxMi7Th3xbsA3"]?.id?.value)
+        assertEquals("eLn-6z3hP2NJG0T20kjWyGw3", example["eLn-6z3hP2NJG0T20kjWyGw3"]?.id?.value)
+        assertEquals("ehbL8Q9rn3jAsl6s8yGxC1w3", example["ehbL8Q9rn3jAsl6s8yGxC1w3"]?.id?.value)
+        assertEquals("e.3Yf2fdBeJFpNyIZg0GVFg3", example["e.3Yf2fdBeJFpNyIZg0GVFg3"]?.id?.value)
+        assertEquals("eqrR1BMfXhGmimr8OUK7PbA3", example["eqrR1BMfXhGmimr8OUK7PbA3"]?.id?.value)
+        assertEquals("eZ1muPaohtiRvQlo0D-yxEg3", example["eZ1muPaohtiRvQlo0D-yxEg3"]?.id?.value)
+        assertEquals("e67ikTL29RrR6zDPXYcbWBA3", example["e67ikTL29RrR6zDPXYcbWBA3"]?.id?.value)
+    }
+
+    @Test
     fun `ensure standard parameters are not included when already provided`() {
         val tenant =
             createTestTenant(

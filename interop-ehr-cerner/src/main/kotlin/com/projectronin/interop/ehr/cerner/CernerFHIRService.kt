@@ -2,7 +2,7 @@ package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.ehr.FHIRService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
-import com.projectronin.interop.ehr.cerner.client.RepeatingParameter
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.fhir.r4.mergeBundles
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.Resource
@@ -40,7 +40,7 @@ abstract class CernerFHIRService<T : Resource<T>>(
         return runBlocking {
             val chunkedIds = resourceFHIRIds.toSet().chunked(batchSize)
             val resource = chunkedIds.map { idSubset ->
-                val parameters = mapOf("_id" to idSubset.joinToString(","))
+                val parameters = mapOf("_id" to idSubset)
                 getResourceListFromSearch(tenant, parameters)
             }.flatten()
             resource.associateBy { it.id!!.value!! }

@@ -38,7 +38,7 @@ internal class EpicLocationServiceTest {
         }
 
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to "12345,67890", "_count" to 50))
+            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to listOf("12345", "67890"), "_count" to 50))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
 
         val response =
@@ -78,10 +78,10 @@ internal class EpicLocationServiceTest {
         }
 
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to "12345,67890", "_count" to 50))
+            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to listOf("12345", "67890"), "_count" to 50))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to "456", "_count" to 50))
+            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to listOf("456"), "_count" to 50))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle2 }, "67890")
 
         val response =
@@ -113,7 +113,7 @@ internal class EpicLocationServiceTest {
         }
 
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to "12345,67890", "_count" to 50))
+            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to listOf("12345", "67890"), "_count" to 50))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
 
         val response =
@@ -153,10 +153,10 @@ internal class EpicLocationServiceTest {
         }
 
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to "12345,67890", "_count" to 50))
+            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to listOf("12345", "67890"), "_count" to 50))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to "456", "_count" to 50))
+            epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to listOf("456"), "_count" to 50))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle2 }, "67890")
 
         val response =

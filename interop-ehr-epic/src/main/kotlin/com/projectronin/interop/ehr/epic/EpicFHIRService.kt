@@ -36,7 +36,7 @@ abstract class EpicFHIRService<T : Resource<T>>(
         return runBlocking {
             val chunkedIds = resourceFHIRIds.toSet().chunked(batchSize)
             val resource = chunkedIds.map { idSubset ->
-                val parameters = mapOf("_id" to idSubset.joinToString(","))
+                val parameters = mapOf("_id" to idSubset)
                 getResourceListFromSearch(tenant, parameters)
             }.flatten()
             resource.associateBy { it.id!!.value!! }

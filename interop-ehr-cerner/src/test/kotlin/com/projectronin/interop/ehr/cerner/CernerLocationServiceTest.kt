@@ -46,11 +46,11 @@ class CernerLocationServiceTest {
             cernerClient.get(
                 testTenant,
                 "/Location",
-                mapOf("_id" to "123,456", "_count" to 20)
+                mapOf("_id" to listOf("123", "456"), "_count" to 20)
             )
         } returns ehrResponse
 
-        val result = locationService.getByIDs(testTenant, listOf("123,456"))
+        val result = locationService.getByIDs(testTenant, listOf("123", "456"))
         assertEquals(2, result.size)
     }
 
@@ -85,11 +85,11 @@ class CernerLocationServiceTest {
         }
 
         coEvery {
-            cernerClient.get(tenant, "/Location", mapOf("_id" to "123,456", "_count" to 20))
+            cernerClient.get(tenant, "/Location", mapOf("_id" to listOf("123", "456"), "_count" to 20))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
 
         coEvery {
-            cernerClient.get(tenant, "/Location", mapOf("_id" to "789", "_count" to 20))
+            cernerClient.get(tenant, "/Location", mapOf("_id" to listOf("789"), "_count" to 20))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle2 }, "67890")
 
         val response =
@@ -109,11 +109,11 @@ class CernerLocationServiceTest {
             cernerClient.get(
                 testTenant,
                 "/Location",
-                mapOf("_id" to "123,456", "_count" to 20)
+                mapOf("_id" to listOf("123", "456"), "_count" to 20)
             )
         } returns ehrResponse
 
-        val result = locationService.getLocationsByFHIRId(testTenant, listOf("123,456"))
+        val result = locationService.getLocationsByFHIRId(testTenant, listOf("123", "456"))
         assertEquals(2, result.size)
     }
 
@@ -148,11 +148,11 @@ class CernerLocationServiceTest {
         }
 
         coEvery {
-            cernerClient.get(tenant, "/Location", mapOf("_id" to "123,456", "_count" to 20))
+            cernerClient.get(tenant, "/Location", mapOf("_id" to listOf("123", "456"), "_count" to 20))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
 
         coEvery {
-            cernerClient.get(tenant, "/Location", mapOf("_id" to "789", "_count" to 20))
+            cernerClient.get(tenant, "/Location", mapOf("_id" to listOf("789"), "_count" to 20))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle2 }, "67890")
 
         val response =

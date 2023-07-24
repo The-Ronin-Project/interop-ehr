@@ -48,7 +48,7 @@ internal class CernerOrganizationServiceTest {
                 tenant,
                 "/Organization",
                 mapOf(
-                    "_id" to fhirId,
+                    "_id" to listOf(fhirId),
                     "_count" to 20
                 )
             )
@@ -74,7 +74,7 @@ internal class CernerOrganizationServiceTest {
                 tenant,
                 "/Organization",
                 mapOf(
-                    "_id" to fhirIds.joinToString(separator = ","),
+                    "_id" to fhirIds,
                     "_count" to 20
                 )
             )
@@ -111,7 +111,7 @@ internal class CernerOrganizationServiceTest {
                 tenant,
                 "/Organization",
                 mapOf(
-                    "_id" to fhirId,
+                    "_id" to listOf(fhirId),
                     "_count" to 20
                 )
             )
@@ -137,7 +137,7 @@ internal class CernerOrganizationServiceTest {
                 tenant,
                 "/Organization",
                 mapOf(
-                    "_id" to fhirIds.joinToString(separator = ","),
+                    "_id" to fhirIds,
                     "_count" to 20
                 )
             )

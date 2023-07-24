@@ -5,6 +5,7 @@ import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
 import com.projectronin.interop.ehr.cerner.auth.CernerAuthentication
 import com.projectronin.interop.ehr.cerner.createTestTenant
 import com.projectronin.interop.ehr.cerner.getClient
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.fhir.r4.resource.Communication
 import com.projectronin.interop.fhir.r4.valueset.EventStatus
 import com.projectronin.interop.fhir.util.asCode

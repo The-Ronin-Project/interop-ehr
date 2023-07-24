@@ -19,6 +19,7 @@ import io.ktor.client.statement.request
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
+import io.ktor.http.encodeURLParameter
 import mu.KotlinLogging
 
 abstract class EHRClient(
@@ -35,7 +36,11 @@ abstract class EHRClient(
         disableRetry: Boolean = false,
         acceptTypeOverride: ContentType = ContentType.Application.Json
     ): EHRResponse {
-        return publishAndReturn(getImpl(tenant, urlPart, parameters, disableRetry, acceptTypeOverride), tenant, disableRetry)
+        return publishAndReturn(
+            getImpl(tenant, urlPart, parameters, disableRetry, acceptTypeOverride),
+            tenant,
+            disableRetry
+        )
     }
 
     suspend fun post(
@@ -65,23 +70,32 @@ abstract class EHRClient(
 
         // Make the call
         val response: HttpResponse =
-            client.request("Epic Organization: ${tenant.name}", tenant.vendor.serviceEndpoint + urlPart) { url ->
-                post(url) {
+            client.request("Epic Organization: ${tenant.name}", tenant.vendor.serviceEndpoint + urlPart) { urlToCall ->
+                post(urlToCall) {
                     headers {
                         append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
                     }
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
                     setBody(requestBody)
-                    parameters.map {
-                        val key = it.key
-                        val value = it.value
-                        if (value is List<*>) {
-                            value.forEach { repetition ->
-                                parameter(key, repetition)
+                    url {
+                        parameters.map { parameterEntry ->
+                            val key = parameterEntry.key
+                            when (val value = parameterEntry.value) {
+                                is List<*> -> {
+                                    encodedParameters.append(
+                                        key,
+                                        // tricky, but this takes a list of any objects, converts, them to string, encodes them
+                                        // and then combines this in a comma separated list
+                                        value.joinToString(separator = ",") { parameterValue ->
+                                            parameterValue.toString().encodeURLParameter(spaceToPlus = true)
+                                        }
+                                    )
+                                }
+
+                                is RepeatingParameter -> url.parameters.appendAll(key, value.values)
+                                else -> parameter(key, value)
                             }
-                        } else {
-                            value?.let { parameter(key, value) }
                         }
                     }
                 }
@@ -117,22 +131,31 @@ abstract class EHRClient(
                 urlPart
             }
 
-        val response: HttpResponse = client.request("Organization: ${tenant.name}", requestUrl) { url ->
-            get(url) {
+        val response: HttpResponse = client.request("Organization: ${tenant.name}", requestUrl) { urlToCall ->
+            get(urlToCall) {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
                     append(NO_RETRY_HEADER, "$disableRetry")
                 }
                 accept(acceptTypeOverride)
-                parameters.map {
-                    val key = it.key
-                    val value = it.value
-                    if (value is List<*>) {
-                        value.forEach { repetition ->
-                            parameter(key, repetition)
+                url {
+                    parameters.map { parameterEntry ->
+                        val key = parameterEntry.key
+                        when (val value = parameterEntry.value) {
+                            is List<*> -> {
+                                encodedParameters.append(
+                                    key,
+                                    // tricky, but this takes a list of any objects, converts, them to string, encodes them
+                                    // and then combines this in a comma separated list
+                                    value.joinToString(separator = ",") { parameterValue ->
+                                        parameterValue.toString().encodeURLParameter(spaceToPlus = true)
+                                    }
+                                )
+                            }
+
+                            is RepeatingParameter -> url.parameters.appendAll(key, value.values)
+                            else -> parameter(key, value)
                         }
-                    } else {
-                        value?.let { parameter(key, value) }
                     }
                 }
             }
@@ -161,3 +184,5 @@ abstract class EHRClient(
         return EHRResponse(response, transactionURL)
     }
 }
+
+data class RepeatingParameter(val values: List<String>)

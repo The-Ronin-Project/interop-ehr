@@ -351,7 +351,7 @@ class EpicClientTest {
             url = httpResponse.httpResponse.request.url
             httpResponse.httpResponse.bodyAsText()
         }
-        assertTrue(url.toString().endsWith("?string=string&list=1&list=2"))
+        assertTrue(url.toString().endsWith("?string=string&list=1,2"))
         // Validate Response
         assertEquals(validPatientSearchJson, response)
     }
@@ -391,7 +391,7 @@ class EpicClientTest {
             httpResponse.httpResponse.bodyAsText()
         }
 
-        assertTrue(url.toString().endsWith("?list=one&list=two&nonList=nonList"))
+        assertTrue(url.toString().endsWith("?list=one,two&nonList=nonList"))
         // Validate Response
         assertEquals(validPatientSearchJson, response)
     }

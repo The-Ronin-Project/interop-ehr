@@ -227,7 +227,7 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/Practitioner",
                 mapOf(
-                    "_id" to "1,2,3",
+                    "_id" to listOf("1", "2", "3"),
                     "_count" to 50
                 )
             )
@@ -240,7 +240,7 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/Practitioner",
                 mapOf(
-                    "_id" to "4,5",
+                    "_id" to listOf("4", "5"),
                     "_count" to 50
                 )
             )
@@ -276,7 +276,7 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/Practitioner",
                 mapOf(
-                    "_id" to "1,2",
+                    "_id" to listOf("1", "2"),
                     "_count" to 50
                 )
             )

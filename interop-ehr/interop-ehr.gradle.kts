@@ -16,4 +16,6 @@ dependencies {
     implementation(libs.dd.trace.api)
 
     testImplementation(libs.mockk)
+    // Using MockWebservice to ensure we can verify the headers set by the ktor engine
+    testImplementation(libs.mockwebserver)
 }

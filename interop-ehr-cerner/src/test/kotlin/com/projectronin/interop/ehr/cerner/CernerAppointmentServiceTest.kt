@@ -4,7 +4,7 @@ import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.ehr.dataauthority.models.IdentifierSearchResponse
 import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
 import com.projectronin.interop.ehr.cerner.client.CernerClient
-import com.projectronin.interop.ehr.cerner.client.RepeatingParameter
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id

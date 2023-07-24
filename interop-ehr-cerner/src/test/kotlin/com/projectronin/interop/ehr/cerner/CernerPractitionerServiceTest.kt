@@ -305,7 +305,7 @@ class CernerPractitionerServiceTest {
                 "/Practitioner",
                 mapOf(
                     "_count" to 20,
-                    "_id" to "1,2,3"
+                    "_id" to listOf("1", "2", "3")
                 )
             )
         } returns EHRResponse(httpResponse, "/Practitioner?_id=1,2,3")
@@ -319,7 +319,7 @@ class CernerPractitionerServiceTest {
                 "/Practitioner",
                 mapOf(
                     "_count" to 20,
-                    "_id" to "4,5"
+                    "_id" to listOf("4", "5")
                 )
             )
         } returns EHRResponse(httpResponse2, "/Practitioner?_id=4,5")
@@ -349,7 +349,7 @@ class CernerPractitionerServiceTest {
                 "/Practitioner",
                 mapOf(
                     "_count" to 20,
-                    "_id" to "1,2"
+                    "_id" to listOf("1", "2")
                 )
             )
         } returns ehrResponse

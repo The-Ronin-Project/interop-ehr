@@ -6,6 +6,7 @@ import com.projectronin.interop.common.http.request
 import com.projectronin.interop.datalake.DatalakePublishService
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
 import com.projectronin.interop.ehr.client.EHRClient
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.HttpClient
 import io.ktor.client.request.accept
@@ -108,5 +109,3 @@ class CernerClient(
         return response
     }
 }
-
-data class RepeatingParameter(val values: List<String>)

@@ -38,11 +38,18 @@ class EpicRequestGroupTest {
         }
 
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/RequestGroup", mapOf("_id" to "18675309,98765432", "_count" to 50))
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/RequestGroup",
+                mapOf("_id" to listOf("18675309", "98765432"), "_count" to 50)
+            )
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "18675309")
 
         val response =
-            requestGroupService.getRequestGroupByFHIRId(tenant, listOf("18675309", "98765432", "18675309")) // test de-duplicate
+            requestGroupService.getRequestGroupByFHIRId(
+                tenant,
+                listOf("18675309", "98765432", "18675309")
+            ) // test de-duplicate
 
         assertEquals(mapOf("18675309" to requestGroup1.resource, "98765432" to requestGroup2.resource), response)
     }
@@ -87,13 +94,18 @@ class EpicRequestGroupTest {
         }
 
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/RequestGroup", mapOf("_id" to "18675309,98765432,11223344,44332211", "_count" to 50))
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/RequestGroup",
+                mapOf("_id" to listOf("18675309", "98765432", "11223344", "44332211"), "_count" to 50)
+            )
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "18675309")
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/RequestGroup", mapOf("_id" to "11998877", "_count" to 50))
+            epicClient.get(tenant, "/api/FHIR/R4/RequestGroup", mapOf("_id" to listOf("11998877"), "_count" to 50))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle2 }, "44332211")
 
-        val response = requestGroupOfFour.getByIDs(tenant, listOf("18675309", "98765432", "11223344", "44332211", "11998877"))
+        val response =
+            requestGroupOfFour.getByIDs(tenant, listOf("18675309", "98765432", "11223344", "44332211", "11998877"))
         assertEquals(
             mapOf(
                 "18675309" to requestGroup1.resource,
@@ -146,13 +158,20 @@ class EpicRequestGroupTest {
         }
 
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/RequestGroup", mapOf("_id" to "18675309,98765432,11223344,44332211", "_count" to 50))
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/RequestGroup",
+                mapOf("_id" to listOf("18675309", "98765432", "11223344", "44332211"), "_count" to 50)
+            )
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "18675309")
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/RequestGroup", mapOf("_id" to "11998877", "_count" to 50))
+            epicClient.get(tenant, "/api/FHIR/R4/RequestGroup", mapOf("_id" to listOf("11998877"), "_count" to 50))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle2 }, "44332211")
 
-        val response = requestGroupOfFour.getRequestGroupByFHIRId(tenant, listOf("18675309", "98765432", "11223344", "44332211", "11998877"))
+        val response = requestGroupOfFour.getRequestGroupByFHIRId(
+            tenant,
+            listOf("18675309", "98765432", "11223344", "44332211", "11998877")
+        )
         assertEquals(
             mapOf(
                 "18675309" to requestGroup1.resource,

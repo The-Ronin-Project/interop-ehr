@@ -52,7 +52,14 @@ class CernerFHIRServiceTest {
         )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Patient>(TypeInfo(Patient::class, Patient::class.java)) } returns mockk(relaxed = true) {
+        coEvery {
+            httpResponse.body<Patient>(
+                TypeInfo(
+                    Patient::class,
+                    Patient::class.java
+                )
+            )
+        } returns mockk(relaxed = true) {
             every { id } returns mockk { every { value } returns "difId" }
         }
         coEvery {
@@ -65,6 +72,31 @@ class CernerFHIRServiceTest {
         val service = TestService(cernerClient)
         val example = service.getByID(tenant, "fhirId")
         assertEquals("difId", example.id?.value)
+    }
+
+    @Test
+    fun `getByIds works`() {
+        val tenant = createTestTenant(
+            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+            authEndpoint = "https://example.org",
+            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+        )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns patientBundle
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "url",
+                mapOf("_id" to listOf("12745871", "12745872"), "_count" to 20)
+            )
+        } returns ehrResponse
+
+        val service = TestService(cernerClient)
+        val example = service.getByIDs(tenant, listOf("12745871", "12745872"))
+        assertEquals(2, example.size)
+        assertEquals("12745871", example["12745871"]?.id?.value)
+        assertEquals("12745872", example["12745872"]?.id?.value)
     }
 
     @Test

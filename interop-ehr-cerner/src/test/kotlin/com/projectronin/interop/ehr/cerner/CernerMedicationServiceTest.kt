@@ -77,7 +77,7 @@ internal class CernerMedicationServiceTest {
 
     @Test
     fun `getByIDs - works with multiple medications`() {
-        val parameters = mapOf("_id" to "$med1Id,$med2Id")
+        val parameters = mapOf("_id" to listOf(med1Id, med2Id))
 
         val bundle = mockk<Bundle> {
             every { entry } returns listOf(
@@ -123,8 +123,8 @@ internal class CernerMedicationServiceTest {
             every { resourceType } returns "Medication"
         }
 
-        val parameters1 = mapOf("_id" to "$med1Id,$med2Id")
-        val parameters2 = mapOf("_id" to med3Id)
+        val parameters1 = mapOf("_id" to listOf(med1Id, med2Id))
+        val parameters2 = mapOf("_id" to listOf(med3Id))
 
         val bundle1 = mockk<Bundle> {
             every { entry } returns listOf(

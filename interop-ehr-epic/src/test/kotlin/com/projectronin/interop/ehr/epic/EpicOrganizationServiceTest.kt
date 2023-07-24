@@ -45,7 +45,7 @@ internal class EpicOrganizationServiceTest {
                 tenant,
                 "/api/FHIR/R4/Organization",
                 mapOf(
-                    "_id" to "e8wMbBzuMGvZrYASWBHiL8w3",
+                    "_id" to listOf("e8wMbBzuMGvZrYASWBHiL8w3"),
                     "_count" to 50
                 )
             )
@@ -69,7 +69,7 @@ internal class EpicOrganizationServiceTest {
                 tenant,
                 "/api/FHIR/R4/Organization",
                 mapOf(
-                    "_id" to "e8wMbBzuMGvZrYASWBHiL8w3",
+                    "_id" to listOf("e8wMbBzuMGvZrYASWBHiL8w3"),
                     "_count" to 50
                 )
             )

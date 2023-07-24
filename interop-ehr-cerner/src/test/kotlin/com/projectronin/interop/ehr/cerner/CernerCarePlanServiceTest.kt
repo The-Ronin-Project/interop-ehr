@@ -2,7 +2,7 @@ package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.ehr.CarePlanService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
-import com.projectronin.interop.ehr.cerner.client.RepeatingParameter
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.BundleEntry
