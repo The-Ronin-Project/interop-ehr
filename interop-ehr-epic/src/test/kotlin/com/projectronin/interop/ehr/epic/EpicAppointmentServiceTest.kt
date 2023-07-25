@@ -4,6 +4,7 @@ import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.ehr.dataauthority.models.IdentifierSearchResponse
 import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
 import com.projectronin.interop.common.http.throwExceptionFromHttpStatus
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.ehr.epic.apporchard.model.EpicAppointment
 import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
 import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
@@ -303,7 +304,7 @@ class EpicAppointmentServiceTest {
                 mapOf(
                     "patient" to "E5597",
                     "status" to "booked",
-                    "date" to listOf("ge2015-01-01", "le2015-11-01"),
+                    "date" to RepeatingParameter(listOf("ge2015-01-01", "le2015-11-01")),
                     "_count" to 50
                 )
             )

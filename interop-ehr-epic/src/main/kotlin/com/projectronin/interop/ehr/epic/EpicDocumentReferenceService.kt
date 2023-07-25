@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.DocumentReferenceService
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -28,7 +29,7 @@ class EpicDocumentReferenceService(epicClient: EpicClient) : DocumentReferenceSe
         val parameters = mapOf(
             "patient" to patientFhirId,
             "category" to "clinical-note,imaging-result",
-            "date" to listOf("ge$startDate", "le$endDate")
+            "date" to RepeatingParameter(listOf("ge$startDate", "le$endDate"))
         )
         return getResourceListFromSearch(tenant, parameters)
     }

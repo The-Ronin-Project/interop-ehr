@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.EncounterService
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -26,7 +27,7 @@ class EpicEncounterService(epicClient: EpicClient) : EncounterService, EpicFHIRS
         List<Encounter> {
         val parameters = mapOf(
             "patient" to patientFhirId,
-            "date" to listOf("ge$startDate", "le$endDate")
+            "date" to RepeatingParameter(listOf("ge$startDate", "le$endDate"))
         )
         return getResourceListFromSearch(tenant, parameters)
     }

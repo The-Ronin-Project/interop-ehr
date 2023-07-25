@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr.epic
 import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
 import com.projectronin.interop.ehr.AppointmentService
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.ehr.epic.apporchard.model.EpicAppointment
 import com.projectronin.interop.ehr.epic.apporchard.model.GetAppointmentsResponse
 import com.projectronin.interop.ehr.epic.apporchard.model.GetPatientAppointmentsRequest
@@ -82,7 +83,7 @@ class EpicAppointmentService(
         val parameters = mapOf(
             "patient" to patientFHIRId,
             "status" to "booked",
-            "date" to listOf("ge$startDate", "le$endDate")
+            "date" to RepeatingParameter(listOf("ge$startDate", "le$endDate"))
         )
         return if (useFhirAPI) {
             getResourceListFromSearchSTU3(tenant, parameters)

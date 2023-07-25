@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.PractitionerRoleService
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.outputs.FindPractitionersResponse
 import com.projectronin.interop.fhir.r4.resource.PractitionerRole
@@ -23,7 +24,7 @@ class EpicPractitionerRoleService(
         val practitionerResponses = locationIds.chunked(1) {
             val locationsParameter = it.joinToString(separator = ",")
             val parameters = mapOf(
-                "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
+                "_include" to RepeatingParameter(listOf("PractitionerRole:practitioner", "PractitionerRole:location")),
                 "location" to locationsParameter
             )
             getBundleWithPaging(tenant, parameters)

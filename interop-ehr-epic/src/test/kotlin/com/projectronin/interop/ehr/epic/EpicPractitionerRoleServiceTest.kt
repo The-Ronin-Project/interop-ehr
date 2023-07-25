@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.ehr.outputs.FindPractitionersResponse
@@ -63,7 +64,12 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
+                    "_include" to RepeatingParameter(
+                        listOf(
+                            "PractitionerRole:practitioner",
+                            "PractitionerRole:location"
+                        )
+                    ),
                     "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03",
                     "_count" to 50
                 )
@@ -99,7 +105,12 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
+                    "_include" to RepeatingParameter(
+                        listOf(
+                            "PractitionerRole:practitioner",
+                            "PractitionerRole:location"
+                        )
+                    ),
                     "location" to "abc",
                     "_count" to 50
                 )
@@ -110,7 +121,12 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
+                    "_include" to RepeatingParameter(
+                        listOf(
+                            "PractitionerRole:practitioner",
+                            "PractitionerRole:location"
+                        )
+                    ),
                     "location" to "123",
                     "_count" to 50
                 )
@@ -163,7 +179,12 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
+                    "_include" to RepeatingParameter(
+                        listOf(
+                            "PractitionerRole:practitioner",
+                            "PractitionerRole:location"
+                        )
+                    ),
                     "location" to "loc1",
                     "_count" to 50
                 )
@@ -174,7 +195,12 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
+                    "_include" to RepeatingParameter(
+                        listOf(
+                            "PractitionerRole:practitioner",
+                            "PractitionerRole:location"
+                        )
+                    ),
                     "location" to "loc2",
                     "_count" to 50
                 )
@@ -185,7 +211,12 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
+                    "_include" to RepeatingParameter(
+                        listOf(
+                            "PractitionerRole:practitioner",
+                            "PractitionerRole:location"
+                        )
+                    ),
                     "location" to "loc3",
                     "_count" to 50
                 )
@@ -224,7 +255,12 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to listOf("PractitionerRole:practitioner", "PractitionerRole:location"),
+                    "_include" to RepeatingParameter(
+                        listOf(
+                            "PractitionerRole:practitioner",
+                            "PractitionerRole:location"
+                        )
+                    ),
                     "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03",
                     "_count" to 50
                 )
