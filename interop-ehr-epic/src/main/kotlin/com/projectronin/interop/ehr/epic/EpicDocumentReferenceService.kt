@@ -28,7 +28,7 @@ class EpicDocumentReferenceService(epicClient: EpicClient) : DocumentReferenceSe
         List<DocumentReference> {
         val parameters = mapOf(
             "patient" to patientFhirId,
-            "category" to "clinical-note,imaging-result",
+            "category" to listOf("clinical-note", "imaging-result"),
             "date" to RepeatingParameter(listOf("ge$startDate", "le$endDate"))
         )
         return getResourceListFromSearch(tenant, parameters)

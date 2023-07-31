@@ -21,7 +21,14 @@ internal class CernerBinaryServiceTest {
         val mockedResponse: EHRResponse = mockk()
         coEvery { mockedResponse.body(any()) } returns mockk<Binary>()
 
-        coEvery { client.get(tenant, "/Binary/12345", acceptTypeOverride = ContentType.Application.FhirJson) } returns mockedResponse
+        coEvery {
+            client.get(
+                tenant,
+                "/Binary/12345",
+                acceptTypeOverride = ContentType.Application.FhirJson,
+                disableRetry = true
+            )
+        } returns mockedResponse
 
         val response = service.getByID(tenant, "12345")
         assertNotNull(response)

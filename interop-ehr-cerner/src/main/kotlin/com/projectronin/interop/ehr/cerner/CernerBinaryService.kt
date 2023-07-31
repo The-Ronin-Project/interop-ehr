@@ -24,7 +24,8 @@ class CernerBinaryService(cernerClient: CernerClient) : BinaryService, CernerFHI
             cernerClient.get(
                 tenant = tenant,
                 urlPart = "$fhirURLSearchPart/$resourceFHIRId",
-                acceptTypeOverride = ContentType.Application.FhirJson
+                acceptTypeOverride = ContentType.Application.FhirJson,
+                disableRetry = true
             ).body(TypeInfo(fhirResourceType.kotlin, fhirResourceType))
         }
     }
