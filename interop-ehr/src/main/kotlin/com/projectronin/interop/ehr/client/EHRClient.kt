@@ -138,6 +138,7 @@ abstract class EHRClient(
                     append(NO_RETRY_HEADER, "$disableRetry")
                 }
                 accept(acceptTypeOverride)
+                contentType(acceptTypeOverride)
                 url {
                     parameters.map { parameterEntry ->
                         val key = parameterEntry.key
