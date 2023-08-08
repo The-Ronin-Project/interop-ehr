@@ -3,9 +3,9 @@ package com.projectronin.interop.ehr.epic
 import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.OnboardFlagService
-import com.projectronin.interop.ehr.epic.apporchard.model.PatientFlag
-import com.projectronin.interop.ehr.epic.apporchard.model.SetPatientFlagRequest
-import com.projectronin.interop.ehr.epic.apporchard.model.SetPatientFlagResponse
+import com.projectronin.interop.ehr.epic.apporchard.model.SetSmartDataValuesRequest
+import com.projectronin.interop.ehr.epic.apporchard.model.SetSmartDataValuesResult
+import com.projectronin.interop.ehr.epic.apporchard.model.SmartDataValue
 import com.projectronin.interop.ehr.epic.apporchard.model.exceptions.AppOrchardError
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.resource.Patient
@@ -22,7 +22,7 @@ class EpicOnboardFlagService(
     private val identifierService: EpicIdentifierService,
     private val ehrDataAuthorityClient: EHRDataAuthorityClient
 ) : OnboardFlagService {
-    private val apiEndpoint = "/api/epic/2011/Billing/Patient/SetPatientFlag/Billing/Patient/Flag"
+    private val apiEndpoint = "/api/epic/2013/Clinical/Utility/SETSMARTDATAVALUES/SmartData/Values"
     private val logger = KotlinLogging.logger { }
 
     override fun setOnboardedFlag(tenant: Tenant, patientFhirID: String): Boolean {
@@ -39,29 +39,33 @@ class EpicOnboardFlagService(
         }
         val patientMRNIdentifier = identifierService.getMRNIdentifier(tenant, patient.identifier)
 
-        val flag = PatientFlag(
-            type = flagType
+        val request = SetSmartDataValuesRequest(
+            id = patientMRNIdentifier.value!!.value!!,
+            idType = epicTenant.patientMRNTypeText,
+            userID = epicTenant.ehrUserId,
+            userIDType = "External",
+            smartDataValues = listOf(
+                SmartDataValue(
+                    comments = listOf("Patient has been onboarded in Ronin."),
+                    values = listOf("onboarded"), // TODO: get real value, waiting on Epic
+                    smartDataID = flagType,
+                    smartDataIDType = "SDI" // TODO: get real value, waiting on Epic
+                )
+            )
         )
-        val postParameters = mapOf(
-            "PatientID" to patientMRNIdentifier.value?.value,
-            "PatientIDType" to epicTenant.patientMRNTypeText,
-            "UserID" to epicTenant.ehrUserId,
-            "UserIDType" to "External"
-        )
-        val response: SetPatientFlagResponse = runBlocking {
-            epicClient.post(
+        val response: SetSmartDataValuesResult = runBlocking {
+            epicClient.put(
                 tenant = tenant,
                 urlPart = apiEndpoint,
-                requestBody = SetPatientFlagRequest(flag),
-                parameters = postParameters
+                requestBody = request
             ).body()
         }
         // if Epic returns a non-2XX status code, our ktor wrapper will handle throwing an exception,
         // but a cool thing Epic does it return a 2XX code with an "Error" present, we should still treat that
         // as an exception
-        if (response.error.isNotEmpty()) {
-            throw AppOrchardError(response.error)
+        if (!response.success) {
+            throw AppOrchardError(response.errors.toString())
         }
-        return response.success
+        return true
     }
 }

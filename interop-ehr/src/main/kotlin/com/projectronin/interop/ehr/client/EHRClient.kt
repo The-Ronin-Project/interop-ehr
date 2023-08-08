@@ -12,6 +12,7 @@ import io.ktor.client.request.get
 import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
+import io.ktor.client.request.put
 import io.ktor.client.request.setBody
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
@@ -52,6 +53,14 @@ abstract class EHRClient(
         return publishAndReturn(postImpl(tenant, urlPart, requestBody, parameters), tenant)
     }
 
+    suspend fun put(
+        tenant: Tenant,
+        urlPart: String,
+        requestBody: Any
+    ): EHRResponse {
+        return publishAndReturn(putImpl(tenant, urlPart, requestBody), tenant, true)
+    }
+
     /**
      * Performs a json POST operation for the service url + [urlPart] and the [requestBody] specified for the [tenant]
      *  and returns the [HttpResponse].
@@ -70,7 +79,7 @@ abstract class EHRClient(
 
         // Make the call
         val response: HttpResponse =
-            client.request("Epic Organization: ${tenant.name}", tenant.vendor.serviceEndpoint + urlPart) { urlToCall ->
+            client.request("Organization: ${tenant.name}", tenant.vendor.serviceEndpoint + urlPart) { urlToCall ->
                 post(urlToCall) {
                     headers {
                         append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
@@ -163,6 +172,40 @@ abstract class EHRClient(
         }
 
         logger.debug { "HTTP status, ${response.status}, returned for GET call to tenant: ${tenant.mnemonic}" }
+
+        return response
+    }
+
+    /**
+     * Performs a json POST operation for the service url + [urlPart] and the [requestBody] specified for the [tenant]
+     *  and returns the [HttpResponse].
+     */
+    protected open suspend fun putImpl(
+        tenant: Tenant,
+        urlPart: String,
+        requestBody: Any
+    ): HttpResponse {
+        logger.debug { "Started PUT call to tenant: ${tenant.mnemonic}" }
+
+        // Authenticate
+        val authentication = authenticationBroker.getAuthentication(tenant)
+            ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
+
+        // Make the call
+        val response: HttpResponse =
+            client.request("Organization: ${tenant.name}", tenant.vendor.serviceEndpoint + urlPart) { urlToCall ->
+
+                put(urlToCall) {
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+                    }
+                    accept(ContentType.Application.Json)
+                    contentType(ContentType.Application.Json)
+                    setBody(requestBody)
+                }
+            }
+
+        logger.debug { "HTTP status, ${response.status}, returned for PUT call to tenant: ${tenant.mnemonic}" }
 
         return response
     }

@@ -2,9 +2,9 @@ package com.projectronin.interop.ehr.epic
 
 import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
-import com.projectronin.interop.ehr.epic.apporchard.model.PatientFlag
-import com.projectronin.interop.ehr.epic.apporchard.model.SetPatientFlagRequest
-import com.projectronin.interop.ehr.epic.apporchard.model.SetPatientFlagResponse
+import com.projectronin.interop.ehr.epic.apporchard.model.SetSmartDataValuesRequest
+import com.projectronin.interop.ehr.epic.apporchard.model.SetSmartDataValuesResult
+import com.projectronin.interop.ehr.epic.apporchard.model.SmartDataValue
 import com.projectronin.interop.ehr.epic.apporchard.model.exceptions.AppOrchardError
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.outputs.EHRResponse
@@ -64,27 +64,39 @@ class EpicOnboardFlagServiceTest {
 
     @Test
     fun `service setsFlag`() {
-        val setPatientResponse = SetPatientFlagResponse(success = true)
+        val setPatientResponse = SetSmartDataValuesResult(success = true)
         val patientMRN = mockk<Identifier> {
             every { value } returns FHIRString("123")
         }
         val patient = mockk<Patient> {
             every { identifier } returns listOf(patientMRN)
         }
-        coEvery { ehrDataAuthorityClient.getResourceAs<Patient>("mnemonic", "Patient", "fhirId".localize(tenant)) } returns patient
+        coEvery {
+            ehrDataAuthorityClient.getResourceAs<Patient>(
+                "mnemonic",
+                "Patient",
+                "fhirId".localize(tenant)
+            )
+        } returns patient
         every { identifierService.getMRNIdentifier(tenant, listOf(patientMRN)) } returns patientMRN
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SetPatientFlagResponse>() } returns setPatientResponse
+        coEvery { httpResponse.body<SetSmartDataValuesResult>() } returns setPatientResponse
         coEvery {
-            epicClient.post(
+            epicClient.put(
                 tenant,
-                "/api/epic/2011/Billing/Patient/SetPatientFlag/Billing/Patient/Flag",
-                SetPatientFlagRequest(PatientFlag(type = "flagType")),
-                mapOf(
-                    "PatientID" to "123",
-                    "PatientIDType" to "MRN",
-                    "UserID" to "ehrUserId",
-                    "UserIDType" to "External"
+                "/api/epic/2013/Clinical/Utility/SETSMARTDATAVALUES/SmartData/Values",
+                SetSmartDataValuesRequest(
+                    id = "123",
+                    idType = "MRN",
+                    userID = "ehrUserId",
+                    smartDataValues = listOf(
+                        SmartDataValue(
+                            comments = listOf("Patient has been onboarded in Ronin."),
+                            values = listOf("onboarded"),
+                            smartDataID = "flagType",
+                            smartDataIDType = "SDI"
+                        )
+                    )
                 )
             )
         } returns ehrResponse
@@ -94,40 +106,58 @@ class EpicOnboardFlagServiceTest {
 
     @Test
     fun `service errors when epic returns error`() {
-        val setPatientResponse = SetPatientFlagResponse(error = "Wow, I should really be an http status")
+        val setPatientResponse = SetSmartDataValuesResult(success = false)
         val patientMRN = mockk<Identifier> {
             every { value } returns FHIRString("123")
         }
         val patient = mockk<Patient> {
             every { identifier } returns listOf(patientMRN)
         }
-        coEvery { ehrDataAuthorityClient.getResourceAs<Patient>("mnemonic", "Patient", "fhirId".localize(tenant)) } returns patient
+        coEvery {
+            ehrDataAuthorityClient.getResourceAs<Patient>(
+                "mnemonic",
+                "Patient",
+                "fhirId".localize(tenant)
+            )
+        } returns patient
         every { identifierService.getMRNIdentifier(tenant, listOf(patientMRN)) } returns patientMRN
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SetPatientFlagResponse>() } returns setPatientResponse
+        coEvery { httpResponse.body<SetSmartDataValuesResult>() } returns setPatientResponse
         coEvery {
-            epicClient.post(
+            epicClient.put(
                 tenant,
-                "/api/epic/2011/Billing/Patient/SetPatientFlag/Billing/Patient/Flag",
-                SetPatientFlagRequest(PatientFlag(type = "flagType")),
-                mapOf(
-                    "PatientID" to "123",
-                    "PatientIDType" to "MRN",
-                    "UserID" to "ehrUserId",
-                    "UserIDType" to "External"
+                "/api/epic/2013/Clinical/Utility/SETSMARTDATAVALUES/SmartData/Values",
+                SetSmartDataValuesRequest(
+                    id = "123",
+                    idType = "MRN",
+                    userID = "ehrUserId",
+                    smartDataValues = listOf(
+                        SmartDataValue(
+                            comments = listOf("Patient has been onboarded in Ronin."),
+                            values = listOf("onboarded"),
+                            smartDataID = "flagType",
+                            smartDataIDType = "SDI"
+                        )
+                    )
                 )
             )
         } returns ehrResponse
 
         val error = assertThrows<AppOrchardError> { (onboardFlagService.setOnboardedFlag(tenant, "fhirId")) }
-        assertEquals("Wow, I should really be an http status", error.message)
     }
 
     @Test
     fun `service errors when EHRDA returns no patient`() {
-        coEvery { ehrDataAuthorityClient.getResourceAs<Patient>("mnemonic", "Patient", "fhirId".localize(tenant)) } returns null
+        coEvery {
+            ehrDataAuthorityClient.getResourceAs<Patient>(
+                "mnemonic",
+                "Patient",
+                "fhirId".localize(tenant)
+            )
+        } returns null
 
-        val error = assertThrows<VendorIdentifierNotFoundException> { (onboardFlagService.setOnboardedFlag(tenant, "fhirId")) }
+        val error =
+            assertThrows<VendorIdentifierNotFoundException> { (onboardFlagService.setOnboardedFlag(tenant, "fhirId")) }
         assertEquals("No Patient found for fhirId", error.message)
     }
 }
