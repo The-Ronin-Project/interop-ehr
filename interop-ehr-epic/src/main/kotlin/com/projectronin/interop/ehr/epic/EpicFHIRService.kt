@@ -17,7 +17,7 @@ import mu.KotlinLogging
  */
 abstract class EpicFHIRService<T : Resource<T>>(
     val epicClient: EpicClient,
-    private val batchSize: Int = 10
+    protected val batchSize: Int = 10
 ) : FHIRService<T> {
     private val logger = KotlinLogging.logger { }
     abstract val fhirURLSearchPart: String

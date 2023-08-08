@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter
 @Component
 class EpicObservationService(
     epicClient: EpicClient,
-    @Value("\${epic.fhir.batchSize:1}") private val batchSize: Int, // This is currently ignored.  See findObservationsByPatientAndCategory() below.
+    @Value("\${epic.fhir.batchSize:1}") batchSize: Int, // This is currently ignored.  See findObservationsByPatientAndCategory() below.
     private val tenantCodesDAO: TenantCodesDAO,
     @Value("\${epic.fhir.observation.incrementalLoadDays:60}") private val incrementalLoadDays: Int
 ) : ObservationService,

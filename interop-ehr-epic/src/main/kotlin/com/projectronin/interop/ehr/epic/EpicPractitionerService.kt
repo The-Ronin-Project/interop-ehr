@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 class EpicPractitionerService(
     epicClient: EpicClient,
     private val practitionerRoleService: EpicPractitionerRoleService,
-    @Value("\${epic.fhir.batchSize:10}") private val batchSize: Int
+    @Value("\${epic.fhir.batchSize:10}") batchSize: Int
 ) : PractitionerService,
     EpicFHIRService<Practitioner>(epicClient, batchSize) {
     override val fhirURLSearchPart = "/api/FHIR/R4/Practitioner"

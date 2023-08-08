@@ -28,7 +28,7 @@ import com.projectronin.ehr.dataauthority.models.Identifier as EHRDAIdentifier
 @Component
 class EpicPatientService(
     epicClient: EpicClient,
-    @Value("\${epic.fhir.batchSize:10}") private val batchSize: Int,
+    @Value("\${epic.fhir.batchSize:10}") batchSize: Int,
     private val ehrdaClient: EHRDataAuthorityClient
 ) : PatientService,
     EpicFHIRService<Patient>(epicClient, batchSize) {

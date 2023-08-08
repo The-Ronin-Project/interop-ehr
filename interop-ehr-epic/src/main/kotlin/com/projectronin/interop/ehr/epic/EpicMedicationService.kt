@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component
 @Component
 class EpicMedicationService(
     epicClient: EpicClient,
-    @Value("\${epic.fhir.batchSize:10}") private val batchSize: Int
+    @Value("\${epic.fhir.batchSize:10}") batchSize: Int
 ) : MedicationService, EpicFHIRService<Medication>(epicClient, batchSize) {
     override val fhirURLSearchPart = "/api/FHIR/R4/Medication"
     override val fhirResourceType = Medication::class.java

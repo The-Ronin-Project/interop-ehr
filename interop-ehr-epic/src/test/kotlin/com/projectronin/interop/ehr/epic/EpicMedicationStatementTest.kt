@@ -12,6 +12,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
@@ -67,7 +68,11 @@ class EpicMedicationStatementTest {
             patientFhirId
         )
 
-        assertEquals(validMedicationStatementList, medicationStatements)
+        val metaLessMedicationStatements = medicationStatements.map {
+            assertNotNull(it.meta?.source)
+            it.copy(meta = null)
+        }
+        assertEquals(validMedicationStatementList, metaLessMedicationStatements)
     }
 
     @Test

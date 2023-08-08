@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr.epic
 import com.projectronin.interop.ehr.MedicationStatementService
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.resource.MedicationStatement
+import com.projectronin.interop.fhir.stu3.resource.STU3MedicationStatement
 import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
 import org.springframework.stereotype.Component
@@ -12,7 +13,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 class EpicMedicationStatementService(epicClient: EpicClient) : MedicationStatementService,
-    EpicFHIRService<MedicationStatement>(epicClient) {
+    EpicSTU3FHIRService<STU3MedicationStatement, MedicationStatement>(epicClient, STU3MedicationStatement::class.java) {
     override val fhirURLSearchPart = "/api/FHIR/STU3/MedicationStatement"
     override val fhirResourceType = MedicationStatement::class.java
 

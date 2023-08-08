@@ -33,6 +33,7 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
 import com.projectronin.interop.fhir.ronin.util.localize
+import com.projectronin.interop.fhir.stu3.resource.STU3Appointment
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import datadog.trace.api.Trace
@@ -57,9 +58,10 @@ class EpicAppointmentService(
     private val practitionerService: EpicPractitionerService,
     private val identifierService: EpicIdentifierService,
     private val ehrdaClient: EHRDataAuthorityClient,
-    @Value("\${epic.fhir.batchSize:10}") private val batchSize: Int,
+    @Value("\${epic.fhir.batchSize:10}") batchSize: Int,
     @Value("\${epic.api.useFhirAPI:false}") private val useFhirAPI: Boolean
-) : AppointmentService, EpicFHIRService<Appointment>(epicClient, batchSize) {
+) : AppointmentService,
+    EpicSTU3FHIRService<STU3Appointment, Appointment>(epicClient, STU3Appointment::class.java, batchSize) {
     private val logger = KotlinLogging.logger { }
     override val fhirURLSearchPart = "/api/FHIR/STU3/Appointment"
     override val fhirResourceType = Appointment::class.java
