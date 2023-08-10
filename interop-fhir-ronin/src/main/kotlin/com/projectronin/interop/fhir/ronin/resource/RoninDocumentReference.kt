@@ -157,8 +157,8 @@ class RoninDocumentReference(
         return Pair(
             mappedTypePair?.let {
                 normalized.copy(
-                    type = it.first,
-                    extension = normalized.extension + it.second
+                    type = it.codeableConcept,
+                    extension = normalized.extension + it.extension
                 )
             } ?: normalized,
             validation

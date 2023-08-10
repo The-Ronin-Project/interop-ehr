@@ -13,7 +13,9 @@ import com.projectronin.interop.fhir.ronin.generators.util.generateEffectiveDate
 import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 
 /**
  * Helps generate ronin respiratory rate observation profile, applies meta and randomly generates an
@@ -25,7 +27,7 @@ fun rcdmObservationRespiratoryRate(tenant: String, block: ObservationGenerator.(
         meta of rcdmMeta(RoninProfile.OBSERVATION_RESPIRATORY_RATE, tenant) {}
         extension of generateExtension(extension.generate(), tenantSourceExtension)
         category of listOf(codeableConcept { coding of vitalSignsCategory })
-        code of generateCodeableConcept(code.generate(), possibleRespiratoryRateCodes.random())
+        code of generateCodeableConcept(code.generate(), possibleRespiratoryRateCodes.codes.random())
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
         effective of generateEffectiveDateTime(effective.generate(), possibleDateTime)
     }
@@ -45,7 +47,7 @@ fun Patient.rcdmObservationRespiratoryRate(block: ObservationGenerator.() -> Uni
     }
 }
 
-val possibleRespiratoryRateCodes = listOf(
+val possibleRespiratoryRateCodesList = listOf(
     coding {
         system of "http://loinc.org"
         version of "2.74"
@@ -88,4 +90,14 @@ val possibleRespiratoryRateCodes = listOf(
         code of Code("76171-8")
         display of "Respiratory rate by Airway flow measurement"
     }
+)
+
+val possibleRespiratoryRateCodes = ValueSetList(
+    possibleRespiratoryRateCodesList,
+    ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "respiratoryrate",
+        valueSetUuid = "46b10973-c8e0-4086-9c71-ec464ef363e8",
+        version = "2"
+    )
 )

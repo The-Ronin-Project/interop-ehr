@@ -7,6 +7,7 @@ import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
 import com.projectronin.interop.fhir.ronin.util.validateReference
@@ -35,12 +36,12 @@ abstract class BaseRoninObservation(
     open fun qualifyingCategories(): List<Coding> = emptyList()
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    open fun qualifyingCodes(): List<Coding> = emptyList()
+    open fun qualifyingCodes(): ValueSetList = ValueSetList(emptyList(), null)
 
     override fun qualifies(resource: Observation): Boolean {
         return (
             resource.category.qualifiesForValueSet(qualifyingCategories()) &&
-                resource.code.qualifiesForValueSet(qualifyingCodes())
+                resource.code.qualifiesForValueSet(qualifyingCodes().codes)
             )
     }
 
@@ -188,11 +189,11 @@ abstract class BaseRoninObservation(
             )
 
             checkTrue(
-                element.code.qualifiesForValueSet(qualifyingCodes()),
+                element.code.qualifiesForValueSet(qualifyingCodes().codes),
                 FHIRError(
                     code = "RONIN_OBS_003",
                     severity = ValidationIssueSeverity.ERROR,
-                    description = "Must match this system|code: ${qualifyingCodes().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }}",
+                    description = "Must match this system|code: ${qualifyingCodes().codes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }}",
                     location = LocationContext(Observation::code)
                 ),
                 parentContext

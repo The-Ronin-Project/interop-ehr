@@ -1,6 +1,5 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
-import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
@@ -8,6 +7,7 @@ import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.isInValueSet
 import com.projectronin.interop.fhir.validate.FHIRError
@@ -37,11 +37,11 @@ class RoninBloodPressure(
     override val profileVersion = 3
 
     // Multipart qualifying codes for RoninBloodPressure
-    fun validSystolicCodes(): List<Coding> = registryClient.getRequiredValueSet(
+    fun validSystolicCodes(): ValueSetList = registryClient.getRequiredValueSet(
         "Observation.component:systolic.code",
         profile
     )
-    fun validDiastolicCodes(): List<Coding> = registryClient.getRequiredValueSet(
+    fun validDiastolicCodes(): ValueSetList = registryClient.getRequiredValueSet(
         "Observation.component:diastolic.code",
         profile
     )
@@ -59,10 +59,10 @@ class RoninBloodPressure(
         if (element.dataAbsentReason == null) {
             val components = element.component
             val systolic = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(validSystolicCodes()) } ?: false
+                comp.code?.coding?.any { it.isInValueSet(validSystolicCodes().codes) } ?: false
             }
             val diastolic = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(validDiastolicCodes()) } ?: false
+                comp.code?.coding?.any { it.isInValueSet(validDiastolicCodes().codes) } ?: false
             }
 
             if (systolic.size == 1) {
@@ -81,7 +81,6 @@ class RoninBloodPressure(
                     validation
                 )
             }
-
             validation.apply {
                 val componentSystolicCodeContext = LocationContext("Observation", "component:systolic.code")
                 checkTrue(
@@ -90,9 +89,10 @@ class RoninBloodPressure(
                         code = "USCORE_BPOBS_001",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        validSystolicCodes().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        validSystolicCodes().codes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
-                        location = componentSystolicCodeContext
+                        location = componentSystolicCodeContext,
+                        metadata = listOf(validSystolicCodes().metadata!!)
                     ),
                     parentContext
                 )
@@ -102,7 +102,8 @@ class RoninBloodPressure(
                         code = "USCORE_BPOBS_004",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Only 1 entry is allowed for systolic blood pressure",
-                        location = componentSystolicCodeContext
+                        location = componentSystolicCodeContext,
+                        metadata = listOf(validSystolicCodes().metadata!!)
                     ),
                     parentContext
                 )
@@ -114,9 +115,10 @@ class RoninBloodPressure(
                         code = "USCORE_BPOBS_002",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        validDiastolicCodes().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        validDiastolicCodes().codes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
-                        location = componentDiastolicCodeContext
+                        location = componentDiastolicCodeContext,
+                        metadata = listOf(validDiastolicCodes().metadata!!)
                     ),
                     parentContext
                 )
@@ -126,7 +128,8 @@ class RoninBloodPressure(
                         code = "USCORE_BPOBS_005",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Only 1 entry is allowed for diastolic blood pressure",
-                        location = componentDiastolicCodeContext
+                        location = componentDiastolicCodeContext,
+                        metadata = listOf(validDiastolicCodes().metadata!!)
                     ),
                     parentContext
                 )

@@ -86,7 +86,7 @@ class RoninAppointment(
 
         // Appointment.status is a single Code
         val mappedStatusPair = normalized.status?.value?.let { statusValue ->
-            val statusPair = registryClient.getConceptMappingForEnum(
+            val statusCode = registryClient.getConceptMappingForEnum(
                 tenant,
                 "Appointment.status",
                 RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "Appointment.status", statusValue),
@@ -97,7 +97,7 @@ class RoninAppointment(
             // validate the mapping we got, use statusValue to report issues
             validation.apply {
                 checkNotNull(
-                    statusPair,
+                    statusCode,
                     FailedConceptMapLookupError(
                         LocationContext(Appointment::status),
                         statusValue,
@@ -105,29 +105,29 @@ class RoninAppointment(
                     ),
                     parentContext
                 )
-                ifNotNull(statusPair) {
-                    statusPair.first.let { coding ->
-                        val statusCode = coding.code
-                        val statusTarget = statusCode?.value
+                ifNotNull(statusCode) {
+                    statusCode.coding.let { coding ->
+                        val statusCodeValue = coding.code
+                        val statusTarget = statusCodeValue?.value
                         val statusMapName = RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "Appointment.status")
                         val statusContext = parentContext.append(LocationContext("Appointment", "status"))
                         validation.apply {
                             checkNotNull(
                                 getCodedEnumOrNull<AppointmentStatus>(statusTarget),
-                                ConceptMapInvalidValueSetError(statusContext, statusMapName, statusValue, statusTarget),
+                                ConceptMapInvalidValueSetError(statusContext, statusMapName, statusValue, statusTarget, statusCode.metadata),
                                 parentContext
                             )
                         }
                     }
                 }
             }
-            statusPair
+            statusCode
         }
 
         val mapped = mappedStatusPair?.let {
             normalized.copy(
-                status = it.first.code,
-                extension = normalized.extension + it.second
+                status = it.coding.code,
+                extension = normalized.extension + it.extension
             )
         } ?: normalized
         return Pair(mapped, validation)

@@ -13,7 +13,9 @@ import com.projectronin.interop.fhir.ronin.generators.util.generateEffectiveDate
 import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 
 /**
  * Helps generate ronin body surface area observation profile, applies meta and randomly generates an
@@ -25,7 +27,7 @@ fun rcdmObservationBodySurfaceArea(tenant: String, block: ObservationGenerator.(
         meta of rcdmMeta(RoninProfile.OBSERVATION_BODY_SURFACE_AREA, tenant) {}
         extension of generateExtension(extension.generate(), tenantSourceExtension)
         category of listOf(codeableConcept { coding of vitalSignsCategory })
-        code of generateCodeableConcept(code.generate(), possibleBodySurfaceAreaCodes.random())
+        code of generateCodeableConcept(code.generate(), possibleBodySurfaceAreaCodes.codes.random())
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
         effective of generateEffectiveDateTime(effective.generate(), possibleDateTime)
     }
@@ -45,23 +47,31 @@ fun Patient.rcdmObservationBodySurfaceArea(block: ObservationGenerator.() -> Uni
     }
 }
 
-val possibleBodySurfaceAreaCodes = listOf(
-    coding {
-        system of "http://loinc.org"
-        version of "2.74"
-        code of Code("8277-6")
-        display of "Body surface area"
-    },
-    coding {
-        system of "http://loinc.org"
-        version of "2.74"
-        code of Code("3140-1")
-        display of "Body surface area Derived from formula"
-    },
-    coding {
-        system of "http://loinc.org"
-        version of "2.74"
-        code of Code("3139-3")
-        display of "Body surface area Measured"
-    }
+val possibleBodySurfaceAreaCodes = ValueSetList(
+    listOf(
+        coding {
+            system of "http://loinc.org"
+            version of "2.74"
+            code of Code("8277-6")
+            display of "Body surface area"
+        },
+        coding {
+            system of "http://loinc.org"
+            version of "2.74"
+            code of Code("3140-1")
+            display of "Body surface area Derived from formula"
+        },
+        coding {
+            system of "http://loinc.org"
+            version of "2.74"
+            code of Code("3139-3")
+            display of "Body surface area Measured"
+        }
+    ),
+    ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "bodysurfaceareabsa",
+        valueSetUuid = "45354da4-30b4-433e-b5aa-d99a903d5dc9",
+        version = "3"
+    )
 )

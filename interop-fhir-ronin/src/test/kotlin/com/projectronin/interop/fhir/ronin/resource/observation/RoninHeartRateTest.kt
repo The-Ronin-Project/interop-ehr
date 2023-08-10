@@ -29,11 +29,15 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.ConceptMapCodeableConcept
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
+import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -95,6 +99,18 @@ class RoninHeartRateTest {
     private val vitalSignsCategoryCodingList = listOf(vitalSignsCategoryCoding)
     private val vitalSignsCategoryConcept = CodeableConcept(coding = vitalSignsCategoryCodingList)
     private val vitalSignsCategoryConceptList = listOf(vitalSignsCategoryConcept)
+    private val conceptMapMetadata = ConceptMapMetadata(
+        registryEntryType = "concept-map",
+        conceptMapName = "test-concept-map",
+        conceptMapUuid = "573b456efca5-03d51d53-1a31-49a9-af74",
+        version = "1"
+    )
+    private val valueSetMetadata = ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "test-value-set",
+        valueSetUuid = "03d51d53-1a31-49a9-af74-573b456efca5",
+        version = "2"
+    )
 
     // In this registry:
     // Raw tenantHeartRateCoding is successfully mapped to heartRateCoding.
@@ -102,7 +118,7 @@ class RoninHeartRateTest {
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_HEART_RATE.value)
-        } returns heartRateCodingList
+        } returns ValueSetList(heartRateCodingList, valueSetMetadata)
         every {
             getConceptMapping(
                 tenant,
@@ -116,7 +132,7 @@ class RoninHeartRateTest {
                 "Observation.code",
                 tenantHeartRateConcept
             )
-        } returns Pair(heartRateConcept, tenantHeartRateSourceExtension)
+        } returns ConceptMapCodeableConcept(heartRateConcept, tenantHeartRateSourceExtension, listOf(conceptMapMetadata))
         every {
             getConceptMapping(
                 tenant,

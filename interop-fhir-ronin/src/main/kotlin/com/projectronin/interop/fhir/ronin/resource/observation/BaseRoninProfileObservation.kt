@@ -6,6 +6,7 @@ import com.projectronin.interop.fhir.ronin.error.FailedConceptMapLookupError
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -32,7 +33,7 @@ abstract class BaseRoninProfileObservation(
         localizer
     ) {
 
-    override fun qualifyingCodes() = registryClient.getRequiredValueSet(
+    override fun qualifyingCodes(): ValueSetList = registryClient.getRequiredValueSet(
         "Observation.code",
         profile
     )
@@ -69,7 +70,7 @@ abstract class BaseRoninProfileObservation(
 
         // Observation.code is a single CodeableConcept
         val mappedCodePair = normalized.code?.let { code ->
-            val codePair = registryClient.getConceptMapping(
+            val observationCode = registryClient.getConceptMapping(
                 tenant,
                 "Observation.code",
                 code,
@@ -78,24 +79,25 @@ abstract class BaseRoninProfileObservation(
             // validate the mapping we got, use code value to report issues
             validation.apply {
                 checkNotNull(
-                    codePair,
+                    observationCode,
                     FailedConceptMapLookupError(
                         LocationContext(Observation::code),
                         code.coding.mapNotNull { it.code?.value }
                             .joinToString(", "),
-                        "any Observation.code concept map for tenant '${tenant.mnemonic}'"
+                        "any Observation.code concept map for tenant '${tenant.mnemonic}'",
+                        observationCode?.metadata
                     ),
                     parentContext
                 )
             }
-            codePair
+            observationCode
         }
 
         return Pair(
             mappedCodePair?.let {
                 normalized.copy(
-                    code = it.first,
-                    extension = normalized.extension + it.second
+                    code = it.codeableConcept,
+                    extension = normalized.extension + it.extension
                 )
             } ?: normalized,
             validation

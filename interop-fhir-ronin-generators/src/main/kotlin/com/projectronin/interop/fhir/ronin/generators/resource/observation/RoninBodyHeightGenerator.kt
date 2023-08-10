@@ -13,7 +13,9 @@ import com.projectronin.interop.fhir.ronin.generators.util.generateEffectiveDate
 import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 
 /**
  * Helps generate ronin body height observation profile, applies meta and randomly generates an
@@ -25,7 +27,7 @@ fun rcdmObservationBodyHeight(tenant: String, block: ObservationGenerator.() -> 
         meta of rcdmMeta(RoninProfile.OBSERVATION_BODY_HEIGHT, tenant) {}
         extension of generateExtension(extension.generate(), tenantSourceExtension)
         category of listOf(codeableConcept { coding of vitalSignsCategory })
-        code of generateCodeableConcept(code.generate(), possibleBodyHeightCodes.random())
+        code of generateCodeableConcept(code.generate(), possibleBodyHeightCodes.codes.random())
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
         effective of generateEffectiveDateTime(effective.generate(), possibleDateTime)
     }
@@ -45,17 +47,25 @@ fun Patient.rcdmObservationBodyHeight(block: ObservationGenerator.() -> Unit): O
     }
 }
 
-val possibleBodyHeightCodes = listOf(
-    coding {
-        system of "http://loinc.org"
-        version of "2.74"
-        code of Code("8302-2")
-        display of "Body height"
-    },
-    coding {
-        system of "http://loinc.org"
-        version of "2.74"
-        code of Code("3137-7")
-        display of "Body height Measured"
-    }
+val possibleBodyHeightCodes = ValueSetList(
+    listOf(
+        coding {
+            system of "http://loinc.org"
+            version of "2.74"
+            code of Code("8302-2")
+            display of "Body height"
+        },
+        coding {
+            system of "http://loinc.org"
+            version of "2.74"
+            code of Code("3137-7")
+            display of "Body height Measured"
+        }
+    ),
+    ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "BodyHeight",
+        valueSetUuid = "12d509bf-c74c-4f11-948b-1aef9f69aef0",
+        version = "1"
+    )
 )

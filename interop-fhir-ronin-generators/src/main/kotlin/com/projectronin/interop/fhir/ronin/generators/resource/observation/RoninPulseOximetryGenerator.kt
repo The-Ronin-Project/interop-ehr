@@ -22,7 +22,9 @@ import com.projectronin.interop.fhir.ronin.generators.util.generateEffectiveDate
 import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 
 /**
  * Helps generate ronin pulse oximetry observation profile, applies meta and randomly generates an
@@ -34,7 +36,7 @@ fun rcdmObservationPulseOximetry(tenant: String, block: ObservationGenerator.() 
         meta of rcdmMeta(RoninProfile.OBSERVATION_PULSE_OXIMETRY, tenant) {}
         extension of generateExtension(extension.generate(), tenantSourceExtension)
         category of listOf(codeableConcept { coding of vitalSignsCategory })
-        code of generateCodeableConcept(code.generate(), possiblePulseOximetryCodes.random())
+        code of generateCodeableConcept(code.generate(), possiblePulseOximetryCodes.codes.random())
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
         effective of generateEffectiveDateTime(effective.generate(), possibleDateTime)
         value of valueQuantity
@@ -104,7 +106,7 @@ private val pulseOxComponent = listOf(
     )
 )
 
-val possiblePulseOximetryCodes = listOf(
+val possiblePulseOximetryCodesList = listOf(
     coding {
         system of "http://loinc.org"
         version of "2.74"
@@ -207,4 +209,13 @@ val possiblePulseOximetryCodes = listOf(
         code of Code("59411-9")
         display of "Oxygen saturation in Arterial blood by Pulse oximetry --post bronchodilation"
     }
+)
+val possiblePulseOximetryCodes = ValueSetList(
+    possiblePulseOximetryCodesList,
+    ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "inhaledoxygenconcentration",
+        valueSetUuid = "74e038f6-d57c-483e-90cb-215af0a5e0ed",
+        version = "2"
+    )
 )

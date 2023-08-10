@@ -13,7 +13,9 @@ import com.projectronin.interop.fhir.ronin.generators.util.generateEffectiveDate
 import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 
 /**
  * Helps generate ronin body weight observation profile, applies meta and randomly generates an
@@ -25,7 +27,7 @@ fun rcdmObservationBodyWeight(tenant: String, block: ObservationGenerator.() -> 
         meta of rcdmMeta(RoninProfile.OBSERVATION_BODY_WEIGHT, tenant) {}
         extension of generateExtension(extension.generate(), tenantSourceExtension)
         category of listOf(codeableConcept { coding of vitalSignsCategory })
-        code of generateCodeableConcept(code.generate(), possibleBodyWeightCodes.random())
+        code of generateCodeableConcept(code.generate(), possibleBodyWeightCodes.codes.random())
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
         effective of generateEffectiveDateTime(effective.generate(), possibleDateTime)
     }
@@ -45,17 +47,25 @@ fun Patient.rcdmObservationBodyWeight(block: ObservationGenerator.() -> Unit): O
     }
 }
 
-val possibleBodyWeightCodes = listOf(
-    coding {
-        system of "http://loinc.org"
-        version of "2.74"
-        code of Code("29463-7")
-        display of "Body weight"
-    },
-    coding {
-        system of "http://loinc.org"
-        version of "2.74"
-        code of Code("3141-9")
-        display of "Body weight Measured"
-    }
+val possibleBodyWeightCodes = ValueSetList(
+    listOf(
+        coding {
+            system of "http://loinc.org"
+            version of "2.74"
+            code of Code("29463-7")
+            display of "Body weight"
+        },
+        coding {
+            system of "http://loinc.org"
+            version of "2.74"
+            code of Code("3141-9")
+            display of "Body weight Measured"
+        }
+    ),
+    ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "BodyWeight",
+        valueSetUuid = "95c2b81b-e776-44fb-ab83-dea5ec5f2f7b",
+        version = "1"
+    )
 )

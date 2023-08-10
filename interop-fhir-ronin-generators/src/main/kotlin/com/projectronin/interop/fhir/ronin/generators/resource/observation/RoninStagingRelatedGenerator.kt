@@ -13,7 +13,9 @@ import com.projectronin.interop.fhir.ronin.generators.util.generateCodeableConce
 import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 
 /**
  * Helps generate ronin staging related observation profile  applies meta and randomly generates an
@@ -29,7 +31,7 @@ fun rcdmObservationStagingRelated(tenant: String, block: ObservationGenerator.()
                 coding of stagingRelatedCategory
             }
         )
-        code of generateCodeableConcept(code.generate(), possibleStagingRelatedCodes.random())
+        code of generateCodeableConcept(code.generate(), possibleStagingRelatedCodes.codes.random())
         subject of generateReference(subject.generate(), subjectStagingReferenceOptions, tenant, "Patient")
     }
 }
@@ -55,7 +57,7 @@ private val stagingRelatedCategory = listOf(
     }
 )
 
-val possibleStagingRelatedCodes = listOf(
+val possibleStagingRelatedCodesList = listOf(
     coding {
         system of "http://snomed.info/sct"
         version of "2023-03-01"
@@ -356,4 +358,14 @@ val possibleStagingRelatedCodes = listOf(
         code of Code("1222832009")
         display of "American Joint Committee on Cancer stage III:21 (qualifier value)"
     }
+)
+
+val possibleStagingRelatedCodes = ValueSetList(
+    possibleStagingRelatedCodesList,
+    ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "rcdmobservationstaging",
+        valueSetUuid = "65c3303c-298e-4276-abda-4849b5f77bde",
+        version = "2"
+    )
 )

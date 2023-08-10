@@ -11,7 +11,9 @@ import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 
 val tenantSourceConditionExtension = listOf(
     Extension(
@@ -66,7 +68,7 @@ val healthConcernCategory =
         code of Code("health-concern")
     }
 
-val possibleConditionCodes = listOf(
+val possibleConditionCodesList = listOf(
     coding {
         system of "http://hl7.org/fhir/sid/icd-10-cm"
         version of "2023"
@@ -367,4 +369,13 @@ val possibleConditionCodes = listOf(
         code of Code("442327001")
         display of "Twin liveborn born in hospital (situation)"
     }
+)
+val possibleConditionCodes = ValueSetList(
+    possibleConditionCodesList,
+    ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "RoninConditionCode",
+        valueSetUuid = "201ad507-64f7-4429-810f-94bdbd51f80a",
+        version = "4"
+    )
 )

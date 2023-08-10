@@ -22,8 +22,10 @@ import com.projectronin.interop.fhir.ronin.generators.resource.referenceData
 import com.projectronin.interop.fhir.ronin.generators.util.generateCodeableConcept
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 
 /**
  * Helps generate ronin blood pressure observation profile, applies meta and randomly generates an
@@ -35,7 +37,7 @@ fun rcdmObservationBloodPressure(tenant: String, block: ObservationGenerator.() 
         meta of rcdmMeta(RoninProfile.OBSERVATION_BLOOD_PRESSURE, tenant) {}
         extension of tenantBloodPressureSourceExtension
         category of listOf(codeableConcept { coding of vitalSignsCategory })
-        code of generateCodeableConcept(code.generate(), possibleBloodPressureCodes.random())
+        code of generateCodeableConcept(code.generate(), possibleBloodPressureCodes.codes.random())
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
         component of bloodPressureComponent
     }
@@ -55,7 +57,7 @@ fun Patient.rcdmObservationBloodPressure(block: ObservationGenerator.() -> Unit)
     }
 }
 
-val possibleBloodPressureCodes = listOf(
+val possibleBloodPressureCodesList = listOf(
     coding {
         system of "http://loinc.org"
         version of "2.74"
@@ -87,6 +89,16 @@ val possibleBloodPressureCodes = listOf(
         display of "Orthostatic blood pressure panel"
     }
 )
+val possibleBloodPressureCodes =
+    ValueSetList(
+        possibleBloodPressureCodesList,
+        ValueSetMetadata(
+            registryEntryType = "value-set",
+            valueSetName = "bloodpressurepanel",
+            valueSetUuid = "64baa785-ba8a-448f-8714-93d57fd64db5",
+            version = "1"
+        )
+    )
 
 val bloodPressureComponent = listOf(
     ObservationComponent(

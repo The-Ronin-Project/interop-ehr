@@ -30,9 +30,12 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.ConceptMapCoding
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -58,6 +61,18 @@ class RoninAppointmentTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
+    private val conceptMapMetadata = ConceptMapMetadata(
+        registryEntryType = "concept-map",
+        conceptMapName = "test-concept-map",
+        conceptMapUuid = "573b456efca5-03d51d53-1a31-49a9-af74",
+        version = "1"
+    )
+    private val valueSetMetadata = ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "test-value-set",
+        valueSetUuid = "03d51d53-1a31-49a9-af74-573b456efca5",
+        version = "2"
+    )
 
     @BeforeEach
     fun setup() {
@@ -315,7 +330,7 @@ class RoninAppointmentTest {
                 AppointmentStatus::class,
                 RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
-        } returns Pair(statusCoding("cancelled"), statusExtension("cancelled"))
+        } returns ConceptMapCoding(statusCoding("cancelled"), statusExtension("cancelled"), listOf(conceptMapMetadata))
 
         val (transformed, validation) = roninAppointment.transform(appointment, tenant)
         validation.alertIfErrors()
@@ -442,7 +457,7 @@ class RoninAppointmentTest {
                 AppointmentStatus::class,
                 RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
-        } returns Pair(statusCoding("cancelled"), statusExtension("cancelled"))
+        } returns ConceptMapCoding(statusCoding("cancelled"), statusExtension("cancelled"), listOf(conceptMapMetadata))
 
         val (transformed, validation) = roninAppointment.transform(appointment, tenant)
         validation.alertIfErrors()
@@ -549,7 +564,7 @@ class RoninAppointmentTest {
                 AppointmentStatus::class,
                 RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
-        } returns Pair(statusCoding("cancelled"), statusExtension("cancelled"))
+        } returns ConceptMapCoding(statusCoding("cancelled"), statusExtension("cancelled"), listOf(conceptMapMetadata))
 
         val (transformed, _) = roninAppointment.transform(appointment, tenant)
         assertNull(transformed)
@@ -926,7 +941,7 @@ class RoninAppointmentTest {
                 AppointmentStatus::class,
                 RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
-        } returns Pair(statusCoding("cancelled"), statusExtension("abc"))
+        } returns ConceptMapCoding(statusCoding("cancelled"), statusExtension("abc"), listOf(conceptMapMetadata))
 
         val (transformed, validation) = roninAppointment.transform(appointment, tenant)
         validation.alertIfErrors()
@@ -1057,7 +1072,7 @@ class RoninAppointmentTest {
                 AppointmentStatus::class,
                 RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
-        } returns Pair(
+        } returns ConceptMapCoding(
             Coding(
                 system = Uri("http://projectronin.io/fhir/CodeSystem/AppointmentStatus"),
                 code = Code(value = "cancelled")
@@ -1068,7 +1083,8 @@ class RoninAppointmentTest {
                     DynamicValueType.CODING,
                     value = sourceCoding
                 )
-            )
+            ),
+            listOf(conceptMapMetadata)
         )
 
         val (transformed, validation) = roninAppointment.transform(appointment, tenant)
@@ -1135,7 +1151,7 @@ class RoninAppointmentTest {
                 AppointmentStatus::class,
                 RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
-        } returns Pair(statusCoding("booked"), statusExtension("cancelled"))
+        } returns ConceptMapCoding(statusCoding("booked"), statusExtension("cancelled"), listOf(conceptMapMetadata))
 
         val (transformed, _) = roninAppointment.transform(appointment, tenant)
         assertNull(transformed)
@@ -1186,7 +1202,7 @@ class RoninAppointmentTest {
                 AppointmentStatus::class,
                 RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
             )
-        } returns Pair(statusCoding("waitlist"), statusExtension("proposed"))
+        } returns ConceptMapCoding(statusCoding("waitlist"), statusExtension("proposed"), listOf(conceptMapMetadata))
 
         val (transformed, _) = roninAppointment.transform(appointment, tenant)
         assertNull(transformed)

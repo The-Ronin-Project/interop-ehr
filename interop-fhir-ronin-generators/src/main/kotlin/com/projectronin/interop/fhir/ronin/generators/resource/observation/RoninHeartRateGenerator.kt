@@ -13,7 +13,9 @@ import com.projectronin.interop.fhir.ronin.generators.util.generateEffectiveDate
 import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 
 /**
  * Helps generate ronin heart rate observation profile, applies meta and randomly generates an
@@ -25,7 +27,7 @@ fun rcdmObservationHeartRate(tenant: String, block: ObservationGenerator.() -> U
         meta of rcdmMeta(RoninProfile.OBSERVATION_HEART_RATE, tenant) {}
         extension of generateExtension(extension.generate(), tenantSourceExtension)
         category of listOf(codeableConcept { coding of vitalSignsCategory })
-        code of generateCodeableConcept(code.generate(), possibleHeartRateCodes.random())
+        code of generateCodeableConcept(code.generate(), possibleHeartRateCodes.codes.random())
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
         effective of generateEffectiveDateTime(effective.generate(), possibleDateTime)
     }
@@ -45,23 +47,31 @@ fun Patient.rcdmObservationHeartRate(block: ObservationGenerator.() -> Unit): Ob
     }
 }
 
-val possibleHeartRateCodes = listOf(
-    coding {
-        system of "http://loinc.org"
-        version of "2.74"
-        code of Code("8867-4")
-        display of "Heart rate"
-    },
-    coding {
-        system of "http://loinc.org"
-        version of "2.74"
-        code of Code("76477-9")
-        display of "Heart rate by Noninvasive"
-    },
-    coding {
-        system of "http://loinc.org"
-        version of "2.74"
-        code of Code("11328-2")
-        display of "Heart rate at First encounter"
-    }
+val possibleHeartRateCodes = ValueSetList(
+    listOf(
+        coding {
+            system of "http://loinc.org"
+            version of "2.74"
+            code of Code("8867-4")
+            display of "Heart rate"
+        },
+        coding {
+            system of "http://loinc.org"
+            version of "2.74"
+            code of Code("76477-9")
+            display of "Heart rate by Noninvasive"
+        },
+        coding {
+            system of "http://loinc.org"
+            version of "2.74"
+            code of Code("11328-2")
+            display of "Heart rate at First encounter"
+        }
+    ),
+    ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "heartratenoninvasive",
+        valueSetUuid = "809f547e-cb7e-438f-84af-8852d586c718",
+        version = "2"
+    )
 )

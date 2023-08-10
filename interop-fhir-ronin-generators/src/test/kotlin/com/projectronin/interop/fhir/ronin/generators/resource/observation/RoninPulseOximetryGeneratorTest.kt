@@ -14,8 +14,10 @@ import com.projectronin.interop.fhir.ronin.generators.resource.rcdmPatient
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninPulseOximetry
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -32,11 +34,27 @@ class RoninPulseOximetryGeneratorTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
-    private val flowRateCoding = listOf(
-        Coding(system = CodeSystem.LOINC.uri, code = Code("3151-8"))
+    private val flowRateCoding = ValueSetList(
+        listOf(
+            Coding(system = CodeSystem.LOINC.uri, code = Code("3151-8"))
+        ),
+        ValueSetMetadata(
+            registryEntryType = "value-set",
+            valueSetName = "inhaledoxygenflowrate",
+            valueSetUuid = "44bf0223-00e1-4424-89ee-048a2f8dbf7d",
+            version = "2"
+        )
     )
-    private val concentrationCoding = listOf(
-        Coding(system = CodeSystem.LOINC.uri, code = Code("3150-0"))
+    private val concentrationCoding = ValueSetList(
+        listOf(
+            Coding(system = CodeSystem.LOINC.uri, code = Code("3150-0"))
+        ),
+        ValueSetMetadata(
+            registryEntryType = "value-set",
+            valueSetName = "inhaledoxygenconcentration",
+            valueSetUuid = "74e038f6-d57c-483e-90cb-215af0a5e0ed",
+            version = "2"
+        )
     )
 
     @BeforeEach

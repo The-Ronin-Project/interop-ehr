@@ -13,10 +13,13 @@ import com.projectronin.interop.fhir.r4.resource.Organization
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
+import com.projectronin.interop.fhir.ronin.normalization.ConceptMapCoding
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.resource.RoninPatient
+import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -65,6 +68,18 @@ class RoninContactPointTest {
     private val emailUse = Code(
         value = emailUseValue,
         extension = listOf(Extension(url = emailUseExtensionUri, value = emailUseExtensionValue))
+    )
+    private val conceptMapMetadata = ConceptMapMetadata(
+        registryEntryType = "concept-map",
+        conceptMapName = "test-concept-map",
+        conceptMapUuid = "573b456efca5-03d51d53-1a31-49a9-af74",
+        version = "1"
+    )
+    private val valueSetMetadata = ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "test-value-set",
+        valueSetUuid = "03d51d53-1a31-49a9-af74-573b456efca5",
+        version = "2"
     )
 
     @BeforeEach
@@ -132,7 +147,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("phone"), systemExtension("abc"))
+            } returns ConceptMapCoding(systemCoding("phone"), systemExtension("abc"), listOf(conceptMapMetadata))
         }
         roninContactPoint = RoninContactPoint(registryClient)
         val telecom = listOf(ContactPoint(system = Code("abc"), value = "8675309".asFHIR()))
@@ -221,7 +236,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("postal"), systemExtension("xyz"))
+            } returns ConceptMapCoding(systemCoding("postal"), systemExtension("xyz"), listOf(conceptMapMetadata))
         }
         roninContactPoint = RoninContactPoint(registryClient)
         val telecom = listOf(ContactPoint(system = Code("xyz"), value = "8675309".asFHIR()))
@@ -297,7 +312,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("phone"), systemExtension(""))
+            } returns ConceptMapCoding(systemCoding("phone"), systemExtension(""), listOf(conceptMapMetadata))
         }
         roninContactPoint = RoninContactPoint(registryClient)
         val telecom = listOf(ContactPoint(system = Code(""), value = "8675309".asFHIR()))
@@ -348,7 +363,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("email"), systemExtension("email"))
+            } returns ConceptMapCoding(systemCoding("email"), systemExtension("email"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -360,7 +375,7 @@ class RoninContactPointTest {
                     ContactPointUse::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
-            } returns Pair(useCoding("home"), useExtension("planet"))
+            } returns ConceptMapCoding(useCoding("home"), useExtension("planet"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -435,7 +450,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("email"), systemExtension("email"))
+            } returns ConceptMapCoding(systemCoding("email"), systemExtension("email"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -509,7 +524,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("email"), systemExtension("email"))
+            } returns ConceptMapCoding(systemCoding("email"), systemExtension("email"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -521,7 +536,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("phone"), systemExtension("telephone"))
+            } returns ConceptMapCoding(systemCoding("phone"), systemExtension("telephone"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -533,7 +548,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("phone"), systemExtension("phone"))
+            } returns ConceptMapCoding(systemCoding("phone"), systemExtension("phone"), listOf(conceptMapMetadata))
         }
         roninContactPoint = RoninContactPoint(registryClient)
         val telecom = listOf(
@@ -617,7 +632,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("phone"), systemExtension("phone"))
+            } returns ConceptMapCoding(systemCoding("phone"), systemExtension("phone"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -629,7 +644,7 @@ class RoninContactPointTest {
                     ContactPointUse::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
-            } returns Pair(useCoding("home"), useExtension("def"))
+            } returns ConceptMapCoding(useCoding("home"), useExtension("def"), listOf(conceptMapMetadata))
         }
         roninContactPoint = RoninContactPoint(registryClient)
         val telecom = listOf(ContactPoint(system = Code("phone"), value = "8675309".asFHIR(), use = Code("def")))
@@ -701,7 +716,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("email"), systemExtension("email"))
+            } returns ConceptMapCoding(systemCoding("email"), systemExtension("email"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -750,7 +765,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("email"), systemExtension("email"))
+            } returns ConceptMapCoding(systemCoding("email"), systemExtension("email"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -762,7 +777,7 @@ class RoninContactPointTest {
                     ContactPointUse::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
-            } returns Pair(useCoding("postal"), useExtension("xyz"))
+            } returns ConceptMapCoding(useCoding("postal"), useExtension("xyz"), listOf(conceptMapMetadata))
         }
         roninContactPoint = RoninContactPoint(registryClient)
         val telecom = listOf(ContactPoint(system = Code("email"), value = "8675309".asFHIR(), use = Code("xyz")))
@@ -799,7 +814,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("email"), systemExtension("email"))
+            } returns ConceptMapCoding(systemCoding("email"), systemExtension("email"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -850,7 +865,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("email"), systemExtension("email"))
+            } returns ConceptMapCoding(systemCoding("email"), systemExtension("email"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -862,7 +877,7 @@ class RoninContactPointTest {
                     ContactPointUse::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
-            } returns Pair(useCoding("home"), useExtension(""))
+            } returns ConceptMapCoding(useCoding("home"), useExtension(""), listOf(conceptMapMetadata))
         }
         roninContactPoint = RoninContactPoint(registryClient)
         val telecom = listOf(ContactPoint(system = Code("email"), value = "8675309".asFHIR(), use = Code("")))
@@ -934,7 +949,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("email"), systemExtension("email"))
+            } returns ConceptMapCoding(systemCoding("email"), systemExtension("email"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -946,7 +961,7 @@ class RoninContactPointTest {
                     ContactPointUse::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
-            } returns Pair(useCoding("home"), useExtension("planet"))
+            } returns ConceptMapCoding(useCoding("home"), useExtension("planet"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -1021,7 +1036,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("email"), systemExtension("email"))
+            } returns ConceptMapCoding(systemCoding("email"), systemExtension("email"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -1033,7 +1048,7 @@ class RoninContactPointTest {
                     ContactPointUse::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
-            } returns Pair(useCoding("abc"), useExtension("planet"))
+            } returns ConceptMapCoding(useCoding("abc"), useExtension("planet"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -1045,7 +1060,7 @@ class RoninContactPointTest {
                     ContactPointUse::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
-            } returns Pair(useCoding("def"), useExtension("city"))
+            } returns ConceptMapCoding(useCoding("def"), useExtension("city"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -1069,7 +1084,7 @@ class RoninContactPointTest {
                     ContactPointUse::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
-            } returns Pair(useCoding("home"), useExtension("home"))
+            } returns ConceptMapCoding(useCoding("home"), useExtension("home"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -1081,7 +1096,7 @@ class RoninContactPointTest {
                     ContactPointUse::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
-            } returns Pair(useCoding("work"), useExtension("work"))
+            } returns ConceptMapCoding(useCoding("work"), useExtension("work"), listOf(conceptMapMetadata))
         }
 
         roninContactPoint = RoninContactPoint(registryClient)
@@ -1125,7 +1140,7 @@ class RoninContactPointTest {
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
                 )
-            } returns Pair(systemCoding("email"), systemExtension("email"))
+            } returns ConceptMapCoding(systemCoding("email"), systemExtension("email"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -1137,7 +1152,7 @@ class RoninContactPointTest {
                     ContactPointUse::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
-            } returns Pair(useCoding("home"), useExtension("planet"))
+            } returns ConceptMapCoding(useCoding("home"), useExtension("planet"), listOf(conceptMapMetadata))
             every {
                 getConceptMappingForEnum(
                     tenant,
@@ -1149,7 +1164,7 @@ class RoninContactPointTest {
                     ContactPointUse::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_USE.value
                 )
-            } returns Pair(useCoding("home"), useExtension("city"))
+            } returns ConceptMapCoding(useCoding("home"), useExtension("city"), listOf(conceptMapMetadata))
         }
         roninContactPoint = RoninContactPoint(registryClient)
         val telecom = listOf(

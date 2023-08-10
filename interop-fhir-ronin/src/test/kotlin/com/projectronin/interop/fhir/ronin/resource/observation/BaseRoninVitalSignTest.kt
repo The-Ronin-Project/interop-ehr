@@ -23,9 +23,11 @@ import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -68,10 +70,17 @@ class BaseRoninVitalSignTest {
             bodyHeightConcept
         )
     )
+
+    private val valueSetMetadata = ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "test-value-set",
+        valueSetUuid = "03d51d53-1a31-49a9-af74-573b456efca5",
+        version = "2"
+    )
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_HEIGHT.value)
-        } returns bodyHeightCoding
+        } returns ValueSetList(bodyHeightCoding, valueSetMetadata)
     }
     private val roninVitalSign = RoninBodyHeight(normalizer, localizer, normRegistryClient)
 

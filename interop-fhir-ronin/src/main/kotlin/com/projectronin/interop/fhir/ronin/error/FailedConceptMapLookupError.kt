@@ -1,5 +1,6 @@
 package com.projectronin.interop.fhir.ronin.error
 
+import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
@@ -13,20 +14,23 @@ import kotlin.reflect.KProperty1
 class FailedConceptMapLookupError(
     actualLocation: LocationContext,
     sourceValue: String,
-    conceptMapName: String
+    conceptMapName: String,
+    metadata: List<ConceptMapMetadata>? = listOf()
 ) :
     FHIRError(
         "NOV_CONMAP_LOOKUP",
         ValidationIssueSeverity.ERROR,
         "Tenant source value '$sourceValue' has no target defined in $conceptMapName",
-        actualLocation
+        actualLocation,
+        metadata
     ) {
     /**
      * Creates an FailedConceptMapLookupError based off an explicit property.
      */
-    constructor(actualLocation: KProperty1<*, *>, sourceValue: String, conceptMapName: String) : this(
+    constructor(actualLocation: KProperty1<*, *>, sourceValue: String, conceptMapName: String, metadata: List<ConceptMapMetadata>?) : this(
         LocationContext(actualLocation),
         sourceValue,
-        conceptMapName
+        conceptMapName,
+        metadata
     )
 }

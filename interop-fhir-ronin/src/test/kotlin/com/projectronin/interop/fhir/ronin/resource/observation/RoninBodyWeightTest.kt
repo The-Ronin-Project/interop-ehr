@@ -29,11 +29,15 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.ConceptMapCodeableConcept
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
+import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -102,6 +106,18 @@ class RoninBodyWeightTest {
     private val vitalSignsCategoryCodingList = listOf(vitalSignsCategoryCoding)
     private val vitalSignsCategoryConcept = CodeableConcept(coding = vitalSignsCategoryCodingList)
     private val vitalSignsCategoryConceptList = listOf(vitalSignsCategoryConcept)
+    private val conceptMapMetadata = ConceptMapMetadata(
+        registryEntryType = "concept-map",
+        conceptMapName = "test-concept-map",
+        conceptMapUuid = "573b456efca5-03d51d53-1a31-49a9-af74",
+        version = "1"
+    )
+    private val valueSetMetadata = ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "test-value-set",
+        valueSetUuid = "03d51d53-1a31-49a9-af74-573b456efca5",
+        version = "2"
+    )
 
     // In this registry:
     // Raw tenantTemperatureAreaCoding is successfully mapped to bodyWeightCoding.
@@ -109,7 +125,7 @@ class RoninBodyWeightTest {
     private val normRegistryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_WEIGHT.value)
-        } returns bodyWeightCodingList
+        } returns ValueSetList(bodyWeightCodingList, valueSetMetadata)
         every {
             getConceptMapping(
                 tenant,
@@ -123,7 +139,7 @@ class RoninBodyWeightTest {
                 "Observation.code",
                 tenantBodyWeightConcept
             )
-        } returns Pair(bodyWeightConcept, tenantBodyWeightSourceExtension)
+        } returns ConceptMapCodeableConcept(bodyWeightConcept, tenantBodyWeightSourceExtension, listOf(conceptMapMetadata))
         every {
             getConceptMapping(
                 tenant,

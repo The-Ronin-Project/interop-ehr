@@ -30,9 +30,11 @@ import com.projectronin.interop.fhir.r4.valueset.DocumentRelationshipType
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.ConceptMapCodeableConcept
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -94,6 +96,12 @@ class RoninDocumentReferenceTest {
             value = tenantDocRefTypeConcept
         )
     )
+    private val docRefTypeMetadata = ConceptMapMetadata(
+        registryEntryType = "concept-map",
+        conceptMapName = "docreference",
+        conceptMapUuid = "2c353c65-e4d7-4932-b518-7bc42d98772d",
+        version = "1"
+    )
     private val documentReferenceExtension = listOf(tenantDocRefTypeExtension)
 
     // registry and profile
@@ -111,14 +119,14 @@ class RoninDocumentReferenceTest {
                 "DocumentReference.type",
                 tenantDocRefTypeConcept
             )
-        } returns Pair(docRefTypeConcept, tenantDocRefTypeExtension)
+        } returns ConceptMapCodeableConcept(docRefTypeConcept, tenantDocRefTypeExtension, listOf(docRefTypeMetadata))
         every {
             getConceptMapping(
                 tenant,
                 "DocumentReference.type",
                 CodeableConcept(text = "bad".asFHIR())
             )
-        } returns Pair(CodeableConcept(text = "worse".asFHIR()), tenantDocRefTypeExtension)
+        } returns ConceptMapCodeableConcept(CodeableConcept(text = "worse".asFHIR()), tenantDocRefTypeExtension, listOf(docRefTypeMetadata))
     }
     private val roninDocumentReference = RoninDocumentReference(normalizer, localizer, registryClient)
 

@@ -5,7 +5,6 @@ import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
 import com.projectronin.interop.fhir.generators.datatypes.coding
 import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.r4.CodeSystem
-import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
@@ -35,7 +34,7 @@ class bodyWeight(
     localizer,
     registryClient
 ) {
-    override fun qualifyingCodes(): List<Coding> = possibleBodyWeightCodes
+    override fun qualifyingCodes() = possibleBodyWeightCodes
 }
 class RoninBodyWeightGeneratorTest {
     private lateinit var roninBodyWeight: RoninBodyWeight

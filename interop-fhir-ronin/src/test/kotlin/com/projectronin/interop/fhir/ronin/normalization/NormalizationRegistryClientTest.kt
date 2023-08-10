@@ -16,6 +16,8 @@ import com.projectronin.interop.fhir.r4.resource.ValueSet
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
+import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -483,6 +485,18 @@ class NormalizationRegistryClientTest {
           }
         }        
     """.trimIndent()
+    private val conceptMapMetadata = ConceptMapMetadata(
+        registryEntryType = "concept-map",
+        conceptMapName = "test-concept-map",
+        conceptMapUuid = "573b456efca5-03d51d53-1a31-49a9-af74",
+        version = "1"
+    )
+    private val valueSetMetadata = ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "test-value-set",
+        valueSetUuid = "03d51d53-1a31-49a9-af74-573b456efca5",
+        version = "2"
+    )
 
     @BeforeEach
     fun setUp() {
@@ -605,10 +619,10 @@ class NormalizationRegistryClientTest {
             "Appointment.status",
             coding1
         )!!
-        assertEquals(mapping1.first.code!!.value, "targetValueAAA")
-        assertEquals(mapping1.first.system!!.value, "targetSystemAAA")
-        assertEquals(mapping1.second.url!!.value, "ext1")
-        assertEquals(mapping1.second.value!!.value, coding1)
+        assertEquals(mapping1.coding.code!!.value, "targetValueAAA")
+        assertEquals(mapping1.coding.system!!.value, "targetSystemAAA")
+        assertEquals(mapping1.extension.url!!.value, "ext1")
+        assertEquals(mapping1.extension.value!!.value, coding1)
         val coding2 = Coding(
             code = Code(value = "sourceValue2"),
             system = Uri(value = "sourceSystem2")
@@ -619,10 +633,10 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.use",
                 coding2
             )!!
-        assertEquals(mapping2.first.code!!.value, "targetValue222")
-        assertEquals(mapping2.first.system!!.value, "targetSystem222")
-        assertEquals(mapping2.second.url!!.value, "ext2")
-        assertEquals(mapping2.second.value!!.value, coding2)
+        assertEquals(mapping2.coding.code!!.value, "targetValue222")
+        assertEquals(mapping2.coding.system!!.value, "targetSystem222")
+        assertEquals(mapping2.extension.url!!.value, "ext2")
+        assertEquals(mapping2.extension.value!!.value, coding2)
     }
 
     @Test
@@ -654,14 +668,14 @@ class NormalizationRegistryClientTest {
         mapping!!
         assertEquals(
             coding,
-            mapping.first
+            mapping.coding
         )
         assertEquals(
             Extension(
                 url = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri,
                 value = DynamicValue(DynamicValueType.CODING, value = coding)
             ),
-            mapping.second
+            mapping.extension
         )
     }
 
@@ -689,7 +703,8 @@ class NormalizationRegistryClientTest {
                     text = "good-or-bad-for-enum, not validated here"
                 )
 
-            )
+            ),
+            metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
             NormalizationRegistryItem.RegistryType.ConceptMap,
@@ -713,14 +728,14 @@ class NormalizationRegistryClientTest {
                 display = "good-or-bad-for-enum".asFHIR(),
                 version = "1".asFHIR()
             ),
-            mapping.first
+            mapping.coding
         )
         assertEquals(
             Extension(
                 url = Uri("ext1"),
                 value = DynamicValue(DynamicValueType.CODING, value = coding)
             ),
-            mapping.second
+            mapping.extension
         )
     }
 
@@ -731,7 +746,7 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system",
                 "specialAppointment"
             )
-        assertTrue(mapping.isEmpty())
+        assertTrue(mapping.codes.isEmpty())
     }
 
     @Test
@@ -759,6 +774,18 @@ class NormalizationRegistryClientTest {
                 resource_type = "Patient",
                 profile_url = "specialPatient"
             )
+        )
+        val valueSetMetadata1 = ValueSetMetadata(
+            registryEntryType = "value-set",
+            valueSetName = "AppointmentStatus",
+            valueSetUuid = "vs-333",
+            version = "1"
+        )
+        val valueSetMetadata2 = ValueSetMetadata(
+            registryEntryType = "value-set",
+            valueSetName = "PatientTelecomUse",
+            valueSetUuid = "vs-4444",
+            version = "1"
         )
         val mockkSet1 = mockk<ValueSet> {
             every { expansion?.contains } returns listOf(
@@ -788,28 +815,39 @@ class NormalizationRegistryClientTest {
         every { JacksonUtil.readJsonObject("setJson2", ValueSet::class) } returns mockkSet2
 
         val valueSet1 = client.getValueSet("Appointment.status", "specialAppointment")
-        val expectedCoding1 = Coding(
-            system = Uri(value = "system1"),
-            code = Code(value = "code1"),
-            display = FHIRString(value = "display1"),
-            version = FHIRString(value = "version1")
+        val expectedCoding1 = ValueSetList(
+            listOf(
+                Coding(
+                    system = Uri(value = "system1"),
+                    code = Code(value = "code1"),
+                    display = FHIRString(value = "display1"),
+                    version = FHIRString(value = "version1")
+                )
+            ),
+            valueSetMetadata1
         )
-        assertEquals(valueSet1, listOf(expectedCoding1))
+        assertEquals(valueSet1, expectedCoding1)
 
         val valueSet2 = client.getValueSet("Patient.telecom.use", "specialPatient")
-        val expectedCoding2 = Coding(
-            system = Uri(value = "system2"),
-            code = Code(value = "code2"),
-            display = FHIRString(value = "display2"),
-            version = FHIRString(value = "version2")
+        val expectedCoding2 = ValueSetList(
+            listOf(
+                Coding(
+                    system = Uri(value = "system2"),
+                    code = Code(value = "code2"),
+                    display = FHIRString(value = "display2"),
+                    version = FHIRString(value = "version2")
+                )
+            ),
+            valueSetMetadata2
         )
-        assertEquals(valueSet2, listOf(expectedCoding2))
+        assertEquals(valueSet2, expectedCoding2)
     }
 
     @Test
     fun `getValueSet with special profile match`() {
         val registry1 = ValueSetItem(
-            set = listOf(TargetValue("code1", "system1", "display1", "version1"))
+            set = listOf(TargetValue("code1", "system1", "display1", "version1")),
+            metadata = valueSetMetadata
         )
         val key = CacheKey(
             NormalizationRegistryItem.RegistryType.ValueSet,
@@ -825,14 +863,15 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system",
                 "specialPatient"
             )
-        assertEquals(1, mapping.size)
-        assertEquals(Code("code1"), mapping[0].code)
+        assertEquals(1, mapping.codes.size)
+        assertEquals(Code("code1"), mapping.codes[0].code)
     }
 
     @Test
     fun `universal getRequiredValueSet with profile match`() {
         val registry1 = ValueSetItem(
-            set = listOf(TargetValue("code1", "system1", "display1", "version1"))
+            set = listOf(TargetValue("code1", "system1", "display1", "version1")),
+            metadata = valueSetMetadata
         )
         val key = CacheKey(
             NormalizationRegistryItem.RegistryType.ValueSet,
@@ -847,8 +886,8 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system",
                 "specialPatient"
             )
-        assertEquals(1, actualValueSet.size)
-        assertEquals(Code("code1"), actualValueSet[0].code)
+        assertEquals(1, actualValueSet.codes.size)
+        assertEquals(Code("code1"), actualValueSet.codes[0].code)
     }
 
     @Test
@@ -865,7 +904,8 @@ class NormalizationRegistryClientTest {
     fun `getConceptMapping for Coding with no system`() {
         val registry = ConceptMapItem(
             source_extension_url = "ext-AB",
-            map = mapAB
+            map = mapAB,
+            metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
             NormalizationRegistryItem.RegistryType.ConceptMap,
@@ -891,7 +931,8 @@ class NormalizationRegistryClientTest {
     fun `getConceptMapping for Coding with no value`() {
         val registry = ConceptMapItem(
             source_extension_url = "ext-AB",
-            map = mapAB
+            map = mapAB,
+            metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
             NormalizationRegistryItem.RegistryType.ConceptMap,
@@ -917,7 +958,8 @@ class NormalizationRegistryClientTest {
     fun `getConceptMapping for Coding - correctly selects 1 entry from many in same map`() {
         val registry = ConceptMapItem(
             source_extension_url = "ext-AB",
-            map = mapAB
+            map = mapAB,
+            metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
             NormalizationRegistryItem.RegistryType.ConceptMap,
@@ -951,11 +993,11 @@ class NormalizationRegistryClientTest {
         )
         assertEquals(
             targetCoding1,
-            mappedResult1?.first
+            mappedResult1?.coding
         )
         assertEquals(
             targetSourceExtension1,
-            mappedResult1?.second
+            mappedResult1?.extension
         )
 
         val sourceCoding2 = Coding(
@@ -982,11 +1024,11 @@ class NormalizationRegistryClientTest {
         )
         assertEquals(
             targetCoding2,
-            mappedResult2?.first
+            mappedResult2?.coding
         )
         assertEquals(
             targetSourceExtension2,
-            mappedResult2?.second
+            mappedResult2?.extension
         )
     }
 
@@ -994,7 +1036,8 @@ class NormalizationRegistryClientTest {
     fun `getConceptMapping for Coding - map found - contains no matching code`() {
         val registry1 = ConceptMapItem(
             source_extension_url = "sourceExtensionUrl",
-            map = mapA
+            map = mapA,
+            metadata = listOf(conceptMapMetadata)
         )
         val key1hr = CacheKey(
             NormalizationRegistryItem.RegistryType.ConceptMap,
@@ -1129,10 +1172,10 @@ class NormalizationRegistryClientTest {
             "Appointment.status",
             concept1
         )!!
-        assertEquals(mapping1.first.coding.first().code!!.value, "targetValueAAA")
-        assertEquals(mapping1.first.coding.first().system!!.value, "targetSystemAAA")
-        assertEquals(mapping1.second.url!!.value, "ext1")
-        assertEquals(mapping1.second.value!!.value, concept1)
+        assertEquals(mapping1.codeableConcept.coding.first().code!!.value, "targetValueAAA")
+        assertEquals(mapping1.codeableConcept.coding.first().system!!.value, "targetSystemAAA")
+        assertEquals(mapping1.extension.url!!.value, "ext1")
+        assertEquals(mapping1.extension.value!!.value, concept1)
         val coding2 = Coding(
             code = Code(value = "sourceValue2"),
             system = Uri(value = "sourceSystem2")
@@ -1146,17 +1189,18 @@ class NormalizationRegistryClientTest {
             "Patient.telecom.use",
             concept2
         )!!
-        assertEquals(mapping2.first.coding.first().code!!.value, "targetValue222")
-        assertEquals(mapping2.first.coding.first().system!!.value, "targetSystem222")
-        assertEquals(mapping2.second.url!!.value, "ext2")
-        assertEquals(mapping2.second.value!!.value, concept2)
+        assertEquals(mapping2.codeableConcept.coding.first().code!!.value, "targetValue222")
+        assertEquals(mapping2.codeableConcept.coding.first().system!!.value, "targetSystem222")
+        assertEquals(mapping2.extension.url!!.value, "ext2")
+        assertEquals(mapping2.extension.value!!.value, concept2)
     }
 
     @Test
     fun `getConceptMapping for CodeableConcept - correctly selects 1 entry from many in same map`() {
         val registry = ConceptMapItem(
             source_extension_url = "ext-AB",
-            map = mapAB
+            map = mapAB,
+            metadata = listOf(conceptMapMetadata)
         )
         val key = CacheKey(
             NormalizationRegistryItem.RegistryType.ConceptMap,
@@ -1195,11 +1239,11 @@ class NormalizationRegistryClientTest {
         )
         assertEquals(
             targetConcept1,
-            mappedResult1?.first
+            mappedResult1?.codeableConcept
         )
         assertEquals(
             targetSourceExtension1,
-            mappedResult1?.second
+            mappedResult1?.extension
         )
 
         val sourceCoding2 = Coding(
@@ -1231,11 +1275,11 @@ class NormalizationRegistryClientTest {
         )
         assertEquals(
             targetConcept2,
-            mappedResult2?.first
+            mappedResult2?.codeableConcept
         )
         assertEquals(
             targetSourceExtension2,
-            mappedResult2?.second
+            mappedResult2?.extension
         )
     }
 
@@ -1243,7 +1287,8 @@ class NormalizationRegistryClientTest {
     fun `getConceptMapping for CodeableConcept - map found - contains no matching code`() {
         val registry1 = ConceptMapItem(
             source_extension_url = "sourceExtensionUrl",
-            map = mapA
+            map = mapA,
+            metadata = listOf(conceptMapMetadata)
         )
         val key1hr = CacheKey(
             NormalizationRegistryItem.RegistryType.ConceptMap,
@@ -1289,7 +1334,8 @@ class NormalizationRegistryClientTest {
                         )
                     )
                 )
-            )
+            ),
+            metadata = listOf(conceptMapMetadata)
         )
         val key1 = CacheKey(
             NormalizationRegistryItem.RegistryType.ConceptMap,
@@ -1332,11 +1378,11 @@ class NormalizationRegistryClientTest {
         )
         assertEquals(
             targetConcept,
-            mappedResult?.first
+            mappedResult?.codeableConcept
         )
         assertEquals(
             targetSourceExtension,
-            mappedResult?.second
+            mappedResult?.extension
         )
     }
 
@@ -1505,13 +1551,13 @@ class NormalizationRegistryClientTest {
             "Observation.code",
             concept1
         )!!
-        assertEquals("targetTextBBB", mapping1.first.text!!.value)
-        assertEquals(1, mapping1.first.coding.size)
-        assertEquals("targetSystem-1", mapping1.first.coding[0].system!!.value)
-        assertEquals("targetValueBBB", mapping1.first.coding[0].code!!.value)
-        assertEquals("targetDisplayBBB", mapping1.first.coding[0].display!!.value)
-        assertEquals("ObservationCode-1", mapping1.second.url!!.value)
-        assertEquals(concept1, mapping1.second.value!!.value)
+        assertEquals("targetTextBBB", mapping1.codeableConcept.text!!.value)
+        assertEquals(1, mapping1.codeableConcept.coding.size)
+        assertEquals("targetSystem-1", mapping1.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueBBB", mapping1.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayBBB", mapping1.codeableConcept.coding[0].display!!.value)
+        assertEquals("ObservationCode-1", mapping1.extension.url!!.value)
+        assertEquals(concept1, mapping1.extension.value!!.value)
         val coding2 = Coding(
             code = Code(value = "sourceValueZ"),
             system = Uri(value = "system-AllVitals-2")
@@ -1525,13 +1571,13 @@ class NormalizationRegistryClientTest {
             "Observation.code",
             concept2
         )!!
-        assertEquals("targetTextZZZ", mapping2.first.text!!.value)
-        assertEquals(1, mapping2.first.coding.size)
-        assertEquals("targetSystem-2", mapping2.first.coding[0].system!!.value)
-        assertEquals("targetValueZZZ", mapping2.first.coding[0].code!!.value)
-        assertEquals("targetDisplayZZZ", mapping2.first.coding[0].display!!.value)
-        assertEquals("ObservationCode-1", mapping2.second.url!!.value)
-        assertEquals(concept2, mapping2.second.value!!.value)
+        assertEquals("targetTextZZZ", mapping2.codeableConcept.text!!.value)
+        assertEquals(1, mapping2.codeableConcept.coding.size)
+        assertEquals("targetSystem-2", mapping2.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueZZZ", mapping2.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayZZZ", mapping2.codeableConcept.coding[0].display!!.value)
+        assertEquals("ObservationCode-1", mapping2.extension.url!!.value)
+        assertEquals(concept2, mapping2.extension.value!!.value)
         val coding3 = Coding(
             code = Code(value = "sourceValueC"),
             system = Uri(value = "system-HeartRate-3")
@@ -1545,13 +1591,13 @@ class NormalizationRegistryClientTest {
             "Observation.code",
             concept3
         )!!
-        assertEquals("targetTextCCC", mapping3.first.text!!.value)
-        assertEquals(1, mapping3.first.coding.size)
-        assertEquals("targetSystem-3", mapping3.first.coding[0].system!!.value)
-        assertEquals("targetValueCCC", mapping3.first.coding[0].code!!.value)
-        assertEquals("targetDisplayCCC", mapping3.first.coding[0].display!!.value)
-        assertEquals("ObservationCode-1", mapping3.second.url!!.value)
-        assertEquals(concept3, mapping3.second.value!!.value)
+        assertEquals("targetTextCCC", mapping3.codeableConcept.text!!.value)
+        assertEquals(1, mapping3.codeableConcept.coding.size)
+        assertEquals("targetSystem-3", mapping3.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueCCC", mapping3.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayCCC", mapping3.codeableConcept.coding[0].display!!.value)
+        assertEquals("ObservationCode-1", mapping3.extension.url!!.value)
+        assertEquals(concept3, mapping3.extension.value!!.value)
     }
 
     @Test
@@ -1710,13 +1756,13 @@ class NormalizationRegistryClientTest {
             "Observation.code",
             concept1
         )!!
-        assertEquals("targetTextBBB", mapping1.first.text!!.value)
-        assertEquals(1, mapping1.first.coding.size)
-        assertEquals("targetSystem-1", mapping1.first.coding[0].system!!.value)
-        assertEquals("targetValueBBB", mapping1.first.coding[0].code!!.value)
-        assertEquals("targetDisplayBBB", mapping1.first.coding[0].display!!.value)
-        assertEquals("ObservationCode-1", mapping1.second.url!!.value)
-        assertEquals(concept1, mapping1.second.value!!.value)
+        assertEquals("targetTextBBB", mapping1.codeableConcept.text!!.value)
+        assertEquals(1, mapping1.codeableConcept.coding.size)
+        assertEquals("targetSystem-1", mapping1.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueBBB", mapping1.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayBBB", mapping1.codeableConcept.coding[0].display!!.value)
+        assertEquals("ObservationCode-1", mapping1.extension.url!!.value)
+        assertEquals(concept1, mapping1.extension.value!!.value)
         val coding2 = Coding(
             code = Code(value = "sourceValueZ"),
             system = Uri(value = "system-AllVitals-2")
@@ -1730,13 +1776,13 @@ class NormalizationRegistryClientTest {
             "Observation.code",
             concept2
         )!!
-        assertEquals("targetTextZZZ", mapping2.first.text!!.value)
-        assertEquals(1, mapping2.first.coding.size)
-        assertEquals("targetSystem-2", mapping2.first.coding[0].system!!.value)
-        assertEquals("targetValueZZZ", mapping2.first.coding[0].code!!.value)
-        assertEquals("targetDisplayZZZ", mapping2.first.coding[0].display!!.value)
-        assertEquals("ObservationCode-1", mapping2.second.url!!.value)
-        assertEquals(concept2, mapping2.second.value!!.value)
+        assertEquals("targetTextZZZ", mapping2.codeableConcept.text!!.value)
+        assertEquals(1, mapping2.codeableConcept.coding.size)
+        assertEquals("targetSystem-2", mapping2.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueZZZ", mapping2.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayZZZ", mapping2.codeableConcept.coding[0].display!!.value)
+        assertEquals("ObservationCode-1", mapping2.extension.url!!.value)
+        assertEquals(concept2, mapping2.extension.value!!.value)
         val coding3 = Coding(
             code = Code(value = "sourceValueC"),
             system = Uri(value = "system-HeartRate-3")
@@ -1908,16 +1954,16 @@ class NormalizationRegistryClientTest {
             "Observation.code",
             concept1
         )!!
-        assertEquals("targetTextAB", mapping1.first.text!!.value)
-        assertEquals(2, mapping1.first.coding.size)
-        assertEquals("targetSystem-1", mapping1.first.coding[0].system!!.value)
-        assertEquals("targetValueAAA", mapping1.first.coding[0].code!!.value)
-        assertEquals("targetDisplayAAA", mapping1.first.coding[0].display!!.value)
-        assertEquals("targetSystem-1", mapping1.first.coding[1].system!!.value)
-        assertEquals("targetValueBBB", mapping1.first.coding[1].code!!.value)
-        assertEquals("targetDisplayBBB", mapping1.first.coding[1].display!!.value)
-        assertEquals("ObservationCode-1", mapping1.second.url!!.value)
-        assertEquals(concept1, mapping1.second.value!!.value)
+        assertEquals("targetTextAB", mapping1.codeableConcept.text!!.value)
+        assertEquals(2, mapping1.codeableConcept.coding.size)
+        assertEquals("targetSystem-1", mapping1.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueAAA", mapping1.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayAAA", mapping1.codeableConcept.coding[0].display!!.value)
+        assertEquals("targetSystem-1", mapping1.codeableConcept.coding[1].system!!.value)
+        assertEquals("targetValueBBB", mapping1.codeableConcept.coding[1].code!!.value)
+        assertEquals("targetDisplayBBB", mapping1.codeableConcept.coding[1].display!!.value)
+        assertEquals("ObservationCode-1", mapping1.extension.url!!.value)
+        assertEquals(concept1, mapping1.extension.value!!.value)
         val coding2 = Coding(
             code = Code(value = "sourceValueXYZ"),
             system = Uri(value = "system-AllVitals-2")
@@ -1931,19 +1977,19 @@ class NormalizationRegistryClientTest {
             "Observation.code",
             concept2
         )!!
-        assertEquals("targetTextXYZ", mapping2.first.text!!.value)
-        assertEquals(3, mapping2.first.coding.size)
-        assertEquals("targetSystem-2", mapping2.first.coding[0].system!!.value)
-        assertEquals("targetValueXXX", mapping2.first.coding[0].code!!.value)
-        assertEquals("targetDisplayXXX", mapping2.first.coding[0].display!!.value)
-        assertEquals("targetSystem-2", mapping2.first.coding[1].system!!.value)
-        assertEquals("targetValueYYY", mapping2.first.coding[1].code!!.value)
-        assertEquals("targetDisplayYYY", mapping2.first.coding[1].display!!.value)
-        assertEquals("targetSystem-2", mapping2.first.coding[2].system!!.value)
-        assertEquals("targetValueZZZ", mapping2.first.coding[2].code!!.value)
-        assertEquals("targetDisplayZZZ", mapping2.first.coding[2].display!!.value)
-        assertEquals("ObservationCode-1", mapping2.second.url!!.value)
-        assertEquals(concept2, mapping2.second.value!!.value)
+        assertEquals("targetTextXYZ", mapping2.codeableConcept.text!!.value)
+        assertEquals(3, mapping2.codeableConcept.coding.size)
+        assertEquals("targetSystem-2", mapping2.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueXXX", mapping2.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayXXX", mapping2.codeableConcept.coding[0].display!!.value)
+        assertEquals("targetSystem-2", mapping2.codeableConcept.coding[1].system!!.value)
+        assertEquals("targetValueYYY", mapping2.codeableConcept.coding[1].code!!.value)
+        assertEquals("targetDisplayYYY", mapping2.codeableConcept.coding[1].display!!.value)
+        assertEquals("targetSystem-2", mapping2.codeableConcept.coding[2].system!!.value)
+        assertEquals("targetValueZZZ", mapping2.codeableConcept.coding[2].code!!.value)
+        assertEquals("targetDisplayZZZ", mapping2.codeableConcept.coding[2].display!!.value)
+        assertEquals("ObservationCode-1", mapping2.extension.url!!.value)
+        assertEquals(concept2, mapping2.extension.value!!.value)
         val coding3 = Coding(
             code = Code(value = "sourceValueCD"),
             system = Uri(value = "system-HeartRate-3")
@@ -1957,16 +2003,16 @@ class NormalizationRegistryClientTest {
             "Observation.code",
             concept3
         )!!
-        assertEquals("targetTextCD", mapping3.first.text!!.value)
-        assertEquals(2, mapping3.first.coding.size)
-        assertEquals("targetSystem-3", mapping3.first.coding[0].system!!.value)
-        assertEquals("targetValueCCC", mapping3.first.coding[0].code!!.value)
-        assertEquals("targetDisplayCCC", mapping3.first.coding[0].display!!.value)
-        assertEquals("targetSystem-3", mapping3.first.coding[1].system!!.value)
-        assertEquals("targetValueDDD", mapping3.first.coding[1].code!!.value)
-        assertEquals("targetDisplayDDD", mapping3.first.coding[1].display!!.value)
-        assertEquals("ObservationCode-1", mapping3.second.url!!.value)
-        assertEquals(concept3, mapping3.second.value!!.value)
+        assertEquals("targetTextCD", mapping3.codeableConcept.text!!.value)
+        assertEquals(2, mapping3.codeableConcept.coding.size)
+        assertEquals("targetSystem-3", mapping3.codeableConcept.coding[0].system!!.value)
+        assertEquals("targetValueCCC", mapping3.codeableConcept.coding[0].code!!.value)
+        assertEquals("targetDisplayCCC", mapping3.codeableConcept.coding[0].display!!.value)
+        assertEquals("targetSystem-3", mapping3.codeableConcept.coding[1].system!!.value)
+        assertEquals("targetValueDDD", mapping3.codeableConcept.coding[1].code!!.value)
+        assertEquals("targetDisplayDDD", mapping3.codeableConcept.coding[1].display!!.value)
+        assertEquals("ObservationCode-1", mapping3.extension.url!!.value)
+        assertEquals(concept3, mapping3.extension.value!!.value)
     }
 
     @Test
@@ -2015,14 +2061,14 @@ class NormalizationRegistryClientTest {
                 ),
                 text = "Tobacco smoking status".asFHIR()
             ),
-            mapping.first
+            mapping.codeableConcept
         )
         assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
             ),
-            mapping.second
+            mapping.extension
         )
     }
 
@@ -2076,14 +2122,14 @@ class NormalizationRegistryClientTest {
                 ),
                 text = "Potassium Level".asFHIR()
             ),
-            mapping.first
+            mapping.codeableConcept
         )
         assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
             ),
-            mapping.second
+            mapping.extension
         )
     }
 
@@ -2137,14 +2183,14 @@ class NormalizationRegistryClientTest {
                 ),
                 text = "Potassium Level".asFHIR()
             ),
-            mapping.first
+            mapping.codeableConcept
         )
         assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
             ),
-            mapping.second
+            mapping.extension
         )
     }
 
@@ -2288,14 +2334,14 @@ class NormalizationRegistryClientTest {
                 ),
                 text = "Blood pressure".asFHIR()
             ),
-            mapping.first
+            mapping.codeableConcept
         )
         assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
             ),
-            mapping.second
+            mapping.extension
         )
     }
 
@@ -2348,14 +2394,14 @@ class NormalizationRegistryClientTest {
                 ),
                 text = "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - PROGNOSTIC INDICATORS - CLARK'S LEVEL".asFHIR()
             ),
-            mapping.first
+            mapping.codeableConcept
         )
         assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
             ),
-            mapping.second
+            mapping.extension
         )
     }
 
@@ -2412,14 +2458,14 @@ class NormalizationRegistryClientTest {
                 ),
                 text = "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - ANATOMIC STAGE/PROGNOSTIC GROUP".asFHIR()
             ),
-            mapping.first
+            mapping.codeableConcept
         )
         assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
             ),
-            mapping.second
+            mapping.extension
         )
     }
 
@@ -2476,14 +2522,14 @@ class NormalizationRegistryClientTest {
                 ),
                 text = "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - ANATOMIC STAGE/PROGNOSTIC GROUP".asFHIR()
             ),
-            mapping.first
+            mapping.codeableConcept
         )
         assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
             ),
-            mapping.second
+            mapping.extension
         )
     }
 
@@ -2536,14 +2582,14 @@ class NormalizationRegistryClientTest {
                 ),
                 text = "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - LYMPH-VASCULAR INVASION (LVI)".asFHIR()
             ),
-            mapping1.first
+            mapping1.codeableConcept
         )
         assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept1)
             ),
-            mapping1.second
+            mapping1.extension
         )
 
         // (/) in Coding.display, / (/) in ntext
@@ -2573,14 +2619,14 @@ class NormalizationRegistryClientTest {
                 ),
                 text = "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - WHO/ISUP GRADE (LOW/HIGH)".asFHIR()
             ),
-            mapping2.first
+            mapping2.codeableConcept
         )
         assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept2)
             ),
-            mapping2.second
+            mapping2.extension
         )
 
         // () and - in Coding.display, 2 Coding, nothing found in map, / () in text
@@ -2617,14 +2663,14 @@ class NormalizationRegistryClientTest {
                 ),
                 text = "FINDINGS - PHYSICAL EXAM - ONCOLOGY - STAGING - TNM CLASSIFICATION - AJCC N - REGIONAL LYMPH NODES (N)".asFHIR()
             ),
-            mapping3.first
+            mapping3.codeableConcept
         )
         assertEquals(
             Extension(
                 url = Uri(sourceUrl),
                 value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept3)
             ),
-            mapping3.second
+            mapping3.extension
         )
     }
 

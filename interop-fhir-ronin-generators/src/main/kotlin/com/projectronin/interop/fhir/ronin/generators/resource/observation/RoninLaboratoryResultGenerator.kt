@@ -18,7 +18,9 @@ import com.projectronin.interop.fhir.ronin.generators.util.generateCodeableConce
 import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 
 /**
  * Helps generate ronin laboratory result  observation profile, applies meta and randomly generates an
@@ -34,7 +36,7 @@ fun rcdmObservationLaboratoryResult(tenant: String, block: ObservationGenerator.
                 coding of laboratoryCategory
             }
         )
-        code of generateCodeableConcept(code.generate(), possibleLaboratoryResultCodes.random())
+        code of generateCodeableConcept(code.generate(), possibleLaboratoryResultCodes.codes.random())
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
         value of valueQuantity
     }
@@ -71,7 +73,7 @@ private val valueQuantity = DynamicValue(
     )
 )
 
-val possibleLaboratoryResultCodes = listOf(
+val possibleLaboratoryResultCodesList = listOf(
     coding {
         system of "http://loinc.org"
         version of "2.73"
@@ -372,4 +374,13 @@ val possibleLaboratoryResultCodes = listOf(
         code of Code("40665-2")
         display of "Reticulocytes [#/volume] in Blood by Manual count"
     }
+)
+val possibleLaboratoryResultCodes = ValueSetList(
+    possibleLaboratoryResultCodesList,
+    ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "RoninLaboratoryObservationResult",
+        valueSetUuid = "29aded61-f243-41fa-bee9-c93129d66762",
+        version = "2"
+    )
 )

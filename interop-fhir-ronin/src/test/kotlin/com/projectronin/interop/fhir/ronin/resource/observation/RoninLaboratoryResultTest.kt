@@ -31,11 +31,15 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.ConceptMapCodeableConcept
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
+import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -108,6 +112,18 @@ class RoninLaboratoryResultTest {
             tenantLaboratoryResultConcept
         )
     )
+    private val conceptMapMetadata = ConceptMapMetadata(
+        registryEntryType = "concept-map",
+        conceptMapName = "test-concept-map",
+        conceptMapUuid = "573b456efca5-03d51d53-1a31-49a9-af74",
+        version = "1"
+    )
+    private val valueSetMetadata = ValueSetMetadata(
+        registryEntryType = "value-set",
+        valueSetName = "test-value-set",
+        valueSetUuid = "03d51d53-1a31-49a9-af74-573b456efca5",
+        version = "2"
+    )
 
     // In this registry:
     // Raw tenantLaboratoryResultCoding is successfully mapped to laboratoryCodeCoding.
@@ -115,7 +131,7 @@ class RoninLaboratoryResultTest {
     private val registryClient = mockk<NormalizationRegistryClient> {
         every {
             getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_LABORATORY_RESULT.value)
-        } returns laboratoryCodeCodingList
+        } returns ValueSetList(laboratoryCodeCodingList, valueSetMetadata)
         every {
             getConceptMapping(
                 tenant,
@@ -129,7 +145,7 @@ class RoninLaboratoryResultTest {
                 "Observation.code",
                 tenantLaboratoryResultConcept
             )
-        } returns Pair(laboratoryCodeConcept, tenantLaboratoryResultSourceExtension)
+        } returns ConceptMapCodeableConcept(laboratoryCodeConcept, tenantLaboratoryResultSourceExtension, listOf(conceptMapMetadata))
         every {
             getConceptMapping(
                 tenant,

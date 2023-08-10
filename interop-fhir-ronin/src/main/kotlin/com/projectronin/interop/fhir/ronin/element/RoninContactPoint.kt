@@ -119,7 +119,7 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
         val transformed = element.mapIndexed { index, telecom ->
             val systemContext = LocationContext(parentContext.element, "telecom[$index].system")
             val mappedSystem = telecom.system?.value?.let { systemValue ->
-                val systemPair = registryClient.getConceptMappingForEnum(
+                val systemCode = registryClient.getConceptMappingForEnum(
                     tenant,
                     "${parentContext.element}.telecom.system",
                     RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.system", systemValue),
@@ -129,28 +129,28 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                 )
                 validation.apply {
                     checkNotNull(
-                        systemPair,
-                        FailedConceptMapLookupError(systemContext, systemValue, systemMapName),
+                        systemCode,
+                        FailedConceptMapLookupError(systemContext, systemValue, systemMapName, systemCode?.metadata),
                         parentContext
                     )
                 }
-                if (systemPair == null) {
+                if (systemCode == null) {
                     telecom.system
                 } else {
-                    val systemTarget = systemPair.first.code?.value
+                    val systemTarget = systemCode.coding.code?.value
                     validation.apply {
                         checkNotNull(
                             getCodedEnumOrNull<ContactPointSystem>(systemTarget),
-                            ConceptMapInvalidValueSetError(systemContext, systemMapName, systemValue, systemTarget),
+                            ConceptMapInvalidValueSetError(systemContext, systemMapName, systemValue, systemTarget, systemCode.metadata),
                             parentContext
                         )
                     }
-                    Code(value = systemTarget, extension = listOf(systemPair.second))
+                    Code(value = systemTarget, extension = listOf(systemCode.extension))
                 }
             }
             val useContext = LocationContext(parentContext.element, "telecom[$index].use")
             val mappedUse = telecom.use?.value?.let { useValue ->
-                val usePair = registryClient.getConceptMappingForEnum(
+                val useCode = registryClient.getConceptMappingForEnum(
                     tenant,
                     "${parentContext.element}.telecom.use",
                     RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.use", useValue),
@@ -160,23 +160,23 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                 )
                 validation.apply {
                     checkNotNull(
-                        usePair,
-                        FailedConceptMapLookupError(useContext, useValue, useMapName),
+                        useCode,
+                        FailedConceptMapLookupError(useContext, useValue, useMapName, useCode?.metadata),
                         parentContext
                     )
                 }
-                if (usePair == null) {
+                if (useCode == null) {
                     telecom.use
                 } else {
-                    val useTarget = usePair.first.code?.value
+                    val useTarget = useCode.coding.code?.value
                     validation.apply {
                         checkNotNull(
                             getCodedEnumOrNull<ContactPointUse>(useTarget),
-                            ConceptMapInvalidValueSetError(useContext, useMapName, useValue, useTarget),
+                            ConceptMapInvalidValueSetError(useContext, useMapName, useValue, useTarget, useCode.metadata),
                             parentContext
                         )
                     }
-                    Code(value = useTarget, extension = listOf(usePair.second))
+                    Code(value = useTarget, extension = listOf(useCode.extension))
                 }
             }
             ContactPoint(

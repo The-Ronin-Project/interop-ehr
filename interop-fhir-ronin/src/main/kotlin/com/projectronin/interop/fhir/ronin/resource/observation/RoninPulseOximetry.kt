@@ -1,6 +1,5 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
-import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
@@ -8,6 +7,7 @@ import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.isInValueSet
 import com.projectronin.interop.fhir.validate.FHIRError
@@ -37,11 +37,11 @@ class RoninPulseOximetry(
     override val profileVersion = 2
 
     // Multipart qualifying codes for RoninPulseOximetry
-    fun qualifyingFlowRateCodes(): List<Coding> = registryClient.getRequiredValueSet(
+    fun qualifyingFlowRateCodes(): ValueSetList = registryClient.getRequiredValueSet(
         "Observation.component:FlowRate.code",
         profile
     )
-    fun qualifyingConcentrationCodes(): List<Coding> = registryClient.getRequiredValueSet(
+    fun qualifyingConcentrationCodes(): ValueSetList = registryClient.getRequiredValueSet(
         "Observation.component:Concentration.code",
         profile
     )
@@ -77,10 +77,10 @@ class RoninPulseOximetry(
         if (element.dataAbsentReason == null) {
             val components = element.component
             val flowRate = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(qualifyingFlowRateCodes()) } ?: false
+                comp.code?.coding?.any { it.isInValueSet(qualifyingFlowRateCodes().codes) } ?: false
             }
             val concentration = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(qualifyingConcentrationCodes()) } ?: false
+                comp.code?.coding?.any { it.isInValueSet(qualifyingConcentrationCodes().codes) } ?: false
             }
 
             if (flowRate.size == 1) {
@@ -108,9 +108,10 @@ class RoninPulseOximetry(
                         code = "RONIN_PXOBS_004",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        qualifyingFlowRateCodes().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        qualifyingFlowRateCodes().codes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
-                        location = flowRateCodeContext
+                        location = flowRateCodeContext,
+                        metadata = listOf(qualifyingFlowRateCodes().metadata!!)
                     ),
                     parentContext
                 )
@@ -120,7 +121,8 @@ class RoninPulseOximetry(
                         code = "USCORE_PXOBS_005",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Only 1 entry is allowed for pulse oximetry flow rate",
-                        location = flowRateCodeContext
+                        location = flowRateCodeContext,
+                        metadata = listOf(qualifyingFlowRateCodes().metadata!!)
                     ),
                     parentContext
                 )
@@ -132,9 +134,10 @@ class RoninPulseOximetry(
                         code = "RONIN_PXOBS_005",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        qualifyingConcentrationCodes().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        qualifyingConcentrationCodes().codes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
-                        location = concentrationCodeContext
+                        location = concentrationCodeContext,
+                        metadata = listOf(qualifyingConcentrationCodes().metadata!!)
                     ),
                     parentContext
                 )
@@ -144,7 +147,8 @@ class RoninPulseOximetry(
                         code = "USCORE_PXOBS_006",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Only 1 entry is allowed for pulse oximetry oxygen concentration",
-                        location = concentrationCodeContext
+                        location = concentrationCodeContext,
+                        metadata = listOf(qualifyingConcentrationCodes().metadata!!)
                     ),
                     parentContext
                 )

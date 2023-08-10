@@ -17,8 +17,10 @@ import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBloodPressure
+import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -36,8 +38,24 @@ class RoninBloodPressureGeneratorTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
-    private val systolicCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8480-6")))
-    private val diastolicCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8462-4")))
+    private val systolicCoding = ValueSetList(
+        listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8480-6"))),
+        ValueSetMetadata(
+            registryEntryType = "value-set",
+            valueSetName = "systolicbloodpressure",
+            valueSetUuid = "800f4e2b-d716-44e8-9183-87d3ed8cba9b",
+            version = "1"
+        )
+    )
+    private val diastolicCoding = ValueSetList(
+        listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8462-4"))),
+        ValueSetMetadata(
+            registryEntryType = "value-set",
+            valueSetName = "diastolicbloodpressure",
+            valueSetUuid = "0718bdad-3386-4193-8b47-1cf9220b4bb3",
+            version = "1"
+        )
+    )
 
     @BeforeEach
     fun setup() {

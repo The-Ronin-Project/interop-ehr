@@ -30,8 +30,8 @@ fun rcdmConditionEncounterDiagnosis(tenant: String, block: ConditionGenerator.()
             identifier of rcdmIdentifiers(tenant, identifier, it.value)
         }
         category of category.generate() + listOf(codeableConcept { coding of listOf(encounterDiagnosisCategory) })
-        code.generate()?.let { generateCodeableConcept(it, possibleConditionCodes.random()) }
-            ?: (code of CodeableConcept(coding = listOf(possibleConditionCodes.random())))
+        code.generate()?.let { generateCodeableConcept(it, possibleConditionCodes.codes.random()) }
+            ?: (code of CodeableConcept(coding = listOf(possibleConditionCodes.codes.random())))
         subject of generateReference(subject.generate(), subjectOptions, tenant, "Patient")
     }
 }

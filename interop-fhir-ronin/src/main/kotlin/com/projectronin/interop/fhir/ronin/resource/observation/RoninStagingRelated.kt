@@ -57,25 +57,12 @@ class RoninStagingRelated(
         listOf("Patient", "Practitioner", "PractitionerRole", "RelatedPerson", "Organization", "CareTeam")
 
     private val requiredIdError = RequiredFieldError(Observation::id)
-    private val singleObservationCodeError = FHIRError(
-        code = "RONIN_STAGING_OBS_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Coding list must contain exactly 1 entry",
-        location = LocationContext(Observation::code)
-    )
-
-    private val requiredObservationCategoryCoding = FHIRError(
-        code = "RONIN_STAGING_OBS_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Coding is required",
-        location = LocationContext(Observation::category)
-    )
 
     // category and category.coding must be present but are not fixed values
     // code.coding must exist in the valueSet
     override fun qualifies(resource: Observation): Boolean {
         return (
-            resource.code.qualifiesForValueSet(qualifyingCodes()) &&
+            resource.code.qualifiesForValueSet(qualifyingCodes().codes) &&
                 resource.category.isNotEmpty() && resource.category.any { category -> category.coding.isNotEmpty() }
             )
     }
@@ -85,7 +72,13 @@ class RoninStagingRelated(
         validation.apply {
             checkTrue(
                 element.category.any { category -> category.coding.isNotEmpty() },
-                requiredObservationCategoryCoding,
+                FHIRError(
+                    code = "RONIN_STAGING_OBS_002",
+                    severity = ValidationIssueSeverity.ERROR,
+                    description = "Coding is required",
+                    location = LocationContext(Observation::category),
+                    metadata = listOf(qualifyingCodes().metadata!!)
+                ),
                 parentContext
             )
         }
@@ -97,7 +90,17 @@ class RoninStagingRelated(
 
         validation.apply {
             element.code?.coding?.let {
-                checkTrue(it.size == 1, singleObservationCodeError, parentContext)
+                checkTrue(
+                    it.size == 1,
+                    FHIRError(
+                        code = "RONIN_STAGING_OBS_001",
+                        severity = ValidationIssueSeverity.ERROR,
+                        description = "Coding list must contain exactly 1 entry",
+                        location = LocationContext(Observation::code),
+                        metadata = listOf(qualifyingCodes().metadata!!)
+                    ),
+                    parentContext
+                )
             }
         }
     }
