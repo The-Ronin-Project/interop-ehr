@@ -72,7 +72,7 @@ class BaseRoninVitalSignTest {
     )
 
     private val valueSetMetadata = ValueSetMetadata(
-        registryEntryType = "value-set",
+        registryEntryType = "value_set",
         valueSetName = "test-value-set",
         valueSetUuid = "03d51d53-1a31-49a9-af74-573b456efca5",
         version = "2"

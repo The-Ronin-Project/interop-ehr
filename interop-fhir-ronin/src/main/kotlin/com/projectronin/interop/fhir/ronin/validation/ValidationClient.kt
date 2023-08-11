@@ -70,7 +70,7 @@ class ValidationClient(private val resourceClient: ResourceClient) {
                 this as ConceptMapMetadata
                 this.asNewConceptMapMetadata()
             }
-            "value-set" -> {
+            "value_set" -> {
                 this as ValueSetMetadata
                 this.asNewValueSetMetadata()
             }

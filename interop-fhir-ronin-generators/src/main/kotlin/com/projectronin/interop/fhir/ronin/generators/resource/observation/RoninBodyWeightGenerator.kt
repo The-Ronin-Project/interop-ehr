@@ -63,7 +63,7 @@ val possibleBodyWeightCodes = ValueSetList(
         }
     ),
     ValueSetMetadata(
-        registryEntryType = "value-set",
+        registryEntryType = "value_set",
         valueSetName = "BodyWeight",
         valueSetUuid = "95c2b81b-e776-44fb-ab83-dea5ec5f2f7b",
         version = "1"

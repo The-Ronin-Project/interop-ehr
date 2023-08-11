@@ -57,7 +57,7 @@ val possibleBodyMassIndexCodes = ValueSetList(
         }
     ),
     ValueSetMetadata(
-        registryEntryType = "value-set",
+        registryEntryType = "value_set",
         valueSetName = "bodymassindexratiobmi",
         valueSetUuid = "0fd5b59f-a7db-4971-9af9-b597a5ffbfac",
         version = "2"

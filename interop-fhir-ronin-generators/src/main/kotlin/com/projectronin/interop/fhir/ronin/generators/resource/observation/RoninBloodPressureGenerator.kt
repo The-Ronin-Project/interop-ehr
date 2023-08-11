@@ -93,7 +93,7 @@ val possibleBloodPressureCodes =
     ValueSetList(
         possibleBloodPressureCodesList,
         ValueSetMetadata(
-            registryEntryType = "value-set",
+            registryEntryType = "value_set",
             valueSetName = "bloodpressurepanel",
             valueSetUuid = "64baa785-ba8a-448f-8714-93d57fd64db5",
             version = "1"

@@ -63,7 +63,7 @@ val possibleBodyHeightCodes = ValueSetList(
         }
     ),
     ValueSetMetadata(
-        registryEntryType = "value-set",
+        registryEntryType = "value_set",
         valueSetName = "BodyHeight",
         valueSetUuid = "12d509bf-c74c-4f11-948b-1aef9f69aef0",
         version = "1"

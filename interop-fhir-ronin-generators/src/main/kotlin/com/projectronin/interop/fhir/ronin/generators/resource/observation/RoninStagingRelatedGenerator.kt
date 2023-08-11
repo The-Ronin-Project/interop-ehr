@@ -363,7 +363,7 @@ val possibleStagingRelatedCodesList = listOf(
 val possibleStagingRelatedCodes = ValueSetList(
     possibleStagingRelatedCodesList,
     ValueSetMetadata(
-        registryEntryType = "value-set",
+        registryEntryType = "value_set",
         valueSetName = "rcdmobservationstaging",
         valueSetUuid = "65c3303c-298e-4276-abda-4849b5f77bde",
         version = "2"

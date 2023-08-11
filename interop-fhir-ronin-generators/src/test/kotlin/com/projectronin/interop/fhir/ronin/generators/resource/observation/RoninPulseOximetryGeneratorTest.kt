@@ -39,7 +39,7 @@ class RoninPulseOximetryGeneratorTest {
             Coding(system = CodeSystem.LOINC.uri, code = Code("3151-8"))
         ),
         ValueSetMetadata(
-            registryEntryType = "value-set",
+            registryEntryType = "value_set",
             valueSetName = "inhaledoxygenflowrate",
             valueSetUuid = "44bf0223-00e1-4424-89ee-048a2f8dbf7d",
             version = "2"
@@ -50,7 +50,7 @@ class RoninPulseOximetryGeneratorTest {
             Coding(system = CodeSystem.LOINC.uri, code = Code("3150-0"))
         ),
         ValueSetMetadata(
-            registryEntryType = "value-set",
+            registryEntryType = "value_set",
             valueSetName = "inhaledoxygenconcentration",
             valueSetUuid = "74e038f6-d57c-483e-90cb-215af0a5e0ed",
             version = "2"

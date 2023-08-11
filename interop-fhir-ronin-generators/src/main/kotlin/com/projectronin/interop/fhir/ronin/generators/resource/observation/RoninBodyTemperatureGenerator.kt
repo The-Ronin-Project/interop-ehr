@@ -87,7 +87,7 @@ val possibleBodyTemperatureCodes = ValueSetList(
         }
     ),
     ValueSetMetadata(
-        registryEntryType = "value-set",
+        registryEntryType = "value_set",
         valueSetName = "bodytemperaturenoninvasive",
         valueSetUuid = "798f075e-a48d-49d2-8ace-66aff6f55478",
         version = "2"

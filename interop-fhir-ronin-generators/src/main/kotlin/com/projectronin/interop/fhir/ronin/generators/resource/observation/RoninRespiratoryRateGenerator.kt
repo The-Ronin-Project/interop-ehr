@@ -95,7 +95,7 @@ val possibleRespiratoryRateCodesList = listOf(
 val possibleRespiratoryRateCodes = ValueSetList(
     possibleRespiratoryRateCodesList,
     ValueSetMetadata(
-        registryEntryType = "value-set",
+        registryEntryType = "value_set",
         valueSetName = "respiratoryrate",
         valueSetUuid = "46b10973-c8e0-4086-9c71-ec464ef363e8",
         version = "2"

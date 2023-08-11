@@ -289,10 +289,10 @@ class NormalizationRegistryClient(
                         ),
                     matchingItems.map { item ->
                         ConceptMapMetadata(
-                            registryEntryType = item.registry_entry_type!!,
-                            conceptMapName = item.concept_map_name!!,
-                            conceptMapUuid = item.concept_map_uuid!!,
-                            version = item.version!!
+                            registryEntryType = item.registry_entry_type ?: "concept_map",
+                            conceptMapName = item.concept_map_name ?: "N/A",
+                            conceptMapUuid = item.concept_map_uuid ?: "N/A",
+                            version = item.version ?: "N/A"
                         )
                     }
                 )
@@ -346,14 +346,14 @@ class NormalizationRegistryClient(
                 it.getRegistryItemType() == key.registryType &&
                     it.data_element == key.elementName &&
                     it.profile_url == key.profileUrl
-            }?.let {
+            }?.let { item ->
                 val metadata = ValueSetMetadata(
-                    registryEntryType = "value-set",
-                    valueSetName = it.value_set_name!!,
-                    valueSetUuid = it.value_set_uuid!!,
-                    version = it.version!!
+                    registryEntryType = item.registry_entry_type ?: "value_set",
+                    valueSetName = item.value_set_name ?: "N/A",
+                    valueSetUuid = item.value_set_uuid ?: "N/A",
+                    version = item.version ?: "N/A"
                 )
-                val valueSetItem = ValueSetItem(set = getValueSetData(it.filename), metadata)
+                val valueSetItem = ValueSetItem(set = getValueSetData(item.filename), metadata)
                 itemLastUpdated[key] = LocalDateTime.now()
                 valueSetItem
             }
