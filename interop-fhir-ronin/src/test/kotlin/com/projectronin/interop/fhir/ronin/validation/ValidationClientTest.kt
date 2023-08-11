@@ -237,7 +237,7 @@ class ValidationClientTest {
     @Test
     fun `testing value set metadata`() {
         val meta = mockk<ValueSetMetadata> {
-            every { registryEntryType } returns "value-set"
+            every { registryEntryType } returns "value_set"
             every { valueSetName } returns "test-value-set"
             every { valueSetUuid } returns "573b456efca5-03d51d53-1a31-49a9-af74"
             every { version } returns "1"
@@ -274,7 +274,7 @@ class ValidationClientTest {
                     location = "Patient.name",
                     metadata = listOf(
                         NewMetadata(
-                            registryEntryType = "value-set",
+                            registryEntryType = "value_set",
                             valueSetName = "test-value-set",
                             valueSetUuid = UUID.fromString("573b456efca5-03d51d53-1a31-49a9-af74"),
                             version = "1"

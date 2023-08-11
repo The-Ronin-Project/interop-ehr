@@ -213,7 +213,7 @@ val possiblePulseOximetryCodesList = listOf(
 val possiblePulseOximetryCodes = ValueSetList(
     possiblePulseOximetryCodesList,
     ValueSetMetadata(
-        registryEntryType = "value-set",
+        registryEntryType = "value_set",
         valueSetName = "inhaledoxygenconcentration",
         valueSetUuid = "74e038f6-d57c-483e-90cb-215af0a5e0ed",
         version = "2"

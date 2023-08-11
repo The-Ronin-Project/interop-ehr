@@ -53,7 +53,7 @@ class ValueSetListTest {
             )
         )
         val valueSetMetadata = ValueSetMetadata(
-            registryEntryType = "value-set",
+            registryEntryType = "value_set",
             valueSetName = "RoninConditionCode",
             valueSetUuid = "201ad507-64f7-4429-810f-94bdbd51f80a",
             version = "4"
@@ -94,7 +94,7 @@ class ValueSetListTest {
                 "display" : "Twin liveborn born in hospital (situation)"
               } ],
               "metadata" : {
-                "registryEntryType" : "value-set",
+                "registryEntryType" : "value_set",
                 "valueSetName" : "RoninConditionCode",
                 "valueSetUuid" : "201ad507-64f7-4429-810f-94bdbd51f80a",
                 "version" : "4"

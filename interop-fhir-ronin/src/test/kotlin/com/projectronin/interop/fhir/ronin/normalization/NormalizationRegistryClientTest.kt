@@ -492,7 +492,7 @@ class NormalizationRegistryClientTest {
         version = "1"
     )
     private val valueSetMetadata = ValueSetMetadata(
-        registryEntryType = "value-set",
+        registryEntryType = "value_set",
         valueSetName = "test-value-set",
         valueSetUuid = "03d51d53-1a31-49a9-af74-573b456efca5",
         version = "2"
@@ -776,13 +776,13 @@ class NormalizationRegistryClientTest {
             )
         )
         val valueSetMetadata1 = ValueSetMetadata(
-            registryEntryType = "value-set",
+            registryEntryType = "value_set",
             valueSetName = "AppointmentStatus",
             valueSetUuid = "vs-333",
             version = "1"
         )
         val valueSetMetadata2 = ValueSetMetadata(
-            registryEntryType = "value-set",
+            registryEntryType = "value_set",
             valueSetName = "PatientTelecomUse",
             valueSetUuid = "vs-4444",
             version = "1"

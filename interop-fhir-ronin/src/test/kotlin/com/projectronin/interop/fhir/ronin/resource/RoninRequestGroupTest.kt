@@ -203,7 +203,7 @@ class RoninRequestGroupTest {
     }
 
     @Test
-    fun `validate - checks R4 profile - fails if not required status value-set`() {
+    fun `validate - checks R4 profile - fails if not required status value_set`() {
         val requestGroup = RequestGroup(
             meta = Meta(profile = listOf(Canonical(RoninProfile.REQUEST_GROUP.value)), source = Uri("source")),
             identifier = listOf(
@@ -244,7 +244,7 @@ class RoninRequestGroupTest {
     }
 
     @Test
-    fun `validate - checks R4 profile - fails if not required intent value-set`() {
+    fun `validate - checks R4 profile - fails if not required intent value_set`() {
         val requestGroup = RequestGroup(
             meta = Meta(profile = listOf(Canonical(RoninProfile.REQUEST_GROUP.value)), source = Uri("source")),
             identifier = listOf(
@@ -285,7 +285,7 @@ class RoninRequestGroupTest {
     }
 
     @Test
-    fun `validate - checks R4 profile - fails if not required priority value-set`() {
+    fun `validate - checks R4 profile - fails if not required priority value_set`() {
         val requestGroup = RequestGroup(
             meta = Meta(profile = listOf(Canonical(RoninProfile.REQUEST_GROUP.value)), source = Uri("source")),
             identifier = listOf(

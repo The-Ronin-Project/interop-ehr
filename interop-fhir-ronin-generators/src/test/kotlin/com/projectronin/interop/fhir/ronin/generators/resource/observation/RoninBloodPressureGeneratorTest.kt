@@ -41,7 +41,7 @@ class RoninBloodPressureGeneratorTest {
     private val systolicCoding = ValueSetList(
         listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8480-6"))),
         ValueSetMetadata(
-            registryEntryType = "value-set",
+            registryEntryType = "value_set",
             valueSetName = "systolicbloodpressure",
             valueSetUuid = "800f4e2b-d716-44e8-9183-87d3ed8cba9b",
             version = "1"
@@ -50,7 +50,7 @@ class RoninBloodPressureGeneratorTest {
     private val diastolicCoding = ValueSetList(
         listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8462-4"))),
         ValueSetMetadata(
-            registryEntryType = "value-set",
+            registryEntryType = "value_set",
             valueSetName = "diastolicbloodpressure",
             valueSetUuid = "0718bdad-3386-4193-8b47-1cf9220b4bb3",
             version = "1"

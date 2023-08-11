@@ -69,7 +69,7 @@ val possibleHeartRateCodes = ValueSetList(
         }
     ),
     ValueSetMetadata(
-        registryEntryType = "value-set",
+        registryEntryType = "value_set",
         valueSetName = "heartratenoninvasive",
         valueSetUuid = "809f547e-cb7e-438f-84af-8852d586c718",
         version = "2"

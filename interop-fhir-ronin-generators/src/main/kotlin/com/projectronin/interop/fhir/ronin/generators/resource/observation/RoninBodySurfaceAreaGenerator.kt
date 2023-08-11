@@ -69,7 +69,7 @@ val possibleBodySurfaceAreaCodes = ValueSetList(
         }
     ),
     ValueSetMetadata(
-        registryEntryType = "value-set",
+        registryEntryType = "value_set",
         valueSetName = "bodysurfaceareabsa",
         valueSetUuid = "45354da4-30b4-433e-b5aa-d99a903d5dc9",
         version = "3"

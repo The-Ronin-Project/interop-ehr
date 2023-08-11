@@ -378,7 +378,7 @@ val possibleLaboratoryResultCodesList = listOf(
 val possibleLaboratoryResultCodes = ValueSetList(
     possibleLaboratoryResultCodesList,
     ValueSetMetadata(
-        registryEntryType = "value-set",
+        registryEntryType = "value_set",
         valueSetName = "RoninLaboratoryObservationResult",
         valueSetUuid = "29aded61-f243-41fa-bee9-c93129d66762",
         version = "2"
