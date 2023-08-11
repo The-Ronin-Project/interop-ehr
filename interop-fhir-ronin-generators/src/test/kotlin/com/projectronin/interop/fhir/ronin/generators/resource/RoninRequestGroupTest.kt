@@ -1,7 +1,6 @@
 package com.projectronin.interop.fhir.ronin.generators.resource
 
 import com.projectronin.interop.common.jackson.JacksonManager
-import com.projectronin.interop.fhir.generators.datatypes.identifier
 import com.projectronin.interop.fhir.generators.datatypes.reference
 import com.projectronin.interop.fhir.generators.primitives.dateTime
 import com.projectronin.interop.fhir.generators.primitives.of

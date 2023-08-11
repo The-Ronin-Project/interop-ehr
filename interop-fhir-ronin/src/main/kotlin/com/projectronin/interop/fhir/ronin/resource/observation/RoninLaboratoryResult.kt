@@ -39,7 +39,7 @@ class RoninLaboratoryResult(
         localizer,
         registryClient
     ) {
-    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val rcdmVersion = RCDMVersion.V3_24_1
     override val profileVersion = 2
 
     override fun qualifyingCategories() =

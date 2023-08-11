@@ -43,8 +43,8 @@ class RoninDocumentReference(
         normalizer,
         localizer
     ) {
-    override val rcdmVersion = RCDMVersion.V3_19_0
-    override val profileVersion = 3
+    override val rcdmVersion = RCDMVersion.V3_24_1
+    override val profileVersion = 4
 
     // From http://hl7.org/fhir/us/core/STU5.0.1/ValueSet-us-core-documentreference-category.html
     private val usCoreDocumentReferenceCategoryValueSet = listOf(
@@ -146,7 +146,8 @@ class RoninDocumentReference(
                         LocationContext(DocumentReference::type),
                         type.coding.mapNotNull { it.code?.value }
                             .joinToString(", "),
-                        "any DocumentReference.type concept map for tenant '${tenant.mnemonic}'"
+                        "any DocumentReference.type concept map for tenant '${tenant.mnemonic}'",
+                        typePair?.metadata
                     ),
                     parentContext
                 )

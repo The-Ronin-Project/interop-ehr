@@ -31,7 +31,7 @@ class RoninBodyWeight(
         localizer,
         registryClient
     ) {
-    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val rcdmVersion = RCDMVersion.V3_24_1
     override val profileVersion = 2
 
     // Quantity unit codes - [USCore Body Weight Units](http://hl7.org/fhir/R4/valueset-ucum-bodyweight.html)

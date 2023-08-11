@@ -33,8 +33,8 @@ class RoninBloodPressure(
         localizer,
         registryClient
     ) {
-    override val rcdmVersion = RCDMVersion.V3_19_0
-    override val profileVersion = 3
+    override val rcdmVersion = RCDMVersion.V3_24_1
+    override val profileVersion = 4
 
     // Multipart qualifying codes for RoninBloodPressure
     fun validSystolicCodes(): ValueSetList = registryClient.getRequiredValueSet(

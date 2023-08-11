@@ -26,7 +26,7 @@ class RoninObservation(
         normalizer,
         localizer
     ) {
-    override val rcdmVersion = RCDMVersion.V3_19_0
+    override val rcdmVersion = RCDMVersion.V3_24_1
     override val profileVersion = 4
 
     /**

@@ -69,7 +69,7 @@ abstract class BaseRoninProfileObservation(
         val validation = Validation()
 
         // Observation.code is a single CodeableConcept
-        val mappedCodePair = normalized.code?.let { code ->
+        val mappedCode = normalized.code?.let { code ->
             val observationCode = registryClient.getConceptMapping(
                 tenant,
                 "Observation.code",
@@ -94,7 +94,7 @@ abstract class BaseRoninProfileObservation(
         }
 
         return Pair(
-            mappedCodePair?.let {
+            mappedCode?.let {
                 normalized.copy(
                     code = it.codeableConcept,
                     extension = normalized.extension + it.extension
