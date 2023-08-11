@@ -119,7 +119,7 @@ val bloodPressureComponent = listOf(
     ObservationComponent(
         code = CodeableConcept(
             coding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8480-6"))),
-            text = "Diastolic".asFHIR()
+            text = "Systolic".asFHIR()
         ),
         value = DynamicValue(
             DynamicValueType.QUANTITY,
