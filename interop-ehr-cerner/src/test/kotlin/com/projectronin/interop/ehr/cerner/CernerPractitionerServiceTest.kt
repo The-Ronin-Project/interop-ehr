@@ -97,7 +97,7 @@ class CernerPractitionerServiceTest {
             cernerClient.get(
                 tenant,
                 "/Practitioner",
-                mapOf("_id" to "ProviderId", "_count" to 20)
+                mapOf("_id" to "ProviderId")
             )
         } returns ehrResponse
 
@@ -112,7 +112,7 @@ class CernerPractitionerServiceTest {
             cernerClient.get(
                 tenant,
                 "/Practitioner",
-                mapOf("_id" to "ProviderId", "_count" to 20)
+                mapOf("_id" to "ProviderId")
             )
         } returns ehrResponse
 
@@ -134,7 +134,7 @@ class CernerPractitionerServiceTest {
             cernerClient.get(
                 tenant,
                 "/Practitioner",
-                mapOf("_id" to "ProviderId", "_count" to 20)
+                mapOf("_id" to "ProviderId")
             )
         } returns ehrResponse
 
@@ -149,7 +149,7 @@ class CernerPractitionerServiceTest {
             cernerClient.get(
                 tenant,
                 "/Practitioner",
-                mapOf("_id" to "ProviderId", "_count" to 20)
+                mapOf("_id" to "ProviderId")
             )
         } returns ehrResponse
 
@@ -260,13 +260,11 @@ class CernerPractitionerServiceTest {
                 tenant,
                 "/Practitioner",
                 mapOf(
-                    "_count" to 20,
                     "_id" to "1,2,3"
                 )
             )
         } returns EHRResponse(httpResponse, "/Practitioner?_id=1,2,3")
         val parameters = mapOf(
-            "_count" to 20,
             "_id" to "1,2,3"
         )
 
@@ -304,7 +302,6 @@ class CernerPractitionerServiceTest {
                 tenant,
                 "/Practitioner",
                 mapOf(
-                    "_count" to 20,
                     "_id" to listOf("1", "2", "3")
                 )
             )
@@ -318,7 +315,6 @@ class CernerPractitionerServiceTest {
                 tenant,
                 "/Practitioner",
                 mapOf(
-                    "_count" to 20,
                     "_id" to listOf("4", "5")
                 )
             )
@@ -348,7 +344,6 @@ class CernerPractitionerServiceTest {
                 tenant,
                 "/Practitioner",
                 mapOf(
-                    "_count" to 20,
                     "_id" to listOf("1", "2")
                 )
             )

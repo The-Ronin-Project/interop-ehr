@@ -41,7 +41,7 @@ class EpicRequestGroupTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/RequestGroup",
-                mapOf("_id" to listOf("18675309", "98765432"), "_count" to 50)
+                mapOf("_id" to listOf("18675309", "98765432"))
             )
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "18675309")
 
@@ -97,11 +97,11 @@ class EpicRequestGroupTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/RequestGroup",
-                mapOf("_id" to listOf("18675309", "98765432", "11223344", "44332211"), "_count" to 50)
+                mapOf("_id" to listOf("18675309", "98765432", "11223344", "44332211"))
             )
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "18675309")
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/RequestGroup", mapOf("_id" to listOf("11998877"), "_count" to 50))
+            epicClient.get(tenant, "/api/FHIR/R4/RequestGroup", mapOf("_id" to listOf("11998877")))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle2 }, "44332211")
 
         val response =
@@ -161,11 +161,11 @@ class EpicRequestGroupTest {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/RequestGroup",
-                mapOf("_id" to listOf("18675309", "98765432", "11223344", "44332211"), "_count" to 50)
+                mapOf("_id" to listOf("18675309", "98765432", "11223344", "44332211"))
             )
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "18675309")
         coEvery {
-            epicClient.get(tenant, "/api/FHIR/R4/RequestGroup", mapOf("_id" to listOf("11998877"), "_count" to 50))
+            epicClient.get(tenant, "/api/FHIR/R4/RequestGroup", mapOf("_id" to listOf("11998877")))
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle2 }, "44332211")
 
         val response = requestGroupOfFour.getRequestGroupByFHIRId(

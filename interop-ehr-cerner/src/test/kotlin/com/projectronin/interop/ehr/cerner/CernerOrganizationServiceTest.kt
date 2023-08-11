@@ -48,8 +48,7 @@ internal class CernerOrganizationServiceTest {
                 tenant,
                 "/Organization",
                 mapOf(
-                    "_id" to listOf(fhirId),
-                    "_count" to 20
+                    "_id" to listOf(fhirId)
                 )
             )
         } returns ehrResponse
@@ -74,8 +73,7 @@ internal class CernerOrganizationServiceTest {
                 tenant,
                 "/Organization",
                 mapOf(
-                    "_id" to fhirIds,
-                    "_count" to 20
+                    "_id" to fhirIds
                 )
             )
         } returns ehrPagingResponse
@@ -111,8 +109,7 @@ internal class CernerOrganizationServiceTest {
                 tenant,
                 "/Organization",
                 mapOf(
-                    "_id" to listOf(fhirId),
-                    "_count" to 20
+                    "_id" to listOf(fhirId)
                 )
             )
         } returns ehrResponse
@@ -137,8 +134,7 @@ internal class CernerOrganizationServiceTest {
                 tenant,
                 "/Organization",
                 mapOf(
-                    "_id" to fhirIds,
-                    "_count" to 20
+                    "_id" to fhirIds
                 )
             )
         } returns ehrPagingResponse

@@ -1,9 +1,8 @@
 package com.projectronin.interop.ehr.cerner
 
-import com.projectronin.interop.ehr.FHIRService
+import com.projectronin.interop.ehr.BaseFHIRService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.ehr.client.RepeatingParameter
-import com.projectronin.interop.fhir.r4.mergeBundles
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -17,10 +16,10 @@ import java.time.LocalDateTime
 abstract class CernerFHIRService<T : Resource<T>>(
     val cernerClient: CernerClient,
     private val batchSize: Int = 10
-) : FHIRService<T> {
+) : BaseFHIRService<T>() {
     private val logger = KotlinLogging.logger { }
     abstract val fhirURLSearchPart: String
-    private val standardParameters: Map<String, Any> = mapOf("_count" to 20)
+    override val standardParameters: Map<String, Any> = mapOf("_count" to 20)
 
     // Auth scopes required for this service. By default we set read, but if a service needs something different
     // it can override these values.
@@ -82,28 +81,6 @@ abstract class CernerFHIRService<T : Resource<T>>(
         } while (nextURL != null)
         logger.info { "Get completed for ${tenant.mnemonic}" }
         return mergeResponses(responses)
-    }
-
-    protected fun mergeResponses(
-        responses: List<Bundle>
-    ): Bundle {
-        var bundle = responses.first()
-        responses.subList(1, responses.size).forEach { bundle = mergeBundles(bundle, it) }
-        return bundle
-    }
-
-    /**
-     * Standardizes the [parameters], including any standard parameters that have not already been included and returning the combined map.
-     */
-    private fun standardizeParameters(parameters: Map<String, Any?>): Map<String, Any?> {
-        val parametersToAdd = standardParameters.mapNotNull {
-            if (parameters.containsKey(it.key)) {
-                null
-            } else {
-                it.toPair()
-            }
-        }
-        return parameters + parametersToAdd
     }
 
     /**

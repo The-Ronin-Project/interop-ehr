@@ -83,8 +83,7 @@ class EpicFHIRServiceTest {
                         "eqrR1BMfXhGmimr8OUK7PbA3",
                         "eZ1muPaohtiRvQlo0D-yxEg3",
                         "e67ikTL29RrR6zDPXYcbWBA3"
-                    ),
-                    "_count" to 50
+                    )
                 )
             )
         } returns ehrResponse

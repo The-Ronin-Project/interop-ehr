@@ -88,7 +88,7 @@ class CernerFHIRServiceTest {
             cernerClient.get(
                 tenant,
                 "url",
-                mapOf("_id" to listOf("12745871", "12745872"), "_count" to 20)
+                mapOf("_id" to listOf("12745871", "12745872"))
             )
         } returns ehrResponse
 

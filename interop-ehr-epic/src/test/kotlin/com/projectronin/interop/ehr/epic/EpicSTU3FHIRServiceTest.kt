@@ -111,8 +111,7 @@ class EpicSTU3FHIRServiceTest {
                         "e-Vg66OIhWXBKqYrsP.XNZVYk.Q7JvA7ZsmahScUJ.843",
                         "e10aG32TY3GxQKga7ejscpB-l24kUZEAL4.pKXNJLOlA3",
                         "e8t3zjLeHVt.mv5I5Eu-6.6Wc4BCkPi1DVNUkU8YkOAY3"
-                    ),
-                    "_count" to 50
+                    )
                 )
             )
         } returns ehrResponse

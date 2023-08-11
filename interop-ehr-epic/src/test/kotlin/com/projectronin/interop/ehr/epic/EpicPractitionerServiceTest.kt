@@ -185,14 +185,12 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/Practitioner",
                 mapOf(
-                    "_id" to "1,2,3",
-                    "_count" to 50
+                    "_id" to "1,2,3"
                 )
             )
         } returns EHRResponse(httpResponse, "/Practitioner?_id=1,2,3")
         val parameters = mapOf(
-            "_id" to "1,2,3",
-            "_count" to 50
+            "_id" to "1,2,3"
         )
         val bundle = practitionerService.getResourceListFromSearch(tenant, parameters)
         assertEquals(3, bundle.size)
@@ -227,8 +225,7 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/Practitioner",
                 mapOf(
-                    "_id" to listOf("1", "2", "3"),
-                    "_count" to 50
+                    "_id" to listOf("1", "2", "3")
                 )
             )
         } returns EHRResponse(httpResponse, "/Practitioner?_id=1,2,3")
@@ -240,8 +237,7 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/Practitioner",
                 mapOf(
-                    "_id" to listOf("4", "5"),
-                    "_count" to 50
+                    "_id" to listOf("4", "5")
                 )
             )
         } returns EHRResponse(httpResponse2, "/Practitioner?_id=4,5")
@@ -276,8 +272,7 @@ class EpicPractitionerServiceTest {
                 tenant,
                 "/api/FHIR/R4/Practitioner",
                 mapOf(
-                    "_id" to listOf("1", "2"),
-                    "_count" to 50
+                    "_id" to listOf("1", "2")
                 )
             )
         } returns ehrResponse
