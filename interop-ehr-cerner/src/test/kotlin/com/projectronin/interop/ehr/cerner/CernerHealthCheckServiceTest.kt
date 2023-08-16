@@ -1,8 +1,10 @@
 package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.ehr.cerner.auth.CernerAuthenticationService
+import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -13,7 +15,7 @@ import org.junit.jupiter.api.Test
 
 class CernerHealthCheckServiceTest {
     private lateinit var authenticationService: CernerAuthenticationService
-    private lateinit var patientService: CernerPatientService
+    private lateinit var cernerClient: CernerClient
     private lateinit var healthCheckService: CernerHealthCheckService
     private lateinit var tenantService: TenantService
     private val tenant = mockk<Tenant>()
@@ -21,9 +23,9 @@ class CernerHealthCheckServiceTest {
     @BeforeEach
     fun setup() {
         authenticationService = mockk()
-        patientService = mockk()
+        cernerClient = mockk()
         tenantService = mockk()
-        healthCheckService = CernerHealthCheckService(authenticationService, patientService, tenantService)
+        healthCheckService = CernerHealthCheckService(authenticationService, cernerClient, tenantService)
     }
 
     @Test
@@ -35,14 +37,18 @@ class CernerHealthCheckServiceTest {
     @Test
     fun `patient service fails`() {
         every { authenticationService.getAuthentication(tenant, true) } returns mockk()
-        every { patientService.findPatient(tenant, any(), "Health", "Check", true) } throws Exception()
+        coEvery {
+            cernerClient.options(tenant, "/Patient", any())
+        } throws Exception()
         assertFalse(healthCheckService.healthCheck(tenant))
     }
 
     @Test
     fun `health check works`() {
         every { authenticationService.getAuthentication(tenant, true) } returns mockk()
-        every { patientService.findPatient(tenant, any(), "Health", "Check", true) } returns mockk()
+        coEvery {
+            cernerClient.options(tenant, "/Patient", any())
+        } returns mockk()
         assertTrue(healthCheckService.healthCheck(tenant))
     }
 

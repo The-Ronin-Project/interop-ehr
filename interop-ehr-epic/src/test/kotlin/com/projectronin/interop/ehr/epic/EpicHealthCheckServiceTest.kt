@@ -1,8 +1,10 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.epic.auth.EpicAuthenticationService
+import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.tenant.config.TenantService
 import com.projectronin.interop.tenant.config.model.Tenant
+import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -13,7 +15,7 @@ import org.junit.jupiter.api.Test
 
 class EpicHealthCheckServiceTest {
     private lateinit var authenticationService: EpicAuthenticationService
-    private lateinit var patientService: EpicPatientService
+    private lateinit var epicClient: EpicClient
     private lateinit var healthCheckService: EpicHealthCheckService
     private lateinit var tenantService: TenantService
     private val tenant = mockk<Tenant>()
@@ -21,9 +23,9 @@ class EpicHealthCheckServiceTest {
     @BeforeEach
     fun setup() {
         authenticationService = mockk()
-        patientService = mockk()
+        epicClient = mockk()
         tenantService = mockk()
-        healthCheckService = EpicHealthCheckService(authenticationService, patientService, tenantService)
+        healthCheckService = EpicHealthCheckService(authenticationService, epicClient, tenantService)
     }
 
     @Test
@@ -35,14 +37,18 @@ class EpicHealthCheckServiceTest {
     @Test
     fun `patient service fails`() {
         every { authenticationService.getAuthentication(tenant, true) } returns mockk()
-        every { patientService.findPatient(tenant, any(), "Health", "Check", true) } throws Exception()
+        coEvery {
+            epicClient.options(tenant, "/Patient", any())
+        } throws Exception()
         assertFalse(healthCheckService.healthCheck(tenant))
     }
 
     @Test
     fun `health check works`() {
         every { authenticationService.getAuthentication(tenant, true) } returns mockk()
-        every { patientService.findPatient(tenant, any(), "Health", "Check", true) } returns mockk()
+        coEvery {
+            epicClient.options(tenant, "/Patient", any())
+        } returns mockk()
         assertTrue(healthCheckService.healthCheck(tenant))
     }
 
