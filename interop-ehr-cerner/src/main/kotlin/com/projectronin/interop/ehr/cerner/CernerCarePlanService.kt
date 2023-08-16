@@ -27,7 +27,7 @@ class CernerCarePlanService(cernerClient: CernerClient) : CarePlanService, Cerne
         val parameters = mapOf(
             "patient" to patientFhirId,
             "category" to "assess-plan", // hard-coded: https://fhir.cerner.com/millennium/r4/clinical/care-provision/care-plan/#:~:text=The-,category,-parameter
-            "date" to getDateParam(startDate, endDate, tenant)
+            "date" to getAltDateParam(startDate, endDate, tenant)
         )
         return getResourceListFromSearch(tenant, parameters)
     }

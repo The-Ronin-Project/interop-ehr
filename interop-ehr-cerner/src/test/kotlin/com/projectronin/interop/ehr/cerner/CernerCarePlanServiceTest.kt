@@ -49,7 +49,7 @@ class CernerCarePlanServiceTest {
                 "/CarePlan",
                 mapOf(
                     "patient" to "12345",
-                    "date" to RepeatingParameter(listOf("ge2015-01-01T00:00:00-06:00", "lt2015-11-02T00:00:00-06:00")),
+                    "date" to RepeatingParameter(listOf("ge2015-01-01T00:00:00-06:00", "le2015-11-02T00:00:00-06:00")),
                     "category" to "assess-plan",
                     "_count" to 20
                 )

@@ -85,7 +85,8 @@ abstract class CernerFHIRService<T : Resource<T>>(
 
     /**
      * Cerner has some restrictive rules on date params. They allow only 'ge' and 'lt', and they require a timestamp.
-     * This function formats the date params correctly.
+     * This function formats the date params correctly. Some resources (only CarePlan) use 'le' instead of 'lt'. Those
+     * should use getAltDateParam
      */
     protected fun getDateParam(startDate: LocalDate, endDate: LocalDate, tenant: Tenant): RepeatingParameter {
         val offset = tenant.timezone.rules.getOffset(LocalDateTime.now())
@@ -93,6 +94,19 @@ abstract class CernerFHIRService<T : Resource<T>>(
             listOf(
                 "ge${startDate}T00:00:00$offset",
                 "lt${endDate.plusDays(1)}T00:00:00$offset"
+            )
+        )
+    }
+
+    /**
+     * For use on resources that 'le' rather than 'lt'. Only CarePlan for now
+     */
+    protected fun getAltDateParam(startDate: LocalDate, endDate: LocalDate, tenant: Tenant): RepeatingParameter {
+        val offset = tenant.timezone.rules.getOffset(LocalDateTime.now())
+        return RepeatingParameter(
+            listOf(
+                "ge${startDate}T00:00:00$offset",
+                "le${endDate.plusDays(1)}T00:00:00$offset"
             )
         )
     }
