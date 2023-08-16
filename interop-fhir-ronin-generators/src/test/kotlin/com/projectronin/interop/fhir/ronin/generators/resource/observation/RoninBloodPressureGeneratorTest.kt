@@ -1,14 +1,20 @@
 package com.projectronin.interop.fhir.ronin.generators.resource.observation
 
 import com.projectronin.interop.common.jackson.JacksonManager
+import com.projectronin.interop.fhir.generators.datatypes.DynamicValues
 import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
 import com.projectronin.interop.fhir.generators.datatypes.coding
+import com.projectronin.interop.fhir.generators.datatypes.quantity
 import com.projectronin.interop.fhir.generators.datatypes.reference
 import com.projectronin.interop.fhir.generators.primitives.of
+import com.projectronin.interop.fhir.generators.resources.observationComponent
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
+import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
@@ -70,10 +76,16 @@ class RoninBloodPressureGeneratorTest {
                 getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)
             } returns possibleBloodPressureCodes
             every {
-                getRequiredValueSet("Observation.component:systolic.code", RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)
+                getRequiredValueSet(
+                    "Observation.component:systolic.code",
+                    RoninProfile.OBSERVATION_BLOOD_PRESSURE.value
+                )
             } returns systolicCoding
             every {
-                getRequiredValueSet("Observation.component:diastolic.code", RoninProfile.OBSERVATION_BLOOD_PRESSURE.value)
+                getRequiredValueSet(
+                    "Observation.component:diastolic.code",
+                    RoninProfile.OBSERVATION_BLOOD_PRESSURE.value
+                )
             } returns diastolicCoding
         }
         roninBloodPressure = RoninBloodPressure(normalizer, localizer, registry)
@@ -99,7 +111,8 @@ class RoninBloodPressureGeneratorTest {
             }
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsBloodPressureJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBloodPressure)
+        val roninObsBloodPressureJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBloodPressure)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsBloodPressureJSON)
@@ -112,7 +125,8 @@ class RoninBloodPressureGeneratorTest {
         val rcdmPatient = rcdmPatient("test") {}
         val roninObsBloodPressure = rcdmPatient.rcdmObservationBloodPressure {}
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsBloodPressureJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBloodPressure)
+        val roninObsBloodPressureJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBloodPressure)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsBloodPressureJSON)
@@ -132,8 +146,10 @@ class RoninBloodPressureGeneratorTest {
         assertNotNull(roninObsBloodPressure.status)
         assertNotNull(roninObsBloodPressure.code?.coding?.get(0)?.code?.value)
         assertNotNull(roninObsBloodPressure.id)
-        val patientFHIRId = roninObsBloodPressure.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = roninObsBloodPressure.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            roninObsBloodPressure.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            roninObsBloodPressure.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", roninObsBloodPressure.id?.value.toString())
     }
 
@@ -263,7 +279,10 @@ class RoninBloodPressureGeneratorTest {
         val validation = roninBloodPressure.validate(bpObs, null)
         assertEquals(validation.hasErrors(), true)
         assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
-        assertEquals(validation.issues()[0].description, "The referenced resource type was not one of CareTeam, Organization, Patient, Practitioner, PractitionerRole")
+        assertEquals(
+            validation.issues()[0].description,
+            "The referenced resource type was not one of CareTeam, Organization, Patient, Practitioner, PractitionerRole"
+        )
         assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "performer[0]"))
         assertEquals(validation.issues()[1].code, "INV_VALUE_SET")
         assertEquals(validation.issues()[1].description, "'fake-status' is outside of required value set")
@@ -346,5 +365,69 @@ class RoninBloodPressureGeneratorTest {
         assertEquals("test-88", bpObs.id?.value)
         assertEquals("test-99", rcdmPatient.id?.value)
         assertEquals("Patient/test-99", bpObs.subject?.reference?.value)
+    }
+
+    @Test
+    fun `roninObservationBloodPressure with custom components`() {
+        val tenant = "ronin"
+        val patientId = "123456"
+        val diastolicValue = 80
+        val systolicValue = 110
+        val units = "mmHg"
+        val effectiveDate = "2023-07-30"
+
+        val roninBloodPressure = rcdmObservationBloodPressure(tenant) {
+            subject of rcdmReference("Patient", patientId)
+            effective of DynamicValues.dateTime(DateTime(effectiveDate))
+            component of listOf(
+                observationComponent {
+                    code of codeableConcept {
+                        coding of listOf(
+                            coding {
+                                system of "http://loinc.org"
+                                code of Code("8462-4")
+                            }
+                        )
+                        text of "Diastolic".asFHIR()
+                    }
+                    value of DynamicValues.quantity(
+                        quantity {
+                            value of Decimal(diastolicValue.toBigDecimal())
+                            unit of units.asFHIR()
+                            system of CodeSystem.UCUM.uri
+                            code of Code(units)
+                        }
+                    )
+                },
+                observationComponent {
+                    code of codeableConcept {
+                        coding of listOf(
+                            coding {
+                                system of "http://loinc.org"
+                                code of Code("8480-6")
+                            }
+                        )
+                        text of "Systolic".asFHIR()
+                    }
+                    value of DynamicValues.quantity(
+                        quantity {
+                            value of Decimal(systolicValue.toBigDecimal())
+                            unit of units.asFHIR()
+                            system of CodeSystem.UCUM.uri
+                            code of Code(units)
+                        }
+                    )
+                }
+            )
+        }
+
+        // Uncomment to take a peek at the JSON
+        // println(JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninBloodPressure))
+
+        assertEquals(
+            diastolicValue,
+            (roninBloodPressure.component[0].value!!.value as? Quantity)?.value?.value?.toInt()
+        )
+        assertEquals(systolicValue, (roninBloodPressure.component[1].value!!.value as? Quantity)?.value?.value?.toInt())
     }
 }

@@ -5,11 +5,17 @@ import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
 import com.projectronin.interop.fhir.generators.datatypes.coding
 import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
+import com.projectronin.interop.fhir.r4.datatype.DynamicValue
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.fhir.r4.resource.ObservationComponent
 import com.projectronin.interop.fhir.ronin.generators.resource.rcdmPatient
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -140,8 +146,10 @@ class RoninPulseOximetryGeneratorTest {
         assertNotNull(roninObsPulseOximetry.status)
         assertNotNull(roninObsPulseOximetry.code?.coding?.get(0)?.code?.value)
         assertNotNull(roninObsPulseOximetry.id)
-        val patientFHIRId = roninObsPulseOximetry.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = roninObsPulseOximetry.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            roninObsPulseOximetry.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            roninObsPulseOximetry.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", roninObsPulseOximetry.id?.value.toString())
     }
 
@@ -222,5 +230,66 @@ class RoninPulseOximetryGeneratorTest {
 
         val issueCodes = validation.issues().map { it.code }.toSet()
         assertEquals(setOf("RONIN_OBS_003"), issueCodes)
+    }
+
+    @Test
+    fun `rcdmObservationPulseOximetry with custom value`() {
+        val valueQuantity = DynamicValue(
+            DynamicValueType.QUANTITY,
+            Quantity(
+                value = Decimal(94.toBigDecimal()),
+                unit = "% O2".asFHIR(),
+                system = CodeSystem.UCUM.uri,
+                code = Code("% 02")
+            )
+        )
+
+        val rcdmObservationPulseOximetry = rcdmObservationPulseOximetry("test") {
+            value of valueQuantity
+        }
+
+        assertEquals(valueQuantity, rcdmObservationPulseOximetry.value)
+    }
+
+    @Test
+    fun `rcdmObservationPulseOximetry with custom component`() {
+        val pulseOxComponent = listOf(
+            ObservationComponent(
+                code = CodeableConcept(
+                    coding = flowRateCoding.codes,
+                    text = "Flow Rate".asFHIR()
+                ),
+                value = DynamicValue(
+                    DynamicValueType.QUANTITY,
+                    Quantity(
+                        value = Decimal(120.toBigDecimal()),
+                        unit = "L/min".asFHIR(),
+                        system = CodeSystem.UCUM.uri,
+                        code = Code("L/min")
+                    )
+                )
+            ),
+            ObservationComponent(
+                code = CodeableConcept(
+                    coding = concentrationCoding.codes,
+                    text = "Concentration".asFHIR()
+                ),
+                value = DynamicValue(
+                    DynamicValueType.QUANTITY,
+                    Quantity(
+                        value = Decimal(63.toBigDecimal()),
+                        unit = "%".asFHIR(),
+                        system = CodeSystem.UCUM.uri,
+                        code = Code("%")
+                    )
+                )
+            )
+        )
+
+        val rcdmObservationPulseOximetry = rcdmObservationPulseOximetry("test") {
+            component of pulseOxComponent
+        }
+
+        assertEquals(pulseOxComponent, rcdmObservationPulseOximetry.component)
     }
 }

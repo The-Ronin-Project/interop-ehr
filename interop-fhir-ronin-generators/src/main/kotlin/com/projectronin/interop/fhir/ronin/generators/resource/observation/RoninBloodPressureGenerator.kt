@@ -21,6 +21,7 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.ronin.generators.resource.referenceData
 import com.projectronin.interop.fhir.ronin.generators.util.generateCodeableConcept
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
+import com.projectronin.interop.fhir.ronin.generators.util.generateWithDefault
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
 import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
@@ -39,7 +40,7 @@ fun rcdmObservationBloodPressure(tenant: String, block: ObservationGenerator.() 
         category of listOf(codeableConcept { coding of vitalSignsCategory })
         code of generateCodeableConcept(code.generate(), possibleBloodPressureCodes.codes.random())
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
-        component of bloodPressureComponent
+        component of generateWithDefault(component, bloodPressureComponent)
     }
 }
 

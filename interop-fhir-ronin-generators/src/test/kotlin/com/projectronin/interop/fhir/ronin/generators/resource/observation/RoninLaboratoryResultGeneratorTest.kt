@@ -5,8 +5,12 @@ import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
 import com.projectronin.interop.fhir.generators.datatypes.coding
 import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.datatype.DynamicValue
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.ronin.generators.resource.rcdmPatient
@@ -65,7 +69,8 @@ class RoninLaboratoryResultGeneratorTest {
             }
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsLaboratoryResultJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsLaboratoryResult)
+        val roninObsLaboratoryResultJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsLaboratoryResult)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsLaboratoryResultJSON)
@@ -78,7 +83,8 @@ class RoninLaboratoryResultGeneratorTest {
         val rcdmPatient = rcdmPatient("test") {}
         val roninObsLaboratoryResult = rcdmPatient.rcdmObservationLaboratoryResult {}
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsLaboratoryResultJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsLaboratoryResult)
+        val roninObsLaboratoryResultJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsLaboratoryResult)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsLaboratoryResultJSON)
@@ -98,8 +104,10 @@ class RoninLaboratoryResultGeneratorTest {
         assertNotNull(roninObsLaboratoryResult.status)
         assertNotNull(roninObsLaboratoryResult.code?.coding?.get(0)?.code?.value)
         assertNotNull(roninObsLaboratoryResult.id)
-        val patientFHIRId = roninObsLaboratoryResult.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = roninObsLaboratoryResult.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            roninObsLaboratoryResult.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            roninObsLaboratoryResult.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", roninObsLaboratoryResult.id?.value.toString())
     }
 
@@ -158,5 +166,24 @@ class RoninLaboratoryResultGeneratorTest {
         assertNotNull(roninLab.status)
         assertNotNull(roninLab.code)
         assertNotNull(roninLab.subject)
+    }
+
+    @Test
+    fun `rcdmObservationLaboratoryResult with custom value`() {
+        val valueQuantity = DynamicValue(
+            DynamicValueType.QUANTITY,
+            Quantity(
+                value = Decimal(100.toBigDecimal()),
+                unit = "mg".asFHIR(),
+                system = CodeSystem.UCUM.uri,
+                code = Code("mg")
+            )
+        )
+
+        val roninObsLaboratoryResult = rcdmObservationLaboratoryResult("test") {
+            value of valueQuantity
+        }
+
+        assertEquals(valueQuantity, roninObsLaboratoryResult.value)
     }
 }

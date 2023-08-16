@@ -17,6 +17,7 @@ import com.projectronin.interop.fhir.ronin.generators.resource.referenceData
 import com.projectronin.interop.fhir.ronin.generators.util.generateCodeableConcept
 import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
+import com.projectronin.interop.fhir.ronin.generators.util.generateWithDefault
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
 import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
@@ -38,7 +39,7 @@ fun rcdmObservationLaboratoryResult(tenant: String, block: ObservationGenerator.
         )
         code of generateCodeableConcept(code.generate(), possibleLaboratoryResultCodes.codes.random())
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
-        value of valueQuantity
+        value of generateWithDefault(value, valueQuantity)
     }
 }
 
