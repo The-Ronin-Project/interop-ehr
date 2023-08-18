@@ -47,10 +47,9 @@ abstract class EHRClient(
 
     suspend fun options(
         tenant: Tenant,
-        urlPart: String,
-        parameters: Map<String, Any?> = mapOf()
+        urlPart: String
     ): HttpResponse {
-        return optionsImpl(tenant, urlPart, parameters)
+        return optionsImpl(tenant, urlPart)
     }
 
     suspend fun post(
@@ -187,8 +186,7 @@ abstract class EHRClient(
 
     protected open suspend fun optionsImpl(
         tenant: Tenant,
-        urlPart: String,
-        parameters: Map<String, Any?> = mapOf()
+        urlPart: String
     ): HttpResponse {
         logger.debug { "Started OPTIONS call to tenant: ${tenant.mnemonic}" }
 
@@ -207,26 +205,6 @@ abstract class EHRClient(
             options(urlToCall) {
                 headers {
                     append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
-                }
-                url {
-                    parameters.map { parameterEntry ->
-                        val key = parameterEntry.key
-                        when (val value = parameterEntry.value) {
-                            is List<*> -> {
-                                encodedParameters.append(
-                                    key,
-                                    // tricky, but this takes a list of any objects, converts, them to string, encodes them
-                                    // and then combines this in a comma separated list
-                                    value.joinToString(separator = ",") { parameterValue ->
-                                        parameterValue.toString().encodeURLParameter(spaceToPlus = true)
-                                    }
-                                )
-                            }
-
-                            is RepeatingParameter -> url.parameters.appendAll(key, value.values)
-                            else -> parameter(key, value)
-                        }
-                    }
                 }
             }
         }

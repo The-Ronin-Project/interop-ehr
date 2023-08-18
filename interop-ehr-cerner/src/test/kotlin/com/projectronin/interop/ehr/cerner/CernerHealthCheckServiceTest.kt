@@ -38,7 +38,7 @@ class CernerHealthCheckServiceTest {
     fun `patient service fails`() {
         every { authenticationService.getAuthentication(tenant, true) } returns mockk()
         coEvery {
-            cernerClient.options(tenant, "/Patient", any())
+            cernerClient.options(tenant, "/")
         } throws Exception()
         assertFalse(healthCheckService.healthCheck(tenant))
     }
@@ -47,7 +47,7 @@ class CernerHealthCheckServiceTest {
     fun `health check works`() {
         every { authenticationService.getAuthentication(tenant, true) } returns mockk()
         coEvery {
-            cernerClient.options(tenant, "/Patient", any())
+            cernerClient.options(tenant, "/")
         } returns mockk()
         assertTrue(healthCheckService.healthCheck(tenant))
     }

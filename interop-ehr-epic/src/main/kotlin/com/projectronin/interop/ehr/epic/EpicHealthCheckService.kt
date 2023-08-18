@@ -8,8 +8,6 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import org.springframework.stereotype.Component
-import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 
 @Component
 class EpicHealthCheckService(
@@ -27,13 +25,8 @@ class EpicHealthCheckService(
             return false
         }
         try {
-            val parameters = mapOf(
-                "given" to "Health",
-                "family:exact" to "Check",
-                "birthdate" to DateTimeFormatter.ofPattern("yyyy-MM-dd").format(LocalDate.now())
-            )
             runBlocking {
-                epicClient.options(tenant, "/Patient", parameters)
+                epicClient.options(tenant, "/")
             }
         } catch (e: Exception) {
             logger.debug(e) { "Failed Patient search health check for ${tenant.mnemonic}" }
