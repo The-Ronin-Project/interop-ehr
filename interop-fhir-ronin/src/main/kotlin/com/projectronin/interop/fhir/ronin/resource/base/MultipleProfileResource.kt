@@ -87,7 +87,7 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
         }
     }
 
-    override fun mapInternal(
+    override fun conceptMap(
         normalized: T,
         parentContext: LocationContext,
         tenant: Tenant,
@@ -96,7 +96,7 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
         val validation = Validation()
 
         val qualified = getQualifiedProfile(normalized, parentContext, validation)
-        val response = qualified?.mapInternal(normalized, parentContext, tenant)
+        val response = qualified?.conceptMap(normalized, parentContext, tenant)
 
         val mapped = response?.let {
             validation.merge(it.second)

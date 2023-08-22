@@ -42,7 +42,7 @@ class BaseObservationGeneratorTest {
         val localizer: Localizer = mockk {
             every { localize(any(), tenant) } answers { firstArg() }
         }
-        roninObs = RoninObservation(normalizer, localizer)
+        roninObs = RoninObservation(normalizer, localizer, mockk())
     }
 
     @Test
@@ -64,7 +64,8 @@ class BaseObservationGeneratorTest {
             }
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObservationJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObservation)
+        val roninObservationJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObservation)
 
         // Uncomment to take a peek at the JSON
         // println(roninObservationJSON)
@@ -78,7 +79,8 @@ class BaseObservationGeneratorTest {
         val roninObservation = rcdmPatient.rcdmObservation {}
 
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObservationJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObservation)
+        val roninObservationJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObservation)
 
         // Uncomment to take a peek at the JSON
         // println(roninObservationJSON)
@@ -119,8 +121,10 @@ class BaseObservationGeneratorTest {
         assertTrue(roninObservation.identifier.any { it.value == "test".asFHIR() })
         assertTrue(roninObservation.identifier.any { it.value == "EHR Data Authority".asFHIR() })
         assertTrue(roninObservation.identifier.any { it.system == CodeSystem.RONIN_FHIR_ID.uri })
-        val patientFHIRId = roninObservation.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = roninObservation.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            roninObservation.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            roninObservation.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", roninObservation.id?.value.toString())
         assertEquals("test", tenant)
         assertNotNull(roninObservation.status)
@@ -250,7 +254,10 @@ class BaseObservationGeneratorTest {
         val validation = roninObs.validate(baseObs, null)
         assertEquals(validation.hasErrors(), true)
         assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
-        assertEquals(validation.issues()[0].description, "The referenced resource type was not one of CareTeam, Organization, Patient, Practitioner, PractitionerRole")
+        assertEquals(
+            validation.issues()[0].description,
+            "The referenced resource type was not one of CareTeam, Organization, Patient, Practitioner, PractitionerRole"
+        )
         assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "performer[0]"))
         assertEquals(validation.issues()[1].code, "INV_VALUE_SET")
         assertEquals(validation.issues()[1].description, "'fake-status' is outside of required value set")
@@ -275,7 +282,10 @@ class BaseObservationGeneratorTest {
         val validation = roninObs.validate(roninObservation, null)
         assertEquals(validation.hasErrors(), true)
         assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
-        assertEquals(validation.issues()[0].description, "The referenced resource type was not one of Patient, Location")
+        assertEquals(
+            validation.issues()[0].description,
+            "The referenced resource type was not one of Patient, Location"
+        )
         assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "subject"))
     }
 

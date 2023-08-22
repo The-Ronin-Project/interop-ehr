@@ -95,7 +95,7 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
         }
     }
 
-    override fun mapInternal(
+    override fun conceptMap(
         normalized: Encounter,
         parentContext: LocationContext,
         tenant: Tenant,

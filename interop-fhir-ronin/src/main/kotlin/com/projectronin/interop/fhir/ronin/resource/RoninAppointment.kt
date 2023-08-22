@@ -76,7 +76,7 @@ class RoninAppointment(
         }
     }
 
-    override fun mapInternal(
+    override fun conceptMap(
         normalized: Appointment,
         parentContext: LocationContext,
         tenant: Tenant,
@@ -114,7 +114,13 @@ class RoninAppointment(
                         validation.apply {
                             checkNotNull(
                                 getCodedEnumOrNull<AppointmentStatus>(statusTarget),
-                                ConceptMapInvalidValueSetError(statusContext, statusMapName, statusValue, statusTarget, statusCode.metadata),
+                                ConceptMapInvalidValueSetError(
+                                    statusContext,
+                                    statusMapName,
+                                    statusValue,
+                                    statusTarget,
+                                    statusCode.metadata
+                                ),
                                 parentContext
                             )
                         }

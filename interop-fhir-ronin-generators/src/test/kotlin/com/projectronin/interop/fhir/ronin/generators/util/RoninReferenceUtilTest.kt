@@ -36,7 +36,7 @@ class RoninReferenceUtilTest {
         val localizer: Localizer = mockk {
             every { localize(any(), tenant) } answers { firstArg() }
         }
-        roninObs = RoninObservation(normalizer, localizer)
+        roninObs = RoninObservation(normalizer, localizer, mockk())
     }
 
     @Test
@@ -166,7 +166,10 @@ class RoninReferenceUtilTest {
         val validation = roninObs.validate(roninObservation, null)
         assertEquals(validation.hasErrors(), true)
         assertEquals("RONIN_INV_REF_TYPE", validation.issues()[0].code)
-        assertEquals("The referenced resource type was not one of Patient, Location", validation.issues()[0].description)
+        assertEquals(
+            "The referenced resource type was not one of Patient, Location",
+            validation.issues()[0].description
+        )
         assertEquals(LocationContext(element = "Observation", field = "subject"), validation.issues()[0].location)
     }
 

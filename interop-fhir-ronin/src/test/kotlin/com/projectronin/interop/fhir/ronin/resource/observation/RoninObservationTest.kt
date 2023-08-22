@@ -49,7 +49,7 @@ class RoninObservationTest {
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
-    private val roninObservation = RoninObservation(normalizer, localizer)
+    private val roninObservation = RoninObservation(normalizer, localizer, mockk())
     private val vitalSignsCategory = Code("vital-signs")
     private val laboratoryCategory = Code("laboratory")
 

@@ -5,6 +5,8 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -18,16 +20,21 @@ import org.springframework.stereotype.Component
 @Component
 class RoninObservation(
     normalizer: Normalizer,
-    localizer: Localizer
+    localizer: Localizer,
+    registryClient: NormalizationRegistryClient
 ) :
     BaseRoninObservation(
         R4ObservationValidator,
         RoninProfile.OBSERVATION.value,
         normalizer,
-        localizer
+        localizer,
+        registryClient
     ) {
     override val rcdmVersion = RCDMVersion.V3_24_1
     override val profileVersion = 4
+
+    // RoninObservation is a catch all, so there are no explicit qualifying codes.
+    override fun qualifyingCodes(): ValueSetList = ValueSetList(emptyList(), null)
 
     /**
      * Any Observation resource qualifies for [RoninObservation].
@@ -36,5 +43,10 @@ class RoninObservation(
         return true
     }
 
-    override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {}
+    override fun validateSpecificObservation(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation
+    ) {
+    }
 }

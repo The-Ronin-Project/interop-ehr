@@ -141,7 +141,7 @@ class RoninObservationsTest {
 
         every { bodyHeight.qualifies(original) } returns false
         every { bodyWeight.qualifies(original) } returns true
-        every { bodyWeight.mapInternal(original, LocationContext(Observation::class), tenant) } returns Pair(
+        every { bodyWeight.conceptMap(original, LocationContext(Observation::class), tenant) } returns Pair(
             mappedObservation,
             Validation()
         )

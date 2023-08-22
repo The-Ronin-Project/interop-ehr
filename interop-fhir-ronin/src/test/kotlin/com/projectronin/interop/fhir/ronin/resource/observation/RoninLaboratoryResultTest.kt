@@ -370,8 +370,8 @@ class RoninLaboratoryResultTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: category is a required element @ Observation.category\n" +
-                "ERROR RONIN_OBS_002: Must match this system|code: http://terminology.hl7.org/CodeSystem/observation-category|laboratory @ Observation.category",
+                "ERROR RONIN_OBS_002: Must match this system|code: http://terminology.hl7.org/CodeSystem/observation-category|laboratory @ Observation.category\n" +
+                "ERROR REQ_FIELD: category is a required element @ Observation.category",
             exception.message
         )
     }
@@ -1707,8 +1707,8 @@ class RoninLaboratoryResultTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_LABOBS_001: Code system must be LOINC @ Observation.code\n" +
-                "ERROR RONIN_OBS_003: Must match this system|code: http://loinc.org|some-code @ Observation.code",
+                "ERROR RONIN_OBS_003: Must match this system|code: http://loinc.org|some-code @ Observation.code\n" +
+                "ERROR RONIN_LABOBS_001: Code system must be LOINC @ Observation.code",
             exception.message
         )
     }

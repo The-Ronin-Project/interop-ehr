@@ -40,7 +40,7 @@ abstract class BaseProfile<T : Resource<T>>(
      * CodeableConcept attributes in the [normalized] element based off [tenant]
      * prior to any other actions in transform(). Validation reports any errors.
      */
-    open fun mapInternal(
+    open fun conceptMap(
         normalized: T,
         parentContext: LocationContext,
         tenant: Tenant,
@@ -73,10 +73,11 @@ abstract class BaseProfile<T : Resource<T>>(
 
         val normalized = normalizer.normalize(original, tenant)
 
-        val (mapped, mappingValidation) = mapInternal(normalized, currentContext, tenant)
+        val (mapped, mappingValidation) = conceptMap(normalized, currentContext, tenant)
         validation.merge(mappingValidation)
 
-        val (transformed, transformValidation) = mapped?.let { transformInternal(mapped, currentContext, tenant) } ?: Pair(null, null)
+        val (transformed, transformValidation) = mapped?.let { transformInternal(mapped, currentContext, tenant) }
+            ?: Pair(null, null)
         transformValidation?.let { validation.merge(transformValidation) }
 
         val localized = transformed?.let { localizer.localize(transformed, tenant) }

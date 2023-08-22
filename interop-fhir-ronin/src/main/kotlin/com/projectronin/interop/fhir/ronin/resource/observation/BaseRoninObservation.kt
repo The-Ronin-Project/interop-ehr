@@ -4,10 +4,13 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.resource.Observation
+import com.projectronin.interop.fhir.ronin.error.FailedConceptMapLookupError
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
 import com.projectronin.interop.fhir.ronin.util.validateReference
@@ -29,14 +32,18 @@ abstract class BaseRoninObservation(
     extendedProfile: ProfileValidator<Observation>,
     profile: String,
     normalizer: Normalizer,
-    localizer: Localizer
+    localizer: Localizer,
+    protected val registryClient: NormalizationRegistryClient
 ) : USCoreBasedProfile<Observation>(extendedProfile, profile, normalizer, localizer) {
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
     open fun qualifyingCategories(): List<Coding> = emptyList()
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    open fun qualifyingCodes(): ValueSetList = ValueSetList(emptyList(), null)
+    open fun qualifyingCodes(): ValueSetList = registryClient.getRequiredValueSet(
+        "Observation.code",
+        profile
+    )
 
     override fun qualifies(resource: Observation): Boolean {
         return (
@@ -87,6 +94,13 @@ abstract class BaseRoninObservation(
         severity = ValidationIssueSeverity.ERROR,
         description = "Coding list is restricted to 1 entry",
         location = LocationContext(Observation::code)
+    )
+
+    private val requiredExtensionCodeError = FHIRError(
+        code = "RONIN_OBS_004",
+        description = "Tenant source observation code extension is missing or invalid",
+        severity = ValidationIssueSeverity.ERROR,
+        location = LocationContext(Observation::extension)
     )
 
     /**
@@ -162,6 +176,8 @@ abstract class BaseRoninObservation(
                 }
             }
 
+            validateSpecificObservation(element, parentContext, validation)
+
             // category and code (basics), dataAbsentReason, effective, status - validated by R4ObservationValidator
         }
     }
@@ -172,10 +188,9 @@ abstract class BaseRoninObservation(
     override fun validateUSCore(element: Observation, parentContext: LocationContext, validation: Validation) {}
 
     /**
-     * To validate subclasses against Ronin rules for a specific Observation type.
-     * Observation type is defined by Ronin Common Data Model based on Observation.category and Observation.code.
+     * Validates a specific Observation against the profile. By default, this will check for a valid category and code, and the appropriate source code extension.
      */
-    open fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
+    open fun validateSpecificObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             checkTrue(
                 element.category.qualifiesForValueSet(qualifyingCategories()),
@@ -198,7 +213,60 @@ abstract class BaseRoninObservation(
                 ),
                 parentContext
             )
+
+            checkTrue(
+                element.extension.any {
+                    it.url == RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri &&
+                        it.value?.type == DynamicValueType.CODEABLE_CONCEPT
+                },
+                requiredExtensionCodeError,
+                parentContext
+            )
         }
+    }
+
+    override fun conceptMap(
+        normalized: Observation,
+        parentContext: LocationContext,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
+    ): Pair<Observation, Validation> {
+        val validation = Validation()
+
+        // Observation.code is a single CodeableConcept
+        val mappedCode = normalized.code?.let { code ->
+            val observationCode = registryClient.getConceptMapping(
+                tenant,
+                "Observation.code",
+                code,
+                forceCacheReloadTS
+            )
+            // validate the mapping we got, use code value to report issues
+            validation.apply {
+                checkNotNull(
+                    observationCode,
+                    FailedConceptMapLookupError(
+                        LocationContext(Observation::code),
+                        code.coding.mapNotNull { it.code?.value }
+                            .joinToString(", "),
+                        "any Observation.code concept map for tenant '${tenant.mnemonic}'",
+                        observationCode?.metadata
+                    ),
+                    parentContext
+                )
+            }
+            observationCode
+        }
+
+        return Pair(
+            mappedCode?.let {
+                normalized.copy(
+                    code = it.codeableConcept,
+                    extension = normalized.extension + it.extension
+                )
+            } ?: normalized,
+            validation
+        )
     }
 
     private val requiredIdError = RequiredFieldError(Observation::id)

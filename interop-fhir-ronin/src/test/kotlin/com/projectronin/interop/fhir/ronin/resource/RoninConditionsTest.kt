@@ -77,7 +77,7 @@ class RoninConditionsTest {
         every { profile1.qualifies(original) } returns false
         every { profile2.qualifies(original) } returns true
         every {
-            profile2.mapInternal(
+            profile2.conceptMap(
                 original,
                 LocationContext(Condition::class),
                 tenant

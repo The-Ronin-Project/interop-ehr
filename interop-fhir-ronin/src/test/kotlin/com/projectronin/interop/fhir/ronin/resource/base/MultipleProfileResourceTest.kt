@@ -161,7 +161,7 @@ class MultipleProfileResourceTest {
         val transformedLocation = Location(id = Id("test-1234"), extension = listOf(extension1))
 
         every {
-            testProfile1.mapInternal(location, any(), tenant)
+            testProfile1.conceptMap(location, any(), tenant)
         } returns Pair(mappedLocation, Validation())
         every {
             testProfile1.transformInternal(
@@ -214,7 +214,7 @@ class MultipleProfileResourceTest {
         every { profile2.qualifies(original) } returns false
         every { profile3.qualifies(original) } returns true
 
-        every { profile3.mapInternal(original, LocationContext(Observation::class), tenant) } returns Pair(
+        every { profile3.conceptMap(original, LocationContext(Observation::class), tenant) } returns Pair(
             mappedObservation,
             Validation()
         )

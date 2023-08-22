@@ -122,7 +122,7 @@ class RoninDocumentReference(
         }
     }
 
-    override fun mapInternal(
+    override fun conceptMap(
         normalized: DocumentReference,
         parentContext: LocationContext,
         tenant: Tenant,

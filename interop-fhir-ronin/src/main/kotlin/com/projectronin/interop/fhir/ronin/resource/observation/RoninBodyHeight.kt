@@ -50,8 +50,12 @@ class RoninBodyHeight(
         location = LocationContext(Observation::bodySite)
     )
 
-    override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validateObservation(element, parentContext, validation)
+    override fun validateSpecificObservation(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation
+    ) {
+        super.validateSpecificObservation(element, parentContext, validation)
         validation.apply {
             checkTrue(element.bodySite == null, noBodySiteError, parentContext)
         }

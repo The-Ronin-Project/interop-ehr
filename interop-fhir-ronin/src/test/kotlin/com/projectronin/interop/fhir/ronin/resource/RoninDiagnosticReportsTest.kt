@@ -80,7 +80,7 @@ class RoninDiagnosticReportsTest {
 
         every { profile1.qualifies(original) } returns false
         every { profile2.qualifies(original) } returns true
-        every { profile2.mapInternal(original, LocationContext(DiagnosticReport::class), tenant) } returns Pair(
+        every { profile2.conceptMap(original, LocationContext(DiagnosticReport::class), tenant) } returns Pair(
             mappedDxReport,
             Validation()
         )

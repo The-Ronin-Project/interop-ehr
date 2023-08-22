@@ -97,7 +97,7 @@ abstract class BaseRoninCondition(
 
     override fun validateUSCore(element: Condition, parentContext: LocationContext, validation: Validation) {}
 
-    override fun mapInternal(
+    override fun conceptMap(
         normalized: Condition,
         parentContext: LocationContext,
         tenant: Tenant,

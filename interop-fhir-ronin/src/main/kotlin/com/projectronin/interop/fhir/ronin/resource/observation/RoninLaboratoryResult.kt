@@ -32,7 +32,7 @@ class RoninLaboratoryResult(
     localizer: Localizer,
     registryClient: NormalizationRegistryClient
 ) :
-    BaseRoninProfileObservation(
+    BaseRoninObservation(
         R4ObservationValidator,
         RoninProfile.OBSERVATION_LABORATORY_RESULT.value,
         normalizer,
@@ -175,8 +175,12 @@ class RoninLaboratoryResult(
         // category, code, dataAbsentReason, effective (basics) - and status - validated by R4ObservationValidator
     }
 
-    override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validateObservation(element, parentContext, validation)
+    override fun validateSpecificObservation(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation
+    ) {
+        super.validateSpecificObservation(element, parentContext, validation)
 
         validation.apply {
             val codingList = element.code?.coding
@@ -195,14 +199,6 @@ class RoninLaboratoryResult(
                 )
             }
         }
-    }
-
-    /**
-     * Validates the Observation against rules from Ronin, USCore, and laboratory Observation type.
-     */
-    override fun validate(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validate(element, parentContext, validation) // Ronin, USCore
-        validateObservation(element, parentContext, validation)
     }
 
     private val requiredIdError = RequiredFieldError(Observation::id)

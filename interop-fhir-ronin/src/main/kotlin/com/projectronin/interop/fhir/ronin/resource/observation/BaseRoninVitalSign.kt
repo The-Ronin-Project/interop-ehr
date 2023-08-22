@@ -29,7 +29,7 @@ abstract class BaseRoninVitalSign(
     localizer: Localizer,
     registryClient: NormalizationRegistryClient
 ) :
-    BaseRoninProfileObservation(
+    BaseRoninObservation(
         extendedProfile,
         profile,
         normalizer,
@@ -37,7 +37,8 @@ abstract class BaseRoninVitalSign(
         registryClient
     ) {
 
-    override fun qualifyingCategories() = listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("vital-signs")))
+    override fun qualifyingCategories() =
+        listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("vital-signs")))
 
     // Quantity unit codes - subclasses may override to modify validation logic for quantity units like "cm" "kg"
     open val validQuantityCodes: List<String> = emptyList()
@@ -58,8 +59,12 @@ abstract class BaseRoninVitalSign(
         location = LocationContext(Observation::code)
     )
 
-    override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validateObservation(element, parentContext, validation)
+    override fun validateSpecificObservation(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation
+    ) {
+        super.validateSpecificObservation(element, parentContext, validation)
 
         validation.apply {
             element.code?.coding?.let {
@@ -77,6 +82,8 @@ abstract class BaseRoninVitalSign(
                 )
             }
         }
+
+        validateVitalSign(element, parentContext, validation)
     }
 
     /**
@@ -139,14 +146,5 @@ abstract class BaseRoninVitalSign(
                 }
             }
         }
-    }
-
-    /**
-     * Validates the Observation against rules from Ronin, USCore, specific Observation type, and vital signs.
-     */
-    override fun validate(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validate(element, parentContext, validation) // Ronin, USCore
-        validateObservation(element, parentContext, validation)
-        validateVitalSign(element, parentContext, validation)
     }
 }

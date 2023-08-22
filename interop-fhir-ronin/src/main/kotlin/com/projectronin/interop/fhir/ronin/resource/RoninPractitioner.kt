@@ -56,7 +56,7 @@ class RoninPractitioner(normalizer: Normalizer, localizer: Localizer) :
         }
     }
 
-    override fun mapInternal(
+    override fun conceptMap(
         normalized: Practitioner,
         parentContext: LocationContext,
         tenant: Tenant,

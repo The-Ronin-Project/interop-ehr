@@ -74,7 +74,7 @@ class RoninMedication(
         }
     }
 
-    override fun mapInternal(
+    override fun conceptMap(
         normalized: Medication,
         parentContext: LocationContext,
         tenant: Tenant,

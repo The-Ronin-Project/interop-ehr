@@ -31,7 +31,7 @@ class RoninStagingRelated(
     localizer: Localizer,
     registryClient: NormalizationRegistryClient
 ) :
-    BaseRoninProfileObservation(
+    BaseRoninObservation(
         R4ObservationValidator,
         RoninProfile.OBSERVATION_STAGING_RELATED.value,
         normalizer,
@@ -98,8 +98,12 @@ class RoninStagingRelated(
         // category non-null - validated by R4ObservationValidator
     }
 
-    override fun validateObservation(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validateObservation(element, parentContext, validation)
+    override fun validateSpecificObservation(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation
+    ) {
+        super.validateSpecificObservation(element, parentContext, validation)
 
         validation.apply {
             element.code?.coding?.let {
@@ -133,11 +137,6 @@ class RoninStagingRelated(
         }
     }
 
-    override fun validate(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validate(element, parentContext, validation) // Ronin, USCore
-        validateObservation(element, parentContext, validation)
-    }
-
     override fun transformInternal(
         normalized: Observation,
         parentContext: LocationContext,
@@ -155,14 +154,14 @@ class RoninStagingRelated(
         return Pair(transformed, validation)
     }
 
-    override fun mapInternal(
+    override fun conceptMap(
         normalized: Observation,
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
     ): Pair<Observation, Validation> {
         // normalize Observation.code
-        val (codeNormalized, codeValidation) = super.mapInternal(
+        val (codeNormalized, codeValidation) = super.conceptMap(
             normalized,
             parentContext,
             tenant,
@@ -204,6 +203,7 @@ class RoninStagingRelated(
                             )
                         } ?: component
                     }
+
                     else -> component
                 }
             }
