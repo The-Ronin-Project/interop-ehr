@@ -20,9 +20,10 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.AvailableTime
-import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.resource.NotAvailable
 import com.projectronin.interop.fhir.r4.resource.PractitionerRole
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerRoleValidator
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
@@ -341,7 +342,7 @@ class RoninPractitionerRoleTest {
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
             text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(Location(id = Id("67890"))),
             identifier = listOf(Identifier(value = "id".asFHIR())),
             active = FHIRBoolean.TRUE,
             period = Period(end = DateTime("2022")),
@@ -369,7 +370,7 @@ class RoninPractitionerRoleTest {
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
-            listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            listOf(Location(id = Id("67890"))),
             transformed.contained
         )
         assertEquals(0, transformed.extension.size)
@@ -424,7 +425,7 @@ class RoninPractitionerRoleTest {
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
             text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(Location(id = Id("67890"))),
             extension = listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
@@ -467,7 +468,7 @@ class RoninPractitionerRoleTest {
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
-            listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            listOf(Location(id = Id("67890"))),
             transformed.contained
         )
         assertEquals(
@@ -552,7 +553,7 @@ class RoninPractitionerRoleTest {
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
         assertNull(transformed.text)
-        assertEquals(listOf<ContainedResource>(), transformed.contained)
+        assertEquals(listOf<Resource<*>>(), transformed.contained)
         assertEquals(listOf<Extension>(), transformed.extension)
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
@@ -613,7 +614,7 @@ class RoninPractitionerRoleTest {
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
         assertNull(transformed.text)
-        assertEquals(listOf<ContainedResource>(), transformed.contained)
+        assertEquals(listOf<Resource<*>>(), transformed.contained)
         assertEquals(listOf<Extension>(), transformed.extension)
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
@@ -679,7 +680,7 @@ class RoninPractitionerRoleTest {
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
         assertNull(transformed.text)
-        assertEquals(listOf<ContainedResource>(), transformed.contained)
+        assertEquals(listOf<Resource<*>>(), transformed.contained)
         assertEquals(listOf<Extension>(), transformed.extension)
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(

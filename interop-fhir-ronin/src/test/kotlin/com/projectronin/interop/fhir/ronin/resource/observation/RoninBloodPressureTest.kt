@@ -21,10 +21,11 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.resource.ObservationComponent
 import com.projectronin.interop.fhir.r4.resource.ObservationReferenceRange
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
@@ -141,7 +142,11 @@ class RoninBloodPressureTest {
                 "Observation.code",
                 tenantBloodPressureConcept
             )
-        } returns ConceptMapCodeableConcept(bloodPressureConcept, tenantBloodPressureSourceExtension, listOf(conceptMapMetadata))
+        } returns ConceptMapCodeableConcept(
+            bloodPressureConcept,
+            tenantBloodPressureSourceExtension,
+            listOf(conceptMapMetadata)
+        )
         every {
             getConceptMapping(
                 tenant,
@@ -2262,7 +2267,7 @@ class RoninBloodPressureTest {
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
             text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(Location(id = Id("67890"))),
             extension = listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
@@ -2362,7 +2367,7 @@ class RoninBloodPressureTest {
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
-            listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            listOf(Location(id = Id("67890"))),
             transformed.contained
         )
         assertEquals(
@@ -2541,7 +2546,7 @@ class RoninBloodPressureTest {
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
         assertNull(transformed.text)
-        assertEquals(listOf<ContainedResource>(), transformed.contained)
+        assertEquals(listOf<Resource<*>>(), transformed.contained)
         assertEquals(
             listOf(tenantBloodPressureSourceExtension),
             transformed.extension

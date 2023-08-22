@@ -12,7 +12,6 @@ import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
-import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.localization.Localizer
@@ -241,7 +240,7 @@ abstract class BaseRoninProfile<T : Resource<T>>(
     }
 
     protected fun containedResourcePresent(
-        containedResource: List<ContainedResource>,
+        containedResource: List<Resource<*>>,
         parentContext: LocationContext,
         validation: Validation
     ) {

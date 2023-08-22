@@ -17,9 +17,10 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.resource.RequestGroup
 import com.projectronin.interop.fhir.r4.resource.RequestGroupAction
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.RequestGroupIntent
 import com.projectronin.interop.fhir.r4.valueset.RequestGroupStatus
@@ -383,7 +384,7 @@ class RoninRequestGroupTest {
         Assertions.assertNull(transformed.implicitRules)
         Assertions.assertNull(transformed.language)
         Assertions.assertNull(transformed.text)
-        assertEquals(listOf<ContainedResource>(), transformed.contained)
+        assertEquals(listOf<Resource<*>>(), transformed.contained)
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
@@ -427,7 +428,7 @@ class RoninRequestGroupTest {
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
             text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(Location(id = Id("67890"))),
             extension = listOf(
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),
@@ -484,7 +485,7 @@ class RoninRequestGroupTest {
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
-            listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            listOf(Location(id = Id("67890"))),
             transformed.contained
         )
         assertEquals(

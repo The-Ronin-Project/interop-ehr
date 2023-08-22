@@ -22,8 +22,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Batch
-import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Ingredient
+import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.resource.Medication
 import com.projectronin.interop.fhir.r4.valueset.MedicationStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
@@ -630,7 +630,7 @@ class RoninMedicationTest {
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
             text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(Location(id = Id("67890"))),
             extension = listOf(
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),
@@ -765,7 +765,7 @@ class RoninMedicationTest {
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
             text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(Location(id = Id("67890"))),
             extension = listOf(
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),

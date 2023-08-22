@@ -15,7 +15,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.validate.resource.R4LocationValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
@@ -586,7 +585,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier
         )
-        every { location.contained } returns listOf(ContainedResource("Patient"))
+        every { location.contained } returns listOf(Location(id = Id("67890")))
 
         TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         val output = outputStream.toString()
@@ -601,7 +600,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier
         )
-        every { location.contained } returns listOf(ContainedResource("Patient"))
+        every { location.contained } returns listOf(Location(id = Id("67890")))
         val warning = TestProfile(normalizer, localizer).validate(location, null)
 
         assertTrue(warning.issues().isNotEmpty())

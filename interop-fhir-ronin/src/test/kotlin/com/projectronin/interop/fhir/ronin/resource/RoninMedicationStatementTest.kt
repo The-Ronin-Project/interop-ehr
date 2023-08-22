@@ -20,7 +20,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.resource.MedicationStatement
 import com.projectronin.interop.fhir.r4.validate.resource.R4MedicationStatementValidator
 import com.projectronin.interop.fhir.r4.valueset.MedicationStatementStatus
@@ -310,7 +310,7 @@ class RoninMedicationStatementTest {
                 status = com.projectronin.interop.fhir.r4.valueset.NarrativeStatus.GENERATED.asCode(),
                 div = "div".asFHIR()
             ),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(Location(id = Id("67890"))),
             extension = listOf(
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),

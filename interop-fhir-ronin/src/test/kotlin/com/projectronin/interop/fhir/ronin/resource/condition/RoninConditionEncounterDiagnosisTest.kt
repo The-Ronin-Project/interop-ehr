@@ -24,7 +24,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.r4.resource.ConditionEvidence
 import com.projectronin.interop.fhir.r4.resource.ConditionStage
-import com.projectronin.interop.fhir.r4.resource.ContainedResource
+import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.validate.resource.R4ConditionValidator
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
@@ -910,7 +911,7 @@ class RoninConditionEncounterDiagnosisTest {
                 status = NarrativeStatus.GENERATED.asCode(),
                 div = "div".asFHIR()
             ),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"13579"}""")),
+            contained = listOf(Location(id = Id("67890"))),
             extension = listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
@@ -1040,7 +1041,7 @@ class RoninConditionEncounterDiagnosisTest {
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = FHIRString("div")), transformed.text)
         assertEquals(
-            listOf(ContainedResource("""{"resourceType":"Banana","id":"13579"}""")),
+            listOf(Location(id = Id("67890"))),
             transformed.contained
         )
         assertEquals(
@@ -1265,7 +1266,7 @@ class RoninConditionEncounterDiagnosisTest {
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
         assertNull(transformed.text)
-        assertEquals(listOf<ContainedResource>(), transformed.contained)
+        assertEquals(listOf<Resource<*>>(), transformed.contained)
         assertEquals(listOf(conditionCodeExtension), transformed.extension)
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(

@@ -21,7 +21,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.PositiveInt
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.fhir.r4.resource.EncounterClassHistory
 import com.projectronin.interop.fhir.r4.resource.EncounterDiagnosis
@@ -29,6 +28,8 @@ import com.projectronin.interop.fhir.r4.resource.EncounterHospitalization
 import com.projectronin.interop.fhir.r4.resource.EncounterLocation
 import com.projectronin.interop.fhir.r4.resource.EncounterParticipant
 import com.projectronin.interop.fhir.r4.resource.EncounterStatusHistory
+import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.valueset.EncounterLocationStatus
 import com.projectronin.interop.fhir.r4.valueset.EncounterStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
@@ -467,7 +468,7 @@ class RoninEncounterTest {
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
             text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(Location(id = Id("67890"))),
             extension = listOf(
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),
@@ -695,7 +696,7 @@ class RoninEncounterTest {
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
-            listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            listOf(Location(id = Id("67890"))),
             transformed.contained
         )
         // TODO: Re-add type and class extensions once outstanding questions resolved
@@ -1041,7 +1042,7 @@ class RoninEncounterTest {
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
         assertNull(transformed.text)
-        assertEquals(listOf<ContainedResource>(), transformed.contained)
+        assertEquals(listOf<Resource<*>>(), transformed.contained)
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(

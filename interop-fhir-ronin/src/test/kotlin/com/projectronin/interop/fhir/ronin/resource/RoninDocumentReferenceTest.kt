@@ -19,11 +19,11 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.r4.resource.ContainedResource
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
 import com.projectronin.interop.fhir.r4.resource.DocumentReferenceContent
 import com.projectronin.interop.fhir.r4.resource.DocumentReferenceContext
 import com.projectronin.interop.fhir.r4.resource.DocumentReferenceRelatesTo
+import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.valueset.CompositionStatus
 import com.projectronin.interop.fhir.r4.valueset.DocumentReferenceStatus
 import com.projectronin.interop.fhir.r4.valueset.DocumentRelationshipType
@@ -126,7 +126,11 @@ class RoninDocumentReferenceTest {
                 "DocumentReference.type",
                 CodeableConcept(text = "bad".asFHIR())
             )
-        } returns ConceptMapCodeableConcept(CodeableConcept(text = "worse".asFHIR()), tenantDocRefTypeExtension, listOf(docRefTypeMetadata))
+        } returns ConceptMapCodeableConcept(
+            CodeableConcept(text = "worse".asFHIR()),
+            tenantDocRefTypeExtension,
+            listOf(docRefTypeMetadata)
+        )
     }
     private val roninDocumentReference = RoninDocumentReference(normalizer, localizer, registryClient)
 
@@ -595,7 +599,7 @@ class RoninDocumentReferenceTest {
             implicitRules = Uri("implicit-rules"),
             language = Code("en-US"),
             text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(ContainedResource("""{"resourceType":"Banana","id":"24680"}""")),
+            contained = listOf(Location(id = Id("67890"))),
             extension = listOf(
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),
