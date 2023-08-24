@@ -33,6 +33,7 @@ class CernerVendorFactoryTest {
     private val carePlanService = mockk<CernerCarePlanService>()
     private val documentReferenceService = mockk<CernerDocumentReferenceService>()
     private val binaryService = mockk<CernerBinaryService>()
+    private val onboardFlagService = mockk<CernerOnboardFlagService>()
 
     private val vendorFactory =
         CernerVendorFactory(
@@ -53,7 +54,8 @@ class CernerVendorFactoryTest {
             requestGroupService = requestGroupService,
             carePlanService = carePlanService,
             documentReferenceService = documentReferenceService,
-            binaryService = binaryService
+            binaryService = binaryService,
+            onboardFlagService = onboardFlagService
         )
 
     @Test
@@ -149,11 +151,6 @@ class CernerVendorFactoryTest {
     }
 
     @Test
-    fun `returns NotImplementedError for OnboardFlagService`() {
-        assertThrows<NotImplementedError> { vendorFactory.onboardFlagService }
-    }
-
-    @Test
     fun `returns NotImplementedError for NoteService`() {
         assertThrows<NotImplementedError> { vendorFactory.noteService }
     }
@@ -176,5 +173,10 @@ class CernerVendorFactoryTest {
     @Test
     fun `returns BinaryService`() {
         assertEquals(binaryService, vendorFactory.binaryService)
+    }
+
+    @Test
+    fun `returns OnboardFlagService`() {
+        assertEquals(onboardFlagService, vendorFactory.onboardFlagService)
     }
 }

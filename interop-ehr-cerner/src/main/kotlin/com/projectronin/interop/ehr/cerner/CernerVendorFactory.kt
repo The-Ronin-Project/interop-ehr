@@ -2,7 +2,6 @@ package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.common.vendor.VendorType
 import com.projectronin.interop.ehr.NoteService
-import com.projectronin.interop.ehr.OnboardFlagService
 import com.projectronin.interop.ehr.PractitionerRoleService
 import com.projectronin.interop.ehr.factory.VendorFactory
 import org.springframework.stereotype.Component
@@ -29,15 +28,12 @@ class CernerVendorFactory(
     override val requestGroupService: CernerRequestGroupService,
     override val carePlanService: CernerCarePlanService,
     override val documentReferenceService: CernerDocumentReferenceService,
-    override val binaryService: CernerBinaryService
-
+    override val binaryService: CernerBinaryService,
+    override val onboardFlagService: CernerOnboardFlagService
 ) : VendorFactory {
     override val vendorType: VendorType = VendorType.CERNER
 
     override val practitionerRoleService: PractitionerRoleService
-        get() = TODO("Not yet implemented")
-
-    override val onboardFlagService: OnboardFlagService
         get() = TODO("Not yet implemented")
 
     override val noteService: NoteService
