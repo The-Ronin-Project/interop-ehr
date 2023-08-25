@@ -102,8 +102,10 @@ class RoninHeartRateGeneratorTest {
         assertNotNull(roninObsHeartRate.status)
         assertNotNull(roninObsHeartRate.code?.coding?.get(0)?.code?.value)
         assertNotNull(roninObsHeartRate.id)
-        val patientFHIRId = roninObsHeartRate.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = roninObsHeartRate.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            roninObsHeartRate.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            roninObsHeartRate.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", roninObsHeartRate.id?.value.toString())
     }
 
@@ -141,7 +143,7 @@ class RoninHeartRateGeneratorTest {
     fun `validates for roninObservationHeartRate`() {
         val roninObsHeartRate = rcdmObservationHeartRate("test") {}
         val validation = roninHeartRate.validate(roninObsHeartRate, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
     }
 
     @Test
@@ -155,7 +157,7 @@ class RoninHeartRateGeneratorTest {
             )
         }
         val validation = roninHeartRate.validate(roninObsHeartRate, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertNotNull(roninObsHeartRate.meta)
         assertNotNull(roninObsHeartRate.identifier)
         assertEquals(4, roninObsHeartRate.identifier.size)
@@ -179,7 +181,7 @@ class RoninHeartRateGeneratorTest {
             }
         }
         val validation = roninHeartRate.validate(roninObsHeartRate, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
     }
 
     @Test

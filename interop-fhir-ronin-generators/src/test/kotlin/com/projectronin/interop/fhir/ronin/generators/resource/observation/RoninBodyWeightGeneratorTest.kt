@@ -36,6 +36,7 @@ class bodyWeight(
 ) {
     override fun qualifyingCodes() = possibleBodyWeightCodes
 }
+
 class RoninBodyWeightGeneratorTest {
     private lateinit var roninBodyWeight: RoninBodyWeight
     private lateinit var registry: NormalizationRegistryClient
@@ -74,7 +75,8 @@ class RoninBodyWeightGeneratorTest {
             }
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsBodyWeightJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyWeight)
+        val roninObsBodyWeightJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyWeight)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsBodyWeightJSON)
@@ -87,7 +89,8 @@ class RoninBodyWeightGeneratorTest {
         val rcdmPatient = rcdmPatient("test") {}
         val roninObsBodyWeight = rcdmPatient.rcdmObservationBodyWeight {}
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsBodyWeightJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyWeight)
+        val roninObsBodyWeightJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyWeight)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsBodyWeightJSON)
@@ -107,8 +110,10 @@ class RoninBodyWeightGeneratorTest {
         assertNotNull(roninObsBodyWeight.status)
         assertNotNull(roninObsBodyWeight.code?.coding?.get(0)?.code?.value)
         assertNotNull(roninObsBodyWeight.id)
-        val patientFHIRId = roninObsBodyWeight.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = roninObsBodyWeight.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            roninObsBodyWeight.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            roninObsBodyWeight.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", roninObsBodyWeight.id?.value.toString())
     }
 
@@ -146,7 +151,7 @@ class RoninBodyWeightGeneratorTest {
     fun `validation for roninObservationBodyWeight`() {
         val roninObsWeight = rcdmObservationBodyWeight("test") {}
         val validation = roninBodyWeight.validate(roninObsWeight, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
     }
 
     @Test
@@ -185,7 +190,7 @@ class RoninBodyWeightGeneratorTest {
             }
         }
         val validation = roninBodyWeight.validate(roninObsWeight, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
     }
 
     @Test

@@ -103,8 +103,10 @@ class RoninBodySurfaceAreaGeneratorTest {
         assertNotNull(roninObsBodySurfaceArea.status)
         assertNotNull(roninObsBodySurfaceArea.code?.coding?.get(0)?.code?.value)
         assertNotNull(roninObsBodySurfaceArea.id)
-        val patientFHIRId = roninObsBodySurfaceArea.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = roninObsBodySurfaceArea.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            roninObsBodySurfaceArea.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            roninObsBodySurfaceArea.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", roninObsBodySurfaceArea.id?.value.toString())
     }
 
@@ -142,7 +144,7 @@ class RoninBodySurfaceAreaGeneratorTest {
     fun `validates for rcdmObservationBodySurfaceArea`() {
         val bodySurfaceArea = rcdmObservationBodySurfaceArea("test") {}
         val validation = roninBodySurfaceArea.validate(bodySurfaceArea, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
     }
 
     @Test
@@ -156,7 +158,7 @@ class RoninBodySurfaceAreaGeneratorTest {
             )
         }
         val validation = roninBodySurfaceArea.validate(bodySurfaceArea, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertNotNull(bodySurfaceArea.meta)
         assertNotNull(bodySurfaceArea.identifier)
         assertEquals(4, bodySurfaceArea.identifier.size)

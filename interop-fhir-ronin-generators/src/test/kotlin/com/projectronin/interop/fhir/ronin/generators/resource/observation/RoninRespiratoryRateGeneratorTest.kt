@@ -103,8 +103,10 @@ class RoninRespiratoryRateGeneratorTest {
         assertNotNull(roninObsRespiratoryRate.status)
         assertNotNull(roninObsRespiratoryRate.code?.coding?.get(0)?.code?.value)
         assertNotNull(roninObsRespiratoryRate.id)
-        val patientFHIRId = roninObsRespiratoryRate.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = roninObsRespiratoryRate.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            roninObsRespiratoryRate.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            roninObsRespiratoryRate.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", roninObsRespiratoryRate.id?.value.toString())
     }
 
@@ -142,7 +144,7 @@ class RoninRespiratoryRateGeneratorTest {
     fun `validates for roninObservationRespiratoryRate`() {
         val roninObsRespRate = rcdmObservationRespiratoryRate("test") {}
         val validation = roninRespRate.validate(roninObsRespRate, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
     }
 
     @Test
@@ -156,7 +158,7 @@ class RoninRespiratoryRateGeneratorTest {
             )
         }
         val validation = roninRespRate.validate(roninObsRespRate, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertNotNull(roninObsRespRate.meta)
         assertNotNull(roninObsRespRate.identifier)
         assertEquals(4, roninObsRespRate.identifier.size)

@@ -10,7 +10,6 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.ronin.generators.resource.referenceData
 import com.projectronin.interop.fhir.ronin.generators.util.generateCodeableConcept
 import com.projectronin.interop.fhir.ronin.generators.util.generateEffectiveDateTime
-import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
 import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
@@ -25,7 +24,6 @@ fun rcdmObservationRespiratoryRate(tenant: String, block: ObservationGenerator.(
     return rcdmBaseObservation(tenant) {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.OBSERVATION_RESPIRATORY_RATE, tenant) {}
-        extension of generateExtension(extension.generate(), tenantSourceExtension)
         category of listOf(codeableConcept { coding of vitalSignsCategory })
         code of generateCodeableConcept(code.generate(), possibleRespiratoryRateCodes.codes.random())
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")

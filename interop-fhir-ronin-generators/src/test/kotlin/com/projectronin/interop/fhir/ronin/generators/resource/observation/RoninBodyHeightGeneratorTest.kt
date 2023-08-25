@@ -37,6 +37,7 @@ class bodyHeight(
 ) {
     override fun qualifyingCodes() = possibleBodyHeightCodes
 }
+
 class RoninBodyHeightGeneratorTest {
     private lateinit var roninBodyHeight: RoninBodyHeight
     private lateinit var registry: NormalizationRegistryClient
@@ -75,7 +76,8 @@ class RoninBodyHeightGeneratorTest {
             }
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsBodyHeightJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyHeight)
+        val roninObsBodyHeightJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyHeight)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsBodyHeightJSON)
@@ -88,7 +90,8 @@ class RoninBodyHeightGeneratorTest {
         val rcdmPatient = rcdmPatient("test") {}
         val roninObsBodyHeight = rcdmPatient.rcdmObservationBodyHeight {}
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsBodyHeightJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyHeight)
+        val roninObsBodyHeightJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyHeight)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsBodyHeightJSON)
@@ -108,8 +111,10 @@ class RoninBodyHeightGeneratorTest {
         assertNotNull(roninObsBodyHeight.status)
         assertNotNull(roninObsBodyHeight.code?.coding?.get(0)?.code?.value)
         assertNotNull(roninObsBodyHeight.id)
-        val patientFHIRId = roninObsBodyHeight.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = roninObsBodyHeight.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            roninObsBodyHeight.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            roninObsBodyHeight.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", roninObsBodyHeight.id?.value.toString())
     }
 
@@ -147,7 +152,7 @@ class RoninBodyHeightGeneratorTest {
     fun `validates roninObservationBodyHeight generator`() {
         val roninObsBodyHeight = rcdmObservationBodyHeight("test") {}
         val validation = roninBodyHeight.validate(roninObsBodyHeight, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
     }
 
     @Test

@@ -41,6 +41,7 @@ class RoninPulseOximetry(
         "Observation.component:FlowRate.code",
         profile
     )
+
     fun qualifyingConcentrationCodes(): ValueSetList = registryClient.getRequiredValueSet(
         "Observation.component:Concentration.code",
         profile
@@ -72,7 +73,7 @@ class RoninPulseOximetry(
     override val validQuantityCodes = listOf("%")
 
     override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
-        super.validateVitalSign(element, parentContext, validation)
+        validateVitalSignValue(element.value, parentContext, validation)
 
         if (element.dataAbsentReason == null) {
             val components = element.component
@@ -86,17 +87,17 @@ class RoninPulseOximetry(
             if (flowRate.size == 1) {
                 validateVitalSignValue(
                     flowRate.first().value,
-                    validFlowRateCodes,
                     LocationContext("Observation", "component:FlowRate"),
-                    validation
+                    validation,
+                    validFlowRateCodes
                 )
             }
             if (concentration.size == 1) {
                 validateVitalSignValue(
                     concentration.first().value,
-                    validConcentrationCodes,
                     LocationContext("Observation", "component:Concentration"),
-                    validation
+                    validation,
+                    validConcentrationCodes
                 )
             }
 

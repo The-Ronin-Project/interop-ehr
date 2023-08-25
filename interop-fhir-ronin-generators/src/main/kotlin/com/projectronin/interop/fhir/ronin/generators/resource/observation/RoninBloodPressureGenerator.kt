@@ -9,11 +9,9 @@ import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
-import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
-import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.resource.ObservationComponent
@@ -24,7 +22,6 @@ import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.generateWithDefault
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
 import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
-import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 
@@ -36,7 +33,6 @@ fun rcdmObservationBloodPressure(tenant: String, block: ObservationGenerator.() 
     return rcdmBaseObservation(tenant) {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.OBSERVATION_BLOOD_PRESSURE, tenant) {}
-        extension of tenantBloodPressureSourceExtension
         category of listOf(codeableConcept { coding of vitalSignsCategory })
         code of generateCodeableConcept(code.generate(), possibleBloodPressureCodes.codes.random())
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
@@ -129,25 +125,6 @@ val bloodPressureComponent = listOf(
                 unit = "mm[Hg]".asFHIR(),
                 system = CodeSystem.UCUM.uri,
                 code = Code("mm[Hg]")
-            )
-        )
-    )
-)
-
-private val tenantBloodPressureSourceExtension = listOf(
-    Extension(
-        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
-        value = DynamicValue(
-            DynamicValueType.CODEABLE_CONCEPT,
-            CodeableConcept(
-                text = "Tenant Blood Pressure".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Bad Blood Pressure".asFHIR(),
-                        code = Code("bad-blood-pressure")
-                    )
-                )
             )
         )
     )

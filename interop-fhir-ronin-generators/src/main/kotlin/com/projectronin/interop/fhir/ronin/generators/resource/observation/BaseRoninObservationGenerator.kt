@@ -21,6 +21,7 @@ import com.projectronin.interop.fhir.ronin.generators.resource.referenceData
 import com.projectronin.interop.fhir.ronin.generators.util.generateCodeableConcept
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.generateUdpId
+import com.projectronin.interop.fhir.ronin.generators.util.includeExtensions
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
@@ -52,6 +53,28 @@ fun rcdmBaseObservation(tenant: String, block: ObservationGenerator.() -> Unit):
         generateUdpId(id.generate(), tenant).let {
             id of it
             identifier of rcdmIdentifiers(tenant, identifier, it.value)
+
+            val extensionsToAdd = if (value.generate()?.type == DynamicValueType.CODEABLE_CONCEPT) {
+                listOf(tenantSourceObservationCodeExtension, tenantSourceObservationValueExtension)
+            } else {
+                listOf(tenantSourceObservationCodeExtension)
+            }
+            extension of includeExtensions(extension.generate(), extensionsToAdd)
+
+            val updatedComponents = component.generate().map { component ->
+                val componentExtensionsToAdd =
+                    if (component.value?.type == DynamicValueType.CODEABLE_CONCEPT) {
+                        listOf(
+                            tenantSourceObservationComponentCodeExtension,
+                            tenantSourceObservationComponentValueExtension
+                        )
+                    } else {
+                        listOf(tenantSourceObservationComponentCodeExtension)
+                    }
+
+                component.copy(extension = includeExtensions(component.extension, componentExtensionsToAdd))
+            }
+            component of updatedComponents
         }
     }
 }
@@ -69,6 +92,7 @@ fun Patient.rcdmObservation(block: ObservationGenerator.() -> Unit): Observation
         )
     }
 }
+
 private val observationCode = listOf(
     coding {
         system of Uri("http://snomed.info/sct")
@@ -107,7 +131,7 @@ val subjectReferenceOptions = listOf(
 
 val possibleDateTime = DynamicValue(DynamicValueType.DATE_TIME, dateTime { })
 
-val tenantSourceExtension = listOf(
+val tenantSourceObservationCodeExtension =
     Extension(
         url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
         value = DynamicValue(
@@ -122,4 +146,48 @@ val tenantSourceExtension = listOf(
             )
         )
     )
-)
+val tenantSourceObservationValueExtension =
+    Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_VALUE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            CodeableConcept(
+                text = "tenant-source-value-extension".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("tenant-source-value-extension")
+                    )
+                )
+            )
+        )
+    )
+val tenantSourceObservationComponentCodeExtension =
+    Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            CodeableConcept(
+                text = "tenant-source-extension".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("tenant-source-component-code-extension")
+                    )
+                )
+            )
+        )
+    )
+val tenantSourceObservationComponentValueExtension =
+    Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_VALUE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            CodeableConcept(
+                text = "tenant-source-value-extension".asFHIR(),
+                coding = listOf(
+                    Coding(
+                        code = Code("tenant-source-component-value-extension")
+                    )
+                )
+            )
+        )
+    )

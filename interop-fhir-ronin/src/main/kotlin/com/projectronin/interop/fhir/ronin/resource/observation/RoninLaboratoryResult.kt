@@ -180,8 +180,6 @@ class RoninLaboratoryResult(
         parentContext: LocationContext,
         validation: Validation
     ) {
-        super.validateSpecificObservation(element, parentContext, validation)
-
         validation.apply {
             val codingList = element.code?.coding
             ifNotNull(codingList) {

@@ -1,10 +1,12 @@
 package com.projectronin.interop.fhir.ronin.generators.resource.observation
 
 import com.projectronin.interop.common.jackson.JacksonManager
+import com.projectronin.interop.fhir.generators.datatypes.DynamicValues
 import com.projectronin.interop.fhir.generators.datatypes.codeableConcept
 import com.projectronin.interop.fhir.generators.datatypes.coding
 import com.projectronin.interop.fhir.generators.datatypes.reference
 import com.projectronin.interop.fhir.generators.primitives.of
+import com.projectronin.interop.fhir.generators.resources.observationComponent
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
@@ -13,6 +15,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.ronin.generators.resource.rcdmPatient
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
+import com.projectronin.interop.fhir.ronin.generators.util.tenantSourceConditionExtension
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
@@ -115,7 +118,7 @@ class BaseObservationGeneratorTest {
         assertNull(roninObservation.language)
         assertNull(roninObservation.text)
         assertEquals(0, roninObservation.contained.size)
-        assertEquals(0, roninObservation.extension.size)
+        assertEquals(listOf(tenantSourceObservationCodeExtension), roninObservation.extension)
         assertEquals(0, roninObservation.modifierExtension.size)
         assertTrue(roninObservation.identifier.size >= 3)
         assertTrue(roninObservation.identifier.any { it.value == "test".asFHIR() })
@@ -172,7 +175,7 @@ class BaseObservationGeneratorTest {
         assertNull(roninObservation.language)
         assertNull(roninObservation.text)
         assertEquals(0, roninObservation.contained.size)
-        assertEquals(0, roninObservation.extension.size)
+        assertEquals(listOf(tenantSourceObservationCodeExtension), roninObservation.extension)
         assertEquals(0, roninObservation.modifierExtension.size)
         assertTrue(roninObservation.identifier.size >= 3)
         assertTrue(roninObservation.identifier.any { it.value == "test".asFHIR() })
@@ -343,5 +346,108 @@ class BaseObservationGeneratorTest {
         assertEquals("test-88", baseObs.id?.value)
         assertEquals("test-99", rcdmPatient.id?.value)
         assertEquals("Patient/test-99", baseObs.subject?.reference?.value)
+    }
+
+    @Test
+    fun `generates code extension when extensions are provided`() {
+        val observation = rcdmBaseObservation("test") {
+            extension of tenantSourceConditionExtension
+        }
+
+        assertEquals(
+            tenantSourceConditionExtension + tenantSourceObservationCodeExtension,
+            observation.extension
+        )
+    }
+
+    @Test
+    fun `generates value extension when codeable concept value is provided`() {
+        val observation = rcdmBaseObservation("test") {
+            value of DynamicValues.codeableConcept(codeableConcept { })
+        }
+
+        assertEquals(
+            listOf(tenantSourceObservationCodeExtension, tenantSourceObservationValueExtension),
+            observation.extension
+        )
+    }
+
+    @Test
+    fun `does not generate value extension when other value type is provided`() {
+        val observation = rcdmBaseObservation("test") {
+            value of DynamicValues.string("value")
+        }
+
+        assertEquals(
+            listOf(tenantSourceObservationCodeExtension),
+            observation.extension
+        )
+    }
+
+    @Test
+    fun `generates component code extension when component with code is provided`() {
+        val observation = rcdmBaseObservation("test") {
+            component of listOf(
+                observationComponent {
+                    code of codeableConcept { }
+                }
+            )
+        }
+
+        assertEquals(
+            listOf(tenantSourceObservationComponentCodeExtension),
+            observation.component.first().extension
+        )
+    }
+
+    @Test
+    fun `generates component value extension when component with codeable concept value is provided`() {
+        val observation = rcdmBaseObservation("test") {
+            component of listOf(
+                observationComponent {
+                    code of codeableConcept { }
+                    value of DynamicValues.codeableConcept(codeableConcept { })
+                }
+            )
+        }
+
+        assertEquals(
+            listOf(tenantSourceObservationComponentCodeExtension, tenantSourceObservationComponentValueExtension),
+            observation.component.first().extension
+        )
+    }
+
+    @Test
+    fun `does not generate component value extension when component with other value type is provided`() {
+        val observation = rcdmBaseObservation("test") {
+            component of listOf(
+                observationComponent {
+                    code of codeableConcept { }
+                    value of DynamicValues.string("value")
+                }
+            )
+        }
+
+        assertEquals(
+            listOf(tenantSourceObservationComponentCodeExtension),
+            observation.component.first().extension
+        )
+    }
+
+    @Test
+    fun `does not generate component value extension when component is provided without a value`() {
+        val observation = rcdmBaseObservation("test") {
+            component of listOf(
+                observationComponent {
+                    code of codeableConcept { }
+                    value of null
+                }
+            )
+        }
+
+        assertEquals(
+            listOf(tenantSourceObservationComponentCodeExtension),
+            observation.component.first().extension
+        )
     }
 }

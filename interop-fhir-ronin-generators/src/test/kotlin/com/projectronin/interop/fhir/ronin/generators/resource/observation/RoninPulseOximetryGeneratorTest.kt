@@ -187,7 +187,7 @@ class RoninPulseOximetryGeneratorTest {
     fun `validates for roninObservationPulseOximetry`() {
         val roninPulseOximetry = rcdmObservationPulseOximetry("test") {}
         val validation = roninPulseOx.validate(roninPulseOximetry, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
     }
 
     @Test
@@ -201,7 +201,7 @@ class RoninPulseOximetryGeneratorTest {
             )
         }
         val validation = roninPulseOx.validate(roninPulseOximetry, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertNotNull(roninPulseOximetry.meta)
         assertNotNull(roninPulseOximetry.identifier)
         assertEquals(4, roninPulseOximetry.identifier.size)
@@ -290,6 +290,40 @@ class RoninPulseOximetryGeneratorTest {
             component of pulseOxComponent
         }
 
-        assertEquals(pulseOxComponent, rcdmObservationPulseOximetry.component)
+        val expectedPulseOxComponent = listOf(
+            ObservationComponent(
+                extension = listOf(tenantSourceObservationComponentCodeExtension),
+                code = CodeableConcept(
+                    coding = flowRateCoding.codes,
+                    text = "Flow Rate".asFHIR()
+                ),
+                value = DynamicValue(
+                    DynamicValueType.QUANTITY,
+                    Quantity(
+                        value = Decimal(120.toBigDecimal()),
+                        unit = "L/min".asFHIR(),
+                        system = CodeSystem.UCUM.uri,
+                        code = Code("L/min")
+                    )
+                )
+            ),
+            ObservationComponent(
+                extension = listOf(tenantSourceObservationComponentCodeExtension),
+                code = CodeableConcept(
+                    coding = concentrationCoding.codes,
+                    text = "Concentration".asFHIR()
+                ),
+                value = DynamicValue(
+                    DynamicValueType.QUANTITY,
+                    Quantity(
+                        value = Decimal(63.toBigDecimal()),
+                        unit = "%".asFHIR(),
+                        system = CodeSystem.UCUM.uri,
+                        code = Code("%")
+                    )
+                )
+            )
+        )
+        assertEquals(expectedPulseOxComponent, rcdmObservationPulseOximetry.component)
     }
 }

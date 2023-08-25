@@ -67,7 +67,8 @@ class RoninBodyMassIndexGeneratorTest {
             }
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsBodyMassIndexJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyMassIndex)
+        val roninObsBodyMassIndexJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyMassIndex)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsBodyMassIndexJSON)
@@ -80,7 +81,8 @@ class RoninBodyMassIndexGeneratorTest {
         val rcdmPatient = rcdmPatient("test") {}
         val roninObsBodyMassIndex = rcdmPatient.rcdmObservationBodyMassIndex {}
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninObsBodyMassIndexJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyMassIndex)
+        val roninObsBodyMassIndexJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyMassIndex)
 
         // Uncomment to take a peek at the JSON
         // println(roninObsBodyMassIndexJSON)
@@ -100,8 +102,10 @@ class RoninBodyMassIndexGeneratorTest {
         assertNotNull(roninObsBodyMassIndex.status)
         assertNotNull(roninObsBodyMassIndex.code?.coding?.get(0)?.code?.value)
         assertNotNull(roninObsBodyMassIndex.id)
-        val patientFHIRId = roninObsBodyMassIndex.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = roninObsBodyMassIndex.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            roninObsBodyMassIndex.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            roninObsBodyMassIndex.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", roninObsBodyMassIndex.id?.value.toString())
     }
 
@@ -139,7 +143,7 @@ class RoninBodyMassIndexGeneratorTest {
     fun `validates rcdmObservationBodyMassIndex generator`() {
         val roninObsBodyMassIndex = rcdmObservationBodyMassIndex("test") {}
         val validation = roninBodyMassIndex.validate(roninObsBodyMassIndex, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
     }
 
     @Test
@@ -153,7 +157,7 @@ class RoninBodyMassIndexGeneratorTest {
             )
         }
         val validation = roninBodyMassIndex.validate(roninObsBodyMassIndex, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertNotNull(roninObsBodyMassIndex.meta)
         assertNotNull(roninObsBodyMassIndex.identifier)
         assertEquals(4, roninObsBodyMassIndex.identifier.size)

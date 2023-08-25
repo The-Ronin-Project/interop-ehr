@@ -10,9 +10,9 @@ import com.projectronin.interop.fhir.ronin.generators.resource.observation.subje
 import com.projectronin.interop.fhir.ronin.generators.resource.referenceData
 import com.projectronin.interop.fhir.ronin.generators.util.encounterDiagnosisCategory
 import com.projectronin.interop.fhir.ronin.generators.util.generateCodeableConcept
-import com.projectronin.interop.fhir.ronin.generators.util.generateExtension
 import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.generateUdpId
+import com.projectronin.interop.fhir.ronin.generators.util.includeExtensions
 import com.projectronin.interop.fhir.ronin.generators.util.possibleConditionCodes
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
@@ -24,7 +24,7 @@ fun rcdmConditionEncounterDiagnosis(tenant: String, block: ConditionGenerator.()
     return condition {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS, tenant) {}
-        extension of generateExtension(extension.generate(), tenantSourceConditionExtension)
+        extension of includeExtensions(extension.generate(), tenantSourceConditionExtension)
         generateUdpId(id.generate(), tenant).let {
             id of it
             identifier of rcdmIdentifiers(tenant, identifier, it.value)

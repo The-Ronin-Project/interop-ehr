@@ -113,6 +113,15 @@ class RoninLaboratoryResultTest {
             tenantLaboratoryResultConcept
         )
     )
+    private val tenantComponentCode = CodeableConcept(text = "code2".asFHIR())
+    private val componentCode = CodeableConcept(text = "Real Code 2".asFHIR())
+    private val tenantComponentSourceCodeExtension = Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            tenantComponentCode
+        )
+    )
     private val conceptMapMetadata = ConceptMapMetadata(
         registryEntryType = "concept-map",
         conceptMapName = "test-concept-map",
@@ -149,6 +158,17 @@ class RoninLaboratoryResultTest {
         } returns ConceptMapCodeableConcept(
             laboratoryCodeConcept,
             tenantLaboratoryResultSourceExtension,
+            listOf(conceptMapMetadata)
+        )
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.component.code",
+                tenantComponentCode
+            )
+        } returns ConceptMapCodeableConcept(
+            componentCode,
+            tenantComponentSourceCodeExtension,
             listOf(conceptMapMetadata)
         )
         every {
@@ -1331,7 +1351,7 @@ class RoninLaboratoryResultTest {
             derivedFrom = listOf(Reference(reference = "Observation/3456".asFHIR())),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(text = "code2".asFHIR()),
+                    code = tenantComponentCode,
                     value = DynamicValue(
                         type = DynamicValueType.STRING,
                         "string"
@@ -1452,7 +1472,8 @@ class RoninLaboratoryResultTest {
         assertEquals(
             listOf(
                 ObservationComponent(
-                    code = CodeableConcept(text = "code2".asFHIR()),
+                    extension = listOf(tenantComponentSourceCodeExtension),
+                    code = componentCode,
                     value = DynamicValue(
                         type = DynamicValueType.STRING,
                         "string"
@@ -1944,7 +1965,24 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            extension = listOf(tenantLaboratoryResultSourceExtension),
+            extension = listOf(
+                tenantLaboratoryResultSourceExtension,
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_VALUE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    system = CodeSystem.RXNORM.uri,
+                                    display = "display".asFHIR()
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -2016,7 +2054,24 @@ class RoninLaboratoryResultTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
-            extension = listOf(tenantLaboratoryResultSourceExtension),
+            extension = listOf(
+                tenantLaboratoryResultSourceExtension,
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_VALUE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    system = CodeSystem.SNOMED_CT.uri,
+                                    display = "display".asFHIR()
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             code = CodeableConcept(
                 text = "laboratory".asFHIR(),
                 coding = listOf(
@@ -2177,10 +2232,28 @@ class RoninLaboratoryResultTest {
             code = Code("mL/min/{1.73_m2}")
         )
         val component1 = ObservationComponent(
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(coding = listOf(Coding(code = Code("code1"))))
+                    )
+                )
+            ),
             code = CodeableConcept(coding = listOf(Coding(code = Code("code1")))),
             value = DynamicValue(DynamicValueType.QUANTITY, quantity)
         )
         val component2 = ObservationComponent(
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(coding = listOf(Coding(code = Code("code2"))))
+                    )
+                )
+            ),
             code = CodeableConcept(coding = listOf(Coding(code = Code("code2")))),
             value = DynamicValue(DynamicValueType.QUANTITY, quantity)
         )

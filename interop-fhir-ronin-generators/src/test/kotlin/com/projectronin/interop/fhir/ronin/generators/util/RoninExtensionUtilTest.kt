@@ -9,7 +9,6 @@ import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.ronin.generators.resource.observation.tenantSourceExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.test.data.generator.collection.ListDataGenerator
 import org.junit.jupiter.api.Assertions.assertEquals
@@ -35,14 +34,20 @@ class RoninExtensionUtilTest {
     )
 
     @Test
-    fun `generate rcdm extension when none is provided`() {
-        val roninEx = generateExtension(extension.generate(), tenantSourceExtension)
-        assertEquals(roninEx, tenantSourceExtension)
+    fun `include rcdm extension when none is provided`() {
+        val roninEx = includeExtensions(extension.generate(), tenantSourceConditionExtension)
+        assertEquals(tenantSourceConditionExtension, roninEx)
     }
 
     @Test
-    fun `generate provided extension`() {
-        val roninEx = generateExtension(providedExtension, tenantSourceExtension)
-        assertEquals(roninEx, providedExtension)
+    fun `include rcdm extensions when provided extension`() {
+        val roninEx = includeExtensions(providedExtension, tenantSourceConditionExtension)
+        assertEquals(providedExtension + tenantSourceConditionExtension, roninEx)
+    }
+
+    @Test
+    fun `does not include extra rcdm extensions when already provided`() {
+        val roninEx = includeExtensions(tenantSourceConditionExtension, tenantSourceConditionExtension)
+        assertEquals(tenantSourceConditionExtension, roninEx)
     }
 }

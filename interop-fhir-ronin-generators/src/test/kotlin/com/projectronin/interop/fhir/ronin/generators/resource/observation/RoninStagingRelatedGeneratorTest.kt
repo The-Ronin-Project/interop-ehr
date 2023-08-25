@@ -103,8 +103,10 @@ class RoninStagingRelatedGeneratorTest {
         assertNotNull(roninObsStagingRelated.status)
         assertNotNull(roninObsStagingRelated.code?.coding?.get(0)?.code?.value)
         assertNotNull(roninObsStagingRelated.id)
-        val patientFHIRId = roninObsStagingRelated.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = roninObsStagingRelated.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            roninObsStagingRelated.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            roninObsStagingRelated.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", roninObsStagingRelated.id?.value.toString())
         assertEquals("test", tenant)
     }
@@ -192,7 +194,10 @@ class RoninStagingRelatedGeneratorTest {
         val validation = roninStageRelated.validate(roninObsStagingRelated, null)
         assertEquals(validation.hasErrors(), true)
         assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
-        assertEquals(validation.issues()[0].description, "The referenced resource type was not one of Patient, Location")
+        assertEquals(
+            validation.issues()[0].description,
+            "The referenced resource type was not one of Patient, Location"
+        )
         assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "subject"))
     }
 
@@ -202,7 +207,7 @@ class RoninStagingRelatedGeneratorTest {
             subject of rcdmReference("Patient", "456")
         }
         val validation = roninStageRelated.validate(roninObsStagingRelated, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertTrue(roninObsStagingRelated.subject?.reference?.value == "Patient/456")
     }
 
@@ -211,7 +216,7 @@ class RoninStagingRelatedGeneratorTest {
         val rcdmPatient = rcdmPatient("test") {}
         val roninObsStagingRelated = rcdmPatient.rcdmObservationStagingRelated {}
         val validation = roninStageRelated.validate(roninObsStagingRelated, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertNotNull(roninObsStagingRelated.meta)
         assertNotNull(roninObsStagingRelated.identifier)
         assertTrue(roninObsStagingRelated.identifier.size >= 3)
@@ -228,7 +233,7 @@ class RoninStagingRelatedGeneratorTest {
             subject of rcdmReference("Patient", "456")
         }
         val validation = roninStageRelated.validate(roninObsStagingRelated, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertEquals("Patient/456", roninObsStagingRelated.subject?.reference?.value)
     }
 
@@ -239,7 +244,7 @@ class RoninStagingRelatedGeneratorTest {
             subject of reference("Patient", "456")
         }
         val validation = roninStageRelated.validate(roninObsStagingRelated, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertEquals("Patient/${rcdmPatient.id?.value}", roninObsStagingRelated.subject?.reference?.value)
     }
 
@@ -250,7 +255,7 @@ class RoninStagingRelatedGeneratorTest {
             id of "88"
         }
         val validation = roninStageRelated.validate(roninObsStagingRelated, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertEquals(3, roninObsStagingRelated.identifier.size)
         val values = roninObsStagingRelated.identifier.mapNotNull { it.value }.toSet()
         assertTrue(values.size == 3)

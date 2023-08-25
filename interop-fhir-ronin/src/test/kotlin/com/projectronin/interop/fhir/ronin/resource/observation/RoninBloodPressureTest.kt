@@ -93,7 +93,30 @@ class RoninBloodPressureTest {
     )
 
     private val systolicCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8480-6")))
+    private val systolicCodeableConcept = CodeableConcept(
+        coding = systolicCoding,
+        text = "Systolic".asFHIR()
+    )
+    private val sourceSystolicCodeExtension = Extension(
+        url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            systolicCodeableConcept
+        )
+    )
+
     private val diastolicCoding = listOf(Coding(system = CodeSystem.LOINC.uri, code = Code("8462-4")))
+    private val diastolicCodeableConcept = CodeableConcept(
+        coding = diastolicCoding,
+        text = "Diastolic".asFHIR()
+    )
+    private val sourceDiastolicCodeExtension = Extension(
+        url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            diastolicCodeableConcept
+        )
+    )
 
     private val vitalSignsCategoryCode = Code("vital-signs")
     private val vitalSignsCategoryCoding = Coding(
@@ -145,6 +168,28 @@ class RoninBloodPressureTest {
         } returns ConceptMapCodeableConcept(
             bloodPressureConcept,
             tenantBloodPressureSourceExtension,
+            listOf(conceptMapMetadata)
+        )
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.component.code",
+                systolicCodeableConcept
+            )
+        } returns ConceptMapCodeableConcept(
+            systolicCodeableConcept,
+            sourceSystolicCodeExtension,
+            listOf(conceptMapMetadata)
+        )
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.component.code",
+                diastolicCodeableConcept
+            )
+        } returns ConceptMapCodeableConcept(
+            diastolicCodeableConcept,
+            sourceDiastolicCodeExtension,
             listOf(conceptMapMetadata)
         )
         every {
@@ -390,10 +435,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -405,10 +448,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -566,10 +607,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -582,10 +621,8 @@ class RoninBloodPressureTest {
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -649,17 +686,13 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -715,10 +748,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -730,10 +761,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -745,10 +774,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
                 )
             )
@@ -804,10 +831,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -818,10 +843,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -885,10 +908,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -899,10 +920,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -966,10 +985,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -981,10 +998,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1048,10 +1063,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1062,10 +1075,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1129,10 +1140,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1144,10 +1153,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1211,10 +1218,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1226,10 +1231,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1294,10 +1297,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1309,10 +1310,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
                 )
             )
@@ -1360,10 +1359,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1375,10 +1372,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1390,10 +1385,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
                 )
             )
@@ -1449,10 +1442,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1464,10 +1455,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1530,10 +1519,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1545,10 +1532,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1611,10 +1596,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1626,10 +1609,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1693,10 +1674,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1708,10 +1687,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1774,10 +1751,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1789,10 +1764,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1865,10 +1838,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1880,10 +1851,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1944,10 +1913,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1959,10 +1926,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2023,10 +1988,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2038,10 +2001,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2101,10 +2062,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2116,10 +2075,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2183,10 +2140,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2198,10 +2153,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2312,10 +2265,7 @@ class RoninBloodPressureTest {
             derivedFrom = listOf(Reference(reference = "DocumentReference/1234".asFHIR())),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2327,10 +2277,7 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2469,10 +2416,8 @@ class RoninBloodPressureTest {
         )
         assertEquals(
             ObservationComponent(
-                code = CodeableConcept(
-                    coding = systolicCoding,
-                    text = "Systolic".asFHIR()
-                ),
+                extension = listOf(sourceSystolicCodeExtension),
+                code = systolicCodeableConcept,
                 value = DynamicValue(
                     DynamicValueType.QUANTITY,
                     Quantity(
@@ -2487,10 +2432,8 @@ class RoninBloodPressureTest {
         )
         assertEquals(
             ObservationComponent(
-                code = CodeableConcept(
-                    coding = diastolicCoding,
-                    text = "Diastolic".asFHIR()
-                ),
+                extension = listOf(sourceDiastolicCodeExtension),
+                code = diastolicCodeableConcept,
                 value = DynamicValue(
                     DynamicValueType.QUANTITY,
                     Quantity(
@@ -2930,6 +2873,24 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
+                    extension = listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+                            value = DynamicValue(
+                                DynamicValueType.CODEABLE_CONCEPT,
+                                CodeableConcept(
+                                    coding = listOf(
+                                        Coding(
+                                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                                            code = Code("blah"),
+                                            display = "Systolic".asFHIR()
+                                        )
+                                    ),
+                                    text = "Systolic".asFHIR()
+                                )
+                            )
+                        )
+                    ),
                     code = CodeableConcept(
                         coding = listOf(
                             Coding(
@@ -2951,10 +2912,8 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = diastolicCoding,
-                        text = "Diastolic".asFHIR()
-                    ),
+                    extension = listOf(sourceDiastolicCodeExtension),
+                    code = diastolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -3018,10 +2977,8 @@ class RoninBloodPressureTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = systolicCoding,
-                        text = "Systolic".asFHIR()
-                    ),
+                    extension = listOf(sourceSystolicCodeExtension),
+                    code = systolicCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -3033,6 +2990,24 @@ class RoninBloodPressureTest {
                     )
                 ),
                 ObservationComponent(
+                    extension = listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+                            value = DynamicValue(
+                                DynamicValueType.CODEABLE_CONCEPT,
+                                CodeableConcept(
+                                    coding = listOf(
+                                        Coding(
+                                            system = CodeSystem.OBSERVATION_CATEGORY.uri,
+                                            code = Code("blah"),
+                                            display = "Diastolic".asFHIR()
+                                        )
+                                    ),
+                                    text = "Diastolic".asFHIR()
+                                )
+                            )
+                        )
+                    ),
                     code = CodeableConcept(
                         coding = listOf(
                             Coding(

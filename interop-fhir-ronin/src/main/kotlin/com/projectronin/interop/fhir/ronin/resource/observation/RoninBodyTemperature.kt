@@ -54,6 +54,10 @@ class RoninBodyTemperature(
         "Procedure"
     )
 
+    override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
+        validateVitalSignValue(element.value, parentContext, validation)
+    }
+
     private val requiredIdError = RequiredFieldError(Observation::id)
 
     override fun transformInternal(

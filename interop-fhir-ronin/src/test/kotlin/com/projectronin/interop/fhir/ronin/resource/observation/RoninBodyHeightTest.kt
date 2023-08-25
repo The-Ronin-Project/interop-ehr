@@ -99,6 +99,16 @@ class RoninBodyHeightTest {
         )
     )
 
+    private val tenantComponentCode = CodeableConcept(text = "code2".asFHIR())
+    private val componentCode = CodeableConcept(text = "Real Code 2".asFHIR())
+    private val tenantComponentSourceCodeExtension = Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            tenantComponentCode
+        )
+    )
+
     private val vitalSignsCategoryCode = Code("vital-signs")
     private val vitalSignsCategoryCoding = Coding(
         system = CodeSystem.OBSERVATION_CATEGORY.uri,
@@ -143,6 +153,17 @@ class RoninBodyHeightTest {
         } returns ConceptMapCodeableConcept(
             bodyHeightConcept,
             tenantBodyHeightSourceExtension,
+            listOf(conceptMapMetadata)
+        )
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.component.code",
+                tenantComponentCode
+            )
+        } returns ConceptMapCodeableConcept(
+            componentCode,
+            tenantComponentSourceCodeExtension,
             listOf(conceptMapMetadata)
         )
         every {
@@ -474,7 +495,6 @@ class RoninBodyHeightTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_OBS_003: Must match this system|code: http://loinc.org|8302-2 @ Observation.code\n" +
                 "ERROR REQ_FIELD: code is a required element @ Observation.code",
             exception.message
         )
@@ -1316,7 +1336,7 @@ class RoninBodyHeightTest {
             derivedFrom = listOf(Reference(reference = "DocumentReference/1234".asFHIR())),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(text = "code2".asFHIR()),
+                    code = tenantComponentCode,
                     value = DynamicValue(
                         type = DynamicValueType.STRING,
                         "string"
@@ -1488,7 +1508,8 @@ class RoninBodyHeightTest {
         assertEquals(
             listOf(
                 ObservationComponent(
-                    code = CodeableConcept(text = "code2".asFHIR()),
+                    extension = listOf(tenantComponentSourceCodeExtension),
+                    code = componentCode,
                     value = DynamicValue(
                         type = DynamicValueType.STRING,
                         "string"

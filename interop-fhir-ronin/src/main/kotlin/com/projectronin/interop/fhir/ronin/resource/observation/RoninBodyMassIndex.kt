@@ -41,6 +41,10 @@ class RoninBodyMassIndex(
     override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
     override val validPartOfValues = listOf("MedicationStatement", "Procedure")
 
+    override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
+        validateVitalSignValue(element.value, parentContext, validation)
+    }
+
     private val requiredIdError = RequiredFieldError(Observation::id)
 
     override fun transformInternal(

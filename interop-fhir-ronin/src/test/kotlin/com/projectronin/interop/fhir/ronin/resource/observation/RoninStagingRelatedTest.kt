@@ -92,12 +92,28 @@ class RoninStagingRelatedTest {
         text = "Staging Related".asFHIR(),
         coding = stagingRelatedCodingList
     )
+    private val componentCode = CodeableConcept(text = "code".asFHIR())
+    private val componentCode2 = CodeableConcept(text = "code2".asFHIR())
 
     private val tenantStagingRelatedSourceExtension = Extension(
         url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
         value = DynamicValue(
             DynamicValueType.CODEABLE_CONCEPT,
             tenantStagingRelatedConcept
+        )
+    )
+    private val componentCodeExtension = Extension(
+        url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            componentCode
+        )
+    )
+    private val componentCode2Extension = Extension(
+        url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            componentCode2
         )
     )
     private val tenantStagingRelatedCompValueExtension = Extension(
@@ -148,6 +164,28 @@ class RoninStagingRelatedTest {
         every {
             getConceptMapping(
                 tenant,
+                "Observation.component.code",
+                componentCode
+            )
+        } returns ConceptMapCodeableConcept(
+            componentCode,
+            componentCodeExtension,
+            listOf(conceptMapMetadata)
+        )
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.component.code",
+                componentCode2
+            )
+        } returns ConceptMapCodeableConcept(
+            componentCode2,
+            componentCode2Extension,
+            listOf(conceptMapMetadata)
+        )
+        every {
+            getConceptMapping(
+                tenant,
                 "Observation.code",
                 CodeableConcept(
                     text = "fake staging code".asFHIR(),
@@ -158,14 +196,14 @@ class RoninStagingRelatedTest {
         every {
             getConceptMapping(
                 tenant,
-                "Observation.Component.value",
+                "Observation.component.value",
                 stagingRelatedConcept
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
-                "Observation.Component.value",
+                "Observation.component.value",
                 tenantStagingRelatedConcept
             )
         } returns ConceptMapCodeableConcept(
@@ -176,7 +214,7 @@ class RoninStagingRelatedTest {
         every {
             getConceptMapping(
                 tenant,
-                "Observation.Component.value",
+                "Observation.component.value",
                 CodeableConcept(
                     text = "fake staging value".asFHIR(),
                     coding = listOf()
@@ -404,7 +442,6 @@ class RoninStagingRelatedTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_OBS_003: Must match this system|code: some-system-uri|some-code @ Observation.code\n" +
                 "ERROR REQ_FIELD: code is a required element @ Observation.code",
             exception.message
         )
@@ -699,7 +736,7 @@ class RoninStagingRelatedTest {
             derivedFrom = listOf(Reference(reference = "Observation/3456".asFHIR())),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(text = "code2".asFHIR()),
+                    code = componentCode2,
                     value = DynamicValue(
                         DynamicValueType.CODEABLE_CONCEPT,
                         tenantStagingRelatedConcept
@@ -820,7 +857,7 @@ class RoninStagingRelatedTest {
         assertEquals(
             listOf(
                 ObservationComponent(
-                    code = CodeableConcept(text = "code2".asFHIR()),
+                    code = componentCode2,
                     value = DynamicValue(
                         DynamicValueType.CODEABLE_CONCEPT,
                         stagingRelatedConcept
@@ -830,6 +867,7 @@ class RoninStagingRelatedTest {
                             url = Uri("http://localhost/valueExtension"),
                             value = DynamicValue(DynamicValueType.STRING, "Value")
                         ),
+                        componentCode2Extension,
                         tenantStagingRelatedCompValueExtension
                     )
                 )
@@ -1312,12 +1350,12 @@ class RoninStagingRelatedTest {
             performer = listOf(Reference(reference = "Patient/1234".asFHIR())),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(text = "code2".asFHIR()),
+                    code = componentCode2,
                     value = DynamicValue(
                         DynamicValueType.CODEABLE_CONCEPT,
                         stagingRelatedConcept
                     ),
-                    extension = listOf(tenantStagingRelatedCompValueExtension)
+                    extension = listOf(componentCode2Extension, tenantStagingRelatedCompValueExtension)
                 )
             )
         )
@@ -1520,7 +1558,7 @@ class RoninStagingRelatedTest {
                         DynamicValueType.CODEABLE_CONCEPT,
                         tenantStagingRelatedConcept // in registry map
                     ),
-                    code = CodeableConcept(text = "code".asFHIR())
+                    code = componentCode
                 )
             )
         )
@@ -1563,7 +1601,7 @@ class RoninStagingRelatedTest {
                         DynamicValueType.CODEABLE_CONCEPT,
                         stagingRelatedConcept
                     ),
-                    code = CodeableConcept(text = "code".asFHIR())
+                    code = componentCode
                 )
             )
         )
@@ -1575,8 +1613,8 @@ class RoninStagingRelatedTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' has no target defined in any Observation.Component.value concept map for tenant 'test' @ Observation.component.value\n" +
-                "ERROR RONIN_STAGING_OBS_003: Tenant source observation component value extension is missing or invalid @ Observation.component",
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' has no target defined in any Observation.component.value concept map for tenant 'test' @ Observation.component[0].value\n" +
+                "ERROR RONIN_OBS_007: Tenant source observation component value extension is missing or invalid @ Observation.component[0].extension",
             exception.message
         )
     }
@@ -1614,7 +1652,7 @@ class RoninStagingRelatedTest {
                         DynamicValueType.CODEABLE_CONCEPT,
                         stagingRelatedConcept
                     ),
-                    code = CodeableConcept(text = "code".asFHIR())
+                    code = componentCode
                 )
             )
         )
@@ -1627,9 +1665,9 @@ class RoninStagingRelatedTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' has no target defined in any Observation.code concept map for tenant 'test' @ Observation.code\n" +
-                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' has no target defined in any Observation.Component.value concept map for tenant 'test' @ Observation.component.value\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' has no target defined in any Observation.component.value concept map for tenant 'test' @ Observation.component[0].value\n" +
                 "ERROR RONIN_OBS_004: Tenant source observation code extension is missing or invalid @ Observation.extension\n" +
-                "ERROR RONIN_STAGING_OBS_003: Tenant source observation component value extension is missing or invalid @ Observation.component",
+                "ERROR RONIN_OBS_007: Tenant source observation component value extension is missing or invalid @ Observation.component[0].extension",
             exception.message
         )
     }
@@ -1675,8 +1713,8 @@ class RoninStagingRelatedTest {
                         DynamicValueType.CODEABLE_CONCEPT,
                         stagingRelatedConcept
                     ),
-                    // extension is missing for the test case
-                    code = CodeableConcept(text = "code".asFHIR())
+                    extension = listOf(componentCodeExtension),
+                    code = componentCode
                 )
             )
         )
@@ -1687,7 +1725,7 @@ class RoninStagingRelatedTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_STAGING_OBS_003: Tenant source observation component value extension is missing or invalid @ Observation.component",
+                "ERROR RONIN_OBS_007: Tenant source observation component value extension is missing or invalid @ Observation.component[0].extension",
             exception.message
         )
     }
@@ -1736,7 +1774,7 @@ class RoninStagingRelatedTest {
                     ),
                     extension = listOf(
                         Extension(
-                            url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
+                            url = RoninExtension.TENANT_SOURCE_MEDICATION_CODE.uri,
                             value = DynamicValue(
                                 DynamicValueType.CODEABLE_CONCEPT,
                                 CodeableConcept(
@@ -1744,9 +1782,10 @@ class RoninStagingRelatedTest {
                                     coding = stagingRelatedCodingList
                                 )
                             )
-                        )
+                        ),
+                        componentCodeExtension
                     ),
-                    code = CodeableConcept(text = "code".asFHIR())
+                    code = componentCode
                 )
             )
         )
@@ -1757,73 +1796,7 @@ class RoninStagingRelatedTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_STAGING_OBS_003: Tenant source observation component value extension is missing or invalid @ Observation.component",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate - fails if source component value extension is used with the wrong value datatype`() {
-        val observation = Observation(
-            id = Id("123"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.OBSERVATION_STAGING_RELATED.value)),
-                source = Uri("source")
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            status = ObservationStatus.AMENDED.asCode(),
-            extension = listOf(tenantStagingRelatedSourceExtension),
-            code = stagingRelatedConcept,
-            category = stagingRelatedConceptList,
-            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            ),
-            performer = listOf(Reference(reference = "Patient/1234".asFHIR())),
-            component = listOf(
-                ObservationComponent(
-                    value = DynamicValue(
-                        DynamicValueType.STRING,
-                        "hello"
-                    ),
-                    extension = listOf(
-                        Extension(
-                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_VALUE.uri,
-                            value = DynamicValue(
-                                DynamicValueType.STRING,
-                                "hello"
-                            )
-                        )
-                    ),
-                    code = CodeableConcept(text = "code".asFHIR())
-                )
-            )
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_STAGING_OBS_003: Tenant source observation component value extension is missing or invalid @ Observation.component",
+                "ERROR RONIN_OBS_007: Tenant source observation component value extension is missing or invalid @ Observation.component[0].extension",
             exception.message
         )
     }
@@ -1861,7 +1834,7 @@ class RoninStagingRelatedTest {
                         DynamicValueType.DATE_TIME,
                         DateTime("2009-01-07")
                     ),
-                    code = CodeableConcept(text = "code".asFHIR())
+                    code = componentCode
                 )
             )
         )
@@ -1875,7 +1848,8 @@ class RoninStagingRelatedTest {
                         DynamicValueType.DATE_TIME,
                         DateTime("2009-01-07")
                     ),
-                    code = CodeableConcept(text = "code".asFHIR())
+                    code = componentCode,
+                    extension = listOf(componentCodeExtension)
                 )
             ),
             transformed?.component

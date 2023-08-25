@@ -59,13 +59,11 @@ abstract class BaseRoninVitalSign(
         location = LocationContext(Observation::code)
     )
 
-    override fun validateSpecificObservation(
+    final override fun validateSpecificObservation(
         element: Observation,
         parentContext: LocationContext,
         validation: Validation
     ) {
-        super.validateSpecificObservation(element, parentContext, validation)
-
         validation.apply {
             element.code?.coding?.let {
                 checkTrue(it.size == 1, singleObservationCodeError, parentContext)
@@ -89,9 +87,7 @@ abstract class BaseRoninVitalSign(
     /**
      * Validates the [element] against Ronin rules for vital sign Observations.
      */
-    open fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
-        validateVitalSignValue(element.value, validQuantityCodes, parentContext, validation)
-    }
+    abstract fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation)
 
     private val requiredQuantityValueError = RequiredFieldError(LocationContext("Observation", "valueQuantity.value"))
     private val requiredQuantityUnitError = RequiredFieldError(LocationContext("Observation", "valueQuantity.unit"))
@@ -111,9 +107,9 @@ abstract class BaseRoninVitalSign(
      */
     open fun validateVitalSignValue(
         value: DynamicValue<Any>?,
-        validUnitCodeList: List<String>,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
+        validUnitCodeList: List<String> = validQuantityCodes
     ) {
         validation.apply {
             value?.let {

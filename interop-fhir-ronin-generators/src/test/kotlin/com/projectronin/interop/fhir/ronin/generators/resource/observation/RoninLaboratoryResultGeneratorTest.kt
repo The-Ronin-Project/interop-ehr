@@ -145,7 +145,7 @@ class RoninLaboratoryResultGeneratorTest {
     fun `validates for roninObservationLaboratoryResult`() {
         val roninLab = rcdmObservationLaboratoryResult("test") {}
         val validation = roninLabResult.validate(roninLab, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
     }
 
     @Test
@@ -159,7 +159,7 @@ class RoninLaboratoryResultGeneratorTest {
             )
         }
         val validation = roninLabResult.validate(roninLab, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertNotNull(roninLab.meta)
         assertNotNull(roninLab.identifier)
         assertEquals(4, roninLab.identifier.size)

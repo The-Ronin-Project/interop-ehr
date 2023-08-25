@@ -102,8 +102,10 @@ class RoninBodyTemperatureGeneratorTest {
         assertNotNull(roninObsBodyTemperature.status)
         assertNotNull(roninObsBodyTemperature.code?.coding?.get(0)?.code?.value)
         assertNotNull(roninObsBodyTemperature.id)
-        val patientFHIRId = roninObsBodyTemperature.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = roninObsBodyTemperature.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            roninObsBodyTemperature.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            roninObsBodyTemperature.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", roninObsBodyTemperature.id?.value.toString())
     }
 
@@ -141,7 +143,7 @@ class RoninBodyTemperatureGeneratorTest {
     fun `validates for roninObservationBodyTemperature`() {
         val bodyTemp = rcdmObservationBodyTemperature("test") {}
         val validation = roninBodyTemp.validate(bodyTemp, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
     }
 
     @Test
@@ -155,7 +157,7 @@ class RoninBodyTemperatureGeneratorTest {
             )
         }
         val validation = roninBodyTemp.validate(bodyTemp, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertNotNull(bodyTemp.meta)
         assertNotNull(bodyTemp.identifier)
         assertEquals(4, bodyTemp.identifier.size)
@@ -179,7 +181,7 @@ class RoninBodyTemperatureGeneratorTest {
             }
         }
         val validation = roninBodyTemp.validate(bodyTemp, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
     }
 
     @Test

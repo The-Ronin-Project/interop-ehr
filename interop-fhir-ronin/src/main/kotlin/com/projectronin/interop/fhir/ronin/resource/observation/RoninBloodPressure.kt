@@ -41,6 +41,7 @@ class RoninBloodPressure(
         "Observation.component:systolic.code",
         profile
     )
+
     fun validDiastolicCodes(): ValueSetList = registryClient.getRequiredValueSet(
         "Observation.component:diastolic.code",
         profile
@@ -68,7 +69,6 @@ class RoninBloodPressure(
             if (systolic.size == 1) {
                 validateVitalSignValue(
                     systolic.first().value,
-                    validQuantityCodes,
                     LocationContext("Observation", "component:systolic"),
                     validation
                 )
@@ -76,7 +76,6 @@ class RoninBloodPressure(
             if (diastolic.size == 1) {
                 validateVitalSignValue(
                     diastolic.first().value,
-                    validQuantityCodes,
                     LocationContext("Observation", "component:diastolic"),
                     validation
                 )

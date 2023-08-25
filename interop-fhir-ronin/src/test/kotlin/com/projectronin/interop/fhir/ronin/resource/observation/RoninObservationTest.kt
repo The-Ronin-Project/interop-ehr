@@ -7,6 +7,7 @@ import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
+import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Reference
@@ -21,6 +22,7 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.r4.valueset.ObservationStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.util.asCode
@@ -153,6 +155,17 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf()
+                        )
+                    )
+                )
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -268,6 +281,23 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "laboratory".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    display = "some-display".asFHIR()
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -329,6 +359,23 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "laboratory".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    display = "some-display".asFHIR(),
+                                    system = Uri("some-system")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -390,6 +437,34 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "laboratory".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code-1"),
+                                    display = "some-display-1".asFHIR(),
+                                    system = Uri("some-system-1")
+                                ),
+                                Coding(
+                                    code = Code("some-code-2"),
+                                    display = "some-display-2".asFHIR(),
+                                    system = Uri("some-system-2")
+                                ),
+                                Coding(
+                                    code = Code("some-code-3"),
+                                    display = "some-display-3".asFHIR(),
+                                    system = Uri("some-system-3")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             status = ObservationStatus.AMENDED.asCode(),
             identifier = listOf(
                 Identifier(
@@ -551,6 +626,24 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "any-text".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    display = "some-display".asFHIR(),
+                                    system = Uri("some-system")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -600,6 +693,24 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "any-text".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    display = "some-display".asFHIR(),
+                                    system = Uri("some-system")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -664,6 +775,24 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "any-text".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    display = "some-display".asFHIR(),
+                                    system = Uri("some-system")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -731,6 +860,23 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = CodeSystem.LOINC.uri,
+                                    display = "Laboratory Result".asFHIR(),
+                                    code = laboratoryCategory
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -794,6 +940,23 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = CodeSystem.LOINC.uri,
+                                    display = "Laboratory Result".asFHIR(),
+                                    code = laboratoryCategory
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -873,6 +1036,23 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = CodeSystem.LOINC.uri,
+                                    display = "Laboratory Result".asFHIR(),
+                                    code = laboratoryCategory
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -946,6 +1126,24 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "any-text".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    display = "some-display".asFHIR(),
+                                    system = Uri("some-system")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1016,6 +1214,24 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "any-text".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    display = "some-display".asFHIR(),
+                                    system = Uri("some-system")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1085,6 +1301,24 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "any-text".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    display = "some-display".asFHIR(),
+                                    system = Uri("some-system")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1153,6 +1387,24 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "any-text".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    display = "some-display".asFHIR(),
+                                    system = Uri("some-system")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1222,6 +1474,24 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "any-text".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    display = "some-display".asFHIR(),
+                                    system = Uri("some-system")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1291,6 +1561,23 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = CodeSystem.LOINC.uri,
+                                    display = "Laboratory Result".asFHIR(),
+                                    code = laboratoryCategory
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1366,6 +1653,24 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "any-text".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    display = "some-display".asFHIR(),
+                                    system = Uri("some-system")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1428,6 +1733,24 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "any-text".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    display = "some-display".asFHIR(),
+                                    system = Uri("some-system")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1493,6 +1816,24 @@ class RoninObservationTest {
     fun `validate checks meta`() {
         val observation = Observation(
             id = Id("123"),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "any-text".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    display = "some-display".asFHIR(),
+                                    system = Uri("some-system")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -1559,6 +1900,24 @@ class RoninObservationTest {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.OBSERVATION.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "any-text".asFHIR(),
+                            coding = listOf(
+                                Coding(
+                                    code = Code("some-code"),
+                                    display = "some-display".asFHIR(),
+                                    system = Uri("some-system")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,

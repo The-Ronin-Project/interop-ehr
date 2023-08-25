@@ -227,7 +227,7 @@ class RoninBloodPressureGeneratorTest {
     fun `validates for rcdmObservationBloodPressure`() {
         val bpObs = rcdmObservationBloodPressure("test") {}
         val validation = roninBloodPressure.validate(bpObs, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
     }
 
     @Test
@@ -307,7 +307,7 @@ class RoninBloodPressureGeneratorTest {
             subject of rcdmReference("Patient", "456")
         }
         val validation = roninBloodPressure.validate(bpObs, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertTrue(bpObs.subject?.reference?.value == "Patient/456")
     }
 
@@ -316,7 +316,7 @@ class RoninBloodPressureGeneratorTest {
         val rcdmPatient = rcdmPatient("test") {}
         val bpObs = rcdmPatient.rcdmObservationBloodPressure {}
         val validation = roninBloodPressure.validate(bpObs, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertNotNull(bpObs.meta)
         assertNotNull(bpObs.identifier)
         assertTrue(bpObs.identifier.size >= 3)
@@ -333,7 +333,7 @@ class RoninBloodPressureGeneratorTest {
             subject of rcdmReference("Patient", "456")
         }
         val validation = roninBloodPressure.validate(bpObs, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertEquals("Patient/456", bpObs.subject?.reference?.value)
     }
 
@@ -344,7 +344,7 @@ class RoninBloodPressureGeneratorTest {
             subject of reference("Patient", "456")
         }
         val validation = roninBloodPressure.validate(bpObs, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertEquals("Patient/${rcdmPatient.id?.value}", bpObs.subject?.reference?.value)
     }
 
@@ -355,7 +355,7 @@ class RoninBloodPressureGeneratorTest {
             id of "88"
         }
         val validation = roninBloodPressure.validate(bpObs, null)
-        assertEquals(validation.hasErrors(), false)
+        validation.alertIfErrors()
         assertEquals(3, bpObs.identifier.size)
         val values = bpObs.identifier.mapNotNull { it.value }.toSet()
         assertTrue(values.size == 3)

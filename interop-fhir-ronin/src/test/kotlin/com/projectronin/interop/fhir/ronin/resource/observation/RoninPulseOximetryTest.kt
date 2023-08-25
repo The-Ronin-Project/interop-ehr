@@ -95,8 +95,32 @@ class RoninPulseOximetryTest {
     private val flowRateCoding = listOf(
         Coding(system = CodeSystem.LOINC.uri, code = Code("3151-8"))
     )
+    private val flowRateCodeableConcept =
+        CodeableConcept(
+            coding = flowRateCoding,
+            text = "Flow Rate".asFHIR()
+        )
+    private val flowRateSourceExtension = Extension(
+        url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            flowRateCodeableConcept
+        )
+    )
     private val concentrationCoding = listOf(
         Coding(system = CodeSystem.LOINC.uri, code = Code("3150-0"))
+    )
+    private val concentrationCodeableConcept =
+        CodeableConcept(
+            coding = concentrationCoding,
+            text = "Concentration".asFHIR()
+        )
+    private val concentrationSourceExtension = Extension(
+        url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            concentrationCodeableConcept
+        )
     )
 
     private val vitalSignsCategoryCode = Code("vital-signs")
@@ -152,6 +176,28 @@ class RoninPulseOximetryTest {
         } returns ConceptMapCodeableConcept(
             pulseOximetryConcept,
             tenantPulseOximetrySourceExtension,
+            listOf(conceptMapMetadata)
+        )
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.component.code",
+                flowRateCodeableConcept
+            )
+        } returns ConceptMapCodeableConcept(
+            flowRateCodeableConcept,
+            flowRateSourceExtension,
+            listOf(conceptMapMetadata)
+        )
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.component.code",
+                concentrationCodeableConcept
+            )
+        } returns ConceptMapCodeableConcept(
+            concentrationCodeableConcept,
+            concentrationSourceExtension,
             listOf(conceptMapMetadata)
         )
         every {
@@ -349,10 +395,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -364,10 +408,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -406,10 +448,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -421,10 +461,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -545,10 +583,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -560,10 +596,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -724,10 +758,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -740,10 +772,8 @@ class RoninPulseOximetryTest {
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -808,17 +838,13 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -875,10 +901,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -890,10 +914,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -905,10 +927,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
                 )
             )
@@ -965,10 +985,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -979,10 +997,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1047,10 +1063,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1061,10 +1075,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1129,10 +1141,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1144,10 +1154,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1212,10 +1220,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1226,10 +1232,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1294,10 +1298,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1309,10 +1311,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1377,10 +1377,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1392,10 +1390,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1461,10 +1457,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1476,10 +1470,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
                 )
             )
@@ -1528,10 +1520,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1543,10 +1533,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1558,10 +1546,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     dataAbsentReason = CodeableConcept(coding = listOf(Coding(code = Code("absent reason"))))
                 )
             )
@@ -1618,10 +1604,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1633,10 +1617,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1700,10 +1682,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1715,10 +1695,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1782,10 +1760,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1797,10 +1773,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1865,10 +1839,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1880,10 +1852,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1947,10 +1917,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -1962,10 +1930,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2039,10 +2005,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2054,10 +2018,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2118,10 +2080,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2133,10 +2093,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2201,10 +2159,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2216,10 +2172,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2289,10 +2243,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2304,10 +2256,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2372,10 +2322,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2387,10 +2335,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2502,10 +2448,7 @@ class RoninPulseOximetryTest {
             derivedFrom = listOf(Reference(reference = "DocumentReference/1234".asFHIR())),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2517,10 +2460,7 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -2648,10 +2588,8 @@ class RoninPulseOximetryTest {
         assertEquals(listOf(Reference(reference = "DocumentReference/1234".asFHIR())), transformed.derivedFrom)
         assertEquals(
             ObservationComponent(
-                code = CodeableConcept(
-                    coding = flowRateCoding,
-                    text = "Flow Rate".asFHIR()
-                ),
+                extension = listOf(flowRateSourceExtension),
+                code = flowRateCodeableConcept,
                 value = DynamicValue(
                     DynamicValueType.QUANTITY,
                     Quantity(
@@ -2666,10 +2604,8 @@ class RoninPulseOximetryTest {
         )
         assertEquals(
             ObservationComponent(
-                code = CodeableConcept(
-                    coding = concentrationCoding,
-                    text = "Concentration".asFHIR()
-                ),
+                extension = listOf(concentrationSourceExtension),
+                code = concentrationCodeableConcept,
                 value = DynamicValue(
                     DynamicValueType.QUANTITY,
                     Quantity(
@@ -3063,6 +2999,24 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
+                    extension = listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+                            value = DynamicValue(
+                                DynamicValueType.CODEABLE_CONCEPT,
+                                CodeableConcept(
+                                    coding = listOf(
+                                        Coding(
+                                            system = CodeSystem.LOINC.uri,
+                                            display = "Flow Rate".asFHIR(),
+                                            code = Code("blah")
+                                        )
+                                    ),
+                                    text = "Flow Rate".asFHIR()
+                                )
+                            )
+                        )
+                    ),
                     code = CodeableConcept(
                         coding = listOf(
                             Coding(
@@ -3084,10 +3038,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -3151,10 +3103,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -3166,6 +3116,24 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
+                    extension = listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.uri,
+                            value = DynamicValue(
+                                DynamicValueType.CODEABLE_CONCEPT,
+                                CodeableConcept(
+                                    coding = listOf(
+                                        Coding(
+                                            system = CodeSystem.LOINC.uri,
+                                            display = "Concentration".asFHIR(),
+                                            code = Code("blah")
+                                        )
+                                    ),
+                                    text = "Concentration".asFHIR()
+                                )
+                            )
+                        )
+                    ),
                     code = CodeableConcept(
                         coding = listOf(
                             Coding(
@@ -3248,10 +3216,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -3263,10 +3229,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -3348,10 +3312,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -3363,10 +3325,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -3448,10 +3408,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -3463,10 +3421,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -3549,10 +3505,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -3564,10 +3518,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -3649,10 +3601,8 @@ class RoninPulseOximetryTest {
             ),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = flowRateCoding,
-                        text = "Flow Rate".asFHIR()
-                    ),
+                    extension = listOf(flowRateSourceExtension),
+                    code = flowRateCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(
@@ -3664,10 +3614,8 @@ class RoninPulseOximetryTest {
                     )
                 ),
                 ObservationComponent(
-                    code = CodeableConcept(
-                        coding = concentrationCoding,
-                        text = "Concentration".asFHIR()
-                    ),
+                    extension = listOf(concentrationSourceExtension),
+                    code = concentrationCodeableConcept,
                     value = DynamicValue(
                         DynamicValueType.QUANTITY,
                         Quantity(

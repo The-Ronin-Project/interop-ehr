@@ -92,6 +92,16 @@ class RoninRespiratoryRateTest {
         )
     )
 
+    private val tenantComponentCode = CodeableConcept(text = "code2".asFHIR())
+    private val componentCode = CodeableConcept(text = "Real Code 2".asFHIR())
+    private val tenantComponentSourceCodeExtension = Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_COMPONENT_CODE.value),
+        value = DynamicValue(
+            DynamicValueType.CODEABLE_CONCEPT,
+            tenantComponentCode
+        )
+    )
+
     private val vitalSignsCategoryCode = Code("vital-signs")
     private val vitalSignsCategoryCoding = Coding(
         system = CodeSystem.OBSERVATION_CATEGORY.uri,
@@ -136,6 +146,17 @@ class RoninRespiratoryRateTest {
         } returns ConceptMapCodeableConcept(
             respiratoryRateConcept,
             tenantRespiratoryRateSourceExtension,
+            listOf(conceptMapMetadata)
+        )
+        every {
+            getConceptMapping(
+                tenant,
+                "Observation.component.code",
+                tenantComponentCode
+            )
+        } returns ConceptMapCodeableConcept(
+            componentCode,
+            tenantComponentSourceCodeExtension,
             listOf(conceptMapMetadata)
         )
         every {
@@ -1091,7 +1112,7 @@ class RoninRespiratoryRateTest {
             derivedFrom = listOf(Reference(reference = "DocumentReference/1234".asFHIR())),
             component = listOf(
                 ObservationComponent(
-                    code = CodeableConcept(text = "code2".asFHIR()),
+                    code = tenantComponentCode,
                     value = DynamicValue(
                         type = DynamicValueType.STRING,
                         "string"
@@ -1212,7 +1233,8 @@ class RoninRespiratoryRateTest {
         assertEquals(
             listOf(
                 ObservationComponent(
-                    code = CodeableConcept(text = "code2".asFHIR()),
+                    extension = listOf(tenantComponentSourceCodeExtension),
+                    code = componentCode,
                     value = DynamicValue(
                         type = DynamicValueType.STRING,
                         "string"
