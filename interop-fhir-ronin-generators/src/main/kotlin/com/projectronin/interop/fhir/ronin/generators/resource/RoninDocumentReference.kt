@@ -1,9 +1,11 @@
 package com.projectronin.interop.fhir.ronin.generators.resource
 
+import com.projectronin.interop.fhir.generators.datatypes.attachment
 import com.projectronin.interop.fhir.generators.datatypes.coding
 import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.generators.resources.DocumentReferenceGenerator
 import com.projectronin.interop.fhir.generators.resources.documentReference
+import com.projectronin.interop.fhir.generators.resources.documentReferenceContent
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
@@ -12,8 +14,10 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.Url
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
+import com.projectronin.interop.fhir.r4.resource.DocumentReferenceContent
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.ronin.generators.resource.observation.subjectReferenceOptions
 import com.projectronin.interop.fhir.ronin.generators.util.generateCode
@@ -26,7 +30,11 @@ import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 
-fun rcdmDocumentReference(tenant: String, block: DocumentReferenceGenerator.() -> Unit): DocumentReference {
+fun rcdmDocumentReference(
+    tenant: String,
+    binaryFhirId: String,
+    block: DocumentReferenceGenerator.() -> Unit
+): DocumentReference {
     return documentReference {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.DOCUMENT_REFERENCE, tenant) {}
@@ -37,14 +45,21 @@ fun rcdmDocumentReference(tenant: String, block: DocumentReferenceGenerator.() -
         }
         status of generateCode(status.generate(), possibleDocumentReferenceStatusCodes.random())
         type of generateCodeableConcept(type.generate(), possibleDocumentReferenceTypeCodes.random())
-        category of generateRequiredCodeableConceptList(category.generate(), possibleDocumentReferenceCategoryCodes.random())
+        category of generateRequiredCodeableConceptList(
+            category.generate(),
+            possibleDocumentReferenceCategoryCodes.random()
+        )
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
+        content of generateContent(content.generate(), binaryFhirId)
     }
 }
 
-fun Patient.rcdmDocumentReference(block: DocumentReferenceGenerator.() -> Unit): DocumentReference {
+fun Patient.rcdmDocumentReference(
+    binaryFhirId: String,
+    block: DocumentReferenceGenerator.() -> Unit
+): DocumentReference {
     val data = this.referenceData()
-    return rcdmDocumentReference(data.tenantId) {
+    return rcdmDocumentReference(data.tenantId, binaryFhirId) {
         block.invoke(this)
         subject of generateReference(
             subject.generate(),
@@ -55,6 +70,30 @@ fun Patient.rcdmDocumentReference(block: DocumentReferenceGenerator.() -> Unit):
         )
     }
 }
+
+private fun generateContent(
+    generatedContent: List<DocumentReferenceContent>,
+    binaryFhirId: String
+): List<DocumentReferenceContent> {
+    val contentList = generatedContent.ifEmpty { listOf(documentReferenceContent { }) }
+
+    return contentList.map { content ->
+        val baseAttachment = content.attachment ?: attachment { }
+
+        val currentUrl = baseAttachment.url
+        val url = currentUrl?.copy(extension = currentUrl.extension + datalakeAttachmentUrlExtension)
+            ?: Url("Binary/$binaryFhirId", extension = listOf(datalakeAttachmentUrlExtension))
+
+        content.copy(
+            attachment = baseAttachment.copy(url = url)
+        )
+    }
+}
+
+private val datalakeAttachmentUrlExtension = Extension(
+    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+    value = DynamicValue(DynamicValueType.URL, Url("datalake/attachment/id"))
+)
 
 private val tenantDocumentReferenceTypeSourceExtension = listOf(
     Extension(

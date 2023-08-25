@@ -20,6 +20,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRInteger
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
@@ -34,6 +35,7 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.RequestStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
@@ -41,6 +43,7 @@ import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
@@ -545,6 +548,20 @@ class RoninCarePlanTest {
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),
                     value = DynamicValue(DynamicValueType.STRING, "value")
+                ),
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                    code = Code("assess-plan")
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             transformed.extension
@@ -1030,6 +1047,25 @@ class RoninCarePlanTest {
         assertNull(transformed.language)
         assertNull(transformed.text)
         assertEquals(listOf<Resource<*>>(), transformed.contained)
+        assertEquals(
+            listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                    code = Code("assess-plan")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            transformed.extension
+        )
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
@@ -1097,7 +1133,6 @@ class RoninCarePlanTest {
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
             )
-
         )
 
         val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
@@ -1114,6 +1149,25 @@ class RoninCarePlanTest {
         assertNull(transformed.language)
         assertNull(transformed.text)
         assertEquals(listOf<Resource<*>>(), transformed.contained)
+        assertEquals(
+            listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                    code = Code("assess-plan")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            transformed.extension
+        )
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
@@ -1156,6 +1210,75 @@ class RoninCarePlanTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             ),
             transformed.subject
+        )
+    }
+
+    @Test
+    fun `transform creates extensions for multiple categories`() {
+        val carePlan = CarePlan(
+            id = Id("12345"),
+            meta = Meta(source = Uri("source")),
+            status = RequestStatus.DRAFT.asCode(),
+            intent = CarePlanIntent.OPTION.asCode(),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                            code = Code("assess-plan")
+                        )
+                    )
+                ),
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                            code = Code("assess-plan-2")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
+        )
+
+        val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
+        validation.alertIfErrors()
+
+        assertEquals(
+            listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                    code = Code("assess-plan")
+                                )
+                            )
+                        )
+                    )
+                ),
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                    code = Code("assess-plan-2")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            transformed!!.extension
         )
     }
 
@@ -1338,5 +1461,259 @@ class RoninCarePlanTest {
                 "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ CarePlan.subject",
             exception.message
         )
+    }
+
+    @Test
+    fun `transform care-plan with non-reference Epic cycle`() {
+        val carePlan = CarePlan(
+            id = Id("12345"),
+            meta = Meta(source = Uri("source")),
+            status = RequestStatus.DRAFT.asCode(),
+            intent = CarePlanIntent.OPTION.asCode(),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                            code = Code("assess-plan")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            activity = listOf(
+                CarePlanActivity(
+                    extension = listOf(
+                        Extension(
+                            url = Uri("http://open.epic.com/FHIR/StructureDefinition/extension/cycle"),
+                            value = DynamicValue(DynamicValueType.STRING, FHIRString("cycle1"))
+                        )
+                    )
+                )
+            )
+        )
+
+        val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
+        validation.alertIfErrors()
+        transformed!!
+
+        assertEquals("CarePlan", transformed.resourceType)
+        assertEquals(Id(value = "12345"), transformed.id)
+        assertEquals(
+            Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
+            transformed.meta
+        )
+        assertNull(transformed.implicitRules)
+        assertNull(transformed.language)
+        assertNull(transformed.text)
+        assertEquals(listOf<Resource<*>>(), transformed.contained)
+        assertEquals(
+            listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                    code = Code("assess-plan")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            transformed.extension
+        )
+        assertEquals(listOf<Extension>(), transformed.modifierExtension)
+        assertEquals(
+            listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            transformed.identifier
+        )
+        assertEquals(RequestStatus.DRAFT.asCode(), transformed.status)
+        assertEquals(CarePlanIntent.OPTION.asCode(), transformed.intent)
+        assertEquals(
+            listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                            code = Code("assess-plan")
+                        )
+                    )
+                )
+            ),
+            transformed.category
+        )
+        assertEquals(
+            Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            transformed.subject
+        )
+        assertEquals(
+            listOf(
+                CarePlanActivity(
+                    extension = listOf(
+                        Extension(
+                            url = Uri("http://open.epic.com/FHIR/StructureDefinition/extension/cycle"),
+                            value = DynamicValue(DynamicValueType.STRING, FHIRString("cycle1"))
+                        )
+                    )
+                )
+            ),
+            transformed.activity
+        )
+    }
+
+    @Test
+    fun `transform care-plan with reference Epic cycle`() {
+        val cycleReference = Reference(reference = FHIRString("CarePlan/67890"))
+        val normalizedCycleReference = Reference(reference = FHIRString("CarePlan/test-67890"))
+        every { normalizer.normalize(cycleReference, tenant) } returns normalizedCycleReference
+
+        val carePlan = CarePlan(
+            id = Id("12345"),
+            meta = Meta(source = Uri("source")),
+            status = RequestStatus.DRAFT.asCode(),
+            intent = CarePlanIntent.OPTION.asCode(),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                            code = Code("assess-plan")
+                        )
+                    )
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            activity = listOf(
+                CarePlanActivity(
+                    extension = listOf(
+                        Extension(
+                            url = Uri("http://open.epic.com/FHIR/StructureDefinition/extension/cycle"),
+                            value = DynamicValue(DynamicValueType.REFERENCE, cycleReference)
+                        )
+                    )
+                )
+            )
+        )
+
+        val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
+        validation.alertIfErrors()
+        transformed!!
+
+        assertEquals("CarePlan", transformed.resourceType)
+        assertEquals(Id(value = "12345"), transformed.id)
+        assertEquals(
+            Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
+            transformed.meta
+        )
+        assertNull(transformed.implicitRules)
+        assertNull(transformed.language)
+        assertNull(transformed.text)
+        assertEquals(listOf<Resource<*>>(), transformed.contained)
+        assertEquals(
+            listOf(
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                    value = DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            coding = listOf(
+                                Coding(
+                                    system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                    code = Code("assess-plan")
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            transformed.extension
+        )
+        assertEquals(listOf<Extension>(), transformed.modifierExtension)
+        assertEquals(
+            listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            transformed.identifier
+        )
+        assertEquals(RequestStatus.DRAFT.asCode(), transformed.status)
+        assertEquals(CarePlanIntent.OPTION.asCode(), transformed.intent)
+        assertEquals(
+            listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                            code = Code("assess-plan")
+                        )
+                    )
+                )
+            ),
+            transformed.category
+        )
+        assertEquals(
+            Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            transformed.subject
+        )
+        assertEquals(
+            listOf(
+                CarePlanActivity(
+                    extension = listOf(
+                        Extension(
+                            url = Uri("http://open.epic.com/FHIR/StructureDefinition/extension/cycle"),
+                            value = DynamicValue(DynamicValueType.REFERENCE, normalizedCycleReference)
+                        )
+                    )
+                )
+            ),
+            transformed.activity
+        )
+
+        verify(exactly = 1) { normalizer.normalize(cycleReference, tenant) }
     }
 }

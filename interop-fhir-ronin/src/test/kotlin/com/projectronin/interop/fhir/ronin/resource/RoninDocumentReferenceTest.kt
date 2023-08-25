@@ -15,9 +15,11 @@ import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Base64Binary
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.Url
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
 import com.projectronin.interop.fhir.r4.resource.DocumentReferenceContent
@@ -166,7 +168,17 @@ class RoninDocumentReferenceTest {
             ),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -211,7 +223,17 @@ class RoninDocumentReferenceTest {
             type = docRefTypeConcept,
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -255,7 +277,17 @@ class RoninDocumentReferenceTest {
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -309,7 +341,17 @@ class RoninDocumentReferenceTest {
             ),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -363,7 +405,17 @@ class RoninDocumentReferenceTest {
             ),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -411,7 +463,17 @@ class RoninDocumentReferenceTest {
             docStatus = Code("bad"),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -454,7 +516,17 @@ class RoninDocumentReferenceTest {
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -467,6 +539,145 @@ class RoninDocumentReferenceTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: meta is a required element @ DocumentReference.meta",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails with no attachment URL`() {
+        val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            type = docRefTypeConcept,
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            category = listOf(CodeableConcept(coding = categoryCodingList)),
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                )
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR())
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDocumentReference.validate(documentReference).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: url is a required element @ DocumentReference.content[0].attachment.url",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails with no datalake attachment extension`() {
+        val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            type = docRefTypeConcept,
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            category = listOf(CodeableConcept(coding = categoryCodingList)),
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(url = Url("Binary/1234"))
+                )
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR())
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDocumentReference.validate(documentReference).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DOCREF_003: Datalake Attachment URL extension is missing or invalid @ DocumentReference.content[0].attachment.url.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails with datalake attachment extension with wrong type`() {
+        val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            type = docRefTypeConcept,
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            category = listOf(CodeableConcept(coding = categoryCodingList)),
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.STRING, FHIRString("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR())
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDocumentReference.validate(documentReference).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DOCREF_003: Datalake Attachment URL extension is missing or invalid @ DocumentReference.content[0].attachment.url.extension",
             exception.message
         )
     }
@@ -498,7 +709,17 @@ class RoninDocumentReferenceTest {
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -516,7 +737,17 @@ class RoninDocumentReferenceTest {
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -541,7 +772,17 @@ class RoninDocumentReferenceTest {
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -641,7 +882,17 @@ class RoninDocumentReferenceTest {
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -759,7 +1010,17 @@ class RoninDocumentReferenceTest {
             ),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             )
         )
@@ -808,7 +1069,17 @@ class RoninDocumentReferenceTest {
             ),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             )
         )
@@ -857,7 +1128,17 @@ class RoninDocumentReferenceTest {
             ),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             )
         )
@@ -948,7 +1229,17 @@ class RoninDocumentReferenceTest {
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -994,7 +1285,17 @@ class RoninDocumentReferenceTest {
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -1041,7 +1342,17 @@ class RoninDocumentReferenceTest {
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())
@@ -1090,7 +1401,17 @@ class RoninDocumentReferenceTest {
             ),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             )
         )
@@ -1150,7 +1471,17 @@ class RoninDocumentReferenceTest {
             ),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             )
         )
@@ -1207,7 +1538,17 @@ class RoninDocumentReferenceTest {
             ),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             )
         )
@@ -1234,8 +1575,15 @@ class RoninDocumentReferenceTest {
             content = listOf(
                 DocumentReferenceContent(
                     attachment = Attachment(
-                        data = Base64Binary("c3po"),
-                        contentType = Code("plain/text")
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
                     )
                 )
             ),
@@ -1266,7 +1614,17 @@ class RoninDocumentReferenceTest {
             category = listOf(CodeableConcept(coding = categoryCodingList)),
             content = listOf(
                 DocumentReferenceContent(
-                    attachment = Attachment(data = Base64Binary("c3po"), contentType = Code("plain/text"))
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
                 )
             ),
             subject = Reference(reference = "Patient/123".asFHIR())

@@ -1,10 +1,12 @@
 package com.projectronin.interop.fhir.ronin.resource
 
 import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.datatype.Attachment
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.datatype.primitive.Url
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
 import com.projectronin.interop.fhir.r4.validate.resource.R4DocumentReferenceValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
@@ -43,8 +45,8 @@ class RoninDocumentReference(
         normalizer,
         localizer
     ) {
-    override val rcdmVersion = RCDMVersion.V3_24_1
-    override val profileVersion = 4
+    override val rcdmVersion = RCDMVersion.V3_25_0
+    override val profileVersion = 5
 
     // From http://hl7.org/fhir/us/core/STU5.0.1/ValueSet-us-core-documentreference-category.html
     private val usCoreDocumentReferenceCategoryValueSet = listOf(
@@ -55,6 +57,7 @@ class RoninDocumentReference(
     private val requiredSubjectError = RequiredFieldError(DocumentReference::subject)
     private val requiredExtensionError = RequiredFieldError(DocumentReference::extension)
     private val requiredTypeError = RequiredFieldError(DocumentReference::type)
+    private val requiredUrlError = RequiredFieldError(Attachment::url)
 
     private val requiredDocumentReferenceTypeExtension = FHIRError(
         code = "RONIN_DOCREF_001",
@@ -67,6 +70,12 @@ class RoninDocumentReference(
         severity = ValidationIssueSeverity.ERROR,
         description = "One, and only one, coding entry is allowed for type",
         location = LocationContext(CodeableConcept::coding)
+    )
+    private val requiredDatalakeAttachmentExtension = FHIRError(
+        code = "RONIN_DOCREF_003",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Datalake Attachment URL extension is missing or invalid",
+        location = LocationContext(Url::extension)
     )
 
     override fun validateRonin(element: DocumentReference, parentContext: LocationContext, validation: Validation) {
@@ -99,6 +108,25 @@ class RoninDocumentReference(
                 LocationContext(DocumentReference::subject),
                 validation
             )
+
+            element.content.forEachIndexed { index, content ->
+                content.attachment?.let { attachment ->
+                    val attachmentContext = parentContext.append(LocationContext("", "content[$index].attachment"))
+                    checkNotNull(attachment.url, requiredUrlError, attachmentContext)
+
+                    attachment.url?.let { url ->
+                        val urlContext = attachmentContext.append(LocationContext("", "url"))
+                        checkTrue(
+                            url.extension.any {
+                                it.url == RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri &&
+                                    it.value?.type == DynamicValueType.URL
+                            },
+                            requiredDatalakeAttachmentExtension,
+                            urlContext
+                        )
+                    }
+                }
+            }
 
             // status is validated in R4
             // type will be populated from mapping
