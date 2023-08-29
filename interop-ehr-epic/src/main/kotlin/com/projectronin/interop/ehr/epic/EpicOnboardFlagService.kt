@@ -8,7 +8,6 @@ import com.projectronin.interop.ehr.epic.apporchard.model.SetSmartDataValuesResu
 import com.projectronin.interop.ehr.epic.apporchard.model.SmartDataValue
 import com.projectronin.interop.ehr.epic.apporchard.model.exceptions.AppOrchardError
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
@@ -20,7 +19,8 @@ import org.springframework.stereotype.Component
 class EpicOnboardFlagService(
     private val epicClient: EpicClient,
     private val identifierService: EpicIdentifierService,
-    private val ehrDataAuthorityClient: EHRDataAuthorityClient
+    private val ehrDataAuthorityClient: EHRDataAuthorityClient,
+    private val epicPatientService: EpicPatientService
 ) : OnboardFlagService {
     private val apiEndpoint = "/api/epic/2013/Clinical/Utility/SETSMARTDATAVALUES/SmartData/Values"
     private val logger = KotlinLogging.logger { }
@@ -31,12 +31,16 @@ class EpicOnboardFlagService(
         val flagType = epicTenant.patientOnboardedFlagId
             ?: throw IllegalStateException("Tenant ${tenant.mnemonic} is missing patient onboarding flag configuration")
         val patient = runBlocking {
-            ehrDataAuthorityClient.getResourceAs<Patient>(
+            ehrDataAuthorityClient.getResourceAs(
                 tenant.mnemonic,
                 "Patient",
                 patientFhirID.localize(tenant)
-            ) ?: throw VendorIdentifierNotFoundException("No Patient found for $patientFhirID")
+            ) ?: run {
+                // attempt to get patient from EHR if not in EHRDA
+                runCatching { epicPatientService.getPatient(tenant, patientFhirID) }.getOrNull()
+            } ?: throw VendorIdentifierNotFoundException("No Patient found for $patientFhirID")
         }
+
         val patientMRNIdentifier = identifierService.getMRNIdentifier(tenant, patient.identifier)
 
         val request = SetSmartDataValuesRequest(

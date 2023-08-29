@@ -30,6 +30,7 @@ class EpicOnboardFlagServiceTest {
     private lateinit var epicClient: EpicClient
     private lateinit var identifierService: EpicIdentifierService
     private lateinit var ehrDataAuthorityClient: EHRDataAuthorityClient
+    private lateinit var epicPatientService: EpicPatientService
     private lateinit var httpResponse: HttpResponse
     private lateinit var ehrResponse: EHRResponse
     private lateinit var tenant: Tenant
@@ -41,7 +42,8 @@ class EpicOnboardFlagServiceTest {
         ehrResponse = EHRResponse(httpResponse, "12345")
         identifierService = mockk()
         ehrDataAuthorityClient = mockk()
-        onboardFlagService = EpicOnboardFlagService(epicClient, identifierService, ehrDataAuthorityClient)
+        epicPatientService = mockk()
+        onboardFlagService = EpicOnboardFlagService(epicClient, identifierService, ehrDataAuthorityClient, epicPatientService)
         tenant = createTestTenant(
             "https://example.org",
             patientOnboardedFlagId = "flagType",
@@ -156,8 +158,53 @@ class EpicOnboardFlagServiceTest {
             )
         } returns null
 
+        coEvery { epicPatientService.getPatient(any(), any()) } throws Exception()
         val error =
             assertThrows<VendorIdentifierNotFoundException> { (onboardFlagService.setOnboardedFlag(tenant, "fhirId")) }
         assertEquals("No Patient found for fhirId", error.message)
+    }
+
+    @Test
+    fun `service gets patient from Epic when EHRDA returns no patient`() {
+        coEvery {
+            ehrDataAuthorityClient.getResourceAs<Patient>(
+                "mnemonic",
+                "Patient",
+                "fhirId".localize(tenant)
+            )
+        } returns null
+
+        val setPatientResponse = SetSmartDataValuesResult(success = true)
+        val patientMRN = mockk<Identifier> {
+            every { value } returns FHIRString("123")
+        }
+        val patient = mockk<Patient> {
+            every { identifier } returns listOf(patientMRN)
+        }
+        coEvery { epicPatientService.getPatient(any(), any()) } returns patient
+        every { identifierService.getMRNIdentifier(tenant, listOf(patientMRN)) } returns patientMRN
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<SetSmartDataValuesResult>() } returns setPatientResponse
+        coEvery {
+            epicClient.put(
+                tenant,
+                "/api/epic/2013/Clinical/Utility/SETSMARTDATAVALUES/SmartData/Values",
+                SetSmartDataValuesRequest(
+                    id = "123",
+                    idType = "MRN",
+                    userID = "ehrUserId",
+                    smartDataValues = listOf(
+                        SmartDataValue(
+                            comments = listOf("Patient has been onboarded in Ronin."),
+                            values = listOf("onboarded"),
+                            smartDataID = "flagType",
+                            smartDataIDType = "SDI"
+                        )
+                    )
+                )
+            )
+        } returns ehrResponse
+
+        assertTrue(onboardFlagService.setOnboardedFlag(tenant, "fhirId"))
     }
 }
