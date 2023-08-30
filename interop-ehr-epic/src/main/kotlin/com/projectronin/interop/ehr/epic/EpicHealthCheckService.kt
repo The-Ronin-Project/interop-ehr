@@ -26,7 +26,7 @@ class EpicHealthCheckService(
         }
         try {
             runBlocking {
-                epicClient.options(tenant, "/")
+                epicClient.options(tenant, "/api/FHIR/R4/")
             }
         } catch (e: Exception) {
             logger.debug(e) { "Failed Patient search health check for ${tenant.mnemonic}" }

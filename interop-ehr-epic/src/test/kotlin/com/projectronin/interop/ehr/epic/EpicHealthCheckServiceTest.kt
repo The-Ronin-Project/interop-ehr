@@ -38,7 +38,7 @@ class EpicHealthCheckServiceTest {
     fun `patient service fails`() {
         every { authenticationService.getAuthentication(tenant, true) } returns mockk()
         coEvery {
-            epicClient.options(tenant, "/")
+            epicClient.options(tenant, "/api/FHIR/R4/")
         } throws Exception()
         assertFalse(healthCheckService.healthCheck(tenant))
     }
@@ -47,7 +47,7 @@ class EpicHealthCheckServiceTest {
     fun `health check works`() {
         every { authenticationService.getAuthentication(tenant, true) } returns mockk()
         coEvery {
-            epicClient.options(tenant, "/")
+            epicClient.options(tenant, "/api/FHIR/R4/")
         } returns mockk()
         assertTrue(healthCheckService.healthCheck(tenant))
     }
