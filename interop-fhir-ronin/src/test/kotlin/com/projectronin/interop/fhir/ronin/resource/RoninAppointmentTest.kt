@@ -35,6 +35,7 @@ import com.projectronin.interop.fhir.ronin.normalization.ConceptMapCoding
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
 import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 import com.projectronin.interop.fhir.util.asCode
@@ -113,7 +114,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -158,7 +159,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -211,7 +212,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -224,6 +225,50 @@ class RoninAppointmentTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: meta is a required element @ Appointment.meta",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate checks actor reference`() {
+        val appointment = Appointment(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(statusExtension("cancelled")),
+            status = AppointmentStatus.CANCELLED.asCode(),
+            participant = listOf(
+                Participant(
+                    actor = Reference(display = "Practitioner/actor".asFHIR()),
+                    status = ParticipationStatus.ACCEPTED.asCode()
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninAppointment.validate(appointment).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of Patient, PractitionerRole, Practitioner, Location, RelatedPerson, Device, HealthcareService @ Participant.actor\n" +
+                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Participant.actor.type",
             exception.message
         )
     }
@@ -254,7 +299,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -313,7 +358,7 @@ class RoninAppointmentTest {
             basedOn = listOf(Reference(display = "based on".asFHIR())),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
@@ -424,7 +469,7 @@ class RoninAppointmentTest {
         assertEquals(
             listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
@@ -441,7 +486,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -531,7 +576,7 @@ class RoninAppointmentTest {
         assertEquals(
             listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
@@ -580,7 +625,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -630,7 +675,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.BOOKED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -673,7 +718,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.PROPOSED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
@@ -724,7 +769,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -775,7 +820,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -830,7 +875,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -882,7 +927,7 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -925,7 +970,7 @@ class RoninAppointmentTest {
             status = Code(value = "abc"),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -994,7 +1039,7 @@ class RoninAppointmentTest {
             status = Code(value = "xyz"),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -1056,7 +1101,7 @@ class RoninAppointmentTest {
             status = Code(value = "cancelled"),
             participant = listOf(
                 Participant(
-                    actor = Reference(display = "actor".asFHIR()),
+                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )

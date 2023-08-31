@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.resource
 
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.resource.Appointment
+import com.projectronin.interop.fhir.r4.resource.Participant
 import com.projectronin.interop.fhir.r4.validate.resource.R4AppointmentValidator
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.ronin.RCDMVersion
@@ -16,6 +17,7 @@ import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.BaseRoninProfile
 import com.projectronin.interop.fhir.ronin.util.getCodedEnumOrNull
+import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -72,6 +74,18 @@ class RoninAppointment(
                     invalidAppointmentStatusExtensionError,
                     parentContext
                 )
+            }
+            // participant
+            val validActorValues = listOf("Patient", "PractitionerRole", "Practitioner", "Location", "RelatedPerson", "Device", "HealthcareService")
+            element.participant.forEach {
+                ifNotNull(it.actor) {
+                    validateReference(it.actor, validActorValues, LocationContext(Participant::actor), validation)
+                    requireDataAuthorityExtensionIdentifier(
+                        it.actor,
+                        LocationContext(Participant::actor),
+                        validation
+                    )
+                }
             }
         }
     }
