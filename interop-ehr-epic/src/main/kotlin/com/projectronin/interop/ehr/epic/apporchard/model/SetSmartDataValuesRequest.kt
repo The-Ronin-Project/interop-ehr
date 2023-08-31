@@ -25,5 +25,5 @@ data class SmartDataValue(
     val comments: List<String> = listOf(),
     val smartDataID: String,
     val smartDataIDType: String,
-    val values: List<String>
+    val values: String
 )

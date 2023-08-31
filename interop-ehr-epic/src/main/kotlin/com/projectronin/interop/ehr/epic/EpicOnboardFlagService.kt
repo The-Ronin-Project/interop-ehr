@@ -51,9 +51,9 @@ class EpicOnboardFlagService(
             smartDataValues = listOf(
                 SmartDataValue(
                     comments = listOf("Patient has been onboarded in Ronin."),
-                    values = listOf("onboarded"), // TODO: get real value, waiting on Epic
+                    values = "true",
                     smartDataID = flagType,
-                    smartDataIDType = "SDI" // TODO: get real value, waiting on Epic
+                    smartDataIDType = "SDI"
                 )
             )
         )
