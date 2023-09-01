@@ -29,6 +29,9 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4ConditionValidator
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.ConceptMapCodeableConcept
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.ronin.util.localizeReferenceTest
@@ -87,7 +90,23 @@ class RoninConditionProblemsAndHealthConcernsTest {
             )
         )
     )
-    private val profile = RoninConditionProblemsAndHealthConcerns(normalizer, localizer)
+    private val registry = mockk<NormalizationRegistryClient> {
+        every {
+            getConceptMapping(tenant, "Condition.code", any<CodeableConcept>(), any())
+        } returns ConceptMapCodeableConcept(
+            CodeableConcept(coding = problemCodingList),
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
+                value =
+                DynamicValue(
+                    DynamicValueType.CODEABLE_CONCEPT,
+                    value = CodeableConcept(coding = problemCodingList)
+                )
+            ),
+            emptyList()
+        )
+    }
+    private val profile = RoninConditionProblemsAndHealthConcerns(normalizer, localizer, registry, "")
 
     @Test
     fun `does not qualify when no categories`() {

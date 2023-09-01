@@ -30,6 +30,8 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4ConditionValidator
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.ConceptMapCodeableConcept
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
@@ -86,7 +88,23 @@ class RoninConditionEncounterDiagnosisTest {
             )
         )
     )
-    private val profile = RoninConditionEncounterDiagnosis(normalizer, localizer)
+    private val registry = mockk<NormalizationRegistryClient> {
+        every {
+            getConceptMapping(tenant, "Condition.code", any<CodeableConcept>(), any())
+        } returns ConceptMapCodeableConcept(
+            CodeableConcept(coding = diagnosisCodingList),
+            Extension(
+                url = RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri,
+                value =
+                DynamicValue(
+                    DynamicValueType.CODEABLE_CONCEPT,
+                    value = CodeableConcept(coding = diagnosisCodingList)
+                )
+            ),
+            emptyList()
+        )
+    }
+    private val profile = RoninConditionEncounterDiagnosis(normalizer, localizer, registry, "unmappedTenant")
 
     @Test
     fun `does not qualify when no categories`() {
@@ -1281,6 +1299,117 @@ class RoninConditionEncounterDiagnosisTest {
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
                     value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            transformed.identifier
+        )
+        assertNull(transformed.clinicalStatus)
+        assertNull(transformed.verificationStatus)
+        assertEquals(
+            listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            ),
+            transformed.category
+        )
+        assertNull(transformed.severity)
+        assertEquals(
+            CodeableConcept(
+                coding = diagnosisCodingList
+            ),
+            transformed.code
+        )
+        assertEquals(listOf<CodeableConcept>(), transformed.bodySite)
+        assertEquals(
+            Reference(
+                reference = "Patient/roninPatientExample01".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            transformed.subject
+        )
+        assertNull(transformed.encounter)
+        assertNull(transformed.onset)
+        assertNull(transformed.abatement)
+        assertNull(transformed.recordedDate)
+        assertNull(transformed.recorder)
+        assertNull(transformed.asserter)
+        assertEquals(listOf<ConditionStage>(), transformed.stage)
+        assertEquals(listOf<ConditionEvidence>(), transformed.evidence)
+        assertEquals(listOf<Annotation>(), transformed.note)
+    }
+
+    @Test
+    fun `unmapped tenant uses old logic`() {
+        val unmappedTenant = mockk<Tenant> {
+            every { mnemonic } returns "unmappedTenant"
+        }
+        every { normalizer.normalize(any(), unmappedTenant) } answers { firstArg() }
+        every { localizer.localize(any(), unmappedTenant) } answers { firstArg() }
+
+        val condition = Condition(
+            id = Id("12345"),
+            meta = Meta(source = Uri("source")),
+            identifier = listOf(
+                Identifier(value = "id".asFHIR())
+            ),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.CONDITION_CATEGORY.uri,
+                            code = Code("encounter-diagnosis")
+                        )
+                    )
+                )
+            ),
+            code = CodeableConcept(
+                coding = diagnosisCodingList
+            ),
+            subject = Reference(
+                reference = "Patient/roninPatientExample01".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
+        )
+
+        val (transformed, validation) = profile.transform(condition, unmappedTenant)
+        validation.alertIfErrors()
+
+        transformed!!
+        assertEquals("Condition", transformed.resourceType)
+        assertEquals(Id("12345"), transformed.id)
+        assertEquals(
+            Meta(profile = listOf(Canonical(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value)), source = Uri("source")),
+            transformed.meta
+        )
+        assertNull(transformed.implicitRules)
+        assertNull(transformed.language)
+        assertNull(transformed.text)
+        assertEquals(listOf<Resource<*>>(), transformed.contained)
+        assertEquals(listOf(conditionCodeExtension), transformed.extension)
+        assertEquals(listOf<Extension>(), transformed.modifierExtension)
+        assertEquals(
+            listOf(
+                Identifier(value = FHIRString("id")),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "unmappedTenant".asFHIR()
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,

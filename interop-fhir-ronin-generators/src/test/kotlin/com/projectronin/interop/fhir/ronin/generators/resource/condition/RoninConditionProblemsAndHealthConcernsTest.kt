@@ -57,7 +57,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
             } returns possibleConditionCodes
         }
 
-        roninConditionProblemsAndHealthConcerns = RoninConditionProblemsAndHealthConcerns(normalizer, localizer)
+        roninConditionProblemsAndHealthConcerns = RoninConditionProblemsAndHealthConcerns(normalizer, localizer, registry, "")
     }
 
     @Test

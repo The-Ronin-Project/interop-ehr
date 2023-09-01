@@ -18,6 +18,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
@@ -33,11 +34,16 @@ class BaseRoninConditionTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
+    private val unmappedTenant = mockk<Tenant> {
+        every { mnemonic } returns "unmappedTenant"
+    }
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
+        every { normalize(any(), unmappedTenant) } answers { firstArg() }
     }
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
+        every { localize(any(), unmappedTenant) } answers { firstArg() }
     }
     private val apnea = "1023001"
     private val diagnosisCode = Code(apnea)
@@ -60,7 +66,8 @@ class BaseRoninConditionTest {
             tenantDiagnosisConcept
         )
     )
-    private val roninCondition = RoninConditionEncounterDiagnosis(normalizer, localizer)
+    private val registry = mockk<NormalizationRegistryClient> {}
+    private val roninCondition = RoninConditionEncounterDiagnosis(normalizer, localizer, registry, "unmappedTenant,unmappedTenant2")
 
     @Test
     fun `validate fails if category is invalid`() {
@@ -213,7 +220,7 @@ class BaseRoninConditionTest {
             )
         )
 
-        val testRoninCondition = TestRoninCondition(normalizer, localizer)
+        val testRoninCondition = TestRoninCondition(normalizer, localizer, registry)
         testRoninCondition.validate(condition).alertIfErrors()
     }
 
@@ -262,7 +269,7 @@ class BaseRoninConditionTest {
             )
         )
 
-        val testRoninCondition = TestRoninConditionOpenCategory(normalizer, localizer)
+        val testRoninCondition = TestRoninConditionOpenCategory(normalizer, localizer, registry)
         testRoninCondition.validate(condition).alertIfErrors()
     }
 
@@ -311,7 +318,7 @@ class BaseRoninConditionTest {
             )
         )
 
-        val testRoninCondition = TestRoninCondition(normalizer, localizer)
+        val testRoninCondition = TestRoninCondition(normalizer, localizer, registry)
         val exception = assertThrows<IllegalArgumentException> {
             testRoninCondition.validate(condition, LocationContext(Condition::class)).alertIfErrors()
         }
@@ -327,11 +334,14 @@ class BaseRoninConditionTest {
 
     class TestRoninCondition(
         normalizer: Normalizer,
-        localizer: Localizer
+        localizer: Localizer,
+        registryClient: NormalizationRegistryClient
     ) :
         RoninConditionEncounterDiagnosis(
             normalizer,
-            localizer
+            localizer,
+            registryClient,
+            ""
         ) {
         override fun qualifyingCategories() = listOf(
             Coding(
@@ -347,11 +357,14 @@ class BaseRoninConditionTest {
 
     class TestRoninConditionOpenCategory(
         normalizer: Normalizer,
-        localizer: Localizer
+        localizer: Localizer,
+        registryClient: NormalizationRegistryClient
     ) :
         RoninConditionEncounterDiagnosis(
             normalizer,
-            localizer
+            localizer,
+            registryClient,
+            ""
         ) {
         override fun qualifyingCategories() = emptyList<Coding>()
     }

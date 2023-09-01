@@ -55,7 +55,7 @@ class RoninConditionEncounterDiagnosisTest {
             } returns possibleConditionCodes
         }
 
-        roninConditionEncounterDiagnosis = RoninConditionEncounterDiagnosis(normalizer, localizer)
+        roninConditionEncounterDiagnosis = RoninConditionEncounterDiagnosis(normalizer, localizer, registry, "")
     }
 
     @Test

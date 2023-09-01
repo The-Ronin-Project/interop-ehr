@@ -3,9 +3,11 @@ package com.projectronin.interop.fhir.ronin.resource.condition
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.resource.Condition
+import com.projectronin.interop.fhir.ronin.error.FailedConceptMapLookupError
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
@@ -27,7 +29,9 @@ abstract class BaseRoninCondition(
     extendedProfile: ProfileValidator<Condition>,
     profile: String,
     normalizer: Normalizer,
-    localizer: Localizer
+    localizer: Localizer,
+    protected val registryClient: NormalizationRegistryClient,
+    private val tenantsNotConditionMapped: String
 ) : USCoreBasedProfile<Condition>(extendedProfile, profile, normalizer, localizer) {
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
@@ -104,17 +108,51 @@ abstract class BaseRoninCondition(
         forceCacheReloadTS: LocalDateTime?
     ): Pair<Condition, Validation> {
         val validation = Validation()
+        if (tenant.mnemonic in tenantsNotConditionMapped) {
+            val tenantSourceConditionCode = getExtensionOrEmptyList(
+                RoninExtension.TENANT_SOURCE_CONDITION_CODE,
+                normalized.code
+            )
 
-        // TODO: apply concept maps to get Condition.code and extension
-        val tenantSourceConditionCode = getExtensionOrEmptyList(
-            RoninExtension.TENANT_SOURCE_CONDITION_CODE,
-            normalized.code
-        )
+            val mapped = normalized.copy(
+                extension = normalized.extension + tenantSourceConditionCode
+            )
+            return Pair(mapped, validation)
+        }
+        // Condition.code is a single CodeableConcept
+        val mappedCode = normalized.code?.let { code ->
+            val conditionCode = registryClient.getConceptMapping(
+                tenant,
+                "Condition.code",
+                code,
+                forceCacheReloadTS
+            )
+            // validate the mapping we got, use code value to report issues
+            validation.apply {
+                checkNotNull(
+                    conditionCode,
+                    FailedConceptMapLookupError(
+                        LocationContext(Condition::code),
+                        code.coding.mapNotNull { it.code?.value }
+                            .joinToString(", "),
+                        "any Condition.code concept map for tenant '${tenant.mnemonic}'",
+                        conditionCode?.metadata
+                    ),
+                    parentContext
+                )
+            }
+            conditionCode
+        }
 
-        val mapped = normalized.copy(
-            extension = normalized.extension + tenantSourceConditionCode
+        return Pair(
+            mappedCode?.let {
+                normalized.copy(
+                    code = it.codeableConcept,
+                    extension = normalized.extension + it.extension
+                )
+            } ?: normalized,
+            validation
         )
-        return Pair(mapped, validation)
     }
 
     private val requiredIdError = RequiredFieldError(Condition::id)
