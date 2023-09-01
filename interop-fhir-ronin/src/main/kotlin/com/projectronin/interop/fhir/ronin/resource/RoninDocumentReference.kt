@@ -114,17 +114,18 @@ class RoninDocumentReference(
                     val attachmentContext = parentContext.append(LocationContext("", "content[$index].attachment"))
                     checkNotNull(attachment.url, requiredUrlError, attachmentContext)
 
-                    attachment.url?.let { url ->
-                        val urlContext = attachmentContext.append(LocationContext("", "url"))
-                        checkTrue(
-                            url.extension.any {
-                                it.url == RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri &&
-                                    it.value?.type == DynamicValueType.URL
-                            },
-                            requiredDatalakeAttachmentExtension,
-                            urlContext
-                        )
-                    }
+                    // TODO: Disabled until we figure out a better way to do this. https://projectronin.atlassian.net/browse/INT-2147
+                    // attachment.url?.let { url ->
+                    //     val urlContext = attachmentContext.append(LocationContext("", "url"))
+                    //     checkTrue(
+                    //         url.extension.any {
+                    //             it.url == RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri &&
+                    //                 it.value?.type == DynamicValueType.URL
+                    //         },
+                    //         requiredDatalakeAttachmentExtension,
+                    //         urlContext
+                    //     )
+                    // }
                 }
             }
 

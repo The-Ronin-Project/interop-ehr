@@ -196,7 +196,7 @@ class EpicOnboardFlagServiceTest {
                     smartDataValues = listOf(
                         SmartDataValue(
                             comments = listOf("Patient has been onboarded in Ronin."),
-                            values = listOf("onboarded"),
+                            values = "true",
                             smartDataID = "flagType",
                             smartDataIDType = "SDI"
                         )

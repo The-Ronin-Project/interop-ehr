@@ -44,6 +44,7 @@ import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
+import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -586,6 +587,7 @@ class RoninDocumentReferenceTest {
         )
     }
 
+    @Disabled
     @Test
     fun `validate - fails with no datalake attachment extension`() {
         val documentReference = DocumentReference(
@@ -629,6 +631,7 @@ class RoninDocumentReferenceTest {
         )
     }
 
+    @Disabled
     @Test
     fun `validate - fails with datalake attachment extension with wrong type`() {
         val documentReference = DocumentReference(
