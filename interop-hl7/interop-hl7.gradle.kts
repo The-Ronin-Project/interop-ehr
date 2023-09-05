@@ -14,4 +14,5 @@ dependencies {
     implementation(libs.bundles.hl7v2)
 
     testImplementation(libs.mockk)
+    testImplementation("org.springframework:spring-test")
 }

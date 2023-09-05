@@ -43,7 +43,8 @@ class EpicOnboardFlagServiceTest {
         identifierService = mockk()
         ehrDataAuthorityClient = mockk()
         epicPatientService = mockk()
-        onboardFlagService = EpicOnboardFlagService(epicClient, identifierService, ehrDataAuthorityClient, epicPatientService)
+        onboardFlagService =
+            EpicOnboardFlagService(epicClient, identifierService, ehrDataAuthorityClient, epicPatientService)
         tenant = createTestTenant(
             "https://example.org",
             patientOnboardedFlagId = "flagType",

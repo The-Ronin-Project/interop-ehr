@@ -1,19 +1,9 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.common.vendor.VendorType
-import com.projectronin.interop.datalake.DatalakePublishService
-import com.projectronin.interop.datalake.oci.client.OCIClient
-import com.projectronin.interop.queue.QueueService
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
-import org.ktorm.database.Database
-import org.springframework.beans.factory.annotation.Qualifier
-import org.springframework.context.annotation.AnnotationConfigApplicationContext
-import org.springframework.context.annotation.Bean
-import org.springframework.context.annotation.ComponentScan
-import org.springframework.context.annotation.Configuration
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 
 class EpicVendorFactoryTest {
     private val appointmentService = mockk<EpicAppointmentService>()
@@ -62,35 +52,6 @@ class EpicVendorFactoryTest {
             documentReferenceService = documentReferenceService,
             binaryService = binaryService
         )
-
-    @Test
-    fun `is all wired for spring`() {
-        @Configuration
-        @ComponentScan("com.projectronin.interop", "com.projectronin.ehr")
-        class TestConfig() {
-            @Bean
-            @Qualifier("ehr")
-            fun ehrDatabase(): Database = mockk()
-
-            @Bean
-            @Qualifier("ConceptMap")
-            fun ociClient(): OCIClient = mockk()
-
-            @Bean
-            @Qualifier("datalake")
-            fun datalakePublishService(): DatalakePublishService = mockk()
-
-            @Bean
-            fun queueService(): QueueService = mockk()
-
-            fun taskExecutor(): ThreadPoolTaskExecutor = mockk(relaxed = true)
-        }
-
-        val applicationContext = AnnotationConfigApplicationContext(TestConfig::class.java)
-
-        // If the Vendor Factory and its dependencies are not wired, this will throw an UnsatisfiedDependencyException.
-        applicationContext.getBean(EpicVendorFactory::class.java)
-    }
 
     @Test
     fun `vendor type is epic`() {

@@ -2,9 +2,9 @@ package com.projectronin.interop.fhir.ronin.resource.base
 
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.ProfileQualifier
-import com.projectronin.interop.fhir.ronin.ProfileTransformer
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.transform.ProfileTransformer
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
 import com.projectronin.interop.fhir.validate.RequiredFieldError

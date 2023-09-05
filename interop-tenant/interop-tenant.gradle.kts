@@ -20,6 +20,7 @@ dependencies {
     testImplementation(libs.interop.commonTestDb)
 
     testImplementation(libs.mockk)
+    testImplementation("org.springframework:spring-test")
 
     testRuntimeOnly(libs.bundles.test.mysql)
 }

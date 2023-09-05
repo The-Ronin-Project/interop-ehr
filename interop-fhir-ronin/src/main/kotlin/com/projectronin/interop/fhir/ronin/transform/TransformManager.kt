@@ -1,4 +1,4 @@
-package com.projectronin.interop.fhir.ronin
+package com.projectronin.interop.fhir.ronin.transform
 
 import com.projectronin.interop.common.logmarkers.LogMarkers
 import com.projectronin.interop.fhir.r4.resource.Resource
@@ -21,7 +21,12 @@ class TransformManager(private val validationClient: ValidationClient) {
      * Issue Management Service. Pass in a timestamp to [forceCacheReloadTS] if this transform requires a fresh pull of
      * normalization data (concept maps + value sets).
      */
-    fun <T : Resource<T>> transformResource(resource: T, transformer: ProfileTransformer<T>, tenant: Tenant, forceCacheReloadTS: LocalDateTime? = null): T? {
+    fun <T : Resource<T>> transformResource(
+        resource: T,
+        transformer: ProfileTransformer<T>,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime? = null
+    ): T? {
         val (transformed, validation) = transformer.transform(resource, tenant, forceCacheReloadTS)
 
         if (validation.hasIssues()) {

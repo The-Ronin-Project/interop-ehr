@@ -33,4 +33,5 @@ dependencies {
 
     // Using MockWebservice to ensure we can verify the headers set by the ktor engine
     testImplementation(libs.mockwebserver)
+    testImplementation("org.springframework:spring-test")
 }
