@@ -30,7 +30,7 @@ class RoninObservation(
         localizer,
         registryClient
     ) {
-    override val rcdmVersion = RCDMVersion.V3_24_1
+    override val rcdmVersion = RCDMVersion.V3_26_1
     override val profileVersion = 4
 
     // RoninObservation is a catch all, so there are no explicit qualifying codes.

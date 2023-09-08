@@ -107,18 +107,42 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
         return validation
     }
 
+    private val requiredTelecomSystemWarning = FHIRError(
+        code = "RONIN_CNTCTPT_005",
+        severity = ValidationIssueSeverity.WARNING,
+        description = "telecom filtered for no system",
+        location = LocationContext(ContactPoint::system)
+    )
+    private val requiredTelecomValueWarning = FHIRError(
+        code = "RONIN_CNTCTPT_006",
+        severity = ValidationIssueSeverity.WARNING,
+        description = "telecom filtered for no value",
+        location = LocationContext(ContactPoint::value)
+    )
+
     fun transform(
         element: List<ContactPoint>,
         tenant: Tenant,
         parentContext: LocationContext,
         validation: Validation,
         forceCacheReloadTS: LocalDateTime? = null
-    ): Pair<List<ContactPoint>?, Validation> {
+    ): Pair<List<ContactPoint>, Validation> {
         val systemMapName = RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "ContactPoint.system")
         val useMapName = RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "ContactPoint.use")
-        val transformed = element.mapIndexed { index, telecom ->
-            val systemContext = LocationContext(parentContext.element, "telecom[$index].system")
-            val mappedSystem = telecom.system?.value?.let { systemValue ->
+        val transformed = element.mapIndexedNotNull { index, contactPoint ->
+            val telecomContext = parentContext.append(LocationContext("", "telecom[$index]"))
+
+            if (contactPoint.value == null) {
+                validation.checkTrue(false, requiredTelecomValueWarning, telecomContext)
+                return@mapIndexedNotNull null
+            }
+            if (contactPoint.system == null) {
+                validation.checkTrue(false, requiredTelecomSystemWarning, telecomContext)
+                return@mapIndexedNotNull null
+            }
+
+            val systemContext = telecomContext.append(LocationContext(ContactPoint::system))
+            val mappedSystem = contactPoint.system?.value?.let { systemValue ->
                 val systemCode = registryClient.getConceptMappingForEnum(
                     tenant,
                     "${parentContext.element}.telecom.system",
@@ -130,26 +154,38 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                 validation.apply {
                     checkNotNull(
                         systemCode,
-                        FailedConceptMapLookupError(systemContext, systemValue, systemMapName, systemCode?.metadata),
+                        FailedConceptMapLookupError(
+                            systemContext,
+                            systemValue,
+                            systemMapName,
+                            systemCode?.metadata
+                        ),
                         parentContext
                     )
                 }
                 if (systemCode == null) {
-                    telecom.system
+                    contactPoint.system
                 } else {
                     val systemTarget = systemCode.coding.code?.value
                     validation.apply {
                         checkNotNull(
                             getCodedEnumOrNull<ContactPointSystem>(systemTarget),
-                            ConceptMapInvalidValueSetError(systemContext, systemMapName, systemValue, systemTarget, systemCode.metadata),
+                            ConceptMapInvalidValueSetError(
+                                systemContext,
+                                systemMapName,
+                                systemValue,
+                                systemTarget,
+                                systemCode.metadata
+                            ),
                             parentContext
                         )
                     }
                     Code(value = systemTarget, extension = listOf(systemCode.extension))
                 }
             }
-            val useContext = LocationContext(parentContext.element, "telecom[$index].use")
-            val mappedUse = telecom.use?.value?.let { useValue ->
+
+            val useContext = telecomContext.append(LocationContext(ContactPoint::use))
+            val mappedUse = contactPoint.use?.value?.let { useValue ->
                 val useCode = registryClient.getConceptMappingForEnum(
                     tenant,
                     "${parentContext.element}.telecom.use",
@@ -166,29 +202,28 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                     )
                 }
                 if (useCode == null) {
-                    telecom.use
+                    contactPoint.use
                 } else {
                     val useTarget = useCode.coding.code?.value
                     validation.apply {
                         checkNotNull(
                             getCodedEnumOrNull<ContactPointUse>(useTarget),
-                            ConceptMapInvalidValueSetError(useContext, useMapName, useValue, useTarget, useCode.metadata),
+                            ConceptMapInvalidValueSetError(
+                                useContext,
+                                useMapName,
+                                useValue,
+                                useTarget,
+                                useCode.metadata
+                            ),
                             parentContext
                         )
                     }
                     Code(value = useTarget, extension = listOf(useCode.extension))
                 }
             }
-            ContactPoint(
-                id = telecom.id,
-                extension = telecom.extension,
-                system = mappedSystem,
-                value = telecom.value,
-                use = mappedUse,
-                rank = telecom.rank,
-                period = telecom.period
-            )
+            contactPoint.copy(system = mappedSystem, use = mappedUse)
         }
+
         return Pair(transformed, validation)
     }
 }

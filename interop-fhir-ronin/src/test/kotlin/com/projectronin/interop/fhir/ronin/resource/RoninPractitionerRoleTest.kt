@@ -16,6 +16,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
@@ -26,8 +27,8 @@ import com.projectronin.interop.fhir.r4.resource.PractitionerRole
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerRoleValidator
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
-import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
+import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
@@ -40,6 +41,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -57,7 +59,17 @@ class RoninPractitionerRoleTest {
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
-    private val roninPractitionerRole = RoninPractitionerRole(normalizer, localizer)
+    private val roninContactPoint = mockk<RoninContactPoint> {
+        every { validateRonin(any(), LocationContext(PractitionerRole::class), any()) } answers { thirdArg() }
+        every { validateUSCore(any(), LocationContext(PractitionerRole::class), any()) } answers { thirdArg() }
+        every { transform(any(), tenant, LocationContext(PractitionerRole::class), any(), any()) } answers {
+            Pair(
+                firstArg(),
+                arg(3)
+            )
+        }
+    }
+    private val roninPractitionerRole = RoninPractitionerRole(normalizer, localizer, roninContactPoint)
 
     @Test
     fun `always qualifies`() {
@@ -120,87 +132,6 @@ class RoninPractitionerRoleTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: practitioner is a required element @ PractitionerRole.practitioner",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails for no telecom value`() {
-        val practitionerRole = PractitionerRole(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
-            organization = Reference(reference = "Organization/5678".asFHIR()),
-            telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode()))
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninPractitionerRole.validate(practitionerRole).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: value is a required element @ PractitionerRole.telecom[0].value",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails for multiple invalid telecoms`() {
-        val practitionerRole = PractitionerRole(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
-            organization = Reference(reference = "Organization/5678".asFHIR()),
-            telecom = listOf(
-                ContactPoint(use = ContactPointUse.HOME.asCode()),
-                ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "josh@projectronin.com".asFHIR()),
-                ContactPoint(system = ContactPointSystem.PHONE.asCode())
-            )
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninPractitionerRole.validate(practitionerRole).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: value is a required element @ PractitionerRole.telecom[0].value\n" +
-                "ERROR REQ_FIELD: value is a required element @ PractitionerRole.telecom[2].value",
             exception.message
         )
     }
@@ -292,6 +223,54 @@ class RoninPractitionerRoleTest {
                 "ERROR REQ_FIELD: meta is a required element @ PractitionerRole.meta",
             exception.message
         )
+    }
+
+    @Test
+    fun `validate checks telecom if provided`() {
+        val telecoms = listOf(
+            ContactPoint(system = Code("email"), value = FHIRString("value"))
+        )
+        val practitionerRole = PractitionerRole(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
+            organization = Reference(reference = "Organization/5678".asFHIR()),
+            telecom = telecoms
+        )
+
+        roninPractitionerRole.validate(practitionerRole).alertIfErrors()
+
+        verify(exactly = 1) {
+            roninContactPoint.validateRonin(
+                telecoms,
+                LocationContext(PractitionerRole::class),
+                any()
+            )
+        }
+        verify(exactly = 1) {
+            roninContactPoint.validateUSCore(
+                telecoms,
+                LocationContext(PractitionerRole::class),
+                any()
+            )
+        }
     }
 
     @Test
@@ -593,134 +572,75 @@ class RoninPractitionerRoleTest {
 
     @Test
     fun `transforms practitioner role with all telecoms filtered`() {
+        val initialTelecoms = listOf(ContactPoint(id = "first".asFHIR()), ContactPoint(id = "second".asFHIR()))
+        every {
+            roninContactPoint.transform(
+                initialTelecoms,
+                tenant,
+                LocationContext(PractitionerRole::class),
+                any(),
+                any()
+            )
+        } answers {
+            Pair(
+                emptyList(),
+                arg(3)
+            )
+        }
+
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
             meta = Meta(source = Uri("source")),
             practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
             organization = Reference(reference = "Organization/5678".asFHIR()),
-            telecom = listOf(ContactPoint(id = "first".asFHIR()), ContactPoint(id = "second".asFHIR()))
+            telecom = initialTelecoms
         )
 
         val (transformed, validation) = roninPractitionerRole.transform(practitionerRole, tenant)
         validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
-        assertEquals("PractitionerRole", transformed.resourceType)
-        assertEquals(Id("12345"), transformed.id)
-        assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
-            transformed.meta
-        )
-        assertNull(transformed.implicitRules)
-        assertNull(transformed.language)
-        assertNull(transformed.text)
-        assertEquals(listOf<Resource<*>>(), transformed.contained)
-        assertEquals(listOf<Extension>(), transformed.extension)
-        assertEquals(listOf<Extension>(), transformed.modifierExtension)
-        assertEquals(
-            listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            transformed.identifier
-        )
-        assertNull(transformed.active)
-        assertNull(transformed.period)
-        assertEquals(Reference(reference = "Practitioner/1234".asFHIR()), transformed.practitioner)
-        assertEquals(Reference(reference = "Organization/5678".asFHIR()), transformed.organization)
-        assertEquals(listOf<CodeableConcept>(), transformed.code)
-        assertEquals(listOf<CodeableConcept>(), transformed.specialty)
-        assertEquals(listOf<Reference>(), transformed.location)
-        assertEquals(listOf<Reference>(), transformed.healthcareService)
         assertEquals(listOf<ContactPoint>(), transformed.telecom)
-        assertEquals(listOf<AvailableTime>(), transformed.availableTime)
-        assertEquals(listOf<NotAvailable>(), transformed.notAvailable)
-        assertNull(transformed.availabilityExceptions)
-        assertEquals(listOf<Reference>(), transformed.endpoint)
     }
 
     @Test
     fun `transforms practitioner role with some telecoms filtered`() {
+        val initialTelecoms = listOf(
+            ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
+            ContactPoint(id = "second".asFHIR()),
+            ContactPoint(id = "third".asFHIR()),
+            ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR())
+        )
+        val finalTelecoms = listOf(
+            ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
+            ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR())
+        )
+        every {
+            roninContactPoint.transform(
+                initialTelecoms,
+                tenant,
+                LocationContext(PractitionerRole::class),
+                any(),
+                any()
+            )
+        } answers {
+            Pair(
+                finalTelecoms,
+                arg(3)
+            )
+        }
         val practitionerRole = PractitionerRole(
             id = Id("12345"),
             meta = Meta(source = Uri("source")),
             practitioner = Reference(reference = "Practitioner/1234".asFHIR()),
             organization = Reference(reference = "Organization/5678".asFHIR()),
-            telecom = listOf(
-                ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
-                ContactPoint(id = "second".asFHIR()),
-                ContactPoint(id = "third".asFHIR()),
-                ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR())
-            )
+            telecom = initialTelecoms
         )
 
         val (transformed, validation) = roninPractitionerRole.transform(practitionerRole, tenant)
         validation.alertIfErrors()
 
         transformed!! // Force it to be treated as non-null
-        assertEquals("PractitionerRole", transformed.resourceType)
-        assertEquals(Id("12345"), transformed.id)
-        assertEquals(
-            Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER_ROLE.value)), source = Uri("source")),
-            transformed.meta
-        )
-        assertNull(transformed.implicitRules)
-        assertNull(transformed.language)
-        assertNull(transformed.text)
-        assertEquals(listOf<Resource<*>>(), transformed.contained)
-        assertEquals(listOf<Extension>(), transformed.extension)
-        assertEquals(listOf<Extension>(), transformed.modifierExtension)
-        assertEquals(
-            listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            transformed.identifier
-        )
-        assertNull(transformed.active)
-        assertNull(transformed.period)
-        assertEquals(Reference(reference = "Practitioner/1234".asFHIR()), transformed.practitioner)
-        assertEquals(Reference(reference = "Organization/5678".asFHIR()), transformed.organization)
-        assertEquals(listOf<CodeableConcept>(), transformed.code)
-        assertEquals(listOf<CodeableConcept>(), transformed.specialty)
-        assertEquals(listOf<Reference>(), transformed.location)
-        assertEquals(listOf<Reference>(), transformed.healthcareService)
-        assertEquals(
-            listOf(
-                ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
-                ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR())
-            ),
-            transformed.telecom
-        )
-        assertEquals(listOf<AvailableTime>(), transformed.availableTime)
-        assertEquals(listOf<NotAvailable>(), transformed.notAvailable)
-        assertNull(transformed.availabilityExceptions)
-        assertEquals(listOf<Reference>(), transformed.endpoint)
+        assertEquals(finalTelecoms, transformed.telecom)
     }
 }

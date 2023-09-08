@@ -23,9 +23,12 @@ import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
+import io.mockk.Called
 import io.mockk.every
 import io.mockk.mockk
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertFalse
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
@@ -89,6 +92,46 @@ class RoninContactPointTest {
     }
 
     @Test
+    fun `validateUSCore fails for missing system`() {
+        val telecom =
+            listOf(ContactPoint(system = null, value = emailValue))
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninContactPoint.validateUSCore(telecom, LocationContext(CareTeam::class), Validation()).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: system is a required element @ CareTeam.telecom[0].system",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validateUSCore fails for missing value`() {
+        val telecom =
+            listOf(ContactPoint(system = Code(value = emailSystemValue), value = null))
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninContactPoint.validateUSCore(telecom, LocationContext(CareTeam::class), Validation()).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: value is a required element @ CareTeam.telecom[0].value",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validateUSCore succeeds`() {
+        val telecom =
+            listOf(ContactPoint(system = Code(value = emailSystemValue), value = emailValue))
+
+        roninContactPoint.validateUSCore(telecom, LocationContext(CareTeam::class), Validation()).alertIfErrors()
+    }
+
+    @Test
     fun `validate fails for telecom system missing source extension`() {
         val telecom =
             listOf(ContactPoint(system = Code(value = emailSystemValue), use = emailUse, value = emailValue))
@@ -131,6 +174,44 @@ class RoninContactPointTest {
                 "ERROR RONIN_CNTCTPT_002: Tenant source telecom system extension is defined without proper URL @ Organization.telecom[0].system",
             exception.message
         )
+    }
+
+    @Test
+    fun `transform filters out and returns warning when no value`() {
+        roninContactPoint = RoninContactPoint(registryClient)
+        val telecom = listOf(ContactPoint(system = Code("abc"), value = null))
+
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        assertEquals(0, transformResult.first!!.size)
+
+        val validation = transformResult.second
+        assertFalse(validation.hasErrors())
+        assertTrue(validation.hasIssues())
+
+        val issues = validation.issues()
+        assertEquals("RONIN_CNTCTPT_006", issues.first().code)
+
+        verify { registryClient wasNot Called }
+    }
+
+    @Test
+    fun `transform filters out and returns warning when no system`() {
+        roninContactPoint = RoninContactPoint(registryClient)
+        val telecom = listOf(ContactPoint(system = null, value = "8675309".asFHIR()))
+
+        val transformResult =
+            roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), Validation())
+        assertEquals(0, transformResult.first!!.size)
+
+        val validation = transformResult.second
+        assertFalse(validation.hasErrors())
+        assertTrue(validation.hasIssues())
+
+        val issues = validation.issues()
+        assertEquals("RONIN_CNTCTPT_005", issues.first().code)
+
+        verify { registryClient wasNot Called }
     }
 
     @Test

@@ -18,6 +18,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
@@ -29,6 +30,7 @@ import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerValidato
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
+import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
@@ -41,6 +43,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -58,7 +61,17 @@ class RoninPractitionerTest {
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
-    private val roninPractitioner = RoninPractitioner(normalizer, localizer)
+    private val roninContactPoint = mockk<RoninContactPoint> {
+        every { validateRonin(any(), LocationContext(Practitioner::class), any()) } answers { thirdArg() }
+        every { validateUSCore(any(), LocationContext(Practitioner::class), any()) } answers { thirdArg() }
+        every { transform(any(), tenant, LocationContext(Practitioner::class), any(), any()) } answers {
+            Pair(
+                firstArg(),
+                arg(3)
+            )
+        }
+    }
+    private val roninPractitioner = RoninPractitioner(normalizer, localizer, roninContactPoint)
 
     @Test
     fun `always qualifies`() {
@@ -287,6 +300,53 @@ class RoninPractitionerTest {
     }
 
     @Test
+    fun `validate checks telecom if provided`() {
+        val telecoms = listOf(
+            ContactPoint(system = Code("email"), value = FHIRString("value"))
+        )
+        val practitioner = Practitioner(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
+            telecom = telecoms
+        )
+
+        roninPractitioner.validate(practitioner).alertIfErrors()
+
+        verify(exactly = 1) {
+            roninContactPoint.validateRonin(
+                telecoms,
+                LocationContext(Practitioner::class),
+                any()
+            )
+        }
+        verify(exactly = 1) {
+            roninContactPoint.validateUSCore(
+                telecoms,
+                LocationContext(Practitioner::class),
+                any()
+            )
+        }
+    }
+
+    @Test
     fun `validate succeeds`() {
         val practitioner = Practitioner(
             id = Id("12345"),
@@ -484,5 +544,77 @@ class RoninPractitionerTest {
         assertEquals(listOf<Attachment>(), transformed.photo)
         assertEquals(listOf<Qualification>(), transformed.qualification)
         assertEquals(listOf<CodeableConcept>(), transformed.communication)
+    }
+
+    @Test
+    fun `transforms practitioner with all telecoms filtered`() {
+        val initialTelecoms = listOf(ContactPoint(id = "first".asFHIR()), ContactPoint(id = "second".asFHIR()))
+        every {
+            roninContactPoint.transform(
+                initialTelecoms,
+                tenant,
+                LocationContext(Practitioner::class),
+                any(),
+                any()
+            )
+        } answers {
+            Pair(
+                emptyList(),
+                arg(3)
+            )
+        }
+
+        val practitioner = Practitioner(
+            id = Id("12345"),
+            meta = Meta(source = Uri("source")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
+            telecom = initialTelecoms
+        )
+
+        val (transformed, validation) = roninPractitioner.transform(practitioner, tenant)
+        validation.alertIfErrors()
+
+        transformed!! // Force it to be treated as non-null
+        assertEquals(listOf<ContactPoint>(), transformed.telecom)
+    }
+
+    @Test
+    fun `transforms practitioner with some telecoms filtered`() {
+        val initialTelecoms = listOf(
+            ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
+            ContactPoint(id = "second".asFHIR()),
+            ContactPoint(id = "third".asFHIR()),
+            ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR())
+        )
+        val finalTelecoms = listOf(
+            ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
+            ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR())
+        )
+        every {
+            roninContactPoint.transform(
+                initialTelecoms,
+                tenant,
+                LocationContext(Practitioner::class),
+                any(),
+                any()
+            )
+        } answers {
+            Pair(
+                finalTelecoms,
+                arg(3)
+            )
+        }
+        val practitioner = Practitioner(
+            id = Id("12345"),
+            meta = Meta(source = Uri("source")),
+            name = listOf(HumanName(family = "Doe".asFHIR())),
+            telecom = initialTelecoms
+        )
+
+        val (transformed, validation) = roninPractitioner.transform(practitioner, tenant)
+        validation.alertIfErrors()
+
+        transformed!! // Force it to be treated as non-null
+        assertEquals(finalTelecoms, transformed.telecom)
     }
 }

@@ -1,20 +1,17 @@
 package com.projectronin.interop.fhir.ronin.resource
 
-import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.resource.PractitionerRole
 import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerRoleValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
+import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
-import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
-import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
-import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
 import java.time.LocalDateTime
@@ -23,7 +20,11 @@ import java.time.LocalDateTime
  * Validator and Transformer for the Ronin [OncologyPractitionerRole](https://crispy-carnival-61996e6e.pages.github.io/StructureDefinition-oncology-practitionerrole.html) profile.
  */
 @Component
-class RoninPractitionerRole(normalizer: Normalizer, localizer: Localizer) : USCoreBasedProfile<PractitionerRole>(
+class RoninPractitionerRole(
+    normalizer: Normalizer,
+    localizer: Localizer,
+    private val roninContactPoint: RoninContactPoint
+) : USCoreBasedProfile<PractitionerRole>(
     R4PractitionerRoleValidator,
     RoninProfile.PRACTITIONER_ROLE.value,
     normalizer,
@@ -41,33 +42,18 @@ class RoninPractitionerRole(normalizer: Normalizer, localizer: Localizer) : USCo
             containedResourcePresent(element.contained, parentContext, validation)
 
             checkNotNull(element.practitioner, requiredPractitionerError, parentContext)
-        }
-    }
 
-    private val requiredTelecomValueError = RequiredFieldError(ContactPoint::value)
-
-    override fun validateUSCore(element: PractitionerRole, parentContext: LocationContext, validation: Validation) {
-        validation.apply {
-            element.telecom.forEachIndexed { index, contactPoint ->
-                val currentContext = parentContext.append(LocationContext("PractitionerRole", "telecom[$index]"))
-                // R4ContactPoint already verifies that a system is present if a value is present, so just checking value here.
-                checkNotNull(contactPoint.value, requiredTelecomValueError, currentContext)
+            if (element.telecom.isNotEmpty()) {
+                roninContactPoint.validateRonin(element.telecom, parentContext, this)
             }
         }
     }
 
-    private val requiredTelecomSystemWarning = FHIRError(
-        code = "USCORE_PRACRL_001",
-        severity = ValidationIssueSeverity.WARNING,
-        description = "telecom filtered for no system",
-        location = LocationContext(ContactPoint::system)
-    )
-    private val requiredTelecomValueWarning = FHIRError(
-        code = "USCORE_PRACRL_002",
-        severity = ValidationIssueSeverity.WARNING,
-        description = "telecom filtered for no value",
-        location = LocationContext(ContactPoint::value)
-    )
+    override fun validateUSCore(element: PractitionerRole, parentContext: LocationContext, validation: Validation) {
+        if (element.telecom.isNotEmpty()) {
+            roninContactPoint.validateUSCore(element.telecom, parentContext, validation)
+        }
+    }
 
     override fun transformInternal(
         normalized: PractitionerRole,
@@ -77,22 +63,14 @@ class RoninPractitionerRole(normalizer: Normalizer, localizer: Localizer) : USCo
     ): Pair<PractitionerRole?, Validation> {
         val validation = Validation()
 
-        val invalidTelecoms = normalized.telecom.filterIndexed { index, contactPoint ->
-            val nullSystem = contactPoint.system == null
-            val nullValue = contactPoint.value == null
-
-            validation.apply {
-                val currentContext = parentContext.append(LocationContext("PractitionerRole", "telecom[$index]"))
-                checkTrue(!nullSystem, requiredTelecomSystemWarning, currentContext)
-                checkTrue(!nullValue, requiredTelecomValueWarning, currentContext)
+        val telecoms =
+            roninContactPoint.transform(normalized.telecom, tenant, parentContext, validation, forceCacheReloadTS).let {
+                validation.merge(it.second)
+                it.first
             }
 
-            nullSystem || nullValue
-        }.toSet()
-
-        val telecoms = normalized.telecom - invalidTelecoms
-        if (invalidTelecoms.isNotEmpty()) {
-            logger.info { "${invalidTelecoms.size} telecoms removed from PractitionerRole ${normalized.id} due to missing system and/or value" }
+        if (telecoms.size != normalized.telecom.size) {
+            logger.info { "${normalized.telecom.size - telecoms.size} telecoms removed from PractitionerRole ${normalized.id?.value} due to failed transformations" }
         }
 
         val transformed = normalized.copy(

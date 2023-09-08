@@ -198,10 +198,15 @@ class RoninPatient(
             normalized.gender!!.extension
         )
         val validation = Validation()
-        val contactPointTransformed = if (normalized.telecom.isNotEmpty()) {
-            contactPoint.transform(normalized.telecom, tenant, LocationContext(Patient::class), validation, forceCacheReloadTS)
-        } else {
-            Pair(normalized.telecom, validation)
+
+        val telecoms =
+            contactPoint.transform(normalized.telecom, tenant, parentContext, validation, forceCacheReloadTS).let {
+                validation.merge(it.second)
+                it.first
+            }
+
+        if (telecoms.size != normalized.telecom.size) {
+            logger.info { "${normalized.telecom.size - telecoms.size} telecoms removed from Patient ${normalized.id?.value} due to failed transformations" }
         }
 
         val normalizedIdentifiers = normalizeIdentifierSystems(normalized.identifier)
@@ -214,9 +219,9 @@ class RoninPatient(
                 tenant
             ) + dataAuthorityIdentifier,
             maritalStatus = maritalStatus,
-            telecom = contactPointTransformed.first ?: emptyList()
+            telecom = telecoms
         )
-        return Pair(transformed, contactPointTransformed.second)
+        return Pair(transformed, validation)
     }
 
     /**

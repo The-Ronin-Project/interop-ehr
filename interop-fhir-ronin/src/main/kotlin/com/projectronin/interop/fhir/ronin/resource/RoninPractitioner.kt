@@ -4,6 +4,7 @@ import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.validate.resource.R4PractitionerValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
+import com.projectronin.interop.fhir.ronin.element.RoninContactPoint
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
@@ -21,7 +22,11 @@ import java.time.LocalDateTime
  * Validator and Transformer for the Ronin Practitioner profile.
  */
 @Component
-class RoninPractitioner(normalizer: Normalizer, localizer: Localizer) :
+class RoninPractitioner(
+    normalizer: Normalizer,
+    localizer: Localizer,
+    private val roninContactPoint: RoninContactPoint
+) :
     USCoreBasedProfile<Practitioner>(R4PractitionerValidator, RoninProfile.PRACTITIONER.value, normalizer, localizer) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
@@ -32,8 +37,9 @@ class RoninPractitioner(normalizer: Normalizer, localizer: Localizer) :
             requireRoninIdentifiers(element.identifier, parentContext, this)
             containedResourcePresent(element.contained, parentContext, validation)
 
-            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG and consider requireCodeableConcept()
-            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG and consider requireCodeableConcept()
+            if (element.telecom.isNotEmpty()) {
+                roninContactPoint.validateRonin(element.telecom, parentContext, validation)
+            }
         }
     }
 
@@ -51,20 +57,10 @@ class RoninPractitioner(normalizer: Normalizer, localizer: Localizer) :
 
             // A practitioner identifier is also required, but Ronin has already checked for identifiers we provide.
 
-            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG re: requireCode() for telecom.system
-            // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG re: requireCode() for telecom.use
+            if (element.telecom.isNotEmpty()) {
+                roninContactPoint.validateUSCore(element.telecom, parentContext, validation)
+            }
         }
-    }
-
-    override fun conceptMap(
-        normalized: Practitioner,
-        parentContext: LocationContext,
-        tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
-    ): Pair<Practitioner, Validation> {
-        // TODO: RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM, check Ronin IG re: extension, concept maps for telecom.status
-        // TODO: RoninExtension.TENANT_SOURCE_TELECOM_USE, check Ronin IG re: extension, concept maps for telecom.use
-        return Pair(normalized, Validation())
     }
 
     override fun transformInternal(
@@ -73,10 +69,23 @@ class RoninPractitioner(normalizer: Normalizer, localizer: Localizer) :
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
     ): Pair<Practitioner?, Validation> {
+        val validation = Validation()
+
+        val telecoms =
+            roninContactPoint.transform(normalized.telecom, tenant, parentContext, validation, forceCacheReloadTS).let {
+                validation.merge(it.second)
+                it.first
+            }
+
+        if (telecoms.size != normalized.telecom.size) {
+            logger.info { "${normalized.telecom.size - telecoms.size} telecoms removed from Practitioner ${normalized.id?.value} due to failed transformations" }
+        }
+
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
+            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant),
+            telecom = telecoms
         )
-        return Pair(transformed, Validation())
+        return Pair(transformed, validation)
     }
 }

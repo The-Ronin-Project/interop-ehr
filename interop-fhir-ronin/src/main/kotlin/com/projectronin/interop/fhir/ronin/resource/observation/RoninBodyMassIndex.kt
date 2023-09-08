@@ -29,8 +29,8 @@ class RoninBodyMassIndex(
         localizer,
         registryClient
     ) {
-    override val rcdmVersion = RCDMVersion.V3_24_1
-    override val profileVersion = 2
+    override val rcdmVersion = RCDMVersion.V3_26_1
+    override val profileVersion = 3
 
     // Quantity unit codes
     override val validQuantityCodes = listOf("kg/m2")

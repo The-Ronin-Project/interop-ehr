@@ -40,6 +40,7 @@ import com.projectronin.interop.fhir.r4.resource.PatientLink
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.validate.resource.R4PatientValidator
 import com.projectronin.interop.fhir.r4.valueset.AdministrativeGender
+import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.IdentifierUse
 import com.projectronin.interop.fhir.r4.valueset.LinkType
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
@@ -58,6 +59,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
+import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
@@ -94,6 +96,12 @@ class RoninPatientTest {
         roninContactPoint = mockk {
             every { validateRonin(any(), LocationContext(Patient::class), any()) } answers { thirdArg() }
             every { validateUSCore(any(), LocationContext(Patient::class), any()) } answers { thirdArg() }
+            every { transform(any(), tenant, LocationContext(Patient::class), any(), any()) } answers {
+                Pair(
+                    firstArg(),
+                    arg(3)
+                )
+            }
         }
         normalizer = mockk {
             every { normalize(any(), tenant) } answers { firstArg() }
@@ -1299,6 +1307,73 @@ class RoninPatientTest {
     }
 
     @Test
+    fun `validate checks telecom if provided`() {
+        val telecoms = listOf(
+            ContactPoint(system = Code("email"), value = FHIRString("value"))
+        )
+        val patient = Patient(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.PATIENT.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_MRN,
+                    system = CodeSystem.RONIN_MRN.uri,
+                    value = "An MRN".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                ),
+                Identifier(
+                    use = IdentifierUse.USUAL.asCode(),
+                    system = Uri("urn:oid:2.16.840.1.113883.4.1"),
+                    value = FHIRString(
+                        value = null,
+                        extension = listOf(
+                            Extension(
+                                url = Uri("http://hl7.org/fhir/StructureDefinition/rendered-value"),
+                                value = DynamicValue(DynamicValueType.STRING, "xxx-xx-1234".asFHIR())
+                            )
+                        )
+                    )
+                )
+            ),
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05"),
+            telecom = telecoms
+        )
+
+        roninPatient.validate(patient).alertIfErrors()
+
+        verify(exactly = 1) {
+            roninContactPoint.validateRonin(
+                telecoms,
+                LocationContext(Patient::class),
+                any()
+            )
+        }
+        verify(exactly = 1) {
+            roninContactPoint.validateUSCore(
+                telecoms,
+                LocationContext(Patient::class),
+                any()
+            )
+        }
+    }
+
+    @Test
     fun `validate succeeds for identifier with value extension`() {
         val patient = Patient(
             id = Id("12345"),
@@ -1566,6 +1641,84 @@ class RoninPatientTest {
                 "ERROR RONIN_PAT_004: Birth date is invalid @ Patient.birthDate",
             exception.message
         )
+    }
+
+    @Test
+    fun `transforms practitioner role with all telecoms filtered`() {
+        val initialTelecoms = listOf(ContactPoint(id = "first".asFHIR()), ContactPoint(id = "second".asFHIR()))
+        every {
+            roninContactPoint.transform(
+                initialTelecoms,
+                tenant,
+                LocationContext(Patient::class),
+                any(),
+                any()
+            )
+        } answers {
+            Pair(
+                emptyList(),
+                arg(3)
+            )
+        }
+
+        val patient = Patient(
+            id = Id("12345"),
+            meta = Meta(source = Uri("source")),
+            identifier = identifierList,
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05"),
+            telecom = initialTelecoms
+        )
+
+        val (transformed, validation) = roninPatient.transform(patient, tenant)
+        validation.alertIfErrors()
+
+        transformed!! // Force it to be treated as non-null
+        assertEquals(listOf<ContactPoint>(), transformed.telecom)
+    }
+
+    @Test
+    fun `transforms practitioner role with some telecoms filtered`() {
+        val initialTelecoms = listOf(
+            ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
+            ContactPoint(id = "second".asFHIR()),
+            ContactPoint(id = "third".asFHIR()),
+            ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR())
+        )
+        val finalTelecoms = listOf(
+            ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
+            ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR())
+        )
+        every {
+            roninContactPoint.transform(
+                initialTelecoms,
+                tenant,
+                LocationContext(Patient::class),
+                any(),
+                any()
+            )
+        } answers {
+            Pair(
+                finalTelecoms,
+                arg(3)
+            )
+        }
+        val patient = Patient(
+            id = Id("12345"),
+            meta = Meta(source = Uri("source")),
+            identifier = identifierList,
+            name = listOf(HumanName(family = "Doe".asFHIR(), use = Code("official"))),
+            gender = AdministrativeGender.FEMALE.asCode(),
+            birthDate = Date("1975-07-05"),
+            telecom = initialTelecoms
+        )
+
+        val (transformed, validation) = roninPatient.transform(patient, tenant)
+        validation.alertIfErrors()
+
+        transformed!! // Force it to be treated as non-null
+        assertEquals(finalTelecoms, transformed.telecom)
     }
 
     private fun systemExtension(value: String) = Extension(

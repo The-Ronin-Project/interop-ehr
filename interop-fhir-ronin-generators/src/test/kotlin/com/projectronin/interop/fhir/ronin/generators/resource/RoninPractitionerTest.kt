@@ -49,7 +49,7 @@ class RoninPractitionerTest {
         localizer = mockk {
             every { localize(any(), tenant) } answers { firstArg() }
         }
-        roninPractitioner = RoninPractitioner(normalizer, localizer)
+        roninPractitioner = RoninPractitioner(normalizer, localizer, roninContactPoint)
     }
 
     @Test
@@ -69,7 +69,8 @@ class RoninPractitionerTest {
         }
 
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninPractitionerJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninPractitioner1)
+        val roninPractitionerJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninPractitioner1)
 
         // Uncomment to take a peek at the JSON
         // println(roninPractitionerJSON)
@@ -86,8 +87,10 @@ class RoninPractitionerTest {
             roninPractitioner1.meta!!.profile[0].value
         )
         assertEquals(3, roninPractitioner1.identifier.size)
-        val practitionerFHIRId = roninPractitioner1.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenantId = roninPractitioner1.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val practitionerFHIRId =
+            roninPractitioner1.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenantId =
+            roninPractitioner1.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenantId-$practitionerFHIRId", roninPractitioner1.id?.value.toString())
         assertNull(roninPractitioner1.active)
         assertNotNull(roninPractitioner1.name)
