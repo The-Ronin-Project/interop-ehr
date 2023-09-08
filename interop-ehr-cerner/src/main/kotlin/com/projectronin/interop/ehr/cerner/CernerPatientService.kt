@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
+import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.ehr.outputs.GetFHIRIDResponse
@@ -110,11 +111,15 @@ class CernerPatientService(cernerClient: CernerClient, private val ehrDataAuthor
 
     @Trace
     override fun getPatientFHIRId(tenant: Tenant, patientIDValue: String): String {
-        return getPatientsFHIRIds(
-            tenant,
-            tenant.vendorAs<Cerner>().patientMRNSystem,
-            listOf(patientIDValue)
-        )[patientIDValue]!!.fhirID
+        val patientFhirId =
+            getPatientsFHIRIds(tenant, tenant.vendorAs<Cerner>().patientMRNSystem, listOf(patientIDValue))[patientIDValue]
+
+        if (patientFhirId == null) {
+            logger.error { "No patient FHIR ID found for patient with ID $patientIDValue in tenant ${tenant.mnemonic}" }
+            throw VendorIdentifierNotFoundException("No FHIR ID found for patient")
+        }
+
+        return patientFhirId.fhirID
     }
 
     fun getPatientsFHIRIds(

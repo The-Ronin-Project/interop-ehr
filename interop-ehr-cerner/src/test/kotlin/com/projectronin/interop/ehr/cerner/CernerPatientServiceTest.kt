@@ -3,6 +3,7 @@ package com.projectronin.interop.ehr.cerner
 import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.ehr.dataauthority.models.IdentifierSearchResponse
 import com.projectronin.ehr.dataauthority.models.IdentifierSearchableResourceTypes
+import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.CodeSystem
@@ -378,6 +379,49 @@ class CernerPatientServiceTest {
         )
 
         assertEquals(fhirID, response)
+    }
+
+    @Test
+    fun `getPatientFHIRId errors with no patient id`() {
+        val mrn = "MRN"
+        val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
+
+        val cernerPatientService = spyk(CernerPatientService(cernerClient, ehrDataAuthorityClient))
+
+        val tenant = createTestTenant(
+            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+            authEndpoint = "https://example.org",
+            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            mrnSystem = mrnSystem
+        )
+
+        val mockResponse = listOf<IdentifierSearchResponse>(
+            mockk {
+                every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
+                every { foundResources } returns listOf()
+            }
+        )
+        coEvery {
+            ehrDataAuthorityClient.getResourceIdentifiers(
+                tenant.mnemonic,
+                IdentifierSearchableResourceTypes.Patient,
+                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem))
+            )
+        } returns mockResponse
+
+        every {
+            cernerPatientService.findPatientsById(
+                tenant,
+                mapOf(mrn to Identifier(value = mrn.asFHIR(), system = Uri(mrnSystem)))
+            )
+        } returns emptyMap()
+
+        assertThrows<VendorIdentifierNotFoundException> {
+            cernerPatientService.getPatientFHIRId(
+                tenant,
+                mrn
+            )
+        }
     }
 
     @Test
