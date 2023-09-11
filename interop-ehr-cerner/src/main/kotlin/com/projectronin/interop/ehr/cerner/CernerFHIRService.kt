@@ -98,6 +98,21 @@ abstract class CernerFHIRService<T : Resource<T>>(
         )
     }
 
+    protected fun getOptionalDateParam(
+        startDate: LocalDate?,
+        endDate: LocalDate?,
+        tenant: Tenant
+    ): RepeatingParameter? {
+        val offset = tenant.timezone.rules.getOffset(LocalDateTime.now())
+        val startDateString = startDate?.let { "ge${startDate}T00:00:00$offset" }
+        val endDateString = endDate?.let { "lt${endDate.plusDays(1)}T00:00:00$offset" }
+        val values = listOf(startDateString, endDateString).mapNotNull { it }
+        if (values.isEmpty()) {
+            return null
+        }
+        return RepeatingParameter(values)
+    }
+
     /**
      * For use on resources that 'le' rather than 'lt'. Only CarePlan for now
      */

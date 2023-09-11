@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.ehr.BaseFHIRService
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.resource.Bundle
 import com.projectronin.interop.fhir.r4.resource.Resource
@@ -10,6 +11,7 @@ import datadog.trace.api.Trace
 import io.ktor.util.reflect.TypeInfo
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import java.time.LocalDate
 
 /**
  * Abstract class to simplify Epic services that need to retrieve bundles using paging.
@@ -123,5 +125,15 @@ abstract class EpicFHIRService<T : Resource<T>>(
         } while (nextURL != null)
         logger.info { "Get completed for ${tenant.mnemonic}" }
         return mergeResponses(responses)
+    }
+
+    protected fun getDateParam(startDate: LocalDate?, endDate: LocalDate?): RepeatingParameter? {
+        val startDateString = startDate?.let { "ge$startDate" }
+        val endDateString = endDate?.let { "le$endDate" }
+        val values = listOf(startDateString, endDateString).mapNotNull { it }
+        if (values.isEmpty()) {
+            return null
+        }
+        return RepeatingParameter(values)
     }
 }

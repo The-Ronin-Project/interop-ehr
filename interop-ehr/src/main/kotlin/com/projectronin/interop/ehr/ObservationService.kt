@@ -6,6 +6,7 @@ import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.valueset.ObservationCategoryCodes
 import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
+import java.time.LocalDate
 
 /**
  * Defines the functionality of an EHR's observation service.
@@ -42,12 +43,16 @@ interface ObservationService : FHIRService<Observation> {
     fun findObservationsByPatient(
         tenant: Tenant,
         patientFhirIds: List<String>,
-        observationCategoryCodes: List<String>
+        observationCategoryCodes: List<String>,
+        startDate: LocalDate? = null,
+        endDate: LocalDate? = null
     ): List<Observation> {
         return findObservationsByPatientAndCategory(
             tenant,
             patientFhirIds,
-            observationCategoryCodes.toSearchTokens()
+            observationCategoryCodes.toSearchTokens(),
+            startDate,
+            endDate
         )
     }
 
@@ -59,14 +64,18 @@ interface ObservationService : FHIRService<Observation> {
     fun findObservationsByPatientAndCategory(
         tenant: Tenant,
         patientFhirIds: List<String>,
-        observationCategoryCodes: List<FHIRSearchToken>
+        observationCategoryCodes: List<FHIRSearchToken>,
+        startDate: LocalDate? = null,
+        endDate: LocalDate? = null
     ):
         List<Observation>
 
     fun findObservationsByCategory(
         tenant: Tenant,
         patientFhirIds: List<String>,
-        observationCategoryCodes: List<ObservationCategoryCodes>
+        observationCategoryCodes: List<ObservationCategoryCodes>,
+        startDate: LocalDate? = null,
+        endDate: LocalDate? = null
     ):
         List<Observation>
 }

@@ -12,6 +12,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 /**
@@ -38,15 +39,19 @@ class EpicObservationService(
     override fun findObservationsByPatientAndCategory(
         tenant: Tenant,
         patientFhirIds: List<String>,
-        observationCategoryCodes: List<FHIRSearchToken>
+        observationCategoryCodes: List<FHIRSearchToken>,
+        startDate: LocalDate?,
+        endDate: LocalDate?
     ): List<Observation> {
+        val dateParam =
+            getDateParam(startDate, endDate) ?: "ge${daysToPastDate(incrementalLoadDays, dateFormat)}"
         // Epic has a problem handling multiple patients in 1 call, so in the meantime force batch size to 1.
         // See https://sherlock.epic.com/default.aspx?view=slg/home#id=6953019&rv=0
         val observationResponses = patientFhirIds.chunked(1) {
             val parameters = mapOf(
                 "patient" to it.joinToString(separator = ","),
                 "category" to observationCategoryCodes.toOrParams(),
-                "date" to "ge${daysToPastDate(incrementalLoadDays, dateFormat)}"
+                "date" to dateParam
             )
             getResourceListFromSearch(tenant, parameters)
         }
@@ -61,7 +66,9 @@ class EpicObservationService(
     override fun findObservationsByCategory(
         tenant: Tenant,
         patientFhirIds: List<String>,
-        observationCategoryCodes: List<ObservationCategoryCodes>
+        observationCategoryCodes: List<ObservationCategoryCodes>,
+        startDate: LocalDate?,
+        endDate: LocalDate?
     ): List<Observation> {
         val extraCodesToSearch = mutableListOf<String>().apply {
             if (observationCategoryCodes.contains(ObservationCategoryCodes.VITAL_SIGNS)) {
@@ -71,20 +78,22 @@ class EpicObservationService(
                 }
             }
         }
+        val dateParam =
+            getDateParam(startDate, endDate) ?: "ge${daysToPastDate(incrementalLoadDays, dateFormat)}"
 
         val observationResponse = mutableListOf<List<Observation>>()
         patientFhirIds.forEach { patientId ->
             var parameters = mapOf(
                 "patient" to patientId,
                 "category" to observationCategoryCodes.joinToString(separator = ",") { it.code },
-                "date" to "ge${daysToPastDate(incrementalLoadDays, dateFormat)}"
+                "date" to dateParam
             )
             observationResponse.add(getResourceListFromSearch(tenant, parameters))
             if (extraCodesToSearch.isNotEmpty()) {
                 parameters = mapOf(
                     "patient" to patientId,
                     "code" to extraCodesToSearch.joinToString(separator = ","),
-                    "date" to "ge${daysToPastDate(incrementalLoadDays, dateFormat)}"
+                    "date" to dateParam
                 )
                 observationResponse.add(getResourceListFromSearch(tenant, parameters))
             }

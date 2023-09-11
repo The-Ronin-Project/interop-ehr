@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.cerner
 
 import com.projectronin.interop.ehr.cerner.client.CernerClient
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.ehr.inputs.FHIRSearchToken
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.valueset.ObservationCategoryCodes
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import java.time.LocalDate
+import java.time.ZoneId
 
 class CernerObservationServiceTest {
     private val client = mockk<CernerClient>()
@@ -21,6 +23,7 @@ class CernerObservationServiceTest {
     private val pastDate = LocalDate.now().minusDays(60).toString()
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "ronin"
+        every { timezone } returns ZoneId.of("Africa/Dakar")
     }
 
     private val observation = mockk<Observation> {
@@ -59,6 +62,31 @@ class CernerObservationServiceTest {
     }
 
     @Test
+    fun `findObservationsByPatientAndCategory works with dates`() {
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "category" to "code",
+                    "date" to RepeatingParameter(values = listOf("ge2023-09-01T00:00:00Z", "lt2023-09-22T00:00:00Z"))
+                )
+            )
+        } returns listOf(observation)
+
+        val results = cernerObservationService.findObservationsByPatientAndCategory(
+            tenant,
+            listOf("fhirId"),
+            listOf(FHIRSearchToken(system = null, code = "code")),
+            LocalDate.of(2023, 9, 1),
+            LocalDate.of(2023, 9, 21)
+        )
+
+        assertEquals(1, results.size)
+        assertEquals(observation, results[0])
+    }
+
+    @Test
     fun `findObservationsByPatientAndCategory handles multiple categories`() {
         every {
             cernerObservationService.getResourceListFromSearch(
@@ -86,6 +114,33 @@ class CernerObservationServiceTest {
 
     @Test
     fun `findObservationsByCategory handles multiple categories`() {
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "category" to "exam,laboratory",
+                    "date" to RepeatingParameter(values = listOf("ge2023-09-01T00:00:00Z"))
+                )
+            )
+        } returns listOf(observation)
+
+        val results = cernerObservationService.findObservationsByCategory(
+            tenant,
+            listOf("fhirId"),
+            listOf(
+                ObservationCategoryCodes.EXAM,
+                ObservationCategoryCodes.LABORATORY
+            ),
+            LocalDate.of(2023, 9, 1)
+        )
+
+        assertEquals(1, results.size)
+        assertEquals(observation, results[0])
+    }
+
+    @Test
+    fun `findObservationsByCategory handles multiple categories with dates`() {
         every {
             cernerObservationService.getResourceListFromSearch(
                 tenant,

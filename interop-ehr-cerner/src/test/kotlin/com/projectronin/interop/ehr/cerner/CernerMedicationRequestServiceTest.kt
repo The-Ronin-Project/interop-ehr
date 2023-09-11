@@ -17,6 +17,7 @@ import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class CernerMedicationRequestServiceTest {
     private val cernerClient: CernerClient = mockk()
@@ -131,6 +132,39 @@ class CernerMedicationRequestServiceTest {
             medicationRequestService.getMedicationRequestByPatient(
                 tenant,
                 "fakeFaKEfAKefakE"
+            )
+
+        assertEquals(validPatientIdBundle.entry.map { it.resource }, validResponse)
+    }
+
+    @Test
+    fun `getMedicationRequestByPatient succeeds with date`() {
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validPatientIdBundle
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "/MedicationRequest",
+                mapOf(
+                    "patient" to "fakeFaKEfAKefakE",
+                    "_count" to 20,
+                    "-timing-boundsPeriod" to "ge2023-09-06T00:00:00Z"
+                )
+            )
+        } returns ehrResponse
+
+        val validResponse =
+            medicationRequestService.getMedicationRequestByPatient(
+                tenant,
+                "fakeFaKEfAKefakE",
+                LocalDate.of(2023, 9, 6)
             )
 
         assertEquals(validPatientIdBundle.entry.map { it.resource }, validResponse)

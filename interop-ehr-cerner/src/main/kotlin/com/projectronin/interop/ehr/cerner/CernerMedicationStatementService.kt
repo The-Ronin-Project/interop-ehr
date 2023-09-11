@@ -5,6 +5,7 @@ import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.fhir.r4.resource.MedicationStatement
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.time.LocalDate
 
 /**
  * Service providing access to Medication Statement within Cerner
@@ -21,7 +22,9 @@ class CernerMedicationStatementService(
      */
     override fun getMedicationStatementsByPatientFHIRId(
         tenant: Tenant,
-        patientFHIRId: String
+        patientFHIRId: String,
+        startDate: LocalDate?,
+        endDate: LocalDate?
     ): List<MedicationStatement> {
         return emptyList()
     }

@@ -5,6 +5,7 @@ import com.projectronin.interop.fhir.r4.resource.MedicationStatement
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.time.LocalDate
 
 class CernerMedicationStatementServiceTest {
     private val tenant = createTestTenant()
@@ -14,6 +15,12 @@ class CernerMedicationStatementServiceTest {
     @Test
     fun `empty list is returned`() {
         val response = medicationStatementService.getMedicationStatementsByPatientFHIRId(tenant, "123")
+        assertEquals(emptyList<MedicationStatement>(), response)
+    }
+
+    @Test
+    fun `empty list is returned event when you return a date`() {
+        val response = medicationStatementService.getMedicationStatementsByPatientFHIRId(tenant, "123", LocalDate.now())
         assertEquals(emptyList<MedicationStatement>(), response)
     }
 

@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.epic
 
+import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.ehr.inputs.FHIRSearchToken
 import com.projectronin.interop.ehr.outputs.EHRResponse
@@ -70,6 +71,45 @@ class EpicObservationServiceTest {
                 tenant,
                 listOf("em2zwhHegmZEu39N4dUEIYA3"),
                 listOf("social-history")
+            )
+
+        val expectedObservationBundle = (validObservationSearchBundle).entry.map { it.resource }
+        assertEquals(expectedObservationBundle, bundle)
+        assertEquals(4, bundle.size)
+    }
+
+    @Test
+    fun `ensure observations are returned with dates`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                "testPrivateKey",
+                "TEST_TENANT"
+            )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validObservationSearchBundle
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Observation",
+                mapOf(
+                    "patient" to "em2zwhHegmZEu39N4dUEIYA3",
+                    "category" to "social-history",
+                    "date" to RepeatingParameter(values = listOf("ge2023-09-01", "le2023-09-21")),
+                    "_count" to 50
+                )
+            )
+        } returns ehrResponse
+
+        val bundle =
+            observationService.findObservationsByPatient(
+                tenant,
+                listOf("em2zwhHegmZEu39N4dUEIYA3"),
+                listOf("social-history"),
+                LocalDate.of(2023, 9, 1),
+                LocalDate.of(2023, 9, 21)
             )
 
         val expectedObservationBundle = (validObservationSearchBundle).entry.map { it.resource }
@@ -201,6 +241,49 @@ class EpicObservationServiceTest {
                 tenant,
                 listOf("abc"),
                 categoryCodes
+            )
+
+        // 1 patient had 4 social-history observations and 0 laboratory observations
+        assertEquals(4, bundle.size)
+    }
+
+    @Test
+    fun `ensure multiple category codes and dates are supported new API`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                "testPrivateKey",
+                "TEST_TENANT"
+            )
+        val categoryCodes = listOf(
+            ObservationCategoryCodes.SOCIAL_HISTORY,
+            ObservationCategoryCodes.LABORATORY
+        )
+        val categoryTokens = "social-history,laboratory"
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validObservationSearchBundle
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/Observation",
+                mapOf(
+                    "patient" to "abc",
+                    "category" to categoryTokens,
+                    "date" to RepeatingParameter(values = listOf("ge2023-09-01", "le2023-09-21")),
+                    "_count" to 50
+                )
+            )
+        } returns ehrResponse
+
+        val bundle =
+            observationService.findObservationsByCategory(
+                tenant,
+                listOf("abc"),
+                categoryCodes,
+                LocalDate.of(2023, 9, 1),
+                LocalDate.of(2023, 9, 21)
             )
 
         // 1 patient had 4 social-history observations and 0 laboratory observations

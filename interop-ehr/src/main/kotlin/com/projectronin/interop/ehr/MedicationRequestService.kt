@@ -2,6 +2,7 @@ package com.projectronin.interop.ehr
 
 import com.projectronin.interop.fhir.r4.resource.MedicationRequest
 import com.projectronin.interop.tenant.config.model.Tenant
+import java.time.LocalDate
 
 /**
  * Defines the functionality of an EHR's medication request service
@@ -20,6 +21,8 @@ interface MedicationRequestService : FHIRService<MedicationRequest> {
      */
     fun getMedicationRequestByPatient(
         tenant: Tenant,
-        patientFhirId: String
+        patientFhirId: String,
+        startDate: LocalDate? = null,
+        endDate: LocalDate? = null
     ): List<MedicationRequest>
 }

@@ -13,6 +13,7 @@ class ObservationServiceTest {
     // Ideally we'd just mockk the ObservationService interface, but mockk has some issues with that
     // approach.  https://github.com/mockk/mockk/issues/64
     abstract class ObservationServiceMock : ObservationService
+
     private val observationService = spyk<ObservationServiceMock>()
 
     @Test
@@ -26,6 +27,22 @@ class ObservationServiceTest {
         } returns listOf(observation)
 
         val results = observationService.findObservationsByPatient(tenant, patientFhirIds, listOf("code"))
+
+        assertEquals(1, results.size)
+        assertSame(observation, results[0])
+    }
+
+    @Test
+    fun `findObservationsByCategory uses default dates`() {
+        val tenant = mockk<Tenant>()
+        val patientFhirIds = listOf("fhirId")
+        val observation = mockk<Observation>()
+
+        every {
+            observationService.findObservationsByPatientAndCategory(any(), any(), any())
+        } returns listOf(observation)
+
+        val results = observationService.findObservationsByPatientAndCategory(tenant, patientFhirIds, emptyList())
 
         assertEquals(1, results.size)
         assertSame(observation, results[0])
