@@ -10,7 +10,10 @@ import com.projectronin.interop.tenant.config.model.Tenant
 /**
  * Localizes the String relative to the [tenant]
  */
-fun String.localize(tenant: Tenant) = "${tenant.mnemonic}-$this"
+fun String.localize(tenant: Tenant): String {
+    val prefix = "${tenant.mnemonic}-"
+    return if (this.startsWith(prefix)) this else "$prefix$this"
+}
 
 /**
  * Localizes the [reference](http://hl7.org/fhir/R4/references.html) contained by this String relative to the [tenant].

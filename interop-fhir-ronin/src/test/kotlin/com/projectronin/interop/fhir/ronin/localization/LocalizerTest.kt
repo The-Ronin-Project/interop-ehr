@@ -62,6 +62,7 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipantRequired
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
+import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -167,6 +168,11 @@ class LocalizerTest {
     @Test
     fun `prepends tenant mnemonic to id`() {
         assertEquals(Id("test-id-value"), localizeId(Id("id-value")))
+    }
+
+    @Test
+    fun `localize string doesn't add additional prefix`() {
+        assertEquals("test-id", "test-id".localize(tenant))
     }
 
     @Test

@@ -29,7 +29,8 @@ class CernerVendorFactory(
     override val carePlanService: CernerCarePlanService,
     override val documentReferenceService: CernerDocumentReferenceService,
     override val binaryService: CernerBinaryService,
-    override val onboardFlagService: CernerOnboardFlagService
+    override val onboardFlagService: CernerOnboardFlagService,
+    override val medicationAdministrationService: CernerMedicationAdministrationService
 ) : VendorFactory {
     override val vendorType: VendorType = VendorType.CERNER
 
