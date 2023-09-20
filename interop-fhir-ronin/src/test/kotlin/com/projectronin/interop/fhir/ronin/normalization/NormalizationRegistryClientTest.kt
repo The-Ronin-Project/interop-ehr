@@ -3070,4 +3070,91 @@ class NormalizationRegistryClientTest {
             exception.message
         )
     }
+
+    @Test
+    fun `getConceptMapping for CodeableConcept - source code contains no valueCodeableConcept attribute wrapper`() {
+        val sourceUrl = "tenant-sourceObservationCode"
+        val cmTestRegistry = listOf(
+            NormalizationRegistryItem(
+                data_element = "Observation.code",
+                registry_uuid = "registry-uuid",
+                filename = "file1.json",
+                concept_map_name = "TestObservationsMashup",
+                concept_map_uuid = "TestObservationsMashup-uuid",
+                registry_entry_type = "concept_map",
+                version = "1",
+                source_extension_url = sourceUrl,
+                resource_type = "Observation",
+                tenant_id = "test"
+            )
+        )
+        mockkObject(JacksonUtil)
+        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
+        every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns cmTestRegistry
+        every { ociClient.getObjectFromINFX("file1.json") } returns """
+            {
+              "resourceType": "ConceptMap",
+              "title": "Test Observations Mashup (for Dev Testing ONLY)",
+              "id": "TestObservationsMashup-id",
+              "name": "TestObservationsMashup-name",
+              "contact": [
+                {
+                  "name": "Interops (for Dev Testing ONLY)"
+                }
+              ],
+              "url": "http://projectronin.io/fhir/StructureDefinition/ConceptMap/TestObservationsMashup",
+              "description": "Interops  (for Dev Testing ONLY)",
+              "purpose": "Testing",
+              "publisher": "Project Ronin",
+              "experimental": true,
+              "date": "2023-05-26",
+              "version": 1,
+              "group": [
+                {
+                  "source": "http://projectronin.io/fhir/CodeSystem/test/TestObservationsMashup",
+                  "sourceVersion": "1.0",
+                  "target": "http://loinc.org",
+                  "targetVersion": "0.0.1",
+                  "element": [
+                    {
+                      "id": "06c19b8e4718f1bf6e81f992cfc12c1e",
+                      "code": "{\"coding\": [{\"code\": \"363905002\", \"display\": \"Details of alcohol drinking behavior (observable entity)\", \"system\": \"http://snomed.info/sct\"}]}",
+                      "display": "Tobacco smoking status",
+                      "target": [
+                        {
+                          "id": "836cc342c39afcc7a8dee6277abc7b75",
+                          "code": "72166-2",
+                          "display": "Tobacco smoking status",
+                          "equivalence": "equivalent",
+                          "comment": null
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ],
+              "extension": [
+                {
+                  "url": "http://projectronin.io/fhir/StructureDefinition/Extension/ronin-conceptMapSchema",
+                  "valueString": "1.0.0"
+                }
+              ],
+              "meta": {
+                "lastUpdated": "2023-05-26T12:49:56.285403+00:00"
+              }
+        }
+        """.trimIndent()
+        val concept = CodeableConcept(
+            coding = listOf(
+                Coding(
+                    code = Code(value = "363905002"),
+                    system = Uri(value = "http://snomed.info/sct")
+                )
+            )
+        )
+
+        val mapping = client.getConceptMapping(tenant, "Observation.code", concept)
+        assertNotNull(mapping)
+        assertEquals("72166-2", mapping?.codeableConcept?.coding?.first()?.code?.value)
+    }
 }

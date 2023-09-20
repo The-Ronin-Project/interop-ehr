@@ -323,11 +323,19 @@ class NormalizationRegistryClient(
         tenantAgnosticSourceSystem: String
     ): SourceConcept {
         if (!groupElementCode.contains("{")) {
+            // No embedded JSON, represent as just a code
             return SourceConcept(setOf(SourceKey(groupElementCode, tenantAgnosticSourceSystem)))
         }
 
-        val conceptMapCode = JacksonManager.objectMapper.readValue<ConceptMapCode>(groupElementCode)
-        return conceptMapCode.valueCodeableConcept.getSourceConcept()
+        val sourceCodeableConcept = if (groupElementCode.contains("valueCodeableConcept")) {
+            // Handle JSON entries wrapped in the valueCodeableConcept
+            JacksonManager.objectMapper.readValue<ConceptMapCode>(groupElementCode).valueCodeableConcept
+        } else {
+            // Handle JSON structured directly as CodeableConcept objects
+            JacksonManager.objectMapper.readValue<CodeableConcept>(groupElementCode)
+        }
+
+        return sourceCodeableConcept.getSourceConcept()
             ?: throw IllegalStateException("Could not create SourceConcept from $groupElementCode")
     }
 
