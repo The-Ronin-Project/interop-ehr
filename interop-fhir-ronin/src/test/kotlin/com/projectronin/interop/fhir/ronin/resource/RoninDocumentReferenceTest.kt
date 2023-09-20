@@ -42,6 +42,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Disabled
@@ -252,6 +253,137 @@ class RoninDocumentReferenceTest {
     }
 
     @Test
+    fun `validate - fails if encounter contains more than one reference`() {
+        val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.DOCUMENT_REFERENCE_CATEGORY.uri,
+                            code = Code("clinical-note"),
+                            display = "Clinical Note".asFHIR()
+                        )
+                    )
+                )
+            ),
+            type = docRefTypeConcept,
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            context = DocumentReferenceContext(
+                encounter = listOf(
+                    Reference(reference = FHIRString("Medication/testTenant-medID")),
+                    Reference(reference = FHIRString("Patient/testTenant-patID"))
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDocumentReference.validate(documentReference).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DOCREF_004: No more than one encounter is allowed for this type @ DocumentReference.encounter",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - passes if encounter contains one reference`() {
+        val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.DOCUMENT_REFERENCE_CATEGORY.uri,
+                            code = Code("clinical-note"),
+                            display = "Clinical Note".asFHIR()
+                        )
+                    )
+                )
+            ),
+            type = docRefTypeConcept,
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            subject = Reference(reference = "Patient/123".asFHIR()),
+            context = DocumentReferenceContext(
+                encounter = listOf(
+                    Reference(reference = FHIRString("Medication/testTenant-medID"))
+                )
+            )
+        )
+
+        assertNotNull(roninDocumentReference.validate(documentReference).alertIfErrors())
+    }
+
+    @Test
     fun `validate - fails if status does not use required valueset`() {
         val documentReference = DocumentReference(
             meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
@@ -365,6 +497,74 @@ class RoninDocumentReferenceTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR INV_VALUE_SET: 'http://hl7.org/fhir/us/core/CodeSystem/us-core-documentreference-category|bad' is outside of required value set @ DocumentReference.category",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate - fails if category does not use required subject`() {
+        val documentReference = DocumentReference(
+            meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
+            extension = documentReferenceExtension,
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = DocumentReferenceStatus.CURRENT.asCode(),
+            category = listOf(
+                CodeableConcept(
+                    coding = listOf(
+                        Coding(
+                            system = CodeSystem.DOCUMENT_REFERENCE_CATEGORY.uri,
+                            code = Code("clinical-note"),
+                            display = "Clinical Note".asFHIR()
+                        )
+                    )
+                )
+            ),
+            type = docRefTypeConcept,
+            content = listOf(
+                DocumentReferenceContent(
+                    attachment = Attachment(
+                        url = Url(
+                            "Binary/1234",
+                            extension = listOf(
+                                Extension(
+                                    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+                                    value = DynamicValue(DynamicValueType.URL, Url("datalakeLocation/1234"))
+                                )
+                            )
+                        )
+                    )
+                )
+            ),
+            context = DocumentReferenceContext(
+                encounter = listOf(
+                    Reference(reference = FHIRString("Medication/testTenant-medID"))
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninDocumentReference.validate(documentReference).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR REQ_FIELD: subject is a required element @ DocumentReference.subject",
             exception.message
         )
     }

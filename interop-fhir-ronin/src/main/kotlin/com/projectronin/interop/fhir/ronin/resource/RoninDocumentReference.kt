@@ -8,6 +8,7 @@ import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Url
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
+import com.projectronin.interop.fhir.r4.resource.DocumentReferenceContext
 import com.projectronin.interop.fhir.r4.validate.resource.R4DocumentReferenceValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.error.FailedConceptMapLookupError
@@ -77,6 +78,12 @@ class RoninDocumentReference(
         description = "Datalake Attachment URL extension is missing or invalid",
         location = LocationContext(Url::extension)
     )
+    private val requiredEncounter = FHIRError(
+        code = "RONIN_DOCREF_004",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "No more than one encounter is allowed for this type",
+        location = LocationContext(DocumentReferenceContext::encounter)
+    )
 
     override fun validateRonin(element: DocumentReference, parentContext: LocationContext, validation: Validation) {
         validation.apply {
@@ -140,6 +147,7 @@ class RoninDocumentReference(
     override fun validateUSCore(element: DocumentReference, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             checkTrue(element.category.isNotEmpty(), requiredCategoryError, parentContext)
+            element.context?.let { context -> checkTrue(context.encounter.size < 2, requiredEncounter, parentContext) }
             element.category.validateCodeInValueSet(
                 usCoreDocumentReferenceCategoryValueSet,
                 DocumentReference::category,
