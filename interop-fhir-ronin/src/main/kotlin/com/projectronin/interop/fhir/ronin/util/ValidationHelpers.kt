@@ -5,10 +5,13 @@ import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.error.InvalidReferenceResourceTypeError
+import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.InvalidValueSetError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
+import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
 import kotlin.reflect.KProperty1
 
 /**
@@ -21,16 +24,13 @@ fun validateReferenceList(
     referenceList: List<Reference>,
     resourceTypesList: List<String>,
     context: LocationContext,
-    validation: Validation
+    validation: Validation,
+    containedResource: List<Resource<*>>? = listOf()
 ) {
     validation.apply {
         referenceList.forEachIndexed { index, reference ->
             val currentContext = LocationContext(context.element, "${context.field}[$index]")
-            checkTrue(
-                reference.isInTypeList(resourceTypesList),
-                InvalidReferenceResourceTypeError(currentContext, resourceTypesList),
-                LocationContext(context.element, "")
-            )
+            validateReference(reference, resourceTypesList, currentContext, validation, containedResource)
         }
     }
 }
@@ -39,15 +39,36 @@ fun validateReference(
     reference: Reference?,
     resourceTypesList: List<String>,
     context: LocationContext,
-    validation: Validation
+    validation: Validation,
+    containedResource: List<Resource<*>>? = listOf()
 ) {
+    val requiredContainedResource = FHIRError(
+        code = "RONIN_REQ_REF_1",
+        severity = ValidationIssueSeverity.ERROR,
+        description = "Contained resource is required if a local reference is provided",
+        location = LocationContext(context.element, context.field)
+    )
     validation.apply {
-        ifNotNull(reference) {
-            checkTrue(
-                reference.isInTypeList(resourceTypesList),
-                InvalidReferenceResourceTypeError(context, resourceTypesList),
-                LocationContext(context.element, "")
-            )
+        reference?.let {
+            if (it.reference?.value.toString().startsWith("#")) {
+                val id = it.reference?.value.toString().substringAfter("#")
+                checkTrue(
+                    !containedResource.isNullOrEmpty(),
+                    requiredContainedResource,
+                    LocationContext(context.element, "")
+                )
+                checkTrue(
+                    resourceTypesList.contains(containedResource?.find { it.id?.value == id }?.resourceType),
+                    InvalidReferenceResourceTypeError(context, resourceTypesList),
+                    LocationContext(context.element, "")
+                )
+            } else {
+                checkTrue(
+                    reference.isInTypeList(resourceTypesList),
+                    InvalidReferenceResourceTypeError(context, resourceTypesList),
+                    LocationContext(context.element, "")
+                )
+            }
         }
     }
 }

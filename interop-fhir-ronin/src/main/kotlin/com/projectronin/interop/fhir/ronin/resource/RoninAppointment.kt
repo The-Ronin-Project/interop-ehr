@@ -79,7 +79,7 @@ class RoninAppointment(
             val validActorValues = listOf("Patient", "PractitionerRole", "Practitioner", "Location", "RelatedPerson", "Device", "HealthcareService")
             element.participant.forEach {
                 ifNotNull(it.actor) {
-                    validateReference(it.actor, validActorValues, LocationContext(Participant::actor), validation)
+                    validateReference(it.actor, validActorValues, LocationContext(Participant::actor), validation, element.contained)
                     requireDataAuthorityExtensionIdentifier(
                         it.actor,
                         LocationContext(Participant::actor),
