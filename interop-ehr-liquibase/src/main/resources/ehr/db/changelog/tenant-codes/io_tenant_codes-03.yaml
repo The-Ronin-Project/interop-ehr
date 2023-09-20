@@ -1,0 +1,20 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-codes-add-stage-codes
+      author: Travis Bean
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_tenant_codes
+                columnName: stage_codes
+      changes:
+        - addColumn:
+            tableName: io_tenant_codes
+            columns:
+              - column:
+                  name: stage_codes
+                  type: java.sql.Types.VARCHAR(256)
+                  remarks: "Contains a comma delimited list of additional observation codes to retrieve to support cancer staging"
+                  constraints:
+                    nullable: true

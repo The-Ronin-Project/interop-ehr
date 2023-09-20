@@ -1,0 +1,28 @@
+io_ehr:
+  - io_ehr_id: 101
+    name: "EPIC"
+    client_id: "12345"
+    public_key: "public"
+    private_key: "private"
+
+io_tenant:
+  - io_tenant_id: 1001
+    mnemonic: "apposnd"
+    full_name: "Epic AppOrchard Sandbox"
+    timezone: "America/New_York"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+  - io_tenant_id: 1002
+    mnemonic: "apposnd2"
+    full_name: "Epic Alternate Sandbox"
+    timezone: "America/Chicago"
+    io_ehr_id: 101
+    available_batch_start: "22:00:00"
+    available_batch_end: "06:00:00"
+
+io_tenant_codes:
+  - io_tenant_id: 1001
+    bsa_code: "123456"
+    bmi_code: "67890"
+    stage_codes: "7788,1934,20"

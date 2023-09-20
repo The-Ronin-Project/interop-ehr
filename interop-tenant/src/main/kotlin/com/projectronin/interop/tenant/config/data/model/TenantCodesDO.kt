@@ -8,4 +8,5 @@ interface TenantCodesDO : Entity<TenantCodesDO> {
     var tenantId: Int
     var bsaCode: String?
     var bmiCode: String?
+    var stageCodes: String?
 }

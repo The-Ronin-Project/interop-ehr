@@ -47,6 +47,7 @@ class TenantCodesDAO(@Qualifier("ehr") private val database: Database) {
         database.update(TenantCodesDOs) {
             set(it.bsaCode, tenantCodesDO.bsaCode)
             set(it.bmiCode, tenantCodesDO.bmiCode)
+            set(it.stageCodes, tenantCodesDO.stageCodes)
             where {
                 it.tenantId eq tenantCodesDO.tenantId
             }
@@ -62,6 +63,7 @@ class TenantCodesDAO(@Qualifier("ehr") private val database: Database) {
             set(it.tenantId, tenantCodesDO.tenantId)
             set(it.bsaCode, tenantCodesDO.bsaCode)
             set(it.bmiCode, tenantCodesDO.bmiCode)
+            set(it.stageCodes, tenantCodesDO.stageCodes)
         }
         return getByTenantId(tenantCodesDO.tenantId)
             // This should be impossible to hit due to DB constraints

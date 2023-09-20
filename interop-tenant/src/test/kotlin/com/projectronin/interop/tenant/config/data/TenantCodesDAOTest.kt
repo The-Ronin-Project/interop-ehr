@@ -12,8 +12,10 @@ import com.projectronin.interop.tenant.config.data.model.TenantCodesDO
 import com.projectronin.interop.tenant.config.data.model.TenantDO
 import io.mockk.every
 import io.mockk.mockk
-import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.sql.SQLIntegrityConstraintViolationException
@@ -51,7 +53,7 @@ class TenantCodesDAOTest {
     fun `getAll works`() {
         val dao = TenantCodesDAO(KtormHelper.database())
         val tenantCodes = dao.getAll()
-        Assertions.assertTrue(tenantCodes.isNotEmpty())
+        assertTrue(tenantCodes.isNotEmpty())
         assertEquals(1, tenantCodes.size)
     }
 
@@ -60,8 +62,9 @@ class TenantCodesDAOTest {
     fun `getByTenantMnemonic works`() {
         val dao = TenantCodesDAO(KtormHelper.database())
         val tenantCodes = dao.getByTenantMnemonic("apposnd")
-        Assertions.assertNotNull(tenantCodes)
+        assertNotNull(tenantCodes)
         assertEquals("12345", tenantCodes?.bsaCode)
+        assertNull(tenantCodes?.stageCodes)
     }
 
     @Test
@@ -69,7 +72,7 @@ class TenantCodesDAOTest {
     fun `getByTenantMnemonic works when not found`() {
         val dao = TenantCodesDAO(KtormHelper.database())
         val tenantCodes = dao.getByTenantMnemonic("blooop")
-        Assertions.assertNull(tenantCodes)
+        assertNull(tenantCodes)
     }
 
     @Test
@@ -99,7 +102,7 @@ class TenantCodesDAOTest {
             bsaCode = "12345"
         }
         val result = dao.updateCodes(testobj)
-        Assertions.assertNull(result)
+        assertNull(result)
     }
 
     @Test
@@ -126,5 +129,53 @@ class TenantCodesDAOTest {
             this.bsaCode = "12345"
         }
         assertThrows<SQLIntegrityConstraintViolationException> { dao.insertCodes(testobj) }
+    }
+
+    @Test
+    @DataSet(value = ["/dbunit/tenant-codes/TenantStageCodes.yaml"], cleanAfter = true)
+    fun `getByTenantMnemonic works with stage codes`() {
+        val dao = TenantCodesDAO(KtormHelper.database())
+        val tenantCodes = dao.getByTenantMnemonic("apposnd")
+        assertNotNull(tenantCodes)
+        assertEquals("12345", tenantCodes?.bsaCode)
+        assertEquals("6789", tenantCodes?.bmiCode)
+        assertEquals("5534,6635", tenantCodes?.stageCodes)
+    }
+
+    @Test
+    @DataSet(value = ["/dbunit/tenant-codes/TenantCodes.yaml"], cleanAfter = true)
+    @ExpectedDataSet(value = ["/dbunit/tenant-codes/ExpectedAfterUpdatingStageCodes.yaml"])
+    fun `updateConfig works to add stage codes`() {
+        val dao = TenantCodesDAO(KtormHelper.database())
+
+        val testObj = TenantCodesDO {
+            this.tenantId = 1001
+            this.bsaCode = "123456"
+            this.bmiCode = "67890"
+            this.stageCodes = "7788,1934,20"
+        }
+        val result = dao.updateCodes(testObj)!!
+        assertEquals(tenantDO.id, result.tenantId)
+        assertEquals("123456", result.bsaCode)
+        assertEquals("67890", result.bmiCode)
+        assertEquals("7788,1934,20", result.stageCodes)
+    }
+
+    @Test
+    @DataSet(value = ["/dbunit/tenant-codes/TenantCodes.yaml"], cleanAfter = true)
+    @ExpectedDataSet(value = ["/dbunit/tenant-codes/ExpectedAfterInsertingStageCodes.yaml"])
+    fun `insert works with stage codes`() {
+        val dao = TenantCodesDAO(KtormHelper.database())
+        val testObj = TenantCodesDO {
+            this.tenantId = 1002
+            this.bsaCode = "54321"
+            this.bmiCode = "09876"
+            this.stageCodes = "19"
+        }
+        val result = dao.insertCodes(testObj)
+        assertEquals(tenantDO2.id, result.tenantId)
+        assertEquals("54321", result.bsaCode)
+        assertEquals("09876", result.bmiCode)
+        assertEquals("19", result.stageCodes)
     }
 }
