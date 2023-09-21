@@ -1,10 +1,10 @@
 [versions]
 caffeine = "3.1.8"
 commons = "1.10.0"
-datadog = "1.20.1"
+datadog = "1.21.0"
 ehrda = "1.3.3"
 hapi = "2.3"
-interop-common = "3.11.0"
+interop-common = "3.12.0"
 interop-fhir = "8.10.0"
 interop-gradle = "3.2.0"
 interop-publish = "8.4.2"
@@ -19,7 +19,7 @@ mockwebserver = "4.11.0"
 mysql-connector = "8.1.0"
 opentracing = "0.33.0"
 ronin-test = "0.2.0"
-swagger-annotations = "2.2.15"
+swagger-annotations = "2.2.16"
 testcontainers-mysql = "1.19.0"
 
 [libraries]
