@@ -194,6 +194,7 @@ class CernerObservationServiceTest {
         } returns mockk {
             every { bmiCode } returns "12345"
             every { bsaCode } returns "09876"
+            every { stageCodes } returns null
         }
 
         val results = cernerObservationService.findObservationsByCategory(
@@ -243,6 +244,230 @@ class CernerObservationServiceTest {
         assertEquals(2, results.size)
         assertTrue(results.contains(observation))
         assertTrue(results.contains(observation2))
+    }
+
+    @Test
+    fun `findObservationsByCategory handles a staging code`() {
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "category" to "vital-signs",
+                    "date" to "ge$pastDate"
+                )
+            )
+        } returns listOf(observation)
+
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "code" to "12345,09876,9988",
+                    "date" to "ge$pastDate"
+                )
+            )
+        } returns listOf(observation2)
+
+        every {
+            codesDAO.getByTenantMnemonic("ronin")
+        } returns mockk {
+            every { bmiCode } returns "12345"
+            every { bsaCode } returns "09876"
+            every { stageCodes } returns "9988"
+        }
+
+        val results = cernerObservationService.findObservationsByCategory(
+            tenant,
+            listOf("fhirId"),
+            listOf(
+                ObservationCategoryCodes.VITAL_SIGNS
+            )
+        )
+
+        assertEquals(2, results.size)
+        assertEquals(observation, results[0])
+        assertEquals(observation2, results[1])
+    }
+
+    @Test
+    fun `findObservationsByCategory handles a ONLY staging code`() {
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "category" to "vital-signs",
+                    "date" to "ge$pastDate"
+                )
+            )
+        } returns listOf()
+
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "code" to "9988",
+                    "date" to "ge$pastDate"
+                )
+            )
+        } returns listOf(observation)
+
+        every {
+            codesDAO.getByTenantMnemonic("ronin")
+        } returns mockk {
+            every { bmiCode } returns null
+            every { bsaCode } returns null
+            every { stageCodes } returns "9988"
+        }
+
+        val results = cernerObservationService.findObservationsByCategory(
+            tenant,
+            listOf("fhirId"),
+            listOf(
+                ObservationCategoryCodes.VITAL_SIGNS
+            )
+        )
+
+        assertEquals(1, results.size)
+        assertEquals(observation, results[0])
+    }
+
+    @Test
+    fun `findObservationsByCategory handles multiple staging codes`() {
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "category" to "vital-signs",
+                    "date" to "ge$pastDate"
+                )
+            )
+        } returns listOf(observation)
+
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "code" to "12345,09876,9988,45446",
+                    "date" to "ge$pastDate"
+                )
+            )
+        } returns listOf(observation2)
+
+        every {
+            codesDAO.getByTenantMnemonic("ronin")
+        } returns mockk {
+            every { bmiCode } returns "12345"
+            every { bsaCode } returns "09876"
+            every { stageCodes } returns "9988,45446"
+        }
+
+        val results = cernerObservationService.findObservationsByCategory(
+            tenant,
+            listOf("fhirId"),
+            listOf(
+                ObservationCategoryCodes.VITAL_SIGNS
+            )
+        )
+
+        assertEquals(2, results.size)
+        assertEquals(observation, results[0])
+        assertEquals(observation2, results[1])
+    }
+
+    @Test
+    fun `findObservationsByCategory handles multiple staging codes with spaces`() {
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "category" to "vital-signs",
+                    "date" to "ge$pastDate"
+                )
+            )
+        } returns listOf(observation)
+
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "code" to "12345,09876,9988,45446",
+                    "date" to "ge$pastDate"
+                )
+            )
+        } returns listOf(observation2)
+
+        every {
+            codesDAO.getByTenantMnemonic("ronin")
+        } returns mockk {
+            every { bmiCode } returns "12345"
+            every { bsaCode } returns "09876"
+            every { stageCodes } returns "9988, 45446"
+        }
+
+        val results = cernerObservationService.findObservationsByCategory(
+            tenant,
+            listOf("fhirId"),
+            listOf(
+                ObservationCategoryCodes.VITAL_SIGNS
+            )
+        )
+
+        assertEquals(2, results.size)
+        assertEquals(observation, results[0])
+        assertEquals(observation2, results[1])
+    }
+
+    @Test
+    fun `findObservationsByCategory handles empties with comma`() {
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "category" to "vital-signs",
+                    "date" to "ge$pastDate"
+                )
+            )
+        } returns listOf(observation)
+
+        every {
+            cernerObservationService.getResourceListFromSearch(
+                tenant,
+                mapOf(
+                    "patient" to "fhirId",
+                    "code" to "12345,09876",
+                    "date" to "ge$pastDate"
+                )
+            )
+        } returns listOf(observation2)
+
+        every {
+            codesDAO.getByTenantMnemonic("ronin")
+        } returns mockk {
+            every { bmiCode } returns "12345"
+            every { bsaCode } returns "09876"
+            every { stageCodes } returns " , "
+        }
+
+        val results = cernerObservationService.findObservationsByCategory(
+            tenant,
+            listOf("fhirId"),
+            listOf(
+                ObservationCategoryCodes.VITAL_SIGNS
+            )
+        )
+
+        assertEquals(2, results.size)
+        assertEquals(observation, results[0])
+        assertEquals(observation2, results[1])
     }
 
     // Strictly to increase code coverage

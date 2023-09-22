@@ -8,6 +8,7 @@ import com.projectronin.interop.ehr.util.toOrParams
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.valueset.ObservationCategoryCodes
 import com.projectronin.interop.tenant.config.data.TenantCodesDAO
+import com.projectronin.interop.tenant.config.data.binding.TenantCodesDOs.stageCodes
 import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
 import org.springframework.beans.factory.annotation.Value
@@ -20,8 +21,7 @@ class CernerObservationService(
     cernerClient: CernerClient,
     private val tenantCodesDAO: TenantCodesDAO,
     @Value("\${cerner.fhir.observation.incrementalLoadDays:60}") private val incrementalLoadDays: Int
-) : ObservationService,
-    CernerFHIRService<Observation>(cernerClient) {
+) : ObservationService, CernerFHIRService<Observation>(cernerClient) {
     override val fhirURLSearchPart = "/Observation"
     override val fhirResourceType = Observation::class.java
     private val dateFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd")
@@ -56,14 +56,18 @@ class CernerObservationService(
         startDate: LocalDate?,
         endDate: LocalDate?
     ): List<Observation> {
-        val extraCodesToSearch = mutableListOf<String>().apply {
-            if (observationCategoryCodes.contains(ObservationCategoryCodes.VITAL_SIGNS)) {
-                tenantCodesDAO.getByTenantMnemonic(tenant.mnemonic)?.let { tenantCodes ->
-                    tenantCodes.bmiCode?.let(::add)
-                    tenantCodes.bsaCode?.let(::add)
+        val extraCodesToSearch = mutableListOf<String>()
+        if (observationCategoryCodes.contains(ObservationCategoryCodes.VITAL_SIGNS)) {
+            tenantCodesDAO.getByTenantMnemonic(tenant.mnemonic)?.let { tenantCodes ->
+                tenantCodes.bmiCode?.let { extraCodesToSearch.add(it) }
+                tenantCodes.bsaCode?.let { extraCodesToSearch.add(it) }
+                // Pull staging codes along with vitals since there isn't a better category.
+                tenantCodes.stageCodes?.let { code ->
+                    extraCodesToSearch.addAll(code.split(",").map { it.trim() }.filter { it.isNotEmpty() })
                 }
             }
         }
+
         val dateParam =
             getOptionalDateParam(startDate, endDate, tenant) ?: "ge${daysToPastDate(incrementalLoadDays, dateFormat)}"
 
