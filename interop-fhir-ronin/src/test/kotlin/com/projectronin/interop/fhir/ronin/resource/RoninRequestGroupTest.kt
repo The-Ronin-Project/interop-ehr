@@ -280,7 +280,7 @@ class RoninRequestGroupTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR INV_VALUE_SET: 'fake-intent' is outside of required value set @ RequestGroup.status",
+                "ERROR INV_VALUE_SET: 'fake-intent' is outside of required value set @ RequestGroup.intent",
             exception.message
         )
     }

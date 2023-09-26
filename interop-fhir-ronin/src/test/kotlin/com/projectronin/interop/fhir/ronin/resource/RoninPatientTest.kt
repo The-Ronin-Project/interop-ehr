@@ -692,7 +692,7 @@ class RoninPatientTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR INV_VALUE_SET: 'null' is outside of required value set @ Patient.gender",
+                "ERROR INV_VALUE_SET: NULL is outside of required value set @ Patient.gender",
             exception.message
         )
     }

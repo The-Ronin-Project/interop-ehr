@@ -158,8 +158,8 @@ class RoninEncounterTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR REQ_FIELD: status is a required element @ Encounter.status\n" +
-                "ERROR REQ_FIELD: class is a required element @ Encounter.class",
+                "ERROR REQ_FIELD: class is a required element @ Encounter.class\n" +
+                "ERROR REQ_FIELD: status is a required element @ Encounter.status",
             exception.message
         )
     }

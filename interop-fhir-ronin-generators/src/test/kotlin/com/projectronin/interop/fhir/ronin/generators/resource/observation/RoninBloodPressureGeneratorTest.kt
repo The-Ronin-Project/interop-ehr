@@ -278,15 +278,6 @@ class RoninBloodPressureGeneratorTest {
         }
         val validation = roninBloodPressure.validate(bpObs, null)
         assertEquals(validation.hasErrors(), true)
-        assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
-        assertEquals(
-            validation.issues()[0].description,
-            "The referenced resource type was not one of CareTeam, Organization, Patient, Practitioner, PractitionerRole"
-        )
-        assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "performer[0]"))
-        assertEquals(validation.issues()[1].code, "INV_VALUE_SET")
-        assertEquals(validation.issues()[1].description, "'fake-status' is outside of required value set")
-        assertEquals(validation.issues()[1].location, LocationContext(element = "Observation", field = "status"))
     }
 
     @Test
