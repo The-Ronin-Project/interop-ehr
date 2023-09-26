@@ -80,7 +80,6 @@ abstract class BaseGenericTransformer {
         if (transformedValues.isEmpty()) {
             return element
         }
-
         val copyFunction = element::class.memberFunctions.firstOrNull { it.name == "copy" } as? KFunction<T>
             ?: throw IllegalStateException()
         val parameters = copyFunction.parameters.filter { it.name != null }.associateBy { it.name }

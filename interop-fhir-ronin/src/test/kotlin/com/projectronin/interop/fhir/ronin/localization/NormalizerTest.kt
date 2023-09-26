@@ -400,6 +400,19 @@ class NormalizerTest {
             id = Id("1234"),
             operationalStatus = Coding(
                 id = "12345".asFHIR(),
+                extension = extensionToFilter,
+                system = Uri("non-normalizable-system"),
+                version = "version".asFHIR(),
+                code = Code("code"),
+                display = "Display".asFHIR(),
+                userSelected = FHIRBoolean.TRUE
+            )
+        )
+
+        val expectedTransformedLocation = Location(
+            id = Id("1234"),
+            operationalStatus = Coding(
+                id = "12345".asFHIR(),
                 extension = extensions,
                 system = Uri("non-normalizable-system"),
                 version = "version".asFHIR(),
@@ -409,6 +422,6 @@ class NormalizerTest {
             )
         )
         val normalizedLocation = normalizer.normalize(location, tenant)
-        assertEquals(location, normalizedLocation)
+        assertEquals(expectedTransformedLocation, normalizedLocation)
     }
 }
