@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.localization
 
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
+import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.ronin.code.normalizeCoding
 import com.projectronin.interop.fhir.ronin.code.normalizeIdentifier
@@ -19,13 +20,14 @@ class Normalizer : BaseGenericTransformer() {
         return copy(element, normalizedValues)
     }
 
-    override fun transformType(element: Any, parameterName: String, tenant: Tenant): Any? {
+    override fun transformType(element: Any, parameterName: String, tenant: Tenant): TransformResult {
         return when (element) {
-            is Coding -> normalizeCoding(element, parameterName, tenant)
-            is Identifier -> normalizeIdentifier(element, parameterName, tenant)
-            is CodeableConcept -> normalizeCodeableConcept(element, parameterName, tenant)
-            is Validatable<*> -> transformOrNull(element, parameterName, tenant)
-            else -> null
+            is Coding -> TransformResult(normalizeCoding(element, parameterName, tenant))
+            is Identifier -> TransformResult(normalizeIdentifier(element, parameterName, tenant))
+            is CodeableConcept -> TransformResult(normalizeCodeableConcept(element, parameterName, tenant))
+            is Extension -> normalizeExtension(element, parameterName, tenant)
+            is Validatable<*> -> TransformResult(transformOrNull(element, parameterName, tenant))
+            else -> TransformResult(null)
         }
     }
 
@@ -80,5 +82,13 @@ class Normalizer : BaseGenericTransformer() {
 
         // Otherwise make no changes
         return nonNormalizedCodeableConcept
+    }
+
+    private fun normalizeExtension(extension: Extension, parameterName: String, tenant: Tenant): TransformResult {
+        return if (extension.value == null) {
+            TransformResult(extension, true)
+        } else {
+            return TransformResult(extension)
+        }
     }
 }

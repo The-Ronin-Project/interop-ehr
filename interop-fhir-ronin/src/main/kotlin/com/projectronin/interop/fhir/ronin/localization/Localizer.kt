@@ -24,14 +24,16 @@ class Localizer : BaseGenericTransformer() {
         return copy(element, localizedValues)
     }
 
-    override fun transformType(element: Any, parameterName: String, tenant: Tenant): Any? {
-        return when (element) {
-            is DynamicValue<*> -> localizeDynamicValue(element as DynamicValue<Any>, parameterName, tenant)
-            is Id -> localizeId(element, parameterName, tenant)
-            is Reference -> localizeReference(element, parameterName, tenant)
-            is Validatable<*> -> transformOrNull(element, parameterName, tenant)
-            else -> null
-        }
+    override fun transformType(element: Any, parameterName: String, tenant: Tenant): TransformResult {
+        return TransformResult(
+            when (element) {
+                is DynamicValue<*> -> localizeDynamicValue(element as DynamicValue<Any>, parameterName, tenant)
+                is Id -> localizeId(element, parameterName, tenant)
+                is Reference -> localizeReference(element, parameterName, tenant)
+                is Validatable<*> -> transformOrNull(element, parameterName, tenant)
+                else -> null
+            }
+        )
     }
 
     /**
@@ -43,7 +45,7 @@ class Localizer : BaseGenericTransformer() {
         tenant: Tenant
     ): DynamicValue<Any>? {
         val localizedValue = transformType(dynamicValue.value, parameterName, tenant)
-        return localizedValue?.let { DynamicValue(dynamicValue.type, it) }
+        return localizedValue.element?.let { DynamicValue(dynamicValue.type, it) }
     }
 
     /**

@@ -380,4 +380,35 @@ class NormalizerTest {
             )
         assertEquals(expectedCodeableConcept, normalizedCodeableConcept)
     }
+
+    @Test
+    fun `normalizer works for extensions that should be filtered out of the extension list`() {
+        val extensionToFilter = listOf(
+            Extension(
+                id = "5678".asFHIR(),
+                url = Uri("http://normalhost/extension"),
+                value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/1234".asFHIR()))
+            ),
+            // Add an extension that should be filtered.
+            Extension(
+                id = "8989".asFHIR(),
+                url = Uri("http://normalhost/extension"),
+                value = null
+            )
+        )
+        val location = Location(
+            id = Id("1234"),
+            operationalStatus = Coding(
+                id = "12345".asFHIR(),
+                extension = extensions,
+                system = Uri("non-normalizable-system"),
+                version = "version".asFHIR(),
+                code = Code("code"),
+                display = "Display".asFHIR(),
+                userSelected = FHIRBoolean.TRUE
+            )
+        )
+        val normalizedLocation = normalizer.normalize(location, tenant)
+        assertEquals(location, normalizedLocation)
+    }
 }

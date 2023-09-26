@@ -16,13 +16,14 @@ abstract class BaseGenericTransformer {
     /**
      * Transforms a specific [element] for the [tenant]. If unable to transform, null be returned.
      */
-    protected abstract fun transformType(element: Any, parameterName: String, tenant: Tenant): Any?
+    protected abstract fun transformType(element: Any, parameterName: String, tenant: Tenant): TransformResult
 
     /**
      * Transforms the [element] for [tenant] if transformation is needed or returns null if it's already transformed.
      */
     protected fun <T : Any> transformOrNull(element: T, parameterName: String, tenant: Tenant): T? {
         val transformedValues = getTransformedValues(element, tenant)
+
         return if (transformedValues.isEmpty()) null else copy(element, transformedValues)
     }
 
@@ -40,7 +41,7 @@ abstract class BaseGenericTransformer {
                         val collectionType = property.returnType.arguments.first().type!!.jvmErasure
                         transformList(value, collectionType, propertyName, tenant)
                     } else {
-                        transformType(value, propertyName, tenant)
+                        transformType(value, propertyName, tenant).element
                     }
 
                     transformedValue?.let { propertyName to transformedValue }
@@ -62,12 +63,12 @@ abstract class BaseGenericTransformer {
     ): List<*>? {
         val originalAndLocalizedItems = collection.filter { it != null && it::class == collectionType }.map {
             it to transformType(it!!, parameterName, tenant)
-        }
-        return if (originalAndLocalizedItems.all { it.second == null }) {
+        }.filter { !it.second.removeFromCollection }
+        return if (originalAndLocalizedItems.all { it.second.element == null }) {
             null
         } else {
             originalAndLocalizedItems.map {
-                it.second ?: it.first
+                it.second.element ?: it.first
             }
         }
     }
@@ -88,3 +89,5 @@ abstract class BaseGenericTransformer {
         return copyFunction.callBy(copyArguments)
     }
 }
+
+data class TransformResult(val element: Any?, val removeFromCollection: Boolean = false)
