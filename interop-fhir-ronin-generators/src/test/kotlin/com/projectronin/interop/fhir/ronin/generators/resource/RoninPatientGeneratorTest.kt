@@ -34,7 +34,7 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
-class RoninPatientTest {
+class RoninPatientGeneratorTest {
     private lateinit var roninContactPoint: RoninContactPoint
     private lateinit var normalizer: Normalizer
     private lateinit var localizer: Localizer

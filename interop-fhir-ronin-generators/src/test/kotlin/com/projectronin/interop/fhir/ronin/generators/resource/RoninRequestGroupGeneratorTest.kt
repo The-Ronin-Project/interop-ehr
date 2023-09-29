@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class RoninRequestGroupTest {
+class RoninRequestGroupGeneratorTest {
     private lateinit var rcdmRequestGroup: RoninRequestGroup
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"

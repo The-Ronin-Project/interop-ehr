@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class RoninDocumentReferenceTest {
+class RoninDocumentReferenceGeneratorTest {
     private lateinit var rcdmDocumentReference: RoninDocumentReference
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"

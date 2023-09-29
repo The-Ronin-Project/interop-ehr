@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class RoninMedicationTest {
+class RoninMedicationGeneratorTest {
     private lateinit var roninMedication: RoninMedication
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"

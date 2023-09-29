@@ -26,7 +26,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class RoninLocationTest {
+class RoninLocationGeneratorTest {
     private lateinit var roninContactPoint: RoninContactPoint
     private lateinit var roninLocation: RoninLocation
     private val tenant = mockk<Tenant> {

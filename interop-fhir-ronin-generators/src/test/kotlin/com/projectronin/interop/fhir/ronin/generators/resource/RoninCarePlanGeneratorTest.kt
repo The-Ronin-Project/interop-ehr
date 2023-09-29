@@ -23,7 +23,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class RoninCarePlanTest {
+class RoninCarePlanGeneratorTest {
     private lateinit var rcdmCarePlan: RoninCarePlan
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"

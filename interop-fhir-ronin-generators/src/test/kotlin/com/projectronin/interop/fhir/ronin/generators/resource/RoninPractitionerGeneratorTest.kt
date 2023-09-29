@@ -28,7 +28,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class RoninPractitionerTest {
+class RoninPractitionerGeneratorTest {
     private lateinit var roninContactPoint: RoninContactPoint
     private lateinit var normalizer: Normalizer
     private lateinit var localizer: Localizer

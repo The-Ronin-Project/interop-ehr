@@ -2,7 +2,6 @@ package com.projectronin.interop.fhir.ronin.generators.resource
 
 import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.fhir.generators.datatypes.ParticipantGenerator
-import com.projectronin.interop.fhir.generators.datatypes.reference
 import com.projectronin.interop.fhir.generators.primitives.of
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
@@ -29,7 +28,7 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class RoninAppointmentTest {
+class RoninAppointmentGeneratorTest {
     private lateinit var roninAppointment: RoninAppointment
     private lateinit var registry: NormalizationRegistryClient
     private val tenant = mockk<Tenant> {
