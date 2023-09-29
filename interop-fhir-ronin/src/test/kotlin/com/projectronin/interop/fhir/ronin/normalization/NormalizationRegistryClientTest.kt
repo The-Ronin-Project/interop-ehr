@@ -712,6 +712,7 @@ class NormalizationRegistryClientTest {
             "test"
         )
         client.conceptMapCache.put(key, registry1)
+        client.registryLastUpdated = LocalDateTime.now()
         client.itemLastUpdated[key] = LocalDateTime.now()
         val coding = RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.system", "MyPhone")
         val mapping = client.getConceptMappingForEnum(
@@ -856,6 +857,7 @@ class NormalizationRegistryClientTest {
             "specialPatient"
         )
         client.valueSetCache.put(key, registry1)
+        client.registryLastUpdated = LocalDateTime.now()
         client.itemLastUpdated[key] = LocalDateTime.now()
 
         val mapping =
@@ -880,6 +882,7 @@ class NormalizationRegistryClientTest {
             "specialPatient"
         )
         client.valueSetCache.put(key, registry1)
+        client.registryLastUpdated = LocalDateTime.now()
         client.itemLastUpdated[key] = LocalDateTime.now()
         val actualValueSet =
             client.getRequiredValueSet(
@@ -967,6 +970,7 @@ class NormalizationRegistryClientTest {
             tenant.mnemonic
         )
         client.conceptMapCache.put(key, registry)
+        client.registryLastUpdated = LocalDateTime.now()
         client.itemLastUpdated[key] = LocalDateTime.now()
 
         val sourceCoding1 = Coding(
@@ -1208,6 +1212,7 @@ class NormalizationRegistryClientTest {
             tenant.mnemonic
         )
         client.conceptMapCache.put(key, registry)
+        client.registryLastUpdated = LocalDateTime.now()
         client.itemLastUpdated[key] = LocalDateTime.now()
 
         val sourceCoding1 = Coding(
@@ -1343,6 +1348,7 @@ class NormalizationRegistryClientTest {
             tenant.mnemonic
         )
         client.conceptMapCache.put(key1, registry1)
+        client.registryLastUpdated = LocalDateTime.now()
         client.itemLastUpdated[key1] = LocalDateTime.now()
 
         val sourceCoding = Coding(
@@ -3156,5 +3162,151 @@ class NormalizationRegistryClientTest {
         val mapping = client.getConceptMapping(tenant, "Observation.code", concept)
         assertNotNull(mapping)
         assertEquals("72166-2", mapping?.codeableConcept?.coding?.first()?.code?.value)
+    }
+
+    @Test
+    fun `getConceptMapping for Coding pulls new registry and maps when a single map is out-of-date`() {
+        val cmTestRegistry = listOf(
+            NormalizationRegistryItem(
+                data_element = "Appointment.status",
+                registry_uuid = "12345",
+                filename = "file1.json",
+                concept_map_name = "AppointmentStatus-tenant",
+                concept_map_uuid = "cm-111",
+                registry_entry_type = "concept_map",
+                version = "1",
+                source_extension_url = "ext1",
+                resource_type = "Appointment",
+                tenant_id = "test"
+            ),
+            NormalizationRegistryItem(
+                data_element = "Patient.telecom.use",
+                registry_uuid = "67890",
+                filename = "file2.json",
+                concept_map_name = "PatientTelecomUse-tenant",
+                concept_map_uuid = "cm-222",
+                registry_entry_type = "concept_map",
+                version = "1",
+                source_extension_url = "ext2",
+                resource_type = "Patient",
+                tenant_id = "test"
+            )
+        )
+        val mockkMap1 = mockk<ConceptMap> {
+            every { group } returns listOf(
+                mockk {
+                    every { target?.value } returns "targetSystemAAA"
+                    every { targetVersion?.value } returns "targetVersionAAA"
+                    every { source?.value } returns "sourceSystemA"
+                    every { element } returns listOf(
+                        mockk {
+                            every { code?.value } returns "sourceValueA"
+                            every { display?.value } returns "targetTextAAA"
+                            every { target } returns listOf(
+                                mockk {
+                                    every { code?.value } returns "targetValueAAA"
+                                    every { display?.value } returns "targetDisplayAAA"
+                                }
+                            )
+                        },
+                        mockk {
+                            every { code?.value } returns "sourceValueB"
+                            every { display?.value } returns "targetTextBBB"
+                            every { target } returns listOf(
+                                mockk {
+                                    every { code?.value } returns "targetValueBBB"
+                                    every { display?.value } returns "targetDisplayBBB"
+                                }
+                            )
+                        }
+                    )
+                }
+            )
+        }
+        val mockkMap2 = mockk<ConceptMap> {
+            every { group } returns listOf(
+                mockk {
+                    every { target?.value } returns "targetSystem222"
+                    every { targetVersion?.value } returns "targetVersion222"
+                    every { source?.value } returns "sourceSystem2"
+                    every { element } returns listOf(
+                        mockk {
+                            every { code?.value } returns "sourceValue2"
+                            every { display?.value } returns "targetText222"
+                            every { target } returns listOf(
+                                mockk {
+                                    every { code?.value } returns "targetValue222"
+                                    every { display?.value } returns "targetDisplay222"
+                                }
+                            )
+                        }
+                    )
+                }
+            )
+        }
+        mockkObject(JacksonUtil)
+        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
+        every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns cmTestRegistry
+        every { ociClient.getObjectFromINFX("file1.json") } returns "mapJson1"
+        every { JacksonUtil.readJsonObject("mapJson1", ConceptMap::class) } returns mockkMap1
+        every { ociClient.getObjectFromINFX("file2.json") } returns "mapJson2"
+        every { JacksonUtil.readJsonObject("mapJson2", ConceptMap::class) } returns mockkMap2
+        val key1 = CacheKey(
+            NormalizationRegistryItem.RegistryType.ConceptMap,
+            "Appointment.status",
+            "test"
+        )
+        client.conceptMapCache.put(key1, mockk(relaxed = true))
+        val key1LastUpdated = LocalDateTime.now().minusMinutes(25)
+        client.itemLastUpdated[key1] = key1LastUpdated
+
+        val key2 = CacheKey(
+            NormalizationRegistryItem.RegistryType.ConceptMap,
+            "Patient.telecom.use",
+            "test"
+        )
+        client.conceptMapCache.put(key2, mockk(relaxed = true))
+        val key2LastUpdated = LocalDateTime.now().minusDays(2)
+        client.itemLastUpdated[key2] = key2LastUpdated
+
+        val registryLastUpdated = LocalDateTime.now().minusHours(1)
+        client.registryLastUpdated = registryLastUpdated
+
+        val coding1 = Coding(
+            code = Code(value = "sourceValueA"),
+            system = Uri(value = "sourceSystemA")
+        )
+
+        // We don't care about the mapping for this test -- really this is because we're using a mock registry, and thus nothing of actual value is present.
+        client.getConceptMapping(
+            tenant,
+            "Appointment.status",
+            coding1
+        )
+
+        // Appointment.status did not trigger an item reload.
+        assertEquals(key1LastUpdated, client.itemLastUpdated[key1])
+        assertEquals(key2LastUpdated, client.itemLastUpdated[key2])
+        assertEquals(registryLastUpdated, client.registryLastUpdated)
+
+        val coding2 = Coding(
+            code = Code(value = "sourceValue2"),
+            system = Uri(value = "sourceSystem2")
+        )
+        val mapping2 =
+            client.getConceptMapping(
+                tenant,
+                "Patient.telecom.use",
+                coding2
+            )!!
+        assertEquals(mapping2.coding.code!!.value, "targetValue222")
+        assertEquals(mapping2.coding.system!!.value, "targetSystem222")
+        assertEquals(mapping2.extension.url!!.value, "ext2")
+        assertEquals(mapping2.extension.value!!.value, coding2)
+
+        // Patient.telecom.use did trigger an item reload.
+        assertNull(client.itemLastUpdated[key1])
+        assertTrue(client.itemLastUpdated[key2]!!.isAfter(key2LastUpdated))
+        assertTrue(client.registryLastUpdated.isAfter(registryLastUpdated))
     }
 }
