@@ -286,8 +286,7 @@ class RoninDiagnosticReportNoteExchangeTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                id = "subject".asFHIR(),
-                display = "display".asFHIR(),
+                reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient")
             )
         )

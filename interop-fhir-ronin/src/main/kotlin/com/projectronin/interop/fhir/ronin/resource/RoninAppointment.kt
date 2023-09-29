@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.resource
 
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.resource.Appointment
+import com.projectronin.interop.fhir.r4.resource.Participant
 import com.projectronin.interop.fhir.r4.validate.resource.R4AppointmentValidator
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.ronin.RCDMVersion
@@ -72,6 +73,16 @@ class RoninAppointment(
                     invalidAppointmentStatusExtensionError,
                     parentContext
                 )
+            }
+
+            element.participant.forEach {
+                ifNotNull(it.actor) {
+                    requireDataAuthorityExtensionIdentifier(
+                        it.actor,
+                        LocationContext(Participant::actor),
+                        validation
+                    )
+                }
             }
         }
     }

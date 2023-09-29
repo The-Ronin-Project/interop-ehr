@@ -15,6 +15,7 @@ import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Instant
 import com.projectronin.interop.fhir.r4.datatype.primitive.PositiveInt
@@ -236,6 +237,125 @@ class RoninAppointmentTest {
                 "ERROR REQ_FIELD: meta is a required element @ Appointment.meta",
             exception.message
         )
+    }
+
+    @Test
+    fun `validate fails actor reference with reference value and no type extension`() {
+        val appointment = Appointment(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(statusExtension("cancelled")),
+            status = AppointmentStatus.CANCELLED.asCode(),
+            participant = listOf(
+                Participant(
+                    actor = Reference(reference = "Patient/actor".asFHIR(), type = Uri("Patient")),
+                    status = ParticipationStatus.ACCEPTED.asCode()
+                )
+            )
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninAppointment.validate(appointment).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_DAUTH_EX_001: Data Authority extension identifier is required for reference @ Participant.actor.type.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate passes when actor reference with reference value and type extension`() {
+        val appointment = Appointment(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(statusExtension("cancelled")),
+            status = AppointmentStatus.CANCELLED.asCode(),
+            participant = listOf(
+                Participant(
+                    actor = Reference(
+                        reference = "Patient/actor".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension)
+                    ),
+                    status = ParticipationStatus.ACCEPTED.asCode()
+                )
+            )
+        )
+
+        roninAppointment.validate(appointment).alertIfErrors()
+    }
+
+    @Test
+    fun `validate passes when actor reference with no reference value and no type extension`() {
+        val appointment = Appointment(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(statusExtension("cancelled")),
+            status = AppointmentStatus.CANCELLED.asCode(),
+            participant = listOf(
+                Participant(
+                    actor = Reference(
+                        identifier = Identifier(system = Uri("urn:oid:1.2.3.4.5.6"), value = FHIRString("12345")),
+                        type = Uri("Patient")
+                    ),
+                    status = ParticipationStatus.ACCEPTED.asCode()
+                )
+            )
+        )
+
+        roninAppointment.validate(appointment).alertIfErrors()
     }
 
     @Test
