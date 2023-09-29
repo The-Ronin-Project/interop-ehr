@@ -15,7 +15,6 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninStagingRelated
-import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -184,21 +183,6 @@ class RoninStagingRelatedGeneratorTest {
 
         val issueCodes = validation.issues().map { it.code }.toSet()
         assertEquals(setOf("RONIN_OBS_003"), issueCodes)
-    }
-
-    @Test
-    fun `invalid subject input - fails validation`() {
-        val roninObsStagingRelated = rcdmObservationStagingRelated("test") {
-            subject of rcdmReference("Device", "456")
-        }
-        val validation = roninStageRelated.validate(roninObsStagingRelated, null)
-        assertEquals(validation.hasErrors(), true)
-        assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
-        assertEquals(
-            validation.issues()[0].description,
-            "The referenced resource type was not one of Patient, Location"
-        )
-        assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "subject"))
     }
 
     @Test

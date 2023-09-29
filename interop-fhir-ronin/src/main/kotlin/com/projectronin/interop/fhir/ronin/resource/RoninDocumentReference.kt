@@ -1,5 +1,6 @@
 package com.projectronin.interop.fhir.ronin.resource
 
+import com.projectronin.event.interop.internal.v1.ResourceType
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Attachment
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
@@ -21,6 +22,7 @@ import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.validateCodeInValueSet
 import com.projectronin.interop.fhir.ronin.util.validateReference
+import com.projectronin.interop.fhir.ronin.util.validateReferenceList
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -109,12 +111,6 @@ class RoninDocumentReference(
                     parentContext.append(LocationContext(DocumentReference::type))
                 )
             }
-            validateReference(
-                element.subject,
-                listOf("Patient"),
-                LocationContext(DocumentReference::subject),
-                validation
-            )
 
             element.content.forEachIndexed { index, content ->
                 content.attachment?.let { attachment ->
@@ -146,8 +142,26 @@ class RoninDocumentReference(
 
     override fun validateUSCore(element: DocumentReference, parentContext: LocationContext, validation: Validation) {
         validation.apply {
+            validateReference(
+                element.subject,
+                listOf(ResourceType.Patient),
+                LocationContext(DocumentReference::subject),
+                validation
+            )
+
             checkTrue(element.category.isNotEmpty(), requiredCategoryError, parentContext)
-            element.context?.let { context -> checkTrue(context.encounter.size < 2, requiredEncounter, parentContext) }
+            element.context?.let { context ->
+                val contextLocationContext = parentContext.append(LocationContext(DocumentReference::context))
+
+                checkTrue(context.encounter.size < 2, requiredEncounter, contextLocationContext)
+
+                validateReferenceList(
+                    context.encounter,
+                    listOf(ResourceType.Encounter),
+                    contextLocationContext.append(LocationContext("", "encounter")),
+                    validation
+                )
+            }
             element.category.validateCodeInValueSet(
                 usCoreDocumentReferenceCategoryValueSet,
                 DocumentReference::category,

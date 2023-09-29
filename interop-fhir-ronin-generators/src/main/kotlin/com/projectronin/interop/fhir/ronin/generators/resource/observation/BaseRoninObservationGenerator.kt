@@ -116,13 +116,11 @@ val observationCategory = listOf(
 )
 
 val subjectBaseReferenceOptions = listOf(
-    "Patient",
-    "Location"
+    "Patient"
 )
 
 val subjectStagingReferenceOptions = listOf(
-    "Patient",
-    "Location"
+    "Patient"
 )
 
 val subjectReferenceOptions = listOf(

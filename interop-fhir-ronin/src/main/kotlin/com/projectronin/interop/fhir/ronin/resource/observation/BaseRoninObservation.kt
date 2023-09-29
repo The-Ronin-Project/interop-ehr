@@ -1,11 +1,11 @@
 package com.projectronin.interop.fhir.ronin.resource.observation
 
+import com.projectronin.event.interop.internal.v1.ResourceType
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
-import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.resource.ObservationComponent
 import com.projectronin.interop.fhir.ronin.error.FailedConceptMapLookupError
@@ -19,7 +19,6 @@ import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
 import com.projectronin.interop.fhir.ronin.util.validateReference
-import com.projectronin.interop.fhir.ronin.util.validateReferenceList
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
@@ -59,23 +58,7 @@ abstract class BaseRoninObservation(
     }
 
     // Reference checks - subclasses may override lists to modify validation logic for reference attributes
-    open val validBasedOnValues = listOf(
-        "CarePlan",
-        "DeviceRequest",
-        "ImmunizationRecommendation",
-        "MedicationRequest",
-        "NutritionOrder",
-        "ServiceRequest"
-    )
-    open val validDerivedFromValues = listOf("DocumentReference", "Observation")
-    open val validDeviceValues = listOf("Device", "DeviceMetric")
-    open val validEncounterValues = listOf("Encounter")
-    open val validHasMemberValues = listOf("Observation")
-    open val validNoteAuthorValues = listOf("Organization", "Patient", "Practitioner")
-    open val validSpecimenValues = listOf("Specimen")
-    open val validSubjectValues = listOf("Patient", "Location")
-    open val validPartOfValues = listOf("Immunization", "MedicationStatement", "Procedure")
-    open val validPerformerValues = listOf("CareTeam", "Organization", "Patient", "Practitioner", "PractitionerRole")
+    open val validSubjectValues = listOf(ResourceType.Patient)
 
     // Dynamic value checks - subclasses may override lists
     open val acceptedEffectiveTypes = listOf(
@@ -145,7 +128,6 @@ abstract class BaseRoninObservation(
             requireCodeCoding("code", element.code?.coding, parentContext, validation)
 
             checkNotNull(element.subject, requiredSubjectError, parentContext)
-            validateReference(element.subject, validSubjectValues, LocationContext(Observation::subject), validation)
             // check that subject reference has type and the extension is the data authority extension identifier
             ifNotNull(element.subject) {
                 requireDataAuthorityExtensionIdentifier(
@@ -153,54 +135,6 @@ abstract class BaseRoninObservation(
                     LocationContext(Observation::subject),
                     validation
                 )
-            }
-
-            validateReferenceList(
-                element.basedOn,
-                validBasedOnValues,
-                LocationContext(Observation::basedOn),
-                validation
-            )
-            validateReferenceList(
-                element.derivedFrom,
-                validDerivedFromValues,
-                LocationContext(Observation::derivedFrom),
-                validation
-            )
-            validateReference(element.device, validDeviceValues, LocationContext(Observation::device), validation)
-            validateReference(
-                element.encounter,
-                validEncounterValues,
-                LocationContext(Observation::encounter),
-                validation
-            )
-            validateReferenceList(
-                element.hasMember,
-                validHasMemberValues,
-                LocationContext(Observation::hasMember),
-                validation
-            )
-            validateReferenceList(element.partOf, validPartOfValues, LocationContext(Observation::partOf), validation)
-            validateReferenceList(
-                element.performer,
-                validPerformerValues,
-                LocationContext(Observation::performer),
-                validation
-            )
-            validateReference(element.specimen, validSpecimenValues, LocationContext(Observation::specimen), validation)
-
-            element.note.forEachIndexed { index, note ->
-                note.author?.let { author ->
-                    if (author.type == DynamicValueType.REFERENCE) {
-                        val reference = author.value as? Reference
-                        validateReference(
-                            reference,
-                            validNoteAuthorValues,
-                            LocationContext("Observation", "note[$index].author"),
-                            validation
-                        )
-                    }
-                }
             }
 
             val qualifyingCategories = qualifyingCategories()
@@ -283,7 +217,11 @@ abstract class BaseRoninObservation(
     /**
      * Validates the [element] against USCore Observation rules.
      */
-    override fun validateUSCore(element: Observation, parentContext: LocationContext, validation: Validation) {}
+    override fun validateUSCore(element: Observation, parentContext: LocationContext, validation: Validation) {
+        validation.apply {
+            validateReference(element.subject, validSubjectValues, LocationContext(Observation::subject), validation)
+        }
+    }
 
     /**
      * Validates a specific Observation against the profile. By default, this will check for a valid category and code, and the appropriate source code extension.

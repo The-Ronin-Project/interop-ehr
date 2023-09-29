@@ -13,7 +13,6 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.BaseRoninProfile
-import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -41,9 +40,6 @@ class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
             ifNotNull(element.subject) {
                 requireDataAuthorityExtensionIdentifier(element.subject, LocationContext(CarePlan::subject), validation)
             }
-
-            // subject required is validated in R4
-            validateReference(element.subject, listOf("Patient"), LocationContext(CarePlan::subject), validation)
 
             // status required, and the required value set, is validated in R4
             // intent required, and the required value set, is validated in R4

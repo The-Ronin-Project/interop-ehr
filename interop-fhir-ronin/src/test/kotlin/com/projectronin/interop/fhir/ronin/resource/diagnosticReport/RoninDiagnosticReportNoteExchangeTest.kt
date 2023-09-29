@@ -775,53 +775,6 @@ class RoninDiagnosticReportNoteExchangeTest {
     }
 
     @Test
-    fun `validate fails with missing reference attribute`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_NOTE_EXCHANGE.value)),
-                source = Uri("source")
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            category = listOf(
-                CodeableConcept(text = "dx report".asFHIR())
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered"),
-            subject = Reference(
-                id = "123".asFHIR(),
-                display = "display".asFHIR(),
-                type = Uri("DiagnosisReport", extension = dataAuthorityExtension)
-            )
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport).alertIfErrors()
-        }
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ DiagnosticReport.subject",
-            exception.message
-        )
-    }
-
-    @Test
     fun `validate fails with wrong reference type`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),
@@ -852,18 +805,18 @@ class RoninDiagnosticReportNoteExchangeTest {
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered"),
             subject = Reference(
-                reference = "Condition/123".asFHIR(),
-                type = Uri("Condition", extension = dataAuthorityExtension)
+                reference = "Group/123".asFHIR(),
+                type = Uri("Group", extension = dataAuthorityExtension)
             )
         )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport).alertIfErrors()
-        }
+        val validation = roninDiagnosticReport.validate(dxReport)
+
+        println(validation.issues())
+        assertEquals(1, validation.issues().size)
         assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ DiagnosticReport.subject",
-            exception.message
+            "WARNING INV_REF_TYPE: reference can only be one of the following: Patient @ DiagnosticReport.subject.reference",
+            validation.issues().first().toString()
         )
     }
 }

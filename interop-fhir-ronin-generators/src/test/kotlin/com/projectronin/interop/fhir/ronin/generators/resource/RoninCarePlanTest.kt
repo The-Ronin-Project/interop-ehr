@@ -53,7 +53,8 @@ class RoninCarePlanTest {
             }
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes will be generated
-        val rcdmCarePlanJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmCarePlan)
+        val rcdmCarePlanJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmCarePlan)
 
         // Uncomment to take a peek at the JSON
         // println(rcdmCarePlanJSON)
@@ -67,7 +68,8 @@ class RoninCarePlanTest {
         val rcdmCarePlan = rcdmPatient.rcdmCarePlan {}
 
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes will be generated
-        val rcdmCarePlanJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmCarePlan)
+        val rcdmCarePlanJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmCarePlan)
 
         // Uncomment to take a peek at the JSON
         // println(rcdmCarePlanJSON)
@@ -84,8 +86,10 @@ class RoninCarePlanTest {
         assertNotNull(rcdmCarePlan.intent)
         assertNotNull(rcdmCarePlan.subject)
         assertNotNull(rcdmCarePlan.id)
-        val patientFHIRId = rcdmCarePlan.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = rcdmCarePlan.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            rcdmCarePlan.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            rcdmCarePlan.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", rcdmCarePlan.id?.value.toString())
         assertEquals("test", tenant)
     }
@@ -136,18 +140,6 @@ class RoninCarePlanTest {
         val validation = rcdmCarePlan.validate(carePlan, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/456", carePlan.subject?.reference?.value)
-    }
-
-    @Test
-    fun `rcdmCarePlan - invalid subject input - validate fails`() {
-        val carePlan = rcdmCarePlan("test") {
-            subject of rcdmReference("Device", "456")
-        }
-        val validation = rcdmCarePlan.validate(carePlan, null)
-        assertEquals(validation.hasErrors(), true)
-        assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
-        assertEquals(validation.issues()[0].description, "The referenced resource type was not Patient")
-        assertEquals(validation.issues()[0].location, LocationContext(element = "CarePlan", field = "subject"))
     }
 
     @Test

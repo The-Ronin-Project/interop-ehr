@@ -15,6 +15,7 @@ dependencies {
     implementation(libs.interop.fhir)
     implementation(libs.interop.validation.client)
     implementation(libs.kotlinx.coroutines.core)
+    implementation(libs.event.interop.resource.internal)
 
     testImplementation(libs.mockk)
     testImplementation("org.springframework:spring-test")

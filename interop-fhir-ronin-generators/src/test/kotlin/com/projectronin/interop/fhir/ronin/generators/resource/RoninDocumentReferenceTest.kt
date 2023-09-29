@@ -154,10 +154,7 @@ class RoninDocumentReferenceTest {
             subject of rcdmReference("Device", "456")
         }
         val validation = rcdmDocumentReference.validate(documentReference, null)
-        assertEquals(true, validation.hasErrors())
-        assertEquals("RONIN_INV_REF_TYPE", validation.issues()[0].code)
-        assertEquals("The referenced resource type was not Patient", validation.issues()[0].description)
-        assertEquals(LocationContext(element = "DocumentReference", field = "subject"), validation.issues()[0].location)
+        assertTrue(validation.hasIssues())
     }
 
     @Test

@@ -27,7 +27,6 @@ import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninBloodPressure
 import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
-import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -278,18 +277,6 @@ class RoninBloodPressureGeneratorTest {
         }
         val validation = roninBloodPressure.validate(bpObs, null)
         assertEquals(validation.hasErrors(), true)
-    }
-
-    @Test
-    fun `invalid subject input - fails validation`() {
-        val bpObs = rcdmObservationBloodPressure("test") {
-            subject of rcdmReference("Location", "456")
-        }
-        val validation = roninBloodPressure.validate(bpObs, null)
-        assertEquals(validation.hasErrors(), true)
-        assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
-        assertEquals(validation.issues()[0].description, "The referenced resource type was not Patient")
-        assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "subject"))
     }
 
     @Test

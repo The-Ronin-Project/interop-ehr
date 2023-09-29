@@ -35,12 +35,6 @@ class RoninBodySurfaceArea(
     // Quantity unit codes
     override val validQuantityCodes = listOf("m2")
 
-    // Reference checks - override BaseRoninObservation value lists as needed for RoninBodyHeight
-    override val validBasedOnValues = listOf("CarePlan", "MedicationRequest")
-    override val validDerivedFromValues = listOf("DocumentReference")
-    override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
-    override val validPartOfValues = listOf("MedicationStatement", "Procedure")
-
     override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
         validateVitalSignValue(element.value, parentContext, validation)
     }

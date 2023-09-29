@@ -37,12 +37,6 @@ class RoninBodyHeight(
     // Quantity unit codes - [USCore Body Length Units](http://hl7.org/fhir/R4/valueset-ucum-bodylength.html)
     override val validQuantityCodes = listOf("cm", "[in_i]")
 
-    // Reference checks - override BaseRoninObservation value lists as needed for RoninBodyHeight
-    override val validBasedOnValues = listOf("CarePlan", "MedicationRequest")
-    override val validDerivedFromValues = listOf("DocumentReference")
-    override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
-    override val validPartOfValues = listOf("MedicationStatement", "Procedure")
-
     private val noBodySiteError = FHIRError(
         code = "RONIN_HTOBS_001",
         severity = ValidationIssueSeverity.ERROR,

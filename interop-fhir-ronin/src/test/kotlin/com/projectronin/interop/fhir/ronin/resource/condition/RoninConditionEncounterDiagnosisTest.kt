@@ -1629,63 +1629,6 @@ class RoninConditionEncounterDiagnosisTest {
     }
 
     @Test
-    fun `validate fails if subject has no reference attribute`() {
-        val condition = Condition(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value)),
-                source = Uri("source")
-            ),
-            extension = listOf(conditionCodeExtension),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            code = CodeableConcept(
-                coding = diagnosisCodingList,
-                text = "code".asFHIR()
-            ),
-            subject = Reference(
-                display = "display".asFHIR(),
-                type = Uri("Condition", extension = dataAuthorityExtension)
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("encounter-diagnosis")
-                        )
-                    )
-                )
-            )
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Condition.subject",
-            exception.message
-        )
-    }
-
-    @Test
     fun `validate fails if subject reference is wrong type`() {
         val condition = Condition(
             id = Id("12345"),
@@ -1716,8 +1659,8 @@ class RoninConditionEncounterDiagnosisTest {
                 text = "code".asFHIR()
             ),
             subject = Reference(
-                reference = "Condition/12345".asFHIR(),
-                type = Uri("Condition", extension = dataAuthorityExtension)
+                reference = "Group/12345".asFHIR(),
+                type = Uri("Group", extension = dataAuthorityExtension)
             ),
             category = listOf(
                 CodeableConcept(
@@ -1731,14 +1674,13 @@ class RoninConditionEncounterDiagnosisTest {
             )
         )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition).alertIfErrors()
-        }
+        val validation = profile.validate(condition)
 
+        println(validation.issues())
+        assertEquals(1, validation.issues().size)
         assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Condition.subject",
-            exception.message
+            "WARNING INV_REF_TYPE: reference can only be one of the following: Patient @ Condition.subject.reference",
+            validation.issues().first().toString()
         )
     }
 

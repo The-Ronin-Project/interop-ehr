@@ -35,25 +35,6 @@ class RoninBodyTemperature(
     // Quantity unit codes - [USCore Body Temperature Units](http://hl7.org/fhir/R4/valueset-ucum-bodytemp.html)
     override val validQuantityCodes = listOf("Cel", "[degF]")
 
-    // Reference checks - override BaseRoninObservation value lists as needed for RoninBodyTemperature
-    override val validDerivedFromValues = listOf(
-        "DocumentReference",
-        "ImagingStudy",
-        "Media",
-        "MolecularSequence",
-        "Observation",
-        "QuestionnaireResponse"
-    )
-    override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
-    override val validPartOfValues = listOf(
-        "ImagingStudy",
-        "Immunization",
-        "MedicationAdministration",
-        "MedicationDispense",
-        "MedicationStatement",
-        "Procedure"
-    )
-
     override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
         validateVitalSignValue(element.value, parentContext, validation)
     }

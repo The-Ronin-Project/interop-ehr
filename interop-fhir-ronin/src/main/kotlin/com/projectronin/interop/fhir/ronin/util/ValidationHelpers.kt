@@ -1,13 +1,14 @@
 package com.projectronin.interop.fhir.ronin.util
 
+import com.projectronin.event.interop.internal.v1.ResourceType
 import com.projectronin.interop.common.enums.CodedEnum
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.resource.Resource
-import com.projectronin.interop.fhir.ronin.error.InvalidReferenceResourceTypeError
 import com.projectronin.interop.fhir.validate.FHIRError
+import com.projectronin.interop.fhir.validate.InvalidReferenceType
 import com.projectronin.interop.fhir.validate.InvalidValueSetError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -22,7 +23,7 @@ inline fun <reified T> getCodedEnumOrNull(targetValue: String?): T? where T : En
 
 fun validateReferenceList(
     referenceList: List<Reference>,
-    resourceTypesList: List<String>,
+    resourceTypesList: List<ResourceType>,
     context: LocationContext,
     validation: Validation,
     containedResource: List<Resource<*>>? = listOf()
@@ -37,17 +38,19 @@ fun validateReferenceList(
 
 fun validateReference(
     reference: Reference?,
-    resourceTypesList: List<String>,
+    resourceTypesList: List<ResourceType>,
     context: LocationContext,
     validation: Validation,
     containedResource: List<Resource<*>>? = listOf()
 ) {
+    val resourceTypesStringList = resourceTypesList.map { it.name }
     val requiredContainedResource = FHIRError(
         code = "RONIN_REQ_REF_1",
         severity = ValidationIssueSeverity.ERROR,
         description = "Contained resource is required if a local reference is provided",
         location = LocationContext(context.element, context.field)
     )
+
     validation.apply {
         reference?.let {
             if (it.reference?.value.toString().startsWith("#")) {
@@ -58,15 +61,15 @@ fun validateReference(
                     LocationContext(context.element, "")
                 )
                 checkTrue(
-                    resourceTypesList.contains(containedResource?.find { it.id?.value == id }?.resourceType),
-                    InvalidReferenceResourceTypeError(context, resourceTypesList),
-                    LocationContext(context.element, "")
+                    resourceTypesStringList.contains(containedResource?.find { r -> r.id?.value == id }?.resourceType),
+                    InvalidReferenceType(Reference::reference, resourceTypesList),
+                    context
                 )
             } else {
                 checkTrue(
-                    reference.isInTypeList(resourceTypesList),
-                    InvalidReferenceResourceTypeError(context, resourceTypesList),
-                    LocationContext(context.element, "")
+                    reference.isInTypeList(resourceTypesStringList),
+                    InvalidReferenceType(Reference::reference, resourceTypesList),
+                    context
                 )
             }
         }

@@ -50,7 +50,8 @@ class RoninMedicationRequestTest {
             status of Code("on-hold")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes will be generated
-        val rcdmMedicationRequestJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmMedicationRequest)
+        val rcdmMedicationRequestJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmMedicationRequest)
 
         // Uncomment to take a peek at the JSON
         // println(rcdmMedicationRequestJSON)
@@ -64,7 +65,8 @@ class RoninMedicationRequestTest {
         val rcdmMedicationRequest = rcdmPatient.rcdmMedicationRequest {}
 
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes will be generated
-        val rcdmMedicationRequestJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmMedicationRequest)
+        val rcdmMedicationRequestJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmMedicationRequest)
 
         // Uncomment to take a peek at the JSON
         // println(rcdmMedicationRequestJSON)
@@ -96,8 +98,10 @@ class RoninMedicationRequestTest {
         assertEquals(emptyList<Reference>(), rcdmMedicationRequest.detectedIssue)
         assertEquals(emptyList<Reference>(), rcdmMedicationRequest.eventHistory)
         assertNotNull(rcdmMedicationRequest.id)
-        val patientFHIRId = rcdmMedicationRequest.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = rcdmMedicationRequest.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            rcdmMedicationRequest.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            rcdmMedicationRequest.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", rcdmMedicationRequest.id?.value.toString())
         assertEquals("test", tenant)
     }
@@ -156,10 +160,7 @@ class RoninMedicationRequestTest {
             subject of rcdmReference("Device", "456")
         }
         val validation = rcdmMedicationRequest.validate(medicationRequest, null)
-        assertEquals(validation.hasErrors(), true)
-        assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
-        assertEquals(validation.issues()[0].description, "The referenced resource type was not Patient")
-        assertEquals(validation.issues()[0].location, LocationContext(element = "MedicationRequest", field = "subject"))
+        assertTrue(validation.hasIssues())
     }
 
     @Test
@@ -170,18 +171,6 @@ class RoninMedicationRequestTest {
         val validation = rcdmMedicationRequest.validate(medicationRequest, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Practitioner/456", medicationRequest.requester?.reference?.value)
-    }
-
-    @Test
-    fun `rcdmMedicationRequest - invalid requester input - validate fails`() {
-        val medicationRequest = rcdmMedicationRequest("test") {
-            requester of rcdmReference("Coverage", "456")
-        }
-        val validation = rcdmMedicationRequest.validate(medicationRequest, null)
-        assertEquals(validation.hasErrors(), true)
-        assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
-        assertEquals(validation.issues()[0].description, "The referenced resource type was not one of Device, Organization, Patient, Practitioner, PractitionerRole, RelatedPerson")
-        assertEquals(validation.issues()[0].location, LocationContext(element = "MedicationRequest", field = "requester"))
     }
 
     @Test

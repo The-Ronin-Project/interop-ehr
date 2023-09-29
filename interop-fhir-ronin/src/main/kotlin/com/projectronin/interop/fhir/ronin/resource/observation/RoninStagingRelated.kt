@@ -35,27 +35,6 @@ class RoninStagingRelated(
     override val rcdmVersion = RCDMVersion.V3_26_1
     override val profileVersion = 3
 
-    override val validDerivedFromValues = listOf(
-        "DocumentReference",
-        "ImagingStudy",
-        "Media",
-        "MolecularSequence",
-        "Observation",
-        "QuestionnaireResponse"
-    )
-
-    override val validPartOfValues = listOf(
-        "ImagingStudy",
-        "Immunization",
-        "MedicationAdministration",
-        "MedicationDispense",
-        "MedicationStatement",
-        "Procedure"
-    )
-
-    override val validPerformerValues =
-        listOf("Patient", "Practitioner", "PractitionerRole", "RelatedPerson", "Organization", "CareTeam")
-
     private val requiredIdError = RequiredFieldError(Observation::id)
 
     // category and category.coding must be present but are not fixed values

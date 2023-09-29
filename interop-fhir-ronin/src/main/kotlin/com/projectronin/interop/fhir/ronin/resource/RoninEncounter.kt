@@ -11,7 +11,6 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
-import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -81,7 +80,6 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
             checkTrue(element.type.isNotEmpty(), requiredTypeError, parentContext)
 
             checkNotNull(element.subject, requiredSubjectError, parentContext)
-            validateReference(element.subject, listOf("Patient"), LocationContext(Encounter::subject), validation)
 
             element.identifier.forEachIndexed { index, identifier ->
                 val identifierContext = parentContext.append(LocationContext("Encounter", "identifier[$index]"))

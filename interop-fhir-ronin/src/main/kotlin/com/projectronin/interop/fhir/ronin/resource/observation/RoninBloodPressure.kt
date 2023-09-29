@@ -50,12 +50,6 @@ class RoninBloodPressure(
     // Quantity unit codes - [USCore Blood Pressure Units](http://hl7.org/fhir/us/core/STU5.0.1/StructureDefinition-us-core-blood-pressure.html)
     override val validQuantityCodes = listOf("mm[Hg]")
 
-    // Reference checks - override BaseRoninObservation value lists as needed for RoninBloodPressure
-    override val validBasedOnValues = listOf("CarePlan", "MedicationRequest")
-    override val validPartOfValues = listOf("MedicationStatement", "Procedure")
-    override val validDerivedFromValues = listOf("DocumentReference")
-    override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
-
     override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
         if (element.dataAbsentReason == null) {
             val components = element.component

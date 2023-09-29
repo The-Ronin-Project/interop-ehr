@@ -37,19 +37,6 @@ class RoninBodyWeight(
     // Quantity unit codes - [USCore Body Weight Units](http://hl7.org/fhir/R4/valueset-ucum-bodyweight.html)
     override val validQuantityCodes = listOf("kg", "[lb_av]", "g")
 
-    // Reference checks - override BaseRoninObservation value lists as needed for RoninBodyWeight
-    override val validBasedOnValues = listOf("CarePlan", "MedicationRequest")
-    override val validDerivedFromValues = listOf("DocumentReference")
-    override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
-    override val validPartOfValues = listOf(
-        "ImagingStudy",
-        "Immunization",
-        "MedicationAdministration",
-        "MedicationDispense",
-        "MedicationStatement",
-        "Procedure"
-    )
-
     private val noBodySiteError = FHIRError(
         code = "RONIN_WTOBS_001",
         severity = ValidationIssueSeverity.ERROR,

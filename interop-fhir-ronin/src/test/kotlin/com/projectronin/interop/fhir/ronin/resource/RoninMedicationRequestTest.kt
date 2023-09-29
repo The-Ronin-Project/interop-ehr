@@ -649,49 +649,6 @@ class RoninMedicationRequestTest {
     }
 
     @Test
-    fun `validate fails with missing subject reference attribute`() {
-        val medicationRequest = MedicationRequest(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            status = MedicationRequestStatus.COMPLETED.asCode(),
-            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
-            subject = Reference(
-                display = "reference".asFHIR(),
-                type = Uri("Condition", extension = dataAuthorityExtension)
-            ),
-            requester = Reference(reference = "Practitioner/1234".asFHIR())
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ MedicationRequest.subject",
-            exception.message
-        )
-    }
-
-    @Test
     fun `validate fails with wrong subject reference type`() {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
@@ -717,20 +674,19 @@ class RoninMedicationRequestTest {
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
             medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
             subject = Reference(
-                reference = "Condition/1234".asFHIR(),
-                type = Uri("Condition", extension = dataAuthorityExtension)
+                reference = "Group/1234".asFHIR(),
+                type = Uri("Group", extension = dataAuthorityExtension)
             ),
             requester = Reference(reference = "Practitioner/1234".asFHIR())
         )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
-        }
+        val validation = roninMedicationRequest.validate(medicationRequest)
 
+        println(validation.issues())
+        assertEquals(1, validation.issues().size)
         assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ MedicationRequest.subject",
-            exception.message
+            "WARNING INV_REF_TYPE: reference can only be one of the following: Patient @ MedicationRequest.subject.reference",
+            validation.issues().first().toString()
         )
     }
 
@@ -770,93 +726,6 @@ class RoninMedicationRequestTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: subject is a required element @ MedicationRequest.subject",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails with missing requester reference attribute`() {
-        val medicationRequest = MedicationRequest(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            status = MedicationRequestStatus.COMPLETED.asCode(),
-            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            ),
-            requester = Reference(display = "reference".asFHIR())
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of Device, Organization, Patient, Practitioner, PractitionerRole, RelatedPerson @ MedicationRequest.requester",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails with wrong requester reference type`() {
-        val medicationRequest = MedicationRequest(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            status = MedicationRequestStatus.COMPLETED.asCode(),
-            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("MedicationRequest", extension = dataAuthorityExtension)
-            ),
-            requester = Reference(reference = "Condition/1234".asFHIR())
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of Device, Organization, " +
-                "Patient, Practitioner, PractitionerRole, RelatedPerson @ MedicationRequest.requester",
             exception.message
         )
     }

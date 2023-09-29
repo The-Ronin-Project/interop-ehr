@@ -1,5 +1,6 @@
 package com.projectronin.interop.fhir.ronin.resource.diagnosticReport
 
+import com.projectronin.event.interop.internal.v1.ResourceType
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.resource.Condition
 import com.projectronin.interop.fhir.r4.resource.DiagnosticReport
@@ -8,10 +9,12 @@ import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
+import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
+import com.projectronin.interop.fhir.validate.append
 import com.projectronin.interop.fhir.validate.validation
 import com.projectronin.interop.tenant.config.model.Tenant
 import java.time.LocalDateTime
@@ -54,6 +57,12 @@ abstract class BaseRoninDiagnosticReport(
     override fun validateUSCore(element: DiagnosticReport, parentContext: LocationContext, validation: Validation) {
         validation.apply {
             checkNotNull(element.code, requiredCodeError, parentContext)
+            validateReference(
+                element.subject,
+                listOf(ResourceType.Patient),
+                parentContext.append(LocationContext(DiagnosticReport::subject)),
+                this
+            )
         }
     }
 

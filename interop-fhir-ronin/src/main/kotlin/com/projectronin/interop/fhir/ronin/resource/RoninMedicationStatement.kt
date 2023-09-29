@@ -8,7 +8,6 @@ import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.BaseRoninProfile
-import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -34,9 +33,6 @@ class RoninMedicationStatement(normalizer: Normalizer, localizer: Localizer) :
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
             containedResourcePresent(element.contained, parentContext, validation)
-
-            // required subject is validated in R4
-            validateReference(element.subject, listOf("Patient"), LocationContext(MedicationStatement::subject), this)
 
             // check that subject reference has type and the extension is the data authority extension identifier
             ifNotNull(element.subject) {

@@ -22,7 +22,6 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.condition.RoninConditionEncounterDiagnosis
-import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -67,15 +66,18 @@ class RoninConditionEncounterDiagnosisTest {
         assertEquals(roninCondition.code?.coding?.size, 1)
         assertNotNull(roninCondition.subject)
         assertNotNull(roninCondition.id)
-        val patientFHIRId = roninCondition.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = roninCondition.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            roninCondition.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            roninCondition.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", roninCondition.id?.value.toString())
         assertEquals("test", tenant)
         assertFalse(validate)
         assertTrue(qualified)
 
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
-        val roninConditionJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninCondition)
+        val roninConditionJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninCondition)
         // Uncomment to take a peek at the JSON
         // println(roninConditionJSON)
         assertNotNull(roninConditionJSON)
@@ -137,18 +139,6 @@ class RoninConditionEncounterDiagnosisTest {
         val validate = roninConditionEncounterDiagnosis.validate(roninCondition).hasErrors()
         assertTrue(validate)
         assertTrue(qualified)
-    }
-
-    @Test
-    fun `invalid subject input - fails validation`() {
-        val roninCondition = rcdmConditionEncounterDiagnosis("test") {
-            subject of rcdmReference("Location", "456")
-        }
-        val validation = roninConditionEncounterDiagnosis.validate(roninCondition, null)
-        assertEquals(validation.hasErrors(), true)
-        assertEquals("RONIN_INV_REF_TYPE", validation.issues()[0].code)
-        assertEquals("The referenced resource type was not Patient", validation.issues()[0].description)
-        assertEquals(LocationContext(element = "Condition", field = "subject"), validation.issues()[0].location)
     }
 
     @Test

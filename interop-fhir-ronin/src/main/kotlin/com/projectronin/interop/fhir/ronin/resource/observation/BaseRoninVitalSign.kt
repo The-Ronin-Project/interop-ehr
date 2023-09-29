@@ -43,9 +43,6 @@ abstract class BaseRoninVitalSign(
     // Quantity unit codes - subclasses may override to modify validation logic for quantity units like "cm" "kg"
     open val validQuantityCodes: List<String> = emptyList()
 
-    // Reference checks - override BaseRoninObservation value lists as needed for BaseRoninVitalSign
-    override val validSubjectValues = listOf("Patient")
-
     // Dynamic value checks - override BaseRoninObservation for BaseRoninVitalSign
     override val acceptedEffectiveTypes = listOf(
         DynamicValueType.DATE_TIME,

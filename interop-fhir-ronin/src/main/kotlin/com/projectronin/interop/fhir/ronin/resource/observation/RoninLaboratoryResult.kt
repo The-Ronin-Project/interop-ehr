@@ -45,28 +45,6 @@ class RoninLaboratoryResult(
     override fun qualifyingCategories() =
         listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("laboratory")))
 
-    // Reference checks - override BaseRoninObservation value lists as needed for RoninLaboratoryResult
-    override val validDerivedFromValues = listOf(
-        "DocumentReference",
-        "ImagingStudy",
-        "Media",
-        "MolecularSequence",
-        "Observation",
-        "QuestionnaireResponse"
-    )
-    override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
-    override val validSubjectValues = listOf("Patient")
-    override val validPartOfValues = listOf(
-        "ImagingStudy",
-        "Immunization",
-        "MedicationAdministration",
-        "MedicationDispense",
-        "MedicationStatement",
-        "Procedure"
-    )
-    override val validPerformerValues =
-        listOf("Patient", "Practitioner", "PractitionerRole", "RelatedPerson", "Organization")
-
     // Dynamic value checks - override BaseRoninObservation for RoninLaboratoryResult
     override val acceptedEffectiveTypes = listOf(
         DynamicValueType.DATE_TIME,

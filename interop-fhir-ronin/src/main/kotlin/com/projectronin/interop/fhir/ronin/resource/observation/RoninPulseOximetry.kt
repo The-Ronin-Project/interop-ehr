@@ -51,25 +51,6 @@ class RoninPulseOximetry(
     private val validFlowRateCodes = listOf("L/min")
     private val validConcentrationCodes = listOf("%")
 
-    // Reference checks - override BaseRoninObservation value lists as needed for RoninPulseOximetry
-    override val validDerivedFromValues = listOf(
-        "DocumentReference",
-        "ImagingStudy",
-        "Media",
-        "MolecularSequence",
-        "Observation",
-        "QuestionnaireResponse"
-    )
-    override val validHasMemberValues = listOf("MolecularSequence", "Observation", "QuestionnaireResponse")
-    override val validPartOfValues = listOf(
-        "ImagingStudy",
-        "Immunization",
-        "MedicationAdministration",
-        "MedicationDispense",
-        "MedicationStatement",
-        "Procedure"
-    )
-
     override val validQuantityCodes = listOf("%")
 
     override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {

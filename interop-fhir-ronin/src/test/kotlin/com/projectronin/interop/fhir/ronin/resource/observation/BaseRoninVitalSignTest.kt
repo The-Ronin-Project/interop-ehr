@@ -271,7 +271,7 @@ class BaseRoninVitalSignTest {
                 )
             ),
             subject = Reference(
-                reference = "Organization/1234".asFHIR(),
+                reference = "Group/1234".asFHIR(),
                 type = Uri("something-here", extension = dataAuthorityExtension)
             ),
             effective = DynamicValue(
@@ -289,14 +289,13 @@ class BaseRoninVitalSignTest {
             )
         )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninVitalSign.validate(observation).alertIfErrors()
-        }
+        val validation = roninVitalSign.validate(observation)
 
+        println(validation.issues())
+        assertEquals(1, validation.issues().size)
         assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ Observation.subject",
-            exception.message
+            "WARNING INV_REF_TYPE: reference can only be one of the following: Patient @ Observation.subject.reference",
+            validation.issues().first().toString()
         )
     }
 

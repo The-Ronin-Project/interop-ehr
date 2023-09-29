@@ -3,11 +3,9 @@ package com.projectronin.interop.fhir.ronin.generators.util
 import com.projectronin.interop.fhir.generators.datatypes.ReferenceGenerator
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.ronin.generators.resource.observation.rcdmObservation
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninObservation
-import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.test.data.generator.NullDataGenerator
 import io.mockk.every
@@ -156,21 +154,6 @@ class RoninReferenceUtilTest {
 
         val roninSubject = generateReference(subjectReference, subjectOptions, tenant.mnemonic, "Patient")
         assertEquals(subjectReference, roninSubject)
-    }
-
-    @Test
-    fun `invalid subject input - fails validation`() {
-        val roninObservation = rcdmObservation("test") {
-            subject of rcdmReference("Device", "456")
-        }
-        val validation = roninObs.validate(roninObservation, null)
-        assertEquals(validation.hasErrors(), true)
-        assertEquals("RONIN_INV_REF_TYPE", validation.issues()[0].code)
-        assertEquals(
-            "The referenced resource type was not one of Patient, Location",
-            validation.issues()[0].description
-        )
-        assertEquals(LocationContext(element = "Observation", field = "subject"), validation.issues()[0].location)
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.projectronin.interop.fhir.ronin.resource.condition
 
+import com.projectronin.event.interop.internal.v1.ResourceType
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.resource.Condition
@@ -85,9 +86,6 @@ abstract class BaseRoninCondition(
             // clinicalStatus required value set is validated in R4
             // verificationStatus required value set is validated in R4
 
-            // subject required is validated in R4
-            validateReference(element.subject, listOf("Patient"), LocationContext(Condition::subject), validation)
-
             checkTrue(
                 element.extension.any {
                     it.url == RoninExtension.TENANT_SOURCE_CONDITION_CODE.uri &&
@@ -99,7 +97,16 @@ abstract class BaseRoninCondition(
         }
     }
 
-    override fun validateUSCore(element: Condition, parentContext: LocationContext, validation: Validation) {}
+    override fun validateUSCore(element: Condition, parentContext: LocationContext, validation: Validation) {
+        validation.apply {
+            validateReference(
+                element.subject,
+                listOf(ResourceType.Patient),
+                LocationContext(Condition::subject),
+                validation
+            )
+        }
+    }
 
     override fun conceptMap(
         normalized: Condition,

@@ -1082,7 +1082,7 @@ class RoninStagingRelatedTest {
     }
 
     @Test
-    fun `validate fails with subject not being Patient or Location`() {
+    fun `validate fails with subject not being Patient`() {
         val observation = Observation(
             id = Id("123"),
             meta = Meta(
@@ -1112,68 +1112,18 @@ class RoninStagingRelatedTest {
             category = stagingRelatedConceptList,
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
             subject = Reference(
-                reference = "Practitioner/1234".asFHIR(),
+                reference = "Group/1234".asFHIR(),
                 type = Uri("something", extension = dataAuthorityExtension)
             )
         )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation).alertIfErrors()
-        }
+        val validation = roninStagingRelated.validate(observation)
 
+        println(validation.issues())
+        assertEquals(1, validation.issues().size)
         assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of Patient, Location @ Observation.subject",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate fails on performer not being of Patient, Practitioner, PractitionerRole, RelatedPerson, Organization, or CareTeam`() {
-        val observation = Observation(
-            id = Id("123"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.OBSERVATION_STAGING_RELATED.value)),
-                source = Uri("source")
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            status = ObservationStatus.AMENDED.asCode(),
-            extension = listOf(tenantStagingRelatedSourceExtension),
-            code = stagingRelatedConcept,
-            category = stagingRelatedConceptList,
-            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(
-                reference = "Patient/1234".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            ),
-
-            performer = listOf(Reference(reference = "CarePlan/1234".asFHIR()))
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of Patient, Practitioner, PractitionerRole, RelatedPerson, Organization, CareTeam @ Observation.performer[0]",
-            exception.message
+            "WARNING INV_REF_TYPE: reference can only be one of the following: Patient @ Observation.subject.reference",
+            validation.issues().first().toString()
         )
     }
 

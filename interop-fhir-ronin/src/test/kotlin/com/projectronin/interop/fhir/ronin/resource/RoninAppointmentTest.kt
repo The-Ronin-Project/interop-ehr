@@ -7,7 +7,6 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
-import com.projectronin.interop.fhir.r4.datatype.HumanName
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Narrative
@@ -25,7 +24,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.resource.Location
 import com.projectronin.interop.fhir.r4.resource.Participant
-import com.projectronin.interop.fhir.r4.resource.Practitioner
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.validate.resource.R4AppointmentValidator
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
@@ -116,7 +114,10 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -161,7 +162,10 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -214,7 +218,10 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -228,132 +235,6 @@ class RoninAppointmentTest {
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: meta is a required element @ Appointment.meta",
             exception.message
-        )
-    }
-
-    @Test
-    fun `validate checks actor reference`() {
-        val appointment = Appointment(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            extension = listOf(statusExtension("cancelled")),
-            status = AppointmentStatus.CANCELLED.asCode(),
-            participant = listOf(
-                Participant(
-                    actor = Reference(display = "Practitioner/actor".asFHIR()),
-                    status = ParticipationStatus.ACCEPTED.asCode()
-                )
-            )
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninAppointment.validate(appointment).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of Patient, PractitionerRole, Practitioner, Location, RelatedPerson, Device, HealthcareService @ Participant.actor\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Participant.actor.type",
-            exception.message
-        )
-    }
-
-    @Test
-    fun `validate checks actor reference for contained reference`() {
-        val appointment = Appointment(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
-            contained = listOf(
-                Practitioner(
-                    id = Id("12345"),
-                    meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-                    name = listOf(HumanName(family = "Doe".asFHIR()))
-                )
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            extension = listOf(statusExtension("cancelled")),
-            status = AppointmentStatus.CANCELLED.asCode(),
-            participant = listOf(
-                Participant(
-                    actor = Reference(reference = "#12345".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
-                    status = ParticipationStatus.ACCEPTED.asCode()
-                )
-            )
-        )
-        roninAppointment.validate(appointment).alertIfErrors()
-    }
-
-    @Test
-    fun `validate checks actor reference for missing contained reference`() {
-        val appointment = Appointment(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            extension = listOf(statusExtension("cancelled")),
-            status = AppointmentStatus.CANCELLED.asCode(),
-            participant = listOf(
-                Participant(
-                    actor = Reference(reference = "#12345".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
-                    status = ParticipationStatus.ACCEPTED.asCode()
-                )
-            )
-        )
-        val error = roninAppointment.validate(appointment).getErrorString()
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_1: Contained resource is required if a local reference is provided @ Participant.actor\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not one of Patient, PractitionerRole, Practitioner, Location, RelatedPerson, Device, HealthcareService @ Participant.actor",
-            error
         )
     }
 
@@ -383,7 +264,10 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -442,7 +326,10 @@ class RoninAppointmentTest {
             basedOn = listOf(Reference(display = "based on".asFHIR())),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
@@ -553,7 +440,10 @@ class RoninAppointmentTest {
         assertEquals(
             listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
@@ -570,7 +460,10 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -660,7 +553,10 @@ class RoninAppointmentTest {
         assertEquals(
             listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
@@ -709,7 +605,10 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -759,7 +658,10 @@ class RoninAppointmentTest {
             status = AppointmentStatus.BOOKED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -802,7 +704,10 @@ class RoninAppointmentTest {
             status = AppointmentStatus.PROPOSED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             ),
@@ -853,7 +758,10 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -904,7 +812,10 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -959,7 +870,10 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -1011,7 +925,10 @@ class RoninAppointmentTest {
             status = AppointmentStatus.CANCELLED.asCode(),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -1054,7 +971,10 @@ class RoninAppointmentTest {
             status = Code(value = "abc"),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -1123,7 +1043,10 @@ class RoninAppointmentTest {
             status = Code(value = "xyz"),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )
@@ -1185,7 +1108,10 @@ class RoninAppointmentTest {
             status = Code(value = "cancelled"),
             participant = listOf(
                 Participant(
-                    actor = Reference(reference = "Practitioner/actor".asFHIR(), type = Uri("Practitioner", extension = dataAuthorityExtension)),
+                    actor = Reference(
+                        reference = "Practitioner/actor".asFHIR(),
+                        type = Uri("Practitioner", extension = dataAuthorityExtension)
+                    ),
                     status = ParticipationStatus.ACCEPTED.asCode()
                 )
             )

@@ -8,7 +8,6 @@ import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.BaseRoninProfile
-import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
@@ -38,12 +37,6 @@ class RoninRequestGroup(normalizer: Normalizer, localizer: Localizer) :
                     validation
                 )
             }
-            validateReference(
-                element.subject,
-                listOf("Group", "Patient"),
-                LocationContext(RequestGroup::subject),
-                validation
-            )
         }
         // required value sets for status, intent, and priority (when present) are validated in R4
     }

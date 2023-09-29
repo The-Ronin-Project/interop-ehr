@@ -53,7 +53,8 @@ class RoninRequestGroupTest {
             }
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes will be generated
-        val rcdmRequestGroupJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmRequestGroup)
+        val rcdmRequestGroupJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmRequestGroup)
 
         // Uncomment to take a peek at the JSON
         // println(rcdmRequestGroupJSON)
@@ -67,7 +68,8 @@ class RoninRequestGroupTest {
         val rcdmRequestGroup = rcdmPatient.rcdmRequestGroup {}
 
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes will be generated
-        val rcdmRequestGroupJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmRequestGroup)
+        val rcdmRequestGroupJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmRequestGroup)
 
         // Uncomment to take a peek at the JSON
         // println(rcdmRequestGroupJSON)
@@ -82,8 +84,10 @@ class RoninRequestGroupTest {
         assertNotNull(rcdmRequestGroup.intent)
         assertNotNull(rcdmRequestGroup.subject)
         assertNotNull(rcdmRequestGroup.id)
-        val patientFHIRId = rcdmRequestGroup.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
-        val tenant = rcdmRequestGroup.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
+        val patientFHIRId =
+            rcdmRequestGroup.identifier.firstOrNull { it.system == CodeSystem.RONIN_FHIR_ID.uri }?.value?.value.toString()
+        val tenant =
+            rcdmRequestGroup.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }?.value?.value.toString()
         assertEquals("$tenant-$patientFHIRId", rcdmRequestGroup.id?.value.toString())
         assertEquals("test", tenant)
     }
@@ -134,18 +138,6 @@ class RoninRequestGroupTest {
         val validation = rcdmRequestGroup.validate(requestGroup, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/456", requestGroup.subject?.reference?.value)
-    }
-
-    @Test
-    fun `rcdmRequestGroup - invalid subject input - validate fails`() {
-        val requestGroup = rcdmRequestGroup("test") {
-            subject of rcdmReference("Device", "456")
-        }
-        val validation = rcdmRequestGroup.validate(requestGroup, null)
-        assertEquals(validation.hasErrors(), true)
-        assertEquals("RONIN_INV_REF_TYPE", validation.issues()[0].code)
-        assertEquals("The referenced resource type was not one of Group, Patient", validation.issues()[0].description)
-        assertEquals(LocationContext(element = "RequestGroup", field = "subject"), validation.issues()[0].location)
     }
 
     @Test

@@ -305,8 +305,8 @@ class RoninDocumentReferenceTest {
             subject = Reference(reference = "Patient/123".asFHIR()),
             context = DocumentReferenceContext(
                 encounter = listOf(
-                    Reference(reference = FHIRString("Medication/testTenant-medID")),
-                    Reference(reference = FHIRString("Patient/testTenant-patID"))
+                    Reference(reference = FHIRString("Encounter/testTenant-medID")),
+                    Reference(reference = FHIRString("Encounter/testTenant-patID"))
                 )
             )
         )
@@ -317,7 +317,7 @@ class RoninDocumentReferenceTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_DOCREF_004: No more than one encounter is allowed for this type @ DocumentReference.encounter",
+                "ERROR RONIN_DOCREF_004: No more than one encounter is allowed for this type @ DocumentReference.context.encounter",
             exception.message
         )
     }
@@ -1240,11 +1240,11 @@ class RoninDocumentReferenceTest {
     }
 
     @Test
-    fun `validate fails if subject has no reference attribute`() {
+    fun `validate warns if subject reference is wrong type`() {
         val documentReference = DocumentReference(
-            id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
             extension = documentReferenceExtension,
+            id = Id("12345"),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
@@ -1264,7 +1264,7 @@ class RoninDocumentReferenceTest {
             ),
             type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
-            subject = Reference(display = "reference".asFHIR()),
+            subject = Reference(reference = "Practitioner/12345".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = categoryCodingList
@@ -1287,19 +1287,17 @@ class RoninDocumentReferenceTest {
             )
         )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference).alertIfErrors()
-        }
+        val validation = roninDocumentReference.validate(documentReference)
 
+        assertEquals(1, validation.issues().size)
         assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ DocumentReference.subject",
-            exception.message
+            "WARNING INV_REF_TYPE: reference can only be one of the following: Patient @ DocumentReference.subject.reference",
+            validation.issues().first().toString()
         )
     }
 
     @Test
-    fun `validate fails if subject reference is wrong type`() {
+    fun `validate warns if context encounter reference is wrong type`() {
         val documentReference = DocumentReference(
             meta = Meta(profile = listOf(Canonical(RoninProfile.DOCUMENT_REFERENCE.value)), source = Uri("source")),
             extension = documentReferenceExtension,
@@ -1323,7 +1321,7 @@ class RoninDocumentReferenceTest {
             ),
             type = docRefTypeConcept,
             status = DocumentReferenceStatus.CURRENT.asCode(),
-            subject = Reference(reference = "DocumentReference/12345".asFHIR()),
+            subject = Reference(reference = "Patient/12345".asFHIR()),
             category = listOf(
                 CodeableConcept(
                     coding = categoryCodingList
@@ -1343,17 +1341,18 @@ class RoninDocumentReferenceTest {
                         )
                     )
                 )
+            ),
+            context = DocumentReferenceContext(
+                encounter = listOf(Reference(reference = "EpisodeOfCare/1234".asFHIR()))
             )
         )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninDocumentReference.validate(documentReference).alertIfErrors()
-        }
+        val validation = roninDocumentReference.validate(documentReference)
 
+        assertEquals(1, validation.issues().size)
         assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_INV_REF_TYPE: The referenced resource type was not Patient @ DocumentReference.subject",
-            exception.message
+            "WARNING INV_REF_TYPE: reference can only be one of the following: Encounter @ DocumentReference.context.encounter[0].reference",
+            validation.issues().first().toString()
         )
     }
 

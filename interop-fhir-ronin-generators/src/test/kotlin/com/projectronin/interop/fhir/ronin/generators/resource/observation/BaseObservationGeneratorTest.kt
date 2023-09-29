@@ -20,7 +20,6 @@ import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninObservation
-import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
@@ -266,21 +265,6 @@ class BaseObservationGeneratorTest {
         val validation = roninObs.validate(roninObservation, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Location/456", roninObservation.subject?.reference?.value)
-    }
-
-    @Test
-    fun `invalid subject input - validate fails`() {
-        val roninObservation = rcdmObservation("test") {
-            subject of rcdmReference("Practitioner", "789")
-        }
-        val validation = roninObs.validate(roninObservation, null)
-        assertEquals(validation.hasErrors(), true)
-        assertEquals(validation.issues()[0].code, "RONIN_INV_REF_TYPE")
-        assertEquals(
-            validation.issues()[0].description,
-            "The referenced resource type was not one of Patient, Location"
-        )
-        assertEquals(validation.issues()[0].location, LocationContext(element = "Observation", field = "subject"))
     }
 
     @Test
