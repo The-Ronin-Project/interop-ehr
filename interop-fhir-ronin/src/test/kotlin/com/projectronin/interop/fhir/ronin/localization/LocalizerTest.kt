@@ -96,21 +96,24 @@ class LocalizerTest {
             value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
         ),
         Extension(
-            id = "5678".asFHIR(),
+            id = "1234".asFHIR(),
             url = Uri("http://localhost/extension"),
             value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/1234".asFHIR()))
         )
     )
     private val localizableExtensions = listOf(
         Extension(
-            id = "5678".asFHIR(),
+            id = "1234".asFHIR(),
             url = Uri("http://localhost/extension"),
-            value = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "Patient/1234".asFHIR()))
+            value = DynamicValue(
+                DynamicValueType.REFERENCE,
+                Reference(reference = "Patient/1234".asFHIR())
+            )
         )
     )
     private val localizedExtensions = listOf(
         Extension(
-            id = "5678".asFHIR(),
+            id = "1234".asFHIR(),
             url = Uri("http://localhost/extension"),
             value = DynamicValue(
                 DynamicValueType.REFERENCE,
@@ -128,7 +131,7 @@ class LocalizerTest {
             value = DynamicValue(DynamicValueType.STRING, "Value".asFHIR())
         ),
         Extension(
-            id = "5678".asFHIR(),
+            id = "1234".asFHIR(),
             url = Uri("http://localhost/extension"),
             value = DynamicValue(
                 DynamicValueType.REFERENCE,
@@ -1675,7 +1678,7 @@ class LocalizerTest {
             url = Uri("url")
         )
         val localizedExtension = localizer.localize(extension, tenant)
-        assertTrue(extension == localizedExtension)
+        assertTrue(extension === localizedExtension)
     }
 
     @Test
@@ -1686,7 +1689,7 @@ class LocalizerTest {
             value = DynamicValue(DynamicValueType.STRING, "Value")
         )
         val localizedExtension = localizer.localize(extension, tenant)
-        assertTrue(extension == localizedExtension)
+        assertTrue(extension === localizedExtension)
     }
 
     @Test

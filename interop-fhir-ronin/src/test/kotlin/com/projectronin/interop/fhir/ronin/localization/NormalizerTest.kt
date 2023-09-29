@@ -16,6 +16,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.r4.resource.RequestGroup
 import com.projectronin.interop.fhir.r4.valueset.IdentifierUse
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.util.asCode
@@ -69,6 +71,15 @@ class NormalizerTest {
         val normalized =
             normalizeCodeableConceptMethod.call(normalizer, codeableConcept, parameterName, tenant) as? CodeableConcept
         normalizeCodeableConceptMethod.isAccessible = false
+        return normalized
+    }
+
+    private fun normalizeAndFilterExtension(extension: Extension): Extension? {
+        val normalizeAndFilterExtensionsMethod =
+            Normalizer::class.functions.find { it.name == "normalizeAndFilterExtension" }!!
+        normalizeAndFilterExtensionsMethod.isAccessible = true
+        val normalized = normalizeAndFilterExtensionsMethod.call(normalizer, extension) as? Extension
+        normalizeAndFilterExtensionsMethod.isAccessible = false
         return normalized
     }
 
@@ -379,5 +390,250 @@ class NormalizerTest {
                 )
             )
         assertEquals(expectedCodeableConcept, normalizedCodeableConcept)
+    }
+
+    @Test
+    fun `normalize extension with no value`() {
+        val patient = Patient(
+            extension = listOf(
+                Extension(
+                    url = Uri("something here")
+                )
+            )
+        )
+        val normalizedExtension = normalizer.normalize(patient, tenant)
+        assertEquals(normalizedExtension.extension.size, 0)
+    }
+
+    @Test
+    fun `normalize extension with no url`() {
+        val patient = Patient(
+            extension = listOf(
+                Extension(
+                    value = DynamicValue(
+                        type = DynamicValueType.CODING,
+                        value = Coding(
+                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                            code = Code(value = "abc")
+                        )
+                    )
+                )
+            )
+        )
+        val normalizedExtension = normalizer.normalize(patient, tenant)
+        assertEquals(0, normalizedExtension.extension.size)
+    }
+
+    @Test
+    fun `normalize extension with ronin url and value`() {
+        val patient = Patient(
+            extension = listOf(
+                Extension(
+                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus"),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODING,
+                        value = Coding(
+                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                            code = Code(value = "abc")
+                        )
+                    )
+                )
+            )
+        )
+        val expectedExtension = listOf(
+            Extension(
+                url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus"),
+                value = DynamicValue(
+                    type = DynamicValueType.CODING,
+                    value = Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                        code = Code(value = "abc")
+                    )
+                )
+            )
+        )
+        val normalizedExtension = normalizer.normalize(patient, tenant)
+        assertEquals(normalizedExtension.extension, expectedExtension)
+    }
+
+    @Test
+    fun `normalize extension within resource that has ronin url and value`() {
+        val patient = Patient(
+            id = Id("12345"),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus"),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODING,
+                        value = Coding(
+                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                            code = Code(value = "abc")
+                        )
+                    )
+                )
+            )
+        )
+        val normalizedExtension = normalizer.normalize(patient, tenant)
+        assertEquals(normalizedExtension, patient)
+    }
+
+    @Test
+    fun `normalize extension within resource that has ronin url`() {
+        val patient = Patient(
+            id = Id("12345"),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceAppointmentStatus")
+                )
+            )
+        )
+        val normalizedExtension = normalizer.normalize(patient, tenant)
+        assertEquals(normalizedExtension.extension.size, 0)
+    }
+
+    @Test
+    fun `normalize extension within resource without value is dropped`() {
+        val requestGroup = RequestGroup(
+            id = Id("1234"),
+            extension = listOf(
+                Extension(
+                    url = Uri("this-should-be-removed-1")
+                )
+            ),
+            status = Code("active"),
+            intent = Code("order"),
+            basedOn = listOf(
+                Reference(
+                    type = Uri("Patient"),
+                    extension = listOf(
+                        Extension(
+                            url = Uri("this-should-be-removed-2")
+                        )
+                    )
+                )
+            )
+        )
+
+        val expectedRequestGroup = RequestGroup(
+            id = Id("1234"),
+            status = Code("active"),
+            intent = Code("order"),
+            basedOn = listOf(
+                Reference(
+                    type = Uri("Patient"),
+                    extension = emptyList()
+                )
+            )
+        )
+
+        val normalizedExtension = normalizer.normalize(requestGroup, tenant)
+        assertEquals(expectedRequestGroup, normalizedExtension)
+    }
+
+    @Test
+    fun `normalize extension within multiple urls and values`() {
+        val requestGroup = RequestGroup(
+            id = Id("1234"),
+            extension = listOf(
+                Extension(
+                    url = Uri("this-should-be-removed")
+                ),
+                Extension(
+                    url = Uri("this-should-be-kept"),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODING,
+                        value = Coding(
+                            code = Code(value = "abc")
+                        )
+                    )
+                ),
+                Extension(
+                    url = Uri("this-should-be-kept"),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODING,
+                        value = Coding(
+                            code = Code(value = "def")
+                        )
+                    )
+                ),
+                Extension(
+                    url = Uri("this-should-be-removed")
+                )
+            ),
+            status = Code("active"),
+            intent = Code("order"),
+            basedOn = listOf(
+                Reference(
+                    type = Uri("Patient"),
+                    extension = listOf(
+                        Extension(
+                            url = Uri("this-is-an-extension-url-should-be-removed")
+                        )
+                    )
+                )
+            )
+        )
+
+        val normalized = normalizer.normalize(requestGroup, tenant)
+        assertEquals(normalized.extension.size, 2)
+        assertEquals(normalized.basedOn[0].extension.size, 0)
+    }
+
+    @Test
+    fun `normalize extension within multiple urls and values - keeps basedOn`() {
+        val requestGroup = RequestGroup(
+            id = Id("1234"),
+            extension = listOf(
+                Extension(
+                    url = Uri("this-should-be-removed")
+                ),
+                Extension(
+                    url = Uri("this-should-be-kept"),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODING,
+                        value = Coding(
+                            code = Code(value = "abc")
+                        )
+                    )
+                ),
+                Extension(
+                    url = Uri("this-should-be-kept"),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODING,
+                        value = Coding(
+                            code = Code(value = "def")
+                        )
+                    )
+                ),
+                Extension(
+                    url = Uri("this-should-be-removed")
+                )
+            ),
+            status = Code("active"),
+            intent = Code("order"),
+            basedOn = listOf(
+                Reference(
+                    type = Uri("Patient"),
+                    extension = listOf(
+                        Extension(
+                            url = Uri("this-is-an-extension-url-should-be-removed")
+                        ),
+                        Extension(
+                            url = Uri("this-should-be-kept"),
+                            value = DynamicValue(
+                                type = DynamicValueType.CODING,
+                                value = Coding(
+                                    code = Code(value = "def")
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+
+        val normalized = normalizer.normalize(requestGroup, tenant)
+        assertEquals(normalized.extension.size, 2)
+        assertEquals(normalized.basedOn[0].extension.size, 1)
     }
 }

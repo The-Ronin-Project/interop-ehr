@@ -16,7 +16,7 @@ abstract class BaseGenericTransformer {
     /**
      * Transforms a specific [element] for the [tenant]. If unable to transform, null be returned.
      */
-    protected abstract fun transformType(element: Any, parameterName: String, tenant: Tenant): Any?
+    protected abstract fun transformType(element: Any, parameterName: String, tenant: Tenant): TransformResult
 
     /**
      * Transforms the [element] for [tenant] if transformation is needed or returns null if it's already transformed.
@@ -40,9 +40,8 @@ abstract class BaseGenericTransformer {
                         val collectionType = property.returnType.arguments.first().type!!.jvmErasure
                         transformList(value, collectionType, propertyName, tenant)
                     } else {
-                        transformType(value, propertyName, tenant)
+                        transformType(value, propertyName, tenant).element
                     }
-
                     transformedValue?.let { propertyName to transformedValue }
                 }
             } else {
@@ -62,12 +61,14 @@ abstract class BaseGenericTransformer {
     ): List<*>? {
         val originalAndLocalizedItems = collection.filter { it != null && it::class == collectionType }.map {
             it to transformType(it!!, parameterName, tenant)
-        }
-        return if (originalAndLocalizedItems.all { it.second == null }) {
+        }.filter { !it.second.removeFromElement }
+        return if (collection.isNotEmpty() && originalAndLocalizedItems.isEmpty()) {
+            originalAndLocalizedItems
+        } else if (originalAndLocalizedItems.all { it.second.element == null }) {
             null
         } else {
             originalAndLocalizedItems.map {
-                it.second ?: it.first
+                it.second.element ?: it.first
             }
         }
     }
@@ -83,8 +84,14 @@ abstract class BaseGenericTransformer {
         val copyFunction = element::class.memberFunctions.firstOrNull { it.name == "copy" } as? KFunction<T>
             ?: throw IllegalStateException()
         val parameters = copyFunction.parameters.filter { it.name != null }.associateBy { it.name }
+
         val copyArguments =
             mapOf(copyFunction.instanceParameter!! to element) + transformedValues.mapKeys { parameters[it.key]!! }
         return copyFunction.callBy(copyArguments)
     }
 }
+
+data class TransformResult(
+    val element: Any?,
+    val removeFromElement: Boolean = false
+)
