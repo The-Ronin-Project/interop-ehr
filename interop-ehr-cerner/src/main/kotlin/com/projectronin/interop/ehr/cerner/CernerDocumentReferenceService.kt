@@ -26,7 +26,8 @@ class CernerDocumentReferenceService(cernerClient: CernerClient) : DocumentRefer
         List<DocumentReference> {
         val parameters = mapOf(
             "patient" to patientFhirId,
-            // TODO - limit by category. INT-2014
+            // Categories are hardcoded per INFX: INT-2014
+            "category" to listOf("LP29684-5", "LP29708-2", "LP75011-4", "LP7819-8", "LP7839-6", "clinical-note"),
             "date" to getDateParam(startDate, endDate, tenant)
         )
         return getResourceListFromSearch(tenant, parameters)
