@@ -39,6 +39,7 @@ class EpicTenantDAOTest {
         assertEquals("urn:oid:1.2.840.114350.1.13.297.3.7.2.686980", epicTenant?.departmentInternalSystem)
         assertEquals("urn:epic:apporchard.curprod", epicTenant?.hsi)
         assertEquals("E8675309", epicTenant?.patientOnboardedFlagId)
+        assertEquals("urn:order.system1", epicTenant?.orderSystem)
     }
 
     @Test
@@ -82,6 +83,7 @@ class EpicTenantDAOTest {
             hsi = "hsi"
             departmentInternalSystem = "departmentSystem"
             patientOnboardedFlagId = "flagID"
+            orderSystem = "urn:order.system3"
         }
 
         val result = dao.insert(testobj)
@@ -99,6 +101,7 @@ class EpicTenantDAOTest {
         assertEquals(testobj.hsi, result.hsi)
         assertEquals(testobj.departmentInternalSystem, result.departmentInternalSystem)
         assertEquals(testobj.patientOnboardedFlagId, result.patientOnboardedFlagId)
+        assertEquals(testobj.orderSystem, result.orderSystem)
     }
 
     @Test
@@ -117,6 +120,7 @@ class EpicTenantDAOTest {
             encounterCSNSystem = "csnSystem"
             patientMRNTypeText = "MRN"
             hsi = "hsi"
+            orderSystem = "urn:order.system1"
         }
 
         assertThrows<SQLIntegrityConstraintViolationException> { dao.insert(testobj) }
@@ -145,6 +149,7 @@ class EpicTenantDAOTest {
             hsi = "hsi"
             departmentInternalSystem = "departmentSystem"
             patientOnboardedFlagId = "flagID"
+            orderSystem = "urn:order.system4"
         }
         val result = dao.update(updated)
         assertNotNull(result)
@@ -165,5 +170,6 @@ class EpicTenantDAOTest {
         assertEquals(updated.hsi, found?.hsi)
         assertEquals(updated.departmentInternalSystem, found?.departmentInternalSystem)
         assertEquals(updated.patientOnboardedFlagId, found?.patientOnboardedFlagId)
+        assertEquals(updated.orderSystem, found?.orderSystem)
     }
 }

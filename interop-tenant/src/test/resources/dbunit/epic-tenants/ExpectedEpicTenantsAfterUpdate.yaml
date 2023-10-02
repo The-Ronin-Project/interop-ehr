@@ -35,6 +35,7 @@ io_tenant_epic:
     patient_internal_system: "internalSystem"
     encounter_csn_system: "csnSystem"
     hsi: "hsi"
+    order_system: "urn:order.system4"
   - io_tenant_id: 1003
     release_version: "2021.10"
     service_endpoint: "https://localhost:8080/"
@@ -47,3 +48,4 @@ io_tenant_epic:
     mrn_type_text: "MRN"
     patient_internal_system: "urn:oid:internal.system"
     encounter_csn_system: "urn:oid:encounter.system"
+    order_system: "urn:order.system2"

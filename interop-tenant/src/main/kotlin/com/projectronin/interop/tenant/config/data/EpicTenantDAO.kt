@@ -43,6 +43,7 @@ class EpicTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTenan
             set(it.hsi, epicTenant.hsi)
             set(it.departmentInternalSystem, epicTenant.departmentInternalSystem)
             set(it.patientOnboardedFlagId, epicTenant.patientOnboardedFlagId)
+            set(it.orderSystem, epicTenant.orderSystem)
         }
         val epicTenants = database.from(EpicTenantDOs)
             .select()
@@ -71,6 +72,7 @@ class EpicTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTenan
             set(it.hsi, epicTenant.hsi)
             set(it.departmentInternalSystem, epicTenant.departmentInternalSystem)
             set(it.patientOnboardedFlagId, epicTenant.patientOnboardedFlagId)
+            set(it.orderSystem, epicTenant.orderSystem)
             where {
                 it.tenantId eq epicTenant.tenantId
             }

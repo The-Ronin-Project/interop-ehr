@@ -29,3 +29,4 @@ io_tenant_epic:
     patient_internal_system: "internalSystem"
     encounter_csn_system: "csnSystem"
     hsi: "hsi"
+    order_system: "urn:order.system3"
