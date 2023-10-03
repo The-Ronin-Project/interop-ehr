@@ -7,16 +7,20 @@ import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.interop.ehr.MedicationAdministrationService
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
+import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
+import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.fhir.r4.resource.MedicationAdministration
+import com.projectronin.interop.fhir.r4.resource.MedicationAdministrationDosage
 import com.projectronin.interop.fhir.r4.resource.MedicationRequest
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.ronin.util.localize
@@ -26,6 +30,7 @@ import com.projectronin.interop.tenant.config.model.vendor.Epic
 import datadog.trace.api.Trace
 import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Component
+import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
 
@@ -98,24 +103,31 @@ class EpicMedicationAdministrationService(
             epicClient.post(tenant, urlSearchPart, request).body<EpicMedAdmin>()
         }
 
-        return response.orders.flatMap { it.medicationAdministrations }.mapNotNull { epicMedAdmin ->
-            if (epicMedAdmin.administrationInstant.isEmpty()) {
-                null
-            } else {
-                MedicationAdministration(
-                    id = Id("$orderID-${Instant.parse(epicMedAdmin.administrationInstant).epochSecond}"),
-                    status = Code(epicMedAdmin.action), // TODO: determine if we should do concept mapping here or in interop-fhir
-                    medication = DynamicValue(
-                        type = DynamicValueType.REFERENCE,
-                        value = Reference(reference = FHIRString("Medication/$medicationID"))
-                    ),
-                    subject = Reference(reference = FHIRString("Patient/$patientID")),
-                    effective = DynamicValue(
-                        type = DynamicValueType.DATE_TIME,
-                        value = DateTime(epicMedAdmin.administrationInstant)
-                    ),
-                    request = Reference(reference = FHIRString("MedicationRequest/$medicationRequestID"))
-                )
+        return response.orders.flatMap { epicMedOrder ->
+            epicMedOrder.medicationAdministrations.mapNotNull { epicMedAdmin ->
+                if (epicMedAdmin.administrationInstant.isEmpty()) {
+                    null
+                } else {
+                    MedicationAdministration(
+                        id = Id("$orderID-${Instant.parse(epicMedAdmin.administrationInstant).epochSecond}"),
+                        status = Code(epicMedAdmin.action), // TODO: determine if we should do concept mapping here or in interop-fhir
+                        medication = DynamicValue(
+                            type = DynamicValueType.CODEABLE_CONCEPT,
+                            value = CodeableConcept(
+                                text = FHIRString(epicMedOrder.name)
+                            )
+                        ),
+                        subject = Reference(reference = FHIRString("Patient/$patientID")),
+                        effective = DynamicValue(
+                            type = DynamicValueType.DATE_TIME,
+                            value = DateTime(epicMedAdmin.administrationInstant)
+                        ),
+                        request = Reference(reference = FHIRString("MedicationRequest/$medicationRequestID")),
+                        dosage = MedicationAdministrationDosage(
+                            dose = Quantity(value = Decimal(BigDecimal(epicMedAdmin.dose.value)), unit = FHIRString(epicMedAdmin.dose.unit))
+                        )
+                    )
+                }
             }
         }
     }
@@ -128,13 +140,22 @@ data class EpicMedAdmin(
 
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class EpicMedicationOrder(
-    val medicationAdministrations: List<EpicMedicationAdministration> = emptyList()
+    val medicationAdministrations: List<EpicMedicationAdministration> = emptyList(),
+    @JsonProperty("Name")
+    val name: String = ""
 )
 
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class EpicMedicationAdministration(
     val administrationInstant: String,
-    val action: String
+    val action: String,
+    val dose: EpicDose
+)
+
+@JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
+data class EpicDose(
+    val value: String,
+    val unit: String
 )
 
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)

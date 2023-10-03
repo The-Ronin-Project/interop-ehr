@@ -3,7 +3,10 @@ package com.projectronin.interop.ehr.epic
 import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.CodeSystem
+import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
+import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Reference
+import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Encounter
@@ -17,6 +20,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import java.math.BigDecimal
 import java.time.LocalDate
 
 internal class EpicMedicationAdministrationServiceTest {
@@ -69,14 +73,17 @@ internal class EpicMedicationAdministrationServiceTest {
         val epicResponse = EpicMedAdmin(
             orders = listOf(
                 EpicMedicationOrder(
+                    name = "TEST NAME",
                     medicationAdministrations = listOf(
                         EpicMedicationAdministration(
                             administrationInstant = "2011-07-05T14:00:00Z",
-                            action = "Given"
+                            action = "Given",
+                            dose = EpicDose(value = "11", unit = "mg")
                         ),
                         EpicMedicationAdministration(
                             administrationInstant = "",
-                            action = "Given"
+                            action = "Given",
+                            dose = EpicDose(value = "15", unit = "mg")
                         )
                     )
                 )
@@ -88,10 +95,13 @@ internal class EpicMedicationAdministrationServiceTest {
         val result = service.findMedicationAdministrationsByRequest(testTenant, medRequest)
         assertEquals(1, result.size)
         assertEquals("orderID-1309874400", result.first().id?.value)
-        assertEquals(Reference(reference = FHIRString("Medication/medID")), result.first().medication?.value)
+        assertEquals(DynamicValueType.CODEABLE_CONCEPT, result.first().medication?.type)
+        assertEquals(CodeableConcept(text = FHIRString("TEST NAME")), result.first().medication?.value)
         assertEquals(Reference(reference = FHIRString("MedicationRequest/medReqID")), result.first().request)
         assertEquals(Reference(reference = FHIRString("Patient/patID")), result.first().subject)
         assertEquals("Given", result.first().status?.value)
+        assertEquals(Decimal(BigDecimal("11")), result.first().dosage?.dose?.value)
+        assertEquals(FHIRString("mg"), result.first().dosage?.dose?.unit)
     }
 
     @Test
