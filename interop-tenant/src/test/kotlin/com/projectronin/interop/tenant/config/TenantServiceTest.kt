@@ -48,6 +48,7 @@ class TenantServiceTest {
     private val epicHsiValue = "urn:epic:apporchard.curprod"
     private val epicDepartmentSystem = "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980"
     private val epicPatientOnboardedFlagId = "E8675309"
+    private val epicOrderSystem = "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268"
     private val standardEHRDO1 = mockk<EhrDO> {
         every { id } returns 1
         every { instanceName } returns "Epic Sandbox"
@@ -90,6 +91,7 @@ class TenantServiceTest {
         every { hsi } returns epicHsiValue
         every { departmentInternalSystem } returns epicDepartmentSystem
         every { patientOnboardedFlagId } returns epicPatientOnboardedFlagId
+        every { orderSystem } returns epicOrderSystem
     }
     private val standardEpicTenantDO2 = mockk<EpicTenantDO> {
         every { tenantId } returns 2
@@ -107,6 +109,7 @@ class TenantServiceTest {
         every { hsi } returns epicHsiValue
         every { departmentInternalSystem } returns epicDepartmentSystem
         every { patientOnboardedFlagId } returns epicPatientOnboardedFlagId
+        every { orderSystem } returns epicOrderSystem
     }
     private val standardCernerTenantDO = mockk<CernerTenantDO> {
         every { tenantId } returns 3
@@ -178,7 +181,8 @@ class TenantServiceTest {
             patientMRNTypeText = "patientMRNTypeText",
             hsi = epicHsiValue,
             departmentInternalSystem = epicDepartmentSystem,
-            patientOnboardedFlagId = epicPatientOnboardedFlagId
+            patientOnboardedFlagId = epicPatientOnboardedFlagId,
+            orderSystem = epicOrderSystem
         ),
         monitoredIndicator = null
     )
@@ -209,7 +213,8 @@ class TenantServiceTest {
             patientMRNTypeText = "patientMRNTypeText",
             hsi = epicHsiValue,
             departmentInternalSystem = epicDepartmentSystem,
-            patientOnboardedFlagId = epicPatientOnboardedFlagId
+            patientOnboardedFlagId = epicPatientOnboardedFlagId,
+            orderSystem = epicOrderSystem
         ),
         monitoredIndicator = false
     )
@@ -391,7 +396,8 @@ class TenantServiceTest {
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = epicHsiValue,
                 departmentInternalSystem = epicDepartmentSystem,
-                patientOnboardedFlagId = epicPatientOnboardedFlagId
+                patientOnboardedFlagId = epicPatientOnboardedFlagId,
+                orderSystem = epicOrderSystem
             ),
             monitoredIndicator = null
         )
@@ -425,6 +431,7 @@ class TenantServiceTest {
             every { hsi } returns epicHsiValue
             every { departmentInternalSystem } returns epicDepartmentSystem
             every { patientOnboardedFlagId } returns epicPatientOnboardedFlagId
+            every { orderSystem } returns epicOrderSystem
         }
         every { epicTenantDAO.getByTenantMnemonic("Tenant1") } returns epicTenantDO
 
@@ -454,7 +461,8 @@ class TenantServiceTest {
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = epicHsiValue,
                 departmentInternalSystem = epicDepartmentSystem,
-                patientOnboardedFlagId = epicPatientOnboardedFlagId
+                patientOnboardedFlagId = epicPatientOnboardedFlagId,
+                orderSystem = epicOrderSystem
             ),
             monitoredIndicator = null
         )
@@ -609,7 +617,8 @@ class TenantServiceTest {
                 patientMRNTypeText = "patientMRNTypeText",
                 hsi = epicHsiValue,
                 departmentInternalSystem = epicDepartmentSystem,
-                patientOnboardedFlagId = epicPatientOnboardedFlagId
+                patientOnboardedFlagId = epicPatientOnboardedFlagId,
+                orderSystem = epicOrderSystem
             ),
             monitoredIndicator = false
         )

@@ -16,6 +16,7 @@ import com.projectronin.interop.tenant.config.model.EpicAuthenticationConfig
  * @property hsi The HSI value to be used for integration with Epic's Tesseract gateway, null if not leveraging Tesseract.
  * @property departmentInternalSystem The system that represent the Epic "internal" department identifier on a Location.
  * @property patientOnboardedFlagId Epic ID for the patient flag that indicates if the patient has onboarded with Ronin.
+ * @property orderSystem Epic ID for order system corresponding to medication orders' identifier system
  */
 @JsonTypeName("EPIC")
 data class Epic(
@@ -34,7 +35,8 @@ data class Epic(
     val patientMRNTypeText: String,
     val hsi: String? = null,
     val departmentInternalSystem: String,
-    val patientOnboardedFlagId: String? = null
+    val patientOnboardedFlagId: String? = null,
+    val orderSystem: String? = null
 ) : Vendor {
     override val type: VendorType
         get() = VendorType.EPIC
