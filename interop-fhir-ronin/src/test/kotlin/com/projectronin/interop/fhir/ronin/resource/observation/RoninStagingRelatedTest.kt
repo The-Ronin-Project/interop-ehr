@@ -593,8 +593,8 @@ class RoninStagingRelatedTest {
             )
         )
 
-        val (transformed, _) = roninStagingRelated.transform(observation, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninStagingRelated.transform(observation, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -632,8 +632,8 @@ class RoninStagingRelatedTest {
             code = stagingRelatedConcept
         )
 
-        val (transformed, _) = roninStagingRelated.transform(observation, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninStagingRelated.transform(observation, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -671,8 +671,8 @@ class RoninStagingRelatedTest {
             code = null
         )
 
-        val (transformed, _) = roninStagingRelated.transform(observation, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninStagingRelated.transform(observation, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -751,10 +751,13 @@ class RoninStagingRelatedTest {
             )
         )
 
-        val (transformed, validation) = roninStagingRelated.transform(observation, tenant)
+        val (transformResponse, validation) = roninStagingRelated.transform(observation, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
@@ -910,10 +913,13 @@ class RoninStagingRelatedTest {
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR())
         )
 
-        val (transformed, validation) = roninStagingRelated.transform(observation, tenant)
+        val (transformResponse, validation) = roninStagingRelated.transform(observation, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Observation", transformed.resourceType)
         assertEquals(
             listOf(tenantStagingRelatedSourceExtension),
@@ -1021,12 +1027,12 @@ class RoninStagingRelatedTest {
             dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR())
         )
 
-        val (transformed, validation) = roninStagingRelated.transform(observation, tenant)
+        val (transformResponse, validation) = roninStagingRelated.transform(observation, tenant)
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
             validation.alertIfErrors()
         }
-        assertNull(transformed)
+        assertNull(transformResponse)
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' " +
@@ -1070,8 +1076,8 @@ class RoninStagingRelatedTest {
         )
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
-            val (transformed, validation) = roninStagingRelated.transform(observation, tenant)
-            assertNull(transformed)
+            val (transformResponse, validation) = roninStagingRelated.transform(observation, tenant)
+            assertNull(transformResponse)
             validation.alertIfErrors()
         }
         assertEquals(
@@ -1513,9 +1519,9 @@ class RoninStagingRelatedTest {
             )
         )
 
-        val (transformed, validation) = roninStagingRelated.transform(observation, tenant)
+        val (transformResponse, validation) = roninStagingRelated.transform(observation, tenant)
         validation.alertIfErrors()
-        assertNotNull(transformed)
+        assertNotNull(transformResponse)
     }
 
     @Test
@@ -1556,8 +1562,8 @@ class RoninStagingRelatedTest {
             )
         )
 
-        val (transformed, validation) = roninStagingRelated.transform(observation, tenant)
-        assertNull(transformed)
+        val (transformResponse, validation) = roninStagingRelated.transform(observation, tenant)
+        assertNull(transformResponse)
         val exception = assertThrows<IllegalArgumentException> {
             validation.alertIfErrors()
         }
@@ -1607,8 +1613,8 @@ class RoninStagingRelatedTest {
             )
         )
 
-        val (transformed, validation) = roninStagingRelated.transform(observation, tenant)
-        assertNull(transformed)
+        val (transformResponse, validation) = roninStagingRelated.transform(observation, tenant)
+        assertNull(transformResponse)
         val exception = assertThrows<IllegalArgumentException> {
             validation.alertIfErrors()
         }
@@ -1789,7 +1795,7 @@ class RoninStagingRelatedTest {
             )
         )
 
-        val (transformed, validation) = roninStagingRelated.transform(observation, tenant)
+        val (transformResponse, validation) = roninStagingRelated.transform(observation, tenant)
         assertFalse(validation.hasErrors())
         assertEquals(
             listOf(
@@ -1802,7 +1808,7 @@ class RoninStagingRelatedTest {
                     extension = listOf(componentCodeExtension)
                 )
             ),
-            transformed?.component
+            transformResponse!!.resource.component
         )
     }
 }

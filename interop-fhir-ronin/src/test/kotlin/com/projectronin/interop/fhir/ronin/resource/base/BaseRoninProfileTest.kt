@@ -21,6 +21,7 @@ import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -286,9 +287,9 @@ class BaseRoninProfileTest {
             identifier = listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
         )
 
-        val (transformedLocation, _) = TestProfile(normalizer, localizer).transform(locationTest, tenant)
+        val (transformedResponse, _) = TestProfile(normalizer, localizer).transform(locationTest, tenant)
 
-        assertEquals(emptyList<Extension>(), transformedLocation!!.extension)
+        assertEquals(emptyList<Extension>(), transformedResponse!!.resource.extension)
     }
 
     @Test
@@ -310,7 +311,7 @@ class BaseRoninProfileTest {
             )
         )
 
-        val (transformedLocation, _) = TestProfile(normalizer, localizer).transform(locationTest, tenant)
+        val (transformedResponse, _) = TestProfile(normalizer, localizer).transform(locationTest, tenant)
 
         assertEquals(
             listOf(
@@ -332,7 +333,7 @@ class BaseRoninProfileTest {
                     )
                 )
             ),
-            transformedLocation!!.extension
+            transformedResponse!!.resource.extension
         )
     }
 
@@ -700,12 +701,12 @@ class BaseRoninProfileTest {
             parentContext: LocationContext,
             tenant: Tenant,
             forceCacheReloadTS: LocalDateTime?
-        ): Pair<Location?, Validation> {
+        ): Pair<TransformResponse<Location>?, Validation> {
             val tenantSourceCodeExtension = getExtensionOrEmptyList(
                 RoninExtension.RONIN_CONCEPT_MAP_SCHEMA,
                 normalized.physicalType
             )
-            return Pair(normalized.copy(extension = tenantSourceCodeExtension), Validation())
+            return Pair(TransformResponse(normalized.copy(extension = tenantSourceCodeExtension)), Validation())
         }
 
         override fun validateRonin(element: Location, parentContext: LocationContext, validation: Validation) {

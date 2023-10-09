@@ -3,6 +3,7 @@ package com.projectronin.interop.fhir.ronin.resource.base
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -110,16 +111,16 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
-    ): Pair<T?, Validation> {
+    ): Pair<TransformResponse<T>?, Validation> {
         val validation = Validation()
 
         val qualified = getQualifiedProfile(normalized, parentContext, validation)
         val response = qualified?.transformInternal(normalized, parentContext, tenant)
 
-        val transformed = response?.let {
+        val transformResponse = response?.let {
             validation.merge(it.second)
             it.first
         }
-        return Pair(transformed, validation)
+        return Pair(transformResponse, validation)
     }
 }

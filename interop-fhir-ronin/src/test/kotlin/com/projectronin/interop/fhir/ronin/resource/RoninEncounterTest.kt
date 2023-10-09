@@ -682,10 +682,13 @@ class RoninEncounterTest {
             partOf = Reference(reference = "Encounter/super".asFHIR())
         )
 
-        val (transformed, validation) = roninEncounter.transform(encounter, tenant)
+        val (transformResponse, validation) = roninEncounter.transform(encounter, tenant)
         validation.alertIfErrors()
 
-        transformed!! // Force it to be treated as non-null
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Encounter", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
@@ -1000,10 +1003,13 @@ class RoninEncounterTest {
             )
         )
 
-        val (transformed, validation) = roninEncounter.transform(encounter, tenant)
+        val (transformResponse, validation) = roninEncounter.transform(encounter, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(
             listOf(
                 Extension(
@@ -1029,10 +1035,13 @@ class RoninEncounterTest {
             )
         )
 
-        val (transformed, validation) = roninEncounter.transform(encounter, tenant)
+        val (transformResponse, validation) = roninEncounter.transform(encounter, tenant)
         validation.alertIfErrors()
 
-        transformed!! // Force it to be treated as non-null
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Encounter", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
@@ -1101,9 +1110,9 @@ class RoninEncounterTest {
             `class` = Coding(code = Code("OBSENC"))
         )
 
-        val (transformed, _) = roninEncounter.transform(encounter, tenant)
+        val (transformResponse, _) = roninEncounter.transform(encounter, tenant)
 
-        assertNull(transformed)
+        assertNull(transformResponse)
     }
 
     @Test

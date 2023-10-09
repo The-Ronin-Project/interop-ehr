@@ -1053,8 +1053,8 @@ class RoninBodySurfaceAreaTest {
             )
         )
 
-        val (transformed, _) = roninBodySurfaceArea.transform(observation, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninBodySurfaceArea.transform(observation, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1129,10 +1129,13 @@ class RoninBodySurfaceAreaTest {
             )
         )
 
-        val (transformed, validation) = roninBodySurfaceArea.transform(observation, tenant)
+        val (transformResponse, validation) = roninBodySurfaceArea.transform(observation, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("123"), transformed.id)
         assertEquals(
@@ -1272,10 +1275,13 @@ class RoninBodySurfaceAreaTest {
             )
         )
 
-        val (transformed, validation) = roninBodySurfaceArea.transform(observation, tenant)
+        val (transformResponse, validation) = roninBodySurfaceArea.transform(observation, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("123"), transformed.id)
         assertEquals(
@@ -1372,12 +1378,12 @@ class RoninBodySurfaceAreaTest {
             )
         )
 
-        val (transformed, validation) = roninBodySurfaceArea.transform(observation, tenant)
+        val (transformResponse, validation) = roninBodySurfaceArea.transform(observation, tenant)
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
             validation.alertIfErrors()
         }
-        assertNull(transformed)
+        assertNull(transformResponse)
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value '3140-1' " +
@@ -1408,8 +1414,8 @@ class RoninBodySurfaceAreaTest {
         )
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
-            val (transformed, validation) = roninBodySurfaceArea.transform(observation, tenant)
-            assertNull(transformed)
+            val (transformResponse, validation) = roninBodySurfaceArea.transform(observation, tenant)
+            assertNull(transformResponse)
             validation.alertIfErrors()
         }
         assertEquals(

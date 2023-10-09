@@ -2,8 +2,11 @@ package com.projectronin.interop.fhir.ronin.resource.base
 
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.r4.resource.Organization
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
@@ -37,8 +40,8 @@ class BaseProfileTest {
                 parentContext: LocationContext,
                 tenant: Tenant,
                 forceCacheReloadTS: LocalDateTime?
-            ): Pair<Location?, Validation> {
-                return Pair(normalized, Validation())
+            ): Pair<TransformResponse<Location>?, Validation> {
+                return Pair(TransformResponse(normalized), Validation())
             }
 
             override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
@@ -47,8 +50,8 @@ class BaseProfileTest {
         }
 
         val original = Location()
-        val (transformed, _) = profile.transform(original, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = profile.transform(original, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -59,7 +62,7 @@ class BaseProfileTest {
                 parentContext: LocationContext,
                 tenant: Tenant,
                 forceCacheReloadTS: LocalDateTime?
-            ): Pair<Location?, Validation> {
+            ): Pair<TransformResponse<Location>?, Validation> {
                 return Pair(null, Validation())
             }
 
@@ -69,8 +72,8 @@ class BaseProfileTest {
         }
 
         val original = Location(id = Id("1234"))
-        val (transformed, _) = profile.transform(original, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = profile.transform(original, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -81,7 +84,7 @@ class BaseProfileTest {
                 parentContext: LocationContext,
                 tenant: Tenant,
                 forceCacheReloadTS: LocalDateTime?
-            ): Pair<Location?, Validation> {
+            ): Pair<TransformResponse<Location>?, Validation> {
                 val validation = validation {
                     checkNotNull(null, RequiredFieldError(Location::id), parentContext)
                 }
@@ -95,8 +98,8 @@ class BaseProfileTest {
         }
 
         val original = Location(id = Id("1234"))
-        val (transformed, _) = profile.transform(original, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = profile.transform(original, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -107,8 +110,8 @@ class BaseProfileTest {
                 parentContext: LocationContext,
                 tenant: Tenant,
                 forceCacheReloadTS: LocalDateTime?
-            ): Pair<Location?, Validation> {
-                return Pair(normalized, Validation())
+            ): Pair<TransformResponse<Location>?, Validation> {
+                return Pair(TransformResponse(normalized), Validation())
             }
 
             override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
@@ -117,8 +120,34 @@ class BaseProfileTest {
         }
 
         val original = Location(id = Id("1234"))
-        val (transformed, _) = profile.transform(original, tenant)
-        assertEquals(Id("1234"), transformed!!.id)
+        val (transformResponse, _) = profile.transform(original, tenant)
+        assertEquals(Id("1234"), transformResponse!!.resource.id)
+        assertEquals(listOf<Resource<*>>(), transformResponse.embeddedResources)
+    }
+
+    @Test
+    fun `handles a successful transformation with embedded resources and no validation errors`() {
+        val embedded = listOf(mockk<Organization>())
+
+        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
+            override fun transformInternal(
+                normalized: Location,
+                parentContext: LocationContext,
+                tenant: Tenant,
+                forceCacheReloadTS: LocalDateTime?
+            ): Pair<TransformResponse<Location>?, Validation> {
+                return Pair(TransformResponse(normalized, embedded), Validation())
+            }
+
+            override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
+                // do nothing
+            }
+        }
+
+        val original = Location(id = Id("1234"))
+        val (transformResponse, _) = profile.transform(original, tenant)
+        assertEquals(Id("1234"), transformResponse!!.resource.id)
+        assertEquals(embedded, transformResponse.embeddedResources)
     }
 
     @Test
@@ -129,12 +158,12 @@ class BaseProfileTest {
                 parentContext: LocationContext,
                 tenant: Tenant,
                 forceCacheReloadTS: LocalDateTime?
-            ): Pair<Location?, Validation> {
+            ): Pair<TransformResponse<Location>?, Validation> {
                 val validation = validation {
                     checkNotNull(null, RequiredFieldError(Location::id), parentContext)
                 }
 
-                return Pair(normalized, validation)
+                return Pair(TransformResponse(normalized), validation)
             }
 
             override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
@@ -143,8 +172,8 @@ class BaseProfileTest {
         }
 
         val original = Location(id = Id("1234"))
-        val (transformed, _) = profile.transform(original, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = profile.transform(original, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -155,8 +184,8 @@ class BaseProfileTest {
                 parentContext: LocationContext,
                 tenant: Tenant,
                 forceCacheReloadTS: LocalDateTime?
-            ): Pair<Location?, Validation> {
-                return Pair(normalized, Validation())
+            ): Pair<TransformResponse<Location>?, Validation> {
+                return Pair(TransformResponse(normalized), Validation())
             }
 
             override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
@@ -165,7 +194,7 @@ class BaseProfileTest {
         }
 
         val original = Location(id = Id("1234"))
-        val (transformed, _) = profile.transform(original, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = profile.transform(original, tenant)
+        assertNull(transformResponse)
     }
 }

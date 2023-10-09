@@ -16,6 +16,7 @@ import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.BaseRoninProfile
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.ronin.util.getCodedEnumOrNull
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -155,13 +156,13 @@ class RoninAppointment(
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
-    ): Pair<Appointment?, Validation> {
+    ): Pair<TransformResponse<Appointment>?, Validation> {
         val validation = Validation()
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
-        return Pair(transformed, validation)
+        return Pair(TransformResponse(transformed), validation)
     }
 }

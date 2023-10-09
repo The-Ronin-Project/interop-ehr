@@ -26,17 +26,17 @@ class TransformManager(private val validationClient: ValidationClient) {
         transformer: ProfileTransformer<T>,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime? = null
-    ): T? {
-        val (transformed, validation) = transformer.transform(resource, tenant, forceCacheReloadTS)
+    ): TransformResponse<T>? {
+        val (transformResponse, validation) = transformer.transform(resource, tenant, forceCacheReloadTS)
 
         if (validation.hasIssues()) {
             // If we did not get back a transformed resource, we need to report out against the original.
-            val reportedResource = transformed ?: resource
+            val reportedResource = transformResponse?.resource ?: resource
             logger.warn(LogMarkers.VALIDATION_ISSUE) { "Failed to transform ${resource.resourceType}" }
             validation.issues().forEach { logger.warn { it } } // makes mirth debugging much easier
             validationClient.reportIssues(validation, reportedResource, tenant)
         }
 
-        return transformed
+        return transformResponse
     }
 }

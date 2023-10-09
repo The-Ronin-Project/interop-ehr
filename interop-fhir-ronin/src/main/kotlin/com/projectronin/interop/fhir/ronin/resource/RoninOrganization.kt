@@ -8,6 +8,7 @@ import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
@@ -50,12 +51,12 @@ class RoninOrganization(normalizer: Normalizer, localizer: Localizer) :
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
-    ): Pair<Organization?, Validation> {
+    ): Pair<TransformResponse<Organization>?, Validation> {
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
 
-        return Pair(transformed, Validation())
+        return Pair(TransformResponse(transformed), Validation())
     }
 }

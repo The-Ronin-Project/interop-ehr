@@ -13,6 +13,7 @@ import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.condition.RoninConditionEncounterDiagnosis
 import com.projectronin.interop.fhir.ronin.resource.condition.RoninConditionProblemsAndHealthConcerns
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -86,17 +87,20 @@ class RoninConditionsTest {
         every { profile1.qualifies(mappedCondition) } returns false
         every { profile2.qualifies(mappedCondition) } returns true
         every { profile2.transformInternal(mappedCondition, LocationContext(Condition::class), tenant) } returns Pair(
-            roninCondition,
+            TransformResponse(roninCondition),
             Validation()
         )
         every { profile1.qualifies(roninCondition) } returns false
         every { profile2.qualifies(roninCondition) } returns true
         every { profile2.validate(roninCondition, LocationContext(Condition::class)) } returns Validation()
 
-        val (transformed, validation) = roninConditions.transform(original, tenant)
+        val (transformResponse, validation) = roninConditions.transform(original, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(roninCondition, transformed)
     }
 }

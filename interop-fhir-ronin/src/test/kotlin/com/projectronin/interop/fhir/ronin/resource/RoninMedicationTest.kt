@@ -229,10 +229,13 @@ class RoninMedicationTest {
         )
 
         // transformation
-        val (transformed, validation) = roninMedication.transform(medication, tenant)
+        val (transformResponse, validation) = roninMedication.transform(medication, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(
             medication.extension + listOf(
                 Extension(
@@ -298,10 +301,13 @@ class RoninMedicationTest {
         )
 
         // transformation
-        val (transformed, validation) = roninMedication.transform(medication, tenant)
+        val (transformResponse, validation) = roninMedication.transform(medication, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(
             medication.extension + listOf(
                 Extension(
@@ -589,10 +595,13 @@ class RoninMedicationTest {
             )
         )
 
-        val (transformed, validation) = roninMedication.transform(medication, tenant)
+        val (transformResponse, validation) = roninMedication.transform(medication, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(Id("12345"), transformed.id)
         assertEquals(3, transformed.identifier.size)
         assertEquals(
@@ -698,10 +707,13 @@ class RoninMedicationTest {
         )
 
         // transformation
-        val (transformed, validation) = roninMedication.transform(medication, tenant)
+        val (transformResponse, validation) = roninMedication.transform(medication, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             RoninProfile.MEDICATION.value,
@@ -836,10 +848,13 @@ class RoninMedicationTest {
         )
 
         // transformation
-        val (transformed, validation) = roninMedication.transform(medication, tenant)
+        val (transformResponse, validation) = roninMedication.transform(medication, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             RoninProfile.MEDICATION.value,
@@ -911,8 +926,8 @@ class RoninMedicationTest {
             )
             // required code attribute is missing
         )
-        val (transformed, _) = roninMedication.transform(medication, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninMedication.transform(medication, tenant)
+        assertNull(transformResponse)
     }
 
     @Test

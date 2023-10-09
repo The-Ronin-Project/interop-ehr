@@ -469,10 +469,13 @@ class RoninAppointmentTest {
             )
         } returns ConceptMapCoding(statusCoding("cancelled"), statusExtension("cancelled"), listOf(conceptMapMetadata))
 
-        val (transformed, validation) = roninAppointment.transform(appointment, tenant)
+        val (transformResponse, validation) = roninAppointment.transform(appointment, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Appointment", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
@@ -602,10 +605,13 @@ class RoninAppointmentTest {
             )
         } returns ConceptMapCoding(statusCoding("cancelled"), statusExtension("cancelled"), listOf(conceptMapMetadata))
 
-        val (transformed, validation) = roninAppointment.transform(appointment, tenant)
+        val (transformResponse, validation) = roninAppointment.transform(appointment, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Appointment", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
@@ -712,8 +718,8 @@ class RoninAppointmentTest {
             )
         } returns ConceptMapCoding(statusCoding("cancelled"), statusExtension("cancelled"), listOf(conceptMapMetadata))
 
-        val (transformed, _) = roninAppointment.transform(appointment, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninAppointment.transform(appointment, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1113,10 +1119,13 @@ class RoninAppointmentTest {
             )
         } returns ConceptMapCoding(statusCoding("cancelled"), statusExtension("abc"), listOf(conceptMapMetadata))
 
-        val (transformed, validation) = roninAppointment.transform(appointment, tenant)
+        val (transformResponse, validation) = roninAppointment.transform(appointment, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(
             listOf(
                 Extension(
@@ -1263,10 +1272,13 @@ class RoninAppointmentTest {
             listOf(conceptMapMetadata)
         )
 
-        val (transformed, validation) = roninAppointment.transform(appointment, tenant)
+        val (transformResponse, validation) = roninAppointment.transform(appointment, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(
             listOf(
                 Extension(
@@ -1329,8 +1341,8 @@ class RoninAppointmentTest {
             )
         } returns ConceptMapCoding(statusCoding("booked"), statusExtension("cancelled"), listOf(conceptMapMetadata))
 
-        val (transformed, _) = roninAppointment.transform(appointment, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninAppointment.transform(appointment, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1380,8 +1392,8 @@ class RoninAppointmentTest {
             )
         } returns ConceptMapCoding(statusCoding("waitlist"), statusExtension("proposed"), listOf(conceptMapMetadata))
 
-        val (transformed, _) = roninAppointment.transform(appointment, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninAppointment.transform(appointment, tenant)
+        assertNull(transformResponse)
     }
 
     private fun statusCoding(value: String) = Coding(

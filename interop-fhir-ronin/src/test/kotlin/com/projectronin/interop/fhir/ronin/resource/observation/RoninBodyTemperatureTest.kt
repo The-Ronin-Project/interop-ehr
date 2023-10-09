@@ -1048,8 +1048,8 @@ class RoninBodyTemperatureTest {
             )
         )
 
-        val (transformed, _) = roninBodyTemperature.transform(observation, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninBodyTemperature.transform(observation, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1124,10 +1124,13 @@ class RoninBodyTemperatureTest {
             )
         )
 
-        val (transformed, validation) = roninBodyTemperature.transform(observation, tenant)
+        val (transformResponse, validation) = roninBodyTemperature.transform(observation, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("123"), transformed.id)
         assertEquals(
@@ -1267,10 +1270,13 @@ class RoninBodyTemperatureTest {
             )
         )
 
-        val (transformed, validation) = roninBodyTemperature.transform(observation, tenant)
+        val (transformResponse, validation) = roninBodyTemperature.transform(observation, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("123"), transformed.id)
         assertEquals(
@@ -1364,11 +1370,11 @@ class RoninBodyTemperatureTest {
             )
         )
 
-        val (transformed, validation) = roninBodyTemperature.transform(observation, tenant)
+        val (transformResponse, validation) = roninBodyTemperature.transform(observation, tenant)
         val exception = assertThrows<java.lang.IllegalArgumentException> {
             validation.alertIfErrors()
         }
-        assertNull(transformed)
+        assertNull(transformResponse)
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value '8310-5' " +
@@ -1399,8 +1405,8 @@ class RoninBodyTemperatureTest {
         )
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
-            val (transformed, validation) = roninBodyTemperature.transform(observation, tenant)
-            assertNull(transformed)
+            val (transformResponse, validation) = roninBodyTemperature.transform(observation, tenant)
+            assertNull(transformResponse)
             validation.alertIfErrors()
         }
         assertEquals(

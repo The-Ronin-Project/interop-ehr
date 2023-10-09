@@ -1017,10 +1017,13 @@ class RoninPatientTest {
             )
         )
 
-        val (transformed, validation) = roninPatient.transform(patient, tenant)
+        val (transformResponse, validation) = roninPatient.transform(patient, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Patient", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
@@ -1125,9 +1128,13 @@ class RoninPatientTest {
 
         every { mockIdentifierService.getMRNIdentifier(tenant, identifiers) } returns identifierList[0]
 
-        val (transformed, validation) = roninPatient.transform(patient, tenant)
+        val (transformResponse, validation) = roninPatient.transform(patient, tenant)
         validation.alertIfErrors()
-        transformed!!
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(
             listOf(
                 identifierList.first(),
@@ -1173,7 +1180,7 @@ class RoninPatientTest {
             birthDate = Date("1975-07-05")
         )
 
-        val (transformed, validation) = roninPatient.transform(patient, tenant)
+        val (transformResponse, validation) = roninPatient.transform(patient, tenant)
         validation.alertIfErrors()
 
         val defaultCoding = Coding(
@@ -1181,7 +1188,11 @@ class RoninPatientTest {
             code = Code("NI"),
             display = "NoInformation".asFHIR()
         )
-        transformed!!
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Patient", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
@@ -1247,8 +1258,8 @@ class RoninPatientTest {
             maritalStatus = CodeableConcept(text = "M".asFHIR())
         )
 
-        val (transformed, _) = roninPatient.transform(patient, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninPatient.transform(patient, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1450,7 +1461,7 @@ class RoninPatientTest {
             birthDate = Date("1975-07-05")
         )
 
-        val (transformed, validation) = roninPatient.transform(patient, tenant)
+        val (transformResponse, validation) = roninPatient.transform(patient, tenant)
         validation.alertIfErrors()
 
         val defaultCoding = Coding(
@@ -1458,7 +1469,11 @@ class RoninPatientTest {
             code = Code("NI"),
             display = "NoInformation".asFHIR()
         )
-        transformed!!
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Patient", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
@@ -1671,10 +1686,13 @@ class RoninPatientTest {
             telecom = initialTelecoms
         )
 
-        val (transformed, validation) = roninPatient.transform(patient, tenant)
+        val (transformResponse, validation) = roninPatient.transform(patient, tenant)
         validation.alertIfErrors()
 
-        transformed!! // Force it to be treated as non-null
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(listOf<ContactPoint>(), transformed.telecom)
     }
 
@@ -1714,10 +1732,13 @@ class RoninPatientTest {
             telecom = initialTelecoms
         )
 
-        val (transformed, validation) = roninPatient.transform(patient, tenant)
+        val (transformResponse, validation) = roninPatient.transform(patient, tenant)
         validation.alertIfErrors()
 
-        transformed!! // Force it to be treated as non-null
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(finalTelecoms, transformed.telecom)
     }
 

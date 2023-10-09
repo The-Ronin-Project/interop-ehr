@@ -26,6 +26,7 @@ import com.projectronin.interop.fhir.ronin.resource.observation.RoninObservation
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninPulseOximetry
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninRespiratoryRate
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninStagingRelated
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -165,7 +166,7 @@ class RoninObservationsTest {
                 tenant
             )
         } returns Pair(
-            roninObservation,
+            TransformResponse(roninObservation),
             Validation()
         )
 
@@ -192,10 +193,13 @@ class RoninObservationsTest {
         every { laboratoryResult.qualifies(roninObservation) } returns false
         every { stagingRelated.qualifies(roninObservation) } returns false
 
-        val (transformed, validation) = roninObservations.transform(original, tenant)
+        val (transformResponse, validation) = roninObservations.transform(original, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(roninObservation, transformed)
     }
 }

@@ -20,6 +20,7 @@ import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryCl
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.ronin.util.validateCodeInValueSet
 import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.ronin.util.validateReferenceList
@@ -222,12 +223,12 @@ class RoninDocumentReference(
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
-    ): Pair<DocumentReference?, Validation> {
+    ): Pair<TransformResponse<DocumentReference>?, Validation> {
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
 
-        return Pair(transformed, Validation())
+        return Pair(TransformResponse(transformed), Validation())
     }
 }

@@ -956,9 +956,13 @@ class RoninDocumentReferenceTest {
             subject = Reference(reference = "Patient/123".asFHIR())
         )
 
-        val (transformed, validation) = roninDocumentReference.transform(documentReference, tenant)
+        val (transformResponse, validation) = roninDocumentReference.transform(documentReference, tenant)
         validation.alertIfErrors()
-        transformed!!
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(
             documentReferenceExtension,
             transformed.extension
@@ -991,10 +995,13 @@ class RoninDocumentReferenceTest {
             subject = Reference(reference = "Patient/123".asFHIR())
         )
 
-        val (transformed, validation) = roninDocumentReference.transform(documentReference, tenant)
+        val (transformResponse, validation) = roninDocumentReference.transform(documentReference, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(Id("12345"), transformed.id)
         assertEquals(3, transformed.identifier.size)
         assertEquals(
@@ -1102,10 +1109,13 @@ class RoninDocumentReferenceTest {
         )
 
         // transformation
-        val (transformed, validation) = roninDocumentReference.transform(documentReference, tenant)
+        val (transformResponse, validation) = roninDocumentReference.transform(documentReference, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             RoninProfile.DOCUMENT_REFERENCE.value,
@@ -1176,8 +1186,8 @@ class RoninDocumentReferenceTest {
             status = null,
             type = tenantDocRefTypeConcept
         )
-        val (transformed, _) = roninDocumentReference.transform(documentReference, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninDocumentReference.transform(documentReference, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1792,8 +1802,8 @@ class RoninDocumentReferenceTest {
             subject = Reference(reference = "Patient/123".asFHIR())
         )
 
-        val (transformed, validation) = roninDocumentReference.transform(documentReference, tenant)
-        assertNull(transformed)
+        val (transformResponse, validation) = roninDocumentReference.transform(documentReference, tenant)
+        assertNull(transformResponse)
         val exception = assertThrows<IllegalArgumentException> {
             validation.alertIfErrors()
         }
@@ -1832,8 +1842,8 @@ class RoninDocumentReferenceTest {
             subject = Reference(reference = "Patient/123".asFHIR())
         )
 
-        val (transformed, validation) = roninDocumentReference.transform(documentReference, tenant)
-        assertNull(transformed)
+        val (transformResponse, validation) = roninDocumentReference.transform(documentReference, tenant)
+        assertNull(transformResponse)
         val exception = assertThrows<IllegalArgumentException> {
             validation.alertIfErrors()
         }

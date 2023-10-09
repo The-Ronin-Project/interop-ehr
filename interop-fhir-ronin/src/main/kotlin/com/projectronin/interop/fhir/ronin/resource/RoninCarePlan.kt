@@ -13,6 +13,7 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.BaseRoninProfile
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -52,7 +53,7 @@ class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
-    ): Pair<CarePlan?, Validation> {
+    ): Pair<TransformResponse<CarePlan>?, Validation> {
         val categoryExtensions = normalized.category.map {
             Extension(
                 url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
@@ -89,6 +90,6 @@ class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
             activity = normalizedActivities
         )
 
-        return Pair(transformed, Validation())
+        return Pair(TransformResponse(transformed), Validation())
     }
 }

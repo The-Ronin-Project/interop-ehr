@@ -378,8 +378,8 @@ class RoninPractitionerTest {
     fun `transform fails for practitioner with no ID`() {
         val practitioner = Practitioner()
 
-        val (transformed, _) = roninPractitioner.transform(practitioner, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninPractitioner.transform(practitioner, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -418,10 +418,13 @@ class RoninPractitionerTest {
             communication = listOf(CodeableConcept(text = "communication".asFHIR()))
         )
 
-        val (transformed, validation) = roninPractitioner.transform(practitioner, tenant)
+        val (transformResponse, validation) = roninPractitioner.transform(practitioner, tenant)
         validation.alertIfErrors()
 
-        transformed!! // Force it to be treated as non-null
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Practitioner", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
@@ -499,10 +502,13 @@ class RoninPractitionerTest {
             name = listOf(HumanName(family = "Doe".asFHIR()))
         )
 
-        val (transformed, validation) = roninPractitioner.transform(practitioner, tenant)
+        val (transformResponse, validation) = roninPractitioner.transform(practitioner, tenant)
         validation.alertIfErrors()
 
-        transformed!! // Force it to be treated as non-null
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Practitioner", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
@@ -571,10 +577,13 @@ class RoninPractitionerTest {
             telecom = initialTelecoms
         )
 
-        val (transformed, validation) = roninPractitioner.transform(practitioner, tenant)
+        val (transformResponse, validation) = roninPractitioner.transform(practitioner, tenant)
         validation.alertIfErrors()
 
-        transformed!! // Force it to be treated as non-null
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(listOf<ContactPoint>(), transformed.telecom)
     }
 
@@ -611,10 +620,13 @@ class RoninPractitionerTest {
             telecom = initialTelecoms
         )
 
-        val (transformed, validation) = roninPractitioner.transform(practitioner, tenant)
+        val (transformResponse, validation) = roninPractitioner.transform(practitioner, tenant)
         validation.alertIfErrors()
 
-        transformed!! // Force it to be treated as non-null
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(finalTelecoms, transformed.telecom)
     }
 }

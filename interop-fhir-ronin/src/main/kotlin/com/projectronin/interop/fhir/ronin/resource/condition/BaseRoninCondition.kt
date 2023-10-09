@@ -11,6 +11,7 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
 import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.FHIRError
@@ -169,7 +170,7 @@ abstract class BaseRoninCondition(
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
-    ): Pair<Condition?, Validation> {
+    ): Pair<TransformResponse<Condition>?, Validation> {
         val validation = validation {
             checkNotNull(normalized.id, requiredIdError, parentContext)
         }
@@ -178,6 +179,6 @@ abstract class BaseRoninCondition(
             meta = normalized.meta.transform(),
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
-        return Pair(transformed, validation)
+        return Pair(TransformResponse(transformed), validation)
     }
 }

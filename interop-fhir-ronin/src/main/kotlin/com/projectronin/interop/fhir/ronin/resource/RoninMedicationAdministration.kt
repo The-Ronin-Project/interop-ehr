@@ -10,6 +10,7 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.BaseRoninProfile
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.ronin.util.OriginalMedDataType
 import com.projectronin.interop.fhir.ronin.util.populateExtensionWithReference
 import com.projectronin.interop.fhir.validate.FHIRError
@@ -143,13 +144,13 @@ class RoninMedicationAdministration(normalizer: Normalizer, localizer: Localizer
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
-    ): Pair<MedicationAdministration?, Validation> {
+    ): Pair<TransformResponse<MedicationAdministration>?, Validation> {
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant),
             extension = normalized.extension + populateExtensionWithReference(normalized.medication) // populate extension based on medication[x]
         )
 
-        return Pair(transformed, Validation())
+        return Pair(TransformResponse(transformed), Validation())
     }
 }

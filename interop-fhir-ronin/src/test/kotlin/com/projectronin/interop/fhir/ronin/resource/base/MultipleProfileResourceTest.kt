@@ -11,6 +11,7 @@ import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.observation.RoninObservation
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -138,8 +139,8 @@ class MultipleProfileResourceTest {
         every { testProfile2.qualifies(location) } returns false
         every { testProfile3.qualifies(location) } returns false
 
-        val (transformed, _) = profile.transform(location, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = profile.transform(location, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -150,8 +151,8 @@ class MultipleProfileResourceTest {
         every { testProfile2.qualifies(location) } returns true
         every { testProfile3.qualifies(location) } returns true
 
-        val (transformed, _) = profile.transform(location, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = profile.transform(location, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -169,7 +170,7 @@ class MultipleProfileResourceTest {
                 any(),
                 tenant
             )
-        } returns Pair(transformedLocation, Validation())
+        } returns Pair(TransformResponse(transformedLocation), Validation())
 
         every { testProfile1.qualifies(location) } returns true
         every { testProfile1.qualifies(mappedLocation) } returns true
@@ -184,8 +185,8 @@ class MultipleProfileResourceTest {
         every { testProfile3.qualifies(mappedLocation) } returns false
         every { testProfile3.qualifies(transformedLocation) } returns false
 
-        val (transformed, _) = profile.transform(location, tenant)
-        assertEquals(transformedLocation, transformed)
+        val (transformResponse, _) = profile.transform(location, tenant)
+        assertEquals(transformedLocation, transformResponse!!.resource)
     }
 
     @Test
@@ -230,7 +231,7 @@ class MultipleProfileResourceTest {
                 tenant
             )
         } returns Pair(
-            roninObservation,
+            TransformResponse(roninObservation),
             Validation()
         )
         every { profile1.qualifies(roninObservation) } returns false
@@ -238,10 +239,13 @@ class MultipleProfileResourceTest {
         every { profile3.qualifies(roninObservation) } returns true
         every { profile3.validate(roninObservation, LocationContext(Observation::class)) } returns Validation()
 
-        val (transformed, validation) = roninObservations.transform(original, tenant)
+        val (transformResponse, validation) = roninObservations.transform(original, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(roninObservation, transformed)
     }
 

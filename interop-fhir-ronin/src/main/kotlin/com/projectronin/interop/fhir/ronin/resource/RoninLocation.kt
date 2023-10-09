@@ -11,6 +11,7 @@ import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -86,7 +87,7 @@ class RoninLocation(
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
-    ): Pair<Location?, Validation> {
+    ): Pair<TransformResponse<Location>?, Validation> {
         val validation = Validation()
 
         val normalizedName = normalized.name
@@ -101,7 +102,13 @@ class RoninLocation(
         }
 
         val contactPointTransformed = if (normalized.telecom.isNotEmpty()) {
-            contactPoint.transform(normalized.telecom, tenant, LocationContext(Location::class), validation, forceCacheReloadTS)
+            contactPoint.transform(
+                normalized.telecom,
+                tenant,
+                LocationContext(Location::class),
+                validation,
+                forceCacheReloadTS
+            )
         } else {
             Pair(normalized.telecom, validation)
         }
@@ -112,6 +119,6 @@ class RoninLocation(
             name = name,
             telecom = contactPointTransformed.first ?: emptyList()
         )
-        return Pair(transformed, contactPointTransformed.second)
+        return Pair(TransformResponse(transformed), contactPointTransformed.second)
     }
 }

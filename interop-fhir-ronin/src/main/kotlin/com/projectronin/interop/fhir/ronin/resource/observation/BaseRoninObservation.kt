@@ -17,6 +17,7 @@ import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryCl
 import com.projectronin.interop.fhir.ronin.normalization.ValueSetList
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
 import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.FHIRError
@@ -388,6 +389,8 @@ abstract class BaseRoninObservation(
         }
     }
 
+    protected open fun getTransformedBodySite(bodySite: CodeableConcept?) = bodySite
+
     private val requiredIdError = RequiredFieldError(Observation::id)
 
     override fun transformInternal(
@@ -395,15 +398,16 @@ abstract class BaseRoninObservation(
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
-    ): Pair<Observation?, Validation> {
+    ): Pair<TransformResponse<Observation>?, Validation> {
         val validation = validation {
             checkNotNull(normalized.id, requiredIdError, parentContext)
         }
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
+            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant),
+            bodySite = getTransformedBodySite(normalized.bodySite)
         )
-        return Pair(transformed, validation)
+        return Pair(TransformResponse(transformed), validation)
     }
 }

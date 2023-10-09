@@ -14,5 +14,9 @@ interface ProfileTransformer<T : Resource<T>> {
      * transformed resource, if it was transformed without validation errors, and the result of running validation against the transformed resource.
      * Pass in a timestamp to [forceCacheReloadTS] if this transform requires a fresh pull of normalization data (concept maps + value sets).
      */
-    fun transform(original: T, tenant: Tenant, forceCacheReloadTS: LocalDateTime? = null): Pair<T?, Validation>
+    fun transform(
+        original: T,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime? = null
+    ): Pair<TransformResponse<T>?, Validation>
 }

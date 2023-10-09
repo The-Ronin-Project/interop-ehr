@@ -334,8 +334,8 @@ class RoninLocationTest {
     fun `transform fails for location with no ID`() {
         val location = Location()
 
-        val (transformed, _) = roninLocation.transform(location, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninLocation.transform(location, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -465,10 +465,13 @@ class RoninLocationTest {
             endpoint = endpoint
         )
 
-        val (transformed, validation) = roninLocation.transform(location, tenant)
+        val (transformResponse, validation) = roninLocation.transform(location, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Location", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
@@ -547,10 +550,13 @@ class RoninLocationTest {
             name = "Name".asFHIR()
         )
 
-        val (transformed, validation) = roninLocation.transform(location, tenant)
+        val (transformResponse, validation) = roninLocation.transform(location, tenant)
         validation.alertIfErrors()
 
-        transformed!! // Force it to be treated as non-null
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Location", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
@@ -626,8 +632,12 @@ class RoninLocationTest {
         )
 
         val locationPair = roninLocation.transformInternal(location, LocationContext(Location::class), tenant)
-        val transformed = locationPair.first
-        transformed!!
+        val transformResponse = locationPair.first
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(
             "Unnamed Location".asFHIR(),
             transformed.name
@@ -661,8 +671,12 @@ class RoninLocationTest {
         )
 
         val locationPair = roninLocation.transformInternal(location, LocationContext(Location::class), tenant)
-        val transformed = locationPair.first
-        transformed!!
+        val transformResponse = locationPair.first
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(
             "Unnamed Location".asFHIR(),
             transformed.name
@@ -688,10 +702,13 @@ class RoninLocationTest {
             name = name
         )
 
-        val (transformed, validation) = roninLocation.transform(location, tenant)
+        val (transformResponse, validation) = roninLocation.transform(location, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Location", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
@@ -775,8 +792,12 @@ class RoninLocationTest {
         )
 
         val locationPair = roninLocation.transformInternal(location, LocationContext(Location::class), tenant)
-        val transformed = locationPair.first
-        transformed!!
+        val transformResponse = locationPair.first
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(
             FHIRString("Unnamed Location", nameId, nameExtensions),
             transformed.name
@@ -817,8 +838,12 @@ class RoninLocationTest {
         )
 
         val locationPair = roninLocation.transformInternal(location, LocationContext(Location::class), tenant)
-        val transformed = locationPair.first
-        transformed!!
+        val transformResponse = locationPair.first
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(
             FHIRString("Unnamed Location", nameId, nameExtensions),
             transformed.name

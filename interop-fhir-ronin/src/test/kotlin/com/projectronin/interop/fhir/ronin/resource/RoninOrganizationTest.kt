@@ -366,10 +366,13 @@ class RoninOrganizationTest {
             )
         )
 
-        val (transformed, validation) = roninOrganization.transform(organization, tenant)
+        val (transformResponse, validation) = roninOrganization.transform(organization, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
 
         assertEquals("Organization", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
@@ -513,10 +516,13 @@ class RoninOrganizationTest {
             active = true.asFHIR()
         )
 
-        val (transformed, validation) = roninOrganization.transform(organization, tenant)
+        val (transformResponse, validation) = roninOrganization.transform(organization, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
 
         assertEquals("Organization", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)

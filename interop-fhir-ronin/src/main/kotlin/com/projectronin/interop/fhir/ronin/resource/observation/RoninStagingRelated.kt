@@ -3,7 +3,6 @@ package com.projectronin.interop.fhir.ronin.resource.observation
 import com.projectronin.interop.fhir.r4.resource.Observation
 import com.projectronin.interop.fhir.r4.validate.resource.R4ObservationValidator
 import com.projectronin.interop.fhir.ronin.RCDMVersion
-import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
@@ -11,13 +10,9 @@ import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
-import com.projectronin.interop.fhir.validate.RequiredFieldError
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.fhir.validate.ValidationIssueSeverity
-import com.projectronin.interop.fhir.validate.validation
-import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
-import java.time.LocalDateTime
 
 @Component
 class RoninStagingRelated(
@@ -34,8 +29,6 @@ class RoninStagingRelated(
     ) {
     override val rcdmVersion = RCDMVersion.V3_26_1
     override val profileVersion = 3
-
-    private val requiredIdError = RequiredFieldError(Observation::id)
 
     // category and category.coding must be present but are not fixed values
     // code.coding must exist in the valueSet
@@ -78,22 +71,5 @@ class RoninStagingRelated(
                 parentContext
             )
         }
-    }
-
-    override fun transformInternal(
-        normalized: Observation,
-        parentContext: LocationContext,
-        tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
-    ): Pair<Observation?, Validation> {
-        val validation = validation {
-            checkNotNull(normalized.id, requiredIdError, parentContext)
-        }
-
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
-        )
-        return Pair(transformed, validation)
     }
 }

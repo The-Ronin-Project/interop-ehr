@@ -21,6 +21,7 @@ import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.toFhirIdentifier
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.ronin.util.dataAbsentReasonExtension
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityIdentifier
 import com.projectronin.interop.fhir.ronin.util.toFhirIdentifier
@@ -182,7 +183,7 @@ class RoninPatient(
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
-    ): Pair<Patient?, Validation> {
+    ): Pair<TransformResponse<Patient>?, Validation> {
         val maritalStatus = normalized.maritalStatus ?: CodeableConcept(
             coding = listOf(
                 Coding(
@@ -221,7 +222,7 @@ class RoninPatient(
             maritalStatus = maritalStatus,
             telecom = telecoms
         )
-        return Pair(transformed, validation)
+        return Pair(TransformResponse(transformed), validation)
     }
 
     /**

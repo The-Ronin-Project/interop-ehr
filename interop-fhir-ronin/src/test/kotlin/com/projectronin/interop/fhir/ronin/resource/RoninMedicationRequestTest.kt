@@ -438,10 +438,13 @@ class RoninMedicationRequestTest {
             eventHistory = listOf(Reference(reference = "Provenance/1234".asFHIR()))
         )
 
-        val (transformed, validation) = roninMedicationRequest.transform(medicationRequest, tenant)
+        val (transformResponse, validation) = roninMedicationRequest.transform(medicationRequest, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("MedicationRequest", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
@@ -552,10 +555,13 @@ class RoninMedicationRequestTest {
             requester = Reference(reference = "Practitioner/1234".asFHIR())
         )
 
-        val (transformed, validation) = roninMedicationRequest.transform(medicationRequest, tenant)
+        val (transformResponse, validation) = roninMedicationRequest.transform(medicationRequest, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("MedicationRequest", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
@@ -644,8 +650,8 @@ class RoninMedicationRequestTest {
             requester = Reference(reference = "Practitioner/1234".asFHIR())
         )
 
-        val (transformed, _) = roninMedicationRequest.transform(medicationRequest, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninMedicationRequest.transform(medicationRequest, tenant)
+        assertNull(transformResponse)
     }
 
     @Test

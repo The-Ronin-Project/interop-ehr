@@ -15,6 +15,7 @@ import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.ronin.util.hasDayFormat
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -184,7 +185,7 @@ class RoninLaboratoryResult(
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
-    ): Pair<Observation?, Validation> {
+    ): Pair<TransformResponse<Observation>?, Validation> {
         val validation = validation {
             checkNotNull(normalized.id, requiredIdError, parentContext)
         }
@@ -195,6 +196,6 @@ class RoninLaboratoryResult(
             meta = normalized.meta.transform(),
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
-        return Pair(transformed, validation)
+        return Pair(TransformResponse(transformed), validation)
     }
 }

@@ -14,6 +14,7 @@ import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.diagnosticReport.RoninDiagnosticReportLaboratory
 import com.projectronin.interop.fhir.ronin.resource.diagnosticReport.RoninDiagnosticReportNoteExchange
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -93,17 +94,20 @@ class RoninDiagnosticReportsTest {
                 tenant
             )
         } returns Pair(
-            roninDxReport,
+            TransformResponse(roninDxReport),
             Validation()
         )
         every { profile1.qualifies(roninDxReport) } returns false
         every { profile2.qualifies(roninDxReport) } returns true
         every { profile2.validate(roninDxReport, LocationContext(DiagnosticReport::class)) } returns Validation()
 
-        val (transformed, validation) = roninDiagnosticReports.transform(original, tenant)
+        val (transformResponse, validation) = roninDiagnosticReports.transform(original, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(roninDxReport, transformed)
     }
 }

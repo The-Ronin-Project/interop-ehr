@@ -147,9 +147,9 @@ class RoninDiagnosticReportLaboratoryTest {
             )
         )
 
-        val (transformed, _) = roninDiagnosticReport.transform(dxReport, tenant)
+        val (transformResponse, _) = roninDiagnosticReport.transform(dxReport, tenant)
 
-        assertNull(transformed)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -707,9 +707,13 @@ class RoninDiagnosticReportLaboratoryTest {
             )
         )
 
-        val (transformed, validation) = roninDiagnosticReport.transform(dxReport, tenant)
+        val (transformResponse, validation) = roninDiagnosticReport.transform(dxReport, tenant)
         validation.alertIfErrors()
-        transformed!!
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
 
         assertEquals("DiagnosticReport", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
@@ -889,9 +893,13 @@ class RoninDiagnosticReportLaboratoryTest {
             subject = localizeReferenceTest(mockReference) // check that it transforms
         )
 
-        val (transformed, validation) = roninDiagnosticReport.transform(dxReport, tenant)
+        val (transformResponse, validation) = roninDiagnosticReport.transform(dxReport, tenant)
         validation.alertIfErrors()
-        transformed!!
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
 
         assertEquals("DiagnosticReport", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)

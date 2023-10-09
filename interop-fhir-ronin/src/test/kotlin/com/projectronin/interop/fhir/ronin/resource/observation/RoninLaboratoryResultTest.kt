@@ -1204,8 +1204,8 @@ class RoninLaboratoryResultTest {
             )
         )
 
-        val (transformed, _) = roninLaboratoryResult.transform(observation, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninLaboratoryResult.transform(observation, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1250,8 +1250,8 @@ class RoninLaboratoryResultTest {
             )
         )
 
-        val (transformed, _) = roninLaboratoryResult.transform(observation, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninLaboratoryResult.transform(observation, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1293,8 +1293,8 @@ class RoninLaboratoryResultTest {
             )
         )
 
-        val (transformed, _) = roninLaboratoryResult.transform(observation, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninLaboratoryResult.transform(observation, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1365,10 +1365,13 @@ class RoninLaboratoryResultTest {
             )
         )
 
-        val (transformed, validation) = roninLaboratoryResult.transform(observation, tenant)
+        val (transformResponse, validation) = roninLaboratoryResult.transform(observation, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("123"), transformed.id)
         assertEquals(
@@ -1512,10 +1515,13 @@ class RoninLaboratoryResultTest {
             )
         )
 
-        val (transformed, validation) = roninLaboratoryResult.transform(observation, tenant)
+        val (transformResponse, validation) = roninLaboratoryResult.transform(observation, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Observation", transformed.resourceType)
         assertEquals(
             listOf(tenantLaboratoryResultSourceExtension),
@@ -1615,12 +1621,12 @@ class RoninLaboratoryResultTest {
             )
         )
 
-        val (transformed, validation) = roninLaboratoryResult.transform(observation, tenant)
+        val (transformResponse, validation) = roninLaboratoryResult.transform(observation, tenant)
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
             validation.alertIfErrors()
         }
-        assertNull(transformed)
+        assertNull(transformResponse)
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' " +
@@ -1653,8 +1659,8 @@ class RoninLaboratoryResultTest {
         )
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
-            val (transformed, validation) = roninLaboratoryResult.transform(observation, tenant)
-            assertNull(transformed)
+            val (transformResponse, validation) = roninLaboratoryResult.transform(observation, tenant)
+            assertNull(transformResponse)
             validation.alertIfErrors()
         }
         assertEquals(

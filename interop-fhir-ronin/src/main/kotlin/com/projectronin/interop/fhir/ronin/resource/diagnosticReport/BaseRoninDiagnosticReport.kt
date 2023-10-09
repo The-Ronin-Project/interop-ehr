@@ -8,6 +8,7 @@ import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.ronin.util.qualifiesForValueSet
 import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -73,7 +74,7 @@ abstract class BaseRoninDiagnosticReport(
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
-    ): Pair<DiagnosticReport?, Validation> {
+    ): Pair<TransformResponse<DiagnosticReport>?, Validation> {
         val validation = validation {
             checkNotNull(normalized.id, requiredIdError, parentContext)
         }
@@ -83,6 +84,6 @@ abstract class BaseRoninDiagnosticReport(
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
         )
 
-        return Pair(transformed, validation)
+        return Pair(TransformResponse(transformed), validation)
     }
 }

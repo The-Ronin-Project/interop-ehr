@@ -348,10 +348,13 @@ class RoninMedicationStatementTest {
             dosage = listOf(Dosage(text = "dosage".asFHIR()))
         )
 
-        val (transformed, validation) = roninMedicationStatement.transform(medicationStatement, tenant)
+        val (transformResponse, validation) = roninMedicationStatement.transform(medicationStatement, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             RoninProfile.MEDICATION_STATEMENT.value,
@@ -423,10 +426,13 @@ class RoninMedicationStatementTest {
             )
         )
 
-        val (transformed, validation) = roninMedicationStatement.transform(medicationStatement, tenant)
+        val (transformResponse, validation) = roninMedicationStatement.transform(medicationStatement, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(3, transformed.identifier.size)
         assertEquals(
             listOf(
@@ -475,9 +481,9 @@ class RoninMedicationStatementTest {
                     value = DateTime("1905-08-23")
                 )
             )
-            val (transformed, validation) = roninMedicationStatement.transform(medicationStatement, tenant)
+            val (transformResponse, validation) = roninMedicationStatement.transform(medicationStatement, tenant)
             validation.alertIfErrors()
-            assertEquals(medicationStatement.medication, transformed!!.medication)
+            assertEquals(medicationStatement.medication, transformResponse!!.resource.medication)
         }
 
         testMedication(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR()))
@@ -505,9 +511,9 @@ class RoninMedicationStatementTest {
                     value = value
                 )
             )
-            val (transformed, validation) = roninMedicationStatement.transform(medicationStatement, tenant)
+            val (transformResponse, validation) = roninMedicationStatement.transform(medicationStatement, tenant)
             validation.alertIfErrors()
-            assertEquals(medicationStatement.medication, transformed!!.medication)
+            assertEquals(medicationStatement.medication, transformResponse!!.resource.medication)
         }
 
         testMedication(DynamicValueType.DATE_TIME, DateTime("2022-10-14"))
@@ -517,8 +523,8 @@ class RoninMedicationStatementTest {
     @Test
     fun `transform fails with missing attributes`() {
         val medicationStatement = MedicationStatement()
-        val (transformed, _) = roninMedicationStatement.transform(medicationStatement, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninMedicationStatement.transform(medicationStatement, tenant)
+        assertNull(transformResponse)
     }
 
     @Test

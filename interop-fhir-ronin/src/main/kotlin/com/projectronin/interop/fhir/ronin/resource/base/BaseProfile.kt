@@ -5,6 +5,7 @@ import com.projectronin.interop.fhir.ronin.ProfileQualifier
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.transform.ProfileTransformer
+import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.ProfileValidator
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -33,7 +34,7 @@ abstract class BaseProfile<T : Resource<T>>(
         parentContext: LocationContext,
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime? = null
-    ): Pair<T?, Validation>
+    ): Pair<TransformResponse<T>?, Validation>
 
     /**
      * Access the DataNormalizationRegistry to concept map any Code, Coding, or
@@ -60,7 +61,11 @@ abstract class BaseProfile<T : Resource<T>>(
         validation.merge(validate(resource, parentContext))
     }
 
-    override fun transform(original: T, tenant: Tenant, forceCacheReloadTS: LocalDateTime?): Pair<T?, Validation> {
+    override fun transform(
+        original: T,
+        tenant: Tenant,
+        forceCacheReloadTS: LocalDateTime?
+    ): Pair<TransformResponse<T>?, Validation> {
         val currentContext = LocationContext(original::class)
 
         val validation = validation {
@@ -76,14 +81,18 @@ abstract class BaseProfile<T : Resource<T>>(
         val (mapped, mappingValidation) = conceptMap(normalized, currentContext, tenant)
         validation.merge(mappingValidation)
 
-        val (transformed, transformValidation) = mapped?.let { transformInternal(mapped, currentContext, tenant) }
+        val (transformResponse, transformValidation) = mapped?.let { transformInternal(mapped, currentContext, tenant) }
             ?: Pair(null, null)
         transformValidation?.let { validation.merge(transformValidation) }
 
-        val localized = transformed?.let { localizer.localize(transformed, tenant) }
+        val localized = transformResponse?.let { localizer.localize(transformResponse.resource, tenant) }
         localized?.let { validateTransformation(localized, currentContext, validation) }
 
-        val validated = if (validation.hasErrors()) null else localized
-        return Pair(validated, validation)
+        val validatedResponse = if (validation.hasErrors()) {
+            null
+        } else {
+            localized?.let { TransformResponse(localized, transformResponse.embeddedResources) }
+        }
+        return Pair(validatedResponse, validation)
     }
 }

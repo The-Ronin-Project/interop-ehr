@@ -1097,8 +1097,8 @@ class RoninBodyWeightTest {
             )
         )
 
-        val (transformed, _) = roninBodyWeight.transform(observation, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninBodyWeight.transform(observation, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1169,10 +1169,13 @@ class RoninBodyWeightTest {
             )
         )
 
-        val (transformed, validation) = roninBodyWeight.transform(observation, tenant)
+        val (transformResponse, validation) = roninBodyWeight.transform(observation, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("123"), transformed.id)
         assertEquals(
@@ -1318,10 +1321,13 @@ class RoninBodyWeightTest {
             )
         )
 
-        val (transformed, validation) = roninBodyWeight.transform(observation, tenant)
+        val (transformResponse, validation) = roninBodyWeight.transform(observation, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("123"), transformed.id)
         assertEquals(
@@ -1423,11 +1429,11 @@ class RoninBodyWeightTest {
             )
         )
 
-        val (transformed, validation) = roninBodyWeight.transform(observation, tenant)
+        val (transformResponse, validation) = roninBodyWeight.transform(observation, tenant)
         val exception = assertThrows<java.lang.IllegalArgumentException> {
             validation.alertIfErrors()
         }
-        assertNull(transformed)
+        assertNull(transformResponse)
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value '29463-7' " +
@@ -1458,8 +1464,8 @@ class RoninBodyWeightTest {
         )
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
-            val (transformed, validation) = roninBodyWeight.transform(observation, tenant)
-            assertNull(transformed)
+            val (transformResponse, validation) = roninBodyWeight.transform(observation, tenant)
+            assertNull(transformResponse)
             validation.alertIfErrors()
         }
         assertEquals(

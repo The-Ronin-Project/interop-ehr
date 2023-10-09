@@ -526,9 +526,13 @@ class RoninCarePlanTest {
             )
         )
 
-        val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
+        val (transformResponse, validation) = roninCarePlan.transform(carePlan, tenant)
         validation.alertIfErrors()
-        transformed!!
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
 
         assertEquals("CarePlan", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
@@ -1033,9 +1037,13 @@ class RoninCarePlanTest {
             )
         )
 
-        val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
+        val (transformResponse, validation) = roninCarePlan.transform(carePlan, tenant)
         validation.alertIfErrors()
-        transformed!!
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
 
         assertEquals("CarePlan", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
@@ -1135,9 +1143,13 @@ class RoninCarePlanTest {
             )
         )
 
-        val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
+        val (transformResponse, validation) = roninCarePlan.transform(carePlan, tenant)
         validation.alertIfErrors()
-        transformed!!
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
 
         assertEquals("CarePlan", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
@@ -1244,9 +1256,13 @@ class RoninCarePlanTest {
             )
         )
 
-        val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
+        val (transformResponse, validation) = roninCarePlan.transform(carePlan, tenant)
         validation.alertIfErrors()
 
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(
             listOf(
                 Extension(
@@ -1308,8 +1324,8 @@ class RoninCarePlanTest {
 
         )
 
-        val (transformed, _) = roninCarePlan.transform(carePlan, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninCarePlan.transform(carePlan, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1334,8 +1350,8 @@ class RoninCarePlanTest {
 
         )
 
-        val (transformed, _) = roninCarePlan.transform(carePlan, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninCarePlan.transform(carePlan, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1357,8 +1373,8 @@ class RoninCarePlanTest {
             subject = null
         )
 
-        val (transformed, _) = roninCarePlan.transform(carePlan, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninCarePlan.transform(carePlan, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1394,9 +1410,13 @@ class RoninCarePlanTest {
             )
         )
 
-        val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
+        val (transformResponse, validation) = roninCarePlan.transform(carePlan, tenant)
         validation.alertIfErrors()
-        transformed!!
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
 
         assertEquals("CarePlan", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
@@ -1522,9 +1542,13 @@ class RoninCarePlanTest {
             )
         )
 
-        val (transformed, validation) = roninCarePlan.transform(carePlan, tenant)
+        val (transformResponse, validation) = roninCarePlan.transform(carePlan, tenant)
         validation.alertIfErrors()
-        transformed!!
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
 
         assertEquals("CarePlan", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)

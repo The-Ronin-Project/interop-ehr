@@ -911,8 +911,8 @@ class RoninConditionEncounterDiagnosisTest {
             )
         )
 
-        val (transformed, _) = profile.transform(condition, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = profile.transform(condition, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1045,10 +1045,13 @@ class RoninConditionEncounterDiagnosisTest {
             )
         )
 
-        val (transformed, validation) = profile.transform(condition, tenant)
+        val (transformResponse, validation) = profile.transform(condition, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Condition", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
@@ -1271,10 +1274,13 @@ class RoninConditionEncounterDiagnosisTest {
             )
         )
 
-        val (transformed, validation) = profile.transform(condition, tenant)
+        val (transformResponse, validation) = profile.transform(condition, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Condition", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
@@ -1382,10 +1388,13 @@ class RoninConditionEncounterDiagnosisTest {
             )
         )
 
-        val (transformed, validation) = profile.transform(condition, unmappedTenant)
+        val (transformResponse, validation) = profile.transform(condition, unmappedTenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Condition", transformed.resourceType)
         assertEquals(Id("12345"), transformed.id)
         assertEquals(

@@ -1,6 +1,8 @@
 package com.projectronin.interop.fhir.ronin.transform
 
+import com.projectronin.interop.fhir.r4.resource.Organization
 import com.projectronin.interop.fhir.r4.resource.Patient
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.ronin.validation.ValidationClient
 import com.projectronin.interop.fhir.validate.Validation
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -26,11 +28,12 @@ class TransformManagerTest {
         }
 
         val transformer = mockk<ProfileTransformer<Patient>> {
-            every { transform(resource, tenant) } returns Pair(transformed, validation)
+            every { transform(resource, tenant) } returns Pair(TransformResponse(transformed), validation)
         }
 
         val result = transformManager.transformResource(resource, transformer, tenant)
-        assertEquals(transformed, result)
+        assertEquals(transformed, result!!.resource)
+        assertEquals(listOf<Resource<*>>(), result.embeddedResources)
 
         verify(exactly = 0) { validationClient.reportIssues(any(), any<Patient>(), any<Tenant>()) }
     }
@@ -73,13 +76,63 @@ class TransformManagerTest {
         }
 
         val transformer = mockk<ProfileTransformer<Patient>> {
-            every { transform(resource, tenant) } returns Pair(transformed, validation)
+            every { transform(resource, tenant) } returns Pair(TransformResponse(transformed), validation)
         }
 
         every { validationClient.reportIssues(validation, transformed, tenant) } returns mockk()
 
         val result = transformManager.transformResource(resource, transformer, tenant)
-        assertEquals(transformed, result)
+        assertEquals(transformed, result!!.resource)
+        assertEquals(listOf<Resource<*>>(), result.embeddedResources)
+
+        verify(exactly = 1) { validationClient.reportIssues(validation, transformed, tenant) }
+    }
+
+    @Test
+    fun `transform with no validation issues and embedded resources`() {
+        val resource = mockk<Patient>()
+        val tenant = mockk<Tenant>()
+
+        val transformed = mockk<Patient>()
+        val embedded = listOf(mockk<Organization>())
+        val transformResponse = TransformResponse(transformed, embedded)
+        val validation = mockk<Validation> {
+            every { hasIssues() } returns false
+        }
+
+        val transformer = mockk<ProfileTransformer<Patient>> {
+            every { transform(resource, tenant) } returns Pair(transformResponse, validation)
+        }
+
+        val result = transformManager.transformResource(resource, transformer, tenant)
+        assertEquals(transformResponse, result)
+
+        verify(exactly = 0) { validationClient.reportIssues(any(), any<Patient>(), any<Tenant>()) }
+    }
+
+    @Test
+    fun `transform with validation issues and a transformation with embedded resources`() {
+        val resource = mockk<Patient>() {
+            every { resourceType } returns "Patient"
+        }
+        val tenant = mockk<Tenant>()
+
+        val transformed = mockk<Patient>()
+        val embedded = listOf(mockk<Organization>())
+        val transformResponse = TransformResponse(transformed, embedded)
+        val validation = mockk<Validation> {
+            every { hasIssues() } returns true
+            every { issues() } returns emptyList()
+        }
+
+        val transformer = mockk<ProfileTransformer<Patient>> {
+            every { transform(resource, tenant) } returns Pair(transformResponse, validation)
+        }
+
+        every { validationClient.reportIssues(validation, transformed, tenant) } returns mockk()
+
+        val result = transformManager.transformResource(resource, transformer, tenant)
+        assertEquals(transformResponse, result)
 
         verify(exactly = 1) { validationClient.reportIssues(validation, transformed, tenant) }
     }

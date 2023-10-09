@@ -522,10 +522,13 @@ class RoninMedicationAdministrationTest {
                 )
             )
         )
-        val (transformed, validation) = roninMedicationAdministration.transform(medAdmin, tenant)
+        val (transformResponse, validation) = roninMedicationAdministration.transform(medAdmin, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             RoninProfile.MEDICATION_ADMINISTRATION.value,
@@ -616,10 +619,13 @@ class RoninMedicationAdministrationTest {
                 )
             )
         )
-        val (transformed, validation) = roninMedicationAdministration.transform(medAdmin, tenant)
+        val (transformResponse, validation) = roninMedicationAdministration.transform(medAdmin, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             RoninProfile.MEDICATION_ADMINISTRATION.value,
@@ -727,10 +733,13 @@ class RoninMedicationAdministrationTest {
             ),
             eventHistory = listOf(Reference(display = "eventHistory".asFHIR()))
         )
-        val (transformed, validation) = roninMedicationAdministration.transform(medAdmin, tenant)
+        val (transformResponse, validation) = roninMedicationAdministration.transform(medAdmin, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             RoninProfile.MEDICATION_ADMINISTRATION.value,
@@ -936,8 +945,8 @@ class RoninMedicationAdministrationTest {
     @Test
     fun `transform fails with missing attributes`() {
         val medAdmin = MedicationAdministration()
-        val (transformed, _) = roninMedicationAdministration.transform(medAdmin, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninMedicationAdministration.transform(medAdmin, tenant)
+        assertNull(transformResponse)
     }
 
     @Test

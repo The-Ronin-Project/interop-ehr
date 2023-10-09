@@ -1055,8 +1055,8 @@ class RoninRespiratoryRateTest {
             )
         )
 
-        val (transformed, _) = roninRespiratoryRate.transform(observation, tenant)
-        assertNull(transformed)
+        val (transformResponse, _) = roninRespiratoryRate.transform(observation, tenant)
+        assertNull(transformResponse)
     }
 
     @Test
@@ -1127,10 +1127,13 @@ class RoninRespiratoryRateTest {
             )
         )
 
-        val (transformed, validation) = roninRespiratoryRate.transform(observation, tenant)
+        val (transformResponse, validation) = roninRespiratoryRate.transform(observation, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("123"), transformed.id)
         assertEquals(
@@ -1274,10 +1277,13 @@ class RoninRespiratoryRateTest {
             )
         )
 
-        val (transformed, validation) = roninRespiratoryRate.transform(observation, tenant)
+        val (transformResponse, validation) = roninRespiratoryRate.transform(observation, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("Observation", transformed.resourceType)
         assertEquals(Id("123"), transformed.id)
         assertEquals(
@@ -1375,12 +1381,12 @@ class RoninRespiratoryRateTest {
             )
         )
 
-        val (transformed, validation) = roninRespiratoryRate.transform(observation, tenant)
+        val (transformResponse, validation) = roninRespiratoryRate.transform(observation, tenant)
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
             validation.alertIfErrors()
         }
-        assertNull(transformed)
+        assertNull(transformResponse)
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value '9279-1' " +
@@ -1411,8 +1417,8 @@ class RoninRespiratoryRateTest {
         )
 
         val exception = assertThrows<java.lang.IllegalArgumentException> {
-            val (transformed, validation) = roninRespiratoryRate.transform(observation, tenant)
-            assertNull(transformed)
+            val (transformResponse, validation) = roninRespiratoryRate.transform(observation, tenant)
+            assertNull(transformResponse)
             validation.alertIfErrors()
         }
         assertEquals(

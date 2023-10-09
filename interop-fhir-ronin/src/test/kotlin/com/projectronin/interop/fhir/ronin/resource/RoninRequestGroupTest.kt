@@ -371,10 +371,13 @@ class RoninRequestGroupTest {
                 type = Uri("Patient", extension = dataAuthorityExtension)
             )
         )
-        val (transformed, validation) = roninRequestGroup.transform(requestGroup, tenant)
+        val (transformResponse, validation) = roninRequestGroup.transform(requestGroup, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("RequestGroup", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
@@ -471,10 +474,13 @@ class RoninRequestGroupTest {
                 )
             )
         )
-        val (transformed, validation) = roninRequestGroup.transform(requestGroup, tenant)
+        val (transformResponse, validation) = roninRequestGroup.transform(requestGroup, tenant)
         validation.alertIfErrors()
 
-        transformed!!
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
         assertEquals("RequestGroup", transformed.resourceType)
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
