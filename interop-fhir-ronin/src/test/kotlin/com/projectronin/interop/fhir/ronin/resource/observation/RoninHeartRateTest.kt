@@ -134,14 +134,16 @@ class RoninHeartRateTest {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                heartRateConcept
+                heartRateConcept,
+                any<Observation>()
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                tenantHeartRateConcept
+                tenantHeartRateConcept,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             heartRateConcept,
@@ -152,7 +154,8 @@ class RoninHeartRateTest {
             getConceptMapping(
                 tenant,
                 "Observation.component.code",
-                tenantComponentCode
+                tenantComponentCode,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             componentCode,
@@ -170,7 +173,8 @@ class RoninHeartRateTest {
                             code = heartRateCode
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
         every {
@@ -184,7 +188,8 @@ class RoninHeartRateTest {
                             code = Code("1234")
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
         every {
@@ -195,7 +200,8 @@ class RoninHeartRateTest {
                     system = CodeSystem.LOINC.uri,
                     display = "Heart Rate".asFHIR(),
                     code = Code("wrong-code")
-                )
+                ),
+                any<Observation>()
             )
         } returns null
     }

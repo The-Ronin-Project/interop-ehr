@@ -141,14 +141,16 @@ class RoninBodySurfaceAreaTest {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                bodySurfaceAreaConcept
+                bodySurfaceAreaConcept,
+                any<Observation>()
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                tenantBodySurfaceAreaConcept
+                tenantBodySurfaceAreaConcept,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             bodySurfaceAreaConcept,
@@ -159,7 +161,8 @@ class RoninBodySurfaceAreaTest {
             getConceptMapping(
                 tenant,
                 "Observation.component.code",
-                tenantComponentCode
+                tenantComponentCode,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             componentCode,
@@ -177,7 +180,8 @@ class RoninBodySurfaceAreaTest {
                             code = bodySurfaceAreaCode
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
         every {
@@ -191,7 +195,8 @@ class RoninBodySurfaceAreaTest {
                             code = Code("1234")
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
     }

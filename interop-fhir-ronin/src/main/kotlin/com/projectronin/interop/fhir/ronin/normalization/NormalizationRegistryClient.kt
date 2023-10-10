@@ -15,7 +15,10 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.ConceptMap
+import com.projectronin.interop.fhir.r4.resource.ConceptMapDependsOn
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.resource.ValueSet
+import com.projectronin.interop.fhir.ronin.normalization.dependson.DependsOnEvaluator
 import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
 import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
@@ -42,12 +45,16 @@ import kotlin.reflect.KClass
 @Component
 class NormalizationRegistryClient(
     private val ociClient: OCIClient,
+    dependsOnEvaluators: List<DependsOnEvaluator<*>>,
     @Value("\${oci.infx.registry.file:DataNormalizationRegistry/v3/registry.json}")
     private val registryFileName: String,
     @Value("\${oci.infx.registry.refresh.hours:12}")
     private val defaultReloadHours: String = "12" // use string to prevent issues
 ) {
     private val logger = KotlinLogging.logger { }
+
+    private val dependsOnEvaluatorByType = dependsOnEvaluators.associateBy { it.resourceType }
+
     internal var conceptMapCache = Caffeine.newBuilder().expireAfterWrite(Duration.ofHours(defaultReloadHours.toLong()))
         .build<CacheKey, ConceptMapItem>()
     internal var valueSetCache = Caffeine.newBuilder().expireAfterWrite(Duration.ofHours(defaultReloadHours.toLong()))
@@ -65,10 +72,11 @@ class NormalizationRegistryClient(
      * second, and the [ConceptMapMetadata] as the third
      * or null if no such mapping could be found. The [Extension] represents the original value before mapping.
      */
-    fun getConceptMapping(
+    fun <T : Resource<T>> getConceptMapping(
         tenant: Tenant,
         elementName: String,
         codeableConcept: CodeableConcept,
+        resource: T,
         forceCacheReloadTS: LocalDateTime? = null
     ): ConceptMapCodeableConcept? {
         val cacheKey = CacheKey(
@@ -77,7 +85,7 @@ class NormalizationRegistryClient(
             tenantId = tenant.mnemonic
         )
         val registryItem = getConceptMapItem(cacheKey, forceCacheReloadTS)
-        return registryItem?.let { codeableConcept.getConceptMapping(registryItem) }
+        return registryItem?.let { codeableConcept.getConceptMapping(registryItem, resource) }
     }
 
     /**
@@ -87,10 +95,11 @@ class NormalizationRegistryClient(
      * the [ConceptMapMetadata] as the third
      * or null to match any element of the type [elementName].
      */
-    fun getConceptMapping(
+    fun <T : Resource<T>> getConceptMapping(
         tenant: Tenant,
         elementName: String,
         coding: Coding,
+        resource: T,
         forceCacheReloadTS: LocalDateTime? = null
     ): ConceptMapCoding? {
         val cacheKey = CacheKey(
@@ -99,7 +108,7 @@ class NormalizationRegistryClient(
             tenantId = tenant.mnemonic
         )
         val registryItem = getConceptMapItem(cacheKey, forceCacheReloadTS)
-        return registryItem?.let { coding.getConceptMapping(registryItem) }
+        return registryItem?.let { coding.getConceptMapping(registryItem, resource) }
     }
 
     /**
@@ -111,12 +120,13 @@ class NormalizationRegistryClient(
      * If there is no concept map found, but the input Coding.code value is correct for the enumClass,
      * return the input [Coding] with a source [Extension] using the enumExtensionUrl provided by the caller.
      */
-    fun <T : CodedEnum<T>> getConceptMappingForEnum(
+    fun <T : CodedEnum<T>, R : Resource<R>> getConceptMappingForEnum(
         tenant: Tenant,
         elementName: String,
         coding: Coding,
         enumClass: KClass<T>,
         enumExtensionUrl: String,
+        resource: R,
         forceCacheReloadTS: LocalDateTime? = null
     ): ConceptMapCoding? {
         val cacheKey = CacheKey(
@@ -128,7 +138,7 @@ class NormalizationRegistryClient(
         val codedEnum = enumClass.java.enumConstants.find { it.code == coding.code?.value }
         return codedEnum?.let {
             ConceptMapCoding(coding, createCodingExtension(enumExtensionUrl, coding), registryItem?.metadata)
-        } ?: registryItem?.let { coding.getConceptMapping(registryItem) }
+        } ?: registryItem?.let { coding.getConceptMapping(registryItem, resource) }
     }
 
     /**
@@ -171,6 +181,34 @@ class NormalizationRegistryClient(
             ?: throw MissingNormalizationContentException("Required value set for $profileUrl and $elementName not found")
     }
 
+    private fun <T : Resource<T>> getTarget(
+        conceptMapItem: ConceptMapItem,
+        sourceConcept: SourceConcept,
+        resource: T
+    ): TargetConcept? {
+        val potentialTargets = conceptMapItem.map[sourceConcept] ?: return null
+
+        @Suppress("UNCHECKED_CAST")
+        val dependsOnEvaluator = dependsOnEvaluatorByType[resource::class] as? DependsOnEvaluator<T>
+        val matchedTargets = potentialTargets.filter {
+            val dependsOn = it.element.first().dependsOn
+            if (dependsOn.isEmpty()) {
+                // If there are no dependsOn, then it always matches
+                true
+            } else {
+                // Check if the dependsOn meets the evaluator requirements.
+                // If there is not an evaluator for dependsOn, but dependsOn is provided, we do not want to consider this matched
+                dependsOnEvaluator?.meetsDependsOn(resource, dependsOn) ?: false
+            }
+        }
+
+        return when (matchedTargets.size) {
+            1 -> matchedTargets.single()
+            0 -> null
+            else -> throw IllegalStateException("Multiple qualified TargetConcepts found for $sourceConcept")
+        }
+    }
+
     /**
      * Find a CodeableConcept mapping in the DataNormalizationRegistry that
      * matches the Coding entries in the input CodeableConcept. The match is on
@@ -183,9 +221,12 @@ class NormalizationRegistryClient(
      * and group.targetVersion values from the DataNormalizationRegistry.
      * also see readGroupElementCode()
      */
-    private fun CodeableConcept.getConceptMapping(conceptMapItem: ConceptMapItem): ConceptMapCodeableConcept? {
-        val sourceConcept = getSourceConcept()
-        val target = conceptMapItem.map[sourceConcept] ?: return null
+    private fun <T : Resource<T>> CodeableConcept.getConceptMapping(
+        conceptMapItem: ConceptMapItem,
+        resource: T
+    ): ConceptMapCodeableConcept? {
+        val sourceConcept = getSourceConcept() ?: return null
+        val target = getTarget(conceptMapItem, sourceConcept, resource) ?: return null
 
         // if elementName is a CodeableConcept datatype: expect 1+ target.element
         return ConceptMapCodeableConcept(
@@ -221,9 +262,12 @@ class NormalizationRegistryClient(
      * group.source, target.code, target.display, and group.targetVersion
      * values from the DataNormalizationRegistry.
      */
-    private fun Coding.getConceptMapping(conceptMapItem: ConceptMapItem): ConceptMapCoding? {
+    private fun <T : Resource<T>> Coding.getConceptMapping(
+        conceptMapItem: ConceptMapItem,
+        resource: T
+    ): ConceptMapCoding? {
         val sourceConcept = getSourceConcept() ?: return null
-        val target = conceptMapItem.map[sourceConcept] ?: return null
+        val target = getTarget(conceptMapItem, sourceConcept, resource) ?: return null
 
         // if elementName is a Code or Coding datatype: expect 1 target.element
         return target.element.first().let {
@@ -434,7 +478,7 @@ class NormalizationRegistryClient(
         }
     }
 
-    internal fun getConceptMapData(filename: String): Map<SourceConcept, TargetConcept> {
+    internal fun getConceptMapData(filename: String): Map<SourceConcept, List<TargetConcept>> {
         val conceptMap = try {
             JacksonUtil.readJsonObject(
                 ociClient.getObjectFromINFX(filename)!!,
@@ -445,7 +489,7 @@ class NormalizationRegistryClient(
             return emptyMap()
         }
         // squish ConceptMap into more usable form
-        val mutableMap = mutableMapOf<SourceConcept, TargetConcept>()
+        val mutableMap = mutableMapOf<SourceConcept, MutableList<TargetConcept>>()
         conceptMap.group.forEach forEachGroup@{ group ->
             val targetSystem = group.target?.value ?: return@forEachGroup
             val sourceSystem = group.source?.value ?: return@forEachGroup
@@ -461,14 +505,16 @@ class NormalizationRegistryClient(
                                 targetCode,
                                 targetSystem,
                                 targetDisplay,
-                                targetVersion
+                                targetVersion,
+                                target.dependsOn
                             )
                         }
                     }
                 }
                 val targetConcept = TargetConcept(targetList, targetText)
                 val sourceConcept = readGroupElementCode(sourceCode, agnosticSourceSystem)
-                mutableMap[sourceConcept] = targetConcept
+
+                mutableMap.computeIfAbsent(sourceConcept) { mutableListOf() }.add(targetConcept)
             }
         }
         return mutableMap
@@ -533,7 +579,7 @@ internal data class NormalizationRegistryItem(
 }
 
 internal data class ConceptMapItem(
-    val map: Map<SourceConcept, TargetConcept>,
+    val map: Map<SourceConcept, List<TargetConcept>>,
     val source_extension_url: String, // non-null for ConceptMap
     val metadata: List<ConceptMapMetadata>
 )
@@ -544,6 +590,13 @@ internal data class ValueSetItem(
 )
 
 internal data class SourceKey(val value: String, val system: String)
-internal data class TargetValue(val value: String, val system: String, val display: String, val version: String)
+internal data class TargetValue(
+    val value: String,
+    val system: String,
+    val display: String,
+    val version: String,
+    val dependsOn: List<ConceptMapDependsOn> = emptyList()
+)
+
 internal data class SourceConcept(val element: Set<SourceKey>)
 internal data class TargetConcept(val element: List<TargetValue>, val text: String? = null)

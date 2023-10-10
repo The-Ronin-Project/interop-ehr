@@ -104,6 +104,7 @@ class RoninAppointment(
                 RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "Appointment.status", statusValue),
                 AppointmentStatus::class,
                 RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
+                normalized,
                 forceCacheReloadTS
             )
             // validate the mapping we got, use statusValue to report issues

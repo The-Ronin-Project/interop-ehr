@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.element
 
 import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
+import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.ContactPointUse
 import com.projectronin.interop.fhir.ronin.error.ConceptMapInvalidValueSetError
@@ -120,8 +121,9 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
         location = LocationContext(ContactPoint::value)
     )
 
-    fun transform(
+    fun <T : Resource<T>> transform(
         element: List<ContactPoint>,
+        resource: T,
         tenant: Tenant,
         parentContext: LocationContext,
         validation: Validation,
@@ -149,6 +151,7 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                     RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.system", systemValue),
                     ContactPointSystem::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
+                    resource,
                     forceCacheReloadTS
                 )
                 validation.apply {
@@ -192,6 +195,7 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                     RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.use", useValue),
                     ContactPointUse::class,
                     RoninExtension.TENANT_SOURCE_TELECOM_USE.value,
+                    resource,
                     forceCacheReloadTS
                 )
                 validation.apply {

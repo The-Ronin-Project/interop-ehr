@@ -465,7 +465,8 @@ class RoninAppointmentTest {
                     code = Code(value = "cancelled")
                 ),
                 AppointmentStatus::class,
-                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
+                appointment
             )
         } returns ConceptMapCoding(statusCoding("cancelled"), statusExtension("cancelled"), listOf(conceptMapMetadata))
 
@@ -601,7 +602,8 @@ class RoninAppointmentTest {
                     code = Code(value = "cancelled")
                 ),
                 AppointmentStatus::class,
-                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
+                appointment
             )
         } returns ConceptMapCoding(statusCoding("cancelled"), statusExtension("cancelled"), listOf(conceptMapMetadata))
 
@@ -714,7 +716,8 @@ class RoninAppointmentTest {
                     code = Code(value = "cancelled")
                 ),
                 AppointmentStatus::class,
-                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
+                appointment
             )
         } returns ConceptMapCoding(statusCoding("cancelled"), statusExtension("cancelled"), listOf(conceptMapMetadata))
 
@@ -1115,7 +1118,8 @@ class RoninAppointmentTest {
                     code = Code(value = "abc")
                 ),
                 AppointmentStatus::class,
-                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
+                appointment
             )
         } returns ConceptMapCoding(statusCoding("cancelled"), statusExtension("abc"), listOf(conceptMapMetadata))
 
@@ -1190,7 +1194,8 @@ class RoninAppointmentTest {
                     code = Code(value = "xyz")
                 ),
                 AppointmentStatus::class,
-                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
+                appointment
             )
         } returns null
 
@@ -1255,7 +1260,8 @@ class RoninAppointmentTest {
                 "Appointment.status",
                 sourceCoding,
                 AppointmentStatus::class,
-                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
+                appointment
             )
         } returns ConceptMapCoding(
             Coding(
@@ -1337,7 +1343,8 @@ class RoninAppointmentTest {
                     code = Code(value = "cancelled")
                 ),
                 AppointmentStatus::class,
-                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
+                appointment
             )
         } returns ConceptMapCoding(statusCoding("booked"), statusExtension("cancelled"), listOf(conceptMapMetadata))
 
@@ -1388,7 +1395,8 @@ class RoninAppointmentTest {
                     code = Code(value = "proposed")
                 ),
                 AppointmentStatus::class,
-                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value
+                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
+                appointment
             )
         } returns ConceptMapCoding(statusCoding("waitlist"), statusExtension("proposed"), listOf(conceptMapMetadata))
 

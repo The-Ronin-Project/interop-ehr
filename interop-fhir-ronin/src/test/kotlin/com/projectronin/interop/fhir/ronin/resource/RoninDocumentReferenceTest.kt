@@ -114,21 +114,24 @@ class RoninDocumentReferenceTest {
             getConceptMapping(
                 tenant,
                 "DocumentReference.type",
-                docRefTypeConcept
+                docRefTypeConcept,
+                any<DocumentReference>()
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "DocumentReference.type",
-                tenantDocRefTypeConcept
+                tenantDocRefTypeConcept,
+                any<DocumentReference>()
             )
         } returns ConceptMapCodeableConcept(docRefTypeConcept, tenantDocRefTypeExtension, listOf(docRefTypeMetadata))
         every {
             getConceptMapping(
                 tenant,
                 "DocumentReference.type",
-                CodeableConcept(text = "bad".asFHIR())
+                CodeableConcept(text = "bad".asFHIR()),
+                any<DocumentReference>()
             )
         } returns ConceptMapCodeableConcept(
             CodeableConcept(text = "worse".asFHIR()),

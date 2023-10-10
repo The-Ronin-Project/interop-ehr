@@ -147,14 +147,16 @@ class RoninStagingRelatedTest {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                stagingRelatedConcept
+                stagingRelatedConcept,
+                any<Observation>()
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                tenantStagingRelatedConcept
+                tenantStagingRelatedConcept,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             stagingRelatedConcept,
@@ -165,7 +167,8 @@ class RoninStagingRelatedTest {
             getConceptMapping(
                 tenant,
                 "Observation.component.code",
-                componentCode
+                componentCode,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             componentCode,
@@ -176,7 +179,8 @@ class RoninStagingRelatedTest {
             getConceptMapping(
                 tenant,
                 "Observation.component.code",
-                componentCode2
+                componentCode2,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             componentCode2,
@@ -190,21 +194,24 @@ class RoninStagingRelatedTest {
                 CodeableConcept(
                     text = "fake staging code".asFHIR(),
                     coding = listOf()
-                )
+                ),
+                any<Observation>()
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.component.value",
-                stagingRelatedConcept
+                stagingRelatedConcept,
+                any<Observation>()
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.component.value",
-                tenantStagingRelatedConcept
+                tenantStagingRelatedConcept,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             stagingRelatedConcept,
@@ -218,7 +225,8 @@ class RoninStagingRelatedTest {
                 CodeableConcept(
                     text = "fake staging value".asFHIR(),
                     coding = listOf()
-                )
+                ),
+                any<Observation>()
             )
         } returns null
     }

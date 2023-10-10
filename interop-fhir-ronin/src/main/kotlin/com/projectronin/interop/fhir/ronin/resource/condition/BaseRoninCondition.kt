@@ -133,6 +133,7 @@ abstract class BaseRoninCondition(
                 tenant,
                 "Condition.code",
                 code,
+                normalized,
                 forceCacheReloadTS
             )
             // validate the mapping we got, use code value to report issues

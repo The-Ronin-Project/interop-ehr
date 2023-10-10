@@ -62,10 +62,19 @@ class RoninPractitionerRoleTest {
     private val roninContactPoint = mockk<RoninContactPoint> {
         every { validateRonin(any(), LocationContext(PractitionerRole::class), any()) } answers { thirdArg() }
         every { validateUSCore(any(), LocationContext(PractitionerRole::class), any()) } answers { thirdArg() }
-        every { transform(any(), tenant, LocationContext(PractitionerRole::class), any(), any()) } answers {
+        every {
+            transform(
+                any(),
+                any<PractitionerRole>(),
+                tenant,
+                LocationContext(PractitionerRole::class),
+                any(),
+                any()
+            )
+        } answers {
             Pair(
                 firstArg(),
-                arg(3)
+                arg(4)
             )
         }
     }
@@ -585,6 +594,7 @@ class RoninPractitionerRoleTest {
         every {
             roninContactPoint.transform(
                 initialTelecoms,
+                any<PractitionerRole>(),
                 tenant,
                 LocationContext(PractitionerRole::class),
                 any(),
@@ -593,7 +603,7 @@ class RoninPractitionerRoleTest {
         } answers {
             Pair(
                 emptyList(),
-                arg(3)
+                arg(4)
             )
         }
 
@@ -630,6 +640,7 @@ class RoninPractitionerRoleTest {
         every {
             roninContactPoint.transform(
                 initialTelecoms,
+                any<PractitionerRole>(),
                 tenant,
                 LocationContext(PractitionerRole::class),
                 any(),
@@ -638,7 +649,7 @@ class RoninPractitionerRoleTest {
         } answers {
             Pair(
                 finalTelecoms,
-                arg(3)
+                arg(4)
             )
         }
         val practitionerRole = PractitionerRole(

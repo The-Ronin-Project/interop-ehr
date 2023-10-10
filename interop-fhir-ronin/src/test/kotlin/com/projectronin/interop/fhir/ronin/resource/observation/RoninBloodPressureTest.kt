@@ -156,14 +156,16 @@ class RoninBloodPressureTest {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                bloodPressureConcept
+                bloodPressureConcept,
+                any<Observation>()
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                tenantBloodPressureConcept
+                tenantBloodPressureConcept,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             bloodPressureConcept,
@@ -174,7 +176,8 @@ class RoninBloodPressureTest {
             getConceptMapping(
                 tenant,
                 "Observation.component.code",
-                systolicCodeableConcept
+                systolicCodeableConcept,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             systolicCodeableConcept,
@@ -185,7 +188,8 @@ class RoninBloodPressureTest {
             getConceptMapping(
                 tenant,
                 "Observation.component.code",
-                diastolicCodeableConcept
+                diastolicCodeableConcept,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             diastolicCodeableConcept,
@@ -203,7 +207,8 @@ class RoninBloodPressureTest {
                             code = bloodPressureCode
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
         every {
@@ -217,7 +222,8 @@ class RoninBloodPressureTest {
                             code = Code("1234")
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
     }

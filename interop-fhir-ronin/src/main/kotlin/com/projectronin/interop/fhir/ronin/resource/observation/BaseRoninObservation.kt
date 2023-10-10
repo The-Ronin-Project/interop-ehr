@@ -244,7 +244,15 @@ abstract class BaseRoninObservation(
         val newExtensions = mutableListOf<Extension>()
 
         val mapCodeResponse =
-            mapCode(normalized.code, "Observation.code", parentContext, tenant, validation, forceCacheReloadTS)
+            mapCode(
+                normalized.code,
+                normalized,
+                "Observation.code",
+                parentContext,
+                tenant,
+                validation,
+                forceCacheReloadTS
+            )
         val mappedCode = if (mapCodeResponse == null) {
             normalized.code
         } else {
@@ -253,7 +261,15 @@ abstract class BaseRoninObservation(
         }
 
         val mapValueResponse =
-            mapValue(normalized.value, "Observation.value", parentContext, tenant, validation, forceCacheReloadTS)
+            mapValue(
+                normalized.value,
+                normalized,
+                "Observation.value",
+                parentContext,
+                tenant,
+                validation,
+                forceCacheReloadTS
+            )
         val mappedValue = if (mapValueResponse == null) {
             normalized.value
         } else {
@@ -269,6 +285,7 @@ abstract class BaseRoninObservation(
 
             val mapComponentCodeResponse = mapCode(
                 normalizedComponent.code,
+                normalized,
                 "Observation.component.code",
                 componentContext,
                 tenant,
@@ -285,6 +302,7 @@ abstract class BaseRoninObservation(
             val mapComponentValueResponse =
                 mapValue(
                     normalizedComponent.value,
+                    normalized,
                     "Observation.component.value",
                     componentContext,
                     tenant,
@@ -319,6 +337,7 @@ abstract class BaseRoninObservation(
 
     private fun mapCode(
         normalizedCodeableConcept: CodeableConcept?,
+        observation: Observation,
         elementName: String,
         parentContext: LocationContext,
         tenant: Tenant,
@@ -330,6 +349,7 @@ abstract class BaseRoninObservation(
                 tenant,
                 elementName,
                 code,
+                observation,
                 forceCacheReloadTS
             )
             // validate the mapping we got, use code value to report issues
@@ -352,6 +372,7 @@ abstract class BaseRoninObservation(
 
     private fun mapValue(
         normalizedValue: DynamicValue<Any>?,
+        observation: Observation,
         elementName: String,
         parentContext: LocationContext,
         tenant: Tenant,
@@ -366,6 +387,7 @@ abstract class BaseRoninObservation(
                     tenant,
                     elementName,
                     valueCodeableConcept,
+                    observation,
                     forceCacheReloadTS
                 )
                 // validate the mapping we got, use code value to report issues

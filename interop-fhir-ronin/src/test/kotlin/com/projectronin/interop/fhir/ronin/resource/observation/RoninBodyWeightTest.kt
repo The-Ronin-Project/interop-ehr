@@ -141,14 +141,16 @@ class RoninBodyWeightTest {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                bodyWeightConcept
+                bodyWeightConcept,
+                any<Observation>()
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                tenantBodyWeightConcept
+                tenantBodyWeightConcept,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             bodyWeightConcept,
@@ -159,7 +161,8 @@ class RoninBodyWeightTest {
             getConceptMapping(
                 tenant,
                 "Observation.component.code",
-                tenantComponentCode
+                tenantComponentCode,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             componentCode,
@@ -177,7 +180,8 @@ class RoninBodyWeightTest {
                             code = bodyWeightCode
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
         every {
@@ -191,7 +195,8 @@ class RoninBodyWeightTest {
                             code = Code("1234")
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
     }

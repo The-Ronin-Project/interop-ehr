@@ -11,9 +11,15 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
+import com.projectronin.interop.fhir.r4.resource.Appointment
 import com.projectronin.interop.fhir.r4.resource.ConceptMap
+import com.projectronin.interop.fhir.r4.resource.ConceptMapDependsOn
+import com.projectronin.interop.fhir.r4.resource.Medication
+import com.projectronin.interop.fhir.r4.resource.Observation
+import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.resource.ValueSet
 import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
+import com.projectronin.interop.fhir.ronin.normalization.dependson.DependsOnEvaluator
 import com.projectronin.interop.fhir.ronin.profile.RoninConceptMap
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
@@ -23,6 +29,7 @@ import io.mockk.every
 import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkAll
+import io.mockk.verify
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNotNull
@@ -36,7 +43,11 @@ import java.time.LocalDateTime
 class NormalizationRegistryClientTest {
     private val ociClient = mockk<OCIClient>()
     private val registryPath = "/DataNormalizationRegistry/v2/registry.json"
-    private val client = NormalizationRegistryClient(ociClient, registryPath)
+    private val medicationDependsOnEvaluator = mockk<DependsOnEvaluator<Medication>> {
+        every { resourceType } returns Medication::class
+    }
+
+    private val client = NormalizationRegistryClient(ociClient, listOf(medicationDependsOnEvaluator), registryPath)
 
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
@@ -50,14 +61,16 @@ class NormalizationRegistryClientTest {
                     system = "systemA"
                 )
             )
-        ) to TargetConcept(
-            text = "textAAA",
-            element = listOf(
-                TargetValue(
-                    "targetValueAAA",
-                    "targetSystemAAA",
-                    "targetDisplayAAA",
-                    "targetVersionAAA"
+        ) to listOf(
+            TargetConcept(
+                text = "textAAA",
+                element = listOf(
+                    TargetValue(
+                        "targetValueAAA",
+                        "targetSystemAAA",
+                        "targetDisplayAAA",
+                        "targetVersionAAA"
+                    )
                 )
             )
         )
@@ -69,14 +82,16 @@ class NormalizationRegistryClientTest {
                     system = "systemB"
                 )
             )
-        ) to TargetConcept(
-            text = "textBBB",
-            element = listOf(
-                TargetValue(
-                    "targetValueBBB",
-                    "targetSystemBBB",
-                    "targetDisplayBBB",
-                    "targetVersionBBB"
+        ) to listOf(
+            TargetConcept(
+                text = "textBBB",
+                element = listOf(
+                    TargetValue(
+                        "targetValueBBB",
+                        "targetSystemBBB",
+                        "targetDisplayBBB",
+                        "targetVersionBBB"
+                    )
                 )
             )
         )
@@ -518,7 +533,8 @@ class NormalizationRegistryClientTest {
             client.getConceptMapping(
                 tenant,
                 "Patient.telecom.system",
-                coding
+                coding,
+                mockk<Patient>()
             )
         assertNull(mapping)
     }
@@ -565,6 +581,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueAAA"
                                     every { display?.value } returns "targetDisplayAAA"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -575,6 +592,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueBBB"
                                     every { display?.value } returns "targetDisplayBBB"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -596,6 +614,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValue222"
                                     every { display?.value } returns "targetDisplay222"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -617,7 +636,8 @@ class NormalizationRegistryClientTest {
         val mapping1 = client.getConceptMapping(
             tenant,
             "Appointment.status",
-            coding1
+            coding1,
+            mockk<Appointment>()
         )!!
         assertEquals(mapping1.coding.code!!.value, "targetValueAAA")
         assertEquals(mapping1.coding.system!!.value, "targetSystemAAA")
@@ -631,7 +651,8 @@ class NormalizationRegistryClientTest {
             client.getConceptMapping(
                 tenant,
                 "Patient.telecom.use",
-                coding2
+                coding2,
+                mockk<Patient>()
             )!!
         assertEquals(mapping2.coding.code!!.value, "targetValue222")
         assertEquals(mapping2.coding.system!!.value, "targetSystem222")
@@ -648,7 +669,8 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system",
                 coding,
                 ContactPointSystem::class,
-                RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
+                RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
+                mockk<Patient>()
             )
         assertNull(mapping)
     }
@@ -662,7 +684,8 @@ class NormalizationRegistryClientTest {
                 "Patient.telecom.system",
                 coding,
                 ContactPointSystem::class,
-                RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
+                RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
+                mockk<Patient>()
             )
         assertNotNull(mapping)
         mapping!!
@@ -691,18 +714,19 @@ class NormalizationRegistryClientTest {
                             system = "http://projectronin.io/fhir/CodeSystem/ContactPointSystem"
                         )
                     )
-                ) to TargetConcept(
-                    element = listOf(
-                        TargetValue(
-                            "good-or-bad-for-enum",
-                            "good-or-bad-for-enum",
-                            "good-or-bad-for-enum",
-                            "1"
-                        )
-                    ),
-                    text = "good-or-bad-for-enum, not validated here"
+                ) to listOf(
+                    TargetConcept(
+                        element = listOf(
+                            TargetValue(
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "good-or-bad-for-enum",
+                                "1"
+                            )
+                        ),
+                        text = "good-or-bad-for-enum, not validated here"
+                    )
                 )
-
             ),
             metadata = listOf(conceptMapMetadata)
         )
@@ -720,7 +744,8 @@ class NormalizationRegistryClientTest {
             "Patient.telecom.system",
             coding,
             ContactPointSystem::class,
-            RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value
+            RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
+            mockk<Patient>()
         )!!
         assertEquals(
             Coding(
@@ -925,7 +950,8 @@ class NormalizationRegistryClientTest {
         val mappedResult1 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            sourceCoding1
+            sourceCoding1,
+            mockk<Observation>()
         )
         assertNull(mappedResult1)
     }
@@ -952,7 +978,8 @@ class NormalizationRegistryClientTest {
         val mappedResult1 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            sourceCoding1
+            sourceCoding1,
+            mockk<Observation>()
         )
         assertNull(mappedResult1)
     }
@@ -993,7 +1020,8 @@ class NormalizationRegistryClientTest {
         val mappedResult1 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            sourceCoding1
+            sourceCoding1,
+            mockk<Observation>()
         )
         assertEquals(
             targetCoding1,
@@ -1024,7 +1052,8 @@ class NormalizationRegistryClientTest {
         val mappedResult2 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            sourceCoding2
+            sourceCoding2,
+            mockk<Observation>()
         )
         assertEquals(
             targetCoding2,
@@ -1058,7 +1087,8 @@ class NormalizationRegistryClientTest {
         val mappedResult = client.getConceptMapping(
             tenant,
             "Observation.code",
-            sourceCoding
+            sourceCoding,
+            mockk<Observation>()
         )
         assertNull(mappedResult)
     }
@@ -1071,7 +1101,8 @@ class NormalizationRegistryClientTest {
             client.getConceptMapping(
                 tenant,
                 "Patient.telecom.system",
-                concept
+                concept,
+                mockk<Patient>()
             )
         assertNull(mapping)
     }
@@ -1118,6 +1149,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueAAA"
                                     every { display?.value } returns "targetDisplayAAA"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -1128,6 +1160,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueBBB"
                                     every { display?.value } returns "targetDisplayBBB"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -1149,6 +1182,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValue222"
                                     every { display?.value } returns "targetDisplay222"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -1174,7 +1208,8 @@ class NormalizationRegistryClientTest {
         val mapping1 = client.getConceptMapping(
             tenant,
             "Appointment.status",
-            concept1
+            concept1,
+            mockk<Appointment>()
         )!!
         assertEquals(mapping1.codeableConcept.coding.first().code!!.value, "targetValueAAA")
         assertEquals(mapping1.codeableConcept.coding.first().system!!.value, "targetSystemAAA")
@@ -1191,7 +1226,8 @@ class NormalizationRegistryClientTest {
         val mapping2 = client.getConceptMapping(
             tenant,
             "Patient.telecom.use",
-            concept2
+            concept2,
+            mockk<Patient>()
         )!!
         assertEquals(mapping2.codeableConcept.coding.first().code!!.value, "targetValue222")
         assertEquals(mapping2.codeableConcept.coding.first().system!!.value, "targetSystem222")
@@ -1240,7 +1276,8 @@ class NormalizationRegistryClientTest {
         val mappedResult1 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            sourceConcept1
+            sourceConcept1,
+            mockk<Observation>()
         )
         assertEquals(
             targetConcept1,
@@ -1276,7 +1313,8 @@ class NormalizationRegistryClientTest {
         val mappedResult2 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            sourceConcept2
+            sourceConcept2,
+            mockk<Observation>()
         )
         assertEquals(
             targetConcept2,
@@ -1311,7 +1349,8 @@ class NormalizationRegistryClientTest {
         val mappedResult = client.getConceptMapping(
             tenant,
             "Observation.code",
-            sourceConcept
+            sourceConcept,
+            mockk<Observation>()
         )
         assertNull(mappedResult)
     }
@@ -1328,14 +1367,16 @@ class NormalizationRegistryClientTest {
                             system = "systemA"
                         )
                     )
-                ) to TargetConcept(
-                    text = "replaced-it",
-                    element = listOf(
-                        TargetValue(
-                            "AAA",
-                            "AAA",
-                            "AAA",
-                            "AAA"
+                ) to listOf(
+                    TargetConcept(
+                        text = "replaced-it",
+                        element = listOf(
+                            TargetValue(
+                                "AAA",
+                                "AAA",
+                                "AAA",
+                                "AAA"
+                            )
                         )
                     )
                 )
@@ -1380,7 +1421,8 @@ class NormalizationRegistryClientTest {
         val mappedResult = client.getConceptMapping(
             tenant,
             "Observation.code",
-            sourceConcept
+            sourceConcept,
+            mockk<Observation>()
         )
         assertEquals(
             targetConcept,
@@ -1446,6 +1488,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueAAA"
                                     every { display?.value } returns "targetDisplayAAA"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -1456,6 +1499,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueBBB"
                                     every { display?.value } returns "targetDisplayBBB"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -1477,6 +1521,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueXXX"
                                     every { display?.value } returns "targetDisplayXXX"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -1487,6 +1532,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueYYY"
                                     every { display?.value } returns "targetDisplayYYY"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -1497,6 +1543,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueZZZ"
                                     every { display?.value } returns "targetDisplayZZZ"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -1518,6 +1565,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueCCC"
                                     every { display?.value } returns "targetDisplayCCC"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -1528,6 +1576,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueDDD"
                                     every { display?.value } returns "targetDisplayDDD"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -1555,7 +1604,8 @@ class NormalizationRegistryClientTest {
         val mapping1 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept1
+            concept1,
+            mockk<Observation>()
         )!!
         assertEquals("targetTextBBB", mapping1.codeableConcept.text!!.value)
         assertEquals(1, mapping1.codeableConcept.coding.size)
@@ -1575,7 +1625,8 @@ class NormalizationRegistryClientTest {
         val mapping2 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept2
+            concept2,
+            mockk<Observation>()
         )!!
         assertEquals("targetTextZZZ", mapping2.codeableConcept.text!!.value)
         assertEquals(1, mapping2.codeableConcept.coding.size)
@@ -1595,7 +1646,8 @@ class NormalizationRegistryClientTest {
         val mapping3 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept3
+            concept3,
+            mockk<Observation>()
         )!!
         assertEquals("targetTextCCC", mapping3.codeableConcept.text!!.value)
         assertEquals(1, mapping3.codeableConcept.coding.size)
@@ -1684,6 +1736,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueAAA"
                                     every { display?.value } returns "targetDisplayAAA"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -1694,6 +1747,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueBBB"
                                     every { display?.value } returns "targetDisplayBBB"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -1715,6 +1769,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueXXX"
                                     every { display?.value } returns "targetDisplayXXX"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -1725,6 +1780,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueYYY"
                                     every { display?.value } returns "targetDisplayYYY"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -1735,6 +1791,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueZZZ"
                                     every { display?.value } returns "targetDisplayZZZ"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -1760,7 +1817,8 @@ class NormalizationRegistryClientTest {
         val mapping1 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept1
+            concept1,
+            mockk<Observation>()
         )!!
         assertEquals("targetTextBBB", mapping1.codeableConcept.text!!.value)
         assertEquals(1, mapping1.codeableConcept.coding.size)
@@ -1780,7 +1838,8 @@ class NormalizationRegistryClientTest {
         val mapping2 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept2
+            concept2,
+            mockk<Observation>()
         )!!
         assertEquals("targetTextZZZ", mapping2.codeableConcept.text!!.value)
         assertEquals(1, mapping2.codeableConcept.coding.size)
@@ -1800,7 +1859,8 @@ class NormalizationRegistryClientTest {
         val mapping3 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept3
+            concept3,
+            mockk<Observation>()
         )
         assertNull(mapping3)
         val coding4 = Coding(
@@ -1814,7 +1874,8 @@ class NormalizationRegistryClientTest {
         val mapping4 = client.getConceptMapping(
             tenant,
             "Appointment.status",
-            concept4
+            concept4,
+            mockk<Appointment>()
         )
         assertNull(mapping4)
     }
@@ -1873,10 +1934,12 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueAAA"
                                     every { display?.value } returns "targetDisplayAAA"
+                                    every { dependsOn } returns emptyList()
                                 },
                                 mockk {
                                     every { code?.value } returns "targetValueBBB"
                                     every { display?.value } returns "targetDisplayBBB"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -1898,14 +1961,17 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueXXX"
                                     every { display?.value } returns "targetDisplayXXX"
+                                    every { dependsOn } returns emptyList()
                                 },
                                 mockk {
                                     every { code?.value } returns "targetValueYYY"
                                     every { display?.value } returns "targetDisplayYYY"
+                                    every { dependsOn } returns emptyList()
                                 },
                                 mockk {
                                     every { code?.value } returns "targetValueZZZ"
                                     every { display?.value } returns "targetDisplayZZZ"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -1927,10 +1993,12 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueCCC"
                                     every { display?.value } returns "targetDisplayCCC"
+                                    every { dependsOn } returns emptyList()
                                 },
                                 mockk {
                                     every { code?.value } returns "targetValueDDD"
                                     every { display?.value } returns "targetDisplayDDD"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -1958,7 +2026,8 @@ class NormalizationRegistryClientTest {
         val mapping1 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept1
+            concept1,
+            mockk<Observation>()
         )!!
         assertEquals("targetTextAB", mapping1.codeableConcept.text!!.value)
         assertEquals(2, mapping1.codeableConcept.coding.size)
@@ -1981,7 +2050,8 @@ class NormalizationRegistryClientTest {
         val mapping2 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept2
+            concept2,
+            mockk<Observation>()
         )!!
         assertEquals("targetTextXYZ", mapping2.codeableConcept.text!!.value)
         assertEquals(3, mapping2.codeableConcept.coding.size)
@@ -2007,7 +2077,8 @@ class NormalizationRegistryClientTest {
         val mapping3 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept3
+            concept3,
+            mockk<Observation>()
         )!!
         assertEquals("targetTextCD", mapping3.codeableConcept.text!!.value)
         assertEquals(2, mapping3.codeableConcept.coding.size)
@@ -2053,7 +2124,8 @@ class NormalizationRegistryClientTest {
         val mapping = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept
+            concept,
+            mockk<Observation>()
         )!!
         assertEquals(
             CodeableConcept(
@@ -2114,7 +2186,8 @@ class NormalizationRegistryClientTest {
         val mapping = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept
+            concept,
+            mockk<Observation>()
         )!!
         assertEquals(
             CodeableConcept(
@@ -2175,7 +2248,8 @@ class NormalizationRegistryClientTest {
         val mapping = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept
+            concept,
+            mockk<Observation>()
         )!!
         assertEquals(
             CodeableConcept(
@@ -2232,7 +2306,8 @@ class NormalizationRegistryClientTest {
         val mapping = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept
+            concept,
+            mockk<Observation>()
         )
         assertNull(mapping)
     }
@@ -2277,7 +2352,8 @@ class NormalizationRegistryClientTest {
         val mapping = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept
+            concept,
+            mockk<Observation>()
         )
         assertNull(mapping)
     }
@@ -2314,7 +2390,8 @@ class NormalizationRegistryClientTest {
         val mapping = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept
+            concept,
+            mockk<Observation>()
         )!!
         assertEquals(
             CodeableConcept(
@@ -2386,7 +2463,8 @@ class NormalizationRegistryClientTest {
         val mapping = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept
+            concept,
+            mockk<Observation>()
         )!!
         assertEquals(
             CodeableConcept(
@@ -2450,7 +2528,8 @@ class NormalizationRegistryClientTest {
         val mapping = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept
+            concept,
+            mockk<Observation>()
         )!!
         assertEquals(
             CodeableConcept(
@@ -2514,7 +2593,8 @@ class NormalizationRegistryClientTest {
         val mapping = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept
+            concept,
+            mockk<Observation>()
         )!!
         assertEquals(
             CodeableConcept(
@@ -2574,7 +2654,8 @@ class NormalizationRegistryClientTest {
         val mapping1 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept1
+            concept1,
+            mockk<Observation>()
         )!!
         assertEquals(
             CodeableConcept(
@@ -2611,7 +2692,8 @@ class NormalizationRegistryClientTest {
         val mapping2 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept2
+            concept2,
+            mockk<Observation>()
         )!!
         assertEquals(
             CodeableConcept(
@@ -2654,7 +2736,8 @@ class NormalizationRegistryClientTest {
         val mapping3 = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept3
+            concept3,
+            mockk<Observation>()
         )!!
         assertEquals(
             CodeableConcept(
@@ -2720,7 +2803,8 @@ class NormalizationRegistryClientTest {
         val mapping = client.getConceptMapping(
             tenant,
             "Observation.code",
-            concept
+            concept,
+            mockk<Observation>()
         )
         assertNull(mapping)
     }
@@ -2779,6 +2863,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueAAA"
                                     every { display?.value } returns "targetDisplayAAA"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -2789,6 +2874,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueBBB"
                                     every { display?.value } returns "targetDisplayBBB"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -2810,6 +2896,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueXXX"
                                     every { display?.value } returns "targetDisplayXXX"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -2820,6 +2907,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueYYY"
                                     every { display?.value } returns "targetDisplayYYY"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -2830,6 +2918,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueZZZ"
                                     every { display?.value } returns "targetDisplayZZZ"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -2851,6 +2940,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueCCC"
                                     every { display?.value } returns "targetDisplayCCC"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -2861,6 +2951,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueDDD"
                                     every { display?.value } returns "targetDisplayDDD"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -2889,7 +2980,8 @@ class NormalizationRegistryClientTest {
             client.getConceptMapping(
                 tenant,
                 "Observation.code",
-                concept
+                concept,
+                mockk<Observation>()
             )
         }
 
@@ -2981,7 +3073,14 @@ class NormalizationRegistryClientTest {
             )
         )
         val exception =
-            assertThrows<IllegalStateException> { client.getConceptMapping(tenant, "Observation.code", concept) }
+            assertThrows<IllegalStateException> {
+                client.getConceptMapping(
+                    tenant,
+                    "Observation.code",
+                    concept,
+                    mockk<Observation>()
+                )
+            }
         assertEquals(
             """Could not create SourceConcept from {"valueCodeableConcept": {"coding": [{"code": "72166-2", "display": null, "system": null}]}}""",
             exception.message
@@ -3070,7 +3169,14 @@ class NormalizationRegistryClientTest {
             )
         )
         val exception =
-            assertThrows<IllegalStateException> { client.getConceptMapping(tenant, "Observation.code", concept) }
+            assertThrows<IllegalStateException> {
+                client.getConceptMapping(
+                    tenant,
+                    "Observation.code",
+                    concept,
+                    mockk<Observation>()
+                )
+            }
         assertEquals(
             """Could not create SourceConcept from {"valueCodeableConcept": {"coding": [{"code": null, "display": null, "system": "system"}]}}""",
             exception.message
@@ -3159,7 +3265,7 @@ class NormalizationRegistryClientTest {
             )
         )
 
-        val mapping = client.getConceptMapping(tenant, "Observation.code", concept)
+        val mapping = client.getConceptMapping(tenant, "Observation.code", concept, mockk<Observation>())
         assertNotNull(mapping)
         assertEquals("72166-2", mapping?.codeableConcept?.coding?.first()?.code?.value)
     }
@@ -3206,6 +3312,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueAAA"
                                     every { display?.value } returns "targetDisplayAAA"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         },
@@ -3216,6 +3323,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValueBBB"
                                     every { display?.value } returns "targetDisplayBBB"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -3237,6 +3345,7 @@ class NormalizationRegistryClientTest {
                                 mockk {
                                     every { code?.value } returns "targetValue222"
                                     every { display?.value } returns "targetDisplay222"
+                                    every { dependsOn } returns emptyList()
                                 }
                             )
                         }
@@ -3281,7 +3390,8 @@ class NormalizationRegistryClientTest {
         client.getConceptMapping(
             tenant,
             "Appointment.status",
-            coding1
+            coding1,
+            mockk<Appointment>()
         )
 
         // Appointment.status did not trigger an item reload.
@@ -3297,7 +3407,8 @@ class NormalizationRegistryClientTest {
             client.getConceptMapping(
                 tenant,
                 "Patient.telecom.use",
-                coding2
+                coding2,
+                mockk<Patient>()
             )!!
         assertEquals(mapping2.coding.code!!.value, "targetValue222")
         assertEquals(mapping2.coding.system!!.value, "targetSystem222")
@@ -3308,5 +3419,327 @@ class NormalizationRegistryClientTest {
         assertNull(client.itemLastUpdated[key1])
         assertTrue(client.itemLastUpdated[key2]!!.isAfter(key2LastUpdated))
         assertTrue(client.registryLastUpdated.isAfter(registryLastUpdated))
+    }
+
+    private val dependsOn = ConceptMapDependsOn(
+        property = Uri("medication.form"),
+        value = FHIRString("some-form-value")
+    )
+    private val dependsOn2 = ConceptMapDependsOn(
+        property = Uri("medication.amount"),
+        value = FHIRString("some-amount-value")
+    )
+    private val mappingWithDependsOnTargets =
+        SourceConcept(
+            element = setOf(
+                SourceKey(
+                    value = "valueA",
+                    system = "systemA"
+                )
+            )
+        ) to listOf(
+            TargetConcept(
+                text = "textAAA",
+                element = listOf(
+                    TargetValue(
+                        "targetValueAAA",
+                        "targetSystemAAA",
+                        "targetDisplayAAA",
+                        "targetVersionAAA",
+                        listOf(dependsOn)
+                    )
+                )
+            ),
+            TargetConcept(
+                text = "textBBB",
+                element = listOf(
+                    TargetValue(
+                        "targetValueBBB",
+                        "targetSystemBBB",
+                        "targetDisplayBBB",
+                        "targetVersionBBB",
+                        listOf(dependsOn2)
+                    )
+                )
+            )
+        )
+
+    @Test
+    fun `dependsOnEvaluator not found for target with no dependsOn data`() {
+        val registry = ConceptMapItem(
+            source_extension_url = "ext-AB",
+            map = mapAB,
+            metadata = listOf(conceptMapMetadata)
+        )
+        val key = CacheKey(
+            NormalizationRegistryItem.RegistryType.ConceptMap,
+            "Observation.code",
+            tenant.mnemonic
+        )
+        client.conceptMapCache.put(key, registry)
+        client.registryLastUpdated = LocalDateTime.now()
+        client.itemLastUpdated[key] = LocalDateTime.now()
+
+        val sourceCoding = Coding(
+            system = Uri("systemA"),
+            code = Code("valueA")
+        )
+        val targetCoding = Coding(
+            system = Uri("targetSystemAAA"),
+            code = Code("targetValueAAA"),
+            display = "targetDisplayAAA".asFHIR(),
+            version = "targetVersionAAA".asFHIR()
+        )
+        val targetSourceExtension = Extension(
+            url = Uri(value = "ext-AB"),
+            value = DynamicValue(
+                type = DynamicValueType.CODING,
+                value = sourceCoding
+            )
+        )
+        val mappedResult = client.getConceptMapping(
+            tenant,
+            "Observation.code",
+            sourceCoding,
+            mockk<Observation>()
+        )
+        assertEquals(
+            targetCoding,
+            mappedResult?.coding
+        )
+        assertEquals(
+            targetSourceExtension,
+            mappedResult?.extension
+        )
+
+        verify(exactly = 0) { medicationDependsOnEvaluator.meetsDependsOn(any(), any()) }
+    }
+
+    @Test
+    fun `dependsOnEvaluator found for target with no dependsOn data`() {
+        val registry = ConceptMapItem(
+            source_extension_url = "ext-AB",
+            map = mapAB,
+            metadata = listOf(conceptMapMetadata)
+        )
+        val key = CacheKey(
+            NormalizationRegistryItem.RegistryType.ConceptMap,
+            "Medication.code",
+            tenant.mnemonic
+        )
+        client.conceptMapCache.put(key, registry)
+        client.registryLastUpdated = LocalDateTime.now()
+        client.itemLastUpdated[key] = LocalDateTime.now()
+
+        val sourceCoding = Coding(
+            system = Uri("systemA"),
+            code = Code("valueA")
+        )
+        val targetCoding = Coding(
+            system = Uri("targetSystemAAA"),
+            code = Code("targetValueAAA"),
+            display = "targetDisplayAAA".asFHIR(),
+            version = "targetVersionAAA".asFHIR()
+        )
+        val targetSourceExtension = Extension(
+            url = Uri(value = "ext-AB"),
+            value = DynamicValue(
+                type = DynamicValueType.CODING,
+                value = sourceCoding
+            )
+        )
+        val mappedResult = client.getConceptMapping(
+            tenant,
+            "Medication.code",
+            sourceCoding,
+            mockk<Medication>()
+        )
+        assertEquals(
+            targetCoding,
+            mappedResult?.coding
+        )
+        assertEquals(
+            targetSourceExtension,
+            mappedResult?.extension
+        )
+
+        verify(exactly = 0) { medicationDependsOnEvaluator.meetsDependsOn(any(), any()) }
+    }
+
+    @Test
+    fun `dependsOnEvaluator not found for target with dependsOn data`() {
+        val registry = ConceptMapItem(
+            source_extension_url = "ext-AB",
+            map = mapOf(mappingWithDependsOnTargets),
+            metadata = listOf(conceptMapMetadata)
+        )
+        val key = CacheKey(
+            NormalizationRegistryItem.RegistryType.ConceptMap,
+            "Observation.code",
+            tenant.mnemonic
+        )
+        client.conceptMapCache.put(key, registry)
+        client.registryLastUpdated = LocalDateTime.now()
+        client.itemLastUpdated[key] = LocalDateTime.now()
+
+        val sourceCoding = Coding(
+            system = Uri("systemA"),
+            code = Code("valueA")
+        )
+        val mappedResult = client.getConceptMapping(
+            tenant,
+            "Observation.code",
+            sourceCoding,
+            mockk<Observation>()
+        )
+        assertNull(mappedResult)
+
+        verify(exactly = 0) { medicationDependsOnEvaluator.meetsDependsOn(any(), any()) }
+    }
+
+    @Test
+    fun `dependsOnEvaluator found and no target dependsOn is met`() {
+        val registry = ConceptMapItem(
+            source_extension_url = "ext-AB",
+            map = mapOf(mappingWithDependsOnTargets),
+            metadata = listOf(conceptMapMetadata)
+        )
+        val key = CacheKey(
+            NormalizationRegistryItem.RegistryType.ConceptMap,
+            "Observation.code",
+            tenant.mnemonic
+        )
+        client.conceptMapCache.put(key, registry)
+        client.registryLastUpdated = LocalDateTime.now()
+        client.itemLastUpdated[key] = LocalDateTime.now()
+
+        val medication = mockk<Medication>()
+
+        every { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn)) } returns false
+        every { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn2)) } returns false
+
+        val sourceCoding = Coding(
+            system = Uri("systemA"),
+            code = Code("valueA")
+        )
+        val mappedResult = client.getConceptMapping(
+            tenant,
+            "Observation.code",
+            sourceCoding,
+            medication
+        )
+        assertNull(mappedResult)
+
+        verify(exactly = 1) { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn)) }
+        verify(exactly = 1) { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn2)) }
+    }
+
+    @Test
+    fun `dependsOnEvaluator found and single target dependsOn is met`() {
+        val registry = ConceptMapItem(
+            source_extension_url = "ext-AB",
+            map = mapOf(mappingWithDependsOnTargets),
+            metadata = listOf(conceptMapMetadata)
+        )
+        val key = CacheKey(
+            NormalizationRegistryItem.RegistryType.ConceptMap,
+            "Observation.code",
+            tenant.mnemonic
+        )
+        client.conceptMapCache.put(key, registry)
+        client.registryLastUpdated = LocalDateTime.now()
+        client.itemLastUpdated[key] = LocalDateTime.now()
+
+        val medication = mockk<Medication>()
+
+        every { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn)) } returns true
+        every { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn2)) } returns false
+
+        val sourceCoding = Coding(
+            system = Uri("systemA"),
+            code = Code("valueA")
+        )
+        val targetCoding = Coding(
+            system = Uri("targetSystemAAA"),
+            code = Code("targetValueAAA"),
+            display = "targetDisplayAAA".asFHIR(),
+            version = "targetVersionAAA".asFHIR()
+        )
+        val targetSourceExtension = Extension(
+            url = Uri(value = "ext-AB"),
+            value = DynamicValue(
+                type = DynamicValueType.CODING,
+                value = sourceCoding
+            )
+        )
+        val mappedResult = client.getConceptMapping(
+            tenant,
+            "Observation.code",
+            sourceCoding,
+            medication
+        )
+        assertEquals(
+            targetCoding,
+            mappedResult?.coding
+        )
+        assertEquals(
+            targetSourceExtension,
+            mappedResult?.extension
+        )
+
+        verify(exactly = 1) { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn)) }
+        verify(exactly = 1) { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn2)) }
+    }
+
+    @Test
+    fun `dependsOnEvaluator found and multiple target dependsOn are met`() {
+        val registry = ConceptMapItem(
+            source_extension_url = "ext-AB",
+            map = mapOf(mappingWithDependsOnTargets),
+            metadata = listOf(conceptMapMetadata)
+        )
+        val key = CacheKey(
+            NormalizationRegistryItem.RegistryType.ConceptMap,
+            "Observation.code",
+            tenant.mnemonic
+        )
+        client.conceptMapCache.put(key, registry)
+        client.registryLastUpdated = LocalDateTime.now()
+        client.itemLastUpdated[key] = LocalDateTime.now()
+
+        val medication = mockk<Medication>()
+
+        every { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn)) } returns true
+        every { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn2)) } returns true
+
+        val sourceCoding = Coding(
+            system = Uri("systemA"),
+            code = Code("valueA")
+        )
+        val targetCoding = Coding(
+            system = Uri("targetSystemAAA"),
+            code = Code("targetValueAAA"),
+            display = "targetDisplayAAA".asFHIR(),
+            version = "targetVersionAAA".asFHIR()
+        )
+        val targetSourceExtension = Extension(
+            url = Uri(value = "ext-AB"),
+            value = DynamicValue(
+                type = DynamicValueType.CODING,
+                value = sourceCoding
+            )
+        )
+        val exception = assertThrows<IllegalStateException> {
+            client.getConceptMapping(
+                tenant,
+                "Observation.code",
+                sourceCoding,
+                medication
+            )
+        }
+        assertTrue(exception.message?.startsWith("Multiple qualified TargetConcepts found for") ?: false)
+
+        verify(exactly = 1) { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn)) }
+        verify(exactly = 1) { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn2)) }
     }
 }

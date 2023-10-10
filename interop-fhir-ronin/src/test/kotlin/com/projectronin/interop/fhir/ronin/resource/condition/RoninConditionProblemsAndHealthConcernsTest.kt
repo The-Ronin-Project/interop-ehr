@@ -92,7 +92,7 @@ class RoninConditionProblemsAndHealthConcernsTest {
     )
     private val registry = mockk<NormalizationRegistryClient> {
         every {
-            getConceptMapping(tenant, "Condition.code", any<CodeableConcept>(), any())
+            getConceptMapping(tenant, "Condition.code", any<CodeableConcept>(), any<Condition>(), any())
         } returns ConceptMapCodeableConcept(
             CodeableConcept(coding = problemCodingList),
             Extension(

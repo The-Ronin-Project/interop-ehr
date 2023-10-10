@@ -134,14 +134,16 @@ class RoninBodyTemperatureTest {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                bodyTemperatureConcept
+                bodyTemperatureConcept,
+                any<Observation>()
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                tenantBodyTemperatureConcept
+                tenantBodyTemperatureConcept,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             bodyTemperatureConcept,
@@ -152,7 +154,8 @@ class RoninBodyTemperatureTest {
             getConceptMapping(
                 tenant,
                 "Observation.component.code",
-                tenantComponentCode
+                tenantComponentCode,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             componentCode,
@@ -170,7 +173,8 @@ class RoninBodyTemperatureTest {
                             code = Code("1234")
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
         every {
@@ -184,7 +188,8 @@ class RoninBodyTemperatureTest {
                             code = bodyTemperatureCode
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
     }

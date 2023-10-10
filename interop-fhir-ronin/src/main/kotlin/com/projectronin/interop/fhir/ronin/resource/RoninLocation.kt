@@ -104,6 +104,7 @@ class RoninLocation(
         val contactPointTransformed = if (normalized.telecom.isNotEmpty()) {
             contactPoint.transform(
                 normalized.telecom,
+                normalized,
                 tenant,
                 LocationContext(Location::class),
                 validation,

@@ -20,4 +20,5 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation("org.springframework:spring-test")
     testImplementation(libs.interop.commonHttp)
+    testImplementation(libs.jackson.module.kotlin)
 }

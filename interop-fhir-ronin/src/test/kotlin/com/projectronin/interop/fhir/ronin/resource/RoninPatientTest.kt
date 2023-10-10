@@ -96,10 +96,10 @@ class RoninPatientTest {
         roninContactPoint = mockk {
             every { validateRonin(any(), LocationContext(Patient::class), any()) } answers { thirdArg() }
             every { validateUSCore(any(), LocationContext(Patient::class), any()) } answers { thirdArg() }
-            every { transform(any(), tenant, LocationContext(Patient::class), any(), any()) } answers {
+            every { transform(any(), any<Patient>(), tenant, LocationContext(Patient::class), any(), any()) } answers {
                 Pair(
                     firstArg(),
-                    arg(3)
+                    arg(4)
                 )
             }
         }
@@ -967,7 +967,15 @@ class RoninPatientTest {
             )
         )
 
-        every { roninContactPoint.transform(telecom, tenant, LocationContext(Patient::class), any()) } returns Pair(
+        every {
+            roninContactPoint.transform(
+                telecom,
+                any<Patient>(),
+                tenant,
+                LocationContext(Patient::class),
+                any()
+            )
+        } returns Pair(
             transformedTelecom,
             Validation()
         )
@@ -1664,6 +1672,7 @@ class RoninPatientTest {
         every {
             roninContactPoint.transform(
                 initialTelecoms,
+                any<Patient>(),
                 tenant,
                 LocationContext(Patient::class),
                 any(),
@@ -1672,7 +1681,7 @@ class RoninPatientTest {
         } answers {
             Pair(
                 emptyList(),
-                arg(3)
+                arg(4)
             )
         }
 
@@ -1711,6 +1720,7 @@ class RoninPatientTest {
         every {
             roninContactPoint.transform(
                 initialTelecoms,
+                any<Patient>(),
                 tenant,
                 LocationContext(Patient::class),
                 any(),
@@ -1719,7 +1729,7 @@ class RoninPatientTest {
         } answers {
             Pair(
                 finalTelecoms,
-                arg(3)
+                arg(4)
             )
         }
         val patient = Patient(

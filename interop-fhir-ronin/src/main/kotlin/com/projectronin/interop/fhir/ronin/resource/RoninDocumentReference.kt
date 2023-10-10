@@ -188,6 +188,7 @@ class RoninDocumentReference(
                 tenant,
                 "DocumentReference.type",
                 type,
+                normalized,
                 forceCacheReloadTS
             )
             // validate the mapping we got, use type value to report issues

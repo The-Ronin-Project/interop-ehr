@@ -73,7 +73,14 @@ class RoninPractitioner(
         val validation = Validation()
 
         val telecoms =
-            roninContactPoint.transform(normalized.telecom, tenant, parentContext, validation, forceCacheReloadTS).let {
+            roninContactPoint.transform(
+                normalized.telecom,
+                normalized,
+                tenant,
+                parentContext,
+                validation,
+                forceCacheReloadTS
+            ).let {
                 validation.merge(it.second)
                 it.first
             }

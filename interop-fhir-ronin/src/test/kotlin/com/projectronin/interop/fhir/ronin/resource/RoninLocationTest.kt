@@ -388,7 +388,15 @@ class RoninLocationTest {
             )
         )
 
-        every { roninContactPoint.transform(telecom, tenant, LocationContext(Location::class), any()) } returns Pair(
+        every {
+            roninContactPoint.transform(
+                telecom,
+                any<Location>(),
+                tenant,
+                LocationContext(Location::class),
+                any()
+            )
+        } returns Pair(
             transformedTelecom,
             Validation()
         )

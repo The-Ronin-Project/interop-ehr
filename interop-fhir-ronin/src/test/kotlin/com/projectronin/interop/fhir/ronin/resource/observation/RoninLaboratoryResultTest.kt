@@ -146,14 +146,16 @@ class RoninLaboratoryResultTest {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                laboratoryCodeConcept
+                laboratoryCodeConcept,
+                any<Observation>()
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                tenantLaboratoryResultConcept
+                tenantLaboratoryResultConcept,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             laboratoryCodeConcept,
@@ -164,7 +166,8 @@ class RoninLaboratoryResultTest {
             getConceptMapping(
                 tenant,
                 "Observation.component.code",
-                tenantComponentCode
+                tenantComponentCode,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             componentCode,
@@ -178,7 +181,8 @@ class RoninLaboratoryResultTest {
                 CodeableConcept(
                     text = "laboratory".asFHIR(),
                     coding = listOf()
-                )
+                ),
+                any<Observation>()
             )
         } returns null
     }

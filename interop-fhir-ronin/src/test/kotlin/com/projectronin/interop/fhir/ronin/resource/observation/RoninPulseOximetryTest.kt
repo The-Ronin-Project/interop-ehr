@@ -164,14 +164,16 @@ class RoninPulseOximetryTest {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                pulseOximetryConcept
+                pulseOximetryConcept,
+                any<Observation>()
             )
         } returns null
         every {
             getConceptMapping(
                 tenant,
                 "Observation.code",
-                tenantPulseOximetryConcept
+                tenantPulseOximetryConcept,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             pulseOximetryConcept,
@@ -182,7 +184,8 @@ class RoninPulseOximetryTest {
             getConceptMapping(
                 tenant,
                 "Observation.component.code",
-                flowRateCodeableConcept
+                flowRateCodeableConcept,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             flowRateCodeableConcept,
@@ -193,7 +196,8 @@ class RoninPulseOximetryTest {
             getConceptMapping(
                 tenant,
                 "Observation.component.code",
-                concentrationCodeableConcept
+                concentrationCodeableConcept,
+                any<Observation>()
             )
         } returns ConceptMapCodeableConcept(
             concentrationCodeableConcept,
@@ -211,7 +215,8 @@ class RoninPulseOximetryTest {
                             code = pulseOximetryCode
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
         every {
@@ -225,7 +230,8 @@ class RoninPulseOximetryTest {
                             code = Code("8867-4")
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
         every {
@@ -239,7 +245,8 @@ class RoninPulseOximetryTest {
                             code = vitalSignsCategoryCode
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
         every {
@@ -253,7 +260,8 @@ class RoninPulseOximetryTest {
                             code = Code("13245")
                         )
                     )
-                )
+                ),
+                any<Observation>()
             )
         } returns null
     }
