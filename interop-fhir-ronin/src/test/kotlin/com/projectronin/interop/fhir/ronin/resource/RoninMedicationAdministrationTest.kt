@@ -127,6 +127,11 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             status = Code("in-progress"),
+            category = CodeableConcept(
+                coding = listOf(
+                    Coding(id = "something".asFHIR())
+                )
+            ),
             effective = DynamicValue(DynamicValueType.DATE_TIME, "00:00:00"),
             medication = DynamicValue(
                 DynamicValueType.REFERENCE,
@@ -148,7 +153,7 @@ class RoninMedicationAdministrationTest {
     }
 
     @Test
-    fun `validate fails with more than one(1) extension`() {
+    fun `validate passed with more than one extension`() {
         val medAdmin = MedicationAdministration(
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_ADMINISTRATION.value)), source = Uri("source")),
             identifier = listOf(
@@ -182,6 +187,13 @@ class RoninMedicationAdministrationTest {
                         type = DynamicValueType.CODE,
                         value = Code("literal reference")
                     )
+                ),
+                Extension(
+                    url = Uri(null),
+                    value = DynamicValue(
+                        type = DynamicValueType.REFERENCE,
+                        value = Code(null)
+                    )
                 )
             ),
             status = Code("in-progress"),
@@ -202,14 +214,7 @@ class RoninMedicationAdministrationTest {
                 )
             )
         )
-        val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationAdministration.validate(medAdmin).alertIfErrors()
-        }
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_MEDADMIN_006: Medication Administration extension list cannot exceed size of one(1) @ MedicationAdministration.extension",
-            exception.message
-        )
+        roninMedicationAdministration.validate(medAdmin).alertIfErrors()
     }
 
     @Test
@@ -313,6 +318,11 @@ class RoninMedicationAdministrationTest {
                     value = "EHR Data Authority".asFHIR()
                 )
             ),
+            category = CodeableConcept(
+                coding = listOf(
+                    Coding(id = "something".asFHIR())
+                )
+            ),
             extension = listOf(
                 Extension(
                     url = Uri(value = "incorrect-url"),
@@ -345,7 +355,75 @@ class RoninMedicationAdministrationTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_MEDADMIN_002: Medication Administration extension url is invalid @ MedicationAdministration.extension",
+                "ERROR RONIN_MEDADMIN_002: Medication Administration extension must contain original Medication Datatype @ MedicationAdministration.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validation fails with incorrect extension`() {
+        val medAdmin = MedicationAdministration(
+            id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.MEDICATION_ADMINISTRATION.value)),
+                source = Uri("source")
+            ),
+            implicitRules = Uri("implicit-rules"),
+            language = Code("en-US"),
+            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
+            contained = listOf(Location(id = Id("67890"))),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(
+                Extension(
+                    url = Uri(RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.REFERENCE,
+                        value = Reference(null)
+                    )
+                )
+            ),
+            status = Code("in-progress"),
+            effective = DynamicValue(DynamicValueType.DATE_TIME, "00:00:00"),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(
+                    reference = "Medication".asFHIR(), // this reference does not meet the requirements for possible references
+                    identifier = null,
+                    type = Uri("Medication", extension = dataAuthorityExtension)
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri(
+                    "Patient",
+                    extension = dataAuthorityExtension
+                )
+            )
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationAdministration.validate(medAdmin).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_MEDADMIN_003: Medication Administration extension value is invalid @ MedicationAdministration.extension\n" +
+                "ERROR RONIN_MEDADMIN_004: Medication Administration extension type is invalid @ MedicationAdministration.extension\n" +
+                "ERROR R4_REF_001: At least one of reference, identifier and display SHALL be present (unless an extension is provided) @ MedicationAdministration.extension[0].value",
             exception.message
         )
     }
@@ -402,8 +480,7 @@ class RoninMedicationAdministrationTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_MEDADMIN_005: Medication Administration extension list cannot be empty or the value of medication[x] is NOT\n" +
-                " one of the following: codeable concept|contained|literal|logical reference @ MedicationAdministration.extension",
+                "ERROR RONIN_MEDADMIN_005: Medication Administration extension list cannot be empty or the value of medication[x] is NOT one of the following: codeable concept|contained|literal|logical reference @ MedicationAdministration.extension",
             exception.message
         )
     }
@@ -912,6 +989,13 @@ class RoninMedicationAdministrationTest {
                     value = DynamicValue(
                         type = DynamicValueType.STRING,
                         value = Code("codeable concept")
+                    )
+                ),
+                Extension(
+                    url = Uri(value = null),
+                    value = DynamicValue(
+                        type = DynamicValueType.STRING,
+                        value = Code(null)
                     )
                 )
             ),

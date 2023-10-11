@@ -45,6 +45,14 @@ class EpicIdentifierServiceTest {
         every { value } returns "internal-value".asFHIR()
         every { type } returns internalType
     }
+    private val epicOrderIdentifier = mockk<Identifier> {
+        every { system } returns Uri("orderSystem")
+        every { value } returns "orderID".asFHIR()
+    }
+    private val epicEncounterIdentifier = mockk<Identifier> {
+        every { system } returns Uri("csnSystem")
+        every { value?.value } returns "encCSN"
+    }
 
     @Test
     fun `getPractitionerIdentifier with no matching type`() {
@@ -388,5 +396,65 @@ class EpicIdentifierServiceTest {
     fun `getLocationIdentifier with matching system`() {
         val locationIdentifier = service.getLocationIdentifier(tenant, listOf(epiclocationIdentifier))
         assertEquals(epiclocationIdentifier, locationIdentifier)
+    }
+
+    @Test
+    fun `getOrderIdentifier works`() {
+        val orderIdentifier = service.getOrderIdentifier(tenant, listOf(epicOrderIdentifier))
+        assertEquals(epicOrderIdentifier, orderIdentifier)
+    }
+
+    @Test
+    fun `getOrderIdentifier with no matching system`() {
+        val identifiers = listOf(Identifier(system = Uri("notTheOrderSystem"), value = "blah".asFHIR()))
+        val exception = assertThrows<VendorIdentifierNotFoundException> {
+            service.getOrderIdentifier(tenant, identifiers)
+        }
+        assertEquals(
+            "No order identifier found for 'orderSystem'",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `getOrderIdentifier with null matching system`() {
+        val identifiers = listOf(Identifier(system = Uri(null), value = null))
+        val exception = assertThrows<VendorIdentifierNotFoundException> {
+            service.getOrderIdentifier(tenant, identifiers)
+        }
+        assertEquals(
+            "No order identifier found for 'orderSystem'",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `getEncounterIdentifier works`() {
+        val encounterIdentifier = service.getEncounterIdentifier(tenant, listOf(epicEncounterIdentifier))
+        assertEquals(epicEncounterIdentifier, encounterIdentifier)
+    }
+
+    @Test
+    fun `getEncounterIdentifier with no matching system`() {
+        val identifiers = listOf(Identifier(system = Uri("notTheEncounterIdentifier"), value = "blah".asFHIR()))
+        val exception = assertThrows<VendorIdentifierNotFoundException> {
+            service.getEncounterIdentifier(tenant, identifiers)
+        }
+        assertEquals(
+            "No encounter identifier found for 'csnSystem'",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `getEncounterIdentifier with null matching system`() {
+        val identifiers = listOf(Identifier(system = Uri(null), value = null))
+        val exception = assertThrows<VendorIdentifierNotFoundException> {
+            service.getEncounterIdentifier(tenant, identifiers)
+        }
+        assertEquals(
+            "No encounter identifier found for 'csnSystem'",
+            exception.message
+        )
     }
 }

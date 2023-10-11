@@ -23,6 +23,9 @@ internal class CernerIdentifierServiceTest {
         every { value } returns "mrn".asFHIR()
     }
 
+    private val orderIdentifier = listOf(Identifier())
+    private val encounterIdentifier = listOf(Identifier())
+
     private val fhirId = Id("id")
     private val fhirIdentifiers = mockk<FHIRIdentifiers> {
         every { id } returns fhirId
@@ -91,6 +94,20 @@ internal class CernerIdentifierServiceTest {
     fun `getLocationIdentifier throws exception`() {
         assertThrows<NotImplementedError> {
             service.getLocationIdentifier(tenant, listOf(mrnIdentifier))
+        }
+    }
+
+    @Test
+    fun `getOrderIdentifier throws exception`() {
+        assertThrows<NotImplementedError> {
+            service.getOrderIdentifier(tenant, orderIdentifier)
+        }
+    }
+
+    @Test
+    fun `getEncounterIdentifier throws exception`() {
+        assertThrows<NotImplementedError> {
+            service.getEncounterIdentifier(tenant, encounterIdentifier)
         }
     }
 }

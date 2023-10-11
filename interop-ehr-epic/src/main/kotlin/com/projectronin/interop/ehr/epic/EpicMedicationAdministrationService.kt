@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.interop.ehr.MedicationAdministrationService
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
@@ -17,7 +16,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
-import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.fhir.r4.resource.MedicationAdministration
 import com.projectronin.interop.fhir.r4.resource.MedicationAdministrationDosage
@@ -26,7 +24,6 @@ import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.ronin.util.unlocalize
 import com.projectronin.interop.tenant.config.model.Tenant
-import com.projectronin.interop.tenant.config.model.vendor.Epic
 import datadog.trace.api.Trace
 import kotlinx.coroutines.runBlocking
 import org.springframework.stereotype.Component
@@ -61,35 +58,26 @@ class EpicMedicationAdministrationService(
     ): List<MedicationAdministration> {
         val patientID = medicationRequest.subject?.decomposedId()?.unlocalize(tenant) ?: return emptyList()
         val encounterID = medicationRequest.encounter?.decomposedId()?.unlocalize(tenant) ?: return emptyList()
-        val medicationReference = medicationRequest.medication?.value ?: return emptyList()
-        val medicationID = (medicationReference as Reference).decomposedId()?.unlocalize(tenant)
         val medicationRequestID = medicationRequest.findFhirId() ?: return emptyList()
         val patient = runBlocking {
-            ehrDataAuthorityClient.getResource(
+            ehrDataAuthorityClient.getResourceAs<Patient>(
                 tenant.mnemonic,
                 "Patient",
                 patientID.localize(tenant)
             )
         } ?: return emptyList()
-        val mrn = identifierService.getPatientIdentifier(tenant, (patient as Patient).identifier).value?.value
+        val mrn = identifierService.getPatientIdentifier(tenant, patient.identifier).value?.value
             ?: return emptyList()
         val encounter = runBlocking {
-            ehrDataAuthorityClient.getResource(
+            ehrDataAuthorityClient.getResourceAs<Encounter>(
                 tenant.mnemonic,
                 "Encounter",
                 encounterID.localize(tenant)
             )
         } ?: return emptyList()
-        val csn = (encounter as Encounter).identifier.firstOrNull {
-            it.system == Uri(tenant.vendorAs<Epic>().encounterCSNSystem)
-        }?.value?.value ?: return emptyList()
 
-        // can replace this logic once we store order system in tenant config
-        val orderID = medicationRequest.identifier.firstOrNull {
-            it.system != CodeSystem.RONIN_FHIR_ID.uri &&
-                it.system != CodeSystem.RONIN_TENANT.uri &&
-                it.system != CodeSystem.RONIN_DATA_AUTHORITY.uri
-        }?.value?.value ?: return emptyList()
+        val csn = identifierService.getEncounterIdentifier(tenant, encounter.identifier).value?.value ?: return emptyList()
+        val orderID = identifierService.getOrderIdentifier(tenant, medicationRequest.identifier).value?.value ?: return emptyList()
 
         val request = EpicMedAdminRequest(
             patientID = mrn,

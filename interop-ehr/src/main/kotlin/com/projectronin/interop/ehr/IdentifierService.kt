@@ -42,4 +42,14 @@ interface IdentifierService {
      * Determines the appropriate [Identifier] for a Location for this [tenant].
      */
     fun getLocationIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier
+
+    /**
+     * Determines the Order System for the [tenant] given a list of identifiers.
+     */
+    fun getOrderIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier
+
+    /**
+     * Determines the encounter identifier for the [tenant] given a list of identifiers.
+     */
+    fun getEncounterIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier
 }

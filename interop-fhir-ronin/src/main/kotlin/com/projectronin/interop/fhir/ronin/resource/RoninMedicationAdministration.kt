@@ -42,10 +42,10 @@ class RoninMedicationAdministration(normalizer: Normalizer, localizer: Localizer
         location = LocationContext(MedicationAdministration::category)
     )
 
-    private val invalidMedicationAdministrationExtensionUrlError = FHIRError(
+    private val invalidMedicationAdministrationExtensionError = FHIRError(
         code = "RONIN_MEDADMIN_002",
         severity = ValidationIssueSeverity.ERROR,
-        description = "Medication Administration extension url is invalid",
+        description = "Medication Administration extension must contain original Medication Datatype",
         location = LocationContext(MedicationAdministration::extension)
     )
 
@@ -66,15 +66,7 @@ class RoninMedicationAdministration(normalizer: Normalizer, localizer: Localizer
     private val requiredMedicationAdministrationExtensionError = FHIRError(
         code = "RONIN_MEDADMIN_005",
         severity = ValidationIssueSeverity.ERROR,
-        description = "Medication Administration extension list cannot be empty or the value of medication[x] is NOT\n" +
-            " one of the following: codeable concept|contained|literal|logical reference",
-        location = LocationContext(MedicationAdministration::extension)
-    )
-
-    private val requiredMedicationAdministrationExtensionSizeError = FHIRError(
-        code = "RONIN_MEDADMIN_006",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Medication Administration extension list cannot exceed size of one(1)",
+        description = "Medication Administration extension list cannot be empty or the value of medication[x] is NOT one of the following: codeable concept|contained|literal|logical reference",
         location = LocationContext(MedicationAdministration::extension)
     )
 
@@ -93,48 +85,55 @@ class RoninMedicationAdministration(normalizer: Normalizer, localizer: Localizer
             checkTrue(extension.isNotEmpty(), requiredMedicationAdministrationExtensionError, parentContext)
 
             if (extension.isNotEmpty()) {
-                // if not empty - can only be 1..1
-                checkTrue(
-                    extension.size == 1,
-                    requiredMedicationAdministrationExtensionSizeError,
-                    parentContext
-                )
-            }
+                val medicationDataType = extension.any { // at least one extension url needs to match
+                    it.url?.value == RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value
+                }
+                if (medicationDataType) {
+                    // if extension ORIGINAL_MEDICATION_DATATYPE url does exist check that specific url
+                    extension.forEach {
+                        if (it.url?.value == RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value) {
+                            val extensionValue = OriginalMedDataType from it.value?.value!! != null // is the value correct
+                            val extensionType = it.value?.type == DynamicValueType.CODE // is it of type CODE
 
-            if (extension.size == 1) {
-                // extension - original medication datatype extension - url value must be ORIGINAL_MEDICATION_DATATYPE
-                checkTrue(
-                    extension.all { it.url?.value == RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value },
-                    invalidMedicationAdministrationExtensionUrlError,
-                    parentContext
-                )
-                // check that the value in the extension is an acceptable value (OriginalMedDataType enum)
-                checkTrue(
-                    extension.all { OriginalMedDataType from it.value?.value!! != null },
-                    invalidMedicationAdministrationExtensionValueError,
-                    parentContext
-                )
-                // check that the extension type is DynamicValueType.CODE
-                checkTrue(
-                    extension.all { it.value?.type == DynamicValueType.CODE },
-                    invalidMedicationAdministrationExtensionTypeError,
-                    parentContext
-                )
-            }
+                            checkTrue(
+                                extensionValue,
+                                invalidMedicationAdministrationExtensionValueError,
+                                parentContext
+                            )
+                            checkTrue(
+                                extensionType,
+                                invalidMedicationAdministrationExtensionTypeError,
+                                parentContext
+                            )
+                        }
+                    }
+                } else {
+                    checkTrue( // if the url does not exist - throw error
+                        medicationDataType,
+                        invalidMedicationAdministrationExtensionError,
+                        parentContext
+                    )
+                }
 
-            // category can only be of size 1 if it exists/is populated
-            ifNotNull(element.category) {
-                checkTrue(element.category?.coding?.size!! == 1, requiredCategoryError, parentContext)
-            }
+                // category can only be of size 1 if it exists/is populated
+                ifNotNull(element.category) {
+                    val categorySize = element.category?.coding?.size!! == 1
+                    checkTrue(
+                        categorySize,
+                        requiredCategoryError,
+                        parentContext
+                    )
+                }
 
-            // required subject is validated in R4
-            ifNotNull(element.subject) {
-                // check that subject reference has type and the extension is the data authority extension identifier
-                requireDataAuthorityExtensionIdentifier(
-                    element.subject,
-                    LocationContext(MedicationAdministration::subject),
-                    validation
-                )
+                // required subject is validated in R4
+                ifNotNull(element.subject) {
+                    // check that subject reference has type and the extension is the data authority extension identifier
+                    requireDataAuthorityExtensionIdentifier(
+                        element.subject,
+                        LocationContext(MedicationAdministration::subject),
+                        validation
+                    )
+                }
             }
         }
     }

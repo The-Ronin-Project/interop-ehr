@@ -5,10 +5,12 @@ import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
+import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
+import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Encounter
 import com.projectronin.interop.fhir.r4.resource.MedicationAdministration
 import com.projectronin.interop.fhir.r4.resource.MedicationRequest
@@ -40,7 +42,6 @@ internal class EpicMedicationAdministrationServiceTest {
         val medRequest = mockk<MedicationRequest> {
             every { subject?.decomposedId() } returns "testTenant-patID"
             every { encounter?.decomposedId() } returns "testTenant-encounterID"
-            every { medication?.value } returns Reference(reference = FHIRString("Medication/testTenant-medID"))
             every { findFhirId() } returns "medReqID"
             every { identifier } returns listOf(
                 mockk {
@@ -58,11 +59,11 @@ internal class EpicMedicationAdministrationServiceTest {
                 }
             )
         }
-        coEvery { ehrda.getResource(any(), "Patient", "testTenant-patID") } returns mockk<Patient> {
+        coEvery { ehrda.getResourceAs<Patient>(any(), "Patient", "testTenant-patID") } returns mockk<Patient> {
             every { identifier } returns listOf(mockk())
         }
         every { identifierService.getPatientIdentifier(testTenant, any()).value?.value } returns "patMRN"
-        coEvery { ehrda.getResource(any(), "Encounter", "testTenant-encounterID") } returns mockk<Encounter> {
+        coEvery { ehrda.getResourceAs<Encounter>(any(), "Encounter", "testTenant-encounterID") } returns mockk<Encounter> {
             every { identifier } returns listOf(
                 mockk {
                     every { system } returns Uri("csnSystem")
@@ -70,6 +71,9 @@ internal class EpicMedicationAdministrationServiceTest {
                 }
             )
         }
+        every { identifierService.getEncounterIdentifier(testTenant, any()).value?.value } returns "encCSN"
+        every { identifierService.getOrderIdentifier(testTenant, any()).value?.value } returns "orderID"
+
         val epicResponse = EpicMedAdmin(
             orders = listOf(
                 EpicMedicationOrder(
@@ -154,7 +158,6 @@ internal class EpicMedicationAdministrationServiceTest {
         val medRequest = mockk<MedicationRequest> {
             every { subject?.decomposedId() } returns "testTenant-patID"
             every { encounter?.decomposedId() } returns "testTenant-encounterID"
-            every { medication?.value } returns Reference(reference = FHIRString("Medication/testTenant-medID"))
             every { findFhirId() } returns "medReqID"
             every { identifier } returns listOf(
                 mockk {
@@ -168,11 +171,11 @@ internal class EpicMedicationAdministrationServiceTest {
                 }
             )
         }
-        coEvery { ehrda.getResource(any(), "Patient", "testTenant-patID") } returns mockk<Patient> {
+        coEvery { ehrda.getResourceAs<Patient>(any(), "Patient", "testTenant-patID") } returns mockk<Patient> {
             every { identifier } returns listOf(mockk())
         }
         every { identifierService.getPatientIdentifier(testTenant, any()).value?.value } returns "patMRN"
-        coEvery { ehrda.getResource(any(), "Encounter", "testTenant-encounterID") } returns mockk<Encounter> {
+        coEvery { ehrda.getResourceAs<Encounter>(any(), "Encounter", "testTenant-encounterID") } returns mockk<Encounter> {
             every { identifier } returns listOf(
                 mockk {
                     every { system } returns Uri("csnSystem")
@@ -180,7 +183,8 @@ internal class EpicMedicationAdministrationServiceTest {
                 }
             )
         }
-
+        every { identifierService.getEncounterIdentifier(testTenant, any()) } returns Identifier(value = null)
+        every { identifierService.getOrderIdentifier(testTenant, any()).value?.value } returns "orderID"
         val result = service.findMedicationAdministrationsByRequest(testTenant, medRequest)
         assertEquals(emptyList<MedicationAdministration>(), result)
     }
@@ -190,14 +194,14 @@ internal class EpicMedicationAdministrationServiceTest {
         val medRequest = mockk<MedicationRequest> {
             every { subject?.decomposedId() } returns "testTenant-patID"
             every { encounter?.decomposedId() } returns "testTenant-encounterID"
-            every { medication?.value } returns Reference(reference = FHIRString("Medication/testTenant-medID"))
             every { findFhirId() } returns "medReqID"
+            every { identifier } returns listOf(Identifier(value = "something".asFHIR()))
         }
-        coEvery { ehrda.getResource(any(), "Patient", "testTenant-patID") } returns mockk<Patient> {
+        coEvery { ehrda.getResourceAs<Patient>(any(), "Patient", "testTenant-patID") } returns mockk<Patient> {
             every { identifier } returns listOf(mockk())
         }
         every { identifierService.getPatientIdentifier(testTenant, any()).value?.value } returns "patMRN"
-        coEvery { ehrda.getResource(any(), "Encounter", "testTenant-encounterID") } returns mockk<Encounter> {
+        coEvery { ehrda.getResourceAs<Encounter>(any(), "Encounter", "testTenant-encounterID") } returns mockk<Encounter> {
             every { identifier } returns listOf(
                 mockk {
                     every { system } returns Uri("notCsnSystem")
@@ -205,7 +209,8 @@ internal class EpicMedicationAdministrationServiceTest {
                 }
             )
         }
-
+        every { identifierService.getEncounterIdentifier(testTenant, any()).value?.value } returns "encCSN"
+        every { identifierService.getOrderIdentifier(testTenant, any()) } returns Identifier(value = null)
         val result = service.findMedicationAdministrationsByRequest(testTenant, medRequest)
         assertEquals(emptyList<MedicationAdministration>(), result)
     }
@@ -215,14 +220,13 @@ internal class EpicMedicationAdministrationServiceTest {
         val medRequest = mockk<MedicationRequest> {
             every { subject?.decomposedId() } returns "testTenant-patID"
             every { encounter?.decomposedId() } returns "testTenant-encounterID"
-            every { medication?.value } returns Reference(reference = FHIRString("Medication/testTenant-medID"))
             every { findFhirId() } returns "medReqID"
         }
-        coEvery { ehrda.getResource(any(), "Patient", "testTenant-patID") } returns mockk<Patient> {
+        coEvery { ehrda.getResourceAs<Patient>(any(), "Patient", "testTenant-patID") } returns mockk<Patient> {
             every { identifier } returns listOf(mockk())
         }
         every { identifierService.getPatientIdentifier(testTenant, any()).value?.value } returns "patMRN"
-        coEvery { ehrda.getResource(any(), "Encounter", "testTenant-encounterID") } returns null
+        coEvery { ehrda.getResourceAs<Encounter>(any(), "Encounter", "testTenant-encounterID") } returns null
 
         val result = service.findMedicationAdministrationsByRequest(testTenant, medRequest)
         assertEquals(emptyList<MedicationAdministration>(), result)
@@ -233,10 +237,9 @@ internal class EpicMedicationAdministrationServiceTest {
         val medRequest = mockk<MedicationRequest> {
             every { subject?.decomposedId() } returns "testTenant-patID"
             every { encounter?.decomposedId() } returns "testTenant-encounterID"
-            every { medication?.value } returns Reference(reference = FHIRString("Medication/testTenant-medID"))
             every { findFhirId() } returns "medReqID"
         }
-        coEvery { ehrda.getResource(any(), "Patient", "testTenant-patID") } returns mockk<Patient> {
+        coEvery { ehrda.getResourceAs<Patient>(any(), "Patient", "testTenant-patID") } returns mockk<Patient> {
             every { identifier } returns listOf(mockk())
         }
         every { identifierService.getPatientIdentifier(testTenant, any()).value } returns null
@@ -250,10 +253,9 @@ internal class EpicMedicationAdministrationServiceTest {
         val medRequest = mockk<MedicationRequest> {
             every { subject?.decomposedId() } returns "testTenant-patID"
             every { encounter?.decomposedId() } returns "testTenant-encounterID"
-            every { medication?.value } returns Reference(reference = FHIRString("Medication/testTenant-medID"))
             every { findFhirId() } returns "medReqID"
         }
-        coEvery { ehrda.getResource(any(), "Patient", "testTenant-patID") } returns null
+        coEvery { ehrda.getResourceAs<Patient>(any(), "Patient", "testTenant-patID") } returns null
 
         val result = service.findMedicationAdministrationsByRequest(testTenant, medRequest)
         assertEquals(emptyList<MedicationAdministration>(), result)
@@ -264,7 +266,6 @@ internal class EpicMedicationAdministrationServiceTest {
         val medRequest = mockk<MedicationRequest> {
             every { subject?.decomposedId() } returns "testTenant-patID"
             every { encounter?.decomposedId() } returns "testTenant-encounterID"
-            every { medication?.value } returns Reference(reference = FHIRString("Medication/testTenant-medID"))
             every { findFhirId() } returns null
         }
 
@@ -277,7 +278,7 @@ internal class EpicMedicationAdministrationServiceTest {
         val medRequest = mockk<MedicationRequest> {
             every { subject?.decomposedId() } returns "testTenant-patID"
             every { encounter?.decomposedId() } returns "testTenant-encounterID"
-            every { medication } returns null
+            every { findFhirId() } returns null
         }
 
         val result = service.findMedicationAdministrationsByRequest(testTenant, medRequest)

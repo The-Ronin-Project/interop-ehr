@@ -107,4 +107,25 @@ class EpicIdentifierService : IdentifierService {
             system
         ) { "No location identifier with system '$system' found" }
     }
+
+    @Trace
+    override fun getOrderIdentifier(
+        tenant: Tenant,
+        identifiers: List<Identifier>
+    ): Identifier {
+        val system = Uri(tenant.vendorAs<Epic>().orderSystem)
+        return identifiers.firstOrNull { it.system == system }
+            ?: throw VendorIdentifierNotFoundException(
+                "No order identifier found for '${tenant.vendorAs<Epic>().orderSystem}'"
+            )
+    }
+
+    @Trace
+    override fun getEncounterIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
+        val system = Uri(tenant.vendorAs<Epic>().encounterCSNSystem)
+        return identifiers.firstOrNull { it.system == system }
+            ?: throw VendorIdentifierNotFoundException(
+                "No encounter identifier found for '${tenant.vendorAs<Epic>().encounterCSNSystem}'"
+            )
+    }
 }

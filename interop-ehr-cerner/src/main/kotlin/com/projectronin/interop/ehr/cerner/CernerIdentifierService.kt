@@ -66,6 +66,14 @@ class CernerIdentifierService : IdentifierService {
         throw NotImplementedError("getLocationIdentifier not implemented for Cerner, as they will always use the FHIR ID")
     }
 
+    override fun getOrderIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
+        throw NotImplementedError("getOrderIdentifier not implemented for Cerner")
+    }
+
+    override fun getEncounterIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
+        throw NotImplementedError("getEncounterIdentifier not implemented for Cerner")
+    }
+
     /**
      * Returns a valid FHIR Id as an [Identifier], or throws an exception.  An [Id] is required in [FHIRIdentifiers],
      * so it will never be null, but the value in the [Id] is nullable and might not be there.

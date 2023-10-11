@@ -37,6 +37,7 @@ fun createTestTenant(
     practitionerUserSystem: String = "userSystem",
     mrnSystem: String = "mrnSystem",
     csnSystem: String = "csnSystem",
+    orderSystem: String = "orderSystem",
     mrnTypeText: String = "MRN",
     internalSystem: String = "internalSystem",
     hsi: String? = null,
@@ -68,7 +69,8 @@ fun createTestTenant(
             mrnTypeText,
             hsi,
             departmentInternalSystem,
-            patientOnboardedFlagId
+            patientOnboardedFlagId,
+            orderSystem
         ),
         monitoredIndicator
     )
