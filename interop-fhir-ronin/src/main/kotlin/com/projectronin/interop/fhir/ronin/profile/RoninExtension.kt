@@ -17,6 +17,8 @@ enum class RoninExtension(val value: String) {
     TENANT_SOURCE_OBSERVATION_VALUE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationValue"),
     TENANT_SOURCE_OBSERVATION_COMPONENT_CODE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationComponentCode"),
     TENANT_SOURCE_OBSERVATION_COMPONENT_VALUE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationComponentValue"),
+    TENANT_SOURCE_SERVICE_REQUEST_CATEGORY("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceServiceRequestCategory"),
+    TENANT_SOURCE_SERVICE_REQUEST_CODE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceServiceRequestCode"),
     TENANT_SOURCE_TELECOM_SYSTEM("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem"),
     TENANT_SOURCE_TELECOM_USE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomUse"),
     TENANT_SOURCE_ENCOUNTER_CLASS("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceEncounterClass"),
@@ -32,5 +34,6 @@ enum class RoninExtension(val value: String) {
 
     TENANT_SOURCE_CARE_PLAN_CATEGORY("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceCarePlanCategory"),
     ORIGINAL_MEDICATION_DATATYPE("http://projectronin.io/fhir/StructureDefinition/Extension/originalMedicationDatatype");
+
     val uri = Uri(value)
 }

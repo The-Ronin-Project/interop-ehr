@@ -31,6 +31,7 @@ enum class RoninProfile(val value: String) {
     OBSERVATION_RESPIRATORY_RATE("http://projectronin.io/fhir/StructureDefinition/ronin-observationRespiratoryRate"),
     OBSERVATION_STAGING_RELATED("http://projectronin.io/fhir/StructureDefinition/ronin-observationStagingRelated"),
     REQUEST_GROUP("http://projectronin.io/fhir/StructureDefinition/ronin-requestGroup"),
+    SERVICE_REQUEST("http://projectronin.io/fhir/StructureDefinition/ronin-serviceRequest"),
 
     @Deprecated("ronin-vitalSigns is a retired profile", ReplaceWith(""), DeprecationLevel.WARNING)
     OBSERVATION_VITAL_SIGNS("http://projectronin.io/fhir/StructureDefinition/ronin-vitalSigns"),

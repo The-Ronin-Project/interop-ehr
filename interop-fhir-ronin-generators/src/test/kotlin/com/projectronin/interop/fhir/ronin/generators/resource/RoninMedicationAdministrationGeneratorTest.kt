@@ -123,7 +123,7 @@ class RoninMedicationAdministrationGeneratorTest {
             validation.issues()[0].code
         )
         assertEquals(
-            "Medication Administration extension url is invalid",
+            "Medication Administration extension must contain original Medication Datatype",
             validation.issues()[0].description
         )
         assertEquals(
