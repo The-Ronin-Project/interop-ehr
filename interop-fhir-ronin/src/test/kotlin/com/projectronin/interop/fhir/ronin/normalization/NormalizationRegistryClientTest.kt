@@ -2093,6 +2093,60 @@ class NormalizationRegistryClientTest {
     }
 
     @Test
+    fun `getConceptMapping for CodeableConcept - 1 match - TESTING`() {
+        val sourceUrl = "tenant-sourceObservationCode"
+        val cmTestRegistry = listOf(
+            NormalizationRegistryItem(
+                data_element = "Observation.code",
+                registry_uuid = "registry-uuid",
+                filename = "file1.json",
+                concept_map_name = "TestObservationsMashup",
+                concept_map_uuid = "TestObservationsMashup-uuid",
+                registry_entry_type = "concept_map",
+                version = "1",
+                source_extension_url = sourceUrl,
+                resource_type = "Observation",
+                tenant_id = "test"
+            )
+        )
+        mockkObject(JacksonUtil)
+        every { ociClient.getObjectFromINFX(registryPath) } returns "registryJson"
+        every { JacksonUtil.readJsonList("registryJson", NormalizationRegistryItem::class) } returns cmTestRegistry
+        every { ociClient.getObjectFromINFX("file1.json") } returns testConceptMapTest
+        val concept = CodeableConcept(
+            text = "Yellow".asFHIR(),
+            coding = listOf()
+        )
+        val mapping = client.getConceptMapping(
+            tenant,
+            "Observation.code",
+            concept,
+            mockk<Observation>()
+        )!!
+        assertEquals(
+            CodeableConcept(
+                coding = listOf(
+                    Coding(
+                        code = Code("371244009"),
+                        system = Uri("http://snomed.info/sct"),
+                        version = "0.0.1".asFHIR(),
+                        display = "Yellow color (qualifier value)".asFHIR()
+                    )
+                ),
+                text = "Yellow".asFHIR()
+            ),
+            mapping.codeableConcept
+        )
+        assertEquals(
+            Extension(
+                url = Uri(sourceUrl),
+                value = DynamicValue(type = DynamicValueType.CODEABLE_CONCEPT, value = concept)
+            ),
+            mapping.extension
+        )
+    }
+
+    @Test
     fun `getConceptMapping for CodeableConcept - parse formatted group element code - source Coding has 1 member - match found`() {
         val sourceUrl = "tenant-sourceObservationCode"
         val cmTestRegistry = listOf(
@@ -3743,3 +3797,244 @@ class NormalizationRegistryClientTest {
         verify(exactly = 1) { medicationDependsOnEvaluator.meetsDependsOn(medication, listOf(dependsOn2)) }
     }
 }
+
+private val testConceptMapTest = """
+    {
+      "resourceType": "ConceptMap",
+      "id": "TestObservationsMashup-id",
+      "name": "TestObservationsMashup-name",
+      "url": "http://projectronin.io/fhir/ConceptMap/03659ed9-c591-4bbc-9bcf-37260e0e402f",
+      "description": "Observations Values to Ronin Observation Values",
+      "purpose": null,
+      "experimental": false,
+      "date": "2023-10-09T18:20:47.059Z",
+      "version": 7,
+      "group": [
+        {
+          "source": "http://projectronin.io/fhir/CodeSystem/test/TestObservationsMashup",
+          "sourceVersion": "1.0",
+          "target": "http://snomed.info/sct",
+          "targetVersion": "0.0.1",
+          "element": [
+            {
+              "id": "54c57f92d30fc58bf76c757b42ab9dc1",
+              "code": "{\"text\": \"Negative\"}",
+              "display": "Negative",
+              "target": [
+                {
+                  "id": "c555f11db938325a89c30922509f41e6",
+                  "code": "260385009",
+                  "display": "Negative (qualifier value)",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "id": "26ea2d0a1c891bd35b2376b998a92118",
+              "code": "{\"coding\": [{\"system\": \"http://snomed.info/sct\", \"code\": \"263707001\", \"display\": \"Clear (qualifier value)\", \"userSelected\": false}], \"text\": \"Clear\"}",
+              "display": "Clear",
+              "target": [
+                {
+                  "id": "5058d7a0e3a720cf9afe3b4436bf1c41",
+                  "code": "263707001",
+                  "display": "Clear (qualifier value)",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "id": "74e5003998ecc635b8ab8227d2d3d28a",
+              "code": "{\"coding\": [{\"code\": \"0\", \"display\": \"Positive\", \"system\": \"urn:oid:1.2.840.114350.1.13.412.2.7.4.696784.55405\"}], \"text\": \"null\"}",
+              "display": "-",
+              "target": [
+                {
+                  "id": "55cd8382019bad0b9e5e41b2512a12e2",
+                  "code": "10828004",
+                  "display": "Positive (qualifier value)",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "id": "81917bffa55aba1840033a54187423a7",
+              "code": "{\"coding\": [{\"system\": \"http://snomed.info/sct\", \"code\": \"260385009\", \"display\": \"Negative (qualifier value)\", \"userSelected\": false}], \"text\": \"Neg\"}",
+              "display": "Neg",
+              "target": [
+                {
+                  "id": "962db91a0bc5886f2239bee64ad2193b",
+                  "code": "260385009",
+                  "display": "Negative (qualifier value)",
+                  "equivalence": "equivalent"
+                }
+              ]
+            },
+            {
+              "id": "fb9b8c03a2a75da276874f3dea768fd3",
+              "code": "{\"text\": \"Yellow\"}",
+              "display": "Yellow",
+              "target": [
+                {
+                  "id": "50ef6185b78f2f5f0dad3f34017e102a",
+                  "code": "371244009",
+                  "display": "Yellow color (qualifier value)",
+                  "equivalence": "equivalent"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "source": "http://projectronin.io/fhir/CodeSystem/p1941/ObservationValue",
+          "sourceVersion": "1.0",
+          "target": "http://projectronin.io/fhir/CodeSystem/ronin/nomap",
+          "targetVersion": "1.0",
+          "element": [
+            {
+              "id": "bb0ac2b94b21cf2a465e68122905f274",
+              "code": "{\"coding\": [{\"code\": \"9986\", \"display\": null, \"system\": \"urn:oid:1.2.840.114350.1.13.412.2.7.5.737384.212\"}, {\"code\": \"9986\", \"display\": \"Archived Material\", \"system\": \"urn:oid:1.2.840.114350.1.13.412.2.7.2.768282\"}], \"text\": \"Archived Material\"}",
+              "display": "Archived Material",
+              "target": [
+                {
+                  "id": "6deaaee35414fe865fe4a149c578405f",
+                  "code": "No map",
+                  "display": "No matching concept",
+                  "equivalence": "wider",
+                  "comment": "Not in target code system source-is-narrower-than-target"
+                },
+                {
+                  "id": "6deaaee35414fe865fe4a149c578405f",
+                  "code": "No map",
+                  "display": "No matching concept",
+                  "equivalence": "wider",
+                  "comment": "Not in target code system source-is-narrower-than-target"
+                }
+              ]
+            },
+            {
+              "id": "0cbf6e53b17940e505653842ff9c687b",
+              "code": "{\"text\": \"Man indicated\"}",
+              "display": "Man indicated",
+              "target": [
+                {
+                  "id": "19877f5c965cb8ec6ea6a6cbdc7464d7",
+                  "code": "No map",
+                  "display": "No matching concept",
+                  "equivalence": "wider",
+                  "comment": "Not enough information source-is-narrower-than-target"
+                }
+              ]
+            },
+            {
+              "id": "15f8d6c0d313197a395815c452d7e2fb",
+              "code": "{\"text\": \"1.020\"}",
+              "display": "1.020",
+              "target": [
+                {
+                  "id": "cedb190d43b807441bcbbea79e1100ef",
+                  "code": "No map",
+                  "display": "No matching concept",
+                  "equivalence": "wider",
+                  "comment": "Other source-is-narrower-than-target"
+                }
+              ]
+            },
+            {
+              "id": "6389562a3e1d8d63c3e0ac4b9b21ac35",
+              "code": "{\"text\": \"8\"}",
+              "display": "8",
+              "target": [
+                {
+                  "id": "e571b7184940768273ed21a372d79fbc",
+                  "code": "No map",
+                  "display": "No matching concept",
+                  "equivalence": "wider",
+                  "comment": "Other source-is-narrower-than-target"
+                }
+              ]
+            },
+            {
+              "id": "eb8250eabd3d878753d0decbdf24013c",
+              "code": "{\"text\": \"Greater than 1.030\"}",
+              "display": "Greater than 1.030",
+              "target": [
+                {
+                  "id": "cc49e93b9b683d3d1e29ecb1eae71f66",
+                  "code": "No map",
+                  "display": "No matching concept",
+                  "equivalence": "wider",
+                  "comment": "Not enough information source-is-narrower-than-target"
+                }
+              ]
+            },
+            {
+              "id": "9edb81b3e960a98ec64a1fa5460e6cda",
+              "code": "{\"text\": \"6.5\"}",
+              "display": "6.5",
+              "target": [
+                {
+                  "id": "dd55c969152c108472e1465371577eb7",
+                  "code": "No map",
+                  "display": "No matching concept",
+                  "equivalence": "wider",
+                  "comment": "Other source-is-narrower-than-target"
+                }
+              ]
+            },
+            {
+              "id": "c579a44386efb92504488a1fdc5b30cb",
+              "code": "{\"text\": \"0.2 mg/dl\"}",
+              "display": "0.2 mg/dl",
+              "target": [
+                {
+                  "id": "41f4b1f785ff4e04eee489619c09dc8a",
+                  "code": "No map",
+                  "display": "No matching concept",
+                  "equivalence": "wider",
+                  "comment": "Other source-is-narrower-than-target"
+                }
+              ]
+            },
+            {
+              "id": "a9a46179e6e9410da05372f055eb6e8f",
+              "code": "{\"text\": \"1.000\"}",
+              "display": "1.000",
+              "target": [
+                {
+                  "id": "6ff772b6fb7ca409ac34ba2353f6c2a7",
+                  "code": "No map",
+                  "display": "No matching concept",
+                  "equivalence": "wider",
+                  "comment": "Other source-is-narrower-than-target"
+                }
+              ]
+            },
+            {
+              "id": "d22eafe40ee7565acbfcc02cb426610c",
+              "code": "{\"text\": \"2 mg/dl\"}",
+              "display": "2 mg/dl",
+              "target": [
+                {
+                  "id": "16eba8e35e50d228b533bc4c90a983b2",
+                  "code": "No map",
+                  "display": "No matching concept",
+                  "equivalence": "wider",
+                  "comment": "Other source-is-narrower-than-target"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      "extension": [
+        {
+          "url": "http://projectronin.io/fhir/StructureDefinition/Extension/ronin-conceptMapSchema",
+          "valueString": "3.0.0"
+        }
+      ],
+      "meta": {
+        "profile": [
+          "http://projectronin.io/fhir/StructureDefinition/ronin-conceptMap"
+        ]
+      }
+    }
+""".trimIndent()

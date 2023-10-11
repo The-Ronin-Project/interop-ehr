@@ -246,11 +246,19 @@ class NormalizationRegistryClient(
         )
     }
 
-    private fun CodeableConcept.getSourceConcept(): SourceConcept? {
-        val sourceKeys = coding.map {
-            it.getSourceKey() ?: return null
-        }.toSet()
-        return SourceConcept(sourceKeys)
+    /**
+     * if only the text of the codeable concept is available/there is no coding create the source-key from text.
+     * otherwise use coding to create the source-key using code and system
+     */
+    private fun CodeableConcept.getSourceConcept(): SourceConcept? { // if coding is empty...
+        val mappingsFound = if (coding.isEmpty()) {
+            setOf(SourceKey(text?.value.toString(), null))
+        } else {
+            coding.map {
+                it.getSourceKey() ?: return null
+            }.toSet()
+        }
+        return SourceConcept(mappingsFound)
     }
 
     /**
@@ -589,7 +597,7 @@ internal data class ValueSetItem(
     val metadata: ValueSetMetadata
 )
 
-internal data class SourceKey(val value: String, val system: String)
+internal data class SourceKey(val value: String, val system: String?)
 internal data class TargetValue(
     val value: String,
     val system: String,
