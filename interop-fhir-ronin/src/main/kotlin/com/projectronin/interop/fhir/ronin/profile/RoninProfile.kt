@@ -30,6 +30,7 @@ enum class RoninProfile(val value: String) {
     OBSERVATION_PULSE_OXIMETRY("http://projectronin.io/fhir/StructureDefinition/ronin-observationPulseOximetry"),
     OBSERVATION_RESPIRATORY_RATE("http://projectronin.io/fhir/StructureDefinition/ronin-observationRespiratoryRate"),
     OBSERVATION_STAGING_RELATED("http://projectronin.io/fhir/StructureDefinition/ronin-observationStagingRelated"),
+    PROCEDURE("http://projectronin.io/fhir/StructureDefinition/ronin-procedure"),
     REQUEST_GROUP("http://projectronin.io/fhir/StructureDefinition/ronin-requestGroup"),
     SERVICE_REQUEST("http://projectronin.io/fhir/StructureDefinition/ronin-serviceRequest"),
 
@@ -39,6 +40,5 @@ enum class RoninProfile(val value: String) {
     PATIENT("http://projectronin.io/fhir/StructureDefinition/ronin-patient"),
     PRACTITIONER("http://projectronin.io/fhir/StructureDefinition/ronin-practitioner"),
     PRACTITIONER_ROLE("http://projectronin.io/fhir/StructureDefinition/ronin-practitionerRole"),
-    PROCEDURE("http://projectronin.io/fhir/StructureDefinition/ronin-procedure"),
     OBSERVATION("http://projectronin.io/fhir/StructureDefinition/ronin-observation");
 }

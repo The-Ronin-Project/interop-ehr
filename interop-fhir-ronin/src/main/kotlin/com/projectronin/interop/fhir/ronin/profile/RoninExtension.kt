@@ -17,6 +17,8 @@ enum class RoninExtension(val value: String) {
     TENANT_SOURCE_OBSERVATION_VALUE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationValue"),
     TENANT_SOURCE_OBSERVATION_COMPONENT_CODE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationComponentCode"),
     TENANT_SOURCE_OBSERVATION_COMPONENT_VALUE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationComponentValue"),
+    TENANT_SOURCE_PROCEDURE_CODE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceProcedureCode"),
+    TENANT_SOURCE_PROCEDURE_CATEGORY("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceProcedureCategory"),
     TENANT_SOURCE_SERVICE_REQUEST_CATEGORY("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceServiceRequestCategory"),
     TENANT_SOURCE_SERVICE_REQUEST_CODE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceServiceRequestCode"),
     TENANT_SOURCE_TELECOM_SYSTEM("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem"),
