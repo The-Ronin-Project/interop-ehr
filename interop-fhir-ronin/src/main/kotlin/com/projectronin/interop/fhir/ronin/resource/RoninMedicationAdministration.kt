@@ -7,12 +7,12 @@ import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.getRoninIdentifiersForResource
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
-import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.BaseRoninProfile
+import com.projectronin.interop.fhir.ronin.resource.extractor.MedicationExtractor
 import com.projectronin.interop.fhir.ronin.transform.TransformResponse
-import com.projectronin.interop.fhir.ronin.util.OriginalMedDataType
 import com.projectronin.interop.fhir.ronin.util.populateExtensionWithReference
+import com.projectronin.interop.fhir.ronin.util.validateMedicationDatatype
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -25,7 +25,11 @@ import java.time.LocalDateTime
  * Validator and transformer for the Ronin Medication Administration profile
  */
 @Component
-class RoninMedicationAdministration(normalizer: Normalizer, localizer: Localizer) :
+class RoninMedicationAdministration(
+    normalizer: Normalizer,
+    localizer: Localizer,
+    private val medicationExtractor: MedicationExtractor
+) :
     BaseRoninProfile<MedicationAdministration>(
         R4MedicationAdministrationValidator,
         RoninProfile.MEDICATION_ADMINISTRATION.value,
@@ -42,32 +46,11 @@ class RoninMedicationAdministration(normalizer: Normalizer, localizer: Localizer
         location = LocationContext(MedicationAdministration::category)
     )
 
-    private val invalidMedicationAdministrationExtensionError = FHIRError(
+    private val requiredMedicationReferenceError = FHIRError(
         code = "RONIN_MEDADMIN_002",
+        description = "Medication must be a Reference",
         severity = ValidationIssueSeverity.ERROR,
-        description = "Medication Administration extension must contain original Medication Datatype",
-        location = LocationContext(MedicationAdministration::extension)
-    )
-
-    private val invalidMedicationAdministrationExtensionValueError = FHIRError(
-        code = "RONIN_MEDADMIN_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Medication Administration extension value is invalid",
-        location = LocationContext(MedicationAdministration::extension)
-    )
-
-    private val invalidMedicationAdministrationExtensionTypeError = FHIRError(
-        code = "RONIN_MEDADMIN_004",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Medication Administration extension type is invalid",
-        location = LocationContext(MedicationAdministration::extension)
-    )
-
-    private val requiredMedicationAdministrationExtensionError = FHIRError(
-        code = "RONIN_MEDADMIN_005",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Medication Administration extension list cannot be empty or the value of medication[x] is NOT one of the following: codeable concept|contained|literal|logical reference",
-        location = LocationContext(MedicationAdministration::extension)
+        location = LocationContext(MedicationAdministration::medication)
     )
 
     override fun validateRonin(
@@ -80,60 +63,34 @@ class RoninMedicationAdministration(normalizer: Normalizer, localizer: Localizer
             requireRoninIdentifiers(element.identifier, parentContext, this)
             containedResourcePresent(element.contained, parentContext, validation)
 
-            // extension - not empty
-            val extension = element.extension
-            checkTrue(extension.isNotEmpty(), requiredMedicationAdministrationExtensionError, parentContext)
+            validateMedicationDatatype(element.extension, parentContext, this)
 
-            if (extension.isNotEmpty()) {
-                val medicationDataType = extension.any { // at least one extension url needs to match
-                    it.url?.value == RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value
-                }
-                if (medicationDataType) {
-                    // if extension ORIGINAL_MEDICATION_DATATYPE url does exist check that specific url
-                    extension.forEach {
-                        if (it.url?.value == RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value) {
-                            val extensionValue = OriginalMedDataType from it.value?.value!! != null // is the value correct
-                            val extensionType = it.value?.type == DynamicValueType.CODE // is it of type CODE
+            element.medication?.let { medication ->
+                checkTrue(
+                    medication.type == DynamicValueType.REFERENCE,
+                    requiredMedicationReferenceError,
+                    parentContext
+                )
+            }
 
-                            checkTrue(
-                                extensionValue,
-                                invalidMedicationAdministrationExtensionValueError,
-                                parentContext
-                            )
-                            checkTrue(
-                                extensionType,
-                                invalidMedicationAdministrationExtensionTypeError,
-                                parentContext
-                            )
-                        }
-                    }
-                } else {
-                    checkTrue( // if the url does not exist - throw error
-                        medicationDataType,
-                        invalidMedicationAdministrationExtensionError,
-                        parentContext
-                    )
-                }
+            // category can only be of size 1 if it exists/is populated
+            ifNotNull(element.category) {
+                val categorySize = element.category?.coding?.size!! == 1
+                checkTrue(
+                    categorySize,
+                    requiredCategoryError,
+                    parentContext
+                )
+            }
 
-                // category can only be of size 1 if it exists/is populated
-                ifNotNull(element.category) {
-                    val categorySize = element.category?.coding?.size!! == 1
-                    checkTrue(
-                        categorySize,
-                        requiredCategoryError,
-                        parentContext
-                    )
-                }
-
-                // required subject is validated in R4
-                ifNotNull(element.subject) {
-                    // check that subject reference has type and the extension is the data authority extension identifier
-                    requireDataAuthorityExtensionIdentifier(
-                        element.subject,
-                        LocationContext(MedicationAdministration::subject),
-                        validation
-                    )
-                }
+            // required subject is validated in R4
+            ifNotNull(element.subject) {
+                // check that subject reference has type and the extension is the data authority extension identifier
+                requireDataAuthorityExtensionIdentifier(
+                    element.subject,
+                    LocationContext(MedicationAdministration::subject),
+                    validation
+                )
             }
         }
     }
@@ -144,12 +101,21 @@ class RoninMedicationAdministration(normalizer: Normalizer, localizer: Localizer
         tenant: Tenant,
         forceCacheReloadTS: LocalDateTime?
     ): Pair<TransformResponse<MedicationAdministration>?, Validation> {
+        val medicationExtraction =
+            medicationExtractor.extractMedication(normalized.medication, normalized.contained, normalized.id)
+
+        val medication = medicationExtraction?.updatedMedication ?: normalized.medication
+        val contained = medicationExtraction?.updatedContained ?: normalized.contained
+        val embeddedMedications = medicationExtraction?.extractedMedication?.let { listOf(it) } ?: emptyList()
+
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant),
+            medication = medication,
+            contained = contained,
             extension = normalized.extension + populateExtensionWithReference(normalized.medication) // populate extension based on medication[x]
         )
 
-        return Pair(TransformResponse(transformed), Validation())
+        return Pair(TransformResponse(transformed, embeddedMedications), Validation())
     }
 }

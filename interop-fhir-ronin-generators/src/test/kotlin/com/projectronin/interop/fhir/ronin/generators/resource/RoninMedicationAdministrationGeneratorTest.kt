@@ -1,17 +1,13 @@
 package com.projectronin.interop.fhir.ronin.generators.resource
 
 import com.projectronin.interop.common.jackson.JacksonManager
-import com.projectronin.interop.fhir.r4.datatype.Coding
-import com.projectronin.interop.fhir.r4.datatype.DynamicValue
-import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
-import com.projectronin.interop.fhir.r4.datatype.Extension
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
-import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.resource.RoninMedicationAdministration
+import com.projectronin.interop.fhir.ronin.resource.extractor.MedicationExtractor
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -37,7 +33,10 @@ class RoninMedicationAdministrationGeneratorTest {
         val localizer: Localizer = mockk {
             every { localize(any(), tenant) } answers { firstArg() }
         }
-        roninMedicationAdministration = RoninMedicationAdministration(normalizer, localizer)
+        val medicationExtractor = mockk<MedicationExtractor> {
+            every { extractMedication(any(), any(), any()) } returns null
+        }
+        roninMedicationAdministration = RoninMedicationAdministration(normalizer, localizer, medicationExtractor)
     }
 
     @Test
@@ -48,7 +47,8 @@ class RoninMedicationAdministrationGeneratorTest {
             status of Code("testing-this-status")
         }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes will be generated
-        val roninMedicationAdministrationJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninMedicationAdministration)
+        val roninMedicationAdministrationJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter()
+            .writeValueAsString(roninMedicationAdministration)
 
         // Uncomment to take a peek at the JSON
         // println(roninMedicationAdministrationJSON)
@@ -93,104 +93,6 @@ class RoninMedicationAdministrationGeneratorTest {
         assertEquals(
             LocationContext(element = "MedicationAdministration", field = "status"),
             validation.issues()[0].location
-        )
-    }
-
-    @Test
-    fun `Incorrect extension URI fails validation`() {
-        val medicationAdministration = rcdmMedicationAdministration("test") {
-            extension.plus(
-                Extension(
-                    url = Uri("bad uri"),
-                    value = DynamicValue(
-                        DynamicValueType.CODE,
-                        possibleMedicationDatatypeCodes.random()
-                    )
-                )
-            )
-        }
-
-        val roninMedicationAdministrationJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(medicationAdministration)
-
-        println(roninMedicationAdministrationJSON)
-
-        val validation = roninMedicationAdministration.validate(medicationAdministration, null)
-        assertTrue(validation.hasErrors())
-        println(validation.issues())
-        assertEquals(2, validation.issues().size)
-        assertEquals(
-            "RONIN_MEDADMIN_002",
-            validation.issues()[0].code
-        )
-        assertEquals(
-            "Medication Administration extension must contain original Medication Datatype",
-            validation.issues()[0].description
-        )
-        assertEquals(
-            "R4_INV_PRIM",
-            validation.issues()[1].code
-
-        )
-        assertEquals(
-            "Supplied value is not valid for a Uri",
-            validation.issues()[1].description
-
-        )
-    }
-
-    @Test
-    fun `Incorrect extension type fails validation`() {
-        val medicationAdministration = rcdmMedicationAdministration("test") {
-            extension of listOf(
-                Extension(
-                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/originalMedicationDatatype"),
-                    value = DynamicValue(
-                        DynamicValueType.AGE,
-                        possibleMedicationDatatypeCodes.random()
-                    )
-                )
-            )
-        }
-
-        val validation = roninMedicationAdministration.validate(medicationAdministration, null)
-        assertTrue(validation.hasErrors())
-        assertEquals(1, validation.issues().size)
-        assertEquals(
-            "RONIN_MEDADMIN_004",
-            validation.issues()[0].code
-        )
-        assertEquals(
-            "Medication Administration extension type is invalid",
-            validation.issues()[0].description
-        )
-    }
-
-    @Test
-    fun `Incorrect extension value fails validation`() {
-        val medicationAdministration = rcdmMedicationAdministration("test") {
-            extension of listOf(
-                Extension(
-                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/originalMedicationDatatype"),
-                    value = DynamicValue(
-                        DynamicValueType.CODE,
-                        Coding(
-                            code = Code("invalid-code")
-                        )
-                    )
-                )
-            )
-        }
-
-        val validation = roninMedicationAdministration.validate(medicationAdministration, null)
-        assertTrue(validation.hasErrors())
-        assertEquals(1, validation.issues().size)
-        assertEquals(
-            "RONIN_MEDADMIN_003",
-            validation.issues()[0].code
-        )
-        assertEquals(
-            "Medication Administration extension value is invalid",
-            validation.issues()[0].description
         )
     }
 

@@ -16,6 +16,7 @@ import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.RoninMedicationStatement
+import com.projectronin.interop.fhir.ronin.resource.extractor.MedicationExtractor
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
@@ -41,7 +42,10 @@ class RoninMedicationStatementGeneratorTest {
         val localizer: Localizer = mockk {
             every { localize(any(), tenant) } answers { firstArg() }
         }
-        rcdmMedicationStatement = RoninMedicationStatement(normalizer, localizer)
+        val medicationExtractor = mockk<MedicationExtractor> {
+            every { extractMedication(any(), any(), any()) } returns null
+        }
+        rcdmMedicationStatement = RoninMedicationStatement(normalizer, localizer, medicationExtractor)
     }
 
     @Test

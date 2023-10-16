@@ -15,7 +15,8 @@ enum class OriginalMedDataType(val value: Code) {
     CodeableConcept(Code("codeable concept"));
 
     companion object { // helper to check value of extension populated from medication[x]
-        infix fun from(value: Any): OriginalMedDataType? = OriginalMedDataType.values().firstOrNull { it.value == value }
+        infix fun from(value: Any?): OriginalMedDataType? =
+            value?.let { OriginalMedDataType.values().firstOrNull { it.value == value } }
     }
 }
 
@@ -57,7 +58,13 @@ fun populateExtensionWithReference(
  */
 private fun getReferenceType(medicationReference: DynamicValue<Any>?): Code? {
     val reference = medicationReference?.value as Reference
-    return if (reference.identifier != null) { OriginalMedDataType.LogicalReference.value } else if (reference.reference?.value?.startsWith("#") == true) { OriginalMedDataType.ContainedReference.value } else if (reference.reference?.value?.contains("/") == true) { OriginalMedDataType.LiteralReference.value } else {
+    return if (reference.identifier != null) {
+        OriginalMedDataType.LogicalReference.value
+    } else if (reference.reference?.value?.startsWith("#") == true) {
+        OriginalMedDataType.ContainedReference.value
+    } else if (reference.reference?.value?.contains("/") == true) {
+        OriginalMedDataType.LiteralReference.value
+    } else {
         null
     }
 }

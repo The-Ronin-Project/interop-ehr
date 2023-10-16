@@ -22,6 +22,7 @@ fun rcdmMedicationStatement(tenant: String, block: MedicationStatementGenerator.
             id of it
             identifier of rcdmIdentifiers(tenant, identifier, it.value)
         }
+        extension.plus(originalMedicationDatatype())
         status of generateCode(status.generate(), possibleMedicationStatementStatusCodes.random())
         medication of generateDynamicValueReference(
             medication.generate(),

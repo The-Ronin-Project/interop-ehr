@@ -16,6 +16,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
 import com.projectronin.interop.fhir.r4.datatype.primitive.UnsignedInt
@@ -23,6 +24,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.DispenseRequest
 import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.r4.resource.Medication
 import com.projectronin.interop.fhir.r4.resource.MedicationRequest
 import com.projectronin.interop.fhir.r4.resource.Resource
 import com.projectronin.interop.fhir.r4.resource.Substitution
@@ -33,7 +35,9 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.RequestPriority
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
+import com.projectronin.interop.fhir.ronin.resource.extractor.MedicationExtractor
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -61,7 +65,10 @@ class RoninMedicationRequestTest {
     private val localizer = mockk<Localizer> {
         every { localize(any(), tenant) } answers { firstArg() }
     }
-    private val roninMedicationRequest = RoninMedicationRequest(normalizer, localizer)
+    private val medicationExtractor = mockk<MedicationExtractor> {
+        every { extractMedication(any(), any(), any()) } returns null
+    }
+    private val roninMedicationRequest = RoninMedicationRequest(normalizer, localizer, medicationExtractor)
 
     @Test
     fun `always qualifies`() {
@@ -86,9 +93,21 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -115,6 +134,15 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -135,7 +163,10 @@ class RoninMedicationRequestTest {
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
             requester = null,
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -158,6 +189,15 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -177,7 +217,10 @@ class RoninMedicationRequestTest {
             ),
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -218,6 +261,15 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -237,7 +289,10 @@ class RoninMedicationRequestTest {
             ),
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
             subject = Reference(reference = "Patient/1234".asFHIR()),
 
             requester = Reference(reference = "Practitioner/1234".asFHIR())
@@ -259,6 +314,15 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -278,7 +342,10 @@ class RoninMedicationRequestTest {
             ),
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
             subject = Reference(reference = "Patient/1234".asFHIR(), type = Uri("Patient")),
 
             requester = Reference(reference = "Practitioner/1234".asFHIR())
@@ -299,6 +366,15 @@ class RoninMedicationRequestTest {
     fun `validate checks meta`() {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -318,7 +394,10 @@ class RoninMedicationRequestTest {
             ),
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -339,10 +418,19 @@ class RoninMedicationRequestTest {
     }
 
     @Test
-    fun `validate succeeds`() {
+    fun `validate fails with no medication datatype extension`() {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = "incorrect-url"),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -362,7 +450,175 @@ class RoninMedicationRequestTest {
             ),
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+
+            requester = Reference(reference = "Practitioner/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_MEDDTEXT_001: Extension must contain original Medication Datatype @ MedicationRequest.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with wrong medication datatype extension value`() {
+        val medicationRequest = MedicationRequest(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("blah")
+                    )
+                )
+            ),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = MedicationRequestStatus.COMPLETED.asCode(),
+            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+
+            requester = Reference(reference = "Practitioner/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_MEDDTEXT_002: Medication Datatype extension value is invalid @ MedicationRequest.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails with wrong medication datatype extension type`() {
+        val medicationRequest = MedicationRequest(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.STRING,
+                        value = Code("codeable concept")
+                    )
+                )
+            ),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = MedicationRequestStatus.COMPLETED.asCode(),
+            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+
+            requester = Reference(reference = "Practitioner/1234".asFHIR())
+        )
+
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationRequest.validate(medicationRequest).alertIfErrors()
+        }
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_MEDDTEXT_003: Medication Datatype extension type is invalid @ MedicationRequest.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate succeeds`() {
+        val medicationRequest = MedicationRequest(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            status = MedicationRequestStatus.COMPLETED.asCode(),
+            intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -409,7 +665,10 @@ class RoninMedicationRequestTest {
             priority = RequestPriority.ASAP.asCode(),
             doNotPerform = FHIRBoolean.FALSE,
             reported = DynamicValue(DynamicValueType.BOOLEAN, true),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/1234"))
+            ),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -463,6 +722,13 @@ class RoninMedicationRequestTest {
                 Extension(
                     url = Uri("http://localhost/extension"),
                     value = DynamicValue(DynamicValueType.STRING, "value")
+                ),
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
                 )
             ),
             transformed.extension
@@ -505,7 +771,10 @@ class RoninMedicationRequestTest {
         assertEquals(FHIRBoolean.FALSE, transformed.doNotPerform)
         assertEquals(DynamicValue(DynamicValueType.BOOLEAN, true), transformed.reported)
         assertEquals(
-            DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/1234"))
+            ),
             transformed.medication
         )
         assertEquals(
@@ -546,7 +815,10 @@ class RoninMedicationRequestTest {
             meta = Meta(source = Uri("source")),
             status = MedicationRequestStatus.CANCELLED.asCode(),
             intent = MedicationRequestIntent.PROPOSAL.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/1234"))
+            ),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -572,7 +844,18 @@ class RoninMedicationRequestTest {
         assertNull(transformed.language)
         assertNull(transformed.text)
         assertEquals(listOf<Resource<*>>(), transformed.contained)
-        assertEquals(listOf<Extension>(), transformed.extension)
+        assertEquals(
+            listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
+            transformed.extension
+        )
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
             listOf(
@@ -602,9 +885,144 @@ class RoninMedicationRequestTest {
         assertNull(transformed.doNotPerform)
         assertNull(transformed.reported)
         assertEquals(
-            DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/1234"))
+            ),
             transformed.medication
         )
+        assertEquals(
+            Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            transformed.subject
+        )
+        assertNull(transformed.encounter)
+        assertEquals(listOf<Reference>(), transformed.supportingInformation)
+        assertNull(transformed.authoredOn)
+        assertEquals(Reference(reference = "Practitioner/1234".asFHIR()), transformed.requester)
+        assertNull(transformed.performer)
+        assertNull(transformed.performerType)
+        assertNull(transformed.recorder)
+        assertEquals(listOf<CodeableConcept>(), transformed.reasonCode)
+        assertEquals(listOf<Reference>(), transformed.reasonReference)
+        assertEquals(listOf<Canonical>(), transformed.instantiatesCanonical)
+        assertEquals(listOf<Uri>(), transformed.instantiatesUri)
+        assertEquals(listOf<Reference>(), transformed.basedOn)
+        assertNull(transformed.groupIdentifier)
+        assertNull(transformed.courseOfTherapyType)
+        assertEquals(listOf<Reference>(), transformed.insurance)
+        assertEquals(listOf<Annotation>(), transformed.note)
+        assertEquals(listOf<Dosage>(), transformed.dosageInstruction)
+        assertNull(transformed.dispenseRequest)
+        assertNull(transformed.substitution)
+        assertNull(transformed.priorPrescription)
+        assertEquals(listOf<Reference>(), transformed.detectedIssue)
+        assertEquals(listOf<Reference>(), transformed.eventHistory)
+    }
+
+    @Test
+    fun `transforms medication request with extracted medications`() {
+        val containedMedication = Medication(
+            id = Id("67890"),
+            code = CodeableConcept(text = "medication".asFHIR())
+        )
+        val originalMedicationDynamicValue =
+            DynamicValue(DynamicValueType.REFERENCE, Reference(reference = "#67890".asFHIR()))
+
+        val medicationRequest = MedicationRequest(
+            id = Id("12345"),
+            meta = Meta(source = Uri("source")),
+            contained = listOf(containedMedication),
+            status = MedicationRequestStatus.CANCELLED.asCode(),
+            intent = MedicationRequestIntent.PROPOSAL.asCode(),
+            medication = originalMedicationDynamicValue,
+            subject = Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            requester = Reference(reference = "Practitioner/1234".asFHIR())
+        )
+
+        val updatedMedicationDynamicValue = DynamicValue(
+            DynamicValueType.REFERENCE,
+            Reference(reference = "Medication/contained-12345-67890".asFHIR())
+        )
+        val theExtractedMedication = Medication(
+            id = Id("contained-12345-67890"),
+            code = CodeableConcept(text = "medication".asFHIR())
+        )
+        every {
+            medicationExtractor.extractMedication(
+                originalMedicationDynamicValue,
+                listOf(containedMedication),
+                Id("12345")
+            )
+        } returns mockk {
+            every { updatedMedication } returns updatedMedicationDynamicValue
+            every { updatedContained } returns emptyList()
+            every { extractedMedication } returns theExtractedMedication
+        }
+
+        val (transformResponse, validation) = roninMedicationRequest.transform(medicationRequest, tenant)
+        validation.alertIfErrors()
+
+        transformResponse!!
+        assertEquals(listOf(theExtractedMedication), transformResponse.embeddedResources)
+
+        val transformed = transformResponse.resource
+        assertEquals("MedicationRequest", transformed.resourceType)
+        assertEquals(Id(value = "12345"), transformed.id)
+        assertEquals(
+            Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            transformed.meta
+        )
+        assertNull(transformed.implicitRules)
+        assertNull(transformed.language)
+        assertNull(transformed.text)
+        assertEquals(listOf<Resource<*>>(), transformed.contained)
+        assertEquals(
+            listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("contained reference")
+                    )
+                )
+            ),
+            transformed.extension
+        )
+        assertEquals(listOf<Extension>(), transformed.modifierExtension)
+        assertEquals(
+            listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            transformed.identifier
+        )
+        assertEquals(MedicationRequestStatus.CANCELLED.asCode(), transformed.status)
+        assertNull(transformed.statusReason)
+        assertEquals(MedicationRequestIntent.PROPOSAL.asCode(), transformed.intent)
+        assertEquals(listOf<CodeableConcept>(), transformed.category)
+        assertNull(transformed.priority)
+        assertNull(transformed.doNotPerform)
+        assertNull(transformed.reported)
+        assertEquals(updatedMedicationDynamicValue, transformed.medication)
         assertEquals(
             Reference(
                 reference = "Patient/1234".asFHIR(),
@@ -641,7 +1059,10 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             status = MedicationRequestStatus.CANCELLED.asCode(),
             intent = MedicationRequestIntent.PROPOSAL.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/1234"))
+            ),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -659,6 +1080,15 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -678,7 +1108,10 @@ class RoninMedicationRequestTest {
             ),
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
             subject = Reference(
                 reference = "Group/1234".asFHIR(),
                 type = Uri("Group", extension = dataAuthorityExtension)
@@ -701,6 +1134,15 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -720,7 +1162,10 @@ class RoninMedicationRequestTest {
             ),
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
             subject = null,
             requester = Reference(reference = "Practitioner/1234".asFHIR())
         )
@@ -741,6 +1186,15 @@ class RoninMedicationRequestTest {
         val medicationRequest = MedicationRequest(
             id = Id("12345"),
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -760,7 +1214,10 @@ class RoninMedicationRequestTest {
             ),
             status = MedicationRequestStatus.COMPLETED.asCode(),
             intent = MedicationRequestIntent.FILLER_ORDER.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)
@@ -783,6 +1240,15 @@ class RoninMedicationRequestTest {
     fun `validate fails with bad priority`() {
         val medicationRequest = MedicationRequest(
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_REQUEST.value)), source = Uri("source")),
+            extension = listOf(
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
             identifier = listOf(
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
@@ -802,7 +1268,10 @@ class RoninMedicationRequestTest {
             ),
             status = MedicationRequestStatus.CANCELLED.asCode(),
             intent = MedicationRequestIntent.PROPOSAL.asCode(),
-            medication = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, CodeableConcept(text = "medication".asFHIR())),
+            medication = DynamicValue(
+                type = DynamicValueType.REFERENCE,
+                value = Reference(reference = FHIRString("Medication/test-1234"))
+            ),
             subject = Reference(
                 reference = "Patient/1234".asFHIR(),
                 type = Uri("Patient", extension = dataAuthorityExtension)

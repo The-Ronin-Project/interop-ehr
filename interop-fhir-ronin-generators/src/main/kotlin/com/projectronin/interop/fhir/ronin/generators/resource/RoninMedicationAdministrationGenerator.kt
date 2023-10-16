@@ -17,7 +17,10 @@ import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 
-fun rcdmMedicationAdministration(tenant: String, block: MedicationAdministrationGenerator.() -> Unit): MedicationAdministration {
+fun rcdmMedicationAdministration(
+    tenant: String,
+    block: MedicationAdministrationGenerator.() -> Unit
+): MedicationAdministration {
     return medicationAdministration {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.MEDICATION_ADMINISTRATION, tenant) {}
@@ -25,7 +28,7 @@ fun rcdmMedicationAdministration(tenant: String, block: MedicationAdministration
             id of it
             identifier of rcdmIdentifiers(tenant, identifier, it.value)
         }
-        extension of extension.generate().ifEmpty { listOf(originalMedicationDatatype()) }
+        extension.plus(originalMedicationDatatype())
         subject of generateReference(subject.generate(), listOf("Patient"), tenant, "Patient")
         medication of generateDynamicValueReference(medication.generate(), listOf("Medication"), tenant, "Medication")
     }
