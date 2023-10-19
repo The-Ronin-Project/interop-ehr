@@ -201,7 +201,7 @@ class RoninStagingRelatedTest {
         every {
             getConceptMapping(
                 tenant,
-                "Observation.component.value",
+                "Observation.component.valueCodeableConcept",
                 stagingRelatedConcept,
                 any<Observation>()
             )
@@ -209,7 +209,7 @@ class RoninStagingRelatedTest {
         every {
             getConceptMapping(
                 tenant,
-                "Observation.component.value",
+                "Observation.component.valueCodeableConcept",
                 tenantStagingRelatedConcept,
                 any<Observation>()
             )
@@ -221,7 +221,7 @@ class RoninStagingRelatedTest {
         every {
             getConceptMapping(
                 tenant,
-                "Observation.component.value",
+                "Observation.component.valueCodeableConcept",
                 CodeableConcept(
                     text = "fake staging value".asFHIR(),
                     coding = listOf()
@@ -1577,7 +1577,7 @@ class RoninStagingRelatedTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' has no target defined in any Observation.component.value concept map for tenant 'test' @ Observation.component[0].value\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' has no target defined in any Observation.component.valueCodeableConcept concept map for tenant 'test' @ Observation.component[0].value\n" +
                 "ERROR RONIN_OBS_007: Tenant source observation component value extension is missing or invalid @ Observation.component[0].extension",
             exception.message
         )
@@ -1629,7 +1629,7 @@ class RoninStagingRelatedTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' has no target defined in any Observation.code concept map for tenant 'test' @ Observation.code\n" +
-                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' has no target defined in any Observation.component.value concept map for tenant 'test' @ Observation.component[0].value\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'some-code' has no target defined in any Observation.component.valueCodeableConcept concept map for tenant 'test' @ Observation.component[0].value\n" +
                 "ERROR RONIN_OBS_004: Tenant source observation code extension is missing or invalid @ Observation.extension\n" +
                 "ERROR RONIN_OBS_007: Tenant source observation component value extension is missing or invalid @ Observation.component[0].extension",
             exception.message

@@ -264,7 +264,7 @@ abstract class BaseRoninObservation(
             mapValue(
                 normalized.value,
                 normalized,
-                "Observation.value",
+                "Observation.valueCodeableConcept",
                 parentContext,
                 tenant,
                 validation,
@@ -303,7 +303,7 @@ abstract class BaseRoninObservation(
                 mapValue(
                     normalizedComponent.value,
                     normalized,
-                    "Observation.component.value",
+                    "Observation.component.valueCodeableConcept",
                     componentContext,
                     tenant,
                     validation,
