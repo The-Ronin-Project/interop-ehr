@@ -23,6 +23,7 @@ import com.projectronin.interop.ehr.PatientService
 import com.projectronin.interop.ehr.PractitionerRoleService
 import com.projectronin.interop.ehr.PractitionerService
 import com.projectronin.interop.ehr.RequestGroupService
+import com.projectronin.interop.ehr.ServiceRequestService
 
 /**
  * Interface defining a factory capable of handling all EHR service implementations for a specific vendor.
@@ -56,4 +57,5 @@ interface VendorFactory {
     val documentReferenceService: DocumentReferenceService
     val binaryService: BinaryService
     val medicationAdministrationService: MedicationAdministrationService
+    val serviceRequestService: ServiceRequestService
 }

@@ -1,0 +1,1448 @@
+{
+  "resourceType" : "Bundle",
+  "type" : "searchset",
+  "total" : 14,
+  "link" : [
+    {
+      "relation" : "self",
+      "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest?patient=enh2Q1c0oNRtWzXArnG4tKw3"
+    }
+  ],
+  "entry" : [
+    {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/e214EEAa7RY8csEhIEJW-qOpDYFRKCusulwMwwzo333g3"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/e214EEAa7RY8csEhIEJW-qOpDYFRKCusulwMwwzo333g3",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "e214EEAa7RY8csEhIEJW-qOpDYFRKCusulwMwwzo333g3",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "795508"
+          }
+        ],
+        "status" : "active",
+        "intent" : "filler-order",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "1",
+                "display" : "Procedures"
+              }
+            ],
+            "text" : "Procedures"
+          }
+        ],
+        "code" : {
+          "coding" : [
+            {
+              "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.696580",
+              "code" : "39334",
+              "display" : "BRONCHOSCOPY"
+            }
+          ],
+          "text" : "BRONCHOSCOPY"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "reference" : "Encounter/eGBa8bqzKut7a4J4.Qf4V9A3",
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "1838"
+          },
+          "display" : "Office Visit"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2012-10-28T05:00:00Z"
+            }
+          }
+        },
+        "authoredOn" : "2012-10-28T20:54:57Z",
+        "requester" : {
+          "reference" : "Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+          "type" : "Practitioner",
+          "display" : "Michael Jones, MD"
+        },
+        "reasonCode" : [
+          {
+            "coding" : [
+              {
+                "system" : "http://snomed.info/sct",
+                "code" : "25479004",
+                "display" : "Foreign body in pharynx (disorder)"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-9-cm/diagnosis",
+                "code" : "933.0",
+                "display" : "Foreign body in throat"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+                "code" : "T17.208A",
+                "display" : "Foreign body in throat"
+              }
+            ],
+            "text" : "Foreign body in throat"
+          }
+        ]
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }, {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/eJdv7I47Ye4onOLN7VU-KBMT-rKYX6tHHMhNLxvd8zE03"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/eJdv7I47Ye4onOLN7VU-KBMT-rKYX6tHHMhNLxvd8zE03",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "eJdv7I47Ye4onOLN7VU-KBMT-rKYX6tHHMhNLxvd8zE03",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "795505"
+          }
+        ],
+        "status" : "active",
+        "intent" : "filler-order",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "1",
+                "display" : "Procedures"
+              }
+            ],
+            "text" : "Procedures"
+          }
+        ],
+        "code" : {
+          "coding" : [
+            {
+              "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.696580",
+              "code" : "13960",
+              "display" : "MYCHART GLUCOSE FLOWSHEET"
+            }
+          ],
+          "text" : "MyChart glucose flowsheet"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "1835"
+          },
+          "display" : "Office Visit"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2012-11-29T06:00:00Z"
+            }
+          }
+        },
+        "authoredOn" : "2012-11-29T22:47:27Z",
+        "requester" : {
+          "reference" : "Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+          "type" : "Practitioner",
+          "display" : "Michael Jones, MD"
+        },
+        "reasonCode" : [
+          {
+            "coding" : [
+              {
+                "system" : "http://snomed.info/sct",
+                "code" : "73211009",
+                "display" : "Diabetes mellitus (disorder)"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-9-cm/diagnosis",
+                "code" : "250.00",
+                "display" : "Diabetes (CMS/HCC)"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+                "code" : "E11.9",
+                "display" : "Diabetes (CMS/HCC)"
+              }
+            ],
+            "text" : "Diabetes (CMS/HCC)"
+          }
+        ]
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }, {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/eFUB.xqv8gnI8aI4yyxIpVl6IcXSnNcPiqDDV854tHic3"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/eFUB.xqv8gnI8aI4yyxIpVl6IcXSnNcPiqDDV854tHic3",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "eFUB.xqv8gnI8aI4yyxIpVl6IcXSnNcPiqDDV854tHic3",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "935490"
+          }
+        ],
+        "status" : "active",
+        "intent" : "filler-order",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "1",
+                "display" : "Procedures"
+              }
+            ],
+            "text" : "Procedures"
+          }
+        ],
+        "code" : {
+          "coding" : [
+            {
+              "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.696580",
+              "code" : "13960",
+              "display" : "MYCHART GLUCOSE FLOWSHEET"
+            }
+          ],
+          "text" : "MyChart Glucose Flowsheet"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "reference" : "Encounter/eqDxZJc43imReA1Ykea5uAw3",
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "20170"
+          },
+          "display" : "Office Visit"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2014-11-14T06:00:00Z"
+            }
+          }
+        },
+        "authoredOn" : "2014-11-14T22:28:29Z",
+        "requester" : {
+          "reference" : "Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+          "type" : "Practitioner",
+          "display" : "Michael Jones, MD"
+        },
+        "reasonCode" : [
+          {
+            "coding" : [
+              {
+                "system" : "http://snomed.info/sct",
+                "code" : "73211009",
+                "display" : "Diabetes mellitus (disorder)"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-9-cm/diagnosis",
+                "code" : "250.00",
+                "display" : "Diabetes (CMS/HCC)"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+                "code" : "E11.9",
+                "display" : "Diabetes (CMS/HCC)"
+              }
+            ],
+            "text" : "Diabetes (CMS/HCC)"
+          }
+        ]
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }, {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/eZymAq7nX9Si14GbhYHwt3IeYyiFszr-OSGZs42GqD0M3"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/eZymAq7nX9Si14GbhYHwt3IeYyiFszr-OSGZs42GqD0M3",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "eZymAq7nX9Si14GbhYHwt3IeYyiFszr-OSGZs42GqD0M3",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "935494"
+          }
+        ],
+        "status" : "active",
+        "intent" : "filler-order",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "1",
+                "display" : "Procedures"
+              }
+            ],
+            "text" : "Procedures"
+          }
+        ],
+        "code" : {
+          "coding" : [
+            {
+              "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.696580",
+              "code" : "29837",
+              "display" : "MYCHART BP FLOWSHEET"
+            }
+          ],
+          "text" : "MyChart BP Flowsheet"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "reference" : "Encounter/elFbUU9vJ8UYfMHz9OpTWHA3",
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "27438"
+          },
+          "display" : "Office Visit"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2019-03-03T06:00:00Z"
+            }
+          }
+        },
+        "authoredOn" : "2019-03-03T23:01:23Z",
+        "requester" : {
+          "reference" : "Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+          "type" : "Practitioner",
+          "display" : "Michael Jones, MD"
+        }
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }, {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/ezcpyor-QLSiAYrHzEHkPASgIpn3ImZFKzWw4KtwjURs3"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/ezcpyor-QLSiAYrHzEHkPASgIpn3ImZFKzWw4KtwjURs3",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "ezcpyor-QLSiAYrHzEHkPASgIpn3ImZFKzWw4KtwjURs3",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "935500"
+          }
+        ],
+        "status" : "active",
+        "intent" : "original-order",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "1",
+                "display" : "Procedures"
+              }
+            ],
+            "text" : "Procedures"
+          }
+        ],
+        "code" : {
+          "coding" : [
+            {
+              "system" : "http://www.ama-assn.org/go/cpt",
+              "code" : "109372",
+              "display" : "MYCHART HEIGHT WEIGHT FLOWSHEET HEALTHASYST"
+            }
+          ],
+          "text" : "MYCHART HEIGHT WEIGHT FLOWSHEET HEALTHASYST"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "reference" : "Encounter/ezcqh4yFC4v7QRPI4nQjGfw3",
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "31750"
+          },
+          "display" : "Orders Only"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2020-08-28T05:00:00Z"
+            },
+            "count" : 1
+          }
+        },
+        "authoredOn" : "2020-08-28T14:54:26Z",
+        "requester" : {
+          "reference" : "Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+          "type" : "Practitioner",
+          "display" : "Michael Jones, MD"
+        },
+        "reasonCode" : [
+          {
+            "coding" : [
+              {
+                "system" : "http://snomed.info/sct",
+                "code" : "443786003",
+                "display" : "Injury while engaged in sports activity (disorder)"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-9-cm/diagnosis",
+                "code" : "E917.0",
+                "display" : "Struck accidentally during sports, initial encounter"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+                "code" : "W21.9XXA",
+                "display" : "Struck accidentally during sports, initial encounter"
+              }
+            ],
+            "text" : "Struck accidentally during sports, initial encounter"
+          }
+        ]
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }, {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/e5PHNjkfbS6dZsbdqOEof7QmKhEjoN3yixyjQMlKF.543"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/e5PHNjkfbS6dZsbdqOEof7QmKhEjoN3yixyjQMlKF.543",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "e5PHNjkfbS6dZsbdqOEof7QmKhEjoN3yixyjQMlKF.543",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "1109719"
+          }
+        ],
+        "status" : "active",
+        "intent" : "original-order",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "1",
+                "display" : "Procedures"
+              }
+            ],
+            "text" : "Procedures"
+          }
+        ],
+        "code" : {
+          "coding" : [
+            {
+              "system" : "http://www.ama-assn.org/go/cpt",
+              "code" : "109379",
+              "display" : "IHEALTH PEF ORDER"
+            }
+          ],
+          "text" : "IHEALTH PEF ORDER"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "reference" : "Encounter/elZFhgGsZz2hME25Qkgb0SQ3",
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "1833"
+          },
+          "display" : "Hospital Encounter"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2021-02-19T06:00:00Z"
+            },
+            "count" : 1
+          }
+        },
+        "authoredOn" : "2021-02-20T01:41:36Z",
+        "requester" : {
+          "reference" : "Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+          "type" : "Practitioner",
+          "display" : "Michael Jones, MD"
+        },
+        "reasonCode" : [
+          {
+            "coding" : [
+              {
+                "system" : "http://snomed.info/sct",
+                "code" : "426232007",
+                "display" : "Environmental allergy (finding)"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-9-cm/diagnosis",
+                "code" : "V15.09",
+                "display" : "Environmental allergies"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+                "code" : "Z91.09",
+                "display" : "Environmental allergies"
+              }
+            ],
+            "text" : "Environmental allergies"
+          }
+        ],
+        "note" : [
+          {
+            "text" : "Complete these items with the assistance of your iHealth device.\r\n "
+          }
+        ]
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }, {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/eDAF1FKeb5lmxBA68nE0cJTL8bVFQXMvqOM4MntiN6Mw3"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/eDAF1FKeb5lmxBA68nE0cJTL8bVFQXMvqOM4MntiN6Mw3",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "eDAF1FKeb5lmxBA68nE0cJTL8bVFQXMvqOM4MntiN6Mw3",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "1109720"
+          }
+        ],
+        "status" : "active",
+        "intent" : "original-order",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "1",
+                "display" : "Procedures"
+              }
+            ],
+            "text" : "Procedures"
+          }
+        ],
+        "code" : {
+          "coding" : [
+            {
+              "system" : "http://www.ama-assn.org/go/cpt",
+              "code" : "109380",
+              "display" : "VOLUMETRIX NIVA ORDER"
+            }
+          ],
+          "text" : "VOLUMETRIX NIVA ORDER"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "reference" : "Encounter/eYWExOnM9wfSn4pRqourt6Q3",
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "27445"
+          },
+          "display" : "Office Visit"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2021-03-12T06:00:00Z"
+            },
+            "count" : 1
+          }
+        },
+        "authoredOn" : "2021-03-12T18:06:45Z",
+        "requester" : {
+          "reference" : "Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+          "type" : "Practitioner",
+          "display" : "Michael Jones, MD"
+        },
+        "reasonCode" : [
+          {
+            "coding" : [
+              {
+                "system" : "http://snomed.info/sct",
+                "code" : "426232007",
+                "display" : "Environmental allergy (finding)"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-9-cm/diagnosis",
+                "code" : "V15.09",
+                "display" : "Environmental allergies"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+                "code" : "Z91.09",
+                "display" : "Environmental allergies"
+              }
+            ],
+            "text" : "Environmental allergies"
+          }
+        ],
+        "note" : [
+          {
+            "text" : "Complete these items with the assistance of your Volumetrix device.\r\n "
+          }
+        ]
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }, {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/e01L4e580PxlSUUsiqtOksvzet.9pOSFAUirY3ZND5fQ3"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/e01L4e580PxlSUUsiqtOksvzet.9pOSFAUirY3ZND5fQ3",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "e01L4e580PxlSUUsiqtOksvzet.9pOSFAUirY3ZND5fQ3",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "935493"
+          }
+        ],
+        "status" : "completed",
+        "intent" : "order",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "7",
+                "display" : "Lab"
+              }
+            ],
+            "text" : "Lab"
+          }
+        ],
+        "code" : {
+          "coding" : [
+            {
+              "system" : "http://loinc.org",
+              "code" : "4548-4",
+              "display" : "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }, {
+              "system" : "http://snomed.info/sct",
+              "code" : "43396009",
+              "display" : "HEMOGLOBIN A1C"
+            }
+          ],
+          "text" : "Hemoglobin A1c"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "reference" : "Encounter/eqDxZJc43imReA1Ykea5uAw3",
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "20170"
+          },
+          "display" : "Office Visit"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2014-11-14T06:00:00Z"
+            }
+          }
+        },
+        "authoredOn" : "2014-11-14T22:32:02Z",
+        "requester" : {
+          "reference" : "Practitioner/e2qocqJm-DdjHLS0Not4qjA3",
+          "type" : "Practitioner",
+          "display" : "Historical Provider, MD"
+        },
+        "specimen" : [
+          {
+            "reference" : "Specimen/esRSARdagzYBOrRnKH4sneA3"
+          }
+        ],
+        "note" : [
+          {
+            "text" : "This order was created through External Result Entry"
+          }
+        ]
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }, {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/eSGC1BqyIHD1h4EpKGncZN94OAFMJ-4J3.gqN4FrncF03"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/eSGC1BqyIHD1h4EpKGncZN94OAFMJ-4J3.gqN4FrncF03",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "eSGC1BqyIHD1h4EpKGncZN94OAFMJ-4J3.gqN4FrncF03",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "935492"
+          }
+        ],
+        "status" : "completed",
+        "intent" : "order",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "7",
+                "display" : "Lab"
+              }
+            ],
+            "text" : "Lab"
+          }
+        ],
+        "code" : {
+          "coding" : [
+            {
+              "system" : "http://loinc.org",
+              "code" : "4548-4",
+              "display" : "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }, {
+              "system" : "http://snomed.info/sct",
+              "code" : "43396009",
+              "display" : "HEMOGLOBIN A1C"
+            }
+          ],
+          "text" : "Hemoglobin A1c"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "reference" : "Encounter/eqDxZJc43imReA1Ykea5uAw3",
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "20170"
+          },
+          "display" : "Office Visit"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2014-11-14T06:00:00Z"
+            }
+          }
+        },
+        "authoredOn" : "2014-11-14T22:31:31Z",
+        "requester" : {
+          "reference" : "Practitioner/e2qocqJm-DdjHLS0Not4qjA3",
+          "type" : "Practitioner",
+          "display" : "Historical Provider, MD"
+        },
+        "specimen" : [
+          {
+            "reference" : "Specimen/eW4l8cSAqDWawwT8VRedQaw3"
+          }
+        ],
+        "note" : [
+          {
+            "text" : "This order was created through External Result Entry"
+          }
+        ]
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }, {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/ejNUmTG9mO0EpgKgqrgqutIThpG8gyLsNgc6sdqM6ZF43"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/ejNUmTG9mO0EpgKgqrgqutIThpG8gyLsNgc6sdqM6ZF43",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "ejNUmTG9mO0EpgKgqrgqutIThpG8gyLsNgc6sdqM6ZF43",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "935491"
+          }
+        ],
+        "status" : "completed",
+        "intent" : "order",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "7",
+                "display" : "Lab"
+              }
+            ],
+            "text" : "Lab"
+          }
+        ],
+        "code" : {
+          "coding" : [
+            {
+              "system" : "http://loinc.org",
+              "code" : "4548-4",
+              "display" : "Hemoglobin A1c/Hemoglobin.total in Blood"
+            }, {
+              "system" : "http://snomed.info/sct",
+              "code" : "43396009",
+              "display" : "HEMOGLOBIN A1C"
+            }
+          ],
+          "text" : "Hemoglobin A1c"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "reference" : "Encounter/eqDxZJc43imReA1Ykea5uAw3",
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "20170"
+          },
+          "display" : "Office Visit"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2014-11-14T06:00:00Z"
+            }
+          }
+        },
+        "authoredOn" : "2014-11-14T22:30:36Z",
+        "requester" : {
+          "reference" : "Practitioner/e2qocqJm-DdjHLS0Not4qjA3",
+          "type" : "Practitioner",
+          "display" : "Historical Provider, MD"
+        },
+        "specimen" : [
+          {
+            "reference" : "Specimen/eGWCAyD4tOq6nyBMBYpUH7Q3"
+          }
+        ],
+        "note" : [
+          {
+            "text" : "This order was created through External Result Entry"
+          }
+        ]
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }, {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/ePM5g7p3ZFbR5BvqhCj0yFH5vDSz2GliAb2OcjuzLvVI3"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/ePM5g7p3ZFbR5BvqhCj0yFH5vDSz2GliAb2OcjuzLvVI3",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "ePM5g7p3ZFbR5BvqhCj0yFH5vDSz2GliAb2OcjuzLvVI3",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "935497"
+          }
+        ],
+        "status" : "revoked",
+        "intent" : "order",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "7",
+                "display" : "Lab"
+              }
+            ],
+            "text" : "Lab"
+          }
+        ],
+        "doNotPerform" : true,
+        "code" : {
+          "coding" : [
+            {
+              "system" : "http://snomed.info/sct",
+              "code" : "26604007",
+              "display" : "CBC"
+            }
+          ],
+          "text" : "CBC"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "reference" : "Encounter/elFbUU9vJ8UYfMHz9OpTWHA3",
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "27438"
+          },
+          "display" : "Office Visit"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2019-12-31T06:00:00Z"
+            },
+            "count" : 1
+          }
+        },
+        "authoredOn" : "2019-12-31T14:50:18Z",
+        "requester" : {
+          "reference" : "Practitioner/ef9TegF2nfECi-0Skirbvpg3",
+          "type" : "Practitioner",
+          "display" : "Abigail Mathers, MD"
+        },
+        "reasonCode" : [
+          {
+            "coding" : [
+              {
+                "system" : "http://snomed.info/sct",
+                "code" : "22298006",
+                "display" : "Myocardial infarction (disorder)"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-9-cm/diagnosis",
+                "code" : "410.70",
+                "display" : "Non-ST elevation (NSTEMI) myocardial infarction (CMS/HCC)"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+                "code" : "I21.4",
+                "display" : "Non-ST elevation (NSTEMI) myocardial infarction (CMS/HCC)"
+              }
+            ],
+            "text" : "Non-ST elevation (NSTEMI) myocardial infarction (CMS/HCC)"
+          }
+        ],
+        "specimen" : [
+          {
+            "reference" : "Specimen/etYYYW3BzIU2z5prtlqClxg3"
+          }
+        ]
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }, {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/e-9ugR6PXxmKpHTuW4KZqppLkTWAkI66O91QylU-EUKc3"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/e-9ugR6PXxmKpHTuW4KZqppLkTWAkI66O91QylU-EUKc3",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "e-9ugR6PXxmKpHTuW4KZqppLkTWAkI66O91QylU-EUKc3",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "935498"
+          }
+        ],
+        "status" : "active",
+        "intent" : "original-order",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "7",
+                "display" : "Lab"
+              }
+            ],
+            "text" : "Lab"
+          }
+        ],
+        "code" : {
+          "coding" : [
+            {
+              "system" : "http://www.ama-assn.org/go/cpt",
+              "code" : "84999",
+              "display" : "PHENOLPHTHALEIN, STOOL"
+            }
+          ],
+          "text" : "Phenolphthalein, stool"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "reference" : "Encounter/elFbUU9vJ8UYfMHz9OpTWHA3",
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "27438"
+          },
+          "display" : "Office Visit"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2020-04-21T05:00:00Z"
+            },
+            "count" : 1
+          }
+        },
+        "authoredOn" : "2020-04-21T19:30:58Z",
+        "requester" : {
+          "reference" : "Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+          "type" : "Practitioner",
+          "display" : "Michael Jones, MD"
+        },
+        "reasonCode" : [
+          {
+            "coding" : [
+              {
+                "system" : "http://snomed.info/sct",
+                "code" : "22298006",
+                "display" : "Myocardial infarction (disorder)"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-9-cm/diagnosis",
+                "code" : "410.70",
+                "display" : "Non-ST elevation (NSTEMI) myocardial infarction (CMS/HCC)"
+              }, {
+                "system" : "http://hl7.org/fhir/sid/icd-10-cm",
+                "code" : "I21.4",
+                "display" : "Non-ST elevation (NSTEMI) myocardial infarction (CMS/HCC)"
+              }
+            ],
+            "text" : "Non-ST elevation (NSTEMI) myocardial infarction (CMS/HCC)"
+          }
+        ],
+        "specimen" : [
+          {
+            "reference" : "Specimen/eAI5oKV22Out.SOtoA9wFgA3"
+          }
+        ]
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }, {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/erULEqA11kbDVEbCIU3HnoCrX.Fe2vUWDzP-UMxTgzG83"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/erULEqA11kbDVEbCIU3HnoCrX.Fe2vUWDzP-UMxTgzG83",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "erULEqA11kbDVEbCIU3HnoCrX.Fe2vUWDzP-UMxTgzG83",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "935499"
+          }
+        ],
+        "status" : "revoked",
+        "intent" : "proposal",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "7",
+                "display" : "Lab"
+              }
+            ],
+            "text" : "Lab"
+          }
+        ],
+        "doNotPerform" : true,
+        "code" : {
+          "coding" : [
+            {
+              "system" : "http://snomed.info/sct",
+              "code" : "26604007",
+              "display" : "CBC"
+            }
+          ],
+          "text" : "CBC"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "reference" : "Encounter/eYWExOnM9wfSn4pRqourt6Q3",
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "27445"
+          },
+          "display" : "Office Visit"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2020-05-22T05:00:00Z"
+            },
+            "count" : 1
+          }
+        },
+        "authoredOn" : "2020-05-22T15:29:55Z",
+        "requester" : {
+          "reference" : "Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+          "type" : "Practitioner",
+          "display" : "Michael Jones, MD"
+        },
+        "specimen" : [
+          {
+            "reference" : "Specimen/e.pl7sAQKIca.EeRYl9LDog3"
+          }
+        ]
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }, {
+      "link" : [
+        {
+          "relation" : "self",
+          "url" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/ePS4PXzbogPs0-wRtDUyPTYCi6uxvfB80YL-mZVRgdLw3"
+        }
+      ],
+      "fullUrl" : "https://vendorservices.epic.com/interconnect-amcurprd-oauth/api/FHIR/R4/ServiceRequest/ePS4PXzbogPs0-wRtDUyPTYCi6uxvfB80YL-mZVRgdLw3",
+      "resource" : {
+        "resourceType" : "ServiceRequest",
+        "id" : "ePS4PXzbogPs0-wRtDUyPTYCi6uxvfB80YL-mZVRgdLw3",
+        "identifier" : [
+          {
+            "use" : "usual",
+            "type" : {
+              "coding" : [
+                {
+                  "system" : "http://terminology.hl7.org/CodeSystem/v2-0203",
+                  "code" : "PLAC",
+                  "display" : "Placer Identifier"
+                }
+              ],
+              "text" : "Placer Identifier"
+            },
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+            "value" : "1109724"
+          }
+        ],
+        "status" : "completed",
+        "intent" : "order",
+        "category" : [
+          {
+            "coding" : [
+              {
+                "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.10.798268.30",
+                "code" : "7",
+                "display" : "Lab"
+              }
+            ],
+            "text" : "Lab"
+          }
+        ],
+        "code" : {
+          "coding" : [
+            {
+              "system" : "http://snomed.info/sct",
+              "code" : "26604007",
+              "display" : "CBC"
+            }
+          ],
+          "text" : "CBC"
+        },
+        "quantityQuantity" : {
+          "value" : 1
+        },
+        "subject" : {
+          "reference" : "Patient/enh2Q1c0oNRtWzXArnG4tKw3",
+          "display" : "M, Damon"
+        },
+        "encounter" : {
+          "reference" : "Encounter/eiL5iVtLLcgyQpI4L6AJoGg3",
+          "identifier" : {
+            "use" : "usual",
+            "system" : "urn:oid:1.2.840.114350.1.13.0.1.7.3.698084.8",
+            "value" : "37294"
+          },
+          "display" : "Office Visit"
+        },
+        "occurrenceTiming" : {
+          "repeat" : {
+            "boundsPeriod" : {
+              "start" : "2021-11-18T06:00:00Z"
+            }
+          }
+        },
+        "authoredOn" : "2021-11-18T16:46:36Z",
+        "requester" : {
+          "reference" : "Practitioner/eM5CWtq15N0WJeuCet5bJlQ3",
+          "type" : "Practitioner",
+          "display" : "Michael Jones, MD"
+        },
+        "specimen" : [
+          {
+            "reference" : "Specimen/eqW27L5owOlpb8XtsDJsJORD7r4IVEDYcDI5c6fhJaj43"
+          }
+        ],
+        "note" : [
+          {
+            "text" : "This order was created through External Result Entry"
+          }
+        ]
+      },
+      "search" : {
+        "mode" : "match"
+      }
+    }
+  ]
+}
