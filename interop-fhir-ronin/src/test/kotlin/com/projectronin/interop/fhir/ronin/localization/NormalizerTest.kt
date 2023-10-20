@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.normalization
 
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
+import com.projectronin.interop.fhir.r4.datatype.ContactPoint
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
@@ -16,9 +17,14 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Location
+import com.projectronin.interop.fhir.r4.resource.Medication
+import com.projectronin.interop.fhir.r4.resource.MedicationRequest
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.resource.RequestGroup
+import com.projectronin.interop.fhir.r4.valueset.ContactPointSystem
 import com.projectronin.interop.fhir.r4.valueset.IdentifierUse
+import com.projectronin.interop.fhir.r4.valueset.MedicationRequestIntent
+import com.projectronin.interop.fhir.r4.valueset.MedicationRequestStatus
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.tenant.config.model.Tenant
@@ -45,41 +51,29 @@ class NormalizerTest {
 
     private val normalizer = Normalizer()
 
-    private fun normalizeCoding(coding: Coding, parameterName: String = "coding"): Coding? {
+    private fun normalizeCoding(coding: Coding): Coding? {
         val normalizeCodingMethod = Normalizer::class.functions.find { it.name == "normalizeCoding" }!!
         normalizeCodingMethod.isAccessible = true
-        val normalized = normalizeCodingMethod.call(normalizer, coding, parameterName, tenant) as? Coding
+        val normalized = normalizeCodingMethod.call(normalizer, coding, tenant) as? Coding
         normalizeCodingMethod.isAccessible = false
         return normalized
     }
 
-    private fun normalizeIdentifier(identifier: Identifier, parameterName: String = "identifier"): Identifier? {
+    private fun normalizeIdentifier(identifier: Identifier): Identifier? {
         val normalizeIdentifierMethod = Normalizer::class.functions.find { it.name == "normalizeIdentifier" }!!
         normalizeIdentifierMethod.isAccessible = true
-        val normalized = normalizeIdentifierMethod.call(normalizer, identifier, parameterName, tenant) as? Identifier
+        val normalized = normalizeIdentifierMethod.call(normalizer, identifier, tenant) as? Identifier
         normalizeIdentifierMethod.isAccessible = false
         return normalized
     }
 
-    private fun normalizeCodeableConcept(
-        codeableConcept: CodeableConcept,
-        parameterName: String = "codeableConcept"
-    ): CodeableConcept? {
+    private fun normalizeCodeableConcept(codeableConcept: CodeableConcept): CodeableConcept? {
         val normalizeCodeableConceptMethod =
             Normalizer::class.functions.find { it.name == "normalizeCodeableConcept" }!!
         normalizeCodeableConceptMethod.isAccessible = true
         val normalized =
-            normalizeCodeableConceptMethod.call(normalizer, codeableConcept, parameterName, tenant) as? CodeableConcept
+            normalizeCodeableConceptMethod.call(normalizer, codeableConcept, tenant) as? CodeableConcept
         normalizeCodeableConceptMethod.isAccessible = false
-        return normalized
-    }
-
-    private fun normalizeAndFilterExtension(extension: Extension): Extension? {
-        val normalizeAndFilterExtensionsMethod =
-            Normalizer::class.functions.find { it.name == "normalizeAndFilterExtension" }!!
-        normalizeAndFilterExtensionsMethod.isAccessible = true
-        val normalized = normalizeAndFilterExtensionsMethod.call(normalizer, extension) as? Extension
-        normalizeAndFilterExtensionsMethod.isAccessible = false
         return normalized
     }
 
@@ -635,5 +629,42 @@ class NormalizerTest {
         val normalized = normalizer.normalize(requestGroup, tenant)
         assertEquals(normalized.extension.size, 2)
         assertEquals(normalized.basedOn[0].extension.size, 1)
+    }
+
+    @Test
+    fun `normalize maintains contained resources`() {
+        val medication = Medication(
+            id = Id("67890"),
+            code = CodeableConcept(text = FHIRString("Medication"))
+        )
+        val medicationRequest = MedicationRequest(
+            id = Id("12345"),
+            contained = listOf(medication),
+            intent = MedicationRequestIntent.ORDER.asCode(),
+            status = MedicationRequestStatus.ACTIVE.asCode(),
+            medication = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = FHIRString("#67890"))),
+            subject = Reference(reference = FHIRString("Patient/13579"))
+        )
+        val normalized = normalizer.normalize(medicationRequest, tenant)
+        assertEquals(medicationRequest, normalized)
+    }
+
+    @Test
+    fun `normalize maintains telecom`() {
+        val patient = Patient(
+            id = Id("12345"),
+            telecom = listOf(
+                ContactPoint(
+                    system = ContactPointSystem.EMAIL.asCode(),
+                    value = "bob@bobster.com".asFHIR()
+                ),
+                ContactPoint(
+                    system = ContactPointSystem.PHONE.asCode(),
+                    value = "5551234567".asFHIR()
+                )
+            )
+        )
+        val normalized = normalizer.normalize(patient, tenant)
+        assertEquals(patient, normalized)
     }
 }

@@ -14,10 +14,10 @@ private val tenant = mockk<Tenant> {
 
 private val localizer = Localizer()
 
-fun localizeReferenceTest(reference: Reference, parameterName: String = "reference"): Reference? {
+fun localizeReferenceTest(reference: Reference): Reference? {
     val localizeReferenceMethod = Localizer::class.functions.find { it.name == "localizeReference" }!!
     localizeReferenceMethod.isAccessible = true
-    val localized = localizeReferenceMethod.call(localizer, reference, parameterName, tenant) as? Reference
+    val localized = localizeReferenceMethod.call(localizer, reference, tenant) as? Reference
     localizeReferenceMethod.isAccessible = false
     return localized
 }

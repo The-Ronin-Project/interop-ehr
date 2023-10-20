@@ -13,15 +13,17 @@ import kotlin.reflect.jvm.jvmErasure
  * Transformer capable of processing across any type of object. This class should be extended to add specific transformation capabilities.
  */
 abstract class BaseGenericTransformer {
+    protected abstract val ignoredFieldNames: Set<String>
+
     /**
      * Transforms a specific [element] for the [tenant]. If unable to transform, null be returned.
      */
-    protected abstract fun transformType(element: Any, parameterName: String, tenant: Tenant): TransformResult
+    protected abstract fun transformType(element: Any, tenant: Tenant): TransformResult
 
     /**
      * Transforms the [element] for [tenant] if transformation is needed or returns null if it's already transformed.
      */
-    protected fun <T : Any> transformOrNull(element: T, parameterName: String, tenant: Tenant): T? {
+    protected fun <T : Any> transformOrNull(element: T, tenant: Tenant): T? {
         val transformedValues = getTransformedValues(element, tenant)
         return if (transformedValues.isEmpty()) null else copy(element, transformedValues)
     }
@@ -36,11 +38,13 @@ abstract class BaseGenericTransformer {
                 val propertyName = property.name
 
                 value?.let {
-                    val transformedValue = if (value is List<*>) {
+                    val transformedValue = if (propertyName in ignoredFieldNames) {
+                        null
+                    } else if (value is List<*>) {
                         val collectionType = property.returnType.arguments.first().type!!.jvmErasure
-                        transformList(value, collectionType, propertyName, tenant)
+                        transformList(value, collectionType, tenant)
                     } else {
-                        transformType(value, propertyName, tenant).element
+                        transformType(value, tenant).element
                     }
                     transformedValue?.let { propertyName to transformedValue }
                 }
@@ -56,11 +60,10 @@ abstract class BaseGenericTransformer {
     private fun transformList(
         collection: List<*>,
         collectionType: KClass<*>,
-        parameterName: String,
         tenant: Tenant
     ): List<*>? {
         val originalAndLocalizedItems = collection.filter { it != null && it::class == collectionType }.map {
-            it to transformType(it!!, parameterName, tenant)
+            it to transformType(it!!, tenant)
         }.filter { !it.second.removeFromElement }
         return if (collection.isNotEmpty() && originalAndLocalizedItems.isEmpty()) {
             originalAndLocalizedItems

@@ -14,7 +14,9 @@ import org.springframework.stereotype.Component
 
 @Component
 class Normalizer : BaseGenericTransformer() {
-    val logger = KotlinLogging.logger { }
+    private val logger = KotlinLogging.logger { }
+
+    override val ignoredFieldNames: Set<String> = setOf("contained")
 
     /**
      * Normalizes the [element] for the [tenant]
@@ -24,18 +26,18 @@ class Normalizer : BaseGenericTransformer() {
         return copy(element, normalizedValues)
     }
 
-    override fun transformType(element: Any, parameterName: String, tenant: Tenant): TransformResult {
+    override fun transformType(element: Any, tenant: Tenant): TransformResult {
         return when (element) {
-            is Coding -> TransformResult(normalizeCoding(element, parameterName, tenant))
-            is Identifier -> TransformResult(normalizeIdentifier(element, parameterName, tenant))
-            is CodeableConcept -> TransformResult(normalizeCodeableConcept(element, parameterName, tenant))
-            is Extension -> normalizeExtension(element, parameterName, tenant)
-            is Validatable<*> -> TransformResult(transformOrNull(element, parameterName, tenant))
+            is Coding -> TransformResult(normalizeCoding(element, tenant))
+            is Identifier -> TransformResult(normalizeIdentifier(element, tenant))
+            is CodeableConcept -> TransformResult(normalizeCodeableConcept(element, tenant))
+            is Extension -> normalizeExtension(element, tenant)
+            is Validatable<*> -> TransformResult(transformOrNull(element, tenant))
             else -> TransformResult(null)
         }
     }
 
-    private fun normalizeExtension(extension: Extension, parameterName: String, tenant: Tenant): TransformResult {
+    private fun normalizeExtension(extension: Extension, tenant: Tenant): TransformResult {
         return if (
             (
                 RoninExtension.values()
@@ -53,8 +55,8 @@ class Normalizer : BaseGenericTransformer() {
     /**
      * Normalizes the [coding] for the [tenant].
      */
-    private fun normalizeCoding(coding: Coding, parameterName: String, tenant: Tenant): Coding? {
-        val nonNormalizedCoding = transformOrNull(coding, parameterName, tenant)
+    private fun normalizeCoding(coding: Coding, tenant: Tenant): Coding? {
+        val nonNormalizedCoding = transformOrNull(coding, tenant)
         val normalizedSystem = coding.system?.normalizeCoding()
         return if (normalizedSystem == coding.system) {
             nonNormalizedCoding
@@ -66,8 +68,8 @@ class Normalizer : BaseGenericTransformer() {
     /**
      * Normalizes the [identifier] for the [tenant].
      */
-    private fun normalizeIdentifier(identifier: Identifier, parameterName: String, tenant: Tenant): Identifier? {
-        val nonNormalizedIdentifier = transformOrNull(identifier, parameterName, tenant)
+    private fun normalizeIdentifier(identifier: Identifier, tenant: Tenant): Identifier? {
+        val nonNormalizedIdentifier = transformOrNull(identifier, tenant)
         val normalizedSystem = identifier.system?.normalizeIdentifier()
         return if (normalizedSystem == identifier.system) {
             nonNormalizedIdentifier
@@ -81,10 +83,9 @@ class Normalizer : BaseGenericTransformer() {
      */
     private fun normalizeCodeableConcept(
         codeableConcept: CodeableConcept,
-        parameterName: String,
         tenant: Tenant
     ): CodeableConcept {
-        val nonNormalizedCodeableConcept = transformOrNull(codeableConcept, parameterName, tenant) ?: codeableConcept
+        val nonNormalizedCodeableConcept = transformOrNull(codeableConcept, tenant) ?: codeableConcept
 
         // If text is populated on the codeable concept already, return as is.
         if (codeableConcept.text?.value?.isNotEmpty() == true) {

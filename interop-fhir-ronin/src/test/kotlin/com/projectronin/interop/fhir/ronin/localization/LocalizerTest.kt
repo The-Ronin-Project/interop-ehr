@@ -43,6 +43,8 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.AvailableTime
 import com.projectronin.interop.fhir.r4.resource.ConditionEvidence
 import com.projectronin.interop.fhir.r4.resource.ConditionStage
+import com.projectronin.interop.fhir.r4.resource.Medication
+import com.projectronin.interop.fhir.r4.resource.MedicationRequest
 import com.projectronin.interop.fhir.r4.resource.NotAvailable
 import com.projectronin.interop.fhir.r4.resource.ObservationComponent
 import com.projectronin.interop.fhir.r4.resource.ObservationReferenceRange
@@ -145,18 +147,18 @@ class LocalizerTest {
 
     private val localizer = Localizer()
 
-    private fun localizeId(id: Id, parameterName: String = "id"): Id? {
+    private fun localizeId(id: Id): Id? {
         val localizeIdMethod = Localizer::class.functions.find { it.name == "localizeId" }!!
         localizeIdMethod.isAccessible = true
-        val localized = localizeIdMethod.call(localizer, id, parameterName, tenant) as? Id
+        val localized = localizeIdMethod.call(localizer, id, tenant) as? Id
         localizeIdMethod.isAccessible = false
         return localized
     }
 
-    private fun localizeReference(reference: Reference, parameterName: String = "reference"): Reference? {
+    private fun localizeReference(reference: Reference): Reference? {
         val localizeReferenceMethod = Localizer::class.functions.find { it.name == "localizeReference" }!!
         localizeReferenceMethod.isAccessible = true
-        val localized = localizeReferenceMethod.call(localizer, reference, parameterName, tenant) as? Reference
+        val localized = localizeReferenceMethod.call(localizer, reference, tenant) as? Reference
         localizeReferenceMethod.isAccessible = false
         return localized
     }
@@ -3296,5 +3298,35 @@ class LocalizerTest {
         val localizedObservationComponent = localizer.localize(observationComponent, tenant)
 
         assertEquals(observationComponent, localizedObservationComponent)
+    }
+
+    @Test
+    fun `localize maintains contained resources`() {
+        val medication = Medication(
+            id = Id("67890"),
+            code = CodeableConcept(text = FHIRString("Medication"))
+        )
+        val medicationRequest = MedicationRequest(
+            id = Id("12345"),
+            contained = listOf(medication),
+            intent = com.projectronin.interop.fhir.r4.valueset.MedicationRequestIntent.ORDER.asCode(),
+            status = com.projectronin.interop.fhir.r4.valueset.MedicationRequestStatus.ACTIVE.asCode(),
+            medication = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = FHIRString("#67890"))),
+            subject = Reference(reference = FHIRString("Patient/13579"))
+        )
+        val localized = localizer.localize(medicationRequest, tenant)
+
+        val expectedMedicationRequest = MedicationRequest(
+            id = Id("test-12345"),
+            contained = listOf(medication),
+            intent = com.projectronin.interop.fhir.r4.valueset.MedicationRequestIntent.ORDER.asCode(),
+            status = com.projectronin.interop.fhir.r4.valueset.MedicationRequestStatus.ACTIVE.asCode(),
+            medication = DynamicValue(DynamicValueType.REFERENCE, Reference(reference = FHIRString("#67890"))),
+            subject = Reference(
+                reference = FHIRString("Patient/test-13579"),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            )
+        )
+        assertEquals(expectedMedicationRequest, localized)
     }
 }

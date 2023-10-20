@@ -80,7 +80,7 @@ class RoninMedicationStatement(
         forceCacheReloadTS: LocalDateTime?
     ): Pair<TransformResponse<MedicationStatement>?, Validation> {
         val medicationExtraction =
-            medicationExtractor.extractMedication(normalized.medication, normalized.contained, normalized.id)
+            medicationExtractor.extractMedication(normalized.medication, normalized.contained, normalized)
 
         val medication = medicationExtraction?.updatedMedication ?: normalized.medication
         val contained = medicationExtraction?.updatedContained ?: normalized.contained

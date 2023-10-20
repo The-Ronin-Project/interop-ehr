@@ -3,9 +3,11 @@ package com.projectronin.interop.fhir.ronin.resource.extractor
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
+import com.projectronin.interop.fhir.r4.datatype.Meta
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
+import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.resource.Medication
 import com.projectronin.interop.fhir.r4.resource.Resource
 import mu.KotlinLogging
@@ -26,20 +28,28 @@ class MedicationExtractor {
     fun extractMedication(
         medication: DynamicValue<Any>?,
         contained: List<Resource<*>>,
-        resourceId: Id?
+        resource: Resource<*>
     ): MedicationExtraction? {
-        val resourceIdString = resourceId?.value
+        val resourceIdString = resource.id?.value
         if (medication == null || resourceIdString == null) {
             return null
         }
 
+        val source = resource.meta?.source
         return when (medication.type) {
             DynamicValueType.CODEABLE_CONCEPT -> extractCodeableConcept(
                 medication.value as CodeableConcept,
-                resourceIdString
+                resourceIdString,
+                source
             )
 
-            DynamicValueType.REFERENCE -> extractReference(medication.value as Reference, contained, resourceIdString)
+            DynamicValueType.REFERENCE -> extractReference(
+                medication.value as Reference,
+                contained,
+                resourceIdString,
+                source
+            )
+
             else -> {
                 logger.warn { "Medication $resourceIdString supplied with an unknown type [${medication.type}] so no Medications were extracted" }
                 null
@@ -52,7 +62,8 @@ class MedicationExtractor {
      */
     private fun extractCodeableConcept(
         medicationCodeableConcept: CodeableConcept,
-        resourceId: String
+        resourceId: String,
+        source: Uri?
     ): MedicationExtraction {
         val codingsForId =
             medicationCodeableConcept.coding.filter { it.userSelected?.value ?: false }.takeIf { it.isNotEmpty() }
@@ -62,6 +73,7 @@ class MedicationExtractor {
 
         val medication = Medication(
             id = Id(medicationId),
+            meta = Meta(source = source),
             code = medicationCodeableConcept
         )
         val medicationReference = Reference(reference = FHIRString("Medication/$medicationId"))
@@ -78,7 +90,8 @@ class MedicationExtractor {
     private fun extractReference(
         medicationReference: Reference,
         contained: List<Resource<*>>,
-        resourceId: String
+        resourceId: String,
+        source: Uri?
     ): MedicationExtraction? {
         // If there's no contained, then we can't do anything
         if (contained.isEmpty()) {
@@ -97,8 +110,10 @@ class MedicationExtractor {
                 )
             } as? Medication
         return medication?.let {
+            val newMeta = medication.meta?.copy(source = source) ?: Meta(source = source)
+
             val newMedicationId = "contained-$resourceId-${medication.id!!.value!!}"
-            val newMedication = medication.copy(id = Id(newMedicationId))
+            val newMedication = medication.copy(id = Id(newMedicationId), meta = newMeta)
             val newMedicationReference = Reference(reference = FHIRString("Medication/$newMedicationId"))
             val newContained = contained - medication
 

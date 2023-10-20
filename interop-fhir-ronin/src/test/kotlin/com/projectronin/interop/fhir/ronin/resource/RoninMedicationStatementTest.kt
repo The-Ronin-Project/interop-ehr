@@ -727,7 +727,7 @@ class RoninMedicationStatementTest {
             medicationExtractor.extractMedication(
                 originalMedicationDynamicValue,
                 listOf(containedMedication),
-                Id("12345")
+                medicationStatement
             )
         } returns mockk {
             every { updatedMedication } returns updatedMedicationDynamicValue

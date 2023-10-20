@@ -15,6 +15,7 @@ import org.springframework.stereotype.Component
  */
 @Component
 class Localizer : BaseGenericTransformer() {
+    override val ignoredFieldNames: Set<String> = setOf("contained", "versionId")
 
     /**
      * Localizes the [element] for the [tenant]
@@ -24,13 +25,13 @@ class Localizer : BaseGenericTransformer() {
         return copy(element, localizedValues)
     }
 
-    override fun transformType(element: Any, parameterName: String, tenant: Tenant): TransformResult {
+    override fun transformType(element: Any, tenant: Tenant): TransformResult {
         return TransformResult(
             when (element) {
-                is DynamicValue<*> -> localizeDynamicValue(element as DynamicValue<Any>, parameterName, tenant)
-                is Id -> localizeId(element, parameterName, tenant)
-                is Reference -> localizeReference(element, parameterName, tenant)
-                is Validatable<*> -> transformOrNull(element, parameterName, tenant)
+                is DynamicValue<*> -> localizeDynamicValue(element as DynamicValue<Any>, tenant)
+                is Id -> localizeId(element, tenant)
+                is Reference -> localizeReference(element, tenant)
+                is Validatable<*> -> transformOrNull(element, tenant)
                 else -> null
             }
         )
@@ -41,24 +42,22 @@ class Localizer : BaseGenericTransformer() {
      */
     private fun localizeDynamicValue(
         dynamicValue: DynamicValue<Any>,
-        parameterName: String,
         tenant: Tenant
     ): DynamicValue<Any>? {
-        val localizedValue = transformType(dynamicValue.value, parameterName, tenant)
+        val localizedValue = transformType(dynamicValue.value, tenant)
         return localizedValue.element?.let { DynamicValue(dynamicValue.type, it) }
     }
 
     /**
      * Localizes the [id] for the [tenant].
      */
-    private fun localizeId(id: Id, parameterName: String, tenant: Tenant): Id? =
-        if (parameterName == "versionId") null else Id(id.value?.localize(tenant), id.id, id.extension)
+    private fun localizeId(id: Id, tenant: Tenant): Id? = Id(id.value?.localize(tenant), id.id, id.extension)
 
     /**
      * Localizes the [reference] for the [tenant].
      */
-    private fun localizeReference(reference: Reference, parameterName: String, tenant: Tenant): Reference? {
-        val nonReferenceLocalized = transformOrNull(reference, parameterName, tenant) ?: reference
+    private fun localizeReference(reference: Reference, tenant: Tenant): Reference? {
+        val nonReferenceLocalized = transformOrNull(reference, tenant) ?: reference
         return nonReferenceLocalized.localizeReference(tenant)
     }
 }
