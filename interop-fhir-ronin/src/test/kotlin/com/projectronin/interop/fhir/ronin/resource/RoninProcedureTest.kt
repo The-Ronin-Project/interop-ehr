@@ -415,7 +415,7 @@ class RoninProcedureTest {
         val validation = roninProcedure.validate(procedure)
 
         assertEquals(
-            "WARNING INV_REF_TYPE: reference can only be one of the following: Patient @ Procedure.reference",
+            "ERROR INV_REF_TYPE: reference can only be one of the following: Patient @ Procedure.reference",
             validation.issues().first().toString()
         )
     }

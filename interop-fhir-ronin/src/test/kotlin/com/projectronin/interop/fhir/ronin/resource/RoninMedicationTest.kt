@@ -462,7 +462,7 @@ class RoninMedicationTest {
                 Ingredient(
                     item = DynamicValue(
                         type = DynamicValueType.REFERENCE,
-                        value = Reference(reference = "Organization/item".asFHIR())
+                        value = Reference(reference = "Substance/item".asFHIR())
                     ),
                     isActive = FHIRBoolean.TRUE
                 ),
@@ -681,7 +681,7 @@ class RoninMedicationTest {
                 Ingredient(
                     item = DynamicValue(
                         type = DynamicValueType.REFERENCE,
-                        value = Reference(reference = "Organization/item".asFHIR())
+                        value = Reference(reference = "Substance/item".asFHIR())
                     ),
                     isActive = FHIRBoolean.TRUE,
                     strength = Ratio(
@@ -757,7 +757,7 @@ class RoninMedicationTest {
         assertEquals(medication.amount, transformed.amount)
         assertEquals(DynamicValueType.REFERENCE, transformed.ingredient[0].item?.type)
         assertEquals(
-            Reference(reference = "Organization/item".asFHIR()),
+            Reference(reference = "Substance/item".asFHIR()),
             transformed.ingredient[0].item?.value
         )
         assertEquals(medication.batch, transformed.batch)

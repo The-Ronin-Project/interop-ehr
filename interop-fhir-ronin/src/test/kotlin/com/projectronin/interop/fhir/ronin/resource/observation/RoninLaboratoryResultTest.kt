@@ -700,7 +700,7 @@ class RoninLaboratoryResultTest {
         println(validation.issues())
         assertEquals(1, validation.issues().size)
         assertEquals(
-            "WARNING INV_REF_TYPE: reference can only be one of the following: Patient @ Observation.subject.reference",
+            "ERROR INV_REF_TYPE: reference can only be one of the following: Patient @ Observation.subject.reference",
             validation.issues().first().toString()
         )
     }

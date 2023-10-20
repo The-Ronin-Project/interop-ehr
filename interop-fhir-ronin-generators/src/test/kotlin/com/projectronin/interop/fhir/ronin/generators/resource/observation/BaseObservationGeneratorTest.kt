@@ -260,11 +260,11 @@ class BaseObservationGeneratorTest {
     @Test
     fun `valid subject input - validate succeeds`() {
         val roninObservation = rcdmObservation("test") {
-            subject of rcdmReference("Location", "456")
+            subject of rcdmReference("Patient", "456")
         }
         val validation = roninObs.validate(roninObservation, null)
         assertEquals(validation.hasErrors(), false)
-        assertEquals("Location/456", roninObservation.subject?.reference?.value)
+        assertEquals("Patient/456", roninObservation.subject?.reference?.value)
     }
 
     @Test

@@ -286,7 +286,7 @@ class RoninDiagnosticReportLaboratoryTest {
                     )
                 )
             ),
-            subject = Reference(reference = "Condition/something".asFHIR(), type = Uri("Condition")),
+            subject = Reference(reference = "Patient/something".asFHIR(), type = Uri("Patient")),
             code = CodeableConcept(text = "dx report".asFHIR()),
             status = Code("registered")
         )

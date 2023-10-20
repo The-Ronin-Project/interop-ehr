@@ -378,7 +378,7 @@ class RoninDocumentReferenceTest {
             subject = Reference(reference = "Patient/123".asFHIR()),
             context = DocumentReferenceContext(
                 encounter = listOf(
-                    Reference(reference = FHIRString("Medication/testTenant-medID"))
+                    Reference(reference = FHIRString("Encounter/testTenant-medID"))
                 )
             )
         )
@@ -556,7 +556,7 @@ class RoninDocumentReferenceTest {
             ),
             context = DocumentReferenceContext(
                 encounter = listOf(
-                    Reference(reference = FHIRString("Medication/testTenant-medID"))
+                    Reference(reference = FHIRString("Encounter/testTenant-medID"))
                 )
             )
         )
@@ -1087,7 +1087,7 @@ class RoninDocumentReferenceTest {
                 )
             ),
             context = DocumentReferenceContext(
-                encounter = listOf(Reference(reference = "Enocunter/ABC".asFHIR())),
+                encounter = listOf(Reference(reference = "Encounter/ABC".asFHIR())),
                 related = listOf(Reference(reference = "DocumentReference/XYZ".asFHIR()))
             ),
             type = tenantDocRefTypeConcept,
@@ -1304,7 +1304,7 @@ class RoninDocumentReferenceTest {
 
         assertEquals(1, validation.issues().size)
         assertEquals(
-            "WARNING INV_REF_TYPE: reference can only be one of the following: Patient @ DocumentReference.subject.reference",
+            "ERROR INV_REF_TYPE: reference can only be one of the following: Patient @ DocumentReference.subject.reference",
             validation.issues().first().toString()
         )
     }
@@ -1364,7 +1364,7 @@ class RoninDocumentReferenceTest {
 
         assertEquals(1, validation.issues().size)
         assertEquals(
-            "WARNING INV_REF_TYPE: reference can only be one of the following: Encounter @ DocumentReference.context.encounter[0].reference",
+            "ERROR INV_REF_TYPE: reference can only be one of the following: Encounter @ DocumentReference.context.encounter[0].reference",
             validation.issues().first().toString()
         )
     }
