@@ -38,16 +38,13 @@ class Normalizer : BaseGenericTransformer() {
     }
 
     private fun normalizeExtension(extension: Extension, tenant: Tenant): TransformResult {
-        return if (
-            (
-                RoninExtension.values()
-                    .find { it.value == extension.url?.value } != null && extension.value != null
-                ) ||
-            (extension.url != null && extension.value != null)
+        val normalizedExtension = transformOrNull(extension, tenant) ?: extension
+        return if ((RoninExtension.values().find { it.value == normalizedExtension.url?.value } != null) ||
+            (normalizedExtension.url != null && (normalizedExtension.value != null || normalizedExtension.extension.isNotEmpty()))
         ) {
-            TransformResult(extension)
+            TransformResult(normalizedExtension)
         } else {
-            logger.warn { "Extension filtered out: $extension" }
+            logger.info { "Extension filtered out: $extension" }
             TransformResult(extension, true)
         }
     }

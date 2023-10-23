@@ -419,6 +419,125 @@ class NormalizerTest {
     }
 
     @Test
+    fun `normalize extension with non-ronin url and value`() {
+        val patient = Patient(
+            extension = listOf(
+                Extension(
+                    url = Uri("some-extension-url"),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODING,
+                        value = Coding(
+                            system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                            code = Code(value = "abc")
+                        )
+                    )
+                )
+            )
+        )
+        val expectedExtension = listOf(
+            Extension(
+                url = Uri("some-extension-url"),
+                value = DynamicValue(
+                    type = DynamicValueType.CODING,
+                    value = Coding(
+                        system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                        code = Code(value = "abc")
+                    )
+                )
+            )
+        )
+        val normalizedExtension = normalizer.normalize(patient, tenant)
+        assertEquals(normalizedExtension.extension, expectedExtension)
+    }
+
+    @Test
+    fun `normalize extension with non-ronin url and extension`() {
+        val patient = Patient(
+            extension = listOf(
+                Extension(
+                    url = Uri("some-extension-url"),
+                    extension = listOf(
+                        Extension(
+                            url = Uri("some-extension-url-2"),
+                            value = DynamicValue(
+                                type = DynamicValueType.CODING,
+                                value = Coding(
+                                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                                    code = Code(value = "abc")
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        val expectedExtension = listOf(
+            Extension(
+                url = Uri("some-extension-url"),
+                extension = listOf(
+                    Extension(
+                        url = Uri("some-extension-url-2"),
+                        value = DynamicValue(
+                            type = DynamicValueType.CODING,
+                            value = Coding(
+                                system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                                code = Code(value = "abc")
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        val normalizedExtension = normalizer.normalize(patient, tenant)
+        assertEquals(normalizedExtension.extension, expectedExtension)
+    }
+
+    @Test
+    fun `normalize extension will filter sub-extensions`() {
+        val patient = Patient(
+            extension = listOf(
+                Extension(
+                    url = Uri("some-extension-url"),
+                    extension = listOf(
+                        Extension(
+                            url = Uri("some-extension-url-2"),
+                            value = DynamicValue(
+                                type = DynamicValueType.CODING,
+                                value = Coding(
+                                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                                    code = Code(value = "abc")
+                                )
+                            )
+                        ),
+                        Extension(
+                            url = Uri("some-extension-url-3")
+                        )
+                    )
+                )
+            )
+        )
+        val expectedExtension = listOf(
+            Extension(
+                url = Uri("some-extension-url"),
+                extension = listOf(
+                    Extension(
+                        url = Uri("some-extension-url-2"),
+                        value = DynamicValue(
+                            type = DynamicValueType.CODING,
+                            value = Coding(
+                                system = Uri("http://projectronin.io/fhir/CodeSystem/test/AppointmentStatus"),
+                                code = Code(value = "abc")
+                            )
+                        )
+                    )
+                )
+            )
+        )
+        val normalizedExtension = normalizer.normalize(patient, tenant)
+        assertEquals(normalizedExtension.extension, expectedExtension)
+    }
+
+    @Test
     fun `normalize extension with ronin url and value`() {
         val patient = Patient(
             extension = listOf(
@@ -482,7 +601,7 @@ class NormalizerTest {
             )
         )
         val normalizedExtension = normalizer.normalize(patient, tenant)
-        assertEquals(normalizedExtension.extension.size, 0)
+        assertEquals(normalizedExtension, patient)
     }
 
     @Test
