@@ -53,6 +53,7 @@ import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertDoesNotThrow
 import org.junit.jupiter.api.assertThrows
 
 class RoninAppointmentTest {
@@ -237,6 +238,45 @@ class RoninAppointmentTest {
                 "ERROR REQ_FIELD: meta is a required element @ Appointment.meta",
             exception.message
         )
+    }
+
+    @Test
+    fun `validate allows actor without type`() {
+        val appointment = Appointment(
+            id = Id("12345"),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.APPOINTMENT.value)), source = Uri("source")),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(statusExtension("cancelled")),
+            status = AppointmentStatus.CANCELLED.asCode(),
+            participant = listOf(
+                Participant(
+                    actor = Reference(
+                        display = FHIRString("Resource")
+                    ),
+                    status = ParticipationStatus.ACCEPTED.asCode()
+                )
+            )
+        )
+
+        assertDoesNotThrow {
+            roninAppointment.validate(appointment).alertIfErrors()
+        }
     }
 
     @Test

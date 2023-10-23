@@ -88,44 +88,6 @@ class RoninRequestGroupTest {
     }
 
     @Test
-    fun `validation fails with subject but no type`() {
-        val requestGroup = RequestGroup(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.REQUEST_GROUP.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            status = RequestGroupStatus.DRAFT.asCode(),
-            intent = RequestGroupIntent.OPTION.asCode(),
-            subject = Reference(reference = "Patient/1234".asFHIR())
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninRequestGroup.validate(requestGroup).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ RequestGroup.subject.type",
-            exception.message
-        )
-    }
-
-    @Test
     fun `validation fails with subject and type but no data-authority reference extension`() {
         val requestGroup = RequestGroup(
             id = Id("12345"),

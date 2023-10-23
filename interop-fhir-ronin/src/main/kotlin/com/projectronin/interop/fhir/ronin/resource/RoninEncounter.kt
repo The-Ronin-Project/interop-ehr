@@ -54,7 +54,7 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
             requireRoninIdentifiers(element.identifier, parentContext, this)
             containedResourcePresent(element.contained, parentContext, validation)
 
-            // check that subject reference has type and the extension is the data authority extension identifier
+            // check that subject reference extension is the data authority extension identifier
             ifNotNull(element.subject) {
                 requireDataAuthorityExtensionIdentifier(
                     element.subject,

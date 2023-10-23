@@ -129,7 +129,7 @@ abstract class BaseRoninObservation(
             requireCodeCoding("code", element.code?.coding, parentContext, validation)
 
             checkNotNull(element.subject, requiredSubjectError, parentContext)
-            // check that subject reference has type and the extension is the data authority extension identifier
+            // check that subject reference extension is the data authority extension identifier
             ifNotNull(element.subject) {
                 requireDataAuthorityExtensionIdentifier(
                     element.subject,

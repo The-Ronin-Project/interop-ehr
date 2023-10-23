@@ -783,62 +783,6 @@ class RoninBodyTemperatureTest {
     }
 
     @Test
-    fun `validate fails with subject but no type`() {
-        val observation = Observation(
-            id = Id("123"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.OBSERVATION_BODY_TEMPERATURE.value)),
-                source = Uri("source")
-            ),
-            status = ObservationStatus.AMENDED.asCode(),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            extension = listOf(tenantBodyTemperatureSourceExtension),
-            code = bodyTemperatureConcept,
-            category = vitalSignsCategoryConceptList,
-            subject = Reference(display = "subject".asFHIR(), reference = "Patient/1234".asFHIR()),
-            effective = DynamicValue(
-                type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
-            ),
-            value = DynamicValue(
-                DynamicValueType.QUANTITY,
-                Quantity(
-                    value = Decimal(37.0),
-                    unit = "Cel".asFHIR(),
-                    system = CodeSystem.UCUM.uri,
-                    code = Code("Cel")
-                )
-            )
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninBodyTemperature.validate(observation).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Observation.subject.type",
-            exception.message
-        )
-    }
-
-    @Test
     fun `validate fails with subject and type but no data authority extension reference`() {
         val observation = Observation(
             id = Id("123"),

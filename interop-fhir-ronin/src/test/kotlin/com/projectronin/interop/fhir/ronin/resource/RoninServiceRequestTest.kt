@@ -359,25 +359,6 @@ class RoninServiceRequestTest {
     }
 
     @Test
-    fun `validation fails when subject type is null`() {
-        val serviceRequest = completeServiceRequest.copy(
-            subject = Reference(
-                id = "888".asFHIR(),
-                type = null,
-                reference = "Patient/888".asFHIR()
-            )
-        )
-
-        val actualException = assertThrows<IllegalArgumentException> {
-            roninServiceRequest.validate(serviceRequest).alertIfErrors()
-        }
-        assertEquals(
-            "Encountered validation error(s):\n" + "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ ServiceRequest.subject.type",
-            actualException.message
-        )
-    }
-
-    @Test
     fun `validation fails when subject is null`() {
         val serviceRequest = completeServiceRequest.copy(subject = null)
         val actualException = assertThrows<IllegalArgumentException> {
@@ -385,7 +366,6 @@ class RoninServiceRequestTest {
         }
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ ServiceRequest.subject.type\n" +
                 "ERROR REQ_FIELD: subject is a required element @ ServiceRequest.subject",
             actualException.message
         )

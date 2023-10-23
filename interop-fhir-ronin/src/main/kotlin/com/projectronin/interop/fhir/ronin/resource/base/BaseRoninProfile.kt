@@ -282,16 +282,11 @@ abstract class BaseRoninProfile<T : Resource<T>>(
     ) {
         validation.apply {
             val referenceType = reference?.type
-            checkNotNull(
-                referenceType,
-                requiredReferenceType,
-                parentContext
-            )
 
             ifNotNull(referenceType) {
                 // This only matters if the reference is populated. If the reference is not populated, then it's not part of a Data Authority.
-                reference.reference?.let {
-                    val dataAuthExtensionIdentifier = referenceType.extension
+                reference?.reference?.let {
+                    val dataAuthExtensionIdentifier = referenceType?.extension
                     checkTrue(
                         dataAuthExtensionIdentifier == dataAuthorityExtension,
                         requiredDataAuthorityExtensionIdentifier,

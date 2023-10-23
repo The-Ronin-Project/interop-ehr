@@ -211,51 +211,6 @@ class RoninDiagnosticReportNoteExchangeTest {
     }
 
     @Test
-    fun `validate fails with no subject type`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_NOTE_EXCHANGE.value)),
-                source = Uri("source")
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            category = listOf(
-                CodeableConcept(text = "dx report".asFHIR())
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered"),
-            subject = Reference(
-                reference = "Patient/123".asFHIR()
-            )
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport).alertIfErrors()
-        }
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ DiagnosticReport.subject.type",
-            exception.message
-        )
-    }
-
-    @Test
     fun `validate fails with subject type but no data authority extension identifier`() {
         val dxReport = DiagnosticReport(
             id = Id("12345"),

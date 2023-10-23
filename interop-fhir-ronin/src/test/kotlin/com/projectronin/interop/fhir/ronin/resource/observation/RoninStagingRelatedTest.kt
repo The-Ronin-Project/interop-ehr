@@ -1142,52 +1142,6 @@ class RoninStagingRelatedTest {
     }
 
     @Test
-    fun `validate fails subject but no type`() {
-        val observation = Observation(
-            id = Id("123"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.OBSERVATION_STAGING_RELATED.value)),
-                source = Uri("source")
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "123".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            status = ObservationStatus.AMENDED.asCode(),
-            extension = listOf(tenantStagingRelatedSourceExtension),
-            code = stagingRelatedConcept,
-            category = stagingRelatedConceptList,
-            dataAbsentReason = CodeableConcept(text = "dataAbsent".asFHIR()),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
-
-            performer = listOf(Reference(reference = "Patient/1234".asFHIR()))
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninStagingRelated.validate(observation).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Observation.subject.type",
-            exception.message
-        )
-    }
-
-    @Test
     fun `validate fails subject and type but no data authority reference extension`() {
         val observation = Observation(
             id = Id("123"),

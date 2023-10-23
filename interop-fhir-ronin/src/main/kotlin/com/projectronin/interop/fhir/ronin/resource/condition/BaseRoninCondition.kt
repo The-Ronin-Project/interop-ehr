@@ -58,7 +58,7 @@ abstract class BaseRoninCondition(
             requireRoninIdentifiers(element.identifier, parentContext, validation)
             containedResourcePresent(element.contained, parentContext, validation)
 
-            // check that subject reference has type and the extension is the data authority extension identifier
+            // check that subject reference extension is the data authority extension identifier
             ifNotNull(element.subject) {
                 requireDataAuthorityExtensionIdentifier(
                     element.subject,

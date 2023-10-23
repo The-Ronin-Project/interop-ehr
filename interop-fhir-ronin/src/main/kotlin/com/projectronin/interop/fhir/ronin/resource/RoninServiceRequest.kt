@@ -103,7 +103,6 @@ class RoninServiceRequest(
                 parentContext
             )
 
-            // USCore Enforces required Patient reference
             requireDataAuthorityExtensionIdentifier(
                 element.subject,
                 LocationContext(ServiceRequest::subject),

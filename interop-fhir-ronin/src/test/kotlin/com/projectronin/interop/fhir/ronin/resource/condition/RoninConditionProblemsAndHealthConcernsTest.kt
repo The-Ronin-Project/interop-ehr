@@ -325,65 +325,6 @@ class RoninConditionProblemsAndHealthConcernsTest {
     }
 
     @Test
-    fun `validate fails without subject reference not having element type`() {
-        val condition = Condition(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.CONDITION_PROBLEMS_CONCERNS.value)),
-                source = Uri("source")
-            ),
-            extension = listOf(conditionCodeExtension),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://snomed.info/sct"),
-                        code = Code("254637007"),
-                        display = "Non-small cell lung cancer".asFHIR()
-                    )
-                )
-            ),
-            subject = Reference(reference = "Patient/1234".asFHIR()),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri,
-                            code = Code("health-concern")
-                        )
-                    )
-                )
-            )
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(condition).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ Condition.subject.type",
-            exception.message
-        )
-    }
-
-    @Test
     fun `validate fails without subject reference having data authority extension identifier`() {
         val condition = Condition(
             id = Id("12345"),

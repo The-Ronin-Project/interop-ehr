@@ -166,55 +166,6 @@ class RoninMedicationStatementTest {
     }
 
     @Test
-    fun `validate fails with subject but no type`() {
-        val medicationStatement = MedicationStatement(
-            meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_STATEMENT.value)), source = Uri("source")),
-            extension = listOf(
-                Extension(
-                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
-                    value = DynamicValue(
-                        type = DynamicValueType.CODE,
-                        value = Code("literal reference")
-                    )
-                )
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            status = MedicationStatementStatus.ACTIVE.asCode(),
-            medication = DynamicValue(
-                type = DynamicValueType.REFERENCE,
-                value = Reference(reference = FHIRString("Medication/1234"))
-            ),
-            subject = Reference(reference = "Patient/1234".asFHIR())
-        )
-
-        val exception = assertThrows<IllegalArgumentException> {
-            roninMedicationStatement.validate(medicationStatement).alertIfErrors()
-        }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_REQ_REF_TYPE_001: Attribute Type is required for the reference @ MedicationStatement.subject.type",
-            exception.message
-        )
-    }
-
-    @Test
     fun `validate fails with subject and type but no data authority reference extension`() {
         val medicationStatement = MedicationStatement(
             meta = Meta(profile = listOf(Canonical(RoninProfile.MEDICATION_STATEMENT.value)), source = Uri("source")),
