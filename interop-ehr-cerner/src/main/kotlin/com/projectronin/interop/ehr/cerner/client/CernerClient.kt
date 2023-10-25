@@ -55,7 +55,8 @@ class CernerClient(
                     append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
                     append(NO_RETRY_HEADER, "$disableRetry")
                 }
-                accept(ContentType.Application.Json)
+                accept(acceptTypeOverride)
+                contentType(acceptTypeOverride)
                 url {
                     parameters.map { parameterEntry ->
                         val key = parameterEntry.key

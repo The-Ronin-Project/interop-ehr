@@ -1,5 +1,6 @@
 package com.projectronin.interop.ehr.cerner.client
 
+import com.projectronin.interop.common.http.FhirJson
 import com.projectronin.interop.datalake.DatalakePublishService
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
 import com.projectronin.interop.ehr.cerner.auth.CernerAuthentication
@@ -10,6 +11,7 @@ import com.projectronin.interop.fhir.r4.resource.Communication
 import com.projectronin.interop.fhir.r4.valueset.EventStatus
 import com.projectronin.interop.fhir.util.asCode
 import io.ktor.client.statement.bodyAsText
+import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.mockk.every
 import io.mockk.mockk
@@ -180,5 +182,41 @@ class CernerClientTest {
         assertTrue(request.headers["Accept"]!!.contains("application/fhir+json"))
         assertTrue(request.headers["Content-Type"]!!.startsWith("application/fhir+json"))
         assertEquals("""{"resourceType":"Communication","status":"completed"}""", request.body.readUtf8())
+    }
+
+    @Test
+    fun `ensure get operation accept header is correct when changing accept type override`() {
+        mockWebServer.enqueue(
+            MockResponse().setBody(patientResult).setHeader("Content-Type", "application/json")
+        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+
+        val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
+        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+
+        val response = runBlocking {
+            cernerClient.get(
+                tenant,
+                "/Patient/12724066",
+                parameters = mapOf(
+                    "simple" to "simple",
+                    "single" to listOf("1", "b", "special="),
+                    "repeating" to RepeatingParameter(listOf("first", "second")),
+                    "noValue" to null
+                ),
+                acceptTypeOverride = ContentType.Application.FhirJson
+            )
+        }
+        assertEquals(HttpStatusCode.OK, response.httpResponse.status)
+
+        val request = mockWebServer.takeRequest()
+
+        assertTrue(request.headers["Accept"]!!.contains("application/fhir+json"))
+        assertTrue(request.headers["Content-Type"]!!.startsWith("application/fhir+json"))
     }
 }
