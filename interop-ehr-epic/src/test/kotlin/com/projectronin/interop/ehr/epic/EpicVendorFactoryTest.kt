@@ -29,6 +29,7 @@ class EpicVendorFactoryTest {
     private val binaryService = mockk<EpicBinaryService>()
     private val medAdminService = mockk<EpicMedicationAdministrationService>()
     private val serviceRequestService = mockk<EpicServiceRequestService>()
+    private val diagnosticReportService = mockk<EpicDiagnosticReportService>()
 
     private val vendorFactory =
         EpicVendorFactory(
@@ -54,7 +55,8 @@ class EpicVendorFactoryTest {
             documentReferenceService = documentReferenceService,
             binaryService = binaryService,
             medicationAdministrationService = medAdminService,
-            serviceRequestService = serviceRequestService
+            serviceRequestService = serviceRequestService,
+            diagnosticReportService = diagnosticReportService
         )
 
     @Test
@@ -165,5 +167,10 @@ class EpicVendorFactoryTest {
     @Test
     fun `returns serviceRequestService`() {
         assertEquals(serviceRequestService, vendorFactory.serviceRequestService)
+    }
+
+    @Test
+    fun `returns DiagnosticReportService`() {
+        assertEquals(diagnosticReportService, vendorFactory.diagnosticReportService)
     }
 }

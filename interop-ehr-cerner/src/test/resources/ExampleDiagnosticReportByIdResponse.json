@@ -1,0 +1,88 @@
+{
+  "resourceType": "DiagnosticReport",
+  "id": "fakeFaKEfAKefakE",
+  "meta": {
+    "versionId": "3",
+    "lastUpdated": "2017-01-06T20:09:17.000+00:00"
+  },
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p><b>Diagnostic Report</b></p><p><b>Patient</b>: RADIOLOGY, TESTTWO</p><p><b>Document Category</b>: Unknown</p><p><b>Document Title</b>: MG Mammo Digital Diagnostic Bilat</p><p><b>Status</b>: Final</p><p><b>Code</b>: MG Mammo Digital Diagnostic Bilat</p><p><b>Effective Date</b>: Jan  6, 2017  7:59 P.M. UTC</p></div>"
+  },
+  "identifier": [
+    {
+      "system": "https://fhir.cerner.com/ceuuid",
+      "value": "CE87caf4b7-9397-4667-9897-702218017c9e-196151517-2017010620084300"
+    },
+    {
+      "system": "https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/acsn",
+      "value": "00000MG20170000004"
+    }
+  ],
+  "basedOn": [
+    {
+      "reference": "ServiceRequest/294749597"
+    }
+  ],
+  "status": "final",
+  "category": [
+    {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/data-absent-reason",
+          "code": "unknown",
+          "display": "Unknown"
+        }
+      ],
+      "text": "Unknown"
+    }
+  ],
+  "code": {
+    "coding": [
+      {
+        "system": "https://fhir.cerner.com/ec2458f2-1e24-41c8-b71b-0e701af7583d/codeSet/72",
+        "code": "21660139",
+        "display": "MG Mammo Digital Diagnostic Bilat",
+        "userSelected": true
+      },
+      {
+        "system": "http://loinc.org",
+        "code": "26346-7"
+      }
+    ],
+    "text": "MG Mammo Digital Diagnostic Bilat"
+  },
+  "subject": {
+    "reference": "Patient/fakeFaKEfAKefakE",
+    "display": "RADIOLOGY, TESTTWO"
+  },
+  "encounter": {
+    "reference": "Encounter/97697440"
+  },
+  "effectiveDateTime": "2017-01-06T19:59:20Z",
+  "issued": "2017-01-06T20:09:17Z",
+  "performer": [
+    {
+      "reference": "Practitioner/11648064"
+    }
+  ],
+  "resultsInterpreter": [
+    {
+      "reference": "Practitioner/11648064"
+    }
+  ],
+  "presentedForm": [
+    {
+      "contentType": "application/pdf",
+      "url": "https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Binary/XR-196151517",
+      "title": "MG Mammo Digital Diagnostic Bilat",
+      "creation": "2017-01-06T20:09:17Z"
+    },
+    {
+      "contentType": "application/xml",
+      "url": "https://fhir-open.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d/Binary/R-196151517",
+      "title": "MG Mammo Digital Diagnostic Bilat",
+      "creation": "2017-01-06T20:09:17Z"
+    }
+  ]
+}

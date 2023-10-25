@@ -28,6 +28,7 @@ class CernerVendorFactoryTest {
     private val onboardFlagService = mockk<CernerOnboardFlagService>()
     private val medAdminService = mockk<CernerMedicationAdministrationService>()
     private val serviceRequestService = mockk<CernerServiceRequestService>()
+    private val diagnosticReportService = mockk<CernerDiagnosticReportService>()
 
     private val vendorFactory =
         CernerVendorFactory(
@@ -51,7 +52,8 @@ class CernerVendorFactoryTest {
             binaryService = binaryService,
             onboardFlagService = onboardFlagService,
             medicationAdministrationService = medAdminService,
-            serviceRequestService = serviceRequestService
+            serviceRequestService = serviceRequestService,
+            diagnosticReportService = diagnosticReportService
         )
 
     @Test
@@ -162,5 +164,10 @@ class CernerVendorFactoryTest {
     @Test
     fun `returns ServiceRequestService`() {
         assertEquals(serviceRequestService, vendorFactory.serviceRequestService)
+    }
+
+    @Test
+    fun `returns DiagnosticReportService`() {
+        assertEquals(diagnosticReportService, vendorFactory.diagnosticReportService)
     }
 }

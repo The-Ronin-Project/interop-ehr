@@ -5,6 +5,7 @@ import com.projectronin.interop.ehr.AppointmentService
 import com.projectronin.interop.ehr.BinaryService
 import com.projectronin.interop.ehr.CarePlanService
 import com.projectronin.interop.ehr.ConditionService
+import com.projectronin.interop.ehr.DiagnosticReportService
 import com.projectronin.interop.ehr.DocumentReferenceService
 import com.projectronin.interop.ehr.EncounterService
 import com.projectronin.interop.ehr.HealthCheckService
@@ -58,4 +59,5 @@ interface VendorFactory {
     val binaryService: BinaryService
     val medicationAdministrationService: MedicationAdministrationService
     val serviceRequestService: ServiceRequestService
+    val diagnosticReportService: DiagnosticReportService
 }
