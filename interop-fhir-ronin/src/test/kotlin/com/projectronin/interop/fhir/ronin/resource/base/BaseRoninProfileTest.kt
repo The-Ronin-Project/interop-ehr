@@ -21,6 +21,7 @@ import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.Validation
@@ -83,7 +84,7 @@ class BaseRoninProfileTest {
     @Test
     fun `no tenant identifier`() {
         every { location.identifier } returns listOf(validFhirIdentifier, validDataAuthorityIdentifier)
-
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
@@ -102,7 +103,7 @@ class BaseRoninProfileTest {
             validDataAuthorityIdentifier,
             validTenantIdentifier.copy(type = null)
         )
-
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
@@ -121,6 +122,7 @@ class BaseRoninProfileTest {
             validDataAuthorityIdentifier,
             validTenantIdentifier.copy(value = null)
         )
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
 
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location).alertIfErrors()
@@ -136,7 +138,7 @@ class BaseRoninProfileTest {
     @Test
     fun `no FHIR identifier`() {
         every { location.identifier } returns listOf(validTenantIdentifier, validDataAuthorityIdentifier)
-
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
@@ -155,6 +157,7 @@ class BaseRoninProfileTest {
             validDataAuthorityIdentifier,
             validFhirIdentifier.copy(type = null)
         )
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
 
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location).alertIfErrors()
@@ -174,7 +177,7 @@ class BaseRoninProfileTest {
             validDataAuthorityIdentifier,
             validFhirIdentifier.copy(value = null)
         )
-
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
@@ -189,7 +192,7 @@ class BaseRoninProfileTest {
     @Test
     fun `no Data Authority identifier`() {
         every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
-
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
@@ -208,7 +211,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier.copy(type = null)
         )
-
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location).alertIfErrors()
         }
@@ -227,6 +230,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier.copy(value = null)
         )
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
 
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location).alertIfErrors()
@@ -246,7 +250,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier
         )
-
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         TestProfile(normalizer, localizer).validate(location).alertIfErrors()
     }
 
@@ -260,7 +264,7 @@ class BaseRoninProfileTest {
         }
 
         val transformed = profile.transformMeta(null)
-        assertEquals(listOf(Canonical("profile")), transformed.profile)
+        assertEquals(listOf(Canonical("http://projectronin.io/fhir/StructureDefinition/ronin-location")), transformed.profile)
     }
 
     @Test
@@ -271,19 +275,17 @@ class BaseRoninProfileTest {
                 return meta.transform()
             }
         }
-
-        val meta = Meta(id = "123".asFHIR(), profile = listOf(Canonical("old-profile")))
-
+        val meta = Meta(id = "123".asFHIR(), profile = listOf(Canonical(RoninProfile.LOCATION.value)))
         val transformed = profile.transformMeta(meta)
         assertEquals("123".asFHIR(), transformed.id)
-        assertEquals(listOf(Canonical("profile")), transformed.profile)
+        assertEquals(listOf(Canonical(RoninProfile.LOCATION.value)), transformed.profile)
     }
 
     @Test
     fun `getExtensionOrEmptyList - null codeableConcept`() {
         val locationTest = Location(
             id = Id("123"),
-            meta = Meta(profile = listOf(Canonical("profile")), source = Uri("source")),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
             identifier = listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
         )
 
@@ -296,7 +298,7 @@ class BaseRoninProfileTest {
     fun `getExtensionOrEmptyList - not null codeableConcept`() {
         val locationTest = Location(
             id = Id("123"),
-            meta = Meta(profile = listOf(Canonical("profile")), source = Uri("source")),
+            meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
             identifier = listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier),
             physicalType = CodeableConcept(
                 text = "b".asFHIR(),
@@ -372,6 +374,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier
         )
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -399,6 +402,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier
         )
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -426,6 +430,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier
         )
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -458,6 +463,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier
         )
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -496,6 +502,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier
         )
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -521,6 +528,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier
         )
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -547,6 +555,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier
         )
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         every { location.physicalType } returns CodeableConcept(
             coding = listOf(
                 Coding(
@@ -586,6 +595,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier
         )
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         every { location.contained } returns listOf(Location(id = Id("67890")))
 
         TestProfile(normalizer, localizer).validate(location).alertIfErrors()
@@ -601,6 +611,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier
         )
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
         every { location.contained } returns listOf(Location(id = Id("67890")))
         val warning = TestProfile(normalizer, localizer).validate(location, null)
 
@@ -646,7 +657,7 @@ class BaseRoninProfileTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_META_001: No profiles found for expected type `profile` @ Location.meta.profile",
+                "ERROR RONIN_META_001: No profiles found for expected type `http://projectronin.io/fhir/StructureDefinition/ronin-location` @ Location.meta.profile",
             exception.message
         )
     }
@@ -666,7 +677,7 @@ class BaseRoninProfileTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_META_001: No profiles found for expected type `profile` @ Location.meta.profile",
+                "ERROR RONIN_META_001: No profiles found for expected type `http://projectronin.io/fhir/StructureDefinition/ronin-location` @ Location.meta.profile",
             exception.message
         )
     }
@@ -678,7 +689,7 @@ class BaseRoninProfileTest {
             validFhirIdentifier,
             validDataAuthorityIdentifier
         )
-        every { location.meta } returns Meta(profile = listOf(Canonical("profile")))
+        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)))
 
         val exception = assertThrows<IllegalArgumentException> {
             TestProfile(normalizer, localizer).validate(location).alertIfErrors()
@@ -692,7 +703,7 @@ class BaseRoninProfileTest {
     }
 
     private open class TestProfile(normalizer: Normalizer, localizer: Localizer) :
-        BaseRoninProfile<Location>(R4LocationValidator, "profile", normalizer, localizer) {
+        BaseRoninProfile<Location>(R4LocationValidator, RoninProfile.LOCATION.value, normalizer, localizer) {
         override val rcdmVersion: RCDMVersion = RCDMVersion.values().last()
         override val profileVersion: Int = 1
 

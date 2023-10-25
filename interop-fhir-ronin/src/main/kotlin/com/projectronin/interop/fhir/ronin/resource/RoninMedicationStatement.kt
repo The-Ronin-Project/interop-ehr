@@ -88,7 +88,7 @@ class RoninMedicationStatement(
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant),
+            identifier = normalized.getRoninIdentifiersForResource(tenant),
             medication = medication,
             contained = contained,
             extension = normalized.extension + populateExtensionWithReference(normalized.medication) // populate extension based on medication[x]

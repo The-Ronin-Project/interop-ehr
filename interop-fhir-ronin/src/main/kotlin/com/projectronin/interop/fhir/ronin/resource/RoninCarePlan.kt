@@ -85,7 +85,7 @@ class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant),
+            identifier = normalized.getRoninIdentifiersForResource(tenant),
             extension = normalized.extension + categoryExtensions,
             activity = normalizedActivities
         )

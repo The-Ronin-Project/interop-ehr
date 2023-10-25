@@ -91,7 +91,7 @@ class RoninPractitioner(
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant),
+            identifier = normalized.getRoninIdentifiersForResource(tenant),
             telecom = telecoms
         )
         return Pair(TransformResponse(transformed), validation)

@@ -29,7 +29,9 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
 
     override fun validate(element: T, parentContext: LocationContext, validation: Validation) {
         val qualifiedProfile = getQualifiedProfile(element, parentContext, validation)
-        qualifiedProfile?.let { validation.merge(it.validate(element, parentContext)) }
+        qualifiedProfile.forEach {
+            validation.merge(it.validate(element, parentContext))
+        }
     }
 
     private val noProfilesError = FHIRError(
@@ -56,7 +58,7 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
      * validate() each call getQualifiedProfile() to select a profile to use.
      *
      * getQualifiedProfile() calls qualifies() on every profile in the
-     * MultipleProfileResource. 1 match is expected, >1 matches are an error,
+     * MultipleProfileResource. returns all profiles that match,
      * 0 matches selects the default profile and warns; if no default profile,
      * 0 matches is an error. Warnings or errors are added to the [validation].
      */
@@ -64,27 +66,17 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
         resource: T,
         parentContext: LocationContext,
         validation: Validation
-    ): BaseProfile<T>? {
+    ): List<BaseProfile<T>> {
         val qualifiedProfiles = potentialProfiles.filter { it.qualifies(resource) }
-        return when (qualifiedProfiles.size) {
-            1 -> qualifiedProfiles[0]
-            0 -> {
-                validation.checkTrue(
-                    false,
-                    defaultProfile?.let { noProfilesDefaultWarning } ?: noProfilesError,
-                    parentContext
-                )
-                defaultProfile
-            }
-
-            else -> {
-                validation.checkTrue(
-                    false,
-                    tooManyProfilesError,
-                    parentContext
-                ) { "Multiple profiles qualified: ${qualifiedProfiles.joinToString(", ") { it::class.java.simpleName }}" }
-                null
-            }
+        return if (qualifiedProfiles.isEmpty()) {
+            validation.checkTrue(
+                false,
+                defaultProfile?.let { noProfilesDefaultWarning } ?: noProfilesError,
+                parentContext
+            )
+            defaultProfile?.let { listOf(it) } ?: emptyList()
+        } else {
+            qualifiedProfiles
         }
     }
 
@@ -97,7 +89,7 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
         val validation = Validation()
 
         val qualified = getQualifiedProfile(normalized, parentContext, validation)
-        val response = qualified?.conceptMap(normalized, parentContext, tenant)
+        val response = qualified.firstOrNull()?.conceptMap(normalized, parentContext, tenant)
 
         val mapped = response?.let {
             validation.merge(it.second)
@@ -115,12 +107,16 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
         val validation = Validation()
 
         val qualified = getQualifiedProfile(normalized, parentContext, validation)
-        val response = qualified?.transformInternal(normalized, parentContext, tenant)
-
-        val transformResponse = response?.let {
-            validation.merge(it.second)
-            it.first
+        var transformed = normalized
+        val embedded = mutableListOf<Resource<*>>()
+        qualified.forEach {
+            val response = it?.transformInternal(transformed, parentContext, tenant)
+            if (response != null) {
+                validation.merge(response.second)
+                transformed = response.first?.resource!!
+                embedded.addAll(response.first!!.embeddedResources)
+            }
         }
-        return Pair(transformResponse, validation)
+        return Pair(TransformResponse(transformed, embedded), validation)
     }
 }

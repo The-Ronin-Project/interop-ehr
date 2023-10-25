@@ -21,5 +21,20 @@ fun Id?.toFhirIdentifier(): Identifier? = this?.let {
     )
 }
 
-fun <T : Resource<T>> T.getRoninIdentifiersForResource(tenant: Tenant): List<Identifier> =
-    this.getFhirIdentifiers() + tenant.toFhirIdentifier() + dataAuthorityIdentifier
+fun <T : Resource<T>> T.getRoninIdentifiersForResource(tenant: Tenant): List<Identifier> {
+    val identifierSet = mutableSetOf<Identifier>()
+    identifierSet.addAll(this.getIdentifiers())
+    identifierSet.addAll(this.getFhirIdentifiers())
+    identifierSet.add(tenant.toFhirIdentifier())
+    identifierSet.add(dataAuthorityIdentifier)
+    return identifierSet.toSet().toList()
+}
+
+@Suppress("UNCHECKED_CAST")
+fun <T : Resource<T>> T.getIdentifiers(): List<Identifier> {
+    return runCatching {
+        val field = this::class.java.getDeclaredField("identifier")
+        field.isAccessible = true
+        field.get(this) as List<Identifier>
+    }.getOrDefault(emptyList())
+}

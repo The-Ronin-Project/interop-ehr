@@ -99,26 +99,6 @@ class MultipleProfileResourceTest {
     }
 
     @Test
-    fun `validate with multiple qualifying profiles`() {
-        val location = mockk<Location>()
-
-        every { testProfile1.qualifies(location) } returns true
-        every { testProfile2.qualifies(location) } returns true
-        every { testProfile3.qualifies(location) } returns true
-
-        val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(location).alertIfErrors()
-        }
-
-        assertTrue(
-            exception.message?.startsWith(
-                "Encountered validation error(s):\n" +
-                    "ERROR RONIN_PROFILE_002: Multiple profiles qualified: "
-            ) == true
-        )
-    }
-
-    @Test
     fun `validate with single qualifying profile`() {
         val location = mockk<Location>()
 
@@ -138,18 +118,6 @@ class MultipleProfileResourceTest {
         every { testProfile1.qualifies(location) } returns false
         every { testProfile2.qualifies(location) } returns false
         every { testProfile3.qualifies(location) } returns false
-
-        val (transformResponse, _) = profile.transform(location, tenant)
-        assertNull(transformResponse)
-    }
-
-    @Test
-    fun `transform with multiple qualifying profiles`() {
-        val location = Location(id = Id("1234"))
-
-        every { testProfile1.qualifies(location) } returns true
-        every { testProfile2.qualifies(location) } returns true
-        every { testProfile3.qualifies(location) } returns true
 
         val (transformResponse, _) = profile.transform(location, tenant)
         assertNull(transformResponse)
@@ -254,6 +222,12 @@ class MultipleProfileResourceTest {
         localizer: Localizer,
         override val potentialProfiles: List<BaseProfile<Location>>
     ) : MultipleProfileResource<Location>(normalizer, localizer)
+
+    private class TestMultipleProfileResourceObs(
+        normalizer: Normalizer,
+        localizer: Localizer,
+        override val potentialProfiles: List<BaseProfile<Observation>>
+    ) : MultipleProfileResource<Observation>(normalizer, localizer)
 
     private class TestProfileWithDefault(
         normalizer: Normalizer,

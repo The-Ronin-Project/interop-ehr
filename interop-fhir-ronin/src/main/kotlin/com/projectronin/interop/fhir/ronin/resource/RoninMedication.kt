@@ -101,7 +101,7 @@ class RoninMedication(
     ): Pair<TransformResponse<Medication>?, Validation> {
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant)
+            identifier = normalized.getRoninIdentifiersForResource(tenant)
         )
         return Pair(TransformResponse(transformed), Validation())
     }

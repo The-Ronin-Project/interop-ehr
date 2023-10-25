@@ -427,7 +427,7 @@ abstract class BaseRoninObservation(
 
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
-            identifier = normalized.identifier + normalized.getRoninIdentifiersForResource(tenant),
+            identifier = normalized.getRoninIdentifiersForResource(tenant),
             bodySite = getTransformedBodySite(normalized.bodySite)
         )
         return Pair(TransformResponse(transformed), validation)

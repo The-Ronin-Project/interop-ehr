@@ -17,6 +17,7 @@ import com.projectronin.interop.fhir.ronin.RCDMVersion
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
+import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
 import com.projectronin.interop.fhir.validate.FHIRError
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -154,12 +155,14 @@ abstract class BaseRoninProfile<T : Resource<T>>(
     )
 
     /**
-     * Transforms the Meta relative to the current profile.
+     * Transforms the Meta relative to the current profile. If more than one profile qualifies add the qualifying
+     * and is a ronin profile add the profile canonical to the meta profile list, profile must exist in roninProfile enum
      */
     fun Meta?.transform(): Meta {
-        val roninProfile = listOf(Canonical(this@BaseRoninProfile.profile))
-
-        return this?.copy(profile = roninProfile) ?: Meta(profile = roninProfile)
+        val roninProfiles = RoninProfile.values().map { it.value }
+        val roninProfile = this?.profile ?: emptyList()
+        val transformedProfile = roninProfile.plus(Canonical(this@BaseRoninProfile.profile)).filter { it.value in roninProfiles }.distinct()
+        return this?.copy(profile = transformedProfile) ?: Meta(profile = transformedProfile)
     }
 
     /**
