@@ -95,7 +95,7 @@ class EpicOnboardFlagServiceTest {
                     smartDataValues = listOf(
                         SmartDataValue(
                             comments = listOf("Patient has been onboarded in Ronin."),
-                            values = "true",
+                            values = listOf("true"),
                             smartDataID = "flagType",
                             smartDataIDType = "SDI"
                         )
@@ -137,7 +137,7 @@ class EpicOnboardFlagServiceTest {
                     smartDataValues = listOf(
                         SmartDataValue(
                             comments = listOf("Patient has been onboarded in Ronin."),
-                            values = "true",
+                            values = listOf("true"),
                             smartDataID = "flagType",
                             smartDataIDType = "SDI"
                         )
@@ -197,7 +197,7 @@ class EpicOnboardFlagServiceTest {
                     smartDataValues = listOf(
                         SmartDataValue(
                             comments = listOf("Patient has been onboarded in Ronin."),
-                            values = "true",
+                            values = listOf("true"),
                             smartDataID = "flagType",
                             smartDataIDType = "SDI"
                         )
