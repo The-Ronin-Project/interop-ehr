@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.normalization.dependson
 
 import com.projectronin.interop.fhir.r4.resource.ConceptMapDependsOn
 import com.projectronin.interop.fhir.r4.resource.Resource
+import mu.KotlinLogging
 import java.util.Locale
 import kotlin.reflect.KClass
 
@@ -12,6 +13,7 @@ abstract class BaseDependsOnEvaluator<T : Resource<T>>(override val resourceType
     /**
      * Determines if the [resource] meets the [dependsOnValue] for the [normalizedProperty].
      */
+    private val logger = KotlinLogging.logger { }
     protected abstract fun meetsDependsOn(resource: T, normalizedProperty: String, dependsOnValue: String): Boolean
 
     override fun meetsDependsOn(resource: T, dependsOn: List<ConceptMapDependsOn>): Boolean {
@@ -19,7 +21,12 @@ abstract class BaseDependsOnEvaluator<T : Resource<T>>(override val resourceType
             val property = it.property?.value?.lowercase(Locale.getDefault())
                 ?: throw IllegalStateException("Null property found for DependsOn: $it")
             val value = it.value?.value ?: throw IllegalStateException("Null value found for DependsOn: $it")
-            meetsDependsOn(resource, property, value)
+            try {
+                meetsDependsOn(resource, property, value)
+            } catch (e: Exception) {
+                logger.warn(e) { "Exception processing $dependsOn" }
+                false
+            }
         }
     }
 }
