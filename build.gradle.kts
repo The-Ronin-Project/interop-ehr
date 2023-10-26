@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.interop.gradle.version)
     alias(libs.plugins.interop.gradle.junit) apply false
     alias(libs.plugins.interop.version.catalog)
+    alias(libs.plugins.interop.gradle.sonarqube)
 }
 
 subprojects {
