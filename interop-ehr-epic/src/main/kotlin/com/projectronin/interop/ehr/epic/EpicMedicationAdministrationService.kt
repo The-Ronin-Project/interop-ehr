@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
 import com.projectronin.interop.ehr.MedicationAdministrationService
 import com.projectronin.interop.ehr.epic.client.EpicClient
+import com.projectronin.interop.ehr.outputs.addMetaSource
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
@@ -36,11 +37,23 @@ import java.time.LocalDate
  */
 @Component
 class EpicMedicationAdministrationService(
-    private val epicClient: EpicClient,
+    epicClient: EpicClient,
     private val ehrDataAuthorityClient: EHRDataAuthorityClient,
     private val identifierService: EpicIdentifierService
-) : MedicationAdministrationService {
+) : MedicationAdministrationService, EpicFHIRService<MedicationAdministration>(epicClient) {
+    override val fhirURLSearchPart: String = "UNUSED"
+    override val fhirResourceType = MedicationAdministration::class.java
+
     val urlSearchPart = "/api/epic/2014/Clinical/Patient/GETMEDICATIONADMINISTRATIONHISTORY/MedicationAdministration"
+
+    override fun getByID(tenant: Tenant, resourceFHIRId: String): MedicationAdministration {
+        // Since the lookup doesn't support null responses, this is our only option
+        throw UnsupportedOperationException("Epic does not support FHIR ID retrieval of MedicationAdministrations")
+    }
+
+    override fun getByIDs(tenant: Tenant, resourceFHIRIds: List<String>): Map<String, MedicationAdministration> {
+        return emptyMap()
+    }
 
     @Trace
     override fun findMedicationAdministrationsByPatient(
@@ -76,8 +89,10 @@ class EpicMedicationAdministrationService(
             )
         } ?: return emptyList()
 
-        val csn = identifierService.getEncounterIdentifier(tenant, encounter.identifier).value?.value ?: return emptyList()
-        val orderID = identifierService.getOrderIdentifier(tenant, medicationRequest.identifier).value?.value ?: return emptyList()
+        val csn =
+            identifierService.getEncounterIdentifier(tenant, encounter.identifier).value?.value ?: return emptyList()
+        val orderID = identifierService.getOrderIdentifier(tenant, medicationRequest.identifier).value?.value
+            ?: return emptyList()
 
         val request = EpicMedAdminRequest(
             patientID = mrn,
@@ -88,7 +103,10 @@ class EpicMedicationAdministrationService(
         )
 
         val response = runBlocking {
-            epicClient.post(tenant, urlSearchPart, request).body<EpicMedAdmin>()
+            val ehrResponse = epicClient.post(tenant, urlSearchPart, request)
+            val medAdminResponse = ehrResponse.body<EpicMedAdmin>()
+            medAdminResponse.transactionId = ehrResponse.sourceURL
+            medAdminResponse
         }
 
         return response.orders.flatMap { epicMedOrder ->
@@ -112,9 +130,12 @@ class EpicMedicationAdministrationService(
                         ),
                         request = Reference(reference = FHIRString("MedicationRequest/$medicationRequestID")),
                         dosage = MedicationAdministrationDosage(
-                            dose = Quantity(value = Decimal(BigDecimal(epicMedAdmin.dose.value)), unit = FHIRString(epicMedAdmin.dose.unit))
+                            dose = Quantity(
+                                value = Decimal(BigDecimal(epicMedAdmin.dose.value)),
+                                unit = FHIRString(epicMedAdmin.dose.unit)
+                            )
                         )
-                    )
+                    ).addMetaSource(response.transactionId) as MedicationAdministration
                 }
             }
         }
@@ -123,13 +144,13 @@ class EpicMedicationAdministrationService(
 
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class EpicMedAdmin(
-    val orders: List<EpicMedicationOrder> = emptyList()
+    val orders: List<EpicMedicationOrder> = emptyList(),
+    var transactionId: String = ""
 )
 
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class EpicMedicationOrder(
     val medicationAdministrations: List<EpicMedicationAdministration> = emptyList(),
-    @JsonProperty("Name")
     val name: String = ""
 )
 
@@ -163,6 +184,6 @@ data class EpicMedAdminRequest(
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class EpicOrderID(
     @JsonProperty("ID")
-    val ID: String,
+    val id: String,
     val type: String
 )

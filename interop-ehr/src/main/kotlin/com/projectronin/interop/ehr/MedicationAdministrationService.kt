@@ -8,8 +8,7 @@ import java.time.LocalDate
 /**
  * Defines the functionality of an EHR's MedicationAdministration service.
  */
-interface MedicationAdministrationService {
-
+interface MedicationAdministrationService : FHIRService<MedicationAdministration> {
     /**
      * Retrieves the MedicationAdministration associated to the requested [medicationRequest] at [tenant].
      */

@@ -1,6 +1,8 @@
 package com.projectronin.interop.ehr.epic
 
+import com.fasterxml.jackson.module.kotlin.readValue
 import com.projectronin.ehr.dataauthority.client.EHRDataAuthorityClient
+import com.projectronin.interop.common.jackson.JacksonManager
 import com.projectronin.interop.ehr.epic.client.EpicClient
 import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
@@ -22,6 +24,7 @@ import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
 import java.time.LocalDate
 
@@ -35,6 +38,19 @@ internal class EpicMedicationAdministrationServiceTest {
         every { vendor } returns mockk<Epic> {
             every { encounterCSNSystem } returns "csnSystem"
         }
+    }
+
+    @Test
+    fun `getById throws exception`() {
+        assertThrows<UnsupportedOperationException> {
+            service.getByID(testTenant, "id")
+        }
+    }
+
+    @Test
+    fun `getByIds returns empty map`() {
+        val response = service.getByIDs(testTenant, listOf("id", "id2"))
+        assertEquals(0, response.size)
     }
 
     @Test
@@ -63,7 +79,13 @@ internal class EpicMedicationAdministrationServiceTest {
             every { identifier } returns listOf(mockk())
         }
         every { identifierService.getPatientIdentifier(testTenant, any()).value?.value } returns "patMRN"
-        coEvery { ehrda.getResourceAs<Encounter>(any(), "Encounter", "testTenant-encounterID") } returns mockk<Encounter> {
+        coEvery {
+            ehrda.getResourceAs<Encounter>(
+                any(),
+                "Encounter",
+                "testTenant-encounterID"
+            )
+        } returns mockk<Encounter> {
             every { identifier } returns listOf(
                 mockk {
                     every { system } returns Uri("csnSystem")
@@ -94,11 +116,13 @@ internal class EpicMedicationAdministrationServiceTest {
             )
         )
         coEvery { client.post(testTenant, any(), any()) } returns mockk {
+            every { sourceURL } returns "https://example.org/medadmin"
             coEvery { body<EpicMedAdmin>() } returns epicResponse
         }
         val result = service.findMedicationAdministrationsByRequest(testTenant, medRequest)
         assertEquals(1, result.size)
         assertEquals("orderID-1309874400", result.first().id?.value)
+        assertEquals("https://example.org/medadmin", result.first().meta?.source?.value)
         assertEquals(DynamicValueType.CODEABLE_CONCEPT, result.first().medication?.type)
         assertEquals(CodeableConcept(text = FHIRString("TEST NAME")), result.first().medication?.value)
         assertEquals(Reference(reference = FHIRString("MedicationRequest/medReqID")), result.first().request)
@@ -175,7 +199,13 @@ internal class EpicMedicationAdministrationServiceTest {
             every { identifier } returns listOf(mockk())
         }
         every { identifierService.getPatientIdentifier(testTenant, any()).value?.value } returns "patMRN"
-        coEvery { ehrda.getResourceAs<Encounter>(any(), "Encounter", "testTenant-encounterID") } returns mockk<Encounter> {
+        coEvery {
+            ehrda.getResourceAs<Encounter>(
+                any(),
+                "Encounter",
+                "testTenant-encounterID"
+            )
+        } returns mockk<Encounter> {
             every { identifier } returns listOf(
                 mockk {
                     every { system } returns Uri("csnSystem")
@@ -201,7 +231,13 @@ internal class EpicMedicationAdministrationServiceTest {
             every { identifier } returns listOf(mockk())
         }
         every { identifierService.getPatientIdentifier(testTenant, any()).value?.value } returns "patMRN"
-        coEvery { ehrda.getResourceAs<Encounter>(any(), "Encounter", "testTenant-encounterID") } returns mockk<Encounter> {
+        coEvery {
+            ehrda.getResourceAs<Encounter>(
+                any(),
+                "Encounter",
+                "testTenant-encounterID"
+            )
+        } returns mockk<Encounter> {
             every { identifier } returns listOf(
                 mockk {
                     every { system } returns Uri("notCsnSystem")
@@ -294,5 +330,35 @@ internal class EpicMedicationAdministrationServiceTest {
 
         val result = service.findMedicationAdministrationsByRequest(testTenant, medRequest)
         assertEquals(emptyList<MedicationAdministration>(), result)
+    }
+
+    @Test
+    fun `verify request serialization and deserialization`() {
+        val request = EpicMedAdminRequest(
+            patientID = "PatientId",
+            patientIDType = "Internal",
+            contactID = "ContactId",
+            contactIDType = "CSN",
+            orderIDs = listOf(EpicOrderID("OrderId", "External"))
+        )
+
+        val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(request)
+
+        val expectedJson = """
+            {
+              "PatientID" : "PatientId",
+              "PatientIDType" : "Internal",
+              "ContactID" : "ContactId",
+              "ContactIDType" : "CSN",
+              "OrderIDs" : [ {
+                "ID" : "OrderId",
+                "Type" : "External"
+              } ]
+            }
+        """.trimIndent()
+        assertEquals(expectedJson, json)
+
+        val deserializedRequest = JacksonManager.objectMapper.readValue<EpicMedAdminRequest>(json)
+        assertEquals(request, deserializedRequest)
     }
 }
