@@ -15,6 +15,7 @@ import com.projectronin.interop.fhir.ronin.generators.util.generateReference
 import com.projectronin.interop.fhir.ronin.generators.util.generateUdpId
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
+import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 
 fun rcdmMedicationAdministration(
@@ -28,7 +29,7 @@ fun rcdmMedicationAdministration(
             id of it
             identifier of rcdmIdentifiers(tenant, identifier, it.value)
         }
-        extension.plus(originalMedicationDatatype())
+        extension.plus(originalMedicationDatatype()).plus(originalMedicationAdministrationStatus())
         subject of generateReference(subject.generate(), listOf("Patient"), tenant, "Patient")
         medication of generateDynamicValueReference(medication.generate(), listOf("Medication"), tenant, "Medication")
     }
@@ -61,6 +62,16 @@ fun originalMedicationDatatype(): Extension {
         value = DynamicValue(
             DynamicValueType.CODE,
             possibleMedicationDatatypeCodes.random()
+        )
+    )
+}
+
+fun originalMedicationAdministrationStatus(): Extension {
+    return Extension(
+        url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.value),
+        value = DynamicValue(
+            DynamicValueType.CODE,
+            Code("original-status")
         )
     )
 }

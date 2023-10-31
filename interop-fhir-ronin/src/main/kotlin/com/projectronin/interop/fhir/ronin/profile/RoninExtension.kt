@@ -35,7 +35,8 @@ enum class RoninExtension(val value: String) {
     RONIN_DATA_AUTHORITY_EXTENSION("http://projectronin.io/fhir/StructureDefinition/Extension/ronin-dataAuthorityIdentifier"),
 
     TENANT_SOURCE_CARE_PLAN_CATEGORY("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceCarePlanCategory"),
-    ORIGINAL_MEDICATION_DATATYPE("http://projectronin.io/fhir/StructureDefinition/Extension/originalMedicationDatatype");
+    ORIGINAL_MEDICATION_DATATYPE("http://projectronin.io/fhir/StructureDefinition/Extension/originalMedicationDatatype"),
+    TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceMedicationAdministrationStatus");
 
     val uri = Uri(value)
 }

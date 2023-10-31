@@ -6,6 +6,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.resource.RoninMedicationAdministration
 import com.projectronin.interop.fhir.ronin.resource.extractor.MedicationExtractor
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -21,12 +22,14 @@ import org.junit.jupiter.api.Test
 
 class RoninMedicationAdministrationGeneratorTest {
     private lateinit var roninMedicationAdministration: RoninMedicationAdministration
+    private lateinit var registry: NormalizationRegistryClient
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
 
     @BeforeEach
     fun setup() {
+        registry = mockk()
         val normalizer: Normalizer = mockk {
             every { normalize(any(), tenant) } answers { firstArg() }
         }
@@ -36,7 +39,8 @@ class RoninMedicationAdministrationGeneratorTest {
         val medicationExtractor = mockk<MedicationExtractor> {
             every { extractMedication(any(), any(), any()) } returns null
         }
-        roninMedicationAdministration = RoninMedicationAdministration(normalizer, localizer, medicationExtractor)
+        roninMedicationAdministration =
+            RoninMedicationAdministration(normalizer, localizer, medicationExtractor, registry)
     }
 
     @Test

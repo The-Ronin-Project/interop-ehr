@@ -17,6 +17,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Canonical
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
+import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRBoolean
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Markdown
@@ -34,10 +35,13 @@ import com.projectronin.interop.fhir.r4.valueset.MedicationAdministrationStatus
 import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.ConceptMapCoding
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.extractor.MedicationExtractor
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
+import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
 import com.projectronin.interop.fhir.util.asCode
 import com.projectronin.interop.fhir.validate.LocationContext
 import com.projectronin.interop.fhir.validate.RequiredFieldError
@@ -48,7 +52,6 @@ import io.mockk.mockk
 import io.mockk.mockkObject
 import io.mockk.unmockkObject
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
@@ -57,6 +60,12 @@ class RoninMedicationAdministrationTest {
     private val tenant = mockk<Tenant> {
         every { mnemonic } returns "test"
     }
+    private val conceptMapMetadata = ConceptMapMetadata(
+        registryEntryType = "concept-map",
+        conceptMapName = "test-concept-map",
+        conceptMapUuid = "573b456efca5-03d51d53-1a31-49a9-af74",
+        version = "1"
+    )
 
     private val normalizer = mockk<Normalizer> {
         every { normalize(any(), tenant) } answers { firstArg() }
@@ -67,8 +76,9 @@ class RoninMedicationAdministrationTest {
     private val medicationExtractor = mockk<MedicationExtractor> {
         every { extractMedication(any(), any(), any()) } returns null
     }
+    private val registryClient = mockk<NormalizationRegistryClient>()
     private val roninMedicationAdministration =
-        RoninMedicationAdministration(normalizer, localizer, medicationExtractor)
+        RoninMedicationAdministration(normalizer, localizer, medicationExtractor, registryClient)
 
     @Test
     fun `validates Ronin Identifiers`() {
@@ -78,6 +88,7 @@ class RoninMedicationAdministrationTest {
                 source = Uri("source")
             ),
             extension = listOf(
+                statusCodeExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -132,6 +143,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
+                statusCodeExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -191,6 +203,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
+                statusCodeExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -264,6 +277,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
+                statusCodeExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -341,6 +355,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
+                statusCodeExtension("mapped"),
                 Extension(
                     url = Uri(value = "incorrect-url"),
                     value = DynamicValue(
@@ -402,6 +417,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
+                statusCodeExtension("mapped"),
                 Extension(
                     url = Uri(RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -494,6 +510,25 @@ class RoninMedicationAdministrationTest {
                 )
             )
         )
+
+        every {
+            registryClient.getConceptMappingForEnum(
+                tenant,
+                "MedicationAdministration.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/MedicationAdministrationStatus"),
+                    code = Code(value = "in-progress")
+                ),
+                MedicationAdministrationStatus::class,
+                RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.value,
+                medAdmin
+            )
+        } returns ConceptMapCoding(
+            statusCoding("in-progress"),
+            statusCodingExtension("in-progress"),
+            listOf(conceptMapMetadata)
+        )
+
         val (transformResponse, validation) = roninMedicationAdministration.transform(medAdmin, tenant)
         validation.alertIfErrors()
 
@@ -509,10 +544,9 @@ class RoninMedicationAdministrationTest {
         assertEquals(medAdmin.implicitRules, transformed.implicitRules)
         assertEquals(medAdmin.language, transformed.language)
         assertEquals(medAdmin.text, transformed.text)
-        assertNotNull(transformed.extension)
         assertEquals(
-            transformed.extension,
             listOf(
+                statusCodeExtension("in-progress"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -520,7 +554,8 @@ class RoninMedicationAdministrationTest {
                         value = Code("literal reference")
                     )
                 )
-            )
+            ),
+            transformed.extension
         )
         assertEquals(3, transformed.identifier.size)
         assertEquals(
@@ -591,6 +626,25 @@ class RoninMedicationAdministrationTest {
                 )
             )
         )
+
+        every {
+            registryClient.getConceptMappingForEnum(
+                tenant,
+                "MedicationAdministration.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/MedicationAdministrationStatus"),
+                    code = Code(value = "in-progress")
+                ),
+                MedicationAdministrationStatus::class,
+                RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.value,
+                medAdmin
+            )
+        } returns ConceptMapCoding(
+            statusCoding("in-progress"),
+            statusCodingExtension("in-progress"),
+            listOf(conceptMapMetadata)
+        )
+
         val (transformResponse, validation) = roninMedicationAdministration.transform(medAdmin, tenant)
         validation.alertIfErrors()
 
@@ -606,10 +660,9 @@ class RoninMedicationAdministrationTest {
         assertEquals(medAdmin.implicitRules, transformed.implicitRules)
         assertEquals(medAdmin.language, transformed.language)
         assertEquals(medAdmin.text, transformed.text)
-        assertNotNull(transformed.extension)
         assertEquals(
-            transformed.extension,
             listOf(
+                statusCodeExtension("in-progress"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -617,7 +670,8 @@ class RoninMedicationAdministrationTest {
                         value = Code("logical reference")
                     )
                 )
-            )
+            ),
+            transformed.extension
         )
         assertEquals(3, transformed.identifier.size)
         assertEquals(
@@ -710,6 +764,25 @@ class RoninMedicationAdministrationTest {
             ),
             eventHistory = listOf(Reference(display = "eventHistory".asFHIR()))
         )
+
+        every {
+            registryClient.getConceptMappingForEnum(
+                tenant,
+                "MedicationAdministration.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/MedicationAdministrationStatus"),
+                    code = Code(value = "in-progress")
+                ),
+                MedicationAdministrationStatus::class,
+                RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.value,
+                medAdmin
+            )
+        } returns ConceptMapCoding(
+            statusCoding("in-progress"),
+            statusCodingExtension("in-progress"),
+            listOf(conceptMapMetadata)
+        )
+
         val (transformResponse, validation) = roninMedicationAdministration.transform(medAdmin, tenant)
         validation.alertIfErrors()
 
@@ -726,10 +799,9 @@ class RoninMedicationAdministrationTest {
         assertEquals(medAdmin.language, transformed.language)
         assertEquals(medAdmin.text, transformed.text)
         assertEquals(transformed.contained, listOf(Location(id = Id("67890"))))
-        assertNotNull(transformed.extension)
         assertEquals(
-            transformed.extension,
             listOf(
+                statusCodeExtension("in-progress"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -737,7 +809,8 @@ class RoninMedicationAdministrationTest {
                         value = Code("contained reference")
                     )
                 )
-            )
+            ),
+            transformed.extension
         )
         assertEquals(4, transformed.identifier.size)
         assertEquals(
@@ -843,6 +916,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
+                statusCodeExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -903,6 +977,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
+                statusCodeExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -977,6 +1052,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
+                statusCodeExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -1033,6 +1109,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
+                statusCodeExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -1096,6 +1173,24 @@ class RoninMedicationAdministrationTest {
             )
         )
 
+        every {
+            registryClient.getConceptMappingForEnum(
+                tenant,
+                "MedicationAdministration.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/MedicationAdministrationStatus"),
+                    code = Code(value = "in-progress")
+                ),
+                MedicationAdministrationStatus::class,
+                RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.value,
+                medAdmin
+            )
+        } returns ConceptMapCoding(
+            statusCoding("in-progress"),
+            statusCodingExtension("in-progress"),
+            listOf(conceptMapMetadata)
+        )
+
         val updatedMedicationDynamicValue = DynamicValue(
             DynamicValueType.REFERENCE,
             Reference(reference = "Medication/contained-12345-67890".asFHIR())
@@ -1108,7 +1203,7 @@ class RoninMedicationAdministrationTest {
             medicationExtractor.extractMedication(
                 originalMedicationDynamicValue,
                 listOf(containedMedication),
-                medAdmin
+                any()
             )
         } returns mockk {
             every { updatedMedication } returns updatedMedicationDynamicValue
@@ -1132,10 +1227,9 @@ class RoninMedicationAdministrationTest {
         assertEquals(medAdmin.implicitRules, transformed.implicitRules)
         assertEquals(medAdmin.language, transformed.language)
         assertEquals(medAdmin.text, transformed.text)
-        assertNotNull(transformed.extension)
         assertEquals(
-            transformed.extension,
             listOf(
+                statusCodeExtension("in-progress"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -1143,7 +1237,8 @@ class RoninMedicationAdministrationTest {
                         value = Code("contained reference")
                     )
                 )
-            )
+            ),
+            transformed.extension
         )
         assertEquals(3, transformed.identifier.size)
         assertEquals(
@@ -1181,4 +1276,287 @@ class RoninMedicationAdministrationTest {
         assertEquals(medAdmin.dosage, transformed.dosage)
         assertEquals(medAdmin.eventHistory, transformed.eventHistory)
     }
+
+    @Test
+    fun `transform fails if no status value`() {
+        val medAdmin = MedicationAdministration(
+            id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical("http://projectronin.io/fhir/StructureDefinition/ronin-medicationAdministration")),
+                source = Uri("source")
+            ),
+            implicitRules = Uri("implicit-rules"),
+            language = Code("en-US"),
+            text = Narrative(
+                status = NarrativeStatus.GENERATED.asCode(),
+                div = "div".asFHIR()
+            ),
+            status = null,
+            effective = DynamicValue(DynamicValueType.DATE_TIME, "00:00:00"),
+            medication = DynamicValue(
+                DynamicValueType.REFERENCE,
+                value = Reference(
+                    reference = "Medication/something".asFHIR(),
+                    identifier = null,
+                    type = Uri("Medication", extension = dataAuthorityExtension)
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri(
+                    "Patient",
+                    extension = dataAuthorityExtension
+                )
+            )
+        )
+
+        val (transformResponse, validation) = roninMedicationAdministration.transform(medAdmin, tenant)
+        assertNull(transformResponse)
+
+        val exception = assertThrows<IllegalArgumentException> {
+            validation.alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_MEDADMIN_003: Tenant source medication administration status extension is missing or invalid @ MedicationAdministration.extension\n" +
+                "ERROR REQ_FIELD: status is a required element @ MedicationAdministration.status",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `transform fails if status cannot be mapped`() {
+        val medAdmin = MedicationAdministration(
+            id = Id("12345"),
+            meta = Meta(
+                profile = listOf(Canonical("http://projectronin.io/fhir/StructureDefinition/ronin-medicationAdministration")),
+                source = Uri("source")
+            ),
+            implicitRules = Uri("implicit-rules"),
+            language = Code("en-US"),
+            text = Narrative(
+                status = NarrativeStatus.GENERATED.asCode(),
+                div = "div".asFHIR()
+            ),
+            status = Code("unmapped"),
+            effective = DynamicValue(DynamicValueType.DATE_TIME, "00:00:00"),
+            medication = DynamicValue(
+                DynamicValueType.REFERENCE,
+                value = Reference(
+                    reference = "Medication/something".asFHIR(),
+                    identifier = null,
+                    type = Uri("Medication", extension = dataAuthorityExtension)
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri(
+                    "Patient",
+                    extension = dataAuthorityExtension
+                )
+            )
+        )
+
+        every {
+            registryClient.getConceptMappingForEnum(
+                tenant,
+                "MedicationAdministration.status",
+                Coding(
+                    system = Uri("http://projectronin.io/fhir/CodeSystem/test/MedicationAdministrationStatus"),
+                    code = Code(value = "unmapped")
+                ),
+                MedicationAdministrationStatus::class,
+                RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.value,
+                medAdmin
+            )
+        } returns null
+
+        val (transformResponse, validation) = roninMedicationAdministration.transform(medAdmin, tenant)
+        assertNull(transformResponse)
+
+        val exception = assertThrows<IllegalArgumentException> {
+            validation.alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'unmapped' has no target defined in http://projectronin.io/fhir/CodeSystem/test/MedicationAdministrationStatus @ MedicationAdministration.status\n" +
+                "ERROR RONIN_MEDADMIN_003: Tenant source medication administration status extension is missing or invalid @ MedicationAdministration.extension\n" +
+                "ERROR INV_VALUE_SET: 'unmapped' is outside of required value set @ MedicationAdministration.status",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails for wrong URL in status source extension`() {
+        val medAdmin = MedicationAdministration(
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.MEDICATION_ADMINISTRATION.value)),
+                source = Uri("source")
+            ),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://example.org/other-extension"),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code(value = "mapped")
+                    )
+                ),
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
+            status = Code("in-progress"),
+            category = CodeableConcept(
+                coding = listOf(
+                    Coding(id = "something".asFHIR())
+                )
+            ),
+            effective = DynamicValue(DynamicValueType.DATE_TIME, "00:00:00"),
+            medication = DynamicValue(
+                DynamicValueType.REFERENCE,
+                value = Reference(
+                    reference = "Medication/something".asFHIR(),
+                    identifier = null,
+                    type = Uri("Medication", extension = dataAuthorityExtension)
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri(
+                    "Patient",
+                    extension = dataAuthorityExtension
+                )
+            )
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationAdministration.validate(medAdmin).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_MEDADMIN_003: Tenant source medication administration status extension is missing or invalid @ MedicationAdministration.extension",
+            exception.message
+        )
+    }
+
+    @Test
+    fun `validate fails for wrong data type in status source extension`() {
+        val medAdmin = MedicationAdministration(
+            meta = Meta(
+                profile = listOf(Canonical(RoninProfile.MEDICATION_ADMINISTRATION.value)),
+                source = Uri("source")
+            ),
+            identifier = listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR()
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR()
+                )
+            ),
+            extension = listOf(
+                Extension(
+                    url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceMedicationAdministrationStatus"),
+                    value = DynamicValue(
+                        type = DynamicValueType.BOOLEAN,
+                        value = FHIRBoolean.FALSE
+                    )
+                ),
+                Extension(
+                    url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
+                    value = DynamicValue(
+                        type = DynamicValueType.CODE,
+                        value = Code("literal reference")
+                    )
+                )
+            ),
+            status = Code("in-progress"),
+            category = CodeableConcept(
+                coding = listOf(
+                    Coding(id = "something".asFHIR())
+                )
+            ),
+            effective = DynamicValue(DynamicValueType.DATE_TIME, "00:00:00"),
+            medication = DynamicValue(
+                DynamicValueType.REFERENCE,
+                value = Reference(
+                    reference = "Medication/something".asFHIR(),
+                    identifier = null,
+                    type = Uri("Medication", extension = dataAuthorityExtension)
+                )
+            ),
+            subject = Reference(
+                reference = "Patient/123".asFHIR(),
+                type = Uri(
+                    "Patient",
+                    extension = dataAuthorityExtension
+                )
+            )
+        )
+        val exception = assertThrows<IllegalArgumentException> {
+            roninMedicationAdministration.validate(medAdmin).alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_MEDADMIN_003: Tenant source medication administration status extension is missing or invalid @ MedicationAdministration.extension",
+            exception.message
+        )
+    }
+
+    private fun statusCoding(value: String) = Coding(
+        system = Uri("http://projectronin.io/fhir/CodeSystem/test/MedicationAdministrationStatus"),
+        code = Code(value = value)
+    )
+
+    private fun statusCodeExtension(value: String) = Extension(
+        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceMedicationAdministrationStatus"),
+        value = DynamicValue(
+            type = DynamicValueType.CODE,
+            value = Code(value = value)
+        )
+    )
+
+    private fun statusCodingExtension(value: String) = Extension(
+        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceMedicationAdministrationStatus"),
+        value = DynamicValue(
+            type = DynamicValueType.CODING,
+            value = Coding(
+                system = Uri("http://projectronin.io/fhir/CodeSystem/test/MedicationAdministrationStatus"),
+                code = Code(value = value)
+            )
+        )
+    )
 }
