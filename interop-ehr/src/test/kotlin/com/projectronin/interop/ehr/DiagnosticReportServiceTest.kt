@@ -4,7 +4,7 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import io.mockk.every
 import io.mockk.mockk
 import io.mockk.spyk
-import org.junit.jupiter.api.Assertions
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class DiagnosticReportServiceTest {
@@ -23,6 +23,6 @@ class DiagnosticReportServiceTest {
 
         val results = diagnosticReportService.getDiagnosticReportByPatient(tenant, patientFhirIds)
 
-        Assertions.assertEquals(0, results.size)
+        assertEquals(0, results.size)
     }
 }

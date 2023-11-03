@@ -1,0 +1,88 @@
+{
+  "resourceType": "Bundle",
+  "type": "searchset",
+  "total": 1,
+  "link": [
+    {
+      "relation": "self",
+      "url": "https://hostname/instance/api/FHIR/R4/Procedure?patient=fakeFaKEfAKefakE"
+    }
+  ],
+  "entry": [
+    {
+      "link": [
+        {
+          "relation": "self",
+          "url": "https://hostname/instance/api/FHIR/R4/Procedure/eMm0.ONP9yY6gU1plJr8Cloh9xVrrivStBjA6GTod-Ag3"
+        }
+      ],
+      "fullUrl": "https://hostname/instance/api/FHIR/R4/Procedure/eMm0.ONP9yY6gU1plJr8Cloh9xVrrivStBjA6GTod-Ag3",
+      "resource": {
+        "resourceType": "Procedure",
+        "id": "eMm0.ONP9yY6gU1plJr8Cloh9xVrrivStBjA6GTod-Ag3",
+        "identifier": [
+          {
+            "use": "usual",
+            "type": {
+              "text": "ORD"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.861.1.7.2.798268",
+            "value": "3287774"
+          },
+          {
+            "use": "usual",
+            "type": {
+              "text": "EAP"
+            },
+            "system": "urn:oid:1.2.840.114350.1.13.861.1.7.2.696580",
+            "value": "307"
+          }
+        ],
+        "status": "completed",
+        "code": {
+          "coding": [
+            {
+              "system": "http://www.ama-assn.org/go/cpt",
+              "code": "11100",
+              "display": "BIOPSY OF SKIN LESION"
+            },
+            {
+              "system": "http://snomed.info/sct",
+              "code": "129902007",
+              "display": "BIOPSY OF SKIN LESION"
+            },
+            {
+              "system": "http://loinc.org",
+              "code": "10002-4",
+              "display": "BIOPSY OF SKIN LESION"
+            }
+          ],
+          "text": "BIOPSY OF SKIN LESION"
+        },
+        "subject": {
+          "reference": "Patient/fakeFaKEfAKefakE",
+          "display": "Meiko H Lufhir Jr., MD"
+        },
+        "encounter": {
+          "reference": "Encounter/ej5R7X.4RdaFNR5vWdsTpVTtccmkRkWJcKixc5XVY4cQ3"
+        },
+        "performedDateTime": "2019-02-15",
+        "reasonCode": [
+          {
+            "coding": [
+              {
+                "system": "http://snomed.info/sct",
+                "code": "400097005",
+                "display": "Ingrowing nail"
+              }
+            ],
+            "text": "Ingrowing nail"
+          }
+        ]
+      },
+      "search": {
+        "mode": "match"
+      }
+    }
+  ]
+}

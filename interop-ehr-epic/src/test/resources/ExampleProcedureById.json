@@ -1,0 +1,41 @@
+{
+  "resourceType": "Procedure",
+  "id": "fakeFaKEfAKefakE",
+  "identifier": [
+    {
+      "use": "usual",
+      "type": {
+        "text": "ORD"
+      },
+      "system": "urn:oid:1.2.840.114350.1.13.861.1.7.2.798268",
+      "value": "3326502"
+    },
+    {
+      "use": "usual",
+      "type": {
+        "text": "EAP"
+      },
+      "system": "urn:oid:1.2.840.114350.1.13.861.1.7.2.696580",
+      "value": "2096"
+    }
+  ],
+  "status": "completed",
+  "code": {
+    "coding": [
+      {
+        "system": "http://www.ama-assn.org/go/cpt",
+        "code": "29405",
+        "display": "APPLY SHORT LEG CAST"
+      }
+    ],
+    "text": "APPLY SHORT LEG CAST"
+  },
+  "subject": {
+    "reference": "Patient/ej4nFxzySJAysjMuv4rTBNA3",
+    "display": "Meiko H Lufhir Jr., MD"
+  },
+  "encounter": {
+    "reference": "Encounter/ej5R7X.4RdaFNR5vWdsTpVTtccmkRkWJcKixc5XVY4cQ3"
+  },
+  "performedDateTime": "2019-03-04T22:31:27Z"
+}

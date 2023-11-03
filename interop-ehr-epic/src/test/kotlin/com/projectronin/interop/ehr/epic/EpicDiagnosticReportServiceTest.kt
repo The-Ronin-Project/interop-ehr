@@ -140,7 +140,7 @@ class EpicDiagnosticReportServiceTest {
     }
 
     @Test
-    fun `getMedicationRequestByPatient returns patient medication request bundle with dates`() {
+    fun `getDiagnosticReportByPatient returns patient diagnostic report bundle with dates`() {
         val tenant =
             createTestTenant(
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
