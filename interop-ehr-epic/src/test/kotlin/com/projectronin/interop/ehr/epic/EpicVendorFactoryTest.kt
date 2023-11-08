@@ -1,8 +1,10 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.common.vendor.VendorType
+import com.projectronin.interop.ehr.decorator.DecoratorPatientService
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertInstanceOf
 import org.junit.jupiter.api.Test
 
 class EpicVendorFactoryTest {
@@ -78,7 +80,7 @@ class EpicVendorFactoryTest {
 
     @Test
     fun `returns PatientService`() {
-        assertEquals(patientService, vendorFactory.patientService)
+        assertInstanceOf(DecoratorPatientService::class.java, vendorFactory.patientService)
     }
 
     @Test

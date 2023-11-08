@@ -84,6 +84,16 @@ class RoninPatientTest {
             ),
             system = Uri("mrnSystem"),
             value = "An MRN".asFHIR()
+        ),
+        Identifier(
+            type = CodeableConcepts.RONIN_FHIR_ID,
+            system = CodeSystem.RONIN_FHIR_ID.uri,
+            value = "12345".asFHIR()
+        ),
+        Identifier(
+            type = CodeableConcepts.RONIN_MRN,
+            system = CodeSystem.RONIN_MRN.uri,
+            value = "An MRN".asFHIR()
         )
     )
     private val mockIdentifierService = mockk<IdentifierService> {
@@ -1064,29 +1074,19 @@ class RoninPatientTest {
             transformed.modifierExtension
         )
         assertEquals(
-            listOf(
-                identifierList.first(),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+            identifierList +
+                listOf(
+                    Identifier(
+                        type = CodeableConcepts.RONIN_TENANT,
+                        system = CodeSystem.RONIN_TENANT.uri,
+                        value = "test".asFHIR()
+                    ),
+                    Identifier(
+                        type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                        system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                        value = "EHR Data Authority".asFHIR()
+                    )
                 ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_MRN,
-                    system = CodeSystem.RONIN_MRN.uri,
-                    value = "An MRN".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
             transformed.identifier
         )
         assertEquals(FHIRBoolean.TRUE, transformed.active)
@@ -1144,35 +1144,25 @@ class RoninPatientTest {
 
         val transformed = transformResponse.resource
         assertEquals(
-            listOf(
-                identifierList.first(),
-                Identifier(
-                    system = Uri(value = null, extension = dataAbsentReasonExtension),
-                    value = "something".asFHIR(),
-                    id = null,
-                    extension = emptyList()
+            identifierList +
+                listOf(
+                    Identifier(
+                        system = Uri(value = null, extension = dataAbsentReasonExtension),
+                        value = "something".asFHIR(),
+                        id = null,
+                        extension = emptyList()
+                    ),
+                    Identifier(
+                        type = CodeableConcepts.RONIN_TENANT,
+                        system = CodeSystem.RONIN_TENANT.uri,
+                        value = "test".asFHIR()
+                    ),
+                    Identifier(
+                        type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                        system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                        value = "EHR Data Authority".asFHIR()
+                    )
                 ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_MRN,
-                    system = CodeSystem.RONIN_MRN.uri,
-                    value = "An MRN".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
             transformed.identifier
         )
     }
@@ -1214,29 +1204,19 @@ class RoninPatientTest {
         assertEquals(listOf<Extension>(), transformed.extension)
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
-            listOf(
-                identifierList.first(),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+            identifierList +
+                listOf(
+                    Identifier(
+                        type = CodeableConcepts.RONIN_TENANT,
+                        system = CodeSystem.RONIN_TENANT.uri,
+                        value = "test".asFHIR()
+                    ),
+                    Identifier(
+                        type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                        system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                        value = "EHR Data Authority".asFHIR()
+                    )
                 ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_MRN,
-                    system = CodeSystem.RONIN_MRN.uri,
-                    value = "An MRN".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
             transformed.identifier
         )
         assertNull(transformed.active)
@@ -1495,30 +1475,20 @@ class RoninPatientTest {
         assertEquals(listOf<Extension>(), transformed.extension)
         assertEquals(listOf<Extension>(), transformed.modifierExtension)
         assertEquals(
-            listOf(
-                identifierList.first(),
-                identifierWithExtension,
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+            identifierList +
+                listOf(
+                    identifierWithExtension,
+                    Identifier(
+                        type = CodeableConcepts.RONIN_TENANT,
+                        system = CodeSystem.RONIN_TENANT.uri,
+                        value = "test".asFHIR()
+                    ),
+                    Identifier(
+                        type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                        system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                        value = "EHR Data Authority".asFHIR()
+                    )
                 ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_MRN,
-                    system = CodeSystem.RONIN_MRN.uri,
-                    value = "An MRN".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
             transformed.identifier
         )
         assertNull(transformed.active)

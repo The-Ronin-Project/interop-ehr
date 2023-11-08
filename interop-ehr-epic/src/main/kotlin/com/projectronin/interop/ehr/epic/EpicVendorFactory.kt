@@ -1,6 +1,8 @@
 package com.projectronin.interop.ehr.epic
 
 import com.projectronin.interop.common.vendor.VendorType
+import com.projectronin.interop.ehr.PatientService
+import com.projectronin.interop.ehr.decorator.DecoratorPatientService
 import com.projectronin.interop.ehr.factory.VendorFactory
 import org.springframework.stereotype.Component
 
@@ -23,7 +25,7 @@ class EpicVendorFactory(
     override val observationService: EpicObservationService,
     override val onboardFlagService: EpicOnboardFlagService,
     override val organizationService: EpicOrganizationService,
-    override val patientService: EpicPatientService,
+    patientService: EpicPatientService,
     override val practitionerService: EpicPractitionerService,
     override val practitionerRoleService: EpicPractitionerRoleService,
     override val requestGroupService: EpicRequestGroupService,
@@ -34,8 +36,9 @@ class EpicVendorFactory(
     override val serviceRequestService: EpicServiceRequestService,
     override val diagnosticReportService: EpicDiagnosticReportService,
     override val procedureService: EpicProcedureService
-
 ) : VendorFactory {
     override val vendorType: VendorType
         get() = VendorType.EPIC
+
+    override val patientService: PatientService by lazy { DecoratorPatientService(patientService, identifierService) }
 }

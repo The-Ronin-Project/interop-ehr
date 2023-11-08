@@ -20,7 +20,6 @@ import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
-import com.projectronin.interop.fhir.ronin.toFhirIdentifier
 import com.projectronin.interop.fhir.ronin.transform.TransformResponse
 import com.projectronin.interop.fhir.ronin.util.dataAbsentReasonExtension
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityIdentifier
@@ -222,41 +221,15 @@ class RoninPatient(
         val transformed = normalized.copy(
             meta = normalized.meta.transform(),
             gender = gender,
-            identifier = normalizedIdentifiers + tenant.toFhirIdentifier() + getRoninIdentifiers(
-                normalized,
-                tenant
-            ) + dataAuthorityIdentifier,
+            identifier = normalizedIdentifiers + tenant.toFhirIdentifier() + dataAuthorityIdentifier,
             maritalStatus = maritalStatus,
             telecom = telecoms
         )
         return Pair(TransformResponse(transformed), validation)
     }
 
-    /**
-     * Create a FHIR [Identifier] from the FHIR Patient.id. Add that and the MRN [Identifier] to a List and return it.
-     * This function is NOT private in this class, because code in other repos besides interop-ehr use it.
-     */
-    fun getRoninIdentifiers(patient: Patient, tenant: Tenant): List<Identifier> {
-        val roninIdentifiers = mutableListOf<Identifier>()
-        patient.id?.toFhirIdentifier()?.let {
-            roninIdentifiers.add(it)
-        }
-
-        try {
-            val existingMRN =
-                ehrFactory.getVendorFactory(tenant).identifierService.getMRNIdentifier(tenant, patient.identifier)
-            roninIdentifiers.add(
-                Identifier(
-                    value = existingMRN.value,
-                    system = CodeSystem.RONIN_MRN.uri,
-                    type = CodeableConcepts.RONIN_MRN
-                )
-            )
-        } catch (e: Exception) {
-            // We will handle this during validation.
-        }
-        return roninIdentifiers
-    }
+    @Deprecated(message = "These values are now placed on the Patient by the DecoratorPatientService, so this method is no longer needed.")
+    fun getRoninIdentifiers(patient: Patient, tenant: Tenant): List<Identifier> = emptyList()
 
     private fun normalizeIdentifierSystems(identifiers: List<Identifier>): List<Identifier> {
         return identifiers.map {
