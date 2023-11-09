@@ -25,14 +25,11 @@ class MDMConfigService(
     fun getPractitionerIdentifierToSend(tenant: Tenant, identifiers: List<Identifier>): Identifier? {
         val system = tenantMdmConfigDAO.getByTenantMnemonic(tenant.mnemonic)?.providerIdentifierSystem
         return system?.let { identifiers.firstOrNull { it.system?.value == system } }
-            ?: identifiers.firstOrNull { it.type?.text?.value == "MDACC" } // INT-1844
     }
 
     fun getDocumentTypeID(tenant: Tenant): String? =
         tenantMdmConfigDAO.getByTenantMnemonic(tenantMnemonic = tenant.mnemonic)?.mdmDocumentTypeID
-            ?: "3000326" // INT-1844
 
     fun getReceivingApplication(tenant: Tenant): String? =
         tenantMdmConfigDAO.getByTenantMnemonic(tenantMnemonic = tenant.mnemonic)?.receivingSystem
-            ?: "TenantApplication" // INT-1844
 }

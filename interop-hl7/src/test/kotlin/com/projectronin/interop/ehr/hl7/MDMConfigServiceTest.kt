@@ -79,24 +79,20 @@ class MDMConfigServiceTest {
     }
 
     @Test
-    fun `getPractitionerIdentifierToSend works for default`() {
-        val mockIdent = mockk<Identifier>() {
-            every { type?.text?.value } returns "MDACC"
-        }
-        val mockIdent2 = mockk<Identifier>() {
-            every { system?.value } returns "notSystem"
-        }
-        every { mdmConfigDAO.getByTenantMnemonic(any()) } returns null
-        val result = mdmConfigService.getPractitionerIdentifierToSend(tenant, listOf(mockIdent, mockIdent2))
-        assertEquals(mockIdent, result)
-    }
-
-    @Test
     fun `getDocumentTypeID works`() {
         every { mdmConfigDAO.getByTenantMnemonic(any()) } returns mockk {
             every { mdmDocumentTypeID } returns "123"
         }
         val result = mdmConfigService.getDocumentTypeID(tenant)
         assertEquals("123", result)
+    }
+
+    @Test
+    fun `getReceivingApplication works`() {
+        every { mdmConfigDAO.getByTenantMnemonic(any()) } returns mockk {
+            every { receivingSystem } returns "TenantApplication"
+        }
+        val result = mdmConfigService.getReceivingApplication(tenant)
+        assertEquals("TenantApplication", result)
     }
 }
