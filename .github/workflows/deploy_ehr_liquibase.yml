@@ -9,7 +9,7 @@ on:
 jobs:
   get-info:
     name: Standard tags
-    runs-on: self-hosted
+    runs-on: oci-shared
     env:
       base_directory: ./interop-ehr-liquibase
 
