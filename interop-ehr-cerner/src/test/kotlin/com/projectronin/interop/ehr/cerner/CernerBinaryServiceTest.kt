@@ -10,11 +10,12 @@ import io.mockk.coEvery
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
+import kotlin.time.Duration.Companion.seconds
 
 internal class CernerBinaryServiceTest {
     private val client: CernerClient = mockk()
     private val tenant: Tenant = mockk()
-    private val service: CernerBinaryService = CernerBinaryService(client)
+    private val service: CernerBinaryService = CernerBinaryService(client, 2)
 
     @Test
     fun `getByID override works`() {
@@ -26,7 +27,8 @@ internal class CernerBinaryServiceTest {
                 tenant,
                 "/Binary/12345",
                 acceptTypeOverride = ContentType.Application.FhirJson,
-                disableRetry = true
+                disableRetry = true,
+                timeoutOverride = 2.seconds
             )
         } returns mockedResponse
 

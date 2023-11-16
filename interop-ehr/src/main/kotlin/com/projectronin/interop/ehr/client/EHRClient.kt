@@ -7,6 +7,7 @@ import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
 import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.HttpClient
+import io.ktor.client.plugins.timeout
 import io.ktor.client.request.accept
 import io.ktor.client.request.get
 import io.ktor.client.request.headers
@@ -23,6 +24,7 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.contentType
 import io.ktor.http.encodeURLParameter
 import mu.KotlinLogging
+import kotlin.time.Duration
 
 abstract class EHRClient(
     private val client: HttpClient,
@@ -30,16 +32,16 @@ abstract class EHRClient(
     private val datalakeService: DatalakePublishService
 ) {
     private val logger = KotlinLogging.logger { }
-
     suspend fun get(
         tenant: Tenant,
         urlPart: String,
         parameters: Map<String, Any?> = mapOf(),
         disableRetry: Boolean = false,
-        acceptTypeOverride: ContentType = ContentType.Application.Json
+        acceptTypeOverride: ContentType = ContentType.Application.Json,
+        timeoutOverride: Duration? = null
     ): EHRResponse {
         return publishAndReturn(
-            getImpl(tenant, urlPart, parameters, disableRetry, acceptTypeOverride),
+            getImpl(tenant, urlPart, parameters, disableRetry, acceptTypeOverride, timeoutOverride),
             tenant,
             disableRetry
         )
@@ -133,7 +135,8 @@ abstract class EHRClient(
         urlPart: String,
         parameters: Map<String, Any?> = mapOf(),
         disableRetry: Boolean = false,
-        acceptTypeOverride: ContentType = ContentType.Application.Json
+        acceptTypeOverride: ContentType = ContentType.Application.Json,
+        timeoutOverride: Duration?
     ): HttpResponse {
         logger.debug { "Started GET call to tenant: ${tenant.mnemonic}" }
 
@@ -174,6 +177,12 @@ abstract class EHRClient(
                             is RepeatingParameter -> url.parameters.appendAll(key, value.values)
                             else -> parameter(key, value)
                         }
+                    }
+                }
+                // if we've got a timeout override add it
+                timeoutOverride?.let {
+                    timeout {
+                        requestTimeoutMillis = it.inWholeMilliseconds
                     }
                 }
             }

@@ -1,6 +1,7 @@
 package com.projectronin.interop.ehr.cerner.client
 
 import com.projectronin.interop.common.http.FhirJson
+import com.projectronin.interop.common.http.exceptions.RequestFailureException
 import com.projectronin.interop.datalake.DatalakePublishService
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
 import com.projectronin.interop.ehr.cerner.auth.CernerAuthentication
@@ -24,6 +25,8 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
 
 class CernerClientTest {
     private val patientResult = this::class.java.getResource("/ExamplePatientResponse.json")!!.readText()
@@ -128,6 +131,65 @@ class CernerClientTest {
         assertEquals(true, requestUrl?.contains("repeating=first"))
         assertEquals(true, requestUrl?.contains("repeating=second"))
         assertEquals(false, requestUrl?.contains("noValue"))
+    }
+
+    @Test
+    fun `ensure get operation returns correctly with no timeout parameters`() {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setBody(patientResult)
+                .setHeader("Content-Type", "application/json")
+                .setBodyDelay(4, TimeUnit.SECONDS)
+        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+
+        val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
+        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+
+        val response = runBlocking {
+            val httpResponse = cernerClient.get(
+                tenant,
+                "/Patient/12724066"
+            )
+            httpResponse.httpResponse.bodyAsText()
+        }
+        assertEquals(patientResult, response)
+        val requestUrl = mockWebServer.takeRequest().path
+        assertTrue(requestUrl?.contains("/Patient/12724066") == true)
+    }
+
+    @Test
+    fun `ensure get operation times out`() {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setBody(patientResult)
+                .setHeader("Content-Type", "application/json")
+                .setBodyDelay(4, TimeUnit.SECONDS)
+        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+            )
+
+        val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
+        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+
+        assertThrows<RequestFailureException> {
+            runBlocking {
+                cernerClient.get(
+                    tenant,
+                    "/Patient/12724066",
+                    timeoutOverride = 1.seconds
+                )
+            }
+        }
     }
 
     @Test

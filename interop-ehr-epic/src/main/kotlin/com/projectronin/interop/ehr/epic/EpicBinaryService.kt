@@ -8,13 +8,19 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.http.ContentType
 import io.ktor.util.reflect.TypeInfo
 import kotlinx.coroutines.runBlocking
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Service providing access to [Binary]s within Epic.
  */
 @Component
-class EpicBinaryService(epicClient: EpicClient) : BinaryService, EpicFHIRService<Binary>(epicClient) {
+class EpicBinaryService(
+    epicClient: EpicClient,
+    @Value("\${epic.fhir.binaryTimeout:20}")
+    val timeout: Int
+) : BinaryService, EpicFHIRService<Binary>(epicClient) {
     override val fhirURLSearchPart = "/api/FHIR/R4/Binary"
     override val fhirResourceType = Binary::class.java
 
@@ -25,7 +31,8 @@ class EpicBinaryService(epicClient: EpicClient) : BinaryService, EpicFHIRService
                 tenant = tenant,
                 urlPart = "$fhirURLSearchPart/$resourceFHIRId",
                 acceptTypeOverride = ContentType.Application.FhirJson,
-                disableRetry = true
+                disableRetry = true,
+                timeoutOverride = timeout.seconds // default is 15 seconds
             ).body(TypeInfo(fhirResourceType.kotlin, fhirResourceType))
         }
     }

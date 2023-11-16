@@ -8,13 +8,19 @@ import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.http.ContentType
 import io.ktor.util.reflect.TypeInfo
 import kotlinx.coroutines.runBlocking
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * Service providing access to [Binary]s within Cerner.
  */
 @Component
-class CernerBinaryService(cernerClient: CernerClient) : BinaryService, CernerFHIRService<Binary>(cernerClient) {
+class CernerBinaryService(
+    cernerClient: CernerClient,
+    @Value("\${cerner.fhir.binaryTimeout:20}")
+    val timeout: Int
+) : BinaryService, CernerFHIRService<Binary>(cernerClient) {
     override val fhirURLSearchPart = "/Binary"
     override val fhirResourceType = Binary::class.java
 
@@ -25,7 +31,8 @@ class CernerBinaryService(cernerClient: CernerClient) : BinaryService, CernerFHI
                 tenant = tenant,
                 urlPart = "$fhirURLSearchPart/$resourceFHIRId",
                 acceptTypeOverride = ContentType.Application.FhirJson,
-                disableRetry = true
+                disableRetry = true,
+                timeoutOverride = timeout.seconds // default is 15 seconds
             ).body(TypeInfo(fhirResourceType.kotlin, fhirResourceType))
         }
     }

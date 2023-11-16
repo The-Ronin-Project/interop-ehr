@@ -3,11 +3,13 @@ package com.projectronin.interop.ehr.client
 import com.fasterxml.jackson.annotation.JsonInclude
 import com.fasterxml.jackson.databind.DeserializationFeature
 import com.projectronin.interop.common.auth.Authentication
+import com.projectronin.interop.common.http.exceptions.RequestFailureException
 import com.projectronin.interop.datalake.DatalakePublishService
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.HttpStatusCode
@@ -22,6 +24,9 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.assertThrows
+import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.seconds
 
 class EHRClientTest {
     private val authenticationBroker = mockk<EHRAuthenticationBroker>()
@@ -35,6 +40,7 @@ class EHRClientTest {
                 setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
             }
         }
+        install(HttpTimeout)
     }
     private val client = TestEHRClient(httpClient, authenticationBroker, datalakePublishService)
 
@@ -156,6 +162,58 @@ class EHRClientTest {
         val request = mockWebServer.takeRequest()
         assertEquals("GET", request.method)
         assertTrue(request.path?.contains("/Patient?_id=12345&_id=67890") == true)
+    }
+
+    @Test
+    fun `get times out with timeout parameters`() {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setBody(basicJson)
+                .setHeader("Content-Type", "application/json")
+                .setBodyDelay(4, TimeUnit.SECONDS)
+        )
+
+        val authentication = mockk<Authentication> {
+            every { accessToken } returns "access-token"
+        }
+        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+
+        assertThrows<RequestFailureException> {
+            runBlocking {
+                client.get(
+                    tenant,
+                    "/Patient/12724066",
+                    timeoutOverride = 1.seconds // ktor default is 15 seconds
+                )
+            }
+        }
+    }
+
+    @Test
+    fun `get works with no timeout parameters`() {
+        mockWebServer.enqueue(
+            MockResponse()
+                .setBody(basicJson)
+                .setHeader("Content-Type", "application/json")
+                .setBodyDelay(4, TimeUnit.SECONDS)
+        )
+
+        val authentication = mockk<Authentication> {
+            every { accessToken } returns "access-token"
+        }
+        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+
+        val response = runBlocking {
+            val httpResponse = client.get(
+                tenant,
+                "/Patient/12724066"
+            )
+            httpResponse.httpResponse.bodyAsText()
+        }
+        assertEquals(basicJson, response)
+        val request = mockWebServer.takeRequest()
+        assertEquals("GET", request.method)
+        assertTrue(request.path?.contains("/Patient/12724066") == true)
     }
 
     @Test
