@@ -1,8 +1,8 @@
 [versions]
 caffeine = "3.1.8"
 commons = "1.11.0"
-datadog = "1.23.0"
-ehrda = "1.5.4"
+datadog = "1.24.0"
+ehrda = "1.5.5"
 hapi = "2.5.1"
 interop-common = "3.13.3"
 interop-event-resource-internal = "1.2.3"
@@ -10,8 +10,8 @@ interop-fhir = "8.11.0"
 interop-gradle = "3.3.0"
 interop-publish = "8.4.2"
 interop-queue = "2.0.0"
-interop-validation = "3.2.1"
-jackson = "2.15.3"
+interop-validation = "3.2.2"
+jackson = "2.16.0"
 kotlinx-coroutines = "1.7.3"
 # @pin INT-2283
 ktor = "2.3.4"
@@ -22,7 +22,7 @@ mysql-connector = "8.2.0"
 opentracing = "0.33.0"
 ronin-test = "0.2.0"
 swagger-annotations = "2.2.19"
-testcontainers-mysql = "1.19.1"
+testcontainers-mysql = "1.19.2"
 
 [libraries]
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
