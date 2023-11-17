@@ -39,8 +39,8 @@ class RoninMedicationRequest(
         normalizer,
         localizer
     ) {
-    override val rcdmVersion = RCDMVersion.V3_19_0
-    override val profileVersion = 2
+    override val rcdmVersion = RCDMVersion.V3_29_0
+    override val profileVersion = 3
 
     private val requiredRequesterError = RequiredFieldError(MedicationRequest::requester)
 

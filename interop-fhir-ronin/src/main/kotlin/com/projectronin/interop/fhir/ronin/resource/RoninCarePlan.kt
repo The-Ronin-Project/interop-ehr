@@ -26,8 +26,8 @@ import java.time.LocalDateTime
 @Component
 class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
     BaseRoninProfile<CarePlan>(R4CarePlanValidator, RoninProfile.CARE_PLAN.value, normalizer, localizer) {
-    override val rcdmVersion = RCDMVersion.V3_25_0
-    override val profileVersion = 6
+    override val rcdmVersion = RCDMVersion.V3_27_0
+    override val profileVersion = 7
 
     private val epicCycleExtension = "http://open.epic.com/FHIR/StructureDefinition/extension/cycle"
 

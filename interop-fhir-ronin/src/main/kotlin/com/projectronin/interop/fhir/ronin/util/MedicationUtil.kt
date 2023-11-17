@@ -68,10 +68,3 @@ private fun getReferenceType(medicationReference: DynamicValue<Any>?): Code? {
         null
     }
 }
-
-/**
- * Check that reference type is Medication for Medication Administration
- */
-fun checkReferenceType(medication: DynamicValue<Any>?): Boolean {
-    return (medication?.value as Reference).type?.value == "Medication"
-}

@@ -2,6 +2,7 @@ package com.projectronin.interop.fhir.ronin.generators.resource
 
 import com.projectronin.interop.fhir.generators.resources.MedicationAdministrationGenerator
 import com.projectronin.interop.fhir.generators.resources.medicationAdministration
+import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Extension
@@ -70,8 +71,11 @@ fun originalMedicationAdministrationStatus(): Extension {
     return Extension(
         url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.value),
         value = DynamicValue(
-            DynamicValueType.CODE,
-            Code("original-status")
+            DynamicValueType.CODING,
+            value = Coding(
+                // system = Uri("http://projectronin.io/fhir/CodeSystem/test/MedicationAdministrationStatus"),
+                code = Code("original-status")
+            )
         )
     )
 }

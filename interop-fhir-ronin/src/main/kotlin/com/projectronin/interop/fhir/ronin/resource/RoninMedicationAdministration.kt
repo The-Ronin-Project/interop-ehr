@@ -1,7 +1,5 @@
 package com.projectronin.interop.fhir.ronin.resource
 
-import com.projectronin.interop.fhir.r4.datatype.Coding
-import com.projectronin.interop.fhir.r4.datatype.DynamicValue
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.resource.MedicationAdministration
 import com.projectronin.interop.fhir.r4.validate.resource.R4MedicationAdministrationValidator
@@ -47,8 +45,8 @@ class RoninMedicationAdministration(
         normalizer,
         localizer
     ) {
-    override val rcdmVersion = RCDMVersion.V3_27_0
-    override val profileVersion = 1
+    override val rcdmVersion = RCDMVersion.V3_31_0
+    override val profileVersion = 3
 
     private val requiredCategoryError = FHIRError(
         code = "RONIN_MEDADMIN_001",
@@ -114,7 +112,7 @@ class RoninMedicationAdministration(
             checkTrue(
                 element.extension.any {
                     it.url?.value == RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.value &&
-                        it.value?.type == DynamicValueType.CODE
+                        it.value?.type == DynamicValueType.CODING
                 },
                 invalidAppointmentStatusExtensionError,
                 parentContext
@@ -168,12 +166,7 @@ class RoninMedicationAdministration(
                 )
                 Pair(
                     newCode,
-                    statusCode.extension.copy(
-                        value = DynamicValue(
-                            DynamicValueType.CODE,
-                            (statusCode.extension.value!!.value as Coding).code!!
-                        )
-                    )
+                    statusCode.extension
                 )
             }
         }

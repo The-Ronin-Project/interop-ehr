@@ -88,7 +88,7 @@ class RoninMedicationAdministrationTest {
                 source = Uri("source")
             ),
             extension = listOf(
-                statusCodeExtension("mapped"),
+                statusCodingExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -143,7 +143,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
-                statusCodeExtension("mapped"),
+                statusCodingExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -203,7 +203,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
-                statusCodeExtension("mapped"),
+                statusCodingExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -277,7 +277,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
-                statusCodeExtension("mapped"),
+                statusCodingExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -355,7 +355,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
-                statusCodeExtension("mapped"),
+                statusCodingExtension("mapped"),
                 Extension(
                     url = Uri(value = "incorrect-url"),
                     value = DynamicValue(
@@ -417,7 +417,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
-                statusCodeExtension("mapped"),
+                statusCodingExtension("mapped"),
                 Extension(
                     url = Uri(RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -546,7 +546,7 @@ class RoninMedicationAdministrationTest {
         assertEquals(medAdmin.text, transformed.text)
         assertEquals(
             listOf(
-                statusCodeExtension("in-progress"),
+                statusCodingExtension("in-progress"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -662,7 +662,7 @@ class RoninMedicationAdministrationTest {
         assertEquals(medAdmin.text, transformed.text)
         assertEquals(
             listOf(
-                statusCodeExtension("in-progress"),
+                statusCodingExtension("in-progress"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -801,7 +801,7 @@ class RoninMedicationAdministrationTest {
         assertEquals(transformed.contained, listOf(Location(id = Id("67890"))))
         assertEquals(
             listOf(
-                statusCodeExtension("in-progress"),
+                statusCodingExtension("in-progress"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -916,7 +916,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
-                statusCodeExtension("mapped"),
+                statusCodingExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -977,7 +977,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
-                statusCodeExtension("mapped"),
+                statusCodingExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -1052,7 +1052,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
-                statusCodeExtension("mapped"),
+                statusCodingExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -1109,7 +1109,7 @@ class RoninMedicationAdministrationTest {
                 )
             ),
             extension = listOf(
-                statusCodeExtension("mapped"),
+                statusCodingExtension("mapped"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -1229,7 +1229,7 @@ class RoninMedicationAdministrationTest {
         assertEquals(medAdmin.text, transformed.text)
         assertEquals(
             listOf(
-                statusCodeExtension("in-progress"),
+                statusCodingExtension("in-progress"),
                 Extension(
                     url = Uri(value = RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
                     value = DynamicValue(
@@ -1539,14 +1539,6 @@ class RoninMedicationAdministrationTest {
     private fun statusCoding(value: String) = Coding(
         system = Uri("http://projectronin.io/fhir/CodeSystem/test/MedicationAdministrationStatus"),
         code = Code(value = value)
-    )
-
-    private fun statusCodeExtension(value: String) = Extension(
-        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceMedicationAdministrationStatus"),
-        value = DynamicValue(
-            type = DynamicValueType.CODE,
-            value = Code(value = value)
-        )
     )
 
     private fun statusCodingExtension(value: String) = Extension(
