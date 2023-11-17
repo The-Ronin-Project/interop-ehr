@@ -10,7 +10,6 @@ import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Code
-import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
 import com.projectronin.interop.fhir.ronin.localization.Localizer
@@ -221,38 +220,6 @@ class RoninDocumentReferenceGeneratorTest {
         val validation = rcdmDocumentReference.validate(documentReference, null)
         assertEquals(false, validation.hasErrors())
         assertEquals("Clinical Note", documentReference.category.first().coding.first().display?.value)
-    }
-
-    @Test
-    fun `rcdmDocumentReference - invalid category input - validate fails`() {
-        val documentReference = rcdmDocumentReference("test", "binaryId") {
-            category of listOf(
-                CodeableConcept(
-                    coding =
-                    listOf(
-                        Coding(
-                            system = Uri("bad system"),
-                            code = Code("bad code"),
-                            display = "Clinical Note".asFHIR()
-                        )
-                    )
-                )
-            )
-        }
-        val validation = rcdmDocumentReference.validate(documentReference, null)
-        assertEquals(true, validation.hasErrors())
-        assertEquals("INV_VALUE_SET", validation.issues()[0].code)
-        assertEquals("'bad system|bad code' is outside of required value set", validation.issues()[0].description)
-        assertEquals(
-            LocationContext(element = "DocumentReference", field = "category"),
-            validation.issues()[0].location
-        )
-        assertEquals("R4_INV_PRIM", validation.issues()[1].code)
-        assertEquals("Supplied value is not valid for a Uri", validation.issues()[1].description)
-        assertEquals(
-            LocationContext(element = "DocumentReference", field = "category[0].coding[0].system"),
-            validation.issues()[1].location
-        )
     }
 
     @Test

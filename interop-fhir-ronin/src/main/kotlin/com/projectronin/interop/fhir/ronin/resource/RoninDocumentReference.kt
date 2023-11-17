@@ -1,12 +1,9 @@
 package com.projectronin.interop.fhir.ronin.resource
 
 import com.projectronin.event.interop.internal.v1.ResourceType
-import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.Attachment
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
-import com.projectronin.interop.fhir.r4.datatype.Coding
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
-import com.projectronin.interop.fhir.r4.datatype.primitive.Code
 import com.projectronin.interop.fhir.r4.datatype.primitive.Url
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
 import com.projectronin.interop.fhir.r4.resource.DocumentReferenceContext
@@ -21,7 +18,6 @@ import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.base.USCoreBasedProfile
 import com.projectronin.interop.fhir.ronin.transform.TransformResponse
-import com.projectronin.interop.fhir.ronin.util.validateCodeInValueSet
 import com.projectronin.interop.fhir.ronin.util.validateReference
 import com.projectronin.interop.fhir.ronin.util.validateReferenceList
 import com.projectronin.interop.fhir.validate.FHIRError
@@ -51,11 +47,6 @@ class RoninDocumentReference(
     ) {
     override val rcdmVersion = RCDMVersion.V3_25_0
     override val profileVersion = 5
-
-    // From http://hl7.org/fhir/us/core/STU5.0.1/ValueSet-us-core-documentreference-category.html
-    private val usCoreDocumentReferenceCategoryValueSet = listOf(
-        Coding(system = CodeSystem.DOCUMENT_REFERENCE_CATEGORY.uri, code = Code("clinical-note"))
-    )
 
     private val requiredCategoryError = RequiredFieldError(DocumentReference::category)
     private val requiredSubjectError = RequiredFieldError(DocumentReference::subject)
@@ -150,7 +141,6 @@ class RoninDocumentReference(
                 validation
             )
 
-            checkTrue(element.category.isNotEmpty(), requiredCategoryError, parentContext)
             element.context?.let { context ->
                 val contextLocationContext = parentContext.append(LocationContext(DocumentReference::context))
 
@@ -163,12 +153,9 @@ class RoninDocumentReference(
                     validation
                 )
             }
-            element.category.validateCodeInValueSet(
-                usCoreDocumentReferenceCategoryValueSet,
-                DocumentReference::category,
-                parentContext,
-                this
-            )
+
+            // USCore adds an optional code (0.*) of Clinical Note, in the category attribute,
+            // but the base binding is still an example binding and there should remain unconstrained.
 
             checkNotNull(element.subject, requiredSubjectError, parentContext)
         }
