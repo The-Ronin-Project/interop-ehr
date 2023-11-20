@@ -83,7 +83,7 @@ class RoninServiceRequest(
 
             // Check for a valid category.
             checkTrue(element.category.size == 1, invalidCategorySizeError, parentContext)
-            requireCodeableConcept("category", element.category.first(), parentContext, this)
+            requireCodeableConcept("category", element.category.firstOrNull(), parentContext, this)
             checkTrue(
                 element.extension.any {
                     it.url?.value == RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CATEGORY.uri.value &&
@@ -135,7 +135,7 @@ class RoninServiceRequest(
 
         val mapCategoryResponse =
             mapElement(
-                normalized.category.first(),
+                normalized.category.firstOrNull(),
                 "ServiceRequest.category",
                 normalized,
                 parentContext,

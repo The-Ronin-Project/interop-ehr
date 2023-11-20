@@ -458,4 +458,36 @@ class RoninServiceRequestTest {
             actualException.message
         )
     }
+
+    @Test
+    fun `ensure transform does not throw NoSuchElement error if category is null`() {
+        val startingServiceRequest = ServiceRequest(
+            id = Id("ServiceRequest1"),
+            meta = Meta(
+                profile = listOf(Canonical("ServiceRequest")),
+                source = Uri("source")
+            ),
+            identifier = listOf(),
+            intent = RequestIntent.ORDER.asCode(),
+            status = RequestStatus.ACTIVE.asCode(),
+            subject = Reference(
+                reference = "Patient/Patient#1".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension)
+            ),
+            code = unmappedCode1,
+            category = listOf()
+        )
+        val actualTransformResult = roninServiceRequest.transform(startingServiceRequest, tenant)
+        val actualException = assertThrows<IllegalArgumentException> {
+            actualTransformResult.second.alertIfErrors()
+        }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_SERVREQ_001: Service Request must have at least two extensions @ ServiceRequest.extension\n" +
+                "ERROR RONIN_SERVREQ_004: Service Request requires exactly 1 Category element @ ServiceRequest.category\n" +
+                "ERROR RONIN_SERVREQ_002: Service Request extension Tenant Source Service Request Category is invalid @ ServiceRequest.extension",
+            actualException.message
+        )
+    }
 }
