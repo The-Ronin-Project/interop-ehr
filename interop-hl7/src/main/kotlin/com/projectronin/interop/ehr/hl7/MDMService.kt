@@ -7,7 +7,6 @@ import ca.uhn.hl7v2.model.v251.segment.OBX
 import ca.uhn.hl7v2.model.v251.segment.PID
 import ca.uhn.hl7v2.model.v251.segment.PV1
 import ca.uhn.hl7v2.model.v251.segment.TXA
-import com.interop.ehr.hl7.fhir.converters.datatypes.toFormattedDate
 import com.projectronin.interop.ehr.hl7.converters.datatypes.toFormattedDate
 import com.projectronin.interop.ehr.hl7.converters.datatypes.toHL7Code
 import com.projectronin.interop.ehr.hl7.converters.datatypes.toPID3

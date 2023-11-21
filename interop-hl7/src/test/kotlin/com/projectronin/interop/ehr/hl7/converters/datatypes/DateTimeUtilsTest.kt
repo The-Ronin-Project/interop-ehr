@@ -1,6 +1,5 @@
 package com.projectronin.interop.ehr.hl7.converters.datatypes
 
-import com.interop.ehr.hl7.fhir.converters.datatypes.toFormattedDate
 import com.projectronin.interop.fhir.r4.datatype.primitive.Date
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
