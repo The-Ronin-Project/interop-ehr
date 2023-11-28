@@ -5,6 +5,7 @@ import com.projectronin.interop.ehr.cerner.client.CernerClient
 import com.projectronin.interop.fhir.r4.resource.DocumentReference
 import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Component
 import java.time.LocalDate
 
@@ -12,9 +13,15 @@ import java.time.LocalDate
  * Service providing access to DocumentReferences within Cerner.
  */
 @Component
-class CernerDocumentReferenceService(cernerClient: CernerClient) : DocumentReferenceService, CernerFHIRService<DocumentReference>(cernerClient) {
+class CernerDocumentReferenceService(
+    cernerClient: CernerClient,
+    @Value("\${cerner.docref.category:LP29684-5,LP29708-2,LP75011-4,LP7819-8,LP7839-6,clinical-note}")
+    categoryString: String
+) : DocumentReferenceService, CernerFHIRService<DocumentReference>(cernerClient) {
     override val fhirURLSearchPart = "/DocumentReference"
     override val fhirResourceType = DocumentReference::class.java
+
+    private val categories: List<String> = if (categoryString.isBlank()) emptyList() else categoryString.split(",")
 
     @Trace
     override fun findPatientDocuments(
@@ -24,12 +31,11 @@ class CernerDocumentReferenceService(cernerClient: CernerClient) : DocumentRefer
         endDate: LocalDate
     ):
         List<DocumentReference> {
+        val categoryParameters = if (categories.isNotEmpty()) mapOf("category" to categories) else emptyMap()
         val parameters = mapOf(
             "patient" to patientFhirId,
-            // Categories are hardcoded per INFX: INT-2014
-            "category" to listOf("LP29684-5", "LP29708-2", "LP75011-4", "LP7819-8", "LP7839-6", "clinical-note"),
             "date" to getDateParam(startDate, endDate, tenant)
-        )
+        ) + categoryParameters
         return getResourceListFromSearch(tenant, parameters)
     }
 }
