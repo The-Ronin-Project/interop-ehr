@@ -46,7 +46,7 @@ import kotlin.reflect.KClass
 class NormalizationRegistryClient(
     private val ociClient: OCIClient,
     dependsOnEvaluators: List<DependsOnEvaluator<*>>,
-    @Value("\${oci.infx.registry.file:DataNormalizationRegistry/v3/registry.json}")
+    @Value("\${oci.infx.registry.file}")
     private val registryFileName: String,
     @Value("\${oci.infx.registry.refresh.hours:12}")
     private val defaultReloadHours: String = "12" // use string to prevent issues
