@@ -247,18 +247,14 @@ class NormalizationRegistryClient(
     }
 
     /**
-     * if only the text of the codeable concept is available/there is no coding create the source-key from text.
+     * if only the text from codeable concept is available (no coding) create the source-key from text,
+     * if text and coding are available use both to create the source-key using text, code, and system
      * otherwise use coding to create the source-key using code and system
      */
-    private fun CodeableConcept.getSourceConcept(): SourceConcept? { // if coding is empty...
-        val mappingsFound = if (coding.isEmpty()) {
-            setOf(SourceKey(text?.value.toString(), null))
-        } else {
-            coding.map {
-                it.getSourceKey() ?: return null
-            }.toSet()
-        }
-        return SourceConcept(mappingsFound)
+    private fun CodeableConcept.getSourceConcept(): SourceConcept? {
+        val codingFound = coding.mapNotNull { it.getSourceKey() ?: return null }.toSet()
+        // add text to SourceConcept
+        return SourceConcept(codingFound, text?.value)
     }
 
     /**
@@ -297,8 +293,10 @@ class NormalizationRegistryClient(
     private fun Coding.getSourceKey(): SourceKey? {
         val sourceVal = this.code?.value ?: return null
         val sourceSystem = this.system?.value ?: return null
+        val sourceDisplay = this.display?.value
+        val sourceVersion = this.version?.value
         val agnosticSourceSystem = getTenantAgnosticCodeSystem(sourceSystem)
-        return SourceKey(sourceVal, agnosticSourceSystem)
+        return SourceKey(sourceVal, agnosticSourceSystem, sourceDisplay, sourceVersion)
     }
 
     private fun createCodeableConceptExtension(conceptMapItem: ConceptMapItem, codeableConcept: CodeableConcept) =
@@ -597,7 +595,13 @@ internal data class ValueSetItem(
     val metadata: ValueSetMetadata
 )
 
-internal data class SourceKey(val value: String, val system: String?)
+internal data class SourceKey(
+    val value: String,
+    val system: String?,
+    val display: String? = null,
+    val version: String? = null
+)
+
 internal data class TargetValue(
     val value: String,
     val system: String,
@@ -606,5 +610,5 @@ internal data class TargetValue(
     val dependsOn: List<ConceptMapDependsOn> = emptyList()
 )
 
-internal data class SourceConcept(val element: Set<SourceKey>)
+internal data class SourceConcept(val element: Set<SourceKey>, val text: String? = null)
 internal data class TargetConcept(val element: List<TargetValue>, val text: String? = null)
