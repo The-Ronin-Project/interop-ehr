@@ -2,7 +2,7 @@
 caffeine = "3.1.8"
 commons = "1.11.0"
 datadog = "1.24.2"
-ehrda = "1.5.5"
+ehrda = "1.6.0"
 hapi = "2.5.1"
 interop-common = "3.13.4"
 interop-event-resource-internal = "1.2.3"
