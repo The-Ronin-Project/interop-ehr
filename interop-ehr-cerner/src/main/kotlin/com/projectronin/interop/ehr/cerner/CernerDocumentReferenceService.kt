@@ -16,7 +16,9 @@ import java.time.LocalDate
 class CernerDocumentReferenceService(
     cernerClient: CernerClient,
     @Value("\${cerner.docref.category:LP29684-5,LP29708-2,LP75011-4,LP7819-8,LP7839-6,clinical-note}")
-    categoryString: String
+    categoryString: String,
+    @Value("\${cerner.batch.docref:0}")
+    private val batchOverride: Int = 0
 ) : DocumentReferenceService, CernerFHIRService<DocumentReference>(cernerClient) {
     override val fhirURLSearchPart = "/DocumentReference"
     override val fhirResourceType = DocumentReference::class.java
@@ -32,10 +34,11 @@ class CernerDocumentReferenceService(
     ):
         List<DocumentReference> {
         val categoryParameters = if (categories.isNotEmpty()) mapOf("category" to categories) else emptyMap()
+        val batchParameters = if (batchOverride > 0) mapOf("_count" to batchOverride) else emptyMap()
         val parameters = mapOf(
             "patient" to patientFhirId,
             "date" to getDateParam(startDate, endDate, tenant)
-        ) + categoryParameters
+        ) + categoryParameters + batchParameters
         return getResourceListFromSearch(tenant, parameters)
     }
 }
