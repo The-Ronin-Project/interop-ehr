@@ -29,7 +29,7 @@ import com.projectronin.ehr.dataauthority.models.Identifier as EHRDAIdentifier
 class EpicPatientService(
     epicClient: EpicClient,
     @Value("\${epic.fhir.batchSize:10}") batchSize: Int,
-    private val ehrdaClient: EHRDataAuthorityClient
+    private val ehrdaClient: EHRDataAuthorityClient,
 ) : PatientService,
     EpicFHIRService<Patient>(epicClient, batchSize) {
     override val fhirURLSearchPart = "/api/FHIR/R4/Patient"
@@ -41,7 +41,7 @@ class EpicPatientService(
         tenant: Tenant,
         birthDate: LocalDate,
         givenName: String,
-        familyName: String
+        familyName: String,
     ): List<Patient> {
         return findPatient(tenant, birthDate, givenName, familyName, false)
     }
@@ -51,15 +51,16 @@ class EpicPatientService(
         birthDate: LocalDate,
         givenName: String,
         familyName: String,
-        disableRetry: Boolean
+        disableRetry: Boolean,
     ): List<Patient> {
         logger.info { "Patient search started for ${tenant.mnemonic}" }
 
-        val parameters = mapOf(
-            "given" to givenName,
-            "family" to familyName,
-            "birthdate" to DateTimeFormatter.ofPattern("yyyy-MM-dd").format(birthDate)
-        )
+        val parameters =
+            mapOf(
+                "given" to givenName,
+                "family" to familyName,
+                "birthdate" to DateTimeFormatter.ofPattern("yyyy-MM-dd").format(birthDate),
+            )
         val patientList = getResourceListFromSearch(tenant, parameters, disableRetry)
 
         logger.info { "Patient search completed for ${tenant.mnemonic}" }
@@ -67,59 +68,74 @@ class EpicPatientService(
     }
 
     @Trace
-    override fun <K> findPatientsById(tenant: Tenant, patientIdsByKey: Map<K, Identifier>): Map<K, Patient> {
+    override fun <K> findPatientsById(
+        tenant: Tenant,
+        patientIdsByKey: Map<K, Identifier>,
+    ): Map<K, Patient> {
         logger.info { "Patient find by id started for ${tenant.mnemonic} with ${patientIdsByKey.size} patients requested" }
 
         // Gather the full batch of identifiers to request.
-        val patientIdentifiers = patientIdsByKey.filter { entry ->
-            val systemFound = entry.value.system != null
-            if (!systemFound) logger.warn { "System missing on key, ${entry.key}. Key was removed." }
-            systemFound
-        }.values.toSet()
+        val patientIdentifiers =
+            patientIdsByKey.filter { entry ->
+                val systemFound = entry.value.system != null
+                if (!systemFound) logger.warn { "System missing on key, ${entry.key}. Key was removed." }
+                systemFound
+            }.values.toSet()
 
         // Chunk the identifiers and run the search
-        val patientList = patientIdentifiers.chunked(batchSize) {
-            val identifierParam = it.joinToString(separator = ",") { patientIdentifier ->
-                "${patientIdentifier.system?.value}|${patientIdentifier.value!!.value}"
-            }
-            getResourceListFromSearch(
-                tenant,
-                mapOf("identifier" to identifierParam)
-            )
-        }.flatten()
+        val patientList =
+            patientIdentifiers.chunked(batchSize) {
+                val identifierParam =
+                    it.joinToString(separator = ",") { patientIdentifier ->
+                        "${patientIdentifier.system?.value}|${patientIdentifier.value!!.value}"
+                    }
+                getResourceListFromSearch(
+                    tenant,
+                    mapOf("identifier" to identifierParam),
+                )
+            }.flatten()
 
         // Index patients found based on identifiers
-        val foundPatientsByIdentifier = patientList.flatMap { patient ->
-            patient.identifier.map { identifier ->
-                SystemValueIdentifier(
-                    systemText = identifier.system?.value?.uppercase(),
-                    value = identifier.value?.value
-                ) to patient
-            }
-        }.toMap()
+        val foundPatientsByIdentifier =
+            patientList.flatMap { patient ->
+                patient.identifier.map { identifier ->
+                    SystemValueIdentifier(
+                        systemText = identifier.system?.value?.uppercase(),
+                        value = identifier.value?.value,
+                    ) to patient
+                }
+            }.toMap()
 
         // Re-key to the request based on requested identifier
-        val patientsFoundByKey = patientIdsByKey.mapNotNull { requestEntry ->
-            val foundPatient = foundPatientsByIdentifier[
-                SystemValueIdentifier(
-                    systemText = requestEntry.value.system?.value?.uppercase(),
-                    value = requestEntry.value.value?.value
-                )
-            ]
-            if (foundPatient != null) requestEntry.key to foundPatient else null
-        }.toMap()
+        val patientsFoundByKey =
+            patientIdsByKey.mapNotNull { requestEntry ->
+                val foundPatient =
+                    foundPatientsByIdentifier[
+                        SystemValueIdentifier(
+                            systemText = requestEntry.value.system?.value?.uppercase(),
+                            value = requestEntry.value.value?.value,
+                        ),
+                    ]
+                if (foundPatient != null) requestEntry.key to foundPatient else null
+            }.toMap()
 
         logger.info { "Patient find by id for ${tenant.mnemonic} found ${patientsFoundByKey.size} patients" }
         return patientsFoundByKey
     }
 
     @Trace
-    override fun getPatient(tenant: Tenant, patientFHIRID: String): Patient {
+    override fun getPatient(
+        tenant: Tenant,
+        patientFHIRID: String,
+    ): Patient {
         return runBlocking { getByID(tenant, patientFHIRID) }
     }
 
     @Trace
-    override fun getPatientFHIRId(tenant: Tenant, patientIDValue: String): String {
+    override fun getPatientFHIRId(
+        tenant: Tenant,
+        patientIDValue: String,
+    ): String {
         val patientFhirId =
             getPatientsFHIRIds(tenant, tenant.vendorAs<Epic>().patientMRNSystem, listOf(patientIDValue))[patientIDValue]
 
@@ -134,28 +150,31 @@ class EpicPatientService(
     fun getPatientsFHIRIds(
         tenant: Tenant,
         patientIDSystem: String,
-        patientIDValues: List<String>
+        patientIDValues: List<String>,
     ): Map<String, GetFHIRIDResponse> {
         // Try the list of patients against EHRDA first
-        val ehrdaResponse = runBlocking {
-            ehrdaClient.getResourceIdentifiers(
-                tenant.mnemonic,
-                IdentifierSearchableResourceTypes.Patient,
-                patientIDValues.map { EHRDAIdentifier(value = it, system = patientIDSystem) }
-            ).associateFHIRId().map { (key, value) -> key.value to GetFHIRIDResponse(value) }.toMap()
-        }
+        val ehrdaResponse =
+            runBlocking {
+                ehrdaClient.getResourceIdentifiers(
+                    tenant.mnemonic,
+                    IdentifierSearchableResourceTypes.Patient,
+                    patientIDValues.map { EHRDAIdentifier(value = it, system = patientIDSystem) },
+                ).associateFHIRId().map { (key, value) -> key.value to GetFHIRIDResponse(value) }.toMap()
+            }
         // Search for any patients that weren't in EHRDA in the EHR.  If there aren't any, return the EHRDA patients.
-        val ehrPatientIDValues = patientIDValues.filterNot { patientID ->
-            ehrdaResponse.keys.contains(patientID)
-        }
+        val ehrPatientIDValues =
+            patientIDValues.filterNot { patientID ->
+                ehrdaResponse.keys.contains(patientID)
+            }
         if (ehrPatientIDValues.isEmpty()) return ehrdaResponse
 
-        val ehrResponse = findPatientsById(
-            tenant = tenant,
-            ehrPatientIDValues.associateWith { Identifier(value = FHIRString(it), system = Uri(patientIDSystem)) }
-        ).filterNot {
-            it.value.id == null
-        }.mapValues { GetFHIRIDResponse(it.value.id!!.value!!, it.value) }
+        val ehrResponse =
+            findPatientsById(
+                tenant = tenant,
+                ehrPatientIDValues.associateWith { Identifier(value = FHIRString(it), system = Uri(patientIDSystem)) },
+            ).filterNot {
+                it.value.id == null
+            }.mapValues { GetFHIRIDResponse(it.value.id!!.value!!, it.value) }
 
         return ehrdaResponse + ehrResponse
     }

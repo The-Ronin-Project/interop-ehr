@@ -6,7 +6,10 @@ import org.springframework.stereotype.Component
 
 @Component
 class CernerOnboardFlagService : OnboardFlagService {
-    override fun setOnboardedFlag(tenant: Tenant, patientFhirID: String): Boolean {
+    override fun setOnboardedFlag(
+        tenant: Tenant,
+        patientFhirID: String,
+    ): Boolean {
         return true
     }
 }

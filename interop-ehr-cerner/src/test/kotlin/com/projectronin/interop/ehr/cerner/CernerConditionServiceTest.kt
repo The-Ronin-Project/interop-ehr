@@ -42,7 +42,7 @@ class CernerConditionServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
         val patientFhirId = "abc"
         val category = "problem-list-item"
@@ -58,8 +58,8 @@ class CernerConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to category,
                     "clinical-status" to clinicalStatus,
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
@@ -68,7 +68,7 @@ class CernerConditionServiceTest {
                 tenant,
                 patientFhirId,
                 category,
-                clinicalStatus
+                clinicalStatus,
             )
 
         assertEquals(validConditionSearch.entry.map { it.resource }, bundle)
@@ -80,16 +80,18 @@ class CernerConditionServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
         val patientFhirId = "abc"
-        val categoryCodes = listOf(
-            FHIRSearchToken(code = "problem-list-item"),
-            FHIRSearchToken(code = "encounter-diagnosis")
-        )
-        val clinicalStatusCodes = listOf(
-            FHIRSearchToken(code = "active")
-        )
+        val categoryCodes =
+            listOf(
+                FHIRSearchToken(code = "problem-list-item"),
+                FHIRSearchToken(code = "encounter-diagnosis"),
+            )
+        val clinicalStatusCodes =
+            listOf(
+                FHIRSearchToken(code = "active"),
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validConditionSearch
@@ -101,8 +103,8 @@ class CernerConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to "problem-list-item,encounter-diagnosis",
                     "clinical-status" to "active",
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
@@ -111,7 +113,7 @@ class CernerConditionServiceTest {
                 tenant,
                 patientFhirId,
                 categoryCodes,
-                clinicalStatusCodes
+                clinicalStatusCodes,
             )
 
         // 2 encounter and 1 problem list item
@@ -123,8 +125,7 @@ class CernerConditionServiceTest {
                         coding.code?.value == "problem-list-item" || coding.code?.value == "encounter-diagnosis"
                     }
                 }
-            }
-
+            },
         )
     }
 
@@ -134,17 +135,19 @@ class CernerConditionServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
         val patientFhirId = "abc"
-        val categoryCodes = listOf(
-            FHIRSearchToken(system = categorySystem, code = "problem-list-item")
-        )
+        val categoryCodes =
+            listOf(
+                FHIRSearchToken(system = categorySystem, code = "problem-list-item"),
+            )
         val categoryToken = "$categorySystem|problem-list-item"
-        val clinicalStatusCodes = listOf(
-            FHIRSearchToken(system = clinicalSystem, code = "active"),
-            FHIRSearchToken(system = clinicalSystem, code = "resolved")
-        )
+        val clinicalStatusCodes =
+            listOf(
+                FHIRSearchToken(system = clinicalSystem, code = "active"),
+                FHIRSearchToken(system = clinicalSystem, code = "resolved"),
+            )
         val clinicalStatusTokens = "active,resolved"
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -157,8 +160,8 @@ class CernerConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to categoryToken,
                     "clinical-status" to clinicalStatusTokens,
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
@@ -167,7 +170,7 @@ class CernerConditionServiceTest {
                 tenant,
                 patientFhirId,
                 categoryCodes,
-                clinicalStatusCodes
+                clinicalStatusCodes,
             )
         // 2 active, 1 resolved
         assertEquals(3, bundle.size)
@@ -176,7 +179,7 @@ class CernerConditionServiceTest {
                 it.clinicalStatus?.coding!!.any { coding ->
                     coding.code?.value == "active" || coding.code?.value == "resolved"
                 }
-            }
+            },
         )
     }
 
@@ -186,7 +189,7 @@ class CernerConditionServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
         val patientFhirId = "abc"
         val categoryToken = "$categorySystem|problem-list-item"
@@ -202,8 +205,8 @@ class CernerConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to categoryToken,
                     "clinical-status" to "active",
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
@@ -212,7 +215,7 @@ class CernerConditionServiceTest {
                 tenant,
                 patientFhirId,
                 categoryToken,
-                clinicalStatusToken
+                clinicalStatusToken,
             )
 
         assertEquals(3, bundle.size)
@@ -224,7 +227,7 @@ class CernerConditionServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
         val patientFhirId = "abc"
         val categoryToken = "$categorySystem|problem-list-item"
@@ -240,8 +243,8 @@ class CernerConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to categoryToken,
                     "clinical-status" to "active",
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
@@ -250,7 +253,7 @@ class CernerConditionServiceTest {
                 tenant,
                 patientFhirId,
                 categoryToken,
-                clinicalStatusToken
+                clinicalStatusToken,
             )
 
         assertEquals(3, bundle.size)
@@ -266,7 +269,7 @@ class CernerConditionServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         every { pagingHttpResponse.status } returns HttpStatusCode.OK
@@ -279,8 +282,8 @@ class CernerConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to categoryToken,
                     "clinical-status" to "active",
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns EHRResponse(pagingHttpResponse, "67890")
 
@@ -289,7 +292,7 @@ class CernerConditionServiceTest {
         coEvery {
             cernerClient.get(
                 tenant,
-                nextUrl
+                nextUrl,
             )
         } returns ehrResponse
 
@@ -298,7 +301,7 @@ class CernerConditionServiceTest {
                 tenant,
                 patientFhirId,
                 categoryToken,
-                clinicalStatusToken
+                clinicalStatusToken,
             )
 
         assertEquals(6, list.size)
@@ -310,12 +313,13 @@ class CernerConditionServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
         val patientFhirId = "abc"
-        val categoryCodes = listOf(
-            FHIRSearchToken(system = categorySystem, code = "problem-list-item")
-        )
+        val categoryCodes =
+            listOf(
+                FHIRSearchToken(system = categorySystem, code = "problem-list-item"),
+            )
         val categoryToken = "$categorySystem|problem-list-item"
         val clinicalStatusTokens = "active,inactive,resolved"
 
@@ -329,8 +333,8 @@ class CernerConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to categoryToken,
                     "clinical-status" to clinicalStatusTokens,
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
@@ -338,7 +342,7 @@ class CernerConditionServiceTest {
             conditionService.findConditionsByCodes(
                 tenant,
                 patientFhirId,
-                categoryCodes
+                categoryCodes,
             )
         // 2 active, 1 resolved
         assertEquals(3, bundle.size)
@@ -347,7 +351,7 @@ class CernerConditionServiceTest {
                 it.clinicalStatus?.coding!!.any { coding ->
                     coding.code?.value == "active" || coding.code?.value == "resolved"
                 }
-            }
+            },
         )
     }
 }

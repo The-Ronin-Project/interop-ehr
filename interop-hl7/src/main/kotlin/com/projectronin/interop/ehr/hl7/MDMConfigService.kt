@@ -13,16 +13,23 @@ import org.springframework.stereotype.Component
  */
 @Component
 class MDMConfigService(
-    private val tenantMdmConfigDAO: TenantMDMConfigDAO
+    private val tenantMdmConfigDAO: TenantMDMConfigDAO,
 ) {
-    fun getIdentifiersToSend(tenant: Tenant, identifiers: List<Identifier>): List<Identifier> {
-        val identifier = identifiers.firstOrNull { it.system?.value == CodeSystem.RONIN_MRN.uri.value }
-            ?: identifiers.firstOrNull { it.system?.value == tenant.vendorAs<Epic>().patientMRNSystem }
-            ?: throw VendorIdentifierNotFoundException("Failed to find either a Ronin or Patient MRN on Patient")
+    fun getIdentifiersToSend(
+        tenant: Tenant,
+        identifiers: List<Identifier>,
+    ): List<Identifier> {
+        val identifier =
+            identifiers.firstOrNull { it.system?.value == CodeSystem.RONIN_MRN.uri.value }
+                ?: identifiers.firstOrNull { it.system?.value == tenant.vendorAs<Epic>().patientMRNSystem }
+                ?: throw VendorIdentifierNotFoundException("Failed to find either a Ronin or Patient MRN on Patient")
         return listOf(identifier)
     }
 
-    fun getPractitionerIdentifierToSend(tenant: Tenant, identifiers: List<Identifier>): Identifier? {
+    fun getPractitionerIdentifierToSend(
+        tenant: Tenant,
+        identifiers: List<Identifier>,
+    ): Identifier? {
         val system = tenantMdmConfigDAO.getByTenantMnemonic(tenant.mnemonic)?.providerIdentifierSystem
         return system?.let { identifiers.firstOrNull { it.system?.value == system } }
     }

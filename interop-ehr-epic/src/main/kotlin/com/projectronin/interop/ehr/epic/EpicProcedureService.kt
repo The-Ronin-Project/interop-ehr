@@ -13,7 +13,7 @@ import java.time.LocalDate
  */
 @Component
 class EpicProcedureService(
-    epicClient: EpicClient
+    epicClient: EpicClient,
 ) : ProcedureService, EpicFHIRService<Procedure>(epicClient) {
     override val fhirURLSearchPart = "/api/FHIR/R4/Procedure"
     override val fhirResourceType = Procedure::class.java
@@ -22,12 +22,13 @@ class EpicProcedureService(
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
     ): List<Procedure> {
-        val parameters = mapOf(
-            "patient" to patientFhirId,
-            "date" to RepeatingParameter(listOf("ge$startDate", "le$endDate"))
-        )
+        val parameters =
+            mapOf(
+                "patient" to patientFhirId,
+                "date" to RepeatingParameter(listOf("ge$startDate", "le$endDate")),
+            )
         return getResourceListFromSearch(tenant, parameters)
     }
 }

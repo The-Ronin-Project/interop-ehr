@@ -26,32 +26,40 @@ import java.time.LocalDateTime
  */
 @Component
 class RoninContactPoint(private val registryClient: NormalizationRegistryClient) {
-    private val requiredTelecomSystemExtensionError = FHIRError(
-        code = "RONIN_CNTCTPT_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Tenant source telecom system extension is required",
-        location = LocationContext(ContactPoint::system)
-    )
-    private val wrongTelecomSystemExtensionError = FHIRError(
-        code = "RONIN_CNTCTPT_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Tenant source telecom system extension is defined without proper URL",
-        location = LocationContext(ContactPoint::system)
-    )
-    private val requiredTelecomUseExtensionError = FHIRError(
-        code = "RONIN_CNTCTPT_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Tenant source telecom use extension is required",
-        location = LocationContext(ContactPoint::use)
-    )
-    private val wrongTelecomUseExtensionError = FHIRError(
-        code = "RONIN_CNTCTPT_004",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Tenant source telecom use extension is defined without proper URL",
-        location = LocationContext(ContactPoint::use)
-    )
+    private val requiredTelecomSystemExtensionError =
+        FHIRError(
+            code = "RONIN_CNTCTPT_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Tenant source telecom system extension is required",
+            location = LocationContext(ContactPoint::system),
+        )
+    private val wrongTelecomSystemExtensionError =
+        FHIRError(
+            code = "RONIN_CNTCTPT_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Tenant source telecom system extension is defined without proper URL",
+            location = LocationContext(ContactPoint::system),
+        )
+    private val requiredTelecomUseExtensionError =
+        FHIRError(
+            code = "RONIN_CNTCTPT_003",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Tenant source telecom use extension is required",
+            location = LocationContext(ContactPoint::use),
+        )
+    private val wrongTelecomUseExtensionError =
+        FHIRError(
+            code = "RONIN_CNTCTPT_004",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Tenant source telecom use extension is defined without proper URL",
+            location = LocationContext(ContactPoint::use),
+        )
 
-    fun validateRonin(element: List<ContactPoint>, parentContext: LocationContext, validation: Validation): Validation {
+    fun validateRonin(
+        element: List<ContactPoint>,
+        parentContext: LocationContext,
+        validation: Validation,
+    ): Validation {
         validation.apply {
             element.forEachIndexed { index, telecom ->
                 val currentContext = parentContext.append(LocationContext("", "telecom[$index]"))
@@ -66,7 +74,7 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                         checkTrue(
                             (extension.first().url?.value == RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value),
                             wrongTelecomSystemExtensionError,
-                            currentContext
+                            currentContext,
                         )
                     }
                 }
@@ -81,7 +89,7 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
                         checkTrue(
                             (extension.first().url?.value == RoninExtension.TENANT_SOURCE_TELECOM_USE.value),
                             wrongTelecomUseExtensionError,
-                            currentContext
+                            currentContext,
                         )
                     }
                 }
@@ -96,7 +104,7 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
     fun validateUSCore(
         element: List<ContactPoint>,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ): Validation {
         validation.apply {
             element.forEachIndexed { index, telecom ->
@@ -108,18 +116,20 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
         return validation
     }
 
-    private val requiredTelecomSystemWarning = FHIRError(
-        code = "RONIN_CNTCTPT_005",
-        severity = ValidationIssueSeverity.WARNING,
-        description = "telecom filtered for no system",
-        location = LocationContext(ContactPoint::system)
-    )
-    private val requiredTelecomValueWarning = FHIRError(
-        code = "RONIN_CNTCTPT_006",
-        severity = ValidationIssueSeverity.WARNING,
-        description = "telecom filtered for no value",
-        location = LocationContext(ContactPoint::value)
-    )
+    private val requiredTelecomSystemWarning =
+        FHIRError(
+            code = "RONIN_CNTCTPT_005",
+            severity = ValidationIssueSeverity.WARNING,
+            description = "telecom filtered for no system",
+            location = LocationContext(ContactPoint::system),
+        )
+    private val requiredTelecomValueWarning =
+        FHIRError(
+            code = "RONIN_CNTCTPT_006",
+            severity = ValidationIssueSeverity.WARNING,
+            description = "telecom filtered for no value",
+            location = LocationContext(ContactPoint::value),
+        )
 
     fun <T : Resource<T>> transform(
         element: List<ContactPoint>,
@@ -127,106 +137,111 @@ class RoninContactPoint(private val registryClient: NormalizationRegistryClient)
         tenant: Tenant,
         parentContext: LocationContext,
         validation: Validation,
-        forceCacheReloadTS: LocalDateTime? = null
+        forceCacheReloadTS: LocalDateTime? = null,
     ): Pair<List<ContactPoint>, Validation> {
         val systemMapName = RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "ContactPoint.system")
         val useMapName = RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "ContactPoint.use")
-        val transformed = element.mapIndexedNotNull { index, contactPoint ->
-            val telecomContext = parentContext.append(LocationContext("", "telecom[$index]"))
+        val transformed =
+            element.mapIndexedNotNull { index, contactPoint ->
+                val telecomContext = parentContext.append(LocationContext("", "telecom[$index]"))
 
-            if (contactPoint.value == null) {
-                validation.checkTrue(false, requiredTelecomValueWarning, telecomContext)
-                return@mapIndexedNotNull null
-            }
-            if (contactPoint.system == null) {
-                validation.checkTrue(false, requiredTelecomSystemWarning, telecomContext)
-                return@mapIndexedNotNull null
-            }
-
-            val systemContext = telecomContext.append(LocationContext(ContactPoint::system))
-            val mappedSystem = contactPoint.system?.value?.let { systemValue ->
-                val systemCode = registryClient.getConceptMappingForEnum(
-                    tenant,
-                    "${parentContext.element}.telecom.system",
-                    RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.system", systemValue),
-                    ContactPointSystem::class,
-                    RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
-                    resource,
-                    forceCacheReloadTS
-                )
-                validation.apply {
-                    checkNotNull(
-                        systemCode,
-                        FailedConceptMapLookupError(
-                            systemContext,
-                            systemValue,
-                            systemMapName,
-                            systemCode?.metadata
-                        ),
-                        parentContext
-                    )
+                if (contactPoint.value == null) {
+                    validation.checkTrue(false, requiredTelecomValueWarning, telecomContext)
+                    return@mapIndexedNotNull null
                 }
-                if (systemCode == null) {
-                    contactPoint.system
-                } else {
-                    val systemTarget = systemCode.coding.code?.value
-                    validation.apply {
-                        checkNotNull(
-                            getCodedEnumOrNull<ContactPointSystem>(systemTarget),
-                            ConceptMapInvalidValueSetError(
-                                systemContext,
-                                systemMapName,
-                                systemValue,
-                                systemTarget,
-                                systemCode.metadata
-                            ),
-                            parentContext
-                        )
+                if (contactPoint.system == null) {
+                    validation.checkTrue(false, requiredTelecomSystemWarning, telecomContext)
+                    return@mapIndexedNotNull null
+                }
+
+                val systemContext = telecomContext.append(LocationContext(ContactPoint::system))
+                val mappedSystem =
+                    contactPoint.system?.value?.let { systemValue ->
+                        val systemCode =
+                            registryClient.getConceptMappingForEnum(
+                                tenant,
+                                "${parentContext.element}.telecom.system",
+                                RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.system", systemValue),
+                                ContactPointSystem::class,
+                                RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value,
+                                resource,
+                                forceCacheReloadTS,
+                            )
+                        validation.apply {
+                            checkNotNull(
+                                systemCode,
+                                FailedConceptMapLookupError(
+                                    systemContext,
+                                    systemValue,
+                                    systemMapName,
+                                    systemCode?.metadata,
+                                ),
+                                parentContext,
+                            )
+                        }
+                        if (systemCode == null) {
+                            contactPoint.system
+                        } else {
+                            val systemTarget = systemCode.coding.code?.value
+                            validation.apply {
+                                checkNotNull(
+                                    getCodedEnumOrNull<ContactPointSystem>(systemTarget),
+                                    ConceptMapInvalidValueSetError(
+                                        systemContext,
+                                        systemMapName,
+                                        systemValue,
+                                        systemTarget,
+                                        systemCode.metadata,
+                                    ),
+                                    parentContext,
+                                )
+                            }
+                            Code(value = systemTarget, extension = listOf(systemCode.extension))
+                        }
                     }
-                    Code(value = systemTarget, extension = listOf(systemCode.extension))
-                }
-            }
 
-            val useContext = telecomContext.append(LocationContext(ContactPoint::use))
-            val mappedUse = contactPoint.use?.value?.let { useValue ->
-                val useCode = registryClient.getConceptMappingForEnum(
-                    tenant,
-                    "${parentContext.element}.telecom.use",
-                    RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.use", useValue),
-                    ContactPointUse::class,
-                    RoninExtension.TENANT_SOURCE_TELECOM_USE.value,
-                    resource,
-                    forceCacheReloadTS
-                )
-                validation.apply {
-                    checkNotNull(
-                        useCode,
-                        FailedConceptMapLookupError(useContext, useValue, useMapName, useCode?.metadata),
-                        parentContext
-                    )
-                }
-                if (useCode == null) {
-                    contactPoint.use
-                } else {
-                    val useTarget = useCode.coding.code?.value
-                    validation.apply {
-                        checkNotNull(
-                            getCodedEnumOrNull<ContactPointUse>(useTarget),
-                            ConceptMapInvalidValueSetError(
-                                useContext,
-                                useMapName,
-                                useValue,
-                                useTarget,
-                                useCode.metadata
-                            ),
-                            parentContext
-                        )
+                val useContext = telecomContext.append(LocationContext(ContactPoint::use))
+                val mappedUse =
+                    contactPoint.use?.value?.let { useValue ->
+                        val useCode =
+                            registryClient.getConceptMappingForEnum(
+                                tenant,
+                                "${parentContext.element}.telecom.use",
+                                RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "ContactPoint.use", useValue),
+                                ContactPointUse::class,
+                                RoninExtension.TENANT_SOURCE_TELECOM_USE.value,
+                                resource,
+                                forceCacheReloadTS,
+                            )
+                        validation.apply {
+                            checkNotNull(
+                                useCode,
+                                FailedConceptMapLookupError(useContext, useValue, useMapName, useCode?.metadata),
+                                parentContext,
+                            )
+                        }
+                        if (useCode == null) {
+                            contactPoint.use
+                        } else {
+                            val useTarget = useCode.coding.code?.value
+                            validation.apply {
+                                checkNotNull(
+                                    getCodedEnumOrNull<ContactPointUse>(useTarget),
+                                    ConceptMapInvalidValueSetError(
+                                        useContext,
+                                        useMapName,
+                                        useValue,
+                                        useTarget,
+                                        useCode.metadata,
+                                    ),
+                                    parentContext,
+                                )
+                            }
+                            Code(value = useTarget, extension = listOf(useCode.extension))
+                        }
                     }
-                    Code(value = useTarget, extension = listOf(useCode.extension))
-                }
+                contactPoint.copy(system = mappedSystem, use = mappedUse)
             }
-            contactPoint.copy(system = mappedSystem, use = mappedUse)
-        }
 
         return Pair(transformed, validation)
     }

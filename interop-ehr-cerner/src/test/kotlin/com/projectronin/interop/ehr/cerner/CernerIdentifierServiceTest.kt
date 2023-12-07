@@ -18,23 +18,27 @@ internal class CernerIdentifierServiceTest {
     private val service = CernerIdentifierService()
     private val tenant = createTestTenant()
 
-    private val mrnIdentifier = mockk<Identifier> {
-        every { system } returns Uri(tenant.vendorAs<Cerner>().patientMRNSystem)
-        every { value } returns "mrn".asFHIR()
-    }
+    private val mrnIdentifier =
+        mockk<Identifier> {
+            every { system } returns Uri(tenant.vendorAs<Cerner>().patientMRNSystem)
+            every { value } returns "mrn".asFHIR()
+        }
 
     private val orderIdentifier = listOf(Identifier())
     private val encounterIdentifier = listOf(Identifier())
 
     private val fhirId = Id("id")
-    private val fhirIdentifiers = mockk<FHIRIdentifiers> {
-        every { id } returns fhirId
-    }
-    private val emptyFhirIdentifiers = mockk<FHIRIdentifiers> {
-        every { id } returns mockk {
-            every { value } returns null
+    private val fhirIdentifiers =
+        mockk<FHIRIdentifiers> {
+            every { id } returns fhirId
         }
-    }
+    private val emptyFhirIdentifiers =
+        mockk<FHIRIdentifiers> {
+            every { id } returns
+                mockk {
+                    every { value } returns null
+                }
+        }
 
     @Test
     fun `getPractitionerIdentifier throws exception`() {
@@ -84,9 +88,10 @@ internal class CernerIdentifierServiceTest {
 
     @Test
     fun `getMRNIdentifier returns throws an exception when no mrn is given`() {
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getMRNIdentifier(tenant, listOf())
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getMRNIdentifier(tenant, listOf())
+            }
         assertEquals("No MRN identifier with system '${tenant.vendorAs<Cerner>().patientMRNSystem}' found for Patient", exception.message)
     }
 

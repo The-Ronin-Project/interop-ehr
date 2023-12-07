@@ -13,18 +13,29 @@ interface PatientService : FHIRService<Patient> {
      * Finds the Bundle of patients associated to the requested
      * [tenant], [birthDate], [givenName], and [familyName] from an EHR tenant.
      */
-    fun findPatient(tenant: Tenant, birthDate: LocalDate, givenName: String, familyName: String): List<Patient>
+    fun findPatient(
+        tenant: Tenant,
+        birthDate: LocalDate,
+        givenName: String,
+        familyName: String,
+    ): List<Patient>
 
     /**
      * Finds the patient associated to any of the requested vendor's [patientIdsByKey] for a particular EHR [tenant].
      * Will return a map of supplied key, of type [K], to [Patient]s when found, otherwise no entry for that key.
      */
-    fun <K> findPatientsById(tenant: Tenant, patientIdsByKey: Map<K, Identifier>): Map<K, Patient>
+    fun <K> findPatientsById(
+        tenant: Tenant,
+        patientIdsByKey: Map<K, Identifier>,
+    ): Map<K, Patient>
 
     /**
      * Returns a single [Patient] based on their FHIR ID.
      */
-    fun getPatient(tenant: Tenant, patientFHIRID: String): Patient
+    fun getPatient(
+        tenant: Tenant,
+        patientFHIRID: String,
+    ): Patient
 
     /**
      * Finds FHIR ID (non-localized) for a patient, based on an Identifier value. Searches EHRDA first before querying
@@ -32,6 +43,6 @@ interface PatientService : FHIRService<Patient> {
      */
     fun getPatientFHIRId(
         tenant: Tenant,
-        patientIDValue: String
+        patientIDValue: String,
     ): String
 }

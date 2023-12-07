@@ -45,14 +45,14 @@ interface ObservationService : FHIRService<Observation> {
         patientFhirIds: List<String>,
         observationCategoryCodes: List<String>,
         startDate: LocalDate? = null,
-        endDate: LocalDate? = null
+        endDate: LocalDate? = null,
     ): List<Observation> {
         return findObservationsByPatientAndCategory(
             tenant,
             patientFhirIds,
             observationCategoryCodes.toSearchTokens(),
             startDate,
-            endDate
+            endDate,
         )
     }
 
@@ -66,16 +66,14 @@ interface ObservationService : FHIRService<Observation> {
         patientFhirIds: List<String>,
         observationCategoryCodes: List<FHIRSearchToken>,
         startDate: LocalDate? = null,
-        endDate: LocalDate? = null
-    ):
-        List<Observation>
+        endDate: LocalDate? = null,
+    ): List<Observation>
 
     fun findObservationsByCategory(
         tenant: Tenant,
         patientFhirIds: List<String>,
         observationCategoryCodes: List<ObservationCategoryCodes>,
         startDate: LocalDate? = null,
-        endDate: LocalDate? = null
-    ):
-        List<Observation>
+        endDate: LocalDate? = null,
+    ): List<Observation>
 }

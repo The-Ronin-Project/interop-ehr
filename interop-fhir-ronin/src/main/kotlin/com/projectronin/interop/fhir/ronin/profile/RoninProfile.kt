@@ -40,5 +40,5 @@ enum class RoninProfile(val value: String) {
     PATIENT("http://projectronin.io/fhir/StructureDefinition/ronin-patient"),
     PRACTITIONER("http://projectronin.io/fhir/StructureDefinition/ronin-practitioner"),
     PRACTITIONER_ROLE("http://projectronin.io/fhir/StructureDefinition/ronin-practitionerRole"),
-    OBSERVATION("http://projectronin.io/fhir/StructureDefinition/ronin-observation");
+    OBSERVATION("http://projectronin.io/fhir/StructureDefinition/ronin-observation"),
 }

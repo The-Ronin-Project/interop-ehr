@@ -21,16 +21,17 @@ class EpicServiceRequestServiceTest {
 
     @Test
     fun `getById - works`() {
-        val serviceRequest = mockk<ServiceRequest>(relaxed = true) {
-            every { id!!.value } returns "12345"
-        }
+        val serviceRequest =
+            mockk<ServiceRequest>(relaxed = true) {
+                every { id!!.value } returns "12345"
+            }
         val mockedResponse: EHRResponse = mockk()
         coEvery { mockedResponse.body(any()) } returns serviceRequest
 
         coEvery {
             epicClient.get(
                 tenant,
-                "/api/FHIR/R4/ServiceRequest/12345"
+                "/api/FHIR/R4/ServiceRequest/12345",
             )
         } returns mockedResponse
 
@@ -41,9 +42,10 @@ class EpicServiceRequestServiceTest {
 
     @Test
     fun `getByPatient - works`() {
-        val httpResponse = mockk<HttpResponse> {
-            every { status } returns HttpStatusCode.OK
-        }
+        val httpResponse =
+            mockk<HttpResponse> {
+                every { status } returns HttpStatusCode.OK
+            }
         coEvery { httpResponse.body<Bundle>() } returns validServiceRequestBundle
 
         val ehrResponse = EHRResponse(httpResponse, "12345")
@@ -53,8 +55,8 @@ class EpicServiceRequestServiceTest {
                 "/api/FHIR/R4/ServiceRequest",
                 mapOf(
                     "patient" to "patty",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 

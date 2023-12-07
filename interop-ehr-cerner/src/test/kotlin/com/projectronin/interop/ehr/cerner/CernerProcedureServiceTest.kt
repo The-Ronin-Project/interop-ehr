@@ -33,8 +33,8 @@ class CernerProcedureServiceTest {
             httpResponse.body<Procedure>(
                 TypeInfo(
                     Procedure::class,
-                    Procedure::class.java
-                )
+                    Procedure::class.java,
+                ),
             )
         } returns mockProcedure
         coEvery { cernerClient.get(tenant, "/Procedure/fakeFaKEfAKefakE") } returns ehrResponse
@@ -50,23 +50,28 @@ class CernerProcedureServiceTest {
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
                 secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-                timezone = "UTC-06:00"
+                timezone = "UTC-06:00",
             )
 
-        val procedure1 = mockk<BundleEntry> {
-            every { resource } returns mockk<Procedure>(relaxed = true) {
-                every { id!!.value } returns "fakeFaKEfAKefakE"
+        val procedure1 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Procedure>(relaxed = true) {
+                        every { id!!.value } returns "fakeFaKEfAKefakE"
+                    }
             }
-        }
-        val procedure2 = mockk<BundleEntry> {
-            every { resource } returns mockk<Procedure>(relaxed = true) {
-                every { id!!.value } returns "fakeFaKEfAKefakE"
+        val procedure2 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Procedure>(relaxed = true) {
+                        every { id!!.value } returns "fakeFaKEfAKefakE"
+                    }
             }
-        }
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(procedure1, procedure2)
-            every { link } returns emptyList()
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(procedure1, procedure2)
+                every { link } returns emptyList()
+            }
         coEvery {
             cernerClient.get(
                 tenant,
@@ -74,8 +79,8 @@ class CernerProcedureServiceTest {
                 mapOf(
                     "patient" to "fakeFaKEfAKefakE",
                     "date" to RepeatingParameter(listOf("ge2015-01-01T00:00:00-06:00", "le2015-11-02T00:00:00-06:00")),
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "fakeFaKEfAKefakE")
 
@@ -84,7 +89,7 @@ class CernerProcedureServiceTest {
                 tenant,
                 "fakeFaKEfAKefakE",
                 LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
+                LocalDate.of(2015, 11, 1),
             )
 
         assertEquals(listOf(procedure1.resource, procedure2.resource), validResponse)

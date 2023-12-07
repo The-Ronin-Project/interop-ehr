@@ -42,10 +42,11 @@ class CernerMessageServiceTest {
 
     @Test
     fun `throws exception when not a Cerner vendor`() {
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "test"
-            every { vendor } returns mockk<Epic>()
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns "test"
+                every { vendor } returns mockk<Epic>()
+            }
 
         val messageInput = mockk<EHRMessageInput>()
         val exception = assertThrows<IllegalStateException> { messageService.sendMessage(tenant, messageInput) }
@@ -54,33 +55,38 @@ class CernerMessageServiceTest {
 
     @Test
     fun `throws exception when no Location header in response`() {
-        val tenant = createTestTenant(
-            mnemonic = "test",
-            practitioner = "SendingPractitioner",
-            messageTopic = "From Ronin",
-            messageCategory = "alert",
-            messagePriority = "routine"
-        )
-        val messageInput = EHRMessageInput(
-            text = "This is a simple message.",
-            "PatientFhirId",
-            listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))))
-        )
+        val tenant =
+            createTestTenant(
+                mnemonic = "test",
+                practitioner = "SendingPractitioner",
+                messageTopic = "From Ronin",
+                messageCategory = "alert",
+                messagePriority = "routine",
+            )
+        val messageInput =
+            EHRMessageInput(
+                text = "This is a simple message.",
+                "PatientFhirId",
+                listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1")))),
+            )
 
-        val expectedCommunication = createCommunication(
-            patientFhirId = "PatientFhirId",
-            topic = "From Ronin",
-            category = "alert",
-            priority = "routine",
-            sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
-            recipients = listOf(Reference(reference = "Practitioner/Recipient1".asFHIR())),
-            encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
-        )
-        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { httpResponse.headers } returns mockk {
-                every { this@mockk["Location"] } returns null
+        val expectedCommunication =
+            createCommunication(
+                patientFhirId = "PatientFhirId",
+                topic = "From Ronin",
+                category = "alert",
+                priority = "routine",
+                sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
+                recipients = listOf(Reference(reference = "Practitioner/Recipient1".asFHIR())),
+                encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg==",
+            )
+        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns
+            mockk {
+                every { httpResponse.headers } returns
+                    mockk {
+                        every { this@mockk["Location"] } returns null
+                    }
             }
-        }
 
         val exception = assertThrows<ResourceCreateException> { messageService.sendMessage(tenant, messageInput) }
         assertEquals("Exception when calling /Communication for test: No Location header received", exception.message)
@@ -88,70 +94,80 @@ class CernerMessageServiceTest {
 
     @Test
     fun `throws exception when invalid Location header in response`() {
-        val tenant = createTestTenant(
-            mnemonic = "test",
-            practitioner = "SendingPractitioner",
-            messageTopic = "From Ronin",
-            messageCategory = "alert",
-            messagePriority = "routine"
-        )
-        val messageInput = EHRMessageInput(
-            text = "This is a simple message.",
-            "PatientFhirId",
-            listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))))
-        )
+        val tenant =
+            createTestTenant(
+                mnemonic = "test",
+                practitioner = "SendingPractitioner",
+                messageTopic = "From Ronin",
+                messageCategory = "alert",
+                messagePriority = "routine",
+            )
+        val messageInput =
+            EHRMessageInput(
+                text = "This is a simple message.",
+                "PatientFhirId",
+                listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1")))),
+            )
 
-        val expectedCommunication = createCommunication(
-            patientFhirId = "PatientFhirId",
-            topic = "From Ronin",
-            category = "alert",
-            priority = "routine",
-            sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
-            recipients = listOf(Reference(reference = "Practitioner/Recipient1".asFHIR())),
-            encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
-        )
-        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { httpResponse.headers } returns mockk {
-                every { this@mockk["Location"] } returns "http://projectronin.com"
+        val expectedCommunication =
+            createCommunication(
+                patientFhirId = "PatientFhirId",
+                topic = "From Ronin",
+                category = "alert",
+                priority = "routine",
+                sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
+                recipients = listOf(Reference(reference = "Practitioner/Recipient1".asFHIR())),
+                encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg==",
+            )
+        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns
+            mockk {
+                every { httpResponse.headers } returns
+                    mockk {
+                        every { this@mockk["Location"] } returns "http://projectronin.com"
+                    }
             }
-        }
 
         val exception = assertThrows<ResourceCreateException> { messageService.sendMessage(tenant, messageInput) }
         assertEquals(
             "Exception when calling /Communication for test: Returned location (http://projectronin.com) is not a valid Reference",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `successful for single recipient`() {
-        val tenant = createTestTenant(
-            mnemonic = "test",
-            practitioner = "SendingPractitioner",
-            messageTopic = "From Ronin",
-            messageCategory = "alert",
-            messagePriority = "routine"
-        )
-        val messageInput = EHRMessageInput(
-            text = "This is a simple message.",
-            "PatientFhirId",
-            listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))))
-        )
+        val tenant =
+            createTestTenant(
+                mnemonic = "test",
+                practitioner = "SendingPractitioner",
+                messageTopic = "From Ronin",
+                messageCategory = "alert",
+                messagePriority = "routine",
+            )
+        val messageInput =
+            EHRMessageInput(
+                text = "This is a simple message.",
+                "PatientFhirId",
+                listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1")))),
+            )
 
-        val expectedCommunication = createCommunication(
-            patientFhirId = "PatientFhirId",
-            topic = "From Ronin",
-            category = "alert",
-            priority = "routine",
-            sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
-            recipients = listOf(Reference(reference = "Practitioner/Recipient1".asFHIR())),
-            encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
-        )
-        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { httpResponse.headers } returns mockk {
-                every { this@mockk["Location"] } returns "Communication/1-2-3-4"
+        val expectedCommunication =
+            createCommunication(
+                patientFhirId = "PatientFhirId",
+                topic = "From Ronin",
+                category = "alert",
+                priority = "routine",
+                sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
+                recipients = listOf(Reference(reference = "Practitioner/Recipient1".asFHIR())),
+                encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg==",
+            )
+        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns
+            mockk {
+                every { httpResponse.headers } returns
+                    mockk {
+                        every { this@mockk["Location"] } returns "Communication/1-2-3-4"
+                    }
             }
-        }
 
         val response = messageService.sendMessage(tenant, messageInput)
         assertEquals("1-2-3-4", response)
@@ -159,39 +175,45 @@ class CernerMessageServiceTest {
 
     @Test
     fun `successful for multiple recipients`() {
-        val tenant = createTestTenant(
-            mnemonic = "test",
-            practitioner = "SendingPractitioner",
-            messageTopic = "From Ronin",
-            messageCategory = "alert",
-            messagePriority = "routine"
-        )
-        val messageInput = EHRMessageInput(
-            text = "This is a simple message.",
-            "PatientFhirId",
-            listOf(
-                EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))),
-                EHRRecipient("Recipient2", IdVendorIdentifier(Id("Recipient2")))
+        val tenant =
+            createTestTenant(
+                mnemonic = "test",
+                practitioner = "SendingPractitioner",
+                messageTopic = "From Ronin",
+                messageCategory = "alert",
+                messagePriority = "routine",
             )
-        )
+        val messageInput =
+            EHRMessageInput(
+                text = "This is a simple message.",
+                "PatientFhirId",
+                listOf(
+                    EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))),
+                    EHRRecipient("Recipient2", IdVendorIdentifier(Id("Recipient2"))),
+                ),
+            )
 
-        val expectedCommunication = createCommunication(
-            patientFhirId = "PatientFhirId",
-            topic = "From Ronin",
-            category = "alert",
-            priority = "routine",
-            sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
-            recipients = listOf(
-                Reference(reference = "Practitioner/Recipient1".asFHIR()),
-                Reference(reference = "Practitioner/Recipient2".asFHIR())
-            ),
-            encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
-        )
-        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { httpResponse.headers } returns mockk {
-                every { this@mockk["Location"] } returns "Communication/1-2-3-4"
+        val expectedCommunication =
+            createCommunication(
+                patientFhirId = "PatientFhirId",
+                topic = "From Ronin",
+                category = "alert",
+                priority = "routine",
+                sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
+                recipients =
+                    listOf(
+                        Reference(reference = "Practitioner/Recipient1".asFHIR()),
+                        Reference(reference = "Practitioner/Recipient2".asFHIR()),
+                    ),
+                encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg==",
+            )
+        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns
+            mockk {
+                every { httpResponse.headers } returns
+                    mockk {
+                        every { this@mockk["Location"] } returns "Communication/1-2-3-4"
+                    }
             }
-        }
 
         val response = messageService.sendMessage(tenant, messageInput)
         assertEquals("1-2-3-4", response)
@@ -199,33 +221,38 @@ class CernerMessageServiceTest {
 
     @Test
     fun `uses default messageTopic when none provided on vendor`() {
-        val tenant = createTestTenant(
-            mnemonic = "test",
-            practitioner = "SendingPractitioner",
-            messageTopic = null,
-            messageCategory = "alert",
-            messagePriority = "routine"
-        )
-        val messageInput = EHRMessageInput(
-            text = "This is a simple message.",
-            "PatientFhirId",
-            listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))))
-        )
+        val tenant =
+            createTestTenant(
+                mnemonic = "test",
+                practitioner = "SendingPractitioner",
+                messageTopic = null,
+                messageCategory = "alert",
+                messagePriority = "routine",
+            )
+        val messageInput =
+            EHRMessageInput(
+                text = "This is a simple message.",
+                "PatientFhirId",
+                listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1")))),
+            )
 
-        val expectedCommunication = createCommunication(
-            patientFhirId = "PatientFhirId",
-            topic = "Ronin Symptoms Alert",
-            category = "alert",
-            priority = "routine",
-            sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
-            recipients = listOf(Reference(reference = "Practitioner/Recipient1".asFHIR())),
-            encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
-        )
-        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { httpResponse.headers } returns mockk {
-                every { this@mockk["Location"] } returns "Communication/1-2-3-4"
+        val expectedCommunication =
+            createCommunication(
+                patientFhirId = "PatientFhirId",
+                topic = "Ronin Symptoms Alert",
+                category = "alert",
+                priority = "routine",
+                sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
+                recipients = listOf(Reference(reference = "Practitioner/Recipient1".asFHIR())),
+                encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg==",
+            )
+        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns
+            mockk {
+                every { httpResponse.headers } returns
+                    mockk {
+                        every { this@mockk["Location"] } returns "Communication/1-2-3-4"
+                    }
             }
-        }
 
         val response = messageService.sendMessage(tenant, messageInput)
         assertEquals("1-2-3-4", response)
@@ -233,33 +260,38 @@ class CernerMessageServiceTest {
 
     @Test
     fun `uses default messageCategory when none provided on vendor`() {
-        val tenant = createTestTenant(
-            mnemonic = "test",
-            practitioner = "SendingPractitioner",
-            messageTopic = "From Ronin",
-            messageCategory = null,
-            messagePriority = "routine"
-        )
-        val messageInput = EHRMessageInput(
-            text = "This is a simple message.",
-            "PatientFhirId",
-            listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))))
-        )
+        val tenant =
+            createTestTenant(
+                mnemonic = "test",
+                practitioner = "SendingPractitioner",
+                messageTopic = "From Ronin",
+                messageCategory = null,
+                messagePriority = "routine",
+            )
+        val messageInput =
+            EHRMessageInput(
+                text = "This is a simple message.",
+                "PatientFhirId",
+                listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1")))),
+            )
 
-        val expectedCommunication = createCommunication(
-            patientFhirId = "PatientFhirId",
-            topic = "From Ronin",
-            category = "notification",
-            priority = "routine",
-            sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
-            recipients = listOf(Reference(reference = "Practitioner/Recipient1".asFHIR())),
-            encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
-        )
-        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { httpResponse.headers } returns mockk {
-                every { this@mockk["Location"] } returns "Communication/1-2-3-4"
+        val expectedCommunication =
+            createCommunication(
+                patientFhirId = "PatientFhirId",
+                topic = "From Ronin",
+                category = "notification",
+                priority = "routine",
+                sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
+                recipients = listOf(Reference(reference = "Practitioner/Recipient1".asFHIR())),
+                encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg==",
+            )
+        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns
+            mockk {
+                every { httpResponse.headers } returns
+                    mockk {
+                        every { this@mockk["Location"] } returns "Communication/1-2-3-4"
+                    }
             }
-        }
 
         val response = messageService.sendMessage(tenant, messageInput)
         assertEquals("1-2-3-4", response)
@@ -267,33 +299,38 @@ class CernerMessageServiceTest {
 
     @Test
     fun `uses default messagePriority when none provided on vendor`() {
-        val tenant = createTestTenant(
-            mnemonic = "test",
-            practitioner = "SendingPractitioner",
-            messageTopic = "From Ronin",
-            messageCategory = "alert",
-            messagePriority = null
-        )
-        val messageInput = EHRMessageInput(
-            text = "This is a simple message.",
-            "PatientFhirId",
-            listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1"))))
-        )
+        val tenant =
+            createTestTenant(
+                mnemonic = "test",
+                practitioner = "SendingPractitioner",
+                messageTopic = "From Ronin",
+                messageCategory = "alert",
+                messagePriority = null,
+            )
+        val messageInput =
+            EHRMessageInput(
+                text = "This is a simple message.",
+                "PatientFhirId",
+                listOf(EHRRecipient("Recipient1", IdVendorIdentifier(Id("Recipient1")))),
+            )
 
-        val expectedCommunication = createCommunication(
-            patientFhirId = "PatientFhirId",
-            topic = "From Ronin",
-            category = "alert",
-            priority = "urgent",
-            sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
-            recipients = listOf(Reference(reference = "Practitioner/Recipient1".asFHIR())),
-            encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg=="
-        )
-        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns mockk {
-            every { httpResponse.headers } returns mockk {
-                every { this@mockk["Location"] } returns "Communication/1-2-3-4"
+        val expectedCommunication =
+            createCommunication(
+                patientFhirId = "PatientFhirId",
+                topic = "From Ronin",
+                category = "alert",
+                priority = "urgent",
+                sender = Reference(reference = "Practitioner/SendingPractitioner".asFHIR()),
+                recipients = listOf(Reference(reference = "Practitioner/Recipient1".asFHIR())),
+                encodedText = "VGhpcyBpcyBhIHNpbXBsZSBtZXNzYWdlLg==",
+            )
+        coEvery { cernerClient.post(tenant, "/Communication", expectedCommunication) } returns
+            mockk {
+                every { httpResponse.headers } returns
+                    mockk {
+                        every { this@mockk["Location"] } returns "Communication/1-2-3-4"
+                    }
             }
-        }
 
         val response = messageService.sendMessage(tenant, messageInput)
         assertEquals("1-2-3-4", response)
@@ -306,34 +343,39 @@ class CernerMessageServiceTest {
         priority: String,
         recipients: List<Reference>,
         sender: Reference,
-        encodedText: String
-    ): Communication = Communication(
-        status = EventStatus.COMPLETED.asCode(),
-        category = listOf(
-            CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://terminology.hl7.org/CodeSystem/communication-category"),
-                        code = Code(category)
-                    )
-                )
-            )
-        ),
-        priority = Code(priority),
-        subject = Reference(reference = FHIRString("Patient/$patientFhirId")),
-        topic = CodeableConcept(text = FHIRString(topic)),
-        recipient = recipients,
-        sender = sender,
-        payload = listOf(
-            CommunicationPayload(
-                content = DynamicValue(
-                    DynamicValueType.ATTACHMENT,
-                    Attachment(
-                        contentType = Code("text/plain"),
-                        data = Base64Binary(encodedText)
-                    )
-                )
-            )
+        encodedText: String,
+    ): Communication =
+        Communication(
+            status = EventStatus.COMPLETED.asCode(),
+            category =
+                listOf(
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = Uri("http://terminology.hl7.org/CodeSystem/communication-category"),
+                                    code = Code(category),
+                                ),
+                            ),
+                    ),
+                ),
+            priority = Code(priority),
+            subject = Reference(reference = FHIRString("Patient/$patientFhirId")),
+            topic = CodeableConcept(text = FHIRString(topic)),
+            recipient = recipients,
+            sender = sender,
+            payload =
+                listOf(
+                    CommunicationPayload(
+                        content =
+                            DynamicValue(
+                                DynamicValueType.ATTACHMENT,
+                                Attachment(
+                                    contentType = Code("text/plain"),
+                                    data = Base64Binary(encodedText),
+                                ),
+                            ),
+                    ),
+                ),
         )
-    )
 }

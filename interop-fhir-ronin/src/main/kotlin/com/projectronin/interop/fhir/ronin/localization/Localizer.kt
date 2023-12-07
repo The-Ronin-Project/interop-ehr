@@ -20,12 +20,18 @@ class Localizer : BaseGenericTransformer() {
     /**
      * Localizes the [element] for the [tenant]
      */
-    fun <T : Any> localize(element: T, tenant: Tenant): T {
+    fun <T : Any> localize(
+        element: T,
+        tenant: Tenant,
+    ): T {
         val localizedValues = getTransformedValues(element, tenant)
         return copy(element, localizedValues)
     }
 
-    override fun transformType(element: Any, tenant: Tenant): TransformResult {
+    override fun transformType(
+        element: Any,
+        tenant: Tenant,
+    ): TransformResult {
         return TransformResult(
             when (element) {
                 is DynamicValue<*> -> localizeDynamicValue(element as DynamicValue<Any>, tenant)
@@ -33,7 +39,7 @@ class Localizer : BaseGenericTransformer() {
                 is Reference -> localizeReference(element, tenant)
                 is Validatable<*> -> transformOrNull(element, tenant)
                 else -> null
-            }
+            },
         )
     }
 
@@ -42,7 +48,7 @@ class Localizer : BaseGenericTransformer() {
      */
     private fun localizeDynamicValue(
         dynamicValue: DynamicValue<Any>,
-        tenant: Tenant
+        tenant: Tenant,
     ): DynamicValue<Any>? {
         val localizedValue = transformType(dynamicValue.value, tenant)
         return localizedValue.element?.let { DynamicValue(dynamicValue.type, it) }
@@ -51,12 +57,18 @@ class Localizer : BaseGenericTransformer() {
     /**
      * Localizes the [id] for the [tenant].
      */
-    private fun localizeId(id: Id, tenant: Tenant): Id? = Id(id.value?.localize(tenant), id.id, id.extension)
+    private fun localizeId(
+        id: Id,
+        tenant: Tenant,
+    ): Id? = Id(id.value?.localize(tenant), id.id, id.extension)
 
     /**
      * Localizes the [reference] for the [tenant].
      */
-    private fun localizeReference(reference: Reference, tenant: Tenant): Reference? {
+    private fun localizeReference(
+        reference: Reference,
+        tenant: Tenant,
+    ): Reference? {
         val nonReferenceLocalized = transformOrNull(reference, tenant) ?: reference
         return nonReferenceLocalized.localizeReference(tenant)
     }

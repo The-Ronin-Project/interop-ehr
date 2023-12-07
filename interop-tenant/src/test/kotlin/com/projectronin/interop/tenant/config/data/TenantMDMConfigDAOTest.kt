@@ -23,28 +23,31 @@ import java.sql.SQLIntegrityConstraintViolationException
 class TenantMDMConfigDAOTest {
     @DBRiderConnection
     lateinit var connectionHolder: ConnectionHolder
-    private val ehrDO = mockk<EhrDO> {
-        every { id } returns 101
-        every { vendorType } returns VendorType.EPIC
-        every { clientId } returns "client"
-        every { publicKey } returns "public"
-        every { privateKey } returns "private"
-    }
-    private val tenantDO = mockk<TenantDO> {
-        every { id } returns 1001
-        every { mnemonic } returns "apposend"
-        every { name } returns "Epic AppOrchard Sandbox"
-        every { ehr } returns ehrDO
-        every { availableBatchStart } returns null
-        every { availableBatchEnd } returns null
-    }
-    private val tenantDO2 = mockk<TenantDO> {
-        every { id } returns 1002
-        every { mnemonic } returns "apposend2"
-        every { ehr } returns ehrDO
-        every { availableBatchStart } returns null
-        every { availableBatchEnd } returns null
-    }
+    private val ehrDO =
+        mockk<EhrDO> {
+            every { id } returns 101
+            every { vendorType } returns VendorType.EPIC
+            every { clientId } returns "client"
+            every { publicKey } returns "public"
+            every { privateKey } returns "private"
+        }
+    private val tenantDO =
+        mockk<TenantDO> {
+            every { id } returns 1001
+            every { mnemonic } returns "apposend"
+            every { name } returns "Epic AppOrchard Sandbox"
+            every { ehr } returns ehrDO
+            every { availableBatchStart } returns null
+            every { availableBatchEnd } returns null
+        }
+    private val tenantDO2 =
+        mockk<TenantDO> {
+            every { id } returns 1002
+            every { mnemonic } returns "apposend2"
+            every { ehr } returns ehrDO
+            every { availableBatchStart } returns null
+            every { availableBatchEnd } returns null
+        }
 
     @Test
     @DataSet(value = ["/dbunit/tenant-mdm-config/TenantMDMConfig.yaml"], cleanAfter = true)
@@ -74,12 +77,13 @@ class TenantMDMConfigDAOTest {
         val providerIdentifierSystem = "system2"
         val receivingSystem = "application2"
 
-        val testobj = TenantMDMConfigDO {
-            this.tenant = tenantDO
-            this.mdmDocumentTypeID = mdmDocumentTypeID
-            this.providerIdentifierSystem = providerIdentifierSystem
-            this.receivingSystem = receivingSystem
-        }
+        val testobj =
+            TenantMDMConfigDO {
+                this.tenant = tenantDO
+                this.mdmDocumentTypeID = mdmDocumentTypeID
+                this.providerIdentifierSystem = providerIdentifierSystem
+                this.receivingSystem = receivingSystem
+            }
         val result = dao.updateConfig(testobj)!!
         assertEquals(tenantDO.id, result.tenant.id)
         assertEquals(mdmDocumentTypeID, result.mdmDocumentTypeID)
@@ -92,12 +96,13 @@ class TenantMDMConfigDAOTest {
     @ExpectedDataSet(value = ["/dbunit/tenant-mdm-config/TenantMDMConfig.yaml"])
     fun `updateConfig fails correctly`() {
         val dao = TenantMDMConfigDAO(KtormHelper.database())
-        val testobj = TenantMDMConfigDO {
-            tenant = tenantDO2
-            mdmDocumentTypeID = "54321"
-            providerIdentifierSystem = "system"
-            receivingSystem = "application"
-        }
+        val testobj =
+            TenantMDMConfigDO {
+                tenant = tenantDO2
+                mdmDocumentTypeID = "54321"
+                providerIdentifierSystem = "system"
+                receivingSystem = "application"
+            }
         val result = dao.updateConfig(testobj)
         assertNull(result)
     }
@@ -107,12 +112,13 @@ class TenantMDMConfigDAOTest {
     @ExpectedDataSet(value = ["/dbunit/tenant-mdm-config/ExpectedAfterInsert.yaml"])
     fun `insert works correctly`() {
         val dao = TenantMDMConfigDAO(KtormHelper.database())
-        val testobj = TenantMDMConfigDO {
-            tenant = tenantDO2
-            mdmDocumentTypeID = "23456"
-            providerIdentifierSystem = "system2"
-            receivingSystem = "application2"
-        }
+        val testobj =
+            TenantMDMConfigDO {
+                tenant = tenantDO2
+                mdmDocumentTypeID = "23456"
+                providerIdentifierSystem = "system2"
+                receivingSystem = "application2"
+            }
         val result = dao.insertConfig(testobj)
         assertEquals(testobj.mdmDocumentTypeID, result.mdmDocumentTypeID)
         assertEquals(testobj.tenant.id, result.tenant.id)
@@ -124,17 +130,19 @@ class TenantMDMConfigDAOTest {
     @DataSet(value = ["/dbunit/tenant-mdm-config/TenantMDMConfig.yaml"], cleanAfter = true)
     fun `insert fails correctly`() {
         val dao = TenantMDMConfigDAO(KtormHelper.database())
-        val fakeTenantDO = mockk<TenantDO> {
-            every { id } returns -1
-            every { mnemonic } returns "no"
-            every { ehr } returns ehrDO
-            every { availableBatchStart } returns null
-            every { availableBatchEnd } returns null
-        }
-        val testobj = TenantMDMConfigDO {
-            tenant = fakeTenantDO
-            mdmDocumentTypeID = "no"
-        }
+        val fakeTenantDO =
+            mockk<TenantDO> {
+                every { id } returns -1
+                every { mnemonic } returns "no"
+                every { ehr } returns ehrDO
+                every { availableBatchStart } returns null
+                every { availableBatchEnd } returns null
+            }
+        val testobj =
+            TenantMDMConfigDO {
+                tenant = fakeTenantDO
+                mdmDocumentTypeID = "no"
+            }
         assertThrows<SQLIntegrityConstraintViolationException> { dao.insertConfig(testobj) }
     }
 }

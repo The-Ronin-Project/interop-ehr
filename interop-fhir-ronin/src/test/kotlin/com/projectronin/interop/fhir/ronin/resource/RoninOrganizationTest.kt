@@ -45,16 +45,19 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class RoninOrganizationTest {
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
-    private val normalizer = mockk<Normalizer> {
-        every { normalize(any(), tenant) } answers { firstArg() }
-    }
-    private val localizer = mockk<Localizer> {
-        every { localize(any(), tenant) } answers { firstArg() }
-    }
+    private val normalizer =
+        mockk<Normalizer> {
+            every { normalize(any(), tenant) } answers { firstArg() }
+        }
+    private val localizer =
+        mockk<Localizer> {
+            every { localize(any(), tenant) } answers { firstArg() }
+        }
     private val roninOrganization = RoninOrganization(normalizer, localizer)
 
     @Test
@@ -64,150 +67,162 @@ class RoninOrganizationTest {
 
     @Test
     fun `validate fails without ronin identifiers`() {
-        val organization = Organization(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
-            name = "Organization Name".asFHIR(),
-            active = true.asFHIR()
-        )
+        val organization =
+            Organization(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
+                name = "Organization Name".asFHIR(),
+                active = true.asFHIR(),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninOrganization.validate(organization).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninOrganization.validate(organization).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ Organization.identifier\n" +
                 "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Organization.identifier\n" +
                 "ERROR RONIN_DAUTH_ID_001: Data Authority identifier required @ Organization.identifier",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate fails with no organization name provided`() {
-        val organization = Organization(
-            meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            active = true.asFHIR()
-        )
+        val organization =
+            Organization(
+                meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
+                id = Id("12345"),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                active = true.asFHIR(),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninOrganization.validate(organization).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninOrganization.validate(organization).alertIfErrors()
+            }
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: name is a required element @ Organization.name",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate fails with no organization active provided`() {
-        val organization = Organization(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = "Organization name".asFHIR()
-        )
+        val organization =
+            Organization(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = "Organization name".asFHIR(),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninOrganization.validate(organization).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninOrganization.validate(organization).alertIfErrors()
+            }
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: active is a required element @ Organization.active",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate against R4 profile for organization`() {
-        val organization = Organization(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = "Organization name".asFHIR(),
-            active = true.asFHIR()
-        )
+        val organization =
+            Organization(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = "Organization name".asFHIR(),
+                active = true.asFHIR(),
+            )
 
         mockkObject(R4OrganizationValidator)
         every {
             R4OrganizationValidator.validate(
                 organization,
-                LocationContext(Organization::class)
+                LocationContext(Organization::class),
             )
-        } returns validation {
-            checkNotNull(
-                null,
-                RequiredFieldError(Organization::name),
-                LocationContext(Organization::class)
-            )
-            checkNotNull(
-                null,
-                RequiredFieldError(Organization::active),
-                LocationContext(Organization::class)
-            )
-        }
+        } returns
+            validation {
+                checkNotNull(
+                    null,
+                    RequiredFieldError(Organization::name),
+                    LocationContext(Organization::class),
+                )
+                checkNotNull(
+                    null,
+                    RequiredFieldError(Organization::active),
+                    LocationContext(Organization::class),
+                )
+            }
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninOrganization.validate(organization).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninOrganization.validate(organization).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: name is a required element @ Organization.name\n" +
                 "ERROR REQ_FIELD: active is a required element @ Organization.active",
-            exception.message
+            exception.message,
         )
 
         unmockkObject(R4OrganizationValidator)
@@ -215,156 +230,178 @@ class RoninOrganizationTest {
 
     @Test
     fun `validate checks meta`() {
-        val organization = Organization(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = "Organization name".asFHIR(),
-            active = true.asFHIR()
-        )
+        val organization =
+            Organization(
+                id = Id("12345"),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = "Organization name".asFHIR(),
+                active = true.asFHIR(),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninOrganization.validate(organization).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninOrganization.validate(organization).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: meta is a required element @ Organization.meta",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate is successful with name and active`() {
-        val organization = Organization(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = "Organization name".asFHIR(),
-            active = true.asFHIR()
-        )
+        val organization =
+            Organization(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = "Organization name".asFHIR(),
+                active = true.asFHIR(),
+            )
 
         roninOrganization.validate(organization).alertIfErrors()
     }
 
     @Test
     fun `transform organization with all attributes`() {
-        val organization = Organization(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/organization.html")),
-                source = Uri("source")
-            ),
-            implicitRules = Uri("implicit-rules"),
-            language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(Location(id = Id("67890"))),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://hl7.org/extension-1"),
-                    value = DynamicValue(DynamicValueType.STRING, "value")
-                )
-            ),
-            modifierExtension = listOf(
-                Extension(
-                    url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            identifier = listOf(Identifier(value = "id".asFHIR())),
-            active = true.asFHIR(),
-            type = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/organization-type"),
-                            code = Code("prov"),
-                            display = "Healthcare Provider".asFHIR()
-                        )
-                    )
-                )
-            ),
-            name = "Organization Name".asFHIR(),
-            alias = listOf(
-                "Other Organization Name".asFHIR(),
-                "Organization also known as...".asFHIR()
-            ),
-            telecom = listOf(
-                ContactPoint(
-                    id = "FAKEID".asFHIR(),
-                    system = Code("phone"),
-                    value = "555-555-5555".asFHIR(),
-                    use = Code("work")
-                )
-            ),
-            address = listOf(
-                Address(
-                    country = "USA".asFHIR()
-                )
-            ),
-            partOf = Reference(reference = "Organization/super".asFHIR()),
-            contact = listOf(
-                OrganizationContact(
-                    purpose = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                code = Code("fake")
-                            )
-                        )
+        val organization =
+            Organization(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("http://hl7.org/fhir/R4/organization.html")),
+                        source = Uri("source"),
                     ),
-                    name = HumanName(
-                        given = listOf(
-                            "FakeName".asFHIR()
-                        )
+                implicitRules = Uri("implicit-rules"),
+                language = Code("en-US"),
+                text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
+                contained = listOf(Location(id = Id("67890"))),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/extension-1"),
+                            value = DynamicValue(DynamicValueType.STRING, "value"),
+                        ),
                     ),
-                    telecom = listOf(
+                modifierExtension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/modifier-extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
+                identifier = listOf(Identifier(value = "id".asFHIR())),
+                active = true.asFHIR(),
+                type =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/organization-type"),
+                                        code = Code("prov"),
+                                        display = "Healthcare Provider".asFHIR(),
+                                    ),
+                                ),
+                        ),
+                    ),
+                name = "Organization Name".asFHIR(),
+                alias =
+                    listOf(
+                        "Other Organization Name".asFHIR(),
+                        "Organization also known as...".asFHIR(),
+                    ),
+                telecom =
+                    listOf(
                         ContactPoint(
+                            id = "FAKEID".asFHIR(),
                             system = Code("phone"),
-                            value = "555-555-5555".asFHIR()
-                        )
+                            value = "555-555-5555".asFHIR(),
+                            use = Code("work"),
+                        ),
                     ),
-                    address = Address(
-                        country = "USA".asFHIR()
-                    )
-                )
-            ),
-            endpoint = listOf(
-                Reference(
-                    reference = "Endpoint/1357".asFHIR()
-                )
+                address =
+                    listOf(
+                        Address(
+                            country = "USA".asFHIR(),
+                        ),
+                    ),
+                partOf = Reference(reference = "Organization/super".asFHIR()),
+                contact =
+                    listOf(
+                        OrganizationContact(
+                            purpose =
+                                CodeableConcept(
+                                    coding =
+                                        listOf(
+                                            Coding(
+                                                code = Code("fake"),
+                                            ),
+                                        ),
+                                ),
+                            name =
+                                HumanName(
+                                    given =
+                                        listOf(
+                                            "FakeName".asFHIR(),
+                                        ),
+                                ),
+                            telecom =
+                                listOf(
+                                    ContactPoint(
+                                        system = Code("phone"),
+                                        value = "555-555-5555".asFHIR(),
+                                    ),
+                                ),
+                            address =
+                                Address(
+                                    country = "USA".asFHIR(),
+                                ),
+                        ),
+                    ),
+                endpoint =
+                    listOf(
+                        Reference(
+                            reference = "Endpoint/1357".asFHIR(),
+                        ),
+                    ),
             )
-        )
 
         val (transformResponse, validation) = roninOrganization.transform(organization, tenant)
         validation.alertIfErrors()
@@ -378,32 +415,32 @@ class RoninOrganizationTest {
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(Location(id = Id("67890"))),
-            transformed.contained
+            transformed.contained,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),
-                    value = DynamicValue(DynamicValueType.STRING, "value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "value"),
+                ),
             ),
-            transformed.extension
+            transformed.extension,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "Value"),
+                ),
             ),
-            transformed.modifierExtension
+            transformed.modifierExtension,
         )
         assertEquals(
             listOf(
@@ -411,43 +448,44 @@ class RoninOrganizationTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertNotNull(transformed.active)
         assertEquals(
             listOf(
                 CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/organization-type"),
-                            code = Code("prov"),
-                            display = "Healthcare Provider".asFHIR()
-                        )
-                    )
-                )
+                    coding =
+                        listOf(
+                            Coding(
+                                system = Uri("http://terminology.hl7.org/CodeSystem/organization-type"),
+                                code = Code("prov"),
+                                display = "Healthcare Provider".asFHIR(),
+                            ),
+                        ),
+                ),
             ),
-            transformed.type
+            transformed.type,
         )
         assertNotNull(transformed.name)
         assertEquals(
             listOf(
                 "Other Organization Name".asFHIR(),
-                "Organization also known as...".asFHIR()
+                "Organization also known as...".asFHIR(),
             ),
-            transformed.alias
+            transformed.alias,
         )
         assertEquals(
             listOf(
@@ -455,66 +493,73 @@ class RoninOrganizationTest {
                     id = "FAKEID".asFHIR(),
                     system = Code("phone"),
                     value = "555-555-5555".asFHIR(),
-                    use = Code("work")
-                )
+                    use = Code("work"),
+                ),
             ),
-            transformed.telecom
+            transformed.telecom,
         )
         assertEquals(
             listOf(
                 Address(
-                    country = "USA".asFHIR()
-                )
+                    country = "USA".asFHIR(),
+                ),
             ),
-            transformed.address
+            transformed.address,
         )
         assertEquals(Reference(reference = "Organization/super".asFHIR()), transformed.partOf)
         assertEquals(
             listOf(
                 OrganizationContact(
-                    purpose = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                code = Code("fake")
-                            )
-                        )
-                    ),
-                    name = HumanName(
-                        given = listOf(
-                            "FakeName".asFHIR()
-                        )
-                    ),
-                    telecom = listOf(
-                        ContactPoint(
-                            system = Code("phone"),
-                            value = "555-555-5555".asFHIR()
-                        )
-                    ),
-                    address = Address(
-                        country = "USA".asFHIR()
-                    )
-                )
+                    purpose =
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        code = Code("fake"),
+                                    ),
+                                ),
+                        ),
+                    name =
+                        HumanName(
+                            given =
+                                listOf(
+                                    "FakeName".asFHIR(),
+                                ),
+                        ),
+                    telecom =
+                        listOf(
+                            ContactPoint(
+                                system = Code("phone"),
+                                value = "555-555-5555".asFHIR(),
+                            ),
+                        ),
+                    address =
+                        Address(
+                            country = "USA".asFHIR(),
+                        ),
+                ),
             ),
-            transformed.contact
+            transformed.contact,
         )
         assertEquals(
             listOf(
                 Reference(
-                    reference = "Endpoint/1357".asFHIR()
-                )
+                    reference = "Endpoint/1357".asFHIR(),
+                ),
             ),
-            transformed.endpoint
+            transformed.endpoint,
         )
     }
 
     @Test
     fun `transform organization with only required attributes`() {
-        val organization = Organization(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            name = "Organization name".asFHIR(),
-            active = true.asFHIR()
-        )
+        val organization =
+            Organization(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                name = "Organization name".asFHIR(),
+                active = true.asFHIR(),
+            )
 
         val (transformResponse, validation) = roninOrganization.transform(organization, tenant)
         validation.alertIfErrors()
@@ -528,7 +573,7 @@ class RoninOrganizationTest {
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.ORGANIZATION.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
@@ -540,20 +585,20 @@ class RoninOrganizationTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertNotNull(transformed.active)
         assertEquals(listOf<CodeableConcept>(), transformed.type)

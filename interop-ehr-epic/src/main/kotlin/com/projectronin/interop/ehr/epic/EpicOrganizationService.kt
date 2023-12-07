@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 class EpicOrganizationService(
     epicClient: EpicClient,
-    @Value("\${epic.fhir.batchSize:10}") batchSize: Int
+    @Value("\${epic.fhir.batchSize:10}") batchSize: Int,
 ) : OrganizationService, EpicFHIRService<Organization>(epicClient, batchSize) {
     override val fhirURLSearchPart = "/api/FHIR/R4/Organization"
     override val fhirResourceType = Organization::class.java
@@ -23,7 +23,7 @@ class EpicOrganizationService(
     @Trace
     override fun findOrganizationsByFHIRId(
         tenant: Tenant,
-        organizationFHIRIds: List<String>
+        organizationFHIRIds: List<String>,
     ): List<Organization> {
         return getByIDs(tenant, organizationFHIRIds).values.toList()
     }

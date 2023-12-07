@@ -17,8 +17,9 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Repository
 
 @Repository
-class MirthTenantConfigDAO(@Qualifier("ehr") private val database: Database) {
-
+class MirthTenantConfigDAO(
+    @Qualifier("ehr") private val database: Database,
+) {
     /**
      * Returns all [MirthTenantConfigDO]s in the table
      */
@@ -75,10 +76,11 @@ class MirthTenantConfigDAO(@Qualifier("ehr") private val database: Database) {
      * [tenantId], or multiple somehow do, it returns null.
      */
     private fun getByTenantId(tenantId: Int): MirthTenantConfigDO? {
-        val mirthTenantConfigs = database.from(MirthTenantConfigDOs)
-            .select()
-            .where(MirthTenantConfigDOs.tenantId eq tenantId)
-            .map { MirthTenantConfigDOs.createEntity(it) }
+        val mirthTenantConfigs =
+            database.from(MirthTenantConfigDOs)
+                .select()
+                .where(MirthTenantConfigDOs.tenantId eq tenantId)
+                .map { MirthTenantConfigDOs.createEntity(it) }
         return mirthTenantConfigs.singleOrNull()
     }
 }

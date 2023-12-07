@@ -22,7 +22,7 @@ fun rcdmName(names: ListDataGenerator<HumanName>): List<HumanName> {
                     given = setOfficial.given,
                     prefix = setOfficial.prefix,
                     suffix = setOfficial.suffix,
-                    period = setOfficial.period
+                    period = setOfficial.period,
                 )
         } else {
             generatedNames

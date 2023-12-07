@@ -14,22 +14,25 @@ import org.junit.jupiter.api.assertThrows
 import java.time.Instant
 
 class AuthenticationBrokerTest {
-    private val epicVendor = mockk<Epic> {
-        every { type } returns VendorType.EPIC
-    }
+    private val epicVendor =
+        mockk<Epic> {
+            every { type } returns VendorType.EPIC
+        }
 
     @Test
     fun `no authentication service for vendor`() {
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "TENANT"
-            every { vendor } returns epicVendor
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns "TENANT"
+                every { vendor } returns epicVendor
+            }
 
         // Since we only have 1 vendor today, we have to send this with no authentication service.
         val broker = EHRAuthenticationBroker(listOf())
-        val exception = assertThrows<IllegalStateException> {
-            broker.getAuthentication(tenant)
-        }
+        val exception =
+            assertThrows<IllegalStateException> {
+                broker.getAuthentication(tenant)
+            }
         assertEquals("No AuthenticationService registered for EPIC", exception.message)
 
         verify(exactly = 1) {
@@ -39,10 +42,11 @@ class AuthenticationBrokerTest {
 
     @Test
     fun `new authentication not granted`() {
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "TENANT"
-            every { vendor } returns epicVendor
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns "TENANT"
+                every { vendor } returns epicVendor
+            }
 
         val authenticationService = mockk<AuthenticationService>()
         every { authenticationService.vendorType } returns VendorType.EPIC
@@ -61,10 +65,11 @@ class AuthenticationBrokerTest {
 
     @Test
     fun `new authentication granted`() {
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "TENANT"
-            every { vendor } returns epicVendor
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns "TENANT"
+                every { vendor } returns epicVendor
+            }
 
         val authenticationService = mockk<AuthenticationService>()
         every { authenticationService.vendorType } returns VendorType.EPIC
@@ -88,17 +93,19 @@ class AuthenticationBrokerTest {
 
     @Test
     fun `saved authentication with no expiration`() {
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "TENANT"
-            every { vendor } returns epicVendor
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns "TENANT"
+                every { vendor } returns epicVendor
+            }
 
         val authenticationService = mockk<AuthenticationService>()
         every { authenticationService.vendorType } returns VendorType.EPIC
 
-        val mockedAuthentication1 = mockk<Authentication>() {
-            every { expiresAt } returns null
-        }
+        val mockedAuthentication1 =
+            mockk<Authentication> {
+                every { expiresAt } returns null
+            }
         val mockedAuthentication2 = mockk<Authentication>()
         every { authenticationService.getAuthentication(tenant) } returns mockedAuthentication1 andThen mockedAuthentication2
 
@@ -127,17 +134,19 @@ class AuthenticationBrokerTest {
 
     @Test
     fun `expired authentication`() {
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "TENANT"
-            every { vendor } returns epicVendor
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns "TENANT"
+                every { vendor } returns epicVendor
+            }
 
         val authenticationService = mockk<AuthenticationService>()
         every { authenticationService.vendorType } returns VendorType.EPIC
 
-        val mockedAuthentication1 = mockk<Authentication>() {
-            every { expiresAt } returns Instant.now().minusSeconds(5)
-        }
+        val mockedAuthentication1 =
+            mockk<Authentication> {
+                every { expiresAt } returns Instant.now().minusSeconds(5)
+            }
         val mockedAuthentication2 = mockk<Authentication>()
         every { authenticationService.getAuthentication(tenant) } returns mockedAuthentication1 andThen mockedAuthentication2
 
@@ -167,17 +176,19 @@ class AuthenticationBrokerTest {
 
     @Test
     fun `authentication expiring within buffer`() {
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "TENANT"
-            every { vendor } returns epicVendor
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns "TENANT"
+                every { vendor } returns epicVendor
+            }
 
         val authenticationService = mockk<AuthenticationService>()
         every { authenticationService.vendorType } returns VendorType.EPIC
 
-        val mockedAuthentication1 = mockk<Authentication>() {
-            every { expiresAt } returns Instant.now().plusSeconds(25)
-        }
+        val mockedAuthentication1 =
+            mockk<Authentication> {
+                every { expiresAt } returns Instant.now().plusSeconds(25)
+            }
         val mockedAuthentication2 = mockk<Authentication>()
         every { authenticationService.getAuthentication(tenant) } returns mockedAuthentication1 andThen mockedAuthentication2
 
@@ -206,17 +217,19 @@ class AuthenticationBrokerTest {
 
     @Test
     fun `authentication expiring outside buffer`() {
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "TENANT"
-            every { vendor } returns epicVendor
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns "TENANT"
+                every { vendor } returns epicVendor
+            }
 
         val authenticationService = mockk<AuthenticationService>()
         every { authenticationService.vendorType } returns VendorType.EPIC
 
-        val mockedAuthentication = mockk<Authentication>() {
-            every { expiresAt } returns Instant.now().plusSeconds(3600)
-        }
+        val mockedAuthentication =
+            mockk<Authentication> {
+                every { expiresAt } returns Instant.now().plusSeconds(3600)
+            }
         every { authenticationService.getAuthentication(tenant) } returns mockedAuthentication
 
         val broker = EHRAuthenticationBroker(listOf(authenticationService))

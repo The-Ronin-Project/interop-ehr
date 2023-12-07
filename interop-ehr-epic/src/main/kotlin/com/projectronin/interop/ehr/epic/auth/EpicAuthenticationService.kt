@@ -34,7 +34,10 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
 
     override val vendorType = VendorType.EPIC
 
-    override fun getAuthentication(tenant: Tenant, disableRetry: Boolean): Authentication? {
+    override fun getAuthentication(
+        tenant: Tenant,
+        disableRetry: Boolean,
+    ): Authentication? {
         val jti = UUID.randomUUID().toString()
         val vendor = tenant.vendorAs<Epic>()
         val authURL = vendor.authenticationConfig.authEndpoint
@@ -46,15 +49,16 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
         val issueDate = Date()
         val expireAt = Date(issueDate.toInstant().toEpochMilli() + 300000)
 
-        val privateKeySpec = PKCS8EncodedKeySpec(
-            Base64.getDecoder().decode(
-                // Remove any Key formatting before decoding
-                vendor.authenticationConfig.privateKey.replace("-----BEGIN PRIVATE KEY-----", "")
-                    .replace("-----END PRIVATE KEY-----", "")
-                    .replace(" ", "")
-                    .replace(System.lineSeparator(), "")
+        val privateKeySpec =
+            PKCS8EncodedKeySpec(
+                Base64.getDecoder().decode(
+                    // Remove any Key formatting before decoding
+                    vendor.authenticationConfig.privateKey.replace("-----BEGIN PRIVATE KEY-----", "")
+                        .replace("-----END PRIVATE KEY-----", "")
+                        .replace(" ", "")
+                        .replace(System.lineSeparator(), ""),
+                ),
             )
-        )
         val privateKeyInstance = KeyFactory.getInstance("RSA").generatePrivate(privateKeySpec)
 
         // Determine the audience value (hsi for Tesseract endpoints or authURL for direct endpoints)
@@ -65,24 +69,27 @@ class EpicAuthenticationService(private val client: HttpClient) : Authentication
                 .sign(Algorithm.RSA384(null, privateKeyInstance as RSAPrivateKey))
 
         logger.debug { "Calling authentication for $authURL, JTI $jti" }
-        val response = runBlocking {
-            val httpResponse: HttpResponse = client.request("Epic Authentication: ${tenant.name}", authURL) { url ->
-                submitForm(
-                    url = url,
-                    formParameters = Parameters.build {
-                        append("grant_type", "client_credentials")
-                        append("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
-                        append("client_assertion", token)
-                    },
-                    encodeInQuery = false
-                ) {
-                    headers {
-                        append(NO_RETRY_HEADER, "$disableRetry")
+        val response =
+            runBlocking {
+                val httpResponse: HttpResponse =
+                    client.request("Epic Authentication: ${tenant.name}", authURL) { url ->
+                        submitForm(
+                            url = url,
+                            formParameters =
+                                Parameters.build {
+                                    append("grant_type", "client_credentials")
+                                    append("client_assertion_type", "urn:ietf:params:oauth:client-assertion-type:jwt-bearer")
+                                    append("client_assertion", token)
+                                },
+                            encodeInQuery = false,
+                        ) {
+                            headers {
+                                append(NO_RETRY_HEADER, "$disableRetry")
+                            }
+                        }
                     }
-                }
+                httpResponse.body<EpicAuthentication>()
             }
-            httpResponse.body<EpicAuthentication>()
-        }
         logger.info { "Call for ${tenant.mnemonic} successfully authenticated" }
         logger.debug { "Completed authentication for $authURL, JTI $jti" }
         return response

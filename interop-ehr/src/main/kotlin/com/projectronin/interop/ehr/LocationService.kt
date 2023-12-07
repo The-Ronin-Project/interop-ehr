@@ -11,5 +11,8 @@ interface LocationService : FHIRService<Location> {
      * Finds the [Location]s associated with the requested [tenant] and FHIR [locationIds].
      */
     @Deprecated("Use getByIDs")
-    fun getLocationsByFHIRId(tenant: Tenant, locationIds: List<String>): Map<String, Location>
+    fun getLocationsByFHIRId(
+        tenant: Tenant,
+        locationIds: List<String>,
+    ): Map<String, Location>
 }

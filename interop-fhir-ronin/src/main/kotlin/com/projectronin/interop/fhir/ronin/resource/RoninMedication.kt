@@ -26,26 +26,31 @@ import java.time.LocalDateTime
 @Component
 class RoninMedication(
     normalizer: Normalizer,
-    localizer: Localizer
+    localizer: Localizer,
 ) :
     USCoreBasedProfile<Medication>(
-        R4MedicationValidator,
-        RoninProfile.MEDICATION.value,
-        normalizer,
-        localizer
-    ) {
+            R4MedicationValidator,
+            RoninProfile.MEDICATION.value,
+            normalizer,
+            localizer,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
 
     private val requiredCodeError = RequiredFieldError(Medication::code)
-    private val requiredExtensionCodeError = FHIRError(
-        code = "RONIN_MED_001",
-        description = "Tenant source medication code extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Medication::extension)
-    )
+    private val requiredExtensionCodeError =
+        FHIRError(
+            code = "RONIN_MED_001",
+            description = "Tenant source medication code extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Medication::extension),
+        )
 
-    override fun validateRonin(element: Medication, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: Medication,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
@@ -59,13 +64,17 @@ class RoninMedication(
                         it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 requiredExtensionCodeError,
-                parentContext
+                parentContext,
             )
             // code will be populated by from mapping
         }
     }
 
-    override fun validateUSCore(element: Medication, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: Medication,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             checkNotNull(element.code, requiredCodeError, parentContext)
 
@@ -79,17 +88,19 @@ class RoninMedication(
         normalized: Medication,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<Medication, Validation> {
         // TODO: apply concept maps to get Medication.code and extension
-        val tenantSourceCodeExtension = getExtensionOrEmptyList(
-            RoninExtension.TENANT_SOURCE_MEDICATION_CODE,
-            normalized.code
-        )
+        val tenantSourceCodeExtension =
+            getExtensionOrEmptyList(
+                RoninExtension.TENANT_SOURCE_MEDICATION_CODE,
+                normalized.code,
+            )
 
-        val mapped = normalized.copy(
-            extension = normalized.extension + tenantSourceCodeExtension
-        )
+        val mapped =
+            normalized.copy(
+                extension = normalized.extension + tenantSourceCodeExtension,
+            )
         return Pair(mapped, Validation())
     }
 
@@ -97,12 +108,13 @@ class RoninMedication(
         normalized: Medication,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<Medication>?, Validation> {
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant)
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+            )
         return Pair(TransformResponse(transformed), Validation())
     }
 }

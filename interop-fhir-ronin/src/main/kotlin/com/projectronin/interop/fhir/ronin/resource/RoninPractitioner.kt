@@ -26,13 +26,17 @@ import java.time.LocalDateTime
 class RoninPractitioner(
     normalizer: Normalizer,
     localizer: Localizer,
-    private val roninContactPoint: RoninContactPoint
+    private val roninContactPoint: RoninContactPoint,
 ) :
     USCoreBasedProfile<Practitioner>(R4PractitionerValidator, RoninProfile.PRACTITIONER.value, normalizer, localizer) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
 
-    override fun validateRonin(element: Practitioner, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: Practitioner,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
@@ -47,7 +51,11 @@ class RoninPractitioner(
     private val requiredNameError = RequiredFieldError(Practitioner::name)
     private val requiredNameFamilyError = RequiredFieldError(HumanName::family)
 
-    override fun validateUSCore(element: Practitioner, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: Practitioner,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             checkTrue(element.name.isNotEmpty(), requiredNameError, parentContext)
 
@@ -68,7 +76,7 @@ class RoninPractitioner(
         normalized: Practitioner,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<Practitioner>?, Validation> {
         val validation = Validation()
 
@@ -79,21 +87,25 @@ class RoninPractitioner(
                 tenant,
                 parentContext,
                 validation,
-                forceCacheReloadTS
+                forceCacheReloadTS,
             ).let {
                 validation.merge(it.second)
                 it.first
             }
 
         if (telecoms.size != normalized.telecom.size) {
-            logger.info { "${normalized.telecom.size - telecoms.size} telecoms removed from Practitioner ${normalized.id?.value} due to failed transformations" }
+            @Suppress("ktlint:standard:max-line-length")
+            logger.info {
+                "${normalized.telecom.size - telecoms.size} telecoms removed from Practitioner ${normalized.id?.value} due to failed transformations"
+            }
         }
 
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant),
-            telecom = telecoms
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+                telecom = telecoms,
+            )
         return Pair(TransformResponse(transformed), validation)
     }
 }

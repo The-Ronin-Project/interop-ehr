@@ -14,12 +14,21 @@ abstract class BaseDependsOnEvaluator<T : Resource<T>>(override val resourceType
      * Determines if the [resource] meets the [dependsOnValue] for the [normalizedProperty].
      */
     private val logger = KotlinLogging.logger { }
-    protected abstract fun meetsDependsOn(resource: T, normalizedProperty: String, dependsOnValue: String): Boolean
 
-    override fun meetsDependsOn(resource: T, dependsOn: List<ConceptMapDependsOn>): Boolean {
+    protected abstract fun meetsDependsOn(
+        resource: T,
+        normalizedProperty: String,
+        dependsOnValue: String,
+    ): Boolean
+
+    override fun meetsDependsOn(
+        resource: T,
+        dependsOn: List<ConceptMapDependsOn>,
+    ): Boolean {
         return dependsOn.all {
-            val property = it.property?.value?.lowercase(Locale.getDefault())
-                ?: throw IllegalStateException("Null property found for DependsOn: $it")
+            val property =
+                it.property?.value?.lowercase(Locale.getDefault())
+                    ?: throw IllegalStateException("Null property found for DependsOn: $it")
             val value = it.value?.value ?: throw IllegalStateException("Null value found for DependsOn: $it")
             try {
                 meetsDependsOn(resource, property, value)

@@ -20,7 +20,10 @@ import com.projectronin.interop.fhir.ronin.generators.util.subjectOptions
 import com.projectronin.interop.fhir.ronin.generators.util.tenantSourceConditionExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 
-fun rcdmConditionEncounterDiagnosis(tenant: String, block: ConditionGenerator.() -> Unit): Condition {
+fun rcdmConditionEncounterDiagnosis(
+    tenant: String,
+    block: ConditionGenerator.() -> Unit,
+): Condition {
     return condition {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS, tenant) {}
@@ -40,12 +43,13 @@ fun Patient.rcdmConditionEncounterDiagnosis(block: ConditionGenerator.() -> Unit
     val data = this.referenceData()
     return rcdmConditionEncounterDiagnosis(data.tenantId) {
         block.invoke(this)
-        subject of generateReference(
-            subject.generate(),
-            subjectReferenceOptions,
-            data.tenantId,
-            "Patient",
-            data.udpId
-        )
+        subject of
+            generateReference(
+                subject.generate(),
+                subjectReferenceOptions,
+                data.tenantId,
+                "Patient",
+                data.udpId,
+            )
     }
 }

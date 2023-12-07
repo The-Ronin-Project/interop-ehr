@@ -28,44 +28,51 @@ import org.junit.jupiter.api.Test
 class RoninHeartRateGeneratorTest {
     private lateinit var roninHeartRate: RoninHeartRate
     private lateinit var registry: NormalizationRegistryClient
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
-        registry = mockk<NormalizationRegistryClient> {
-            every {
-                getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_HEART_RATE.value)
-            } returns possibleHeartRateCodes
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
+        registry =
+            mockk<NormalizationRegistryClient> {
+                every {
+                    getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_HEART_RATE.value)
+                } returns possibleHeartRateCodes
+            }
         roninHeartRate = RoninHeartRate(normalizer, localizer, registry)
     }
 
     @Test
     fun `example use for roninObservationHeartRate`() {
         // Create HeartRate Obs with attributes you need, provide the tenant
-        val roninObsHeartRate = rcdmObservationHeartRate("test") {
-            // if you want to test for a specific status
-            status of Code("heart-rate-status")
-            // test for a new or different code
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        code of Code("89299-2")
-                        display of "Heart rate special circumstances"
+        val roninObsHeartRate =
+            rcdmObservationHeartRate("test") {
+                // if you want to test for a specific status
+                status of Code("heart-rate-status")
+                // test for a new or different code
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    code of Code("89299-2")
+                                    display of "Heart rate special circumstances"
+                                },
+                            )
+                        text of "Heart rate special circumstances" // text is kept if provided otherwise only a code.coding is generated
                     }
-                )
-                text of "Heart rate special circumstances" // text is kept if provided otherwise only a code.coding is generated
             }
-        }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsHeartRateJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsHeartRate)
@@ -90,7 +97,7 @@ class RoninHeartRateGeneratorTest {
         assertNotNull(roninObsHeartRate.meta)
         assertEquals(
             roninObsHeartRate.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_HEART_RATE.value
+            RoninProfile.OBSERVATION_HEART_RATE.value,
         )
         assertNotNull(roninObsHeartRate.status)
         assertEquals(1, roninObsHeartRate.category.size)
@@ -116,7 +123,7 @@ class RoninHeartRateGeneratorTest {
         assertNotNull(roninObsHeartRate.meta)
         assertEquals(
             roninObsHeartRate.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_HEART_RATE.value
+            RoninProfile.OBSERVATION_HEART_RATE.value,
         )
         assertNull(roninObsHeartRate.implicitRules)
         assertNull(roninObsHeartRate.language)
@@ -148,14 +155,16 @@ class RoninHeartRateGeneratorTest {
 
     @Test
     fun `validation for roninObservationHeartRate with existing identifier`() {
-        val roninObsHeartRate = rcdmObservationHeartRate("test") {
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-        }
+        val roninObsHeartRate =
+            rcdmObservationHeartRate("test") {
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
+                    )
+            }
         val validation = roninHeartRate.validate(roninObsHeartRate, null)
         validation.alertIfErrors()
         assertNotNull(roninObsHeartRate.meta)
@@ -168,35 +177,41 @@ class RoninHeartRateGeneratorTest {
 
     @Test
     fun `validation passed for roninObservationHeartRate with code`() {
-        val roninObsHeartRate = rcdmObservationHeartRate("test") {
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        version of "2.74"
-                        code of Code("8867-4")
-                        display of "Heart rate"
+        val roninObsHeartRate =
+            rcdmObservationHeartRate("test") {
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    version of "2.74"
+                                    code of Code("8867-4")
+                                    display of "Heart rate"
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = roninHeartRate.validate(roninObsHeartRate, null)
         validation.alertIfErrors()
     }
 
     @Test
     fun `validation fails for roninObservationHeartRate with bad code`() {
-        val roninObsHeartRate = rcdmObservationHeartRate("test") {
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        version of "1000000"
-                        code of Code("some code here")
+        val roninObsHeartRate =
+            rcdmObservationHeartRate("test") {
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    version of "1000000"
+                                    code of Code("some code here")
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = roninHeartRate.validate(roninObsHeartRate, null)
         assertTrue(validation.hasErrors())
 

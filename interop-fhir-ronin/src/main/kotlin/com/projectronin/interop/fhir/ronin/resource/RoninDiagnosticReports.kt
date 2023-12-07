@@ -17,7 +17,7 @@ class RoninDiagnosticReports(
     normalizer: Normalizer,
     localizer: Localizer,
     roninDiagnosticReportLaboratory: RoninDiagnosticReportLaboratory,
-    roninDiagnosticReportNoteExchange: RoninDiagnosticReportNoteExchange
+    roninDiagnosticReportNoteExchange: RoninDiagnosticReportNoteExchange,
 ) :
     MultipleProfileResource<DiagnosticReport>(normalizer, localizer) {
     override val potentialProfiles: List<BaseProfile<DiagnosticReport>> =

@@ -31,9 +31,10 @@ class FHIRSearchTokenTest {
 
     @Test
     fun `empty code throws exception`() {
-        val exception = assertThrows<IllegalArgumentException> {
-            FHIRSearchToken(system = "system", code = "")
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                FHIRSearchToken(system = "system", code = "")
+            }
         assertEquals("A FHIR search token requires a code", exception.message)
     }
 }

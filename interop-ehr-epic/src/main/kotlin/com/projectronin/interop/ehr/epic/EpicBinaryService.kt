@@ -19,20 +19,24 @@ import kotlin.time.Duration.Companion.seconds
 class EpicBinaryService(
     epicClient: EpicClient,
     @Value("\${epic.fhir.binaryTimeout:20}")
-    val timeout: Int
+    val timeout: Int,
 ) : BinaryService, EpicFHIRService<Binary>(epicClient) {
     override val fhirURLSearchPart = "/api/FHIR/R4/Binary"
     override val fhirResourceType = Binary::class.java
 
     // Binary requires a different Accept header
-    override fun getByID(tenant: Tenant, resourceFHIRId: String): Binary {
+    override fun getByID(
+        tenant: Tenant,
+        resourceFHIRId: String,
+    ): Binary {
         return runBlocking {
             epicClient.get(
                 tenant = tenant,
                 urlPart = "$fhirURLSearchPart/$resourceFHIRId",
                 acceptTypeOverride = ContentType.Application.FhirJson,
                 disableRetry = true,
-                timeoutOverride = timeout.seconds // default is 15 seconds
+                // default is 15 seconds
+                timeoutOverride = timeout.seconds,
             ).body(TypeInfo(fhirResourceType.kotlin, fhirResourceType))
         }
     }

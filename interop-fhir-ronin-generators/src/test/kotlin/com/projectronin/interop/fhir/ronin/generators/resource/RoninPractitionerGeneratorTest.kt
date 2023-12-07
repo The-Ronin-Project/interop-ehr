@@ -33,40 +33,46 @@ class RoninPractitionerGeneratorTest {
     private lateinit var normalizer: Normalizer
     private lateinit var localizer: Localizer
     private lateinit var roninPractitioner: RoninPractitioner
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        roninContactPoint = mockk {
-            every { validateRonin(any(), LocationContext(Practitioner::class), any()) } answers { thirdArg() }
-            every { validateUSCore(any(), LocationContext(Practitioner::class), any()) } answers { thirdArg() }
-        }
-        normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
+        roninContactPoint =
+            mockk {
+                every { validateRonin(any(), LocationContext(Practitioner::class), any()) } answers { thirdArg() }
+                every { validateUSCore(any(), LocationContext(Practitioner::class), any()) } answers { thirdArg() }
+            }
+        normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
         roninPractitioner = RoninPractitioner(normalizer, localizer, roninContactPoint)
     }
 
     @Test
     fun `example use for rcdmPractitioner`() {
         // create practitioner for tenant "test"
-        val roninPractitioner1 = rcdmPractitioner("test") {
-            // to test an attribute like telecom - provide the value
-            telecom of listOf(
-                ContactPoint(
-                    value = "123-456-7890".asFHIR(),
-                    system = Code(ContactPointSystem.PHONE.code),
-                    use = Code(ContactPointUse.WORK.code)
-                )
-            )
-            // an NPI is optional, but if you want an NPI, generate it like this
-            identifier of listOf(rcdmPractitionerNPI())
-        }
+        val roninPractitioner1 =
+            rcdmPractitioner("test") {
+                // to test an attribute like telecom - provide the value
+                telecom of
+                    listOf(
+                        ContactPoint(
+                            value = "123-456-7890".asFHIR(),
+                            system = Code(ContactPointSystem.PHONE.code),
+                            use = Code(ContactPointUse.WORK.code),
+                        ),
+                    )
+                // an NPI is optional, but if you want an NPI, generate it like this
+                identifier of listOf(rcdmPractitionerNPI())
+            }
 
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninPractitionerJSON =
@@ -84,7 +90,7 @@ class RoninPractitionerGeneratorTest {
         assertNotNull(roninPractitioner1.meta)
         assertEquals(
             RoninProfile.PRACTITIONER.value,
-            roninPractitioner1.meta!!.profile[0].value
+            roninPractitioner1.meta!!.profile[0].value,
         )
         assertEquals(3, roninPractitioner1.identifier.size)
         val practitionerFHIRId =
@@ -109,9 +115,10 @@ class RoninPractitionerGeneratorTest {
 
     @Test
     fun `rcdmPractitioner with fhir id input`() {
-        val roninPractitioner1 = rcdmPractitioner("test") {
-            id of Id("99")
-        }
+        val roninPractitioner1 =
+            rcdmPractitioner("test") {
+                id of Id("99")
+            }
         val validation = roninPractitioner.validate(roninPractitioner1, null)
         assertEquals(false, validation.hasErrors())
         assertEquals(3, roninPractitioner1.identifier.size)
@@ -125,9 +132,10 @@ class RoninPractitionerGeneratorTest {
 
     @Test
     fun `rcdmPractitioner with an input NPI generated`() {
-        val roninPractitioner1 = rcdmPractitioner("test") {
-            identifier of listOf(rcdmPractitionerNPI())
-        }
+        val roninPractitioner1 =
+            rcdmPractitioner("test") {
+                identifier of listOf(rcdmPractitionerNPI())
+            }
         val validation = roninPractitioner.validate(roninPractitioner1, null)
         assertEquals(false, validation.hasErrors())
         val npi = roninPractitioner1.identifier.find { it.system == CodeSystem.NPI.uri }
@@ -136,9 +144,10 @@ class RoninPractitionerGeneratorTest {
 
     @Test
     fun `rcdmPractitioner with an input NPI value supplied`() {
-        val roninPractitioner1 = rcdmPractitioner("test") {
-            identifier of listOf(rcdmPractitionerNPI("An NPI"))
-        }
+        val roninPractitioner1 =
+            rcdmPractitioner("test") {
+                identifier of listOf(rcdmPractitionerNPI("An NPI"))
+            }
         val validation = roninPractitioner.validate(roninPractitioner1, null)
         assertEquals(false, validation.hasErrors())
         val npi = roninPractitioner1.identifier.find { it.system == CodeSystem.NPI.uri }
@@ -147,9 +156,10 @@ class RoninPractitionerGeneratorTest {
 
     @Test
     fun `rcdmPractitioner with an empty input NPI generated`() {
-        val roninPractitioner1 = rcdmPractitioner("test") {
-            identifier of listOf(rcdmPractitionerNPI(""))
-        }
+        val roninPractitioner1 =
+            rcdmPractitioner("test") {
+                identifier of listOf(rcdmPractitionerNPI(""))
+            }
         val validation = roninPractitioner.validate(roninPractitioner1, null)
         assertEquals(false, validation.hasErrors())
         val npi = roninPractitioner1.identifier.find { it.system == CodeSystem.NPI.uri }
@@ -158,14 +168,16 @@ class RoninPractitionerGeneratorTest {
 
     @Test
     fun `rcdmPractitioner with valid telecom input`() {
-        val contactPoint = ContactPoint(
-            value = "123-456-7890".asFHIR(),
-            system = Code(ContactPointSystem.PHONE.code),
-            use = Code(ContactPointUse.HOME.code)
-        )
-        val roninPractitioner1 = rcdmPractitioner("test") {
-            telecom of listOf(contactPoint)
-        }
+        val contactPoint =
+            ContactPoint(
+                value = "123-456-7890".asFHIR(),
+                system = Code(ContactPointSystem.PHONE.code),
+                use = Code(ContactPointUse.HOME.code),
+            )
+        val roninPractitioner1 =
+            rcdmPractitioner("test") {
+                telecom of listOf(contactPoint)
+            }
         val validation = roninPractitioner.validate(roninPractitioner1, null)
         assertEquals(false, validation.hasErrors())
         assertEquals(1, roninPractitioner1.telecom.size)
@@ -174,17 +186,20 @@ class RoninPractitionerGeneratorTest {
 
     @Test
     fun `rcdmPractitioner with an invalid contact point drops only that contact point`() {
-        val contactPoint = ContactPoint(
-            value = "123-456-7890".asFHIR()
-        )
-        val contactPoint2 = ContactPoint(
-            value = "123-456-7890".asFHIR(),
-            system = Code(ContactPointSystem.PHONE.code),
-            use = Code(ContactPointUse.HOME.code)
-        )
-        val roninPractitioner1 = rcdmPractitioner("test") {
-            telecom of listOf(contactPoint, contactPoint2)
-        }
+        val contactPoint =
+            ContactPoint(
+                value = "123-456-7890".asFHIR(),
+            )
+        val contactPoint2 =
+            ContactPoint(
+                value = "123-456-7890".asFHIR(),
+                system = Code(ContactPointSystem.PHONE.code),
+                use = Code(ContactPointUse.HOME.code),
+            )
+        val roninPractitioner1 =
+            rcdmPractitioner("test") {
+                telecom of listOf(contactPoint, contactPoint2)
+            }
         val validation = roninPractitioner.validate(roninPractitioner1, null)
         assertEquals(false, validation.hasErrors())
         assertEquals(1, roninPractitioner1.telecom.size)

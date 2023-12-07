@@ -27,9 +27,8 @@ abstract class BaseRoninDiagnosticReport(
     extendedProfile: ProfileValidator<DiagnosticReport>,
     profile: String,
     normalizer: Normalizer,
-    localizer: Localizer
+    localizer: Localizer,
 ) : USCoreBasedProfile<DiagnosticReport>(extendedProfile, profile, normalizer, localizer) {
-
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
     open fun qualifyingCategories(): List<Coding> = emptyList()
 
@@ -37,7 +36,11 @@ abstract class BaseRoninDiagnosticReport(
         return resource.category.qualifiesForValueSet(qualifyingCategories())
     }
 
-    override fun validateRonin(element: DiagnosticReport, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: DiagnosticReport,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
@@ -47,7 +50,7 @@ abstract class BaseRoninDiagnosticReport(
                 requireDataAuthorityExtensionIdentifier(
                     element.subject,
                     LocationContext(DiagnosticReport::subject),
-                    validation
+                    validation,
                 )
             }
         }
@@ -55,14 +58,18 @@ abstract class BaseRoninDiagnosticReport(
 
     private val requiredCodeError = RequiredFieldError(Condition::code)
 
-    override fun validateUSCore(element: DiagnosticReport, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: DiagnosticReport,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             checkNotNull(element.code, requiredCodeError, parentContext)
             validateReference(
                 element.subject,
                 listOf(ResourceType.Patient),
                 parentContext.append(LocationContext(DiagnosticReport::subject)),
-                this
+                this,
             )
         }
     }
@@ -73,16 +80,18 @@ abstract class BaseRoninDiagnosticReport(
         normalized: DiagnosticReport,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<DiagnosticReport>?, Validation> {
-        val validation = validation {
-            checkNotNull(normalized.id, requiredIdError, parentContext)
-        }
+        val validation =
+            validation {
+                checkNotNull(normalized.id, requiredIdError, parentContext)
+            }
 
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant)
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+            )
 
         return Pair(TransformResponse(transformed), validation)
     }

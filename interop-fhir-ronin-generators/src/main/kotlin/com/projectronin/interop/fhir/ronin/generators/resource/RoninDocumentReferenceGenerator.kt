@@ -33,7 +33,7 @@ import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 fun rcdmDocumentReference(
     tenant: String,
     binaryFhirId: String,
-    block: DocumentReferenceGenerator.() -> Unit
+    block: DocumentReferenceGenerator.() -> Unit,
 ): DocumentReference {
     return documentReference {
         block.invoke(this)
@@ -45,10 +45,11 @@ fun rcdmDocumentReference(
         }
         status of generateCode(status.generate(), possibleDocumentReferenceStatusCodes.random())
         type of generateCodeableConcept(type.generate(), possibleDocumentReferenceTypeCodes.random())
-        category of generateRequiredCodeableConceptList(
-            category.generate(),
-            possibleDocumentReferenceCategoryCodes.random()
-        )
+        category of
+            generateRequiredCodeableConceptList(
+                category.generate(),
+                possibleDocumentReferenceCategoryCodes.random(),
+            )
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
         content of generateContent(content.generate(), binaryFhirId)
     }
@@ -56,24 +57,25 @@ fun rcdmDocumentReference(
 
 fun Patient.rcdmDocumentReference(
     binaryFhirId: String,
-    block: DocumentReferenceGenerator.() -> Unit
+    block: DocumentReferenceGenerator.() -> Unit,
 ): DocumentReference {
     val data = this.referenceData()
     return rcdmDocumentReference(data.tenantId, binaryFhirId) {
         block.invoke(this)
-        subject of generateReference(
-            subject.generate(),
-            subjectReferenceOptions,
-            data.tenantId,
-            "Patient",
-            data.udpId
-        )
+        subject of
+            generateReference(
+                subject.generate(),
+                subjectReferenceOptions,
+                data.tenantId,
+                "Patient",
+                data.udpId,
+            )
     }
 }
 
 private fun generateContent(
     generatedContent: List<DocumentReferenceContent>,
-    binaryFhirId: String
+    binaryFhirId: String,
 ): List<DocumentReferenceContent> {
     val contentList = generatedContent.ifEmpty { listOf(documentReferenceContent { }) }
 
@@ -81,169 +83,180 @@ private fun generateContent(
         val baseAttachment = content.attachment ?: attachment { }
 
         val currentUrl = baseAttachment.url
-        val url = currentUrl?.copy(extension = currentUrl.extension + datalakeAttachmentUrlExtension)
-            ?: Url("Binary/$binaryFhirId", extension = listOf(datalakeAttachmentUrlExtension))
+        val url =
+            currentUrl?.copy(extension = currentUrl.extension + datalakeAttachmentUrlExtension)
+                ?: Url("Binary/$binaryFhirId", extension = listOf(datalakeAttachmentUrlExtension))
 
         content.copy(
-            attachment = baseAttachment.copy(url = url)
+            attachment = baseAttachment.copy(url = url),
         )
     }
 }
 
-private val datalakeAttachmentUrlExtension = Extension(
-    url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
-    value = DynamicValue(DynamicValueType.URL, Url("datalake/attachment/id"))
-)
-
-private val tenantDocumentReferenceTypeSourceExtension = listOf(
+private val datalakeAttachmentUrlExtension =
     Extension(
-        url = Uri(RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE.value),
-        value = DynamicValue(
-            DynamicValueType.CODEABLE_CONCEPT,
-            CodeableConcept(
-                text = "Tenant Note".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.LOINC.uri,
-                        display = "Invalid Note".asFHIR(),
-                        code = Code("invalid-note")
-                    )
-                )
-            )
-        )
+        url = RoninExtension.DATALAKE_DOCUMENT_REFERENCE_ATTACHMENT_URL.uri,
+        value = DynamicValue(DynamicValueType.URL, Url("datalake/attachment/id")),
     )
-)
 
-val possibleDocumentReferenceStatusCodes = listOf(
-    Code("current"),
-    Code("superseded"),
-    Code("entered-in-error")
-)
+private val tenantDocumentReferenceTypeSourceExtension =
+    listOf(
+        Extension(
+            url = Uri(RoninExtension.TENANT_SOURCE_DOCUMENT_REFERENCE_TYPE.value),
+            value =
+                DynamicValue(
+                    DynamicValueType.CODEABLE_CONCEPT,
+                    CodeableConcept(
+                        text = "Tenant Note".asFHIR(),
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = CodeSystem.LOINC.uri,
+                                    display = "Invalid Note".asFHIR(),
+                                    code = Code("invalid-note"),
+                                ),
+                            ),
+                    ),
+                ),
+        ),
+    )
 
-val possibleDocumentReferenceCategoryCodes = listOf(
-    // per RCDM: The US Core DocumentReferences Type Value Set is a starter set
-    // of categories supported for fetching and storing clinical notes.
-    coding {
-        system of CodeSystem.DOCUMENT_REFERENCE_CATEGORY.uri
-        code of Code("clinical-note")
-        display of "Clinical Note"
-    }
-)
+val possibleDocumentReferenceStatusCodes =
+    listOf(
+        Code("current"),
+        Code("superseded"),
+        Code("entered-in-error"),
+    )
 
-val possibleDocumentReferenceTypeCodes = listOf(
-    // per RCDM: All LOINC values whose SCALE is DOC in the LOINC database
-    // and the HL7 v3 Code System NullFlavor concept 'unknown'. Use "UNK" plus
-    // a short extract from USCore featuring keywords "cancer", "oncology", etc.
-    coding {
-        system of CodeSystem.NULL_FLAVOR.uri
-        code of Code("UNK")
-        display of "Unknown"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100029-8")
-        display of "Cancer related multigene analysis in Plasma cell-free DNA by Molecular genetics method"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100213-8")
-        display of "Prostate cancer multigene analysis in Blood or Tissue by Molecular genetics method"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100215-3")
-        display of "Episode of care medical records Document Transplant surgery"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100217-9")
-        display of "Surgical oncology synoptic report"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100455-5")
-        display of "Clinical pathology Outpatient Progress note"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100468-8")
-        display of "Gynecologic oncology Outpatient Progress note"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100474-6")
-        display of "Hematology+Medical oncology Outpatient Progress note"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100496-9")
-        display of "Oncology Outpatient Progress note"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100525-5")
-        display of "Radiation oncology Outpatient Progress note"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100526-3")
-        display of "Radiology Outpatient Progress note"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100553-7")
-        display of "Blood banking and transfusion medicine Hospital Progress note"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100563-6")
-        display of "Clinical pathology Hospital Progress note"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100604-8")
-        display of "Oncology Hospital Progress note"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100631-1")
-        display of "Radiation oncology Hospital Progress note"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("100719-4")
-        display of "Surgical oncology Discharge summary"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("101136-0")
-        display of "Radiation oncology End of treatment letter"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("11486-8")
-        display of "Chemotherapy records"
-    },
-    coding {
-        system of CodeSystem.LOINC.uri
-        code of Code("18776-5")
-        display of "Plan of care note"
-    }
-)
+val possibleDocumentReferenceCategoryCodes =
+    listOf(
+        // per RCDM: The US Core DocumentReferences Type Value Set is a starter set
+        // of categories supported for fetching and storing clinical notes.
+        coding {
+            system of CodeSystem.DOCUMENT_REFERENCE_CATEGORY.uri
+            code of Code("clinical-note")
+            display of "Clinical Note"
+        },
+    )
 
-val authorReferenceOptions = listOf(
-    "Patient",
-    "Practitioner",
-    "PractitionerRole",
-    "Organization"
-)
+val possibleDocumentReferenceTypeCodes =
+    listOf(
+        // per RCDM: All LOINC values whose SCALE is DOC in the LOINC database
+        // and the HL7 v3 Code System NullFlavor concept 'unknown'. Use "UNK" plus
+        // a short extract from USCore featuring keywords "cancer", "oncology", etc.
+        coding {
+            system of CodeSystem.NULL_FLAVOR.uri
+            code of Code("UNK")
+            display of "Unknown"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100029-8")
+            display of "Cancer related multigene analysis in Plasma cell-free DNA by Molecular genetics method"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100213-8")
+            display of "Prostate cancer multigene analysis in Blood or Tissue by Molecular genetics method"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100215-3")
+            display of "Episode of care medical records Document Transplant surgery"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100217-9")
+            display of "Surgical oncology synoptic report"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100455-5")
+            display of "Clinical pathology Outpatient Progress note"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100468-8")
+            display of "Gynecologic oncology Outpatient Progress note"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100474-6")
+            display of "Hematology+Medical oncology Outpatient Progress note"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100496-9")
+            display of "Oncology Outpatient Progress note"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100525-5")
+            display of "Radiation oncology Outpatient Progress note"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100526-3")
+            display of "Radiology Outpatient Progress note"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100553-7")
+            display of "Blood banking and transfusion medicine Hospital Progress note"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100563-6")
+            display of "Clinical pathology Hospital Progress note"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100604-8")
+            display of "Oncology Hospital Progress note"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100631-1")
+            display of "Radiation oncology Hospital Progress note"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("100719-4")
+            display of "Surgical oncology Discharge summary"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("101136-0")
+            display of "Radiation oncology End of treatment letter"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("11486-8")
+            display of "Chemotherapy records"
+        },
+        coding {
+            system of CodeSystem.LOINC.uri
+            code of Code("18776-5")
+            display of "Plan of care note"
+        },
+    )
 
-val authenticatorReferenceOptions = listOf(
-    "Practitioner",
-    "Organization",
-    "PractitionerRole"
-)
+val authorReferenceOptions =
+    listOf(
+        "Patient",
+        "Practitioner",
+        "PractitionerRole",
+        "Organization",
+    )
 
-val custodianReferenceOptions = listOf(
-    "Organization"
-)
+val authenticatorReferenceOptions =
+    listOf(
+        "Practitioner",
+        "Organization",
+        "PractitionerRole",
+    )
+
+val custodianReferenceOptions =
+    listOf(
+        "Organization",
+    )

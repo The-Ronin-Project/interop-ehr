@@ -27,31 +27,38 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
     protected abstract val potentialProfiles: List<BaseProfile<T>>
     protected open val defaultProfile: BaseProfile<T>? = null
 
-    override fun validate(element: T, parentContext: LocationContext, validation: Validation) {
+    override fun validate(
+        element: T,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         val qualifiedProfile = getQualifiedProfile(element, parentContext, validation)
         qualifiedProfile.forEach {
             validation.merge(it.validate(element, parentContext))
         }
     }
 
-    private val noProfilesError = FHIRError(
-        code = "RONIN_PROFILE_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "No profiles qualified",
-        location = null
-    )
-    private val tooManyProfilesError = FHIRError(
-        code = "RONIN_PROFILE_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Multiple profiles qualified",
-        location = null
-    )
-    private val noProfilesDefaultWarning = FHIRError(
-        code = "RONIN_PROFILE_003",
-        severity = ValidationIssueSeverity.WARNING,
-        description = "No profiles qualified, the default profile was used",
-        location = null
-    )
+    private val noProfilesError =
+        FHIRError(
+            code = "RONIN_PROFILE_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "No profiles qualified",
+            location = null,
+        )
+    private val tooManyProfilesError =
+        FHIRError(
+            code = "RONIN_PROFILE_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Multiple profiles qualified",
+            location = null,
+        )
+    private val noProfilesDefaultWarning =
+        FHIRError(
+            code = "RONIN_PROFILE_003",
+            severity = ValidationIssueSeverity.WARNING,
+            description = "No profiles qualified, the default profile was used",
+            location = null,
+        )
 
     /**
      * Retrieves the qualified profile for the [resource]. transform() and
@@ -65,14 +72,14 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
     private fun getQualifiedProfile(
         resource: T,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ): List<BaseProfile<T>> {
         val qualifiedProfiles = potentialProfiles.filter { it.qualifies(resource) }
         return if (qualifiedProfiles.isEmpty()) {
             validation.checkTrue(
                 false,
                 defaultProfile?.let { noProfilesDefaultWarning } ?: noProfilesError,
-                parentContext
+                parentContext,
             )
             defaultProfile?.let { listOf(it) } ?: emptyList()
         } else {
@@ -84,17 +91,18 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
         normalized: T,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<T?, Validation> {
         val validation = Validation()
 
         val qualified = getQualifiedProfile(normalized, parentContext, validation)
         val response = qualified.firstOrNull()?.conceptMap(normalized, parentContext, tenant)
 
-        val mapped = response?.let {
-            validation.merge(it.second)
-            it.first
-        }
+        val mapped =
+            response?.let {
+                validation.merge(it.second)
+                it.first
+            }
         return Pair(mapped, validation)
     }
 
@@ -102,7 +110,7 @@ abstract class MultipleProfileResource<T : Resource<T>>(normalizer: Normalizer, 
         normalized: T,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<T>?, Validation> {
         val validation = Validation()
 

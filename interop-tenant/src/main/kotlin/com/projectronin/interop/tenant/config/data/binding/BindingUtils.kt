@@ -17,12 +17,19 @@ fun BaseTable<*>.timezone(name: String): Column<ZoneId> = registerColumn(name, Z
  * SqlType supporting storing a ZoneId.
  */
 object ZoneIdSqlType : SqlType<ZoneId>(Types.VARCHAR, "varchar") {
-    override fun doGetResult(rs: ResultSet, index: Int): ZoneId? {
+    override fun doGetResult(
+        rs: ResultSet,
+        index: Int,
+    ): ZoneId? {
         val timezone = rs.getString(index)
         return timezone?.let { ZoneId.of(timezone) }
     }
 
-    override fun doSetParameter(ps: PreparedStatement, index: Int, parameter: ZoneId) {
+    override fun doSetParameter(
+        ps: PreparedStatement,
+        index: Int,
+        parameter: ZoneId,
+    ) {
         ps.setString(index, parameter.id)
     }
 }

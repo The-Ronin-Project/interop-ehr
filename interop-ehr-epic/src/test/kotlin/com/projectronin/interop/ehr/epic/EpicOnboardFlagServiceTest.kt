@@ -45,21 +45,23 @@ class EpicOnboardFlagServiceTest {
         epicPatientService = mockk()
         onboardFlagService =
             EpicOnboardFlagService(epicClient, identifierService, ehrDataAuthorityClient, epicPatientService)
-        tenant = createTestTenant(
-            "https://example.org",
-            patientOnboardedFlagId = "flagType",
-            mrnSystem = "oid.123",
-            mrnTypeText = "MRN",
-            ehrUserId = "ehrUserId"
-        )
+        tenant =
+            createTestTenant(
+                "https://example.org",
+                patientOnboardedFlagId = "flagType",
+                mrnSystem = "oid.123",
+                mrnTypeText = "MRN",
+                ehrUserId = "ehrUserId",
+            )
     }
 
     @Test
     fun `bad tenant throws error`() {
-        tenant = createTestTenant(
-            "https://example.org",
-            patientOnboardedFlagId = null
-        )
+        tenant =
+            createTestTenant(
+                "https://example.org",
+                patientOnboardedFlagId = null,
+            )
         assertThrows<IllegalStateException> {
             onboardFlagService.setOnboardedFlag(tenant, "123")
         }
@@ -68,17 +70,19 @@ class EpicOnboardFlagServiceTest {
     @Test
     fun `service setsFlag`() {
         val setPatientResponse = SetSmartDataValuesResult(success = true)
-        val patientMRN = mockk<Identifier> {
-            every { value } returns FHIRString("123")
-        }
-        val patient = mockk<Patient> {
-            every { identifier } returns listOf(patientMRN)
-        }
+        val patientMRN =
+            mockk<Identifier> {
+                every { value } returns FHIRString("123")
+            }
+        val patient =
+            mockk<Patient> {
+                every { identifier } returns listOf(patientMRN)
+            }
         coEvery {
             ehrDataAuthorityClient.getResourceAs<Patient>(
                 "mnemonic",
                 "Patient",
-                "fhirId".localize(tenant)
+                "fhirId".localize(tenant),
             )
         } returns patient
         every { identifierService.getMRNIdentifier(tenant, listOf(patientMRN)) } returns patientMRN
@@ -92,15 +96,16 @@ class EpicOnboardFlagServiceTest {
                     id = "123",
                     idType = "MRN",
                     userID = "ehrUserId",
-                    smartDataValues = listOf(
-                        SmartDataValue(
-                            comments = listOf("Patient has been onboarded in Ronin."),
-                            values = listOf("true"),
-                            smartDataID = "flagType",
-                            smartDataIDType = "SDI"
-                        )
-                    )
-                )
+                    smartDataValues =
+                        listOf(
+                            SmartDataValue(
+                                comments = listOf("Patient has been onboarded in Ronin."),
+                                values = listOf("true"),
+                                smartDataID = "flagType",
+                                smartDataIDType = "SDI",
+                            ),
+                        ),
+                ),
             )
         } returns ehrResponse
 
@@ -110,17 +115,19 @@ class EpicOnboardFlagServiceTest {
     @Test
     fun `service errors when epic returns error`() {
         val setPatientResponse = SetSmartDataValuesResult(success = false)
-        val patientMRN = mockk<Identifier> {
-            every { value } returns FHIRString("123")
-        }
-        val patient = mockk<Patient> {
-            every { identifier } returns listOf(patientMRN)
-        }
+        val patientMRN =
+            mockk<Identifier> {
+                every { value } returns FHIRString("123")
+            }
+        val patient =
+            mockk<Patient> {
+                every { identifier } returns listOf(patientMRN)
+            }
         coEvery {
             ehrDataAuthorityClient.getResourceAs<Patient>(
                 "mnemonic",
                 "Patient",
-                "fhirId".localize(tenant)
+                "fhirId".localize(tenant),
             )
         } returns patient
         every { identifierService.getMRNIdentifier(tenant, listOf(patientMRN)) } returns patientMRN
@@ -134,15 +141,16 @@ class EpicOnboardFlagServiceTest {
                     id = "123",
                     idType = "MRN",
                     userID = "ehrUserId",
-                    smartDataValues = listOf(
-                        SmartDataValue(
-                            comments = listOf("Patient has been onboarded in Ronin."),
-                            values = listOf("true"),
-                            smartDataID = "flagType",
-                            smartDataIDType = "SDI"
-                        )
-                    )
-                )
+                    smartDataValues =
+                        listOf(
+                            SmartDataValue(
+                                comments = listOf("Patient has been onboarded in Ronin."),
+                                values = listOf("true"),
+                                smartDataID = "flagType",
+                                smartDataIDType = "SDI",
+                            ),
+                        ),
+                ),
             )
         } returns ehrResponse
 
@@ -155,7 +163,7 @@ class EpicOnboardFlagServiceTest {
             ehrDataAuthorityClient.getResourceAs<Patient>(
                 "mnemonic",
                 "Patient",
-                "fhirId".localize(tenant)
+                "fhirId".localize(tenant),
             )
         } returns null
 
@@ -171,17 +179,19 @@ class EpicOnboardFlagServiceTest {
             ehrDataAuthorityClient.getResourceAs<Patient>(
                 "mnemonic",
                 "Patient",
-                "fhirId".localize(tenant)
+                "fhirId".localize(tenant),
             )
         } returns null
 
         val setPatientResponse = SetSmartDataValuesResult(success = true)
-        val patientMRN = mockk<Identifier> {
-            every { value } returns FHIRString("123")
-        }
-        val patient = mockk<Patient> {
-            every { identifier } returns listOf(patientMRN)
-        }
+        val patientMRN =
+            mockk<Identifier> {
+                every { value } returns FHIRString("123")
+            }
+        val patient =
+            mockk<Patient> {
+                every { identifier } returns listOf(patientMRN)
+            }
         coEvery { epicPatientService.getPatient(any(), any()) } returns patient
         every { identifierService.getMRNIdentifier(tenant, listOf(patientMRN)) } returns patientMRN
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -194,15 +204,16 @@ class EpicOnboardFlagServiceTest {
                     id = "123",
                     idType = "MRN",
                     userID = "ehrUserId",
-                    smartDataValues = listOf(
-                        SmartDataValue(
-                            comments = listOf("Patient has been onboarded in Ronin."),
-                            values = listOf("true"),
-                            smartDataID = "flagType",
-                            smartDataIDType = "SDI"
-                        )
-                    )
-                )
+                    smartDataValues =
+                        listOf(
+                            SmartDataValue(
+                                comments = listOf("Patient has been onboarded in Ronin."),
+                                values = listOf("true"),
+                                smartDataID = "flagType",
+                                smartDataIDType = "SDI",
+                            ),
+                        ),
+                ),
             )
         } returns ehrResponse
 

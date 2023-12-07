@@ -28,12 +28,13 @@ class EhrDAOTest {
     @Test
     fun `insert ehr`() {
         val dao = EhrDAO(KtormHelper.database())
-        val testobj = EhrDO {
-            vendorType = VendorType.EPIC
-            clientId = "12345"
-            publicKey = "public"
-            privateKey = "private"
-        }
+        val testobj =
+            EhrDO {
+                vendorType = VendorType.EPIC
+                clientId = "12345"
+                publicKey = "public"
+                privateKey = "private"
+            }
         val result = dao.insert(testobj)
         assertTrue(result.id != 0)
         assertEquals(result.clientId, testobj.clientId)
@@ -48,13 +49,14 @@ class EhrDAOTest {
     @DataSet(value = ["/dbunit/ehr/EHRVendor.yaml"], cleanAfter = true)
     fun `insert ehr fails`() {
         val dao = EhrDAO(KtormHelper.database())
-        val testobj = EhrDO {
-            instanceName = "Epic Sandbox"
-            vendorType = VendorType.EPIC
-            clientId = "12345"
-            publicKey = "public"
-            privateKey = "private"
-        }
+        val testobj =
+            EhrDO {
+                instanceName = "Epic Sandbox"
+                vendorType = VendorType.EPIC
+                clientId = "12345"
+                publicKey = "public"
+                privateKey = "private"
+            }
         assertThrows<SQLIntegrityConstraintViolationException> { dao.insert(testobj) }
     }
 
@@ -65,13 +67,14 @@ class EhrDAOTest {
     @DataSet(value = ["/dbunit/ehr/EHRVendor.yaml"], cleanAfter = true)
     fun `insert new ehr instance`() {
         val dao = EhrDAO(KtormHelper.database())
-        val testobj = EhrDO {
-            instanceName = "Epic Prod"
-            vendorType = VendorType.EPIC
-            clientId = "12345"
-            publicKey = "public"
-            privateKey = "private"
-        }
+        val testobj =
+            EhrDO {
+                instanceName = "Epic Prod"
+                vendorType = VendorType.EPIC
+                clientId = "12345"
+                publicKey = "public"
+                privateKey = "private"
+            }
         val result = dao.insert(testobj)
         assertEquals(result.clientId, testobj.clientId)
         assertEquals(result.instanceName, testobj.instanceName)
@@ -86,14 +89,15 @@ class EhrDAOTest {
     @DataSet(value = ["/dbunit/ehr/EHRVendor.yaml"], cleanAfter = true)
     fun `update ehr`() {
         val dao = EhrDAO(KtormHelper.database())
-        val testobj = EhrDO {
-            id = 101
-            vendorType = VendorType.EPIC
-            instanceName = "Epic Sandbox"
-            clientId = "56789"
-            publicKey = "tomato"
-            privateKey = "potato"
-        }
+        val testobj =
+            EhrDO {
+                id = 101
+                vendorType = VendorType.EPIC
+                instanceName = "Epic Sandbox"
+                clientId = "56789"
+                publicKey = "tomato"
+                privateKey = "potato"
+            }
         val result = dao.update(testobj)
         assertEquals(result.clientId, testobj.clientId)
         assertEquals(result.publicKey, testobj.publicKey)
@@ -132,22 +136,24 @@ class EhrDAOTest {
     @DataSet(value = ["/dbunit/ehr/NoEHRVendor.yaml"], cleanBefore = true)
     fun `update ehr fails`() {
         val dao = EhrDAO(KtormHelper.database())
-        val testobj = EhrDO {
-            instanceName = "Epic fake"
-            vendorType = VendorType.EPIC
-            clientId = "56789"
-            publicKey = "roses"
-            privateKey = "peonies"
-        }
+        val testobj =
+            EhrDO {
+                instanceName = "Epic fake"
+                vendorType = VendorType.EPIC
+                clientId = "56789"
+                publicKey = "roses"
+                privateKey = "peonies"
+            }
         assertThrows<NoEHRFoundException> { dao.update(testobj) }
     }
 
     @Test
     fun `update handles exception`() {
         val dao = EhrDAO(KtormHelper.database())
-        val testobj = mockk<EhrDO>(relaxed = true) {
-            every { vendorType } throws RuntimeException()
-        }
+        val testobj =
+            mockk<EhrDO>(relaxed = true) {
+                every { vendorType } throws RuntimeException()
+            }
         assertThrows<RuntimeException> { dao.update(testobj) }
     }
 

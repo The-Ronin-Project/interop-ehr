@@ -40,62 +40,75 @@ class RoninPatientGeneratorTest {
     private lateinit var localizer: Localizer
     private lateinit var roninPatient: RoninPatient
 
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
-    private val goodRoninMrn = Identifier(
-        type = CodeableConcepts.RONIN_MRN,
-        system = CodeSystem.RONIN_MRN.uri,
-        value = "An MRN".asFHIR()
-    )
-    private val otherMrn = Identifier(
-        system = Uri("testsystem"),
-        value = "tomato".asFHIR()
-    )
-    private val roninFhir = Identifier(
-        system = CodeSystem.RONIN_FHIR_ID.uri,
-        value = "fhirId".asFHIR(),
-        type = CodeableConcepts.RONIN_FHIR_ID
-    )
-    private val roninTenant = Identifier(
-        system = CodeSystem.RONIN_TENANT.uri,
-        value = "tenantId".asFHIR(),
-        type = CodeableConcepts.RONIN_TENANT
-    )
-
-    private val identifierList = listOf(
+    private val goodRoninMrn =
         Identifier(
-            type = CodeableConcept(
-                text = "MRN".asFHIR()
-            ),
-            system = Uri("mrnSystem"),
-            value = "An MRN".asFHIR()
+            type = CodeableConcepts.RONIN_MRN,
+            system = CodeSystem.RONIN_MRN.uri,
+            value = "An MRN".asFHIR(),
         )
-    )
+    private val otherMrn =
+        Identifier(
+            system = Uri("testsystem"),
+            value = "tomato".asFHIR(),
+        )
+    private val roninFhir =
+        Identifier(
+            system = CodeSystem.RONIN_FHIR_ID.uri,
+            value = "fhirId".asFHIR(),
+            type = CodeableConcepts.RONIN_FHIR_ID,
+        )
+    private val roninTenant =
+        Identifier(
+            system = CodeSystem.RONIN_TENANT.uri,
+            value = "tenantId".asFHIR(),
+            type = CodeableConcepts.RONIN_TENANT,
+        )
 
-    private val mockIdentifierService = mockk<IdentifierService> {
-        every { getMRNIdentifier(tenant, identifierList) } returns identifierList[0]
-        every { getMRNIdentifier(tenant, emptyList()) } throws VendorIdentifierNotFoundException()
-    }
+    private val identifierList =
+        listOf(
+            Identifier(
+                type =
+                    CodeableConcept(
+                        text = "MRN".asFHIR(),
+                    ),
+                system = Uri("mrnSystem"),
+                value = "An MRN".asFHIR(),
+            ),
+        )
+
+    private val mockIdentifierService =
+        mockk<IdentifierService> {
+            every { getMRNIdentifier(tenant, identifierList) } returns identifierList[0]
+            every { getMRNIdentifier(tenant, emptyList()) } throws VendorIdentifierNotFoundException()
+        }
 
     @BeforeEach
     fun setup() {
-        roninContactPoint = mockk {
-            every { validateRonin(any(), LocationContext(Patient::class), any()) } answers { thirdArg() }
-            every { validateUSCore(any(), LocationContext(Patient::class), any()) } answers { thirdArg() }
-        }
-        normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
-        val ehrFactory = mockk<EHRFactory> {
-            every { getVendorFactory(tenant) } returns mockk {
-                every { identifierService } returns mockIdentifierService
+        roninContactPoint =
+            mockk {
+                every { validateRonin(any(), LocationContext(Patient::class), any()) } answers { thirdArg() }
+                every { validateUSCore(any(), LocationContext(Patient::class), any()) } answers { thirdArg() }
             }
-        }
+        normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
+        val ehrFactory =
+            mockk<EHRFactory> {
+                every { getVendorFactory(tenant) } returns
+                    mockk {
+                        every { identifierService } returns mockIdentifierService
+                    }
+            }
         roninPatient = RoninPatient(ehrFactory, roninContactPoint, normalizer, localizer)
     }
 
@@ -118,9 +131,10 @@ class RoninPatientGeneratorTest {
 
     @Test
     fun `rcdmPatient with fhir id input - validate succeeds`() {
-        val roninPatient1 = rcdmPatient("test") {
-            id of Id("99")
-        }
+        val roninPatient1 =
+            rcdmPatient("test") {
+                id of Id("99")
+            }
         val validation = roninPatient.validate(roninPatient1, null).hasErrors()
         assertEquals(validation, false)
         assertEquals(4, roninPatient1.identifier.size)
@@ -134,9 +148,10 @@ class RoninPatientGeneratorTest {
 
     @Test
     fun `generates valid RoninPatient with existing correct MRN`() {
-        val roninPatient1 = rcdmPatient("test") {
-            identifier of listOf(goodRoninMrn)
-        }
+        val roninPatient1 =
+            rcdmPatient("test") {
+                identifier of listOf(goodRoninMrn)
+            }
         val validation = roninPatient.validate(roninPatient1, null).hasErrors()
         assertEquals(validation, false)
         val mrn = roninPatient1.identifier.find { it.system == CodeSystem.RONIN_MRN.uri }
@@ -145,9 +160,10 @@ class RoninPatientGeneratorTest {
 
     @Test
     fun `generates valid RoninPatient with existing list of MRNs`() {
-        val roninPatient1 = rcdmPatient("test") {
-            identifier of listOf(goodRoninMrn, otherMrn)
-        }
+        val roninPatient1 =
+            rcdmPatient("test") {
+                identifier of listOf(goodRoninMrn, otherMrn)
+            }
         val validation = roninPatient.validate(roninPatient1, null).hasErrors()
         assertEquals(validation, false)
         assertEquals(5, roninPatient1.identifier.size)
@@ -159,9 +175,10 @@ class RoninPatientGeneratorTest {
 
     @Test
     fun `generates valid RoninPatient with MRN and Ronin Tenant Id`() {
-        val roninPatient1 = rcdmPatient("test") {
-            identifier of listOf(otherMrn, roninTenant)
-        }
+        val roninPatient1 =
+            rcdmPatient("test") {
+                identifier of listOf(otherMrn, roninTenant)
+            }
         val validation = roninPatient.validate(roninPatient1, null).hasErrors()
         assertEquals(validation, false)
         assertEquals(5, roninPatient1.identifier.size)
@@ -171,9 +188,10 @@ class RoninPatientGeneratorTest {
 
     @Test
     fun `generates valid RoninPatient with MRN and Ronin Fhir Id`() {
-        val roninPatient1 = rcdmPatient("test") {
-            identifier of listOf(otherMrn, roninFhir)
-        }
+        val roninPatient1 =
+            rcdmPatient("test") {
+                identifier of listOf(otherMrn, roninFhir)
+            }
         val validation = roninPatient.validate(roninPatient1, null).hasErrors()
         assertEquals(validation, false)
         assertEquals(5, roninPatient1.identifier.size)
@@ -183,9 +201,10 @@ class RoninPatientGeneratorTest {
 
     @Test
     fun `generates valid RoninPatient with other MRNs`() {
-        val roninPatient1 = rcdmPatient("test") {
-            identifier of listOf(otherMrn)
-        }
+        val roninPatient1 =
+            rcdmPatient("test") {
+                identifier of listOf(otherMrn)
+            }
         val validation = roninPatient.validate(roninPatient1, null).hasErrors()
         assertEquals(validation, false)
         assertEquals(5, roninPatient1.identifier.size)
@@ -195,19 +214,22 @@ class RoninPatientGeneratorTest {
 
     @Test
     fun `generates valid RoninPatient with tenant and bad contact point drops contact point`() {
-        val contactPoint = ContactPoint(
-            value = "123-456-7890".asFHIR()
-        )
-        val contactPoint2 = ContactPoint(
-            value = "123-456-7890".asFHIR(),
-            system = Code(ContactPointSystem.PHONE.code),
-            use = Code(ContactPointUse.HOME.code)
-        )
-        val roninPatient1 = rcdmPatient("test") {
-            telecom of listOf(contactPoint, contactPoint2)
-            gender of Code("female")
-            maritalStatus of CodeableConcept(text = "single".asFHIR())
-        }
+        val contactPoint =
+            ContactPoint(
+                value = "123-456-7890".asFHIR(),
+            )
+        val contactPoint2 =
+            ContactPoint(
+                value = "123-456-7890".asFHIR(),
+                system = Code(ContactPointSystem.PHONE.code),
+                use = Code(ContactPointUse.HOME.code),
+            )
+        val roninPatient1 =
+            rcdmPatient("test") {
+                telecom of listOf(contactPoint, contactPoint2)
+                gender of Code("female")
+                maritalStatus of CodeableConcept(text = "single".asFHIR())
+            }
         val validation = roninPatient.validate(roninPatient1, null).hasErrors()
 
         assertEquals(validation, false)
@@ -219,13 +241,15 @@ class RoninPatientGeneratorTest {
 
     @Test
     fun `generates valid RoninPatient with other names`() {
-        val testName = HumanName(
-            family = "family".asFHIR(),
-            given = listOf("given".asFHIR())
-        )
-        val roninPatient1 = rcdmPatient("test") {
-            name of listOf(testName)
-        }
+        val testName =
+            HumanName(
+                family = "family".asFHIR(),
+                given = listOf("given".asFHIR()),
+            )
+        val roninPatient1 =
+            rcdmPatient("test") {
+                name of listOf(testName)
+            }
         val validation = roninPatient.validate(roninPatient1, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("official", roninPatient1.name[1].use?.value.toString())
@@ -233,16 +257,18 @@ class RoninPatientGeneratorTest {
 
     @Test
     fun `MRN generator with partial MRN, will cause another MRN to be generated`() {
-        val testMrn = Identifier(
-            type = CodeableConcepts.RONIN_MRN,
-            system = Uri("testsystem"),
-            value = "An MRN".asFHIR()
-        )
-        val testMrn2 = Identifier(
-            type = CodeableConcept(text = "test".asFHIR()),
-            system = CodeSystem.RONIN_MRN.uri,
-            value = "An MRN".asFHIR()
-        )
+        val testMrn =
+            Identifier(
+                type = CodeableConcepts.RONIN_MRN,
+                system = Uri("testsystem"),
+                value = "An MRN".asFHIR(),
+            )
+        val testMrn2 =
+            Identifier(
+                type = CodeableConcept(text = "test".asFHIR()),
+                system = CodeSystem.RONIN_MRN.uri,
+                value = "An MRN".asFHIR(),
+            )
         val mrnList = ListDataGenerator(0, IdentifierGenerator()).plus(testMrn).plus(testMrn2)
         val roninMrn = rcdmMrn(mrnList)
         assertEquals(1, roninMrn.size)
@@ -262,9 +288,10 @@ class RoninPatientGeneratorTest {
     fun `getReferenceData fails when no tenant`() {
         val rcdmPatient = rcdmPatient("test") {}
         val badPatient = rcdmPatient.copy(identifier = emptyList())
-        val exception = assertThrows<IllegalArgumentException> {
-            badPatient.referenceData()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                badPatient.referenceData()
+            }
         assertEquals("Patient is missing some required data", exception.message)
     }
 
@@ -276,9 +303,10 @@ class RoninPatientGeneratorTest {
         val tenant = rcdmPatient.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }!!
         val badTenant = tenant.copy(value = "".asFHIR())
         val badPatient = rcdmPatient.copy(identifier = emptyList<Identifier>() + fhir + mrn + badTenant)
-        val exception = assertThrows<IllegalArgumentException> {
-            badPatient.referenceData()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                badPatient.referenceData()
+            }
         assertEquals("Patient is missing some required data", exception.message)
     }
 
@@ -290,9 +318,10 @@ class RoninPatientGeneratorTest {
         val tenant = rcdmPatient.identifier.firstOrNull { it.system == CodeSystem.RONIN_TENANT.uri }!!
         val badTenant = tenant.copy(value = null)
         val badPatient = rcdmPatient.copy(identifier = emptyList<Identifier>() + fhir + mrn + badTenant)
-        val exception = assertThrows<IllegalArgumentException> {
-            badPatient.referenceData()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                badPatient.referenceData()
+            }
         assertEquals("Patient is missing some required data", exception.message)
     }
 
@@ -300,9 +329,10 @@ class RoninPatientGeneratorTest {
     fun `getReferenceData fails when no id`() {
         val rcdmPatient = rcdmPatient("test") {}
         val badPatient = rcdmPatient.copy(id = null)
-        val exception = assertThrows<IllegalArgumentException> {
-            badPatient.referenceData()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                badPatient.referenceData()
+            }
         assertEquals("Patient is missing some required data", exception.message)
     }
 
@@ -310,9 +340,10 @@ class RoninPatientGeneratorTest {
     fun `getReferenceData fails when empty id`() {
         val rcdmPatient = rcdmPatient("test") {}
         val badPatient = rcdmPatient.copy(id = Id(""))
-        val exception = assertThrows<IllegalArgumentException> {
-            badPatient.referenceData()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                badPatient.referenceData()
+            }
         assertEquals("Patient is missing some required data", exception.message)
     }
 
@@ -320,9 +351,10 @@ class RoninPatientGeneratorTest {
     fun `getReferenceData fails when null id value`() {
         val rcdmPatient = rcdmPatient("test") {}
         val badPatient = rcdmPatient.copy(id = Id(value = null))
-        val exception = assertThrows<IllegalArgumentException> {
-            badPatient.referenceData()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                badPatient.referenceData()
+            }
         assertEquals("Patient is missing some required data", exception.message)
     }
 }

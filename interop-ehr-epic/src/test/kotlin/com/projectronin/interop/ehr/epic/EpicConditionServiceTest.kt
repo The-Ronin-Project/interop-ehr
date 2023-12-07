@@ -43,7 +43,7 @@ class EpicConditionServiceTest {
                 "clientId",
                 "https://example.org",
                 "testPrivateKey",
-                "tenantId"
+                "tenantId",
             )
         val patientFhirId = "abc"
         val category = "problem-list-item"
@@ -59,8 +59,8 @@ class EpicConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to category,
                     "clinical-status" to clinicalStatus,
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
@@ -69,7 +69,7 @@ class EpicConditionServiceTest {
                 tenant,
                 patientFhirId,
                 category,
-                clinicalStatus
+                clinicalStatus,
             )
 
         assertEquals(validConditionSearch.entry.map { it.resource }, bundle)
@@ -82,16 +82,18 @@ class EpicConditionServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
         val patientFhirId = "abc"
-        val categoryCodes = listOf(
-            FHIRSearchToken(code = "problem-list-item"),
-            FHIRSearchToken(code = "encounter-diagnosis")
-        )
-        val clinicalStatusCodes = listOf(
-            FHIRSearchToken(code = "active")
-        )
+        val categoryCodes =
+            listOf(
+                FHIRSearchToken(code = "problem-list-item"),
+                FHIRSearchToken(code = "encounter-diagnosis"),
+            )
+        val clinicalStatusCodes =
+            listOf(
+                FHIRSearchToken(code = "active"),
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validConditionSearch
@@ -103,8 +105,8 @@ class EpicConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to "problem-list-item,encounter-diagnosis",
                     "clinical-status" to "active",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
@@ -113,7 +115,7 @@ class EpicConditionServiceTest {
                 tenant,
                 patientFhirId,
                 categoryCodes,
-                clinicalStatusCodes
+                clinicalStatusCodes,
             )
 
         // 1 patient had 7 problem-list-item conditions and 0 encounter-diagnosis conditions
@@ -127,17 +129,19 @@ class EpicConditionServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
         val patientFhirId = "abc"
-        val categoryCodes = listOf(
-            FHIRSearchToken(system = categorySystem, code = "problem-list-item")
-        )
+        val categoryCodes =
+            listOf(
+                FHIRSearchToken(system = categorySystem, code = "problem-list-item"),
+            )
         val categoryToken = "$categorySystem|problem-list-item"
-        val clinicalStatusCodes = listOf(
-            FHIRSearchToken(system = clinicalSystem, code = "active"),
-            FHIRSearchToken(system = clinicalSystem, code = "resolved")
-        )
+        val clinicalStatusCodes =
+            listOf(
+                FHIRSearchToken(system = clinicalSystem, code = "active"),
+                FHIRSearchToken(system = clinicalSystem, code = "resolved"),
+            )
         val clinicalStatusTokens = "$clinicalSystem|active,$clinicalSystem|resolved"
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -150,8 +154,8 @@ class EpicConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to categoryToken,
                     "clinical-status" to clinicalStatusTokens,
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
@@ -160,7 +164,7 @@ class EpicConditionServiceTest {
                 tenant,
                 patientFhirId,
                 categoryCodes,
-                clinicalStatusCodes
+                clinicalStatusCodes,
             )
 
         // 1 patient had 7 active conditions and 0 resolved conditions
@@ -174,7 +178,7 @@ class EpicConditionServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
         val patientFhirId = "abc"
         val categoryToken = "$categorySystem|problem-list-item"
@@ -190,8 +194,8 @@ class EpicConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to categoryToken,
                     "clinical-status" to clinicalStatusToken,
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
@@ -200,7 +204,7 @@ class EpicConditionServiceTest {
                 tenant,
                 patientFhirId,
                 categoryToken,
-                clinicalStatusToken
+                clinicalStatusToken,
             )
 
         // 1 patient had 7 problem-list-item conditions
@@ -214,7 +218,7 @@ class EpicConditionServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
         val patientFhirId = "abc"
         val categoryToken = "$categorySystem|problem-list-item"
@@ -230,8 +234,8 @@ class EpicConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to categoryToken,
                     "clinical-status" to clinicalStatusToken,
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
@@ -240,7 +244,7 @@ class EpicConditionServiceTest {
                 tenant,
                 patientFhirId,
                 categoryToken,
-                clinicalStatusToken
+                clinicalStatusToken,
             )
 
         // 1 patient had 7 problem-list-item conditions
@@ -257,7 +261,7 @@ class EpicConditionServiceTest {
                 "clientId",
                 "https://example.org",
                 "testPrivateKey",
-                "tenantId"
+                "tenantId",
             )
 
         // Mock response with paging
@@ -271,18 +275,19 @@ class EpicConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to categoryToken,
                     "clinical-status" to clinicalStatusToken,
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns EHRResponse(pagingHttpResponse, "67890")
 
         // Mock response without paging
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validConditionSearch
+        @Suppress("ktlint:standard:max-line-length")
         coEvery {
             epicClient.get(
                 tenant,
-                "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition?patient=eovSKnwDlsv-8MsEzCJO3BA3&clinical-status=active,inactive,resolved&category=problem-list-item"
+                "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Condition?patient=eovSKnwDlsv-8MsEzCJO3BA3&clinical-status=active,inactive,resolved&category=problem-list-item",
             )
         } returns ehrResponse
 
@@ -291,7 +296,7 @@ class EpicConditionServiceTest {
                 tenant,
                 patientFhirId,
                 categoryToken,
-                clinicalStatusToken
+                clinicalStatusToken,
             )
 
         // 7 resources from the first query, 7 from the second total of 14, remove duplicates = 7
@@ -305,16 +310,18 @@ class EpicConditionServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
         val patientFhirId = "abc"
-        val categoryCodes = listOf(
-            FHIRSearchToken(code = "problem-list-item"),
-            FHIRSearchToken(code = "encounter-diagnosis")
-        )
-        val clinicalStatusCodes = "http://terminology.hl7.org/CodeSystem/condition-clinical|active," +
-            "http://terminology.hl7.org/CodeSystem/condition-clinical|inactive," +
-            "http://terminology.hl7.org/CodeSystem/condition-clinical|resolved"
+        val categoryCodes =
+            listOf(
+                FHIRSearchToken(code = "problem-list-item"),
+                FHIRSearchToken(code = "encounter-diagnosis"),
+            )
+        val clinicalStatusCodes =
+            "http://terminology.hl7.org/CodeSystem/condition-clinical|active," +
+                "http://terminology.hl7.org/CodeSystem/condition-clinical|inactive," +
+                "http://terminology.hl7.org/CodeSystem/condition-clinical|resolved"
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validConditionSearch
@@ -326,8 +333,8 @@ class EpicConditionServiceTest {
                     "patient" to patientFhirId,
                     "category" to "problem-list-item,encounter-diagnosis",
                     "clinical-status" to clinicalStatusCodes,
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
@@ -335,7 +342,7 @@ class EpicConditionServiceTest {
             conditionService.findConditionsByCodes(
                 tenant,
                 patientFhirId,
-                categoryCodes
+                categoryCodes,
             )
 
         // 1 patient had 7 problem-list-item conditions and 0 encounter-diagnosis conditions

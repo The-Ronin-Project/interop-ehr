@@ -37,7 +37,10 @@ internal fun Tenant.toTenantDO(ehrDO: EhrDO): TenantDO {
  *  prevents us from adding functions there and properly testing them
  *  https://github.com/mockk/mockk/issues/64
  */
-fun TenantDO.toTenant(ehrTenantDO: EHRTenantDO, ehrDO: EhrDO): Tenant {
+fun TenantDO.toTenant(
+    ehrTenantDO: EHRTenantDO,
+    ehrDO: EhrDO,
+): Tenant {
     val batchConfig = this.createBatchConfig()
     return Tenant(
         internalId = id,
@@ -46,7 +49,7 @@ fun TenantDO.toTenant(ehrTenantDO: EHRTenantDO, ehrDO: EhrDO): Tenant {
         timezone = timezone,
         batchConfig = batchConfig,
         vendor = ehrTenantDO.toVendor(ehrDO),
-        monitoredIndicator = monitoredIndicator
+        monitoredIndicator = monitoredIndicator,
     )
 }
 
@@ -80,11 +83,12 @@ fun EHRTenantDO.toVendor(ehrDO: EhrDO): Vendor {
  *  Transforms an [EpicTenantDO] object into an [Epic] object, provided a link to the ehrDO representing Epic
  */
 private fun EpicTenantDO.toEpic(ehrDO: EhrDO): Epic {
-    val authenticationConfig = EpicAuthenticationConfig(
-        authEndpoint = authEndpoint,
-        publicKey = ehrDO.publicKey!!,
-        privateKey = ehrDO.privateKey!!
-    )
+    val authenticationConfig =
+        EpicAuthenticationConfig(
+            authEndpoint = authEndpoint,
+            publicKey = ehrDO.publicKey!!,
+            privateKey = ehrDO.privateKey!!,
+        )
     return Epic(
         clientId = ehrDO.clientId,
         instanceName = ehrDO.instanceName,
@@ -102,17 +106,17 @@ private fun EpicTenantDO.toEpic(ehrDO: EhrDO): Epic {
         hsi = hsi,
         departmentInternalSystem = departmentInternalSystem,
         patientOnboardedFlagId = patientOnboardedFlagId,
-        orderSystem = orderSystem
-
+        orderSystem = orderSystem,
     )
 }
 
 private fun CernerTenantDO.toCerner(ehrDO: EhrDO): Cerner {
-    val authenticationConfig = CernerAuthenticationConfig(
-        authEndpoint = authEndpoint,
-        accountId = ehrDO.accountId!!,
-        secret = ehrDO.secret!!
-    )
+    val authenticationConfig =
+        CernerAuthenticationConfig(
+            authEndpoint = authEndpoint,
+            accountId = ehrDO.accountId!!,
+            secret = ehrDO.secret!!,
+        )
     return Cerner(
         clientId = ehrDO.clientId,
         instanceName = ehrDO.instanceName,
@@ -122,7 +126,7 @@ private fun CernerTenantDO.toCerner(ehrDO: EhrDO): Cerner {
         messagePractitioner = messagePractitioner,
         messageTopic = messageTopic,
         messageCategory = messageCategory,
-        messagePriority = messagePriority
+        messagePriority = messagePriority,
     )
 }
 

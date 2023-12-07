@@ -21,13 +21,18 @@ import org.springframework.stereotype.Repository
  * Provides data access operations for tenant data models.
  */
 @Repository
-class ProviderPoolDAO(@Qualifier("ehr") private val database: Database) {
+class ProviderPoolDAO(
+    @Qualifier("ehr") private val database: Database,
+) {
     private val logger = KotlinLogging.logger { }
 
     /**
      * Retrieves a list of [ProviderPoolDO]s for the supplied [tenantId] and [providerIds].
      */
-    fun getPoolsForProviders(tenantId: Int, providerIds: List<String>): List<ProviderPoolDO> {
+    fun getPoolsForProviders(
+        tenantId: Int,
+        providerIds: List<String>,
+    ): List<ProviderPoolDO> {
         return database.from(ProviderPoolDOs).joinReferencesAndSelect()
             .where((ProviderPoolDOs.tenantId eq tenantId) and (ProviderPoolDOs.providerId inList providerIds))
             .map { ProviderPoolDOs.createEntity(it) }
@@ -52,11 +57,12 @@ class ProviderPoolDAO(@Qualifier("ehr") private val database: Database) {
     }
 
     fun insert(providerPool: ProviderPoolDO): ProviderPoolDO {
-        val newProviderPoolId = database.insertAndGenerateKey(ProviderPoolDOs) {
-            set(it.tenantId, providerPool.tenant.id)
-            set(it.providerId, providerPool.providerId)
-            set(it.poolId, providerPool.poolId)
-        } as Int
+        val newProviderPoolId =
+            database.insertAndGenerateKey(ProviderPoolDOs) {
+                set(it.tenantId, providerPool.tenant.id)
+                set(it.providerId, providerPool.providerId)
+                set(it.poolId, providerPool.poolId)
+            } as Int
         return getPoolById(newProviderPoolId)
             // This should be impossible to hit due to DB constraints
             ?: throw Exception("Inserted ProviderPool ${providerPool.id} not found")

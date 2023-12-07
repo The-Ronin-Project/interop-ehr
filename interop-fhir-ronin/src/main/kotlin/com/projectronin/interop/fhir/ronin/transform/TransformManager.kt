@@ -25,7 +25,7 @@ class TransformManager(private val validationClient: ValidationClient) {
         resource: T,
         transformer: ProfileTransformer<T>,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime? = null
+        forceCacheReloadTS: LocalDateTime? = null,
     ): TransformResponse<T>? {
         val (transformResponse, validation) = transformer.transform(resource, tenant, forceCacheReloadTS)
 

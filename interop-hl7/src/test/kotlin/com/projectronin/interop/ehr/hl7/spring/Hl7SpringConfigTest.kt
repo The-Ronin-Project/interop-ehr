@@ -33,7 +33,6 @@ class Hl7SpringConfigTest {
 
 @Configuration
 class TestConfig {
-
     @Bean
     fun threadPoolTaskExecutor() = mockk<ThreadPoolTaskExecutor>(relaxed = true)
 

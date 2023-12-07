@@ -36,7 +36,10 @@ class CernerMessageService(cernerClient: CernerClient) :
     override val fhirResourceType = Communication::class.java
     override val writeScope = true
 
-    override fun sendMessage(tenant: Tenant, messageInput: EHRMessageInput): String {
+    override fun sendMessage(
+        tenant: Tenant,
+        messageInput: EHRMessageInput,
+    ): String {
         val vendor = tenant.vendor
         if (vendor !is Cerner) {
             throw IllegalStateException("Tenant is not Cerner vendor: ${tenant.mnemonic}")
@@ -46,13 +49,15 @@ class CernerMessageService(cernerClient: CernerClient) :
         val communication = createCommunication(tenant, vendor, messageInput)
         val response = runBlocking { cernerClient.post(tenant, fhirURLSearchPart, communication) }
 
-        val resourceLocation = response.httpResponse.headers["Location"]
-            ?: throw ResourceCreateException(tenant, fhirURLSearchPart) { "No Location header received" }
-        val createdFhirId = Reference.getId(resourceLocation)
-            ?: throw ResourceCreateException(
-                tenant,
-                fhirURLSearchPart
-            ) { "Returned location ($resourceLocation) is not a valid Reference" }
+        val resourceLocation =
+            response.httpResponse.headers["Location"]
+                ?: throw ResourceCreateException(tenant, fhirURLSearchPart) { "No Location header received" }
+        val createdFhirId =
+            Reference.getId(resourceLocation)
+                ?: throw ResourceCreateException(
+                    tenant,
+                    fhirURLSearchPart,
+                ) { "Returned location ($resourceLocation) is not a valid Reference" }
 
         // Add the response FHIR ID to our log spans to get better visibility when debugging in DataDog.
         val span = GlobalTracer.get().activeSpan()
@@ -61,7 +66,11 @@ class CernerMessageService(cernerClient: CernerClient) :
         return createdFhirId
     }
 
-    private fun createCommunication(tenant: Tenant, cerner: Cerner, messageInput: EHRMessageInput): Communication {
+    private fun createCommunication(
+        tenant: Tenant,
+        cerner: Cerner,
+        messageInput: EHRMessageInput,
+    ): Communication {
         val recipients = messageInput.recipients.map { Reference(reference = FHIRString("Practitioner/${it.id}")) }
         val sender = "Practitioner/${cerner.messagePractitioner}"
         val topic = cerner.messageTopic ?: "Ronin Symptoms Alert"
@@ -71,32 +80,36 @@ class CernerMessageService(cernerClient: CernerClient) :
 
         return Communication(
             status = EventStatus.COMPLETED.asCode(),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/communication-category"),
-                            code = Code(category)
-                        )
-                    )
-                )
-            ),
+            category =
+                listOf(
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = Uri("http://terminology.hl7.org/CodeSystem/communication-category"),
+                                    code = Code(category),
+                                ),
+                            ),
+                    ),
+                ),
             priority = Code(priority),
             subject = Reference(reference = FHIRString("Patient/${messageInput.patientFHIRID}")),
             topic = CodeableConcept(text = FHIRString(topic)),
             recipient = recipients,
             sender = Reference(reference = FHIRString(sender)),
-            payload = listOf(
-                CommunicationPayload(
-                    content = DynamicValue(
-                        DynamicValueType.ATTACHMENT,
-                        Attachment(
-                            contentType = Code("text/plain"),
-                            data = Base64Binary(encodedText)
-                        )
-                    )
-                )
-            )
+            payload =
+                listOf(
+                    CommunicationPayload(
+                        content =
+                            DynamicValue(
+                                DynamicValueType.ATTACHMENT,
+                                Attachment(
+                                    contentType = Code("text/plain"),
+                                    data = Base64Binary(encodedText),
+                                ),
+                            ),
+                    ),
+                ),
         )
     }
 }

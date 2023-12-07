@@ -15,7 +15,6 @@ interface DocumentReferenceService : FHIRService<DocumentReference> {
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate,
-        endDate: LocalDate
-    ):
-        List<DocumentReference>
+        endDate: LocalDate,
+    ): List<DocumentReference>
 }

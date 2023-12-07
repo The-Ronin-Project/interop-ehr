@@ -28,12 +28,13 @@ internal class EpicOrganizationServiceTest {
         httpResponse = mockk()
         ehrResponse = EHRResponse(httpResponse, "12345")
         organizationService = EpicOrganizationService(epicClient, 5)
-        tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            "testPrivateKey",
-            "TEST_TENANT"
-        )
+        tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                "testPrivateKey",
+                "TEST_TENANT",
+            )
     }
 
     @Test
@@ -45,15 +46,16 @@ internal class EpicOrganizationServiceTest {
                 tenant,
                 "/api/FHIR/R4/Organization",
                 mapOf(
-                    "_id" to listOf("e8wMbBzuMGvZrYASWBHiL8w3")
-                )
+                    "_id" to listOf("e8wMbBzuMGvZrYASWBHiL8w3"),
+                ),
             )
         } returns ehrResponse
 
-        val bundle = organizationService.getByIDs(
-            tenant,
-            listOf("e8wMbBzuMGvZrYASWBHiL8w3")
-        ).values.toList()
+        val bundle =
+            organizationService.getByIDs(
+                tenant,
+                listOf("e8wMbBzuMGvZrYASWBHiL8w3"),
+            ).values.toList()
 
         val expectedOrganizationBundle = (validOrganizationResponse).entry.map { it.resource }
         assertEquals(expectedOrganizationBundle, bundle)
@@ -68,15 +70,16 @@ internal class EpicOrganizationServiceTest {
                 tenant,
                 "/api/FHIR/R4/Organization",
                 mapOf(
-                    "_id" to listOf("e8wMbBzuMGvZrYASWBHiL8w3")
-                )
+                    "_id" to listOf("e8wMbBzuMGvZrYASWBHiL8w3"),
+                ),
             )
         } returns ehrResponse
 
-        val bundle = organizationService.findOrganizationsByFHIRId(
-            tenant,
-            listOf("e8wMbBzuMGvZrYASWBHiL8w3")
-        )
+        val bundle =
+            organizationService.findOrganizationsByFHIRId(
+                tenant,
+                listOf("e8wMbBzuMGvZrYASWBHiL8w3"),
+            )
 
         val expectedOrganizationBundle = (validOrganizationResponse).entry.map { it.resource }
         assertEquals(expectedOrganizationBundle, bundle)

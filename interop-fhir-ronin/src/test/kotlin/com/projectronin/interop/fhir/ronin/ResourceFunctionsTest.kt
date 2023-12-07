@@ -30,10 +30,10 @@ class ResourceFunctionsTest {
                 Identifier(
                     value = "1234".asFHIR(),
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    type = CodeableConcepts.RONIN_FHIR_ID
-                )
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                ),
             ),
-            identifiers
+            identifiers,
         )
     }
 
@@ -51,9 +51,9 @@ class ResourceFunctionsTest {
             Identifier(
                 value = "1234".asFHIR(),
                 system = CodeSystem.RONIN_FHIR_ID.uri,
-                type = CodeableConcepts.RONIN_FHIR_ID
+                type = CodeableConcepts.RONIN_FHIR_ID,
             ),
-            identifier
+            identifier,
         )
     }
 
@@ -64,9 +64,9 @@ class ResourceFunctionsTest {
             Identifier(
                 value = null,
                 system = CodeSystem.RONIN_FHIR_ID.uri,
-                type = CodeableConcepts.RONIN_FHIR_ID
+                type = CodeableConcepts.RONIN_FHIR_ID,
             ),
-            identifier
+            identifier,
         )
     }
 
@@ -75,6 +75,6 @@ class ResourceFunctionsTest {
         override val implicitRules: Uri? = null,
         override val language: Code? = null,
         override var meta: Meta? = null,
-        override val resourceType: String = "Sample"
+        override val resourceType: String = "Sample",
     ) : Resource<SampleResource>
 }

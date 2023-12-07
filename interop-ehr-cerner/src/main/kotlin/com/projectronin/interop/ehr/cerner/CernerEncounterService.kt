@@ -21,13 +21,13 @@ class CernerEncounterService(cernerClient: CernerClient) : EncounterService, Cer
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate,
-        endDate: LocalDate
-    ):
-        List<Encounter> {
-        val parameters = mapOf(
-            "patient" to patientFhirId,
-            "date" to getDateParam(startDate, endDate, tenant)
-        )
+        endDate: LocalDate,
+    ): List<Encounter> {
+        val parameters =
+            mapOf(
+                "patient" to patientFhirId,
+                "date" to getDateParam(startDate, endDate, tenant),
+            )
         return getResourceListFromSearch(tenant, parameters)
     }
 }

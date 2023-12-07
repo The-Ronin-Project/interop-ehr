@@ -20,5 +20,5 @@ data class ScheduleProvider(
     @field:Schema(example = "External", type = "string")
     val idType: String = "External",
     val departmentID: String = "",
-    val departmentIDType: String = ""
+    val departmentIDType: String = "",
 )

@@ -5,13 +5,14 @@ package com.projectronin.interop.ehr.inputs
  */
 data class FHIRSearchToken(
     var system: String? = null,
-    val code: String
+    val code: String,
 ) {
     init {
         if (code.isEmpty()) {
             throw IllegalArgumentException("A FHIR search token requires a code")
         }
     }
+
     fun toParam(): String {
         if (system.isNullOrEmpty()) {
             return code

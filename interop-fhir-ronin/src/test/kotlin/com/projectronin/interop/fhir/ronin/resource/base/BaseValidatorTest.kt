@@ -18,11 +18,16 @@ class BaseValidatorTest {
     fun `uses the supplied parent context`() {
         val locationContext = LocationContext(Bundle::entry)
 
-        val validator = object : BaseValidator<Location>(null) {
-            override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
-                assertEquals(locationContext, parentContext)
+        val validator =
+            object : BaseValidator<Location>(null) {
+                override fun validate(
+                    element: Location,
+                    parentContext: LocationContext,
+                    validation: Validation,
+                ) {
+                    assertEquals(locationContext, parentContext)
+                }
             }
-        }
 
         val location = mockk<Location>()
 
@@ -34,11 +39,16 @@ class BaseValidatorTest {
 
     @Test
     fun `generates a parent context if one is not provided`() {
-        val validator = object : BaseValidator<Location>(null) {
-            override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
-                assertEquals(LocationContext(Location::class), parentContext)
+        val validator =
+            object : BaseValidator<Location>(null) {
+                override fun validate(
+                    element: Location,
+                    parentContext: LocationContext,
+                    validation: Validation,
+                ) {
+                    assertEquals(LocationContext(Location::class), parentContext)
+                }
             }
-        }
 
         val location = mockk<Location>()
 
@@ -50,14 +60,20 @@ class BaseValidatorTest {
 
     @Test
     fun `validates against the extended profile when provided`() {
-        val validator = object : BaseValidator<Location>(R4LocationValidator) {
-            override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
+        val validator =
+            object : BaseValidator<Location>(R4LocationValidator) {
+                override fun validate(
+                    element: Location,
+                    parentContext: LocationContext,
+                    validation: Validation,
+                ) {
+                }
             }
-        }
 
-        val location = mockk<Location> {
-            every { validate(R4LocationValidator, eq(LocationContext(Location::class))) } returns Validation()
-        }
+        val location =
+            mockk<Location> {
+                every { validate(R4LocationValidator, eq(LocationContext(Location::class))) } returns Validation()
+            }
 
         val validation = validator.validate(location)
         assertNotNull(validation)

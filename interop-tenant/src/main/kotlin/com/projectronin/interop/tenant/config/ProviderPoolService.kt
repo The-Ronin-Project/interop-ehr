@@ -15,7 +15,10 @@ class ProviderPoolService(private val providerPoolDAO: ProviderPoolDAO) {
      * keyed by the provider IDs and valued by the pool IDs. Any providers that do not have an associated pool will not
      * be included in the response.
      */
-    fun getPoolsForProviders(tenant: Tenant, providerIds: List<String>): Map<String, String> {
+    fun getPoolsForProviders(
+        tenant: Tenant,
+        providerIds: List<String>,
+    ): Map<String, String> {
         return providerPoolDAO.getPoolsForProviders(tenant.internalId, providerIds)
             .associate { it.providerId to it.poolId }
     }

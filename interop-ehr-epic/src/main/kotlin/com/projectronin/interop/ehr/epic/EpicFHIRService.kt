@@ -18,14 +18,17 @@ import java.time.LocalDate
  */
 abstract class EpicFHIRService<T : Resource<T>>(
     val epicClient: EpicClient,
-    protected val batchSize: Int = 10
+    protected val batchSize: Int = 10,
 ) : BaseFHIRService<T>() {
     private val logger = KotlinLogging.logger { }
     abstract val fhirURLSearchPart: String
     override val standardParameters: Map<String, Any> = mapOf("_count" to 50)
 
     @Trace
-    override fun getByID(tenant: Tenant, resourceFHIRId: String): T {
+    override fun getByID(
+        tenant: Tenant,
+        resourceFHIRId: String,
+    ): T {
         return runBlocking {
             epicClient.get(tenant, "$fhirURLSearchPart/$resourceFHIRId")
                 .body(TypeInfo(fhirResourceType.kotlin, fhirResourceType))
@@ -33,13 +36,17 @@ abstract class EpicFHIRService<T : Resource<T>>(
     }
 
     @Trace
-    override fun getByIDs(tenant: Tenant, resourceFHIRIds: List<String>): Map<String, T> {
+    override fun getByIDs(
+        tenant: Tenant,
+        resourceFHIRIds: List<String>,
+    ): Map<String, T> {
         return runBlocking {
             val chunkedIds = resourceFHIRIds.toSet().chunked(batchSize)
-            val resource = chunkedIds.map { idSubset ->
-                val parameters = mapOf("_id" to idSubset)
-                getResourceListFromSearch(tenant, parameters)
-            }.flatten()
+            val resource =
+                chunkedIds.map { idSubset ->
+                    val parameters = mapOf("_id" to idSubset)
+                    getResourceListFromSearch(tenant, parameters)
+                }.flatten()
             resource.associateBy { it.id!!.value!! }
         }
     }
@@ -47,13 +54,16 @@ abstract class EpicFHIRService<T : Resource<T>>(
     internal fun getResourceListFromSearch(
         tenant: Tenant,
         parameters: Map<String, Any?>,
-        disableRetry: Boolean = false
+        disableRetry: Boolean = false,
     ): List<T> {
         return getBundleWithPaging(tenant, parameters, disableRetry).entry.mapNotNull { it.resource }
             .filterIsInstance(fhirResourceType)
     }
 
-    internal fun getResourceListFromSearchSTU3(tenant: Tenant, parameters: Map<String, Any?>): List<T> {
+    internal fun getResourceListFromSearchSTU3(
+        tenant: Tenant,
+        parameters: Map<String, Any?>,
+    ): List<T> {
         return getBundleWithPagingSTU3(tenant, parameters).entry.mapNotNull { it.resource }
             .filterIsInstance(fhirResourceType)
     }
@@ -67,7 +77,7 @@ abstract class EpicFHIRService<T : Resource<T>>(
     internal fun getBundleWithPaging(
         tenant: Tenant,
         parameters: Map<String, Any?>,
-        disableRetry: Boolean = false
+        disableRetry: Boolean = false,
     ): Bundle {
         logger.info { "Get started for ${tenant.mnemonic}" }
 
@@ -76,15 +86,16 @@ abstract class EpicFHIRService<T : Resource<T>>(
         val responses: MutableList<Bundle> = mutableListOf()
         var nextURL: String? = null
         do {
-            val bundle = runBlocking {
-                val httpResponse =
-                    if (nextURL == null) {
-                        epicClient.get(tenant, fhirURLSearchPart, standardizedParameters, disableRetry)
-                    } else {
-                        epicClient.get(tenant, nextURL!!, disableRetry = disableRetry)
-                    }
-                httpResponse.body<Bundle>()
-            }
+            val bundle =
+                runBlocking {
+                    val httpResponse =
+                        if (nextURL == null) {
+                            epicClient.get(tenant, fhirURLSearchPart, standardizedParameters, disableRetry)
+                        } else {
+                            epicClient.get(tenant, nextURL!!, disableRetry = disableRetry)
+                        }
+                    httpResponse.body<Bundle>()
+                }
 
             responses.add(bundle)
             nextURL = bundle.link.firstOrNull { it.relation?.value == "next" }?.url?.value
@@ -100,7 +111,7 @@ abstract class EpicFHIRService<T : Resource<T>>(
      */
     internal fun getBundleWithPagingSTU3(
         tenant: Tenant,
-        parameters: Map<String, Any?>
+        parameters: Map<String, Any?>,
     ): Bundle {
         logger.info { "Get started for ${tenant.mnemonic}" }
 
@@ -109,16 +120,17 @@ abstract class EpicFHIRService<T : Resource<T>>(
         val responses: MutableList<Bundle> = mutableListOf()
         var nextURL: String? = null
         do {
-            val bundle = runBlocking {
-                val httpResponse =
-                    if (nextURL == null) {
-                        epicClient.get(tenant, fhirURLSearchPart, standardizedParameters)
-                    } else {
-                        epicClient.get(tenant, nextURL!!)
-                    }
-                // TODO: update to use EHRResponse + transaction ID
-                httpResponse.body<STU3Bundle>()
-            }
+            val bundle =
+                runBlocking {
+                    val httpResponse =
+                        if (nextURL == null) {
+                            epicClient.get(tenant, fhirURLSearchPart, standardizedParameters)
+                        } else {
+                            epicClient.get(tenant, nextURL!!)
+                        }
+                    // TODO: update to use EHRResponse + transaction ID
+                    httpResponse.body<STU3Bundle>()
+                }
 
             responses.add(bundle.transformToR4())
             nextURL = bundle.link.firstOrNull { it.relation?.value == "next" }?.url?.value
@@ -127,7 +139,10 @@ abstract class EpicFHIRService<T : Resource<T>>(
         return mergeResponses(responses)
     }
 
-    protected fun getDateParam(startDate: LocalDate?, endDate: LocalDate?): RepeatingParameter? {
+    protected fun getDateParam(
+        startDate: LocalDate?,
+        endDate: LocalDate?,
+    ): RepeatingParameter? {
         val startDateString = startDate?.let { "ge$startDate" }
         val endDateString = endDate?.let { "le$endDate" }
         val values = listOf(startDateString, endDateString).mapNotNull { it }

@@ -15,18 +15,20 @@ class EHRTenantDAOFactoryTest {
 
     @Test
     fun `returns epic correctly`() {
-        val tenantDO = mockk<TenantDO> {
-            every { ehr.vendorType } returns VendorType.EPIC
-        }
+        val tenantDO =
+            mockk<TenantDO> {
+                every { ehr.vendorType } returns VendorType.EPIC
+            }
         val dao = EHRTenantDAOFactory(epicTenantDAO, cernerTenantDAO).getEHRTenantDAO(tenantDO)
         assertEquals(epicTenantDAO, dao)
     }
 
     @Test
     fun `returns cerner correctly`() {
-        val tenantDO = mockk<TenantDO> {
-            every { ehr.vendorType } returns VendorType.CERNER
-        }
+        val tenantDO =
+            mockk<TenantDO> {
+                every { ehr.vendorType } returns VendorType.CERNER
+            }
         val dao = EHRTenantDAOFactory(epicTenantDAO, cernerTenantDAO).getEHRTenantDAO(tenantDO)
         assertEquals(cernerTenantDAO, dao)
     }

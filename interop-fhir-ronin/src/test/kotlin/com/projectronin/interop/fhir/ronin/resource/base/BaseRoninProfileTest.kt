@@ -38,243 +38,322 @@ import java.io.ByteArrayOutputStream
 import java.io.PrintStream
 import java.time.LocalDateTime
 
+@Suppress("ktlint:standard:max-line-length")
 class BaseRoninProfileTest {
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
-    private val normalizer = mockk<Normalizer> {
-        every { normalize(any(), tenant) } answers { firstArg() }
-    }
-    private val localizer = mockk<Localizer> {
-        every { localize(any(), tenant) } answers { firstArg() }
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
+    private val normalizer =
+        mockk<Normalizer> {
+            every { normalize(any(), tenant) } answers { firstArg() }
+        }
+    private val localizer =
+        mockk<Localizer> {
+            every { localize(any(), tenant) } answers { firstArg() }
+        }
 
     private val validTenantIdentifier =
         Identifier(
             system = CodeSystem.RONIN_TENANT.uri,
             type = CodeableConcepts.RONIN_TENANT,
-            value = "tenant".asFHIR()
+            value = "tenant".asFHIR(),
         )
     private val validFhirIdentifier =
         Identifier(
             system = CodeSystem.RONIN_FHIR_ID.uri,
             type = CodeableConcepts.RONIN_FHIR_ID,
-            value = "fhir".asFHIR()
+            value = "fhir".asFHIR(),
         )
     private val validDataAuthorityIdentifier =
         Identifier(
             system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
             type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-            value = "EHR Data Authority".asFHIR()
+            value = "EHR Data Authority".asFHIR(),
         )
 
     private lateinit var location: Location
 
     @BeforeEach
     fun setup() {
-        location = mockk(relaxed = true) {
-            every { meta } returns mockk {
-                every { profile } returns listOf(Canonical("profile"))
-                every { source } returns Uri("source")
+        location =
+            mockk(relaxed = true) {
+                every { meta } returns
+                    mockk {
+                        every { profile } returns listOf(Canonical("profile"))
+                        every { source } returns Uri("source")
+                    }
+                every { validate(R4LocationValidator, eq(LocationContext(Location::class))) } returns Validation()
             }
-            every { validate(R4LocationValidator, eq(LocationContext(Location::class))) } returns Validation()
-        }
     }
 
     @Test
     fun `no tenant identifier`() {
         every { location.identifier } returns listOf(validFhirIdentifier, validDataAuthorityIdentifier)
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ Location.identifier",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `tenant identifier system with wrong type`() {
-        every { location.identifier } returns listOf(
-            validFhirIdentifier,
-            validDataAuthorityIdentifier,
-            validTenantIdentifier.copy(type = null)
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        every { location.identifier } returns
+            listOf(
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
+                validTenantIdentifier.copy(type = null),
+            )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_002: Tenant identifier provided without proper CodeableConcept defined @ Location.identifier",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `tenant identifier with no value`() {
-        every { location.identifier } returns listOf(
-            validFhirIdentifier,
-            validDataAuthorityIdentifier,
-            validTenantIdentifier.copy(value = null)
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
+        every { location.identifier } returns
+            listOf(
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
+                validTenantIdentifier.copy(value = null),
+            )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_003: Tenant identifier value is required @ Location.identifier",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `no FHIR identifier`() {
         every { location.identifier } returns listOf(validTenantIdentifier, validDataAuthorityIdentifier)
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Location.identifier",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `FHIR identifier system with wrong type`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validDataAuthorityIdentifier,
-            validFhirIdentifier.copy(type = null)
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validDataAuthorityIdentifier,
+                validFhirIdentifier.copy(type = null),
+            )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_FHIR_ID_002: FHIR identifier provided without proper CodeableConcept defined @ Location.identifier",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `FHIR identifier with no value`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validDataAuthorityIdentifier,
-            validFhirIdentifier.copy(value = null)
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validDataAuthorityIdentifier,
+                validFhirIdentifier.copy(value = null),
+            )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_FHIR_ID_003: FHIR identifier value is required @ Location.identifier",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `no Data Authority identifier`() {
         every { location.identifier } returns listOf(validTenantIdentifier, validFhirIdentifier)
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_DAUTH_ID_001: Data Authority identifier required @ Location.identifier",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `Data Authority identifier system with wrong type`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier.copy(type = null)
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier.copy(type = null),
+            )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_DAUTH_ID_002: Data Authority identifier provided without proper CodeableConcept defined @ Location.identifier",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `Data Authority identifier with no value`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier.copy(value = null)
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier.copy(value = null),
+            )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_DAUTH_ID_003: Data Authority identifier value is required @ Location.identifier",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `all ronin identifiers are valid`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
+            )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
         TestProfile(normalizer, localizer).validate(location).alertIfErrors()
     }
 
     @Test
     fun `sets profile on meta transform for null meta`() {
-        val profile = object : TestProfile(normalizer, localizer) {
-            override fun validateRonin(element: Location, parentContext: LocationContext, validation: Validation) {}
-            fun transformMeta(meta: Meta?): Meta {
-                return meta.transform()
+        val profile =
+            object : TestProfile(normalizer, localizer) {
+                override fun validateRonin(
+                    element: Location,
+                    parentContext: LocationContext,
+                    validation: Validation,
+                ) {
+                }
+
+                fun transformMeta(meta: Meta?): Meta {
+                    return meta.transform()
+                }
             }
-        }
 
         val transformed = profile.transformMeta(null)
-        assertEquals(listOf(Canonical("http://projectronin.io/fhir/StructureDefinition/ronin-location")), transformed.profile)
+        assertEquals(
+            listOf(Canonical("http://projectronin.io/fhir/StructureDefinition/ronin-location")),
+            transformed.profile,
+        )
     }
 
     @Test
     fun `sets profile on meta transform for non-null meta`() {
-        val profile = object : TestProfile(normalizer, localizer) {
-            override fun validateRonin(element: Location, parentContext: LocationContext, validation: Validation) {}
-            fun transformMeta(meta: Meta?): Meta {
-                return meta.transform()
+        val profile =
+            object : TestProfile(normalizer, localizer) {
+                override fun validateRonin(
+                    element: Location,
+                    parentContext: LocationContext,
+                    validation: Validation,
+                ) {
+                }
+
+                fun transformMeta(meta: Meta?): Meta {
+                    return meta.transform()
+                }
             }
-        }
         val meta = Meta(id = "123".asFHIR(), profile = listOf(Canonical(RoninProfile.LOCATION.value)))
         val transformed = profile.transformMeta(meta)
         assertEquals("123".asFHIR(), transformed.id)
@@ -283,11 +362,12 @@ class BaseRoninProfileTest {
 
     @Test
     fun `getExtensionOrEmptyList - null codeableConcept`() {
-        val locationTest = Location(
-            id = Id("123"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
-            identifier = listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier)
-        )
+        val locationTest =
+            Location(
+                id = Id("123"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
+                identifier = listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier),
+            )
 
         val (transformedResponse, _) = TestProfile(normalizer, localizer).transform(locationTest, tenant)
 
@@ -296,22 +376,25 @@ class BaseRoninProfileTest {
 
     @Test
     fun `getExtensionOrEmptyList - not null codeableConcept`() {
-        val locationTest = Location(
-            id = Id("123"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
-            identifier = listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier),
-            physicalType = CodeableConcept(
-                text = "b".asFHIR(),
-                coding = listOf(
-                    Coding(
-                        system = CodeSystem.RXNORM.uri,
-                        code = Code("b"),
-                        version = "1.0.0".asFHIR(),
-                        display = "b".asFHIR()
-                    )
-                )
+        val locationTest =
+            Location(
+                id = Id("123"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source")),
+                identifier = listOf(validTenantIdentifier, validFhirIdentifier, validDataAuthorityIdentifier),
+                physicalType =
+                    CodeableConcept(
+                        text = "b".asFHIR(),
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = CodeSystem.RXNORM.uri,
+                                    code = Code("b"),
+                                    version = "1.0.0".asFHIR(),
+                                    display = "b".asFHIR(),
+                                ),
+                            ),
+                    ),
             )
-        )
 
         val (transformedResponse, _) = TestProfile(normalizer, localizer).transform(locationTest, tenant)
 
@@ -319,268 +402,328 @@ class BaseRoninProfileTest {
             listOf(
                 Extension(
                     url = Uri(RoninExtension.RONIN_CONCEPT_MAP_SCHEMA.value),
-                    value = DynamicValue(
-                        DynamicValueType.CODEABLE_CONCEPT,
-                        CodeableConcept(
-                            text = "b".asFHIR(),
-                            coding = listOf(
-                                Coding(
-                                    system = CodeSystem.RXNORM.uri,
-                                    code = Code("b"),
-                                    version = "1.0.0".asFHIR(),
-                                    display = "b".asFHIR()
-                                )
-                            )
-                        )
-                    )
-                )
+                    value =
+                        DynamicValue(
+                            DynamicValueType.CODEABLE_CONCEPT,
+                            CodeableConcept(
+                                text = "b".asFHIR(),
+                                coding =
+                                    listOf(
+                                        Coding(
+                                            system = CodeSystem.RXNORM.uri,
+                                            code = Code("b"),
+                                            version = "1.0.0".asFHIR(),
+                                            display = "b".asFHIR(),
+                                        ),
+                                    ),
+                            ),
+                        ),
+                ),
             ),
-            transformedResponse!!.resource.extension
+            transformedResponse!!.resource.extension,
         )
     }
 
     @Disabled("See INT-1882")
     @Test
     fun `codeable concept contains coding missing display - validation error`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
-        every { location.physicalType } returns CodeableConcept(
-            coding = listOf(
-                Coding(
-                    system = CodeSystem.SNOMED_CT.uri,
-                    code = Code("code")
-                )
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
             )
-        )
+        every { location.physicalType } returns
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(
+                            system = CodeSystem.SNOMED_CT.uri,
+                            code = Code("code"),
+                        ),
+                    ),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Location.physicalType",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `codeable concept contains coding missing code - validation error`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
-        every { location.physicalType } returns CodeableConcept(
-            coding = listOf(
-                Coding(
-                    system = CodeSystem.SNOMED_CT.uri,
-                    display = "display".asFHIR()
-                )
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
             )
-        )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
+        every { location.physicalType } returns
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(
+                            system = CodeSystem.SNOMED_CT.uri,
+                            display = "display".asFHIR(),
+                        ),
+                    ),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Location.physicalType",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `codeable concept contains coding missing system - validation error`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
-        every { location.physicalType } returns CodeableConcept(
-            coding = listOf(
-                Coding(
-                    code = Code("code"),
-                    display = "display".asFHIR()
-                )
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
             )
-        )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
+        every { location.physicalType } returns
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(
+                            code = Code("code"),
+                            display = "display".asFHIR(),
+                        ),
+                    ),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Location.physicalType",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `codeable concept contains invalid and valid coding - validation error`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
-        every { location.physicalType } returns CodeableConcept(
-            coding = listOf(
-                Coding(
-                    code = Code("code"),
-                    display = "display".asFHIR()
-                ),
-                Coding(
-                    system = CodeSystem.SNOMED_CT.uri,
-                    code = Code("code2"),
-                    display = "display2".asFHIR()
-                )
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
             )
-        )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
+        every { location.physicalType } returns
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(
+                            code = Code("code"),
+                            display = "display".asFHIR(),
+                        ),
+                        Coding(
+                            system = CodeSystem.SNOMED_CT.uri,
+                            code = Code("code2"),
+                            display = "display2".asFHIR(),
+                        ),
+                    ),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Location.physicalType",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `codeable concept blanks counted as error - validation error`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
-        every { location.physicalType } returns CodeableConcept(
-            coding = listOf(
-                Coding(
-                    system = CodeSystem.SNOMED_CT.uri,
-                    code = Code(" "),
-                    display = "display".asFHIR()
-                ),
-                Coding(
-                    system = CodeSystem.SNOMED_CT.uri,
-                    code = Code("code2"),
-                    display = "".asFHIR()
-                ),
-                Coding(
-                    system = Uri("   "),
-                    code = Code("code3"),
-                    display = "display 3".asFHIR()
-                )
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
             )
-        )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
+        every { location.physicalType } returns
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(
+                            system = CodeSystem.SNOMED_CT.uri,
+                            code = Code(" "),
+                            display = "display".asFHIR(),
+                        ),
+                        Coding(
+                            system = CodeSystem.SNOMED_CT.uri,
+                            code = Code("code2"),
+                            display = "".asFHIR(),
+                        ),
+                        Coding(
+                            system = Uri("   "),
+                            code = Code("code3"),
+                            display = "display 3".asFHIR(),
+                        ),
+                    ),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_NOV_CODING_001: Coding list entry missing the required fields @ Location.physicalType",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `codeable concept contains all valid coding - no validation error`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
-        every { location.physicalType } returns CodeableConcept(
-            coding = listOf(
-                Coding(
-                    system = CodeSystem.SNOMED_CT.uri,
-                    code = Code("code"),
-                    display = "display".asFHIR()
-                ),
-                Coding(
-                    system = CodeSystem.SNOMED_CT.uri,
-                    code = Code("code2"),
-                    display = "display2".asFHIR()
-                )
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
             )
-        )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
+        every { location.physicalType } returns
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(
+                            system = CodeSystem.SNOMED_CT.uri,
+                            code = Code("code"),
+                            display = "display".asFHIR(),
+                        ),
+                        Coding(
+                            system = CodeSystem.SNOMED_CT.uri,
+                            code = Code("code2"),
+                            display = "display2".asFHIR(),
+                        ),
+                    ),
+            )
 
         TestProfile(normalizer, localizer).validate(location).alertIfErrors()
     }
 
     @Test
     fun `codeable concept contains single user selected - no validation error`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
-        every { location.physicalType } returns CodeableConcept(
-            coding = listOf(
-                Coding(
-                    system = CodeSystem.SNOMED_CT.uri,
-                    code = Code("code"),
-                    display = "display".asFHIR(),
-                    userSelected = FHIRBoolean.TRUE
-                ),
-                Coding(
-                    system = CodeSystem.SNOMED_CT.uri,
-                    code = Code("code2"),
-                    display = "display2".asFHIR()
-                )
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
             )
-        )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
+        every { location.physicalType } returns
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(
+                            system = CodeSystem.SNOMED_CT.uri,
+                            code = Code("code"),
+                            display = "display".asFHIR(),
+                            userSelected = FHIRBoolean.TRUE,
+                        ),
+                        Coding(
+                            system = CodeSystem.SNOMED_CT.uri,
+                            code = Code("code2"),
+                            display = "display2".asFHIR(),
+                        ),
+                    ),
+            )
 
         TestProfile(normalizer, localizer).validate(location).alertIfErrors()
     }
 
     @Test
     fun `codeable concept contains multiple user selected - validation error`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
-        every { location.physicalType } returns CodeableConcept(
-            coding = listOf(
-                Coding(
-                    system = CodeSystem.SNOMED_CT.uri,
-                    code = Code("code"),
-                    display = "display".asFHIR(),
-                    userSelected = FHIRBoolean.TRUE
-                ),
-                Coding(
-                    system = CodeSystem.SNOMED_CT.uri,
-                    code = Code("code2"),
-                    display = "display2".asFHIR(),
-                    userSelected = FHIRBoolean.TRUE
-                )
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
             )
-        )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
+        every { location.physicalType } returns
+            CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(
+                            system = CodeSystem.SNOMED_CT.uri,
+                            code = Code("code"),
+                            display = "display".asFHIR(),
+                            userSelected = FHIRBoolean.TRUE,
+                        ),
+                        Coding(
+                            system = CodeSystem.SNOMED_CT.uri,
+                            code = Code("code2"),
+                            display = "display2".asFHIR(),
+                            userSelected = FHIRBoolean.TRUE,
+                        ),
+                    ),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_INV_CODING_SEL_001: More than one coding entry has userSelected true @ Location.physicalType",
-            exception.message
+            exception.message,
         )
     }
 
@@ -590,12 +733,17 @@ class BaseRoninProfileTest {
         val out = System.out
         System.setOut(PrintStream(outputStream))
 
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
+            )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
         every { location.contained } returns listOf(Location(id = Id("67890")))
 
         TestProfile(normalizer, localizer).validate(location).alertIfErrors()
@@ -606,99 +754,112 @@ class BaseRoninProfileTest {
 
     @Test
     fun `contained resource warning`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
-        every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)), source = Uri("source"))
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
+            )
+        every { location.meta } returns
+            Meta(
+                profile = listOf(Canonical(RoninProfile.LOCATION.value)),
+                source = Uri("source"),
+            )
         every { location.contained } returns listOf(Location(id = Id("67890")))
         val warning = TestProfile(normalizer, localizer).validate(location, null)
 
         assertTrue(warning.issues().isNotEmpty())
         assertEquals(
             warning.issues()[0].toString(),
-            "WARNING RONIN_CONTAINED_RESOURCE: There is a Contained Resource present @ Location.contained"
+            "WARNING RONIN_CONTAINED_RESOURCE: There is a Contained Resource present @ Location.contained",
         )
     }
 
     @Test
     fun `no meta`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
+            )
         every { location.meta } returns null
 
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: meta is a required element @ Location.meta",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `no meta profiles`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
+            )
         every { location.meta } returns Meta(profile = listOf(), source = Uri("source"))
 
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_META_001: No profiles found for expected type `http://projectronin.io/fhir/StructureDefinition/ronin-location` @ Location.meta.profile",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `no meta profile matching expected profile`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
+            )
         every { location.meta } returns Meta(profile = listOf(Canonical("other-profile")), source = Uri("source"))
 
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_META_001: No profiles found for expected type `http://projectronin.io/fhir/StructureDefinition/ronin-location` @ Location.meta.profile",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `no meta source`() {
-        every { location.identifier } returns listOf(
-            validTenantIdentifier,
-            validFhirIdentifier,
-            validDataAuthorityIdentifier
-        )
+        every { location.identifier } returns
+            listOf(
+                validTenantIdentifier,
+                validFhirIdentifier,
+                validDataAuthorityIdentifier,
+            )
         every { location.meta } returns Meta(profile = listOf(Canonical(RoninProfile.LOCATION.value)))
 
-        val exception = assertThrows<IllegalArgumentException> {
-            TestProfile(normalizer, localizer).validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                TestProfile(normalizer, localizer).validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: source is a required element @ Location.meta.source",
-            exception.message
+            exception.message,
         )
     }
 
@@ -711,16 +872,21 @@ class BaseRoninProfileTest {
             normalized: Location,
             parentContext: LocationContext,
             tenant: Tenant,
-            forceCacheReloadTS: LocalDateTime?
+            forceCacheReloadTS: LocalDateTime?,
         ): Pair<TransformResponse<Location>?, Validation> {
-            val tenantSourceCodeExtension = getExtensionOrEmptyList(
-                RoninExtension.RONIN_CONCEPT_MAP_SCHEMA,
-                normalized.physicalType
-            )
+            val tenantSourceCodeExtension =
+                getExtensionOrEmptyList(
+                    RoninExtension.RONIN_CONCEPT_MAP_SCHEMA,
+                    normalized.physicalType,
+                )
             return Pair(TransformResponse(normalized.copy(extension = tenantSourceCodeExtension)), Validation())
         }
 
-        override fun validateRonin(element: Location, parentContext: LocationContext, validation: Validation) {
+        override fun validateRonin(
+            element: Location,
+            parentContext: LocationContext,
+            validation: Validation,
+        ) {
             validation.apply {
                 requireMeta(element.meta, parentContext, validation)
                 requireRoninIdentifiers(element.identifier, parentContext, validation)

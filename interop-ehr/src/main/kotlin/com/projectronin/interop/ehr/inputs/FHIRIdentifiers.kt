@@ -8,5 +8,5 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
  */
 data class FHIRIdentifiers(
     val id: Id,
-    val identifiers: List<Identifier>
+    val identifiers: List<Identifier>,
 )

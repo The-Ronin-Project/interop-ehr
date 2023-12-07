@@ -28,25 +28,30 @@ import java.time.LocalDateTime
 class RoninMedicationStatement(
     normalizer: Normalizer,
     localizer: Localizer,
-    private val medicationExtractor: MedicationExtractor
+    private val medicationExtractor: MedicationExtractor,
 ) :
     BaseRoninProfile<MedicationStatement>(
-        R4MedicationStatementValidator,
-        RoninProfile.MEDICATION_STATEMENT.value,
-        normalizer,
-        localizer
-    ) {
+            R4MedicationStatementValidator,
+            RoninProfile.MEDICATION_STATEMENT.value,
+            normalizer,
+            localizer,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_29_0
     override val profileVersion = 3
 
-    private val requiredMedicationReferenceError = FHIRError(
-        code = "RONIN_MEDSTAT_001",
-        description = "Medication must be a Reference",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(MedicationStatement::medication)
-    )
+    private val requiredMedicationReferenceError =
+        FHIRError(
+            code = "RONIN_MEDSTAT_001",
+            description = "Medication must be a Reference",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(MedicationStatement::medication),
+        )
 
-    override fun validateRonin(element: MedicationStatement, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: MedicationStatement,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
@@ -57,7 +62,7 @@ class RoninMedicationStatement(
                 requireDataAuthorityExtensionIdentifier(
                     element.subject,
                     LocationContext(MedicationStatement::subject),
-                    validation
+                    validation,
                 )
             }
 
@@ -67,7 +72,7 @@ class RoninMedicationStatement(
                 checkTrue(
                     medication.type == DynamicValueType.REFERENCE,
                     requiredMedicationReferenceError,
-                    parentContext
+                    parentContext,
                 )
             }
         }
@@ -77,7 +82,7 @@ class RoninMedicationStatement(
         normalized: MedicationStatement,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<MedicationStatement>?, Validation> {
         val medicationExtraction =
             medicationExtractor.extractMedication(normalized.medication, normalized.contained, normalized)
@@ -86,13 +91,15 @@ class RoninMedicationStatement(
         val contained = medicationExtraction?.updatedContained ?: normalized.contained
         val embeddedMedications = medicationExtraction?.extractedMedication?.let { listOf(it) } ?: emptyList()
 
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant),
-            medication = medication,
-            contained = contained,
-            extension = normalized.extension + populateExtensionWithReference(normalized.medication) // populate extension based on medication[x]
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+                medication = medication,
+                contained = contained,
+                // populate extension based on medication[x]
+                extension = normalized.extension + populateExtensionWithReference(normalized.medication),
+            )
 
         return Pair(TransformResponse(transformed, embeddedMedications), Validation())
     }

@@ -17,7 +17,6 @@ import io.ktor.util.reflect.TypeInfo
  * @param sourceURL The URL of the raw data stored in datalake.
  */
 class EHRResponse(val httpResponse: HttpResponse, val sourceURL: String) {
-
     /**
      * Gets the response body as an object of type T.
      *

@@ -30,31 +30,36 @@ import org.junit.jupiter.api.Test
 
 class RoninMedicationStatementGeneratorTest {
     private lateinit var rcdmMedicationStatement: RoninMedicationStatement
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
-        val medicationExtractor = mockk<MedicationExtractor> {
-            every { extractMedication(any(), any(), any()) } returns null
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
+        val medicationExtractor =
+            mockk<MedicationExtractor> {
+                every { extractMedication(any(), any(), any()) } returns null
+            }
         rcdmMedicationStatement = RoninMedicationStatement(normalizer, localizer, medicationExtractor)
     }
 
     @Test
     fun `example use for rcdmMedicationStatement`() {
         // create medication statement resource with attributes you need, provide the tenant
-        val rcdmMedicationStatement = rcdmMedicationStatement("test") {
-            // to test an attribute like status - provide the value
-            status of Code("on-hold")
-        }
+        val rcdmMedicationStatement =
+            rcdmMedicationStatement("test") {
+                // to test an attribute like status - provide the value
+                status of Code("on-hold")
+            }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes will be generated
         val rcdmMedicationStatementJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmMedicationStatement)
@@ -82,7 +87,7 @@ class RoninMedicationStatementGeneratorTest {
         assertNotNull(rcdmMedicationStatement.meta)
         assertEquals(
             RoninProfile.MEDICATION_STATEMENT.value,
-            rcdmMedicationStatement.meta!!.profile[0].value
+            rcdmMedicationStatement.meta!!.profile[0].value,
         )
         assertEquals(3, rcdmMedicationStatement.identifier.size)
         val patientFHIRId =
@@ -121,9 +126,10 @@ class RoninMedicationStatementGeneratorTest {
 
     @Test
     fun `rcdmMedicationStatement validates with identifier added`() {
-        val medicationStatement = rcdmMedicationStatement("test") {
-            identifier of listOf(Identifier(value = "identifier".asFHIR()))
-        }
+        val medicationStatement =
+            rcdmMedicationStatement("test") {
+                identifier of listOf(Identifier(value = "identifier".asFHIR()))
+            }
         val validation = rcdmMedicationStatement.validate(medicationStatement, null)
         assertEquals(false, validation.hasErrors())
         assertEquals(4, medicationStatement.identifier.size)
@@ -137,9 +143,10 @@ class RoninMedicationStatementGeneratorTest {
 
     @Test
     fun `generates rcdmMedicationStatement with given status but fails validation because status is bad`() {
-        val medicationStatement = rcdmMedicationStatement("test") {
-            status of Code("this is a bad status")
-        }
+        val medicationStatement =
+            rcdmMedicationStatement("test") {
+                status of Code("this is a bad status")
+            }
         assertEquals(Code("this is a bad status"), medicationStatement.status)
 
         // validate should fail
@@ -149,15 +156,16 @@ class RoninMedicationStatementGeneratorTest {
         assertEquals("'this is a bad status' is outside of required value set", validation.issues()[0].description)
         assertEquals(
             LocationContext(element = "MedicationStatement", field = "status"),
-            validation.issues()[0].location
+            validation.issues()[0].location,
         )
     }
 
     @Test
     fun `rcdmMedicationStatement - valid subject input - validate succeeds`() {
-        val medicationStatement = rcdmMedicationStatement("test") {
-            subject of rcdmReference("Patient", "456")
-        }
+        val medicationStatement =
+            rcdmMedicationStatement("test") {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = rcdmMedicationStatement.validate(medicationStatement, null)
         assertEquals(false, validation.hasErrors())
         assertEquals("Patient/456", medicationStatement.subject?.reference?.value)
@@ -175,9 +183,10 @@ class RoninMedicationStatementGeneratorTest {
     @Test
     fun `rcdmPatient rcdmMedicationStatement - base patient overrides invalid subject input - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val medicationStatement = rcdmPatient.rcdmMedicationStatement {
-            subject of reference("Patient", "456")
-        }
+        val medicationStatement =
+            rcdmPatient.rcdmMedicationStatement {
+                subject of reference("Patient", "456")
+            }
         val validation = rcdmMedicationStatement.validate(medicationStatement, null)
         assertEquals(false, validation.hasErrors())
         assertEquals("Patient/${rcdmPatient.id?.value}", medicationStatement.subject?.reference?.value)
@@ -186,9 +195,10 @@ class RoninMedicationStatementGeneratorTest {
     @Test
     fun `rcdmPatient rcdmMedicationStatement - valid subject input overrides base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val medicationStatement = rcdmPatient.rcdmMedicationStatement {
-            subject of rcdmReference("Patient", "456")
-        }
+        val medicationStatement =
+            rcdmPatient.rcdmMedicationStatement {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = rcdmMedicationStatement.validate(medicationStatement, null)
         assertEquals(false, validation.hasErrors())
         assertEquals("Patient/456", medicationStatement.subject?.reference?.value)
@@ -197,9 +207,10 @@ class RoninMedicationStatementGeneratorTest {
     @Test
     fun `rcdmPatient rcdmMedicationStatement - fhir id input for both - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") { id of "99" }
-        val medicationStatement = rcdmPatient.rcdmMedicationStatement {
-            id of "88"
-        }
+        val medicationStatement =
+            rcdmPatient.rcdmMedicationStatement {
+                id of "88"
+            }
         val validation = rcdmMedicationStatement.validate(medicationStatement, null)
         assertEquals(false, validation.hasErrors())
         assertEquals(3, medicationStatement.identifier.size)

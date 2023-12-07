@@ -9,7 +9,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class AppointmentsWithNewPatientsTest {
-
     @Test
     fun test() {
         val patients = listOf(Patient(id = Id("12345")))

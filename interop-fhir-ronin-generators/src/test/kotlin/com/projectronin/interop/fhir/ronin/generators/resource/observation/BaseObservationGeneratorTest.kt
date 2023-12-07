@@ -30,41 +30,48 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@Suppress("ktlint:standard:max-line-length")
 class BaseObservationGeneratorTest {
     private lateinit var roninObs: RoninObservation
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
         roninObs = RoninObservation(normalizer, localizer, mockk())
     }
 
     @Test
     fun `example use for roninObservation`() {
         // Create roninObs with attributes you need, provide the tenant
-        val roninObservation = rcdmObservation("test") {
-            // to test an attribute like status - provide the value
-            status of Code("registered-different")
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        version of "0.01"
-                        code of Code("94499-1")
-                        display of "Respiratory viral pathogens DNA and RNA panel - Respiratory specimen Qualitative by NAA with probe detection"
+        val roninObservation =
+            rcdmObservation("test") {
+                // to test an attribute like status - provide the value
+                status of Code("registered-different")
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    version of "0.01"
+                                    code of Code("94499-1")
+                                    display of "Respiratory viral pathogens DNA and RNA panel - Respiratory specimen Qualitative by NAA with probe detection"
+                                },
+                            )
+                        text of "Respiratory viral pathogens DNA and RNA panel" // text is kept if provided otherwise only a code.coding is generated
                     }
-                )
-                text of "Respiratory viral pathogens DNA and RNA panel" // text is kept if provided otherwise only a code.coding is generated
             }
-        }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObservationJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObservation)
@@ -90,7 +97,7 @@ class BaseObservationGeneratorTest {
         assertNotNull(roninObservation.meta)
         assertEquals(
             roninObservation.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION.value
+            RoninProfile.OBSERVATION.value,
         )
         assertNotNull(roninObservation.status)
         assertEquals(1, roninObservation.category.size)
@@ -111,7 +118,7 @@ class BaseObservationGeneratorTest {
         assertNotNull(roninObservation.meta)
         assertEquals(
             roninObservation.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION.value
+            RoninProfile.OBSERVATION.value,
         )
         assertNull(roninObservation.implicitRules)
         assertNull(roninObservation.language)
@@ -142,33 +149,38 @@ class BaseObservationGeneratorTest {
 
     @Test
     fun `generates base roninObservation with params`() {
-        val roninObservation = rcdmObservation("test") {
-            id of Id("Id-Id")
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-            status of Code("fake-status")
-            category of listOf(
-                codeableConcept {
-                    coding of listOf(
-                        coding {
-                            system of "fake-system"
-                        }
+        val roninObservation =
+            rcdmObservation("test") {
+                id of Id("Id-Id")
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
                     )
-                }
-            )
-            code of codeableConcept {
-                text of "fake text goes here"
+                status of Code("fake-status")
+                category of
+                    listOf(
+                        codeableConcept {
+                            coding of
+                                listOf(
+                                    coding {
+                                        system of "fake-system"
+                                    },
+                                )
+                        },
+                    )
+                code of
+                    codeableConcept {
+                        text of "fake text goes here"
+                    }
             }
-        }
         assertEquals("test-Id-Id", roninObservation.id?.value)
         assertNotNull(roninObservation.meta)
         assertEquals(
             roninObservation.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION.value
+            RoninProfile.OBSERVATION.value,
         )
         assertNull(roninObservation.implicitRules)
         assertNull(roninObservation.language)
@@ -208,14 +220,16 @@ class BaseObservationGeneratorTest {
 
     @Test
     fun `validation for base observation with existing identifier`() {
-        val baseObs = rcdmObservation("test") {
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-        }
+        val baseObs =
+            rcdmObservation("test") {
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
+                    )
+            }
         val validation = roninObs.validate(baseObs, null)
         assertEquals(validation.hasErrors(), false)
         assertNotNull(baseObs.meta)
@@ -229,39 +243,46 @@ class BaseObservationGeneratorTest {
 
     @Test
     fun `validation fails base observation with incorrect params`() {
-        val baseObs = rcdmObservation("test") {
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-            status of Code("fake-status")
-            category of listOf(
-                codeableConcept {
-                    coding of listOf(
-                        coding {
-                            system of "fake-system"
-                        }
+        val baseObs =
+            rcdmObservation("test") {
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
                     )
-                }
-            )
-            code of codeableConcept {
-                text of "fake text goes here"
+                status of Code("fake-status")
+                category of
+                    listOf(
+                        codeableConcept {
+                            coding of
+                                listOf(
+                                    coding {
+                                        system of "fake-system"
+                                    },
+                                )
+                        },
+                    )
+                code of
+                    codeableConcept {
+                        text of "fake text goes here"
+                    }
+                performer of
+                    listOf(
+                        reference("Location", "789"),
+                    )
             }
-            performer of listOf(
-                reference("Location", "789")
-            )
-        }
         val validation = roninObs.validate(baseObs, null)
         assertEquals(true, validation.hasErrors())
     }
 
     @Test
     fun `valid subject input - validate succeeds`() {
-        val roninObservation = rcdmObservation("test") {
-            subject of rcdmReference("Patient", "456")
-        }
+        val roninObservation =
+            rcdmObservation("test") {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = roninObs.validate(roninObservation, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/456", roninObservation.subject?.reference?.value)
@@ -285,9 +306,10 @@ class BaseObservationGeneratorTest {
     @Test
     fun `rcdmPatient rcdmObservation - valid subject input overrides base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val baseObs = rcdmPatient.rcdmObservation {
-            subject of rcdmReference("Patient", "456")
-        }
+        val baseObs =
+            rcdmPatient.rcdmObservation {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = roninObs.validate(baseObs, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/456", baseObs.subject?.reference?.value)
@@ -296,9 +318,10 @@ class BaseObservationGeneratorTest {
     @Test
     fun `rcdmPatient rcdmObservation - base patient overrides invalid subject input - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val baseObs = rcdmPatient.rcdmObservation {
-            subject of reference("Patient", "456")
-        }
+        val baseObs =
+            rcdmPatient.rcdmObservation {
+                subject of reference("Patient", "456")
+            }
         val validation = roninObs.validate(baseObs, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/${rcdmPatient.id?.value}", baseObs.subject?.reference?.value)
@@ -307,9 +330,10 @@ class BaseObservationGeneratorTest {
     @Test
     fun `rcdmPatient rcdmObservation - fhir id input for both - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") { id of "99" }
-        val baseObs = rcdmPatient.rcdmObservation {
-            id of "88"
-        }
+        val baseObs =
+            rcdmPatient.rcdmObservation {
+                id of "88"
+            }
         val validation = roninObs.validate(baseObs, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals(3, baseObs.identifier.size)
@@ -325,104 +349,115 @@ class BaseObservationGeneratorTest {
 
     @Test
     fun `generates code extension when extensions are provided`() {
-        val observation = rcdmBaseObservation("test") {
-            extension of tenantSourceConditionExtension
-        }
+        val observation =
+            rcdmBaseObservation("test") {
+                extension of tenantSourceConditionExtension
+            }
 
         assertEquals(
             tenantSourceConditionExtension + tenantSourceObservationCodeExtension,
-            observation.extension
+            observation.extension,
         )
     }
 
     @Test
     fun `generates value extension when codeable concept value is provided`() {
-        val observation = rcdmBaseObservation("test") {
-            value of DynamicValues.codeableConcept(codeableConcept { })
-        }
+        val observation =
+            rcdmBaseObservation("test") {
+                value of DynamicValues.codeableConcept(codeableConcept { })
+            }
 
         assertEquals(
             listOf(tenantSourceObservationCodeExtension, tenantSourceObservationValueExtension),
-            observation.extension
+            observation.extension,
         )
     }
 
     @Test
     fun `does not generate value extension when other value type is provided`() {
-        val observation = rcdmBaseObservation("test") {
-            value of DynamicValues.string("value")
-        }
+        val observation =
+            rcdmBaseObservation("test") {
+                value of DynamicValues.string("value")
+            }
 
         assertEquals(
             listOf(tenantSourceObservationCodeExtension),
-            observation.extension
+            observation.extension,
         )
     }
 
     @Test
     fun `generates component code extension when component with code is provided`() {
-        val observation = rcdmBaseObservation("test") {
-            component of listOf(
-                observationComponent {
-                    code of codeableConcept { }
-                }
-            )
-        }
+        val observation =
+            rcdmBaseObservation("test") {
+                component of
+                    listOf(
+                        observationComponent {
+                            code of codeableConcept { }
+                        },
+                    )
+            }
 
         assertEquals(
             listOf(tenantSourceObservationComponentCodeExtension),
-            observation.component.first().extension
+            observation.component.first().extension,
         )
     }
 
     @Test
     fun `generates component value extension when component with codeable concept value is provided`() {
-        val observation = rcdmBaseObservation("test") {
-            component of listOf(
-                observationComponent {
-                    code of codeableConcept { }
-                    value of DynamicValues.codeableConcept(codeableConcept { })
-                }
-            )
-        }
+        val observation =
+            rcdmBaseObservation("test") {
+                component of
+                    listOf(
+                        observationComponent {
+                            code of codeableConcept { }
+                            value of DynamicValues.codeableConcept(codeableConcept { })
+                        },
+                    )
+            }
 
         assertEquals(
             listOf(tenantSourceObservationComponentCodeExtension, tenantSourceObservationComponentValueExtension),
-            observation.component.first().extension
+            observation.component.first().extension,
         )
     }
 
     @Test
     fun `does not generate component value extension when component with other value type is provided`() {
-        val observation = rcdmBaseObservation("test") {
-            component of listOf(
-                observationComponent {
-                    code of codeableConcept { }
-                    value of DynamicValues.string("value")
-                }
-            )
-        }
+        val observation =
+            rcdmBaseObservation("test") {
+                component of
+                    listOf(
+                        observationComponent {
+                            code of codeableConcept { }
+                            value of DynamicValues.string("value")
+                        },
+                    )
+            }
 
         assertEquals(
             listOf(tenantSourceObservationComponentCodeExtension),
-            observation.component.first().extension
+            observation.component.first().extension,
         )
     }
 
     @Test
     fun `does not generate component value extension when component is provided without a value`() {
-        val observation = rcdmBaseObservation("test") {
-            component of listOf(
-                observationComponent {
-                    code of codeableConcept { }
-                    value of null
-                }
-            )
-        }
+        val observation =
+            rcdmBaseObservation("test") {
+                component of
+                    listOf(
+                        observationComponent {
+                            code of codeableConcept { }
+                            value of null
+                        },
+                    )
+            }
 
         assertEquals(
             listOf(tenantSourceObservationComponentCodeExtension),
-            observation.component.first().extension
+            observation.component.first().extension,
         )
     }
 }

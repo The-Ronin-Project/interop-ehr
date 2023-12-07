@@ -18,7 +18,9 @@ import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.stereotype.Repository
 
 @Repository
-class TenantMDMConfigDAO(@Qualifier("ehr") private val database: Database) {
+class TenantMDMConfigDAO(
+    @Qualifier("ehr") private val database: Database,
+) {
     fun getByTenantMnemonic(tenantMnemonic: String): TenantMDMConfigDO? {
         return database.from(TenantMDMConfigDOs)
             .leftJoin(TenantDOs, on = TenantMDMConfigDOs.tenantId eq TenantDOs.id)
@@ -60,10 +62,11 @@ class TenantMDMConfigDAO(@Qualifier("ehr") private val database: Database) {
     }
 
     private fun getByTenantId(tenantId: Int): TenantMDMConfigDO? {
-        val configs = database.from(TenantMDMConfigDOs)
-            .select()
-            .where(TenantMDMConfigDOs.tenantId eq tenantId)
-            .map { TenantMDMConfigDOs.createEntity(it) }
+        val configs =
+            database.from(TenantMDMConfigDOs)
+                .select()
+                .where(TenantMDMConfigDOs.tenantId eq tenantId)
+                .map { TenantMDMConfigDOs.createEntity(it) }
         return configs.singleOrNull()
     }
 }

@@ -8,18 +8,20 @@ import org.junit.jupiter.api.Test
 class IDTypeTest {
     @Test
     fun `can serialize and deserialize JSON`() {
-        val idType = IDType(
-            id = "123",
-            type = "abc"
-        )
+        val idType =
+            IDType(
+                id = "123",
+                type = "abc",
+            )
         val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(idType)
 
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "ID" : "123",
               "Type" : "abc"
             }
-        """.trimIndent()
+            """.trimIndent()
         assertEquals(expectedJson, json)
 
         val deserializedIDType = JacksonManager.objectMapper.readValue<IDType>(json)

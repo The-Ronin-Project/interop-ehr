@@ -31,7 +31,7 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
         R4EncounterValidator,
         RoninProfile.ENCOUNTER.value,
         normalizer,
-        localizer
+        localizer,
     ) {
     override val rcdmVersion = RCDMVersion.V3_20_0
     override val profileVersion = 4
@@ -41,14 +41,19 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
     private val requiredIdentifierSystemError = RequiredFieldError(Identifier::system)
     private val requiredIdentifierValueError = RequiredFieldError(Identifier::value)
 
-    private val requiredExtensionClassError = FHIRError(
-        code = "RONIN_ENC_001",
-        description = "Tenant source encounter class extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Encounter::extension)
-    )
+    private val requiredExtensionClassError =
+        FHIRError(
+            code = "RONIN_ENC_001",
+            description = "Tenant source encounter class extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Encounter::extension),
+        )
 
-    override fun validateRonin(element: Encounter, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: Encounter,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
@@ -59,7 +64,7 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
                 requireDataAuthorityExtensionIdentifier(
                     element.subject,
                     LocationContext(Encounter::subject),
-                    validation
+                    validation,
                 )
             }
 
@@ -69,14 +74,18 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
                         it.value?.type == DynamicValueType.CODING
                 },
                 requiredExtensionClassError,
-                parentContext
+                parentContext,
             )
         }
     }
 
     private val requiredTypeError = RequiredFieldError(Encounter::type)
 
-    override fun validateUSCore(element: Encounter, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: Encounter,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             checkTrue(element.type.isNotEmpty(), requiredTypeError, parentContext)
 
@@ -98,13 +107,14 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
         normalized: Encounter,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<Encounter, Validation> {
         // TODO: Check concept maps for class code
         val classExtension = getExtensionOrEmptyList(RoninExtension.TENANT_SOURCE_ENCOUNTER_CLASS, normalized.`class`)
-        val mapped = normalized.copy(
-            extension = normalized.extension + classExtension
-        )
+        val mapped =
+            normalized.copy(
+                extension = normalized.extension + classExtension,
+            )
         return Pair(mapped, Validation())
     }
 
@@ -112,12 +122,13 @@ class RoninEncounter(normalizer: Normalizer, localizer: Localizer) :
         normalized: Encounter,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<Encounter>?, Validation> {
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant)
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+            )
         return Pair(TransformResponse(transformed), Validation())
     }
 }

@@ -34,82 +34,92 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@Suppress("ktlint:standard:max-line-length")
 class RoninPulseOximetryGeneratorTest {
     private lateinit var roninPulseOx: RoninPulseOximetry
     private lateinit var registry: NormalizationRegistryClient
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
-    private val flowRateCoding = ValueSetList(
-        listOf(
-            Coding(system = CodeSystem.LOINC.uri, code = Code("3151-8"))
-        ),
-        ValueSetMetadata(
-            registryEntryType = "value_set",
-            valueSetName = "inhaledoxygenflowrate",
-            valueSetUuid = "44bf0223-00e1-4424-89ee-048a2f8dbf7d",
-            version = "2"
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
+    private val flowRateCoding =
+        ValueSetList(
+            listOf(
+                Coding(system = CodeSystem.LOINC.uri, code = Code("3151-8")),
+            ),
+            ValueSetMetadata(
+                registryEntryType = "value_set",
+                valueSetName = "inhaledoxygenflowrate",
+                valueSetUuid = "44bf0223-00e1-4424-89ee-048a2f8dbf7d",
+                version = "2",
+            ),
         )
-    )
-    private val concentrationCoding = ValueSetList(
-        listOf(
-            Coding(system = CodeSystem.LOINC.uri, code = Code("3150-0"))
-        ),
-        ValueSetMetadata(
-            registryEntryType = "value_set",
-            valueSetName = "inhaledoxygenconcentration",
-            valueSetUuid = "74e038f6-d57c-483e-90cb-215af0a5e0ed",
-            version = "2"
+    private val concentrationCoding =
+        ValueSetList(
+            listOf(
+                Coding(system = CodeSystem.LOINC.uri, code = Code("3150-0")),
+            ),
+            ValueSetMetadata(
+                registryEntryType = "value_set",
+                valueSetName = "inhaledoxygenconcentration",
+                valueSetUuid = "74e038f6-d57c-483e-90cb-215af0a5e0ed",
+                version = "2",
+            ),
         )
-    )
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
-        registry = mockk<NormalizationRegistryClient> {
-            every {
-                getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_PULSE_OXIMETRY.value)
-            } returns possiblePulseOximetryCodes
-            every {
-                getRequiredValueSet(
-                    "Observation.component:FlowRate.code",
-                    RoninProfile.OBSERVATION_PULSE_OXIMETRY.value
-                )
-            } returns flowRateCoding
-            every {
-                getRequiredValueSet(
-                    "Observation.component:Concentration.code",
-                    RoninProfile.OBSERVATION_PULSE_OXIMETRY.value
-                )
-            } returns concentrationCoding
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
+        registry =
+            mockk<NormalizationRegistryClient> {
+                every {
+                    getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_PULSE_OXIMETRY.value)
+                } returns possiblePulseOximetryCodes
+                every {
+                    getRequiredValueSet(
+                        "Observation.component:FlowRate.code",
+                        RoninProfile.OBSERVATION_PULSE_OXIMETRY.value,
+                    )
+                } returns flowRateCoding
+                every {
+                    getRequiredValueSet(
+                        "Observation.component:Concentration.code",
+                        RoninProfile.OBSERVATION_PULSE_OXIMETRY.value,
+                    )
+                } returns concentrationCoding
+            }
         roninPulseOx = RoninPulseOximetry(normalizer, localizer, registry)
     }
 
     @Test
     fun `example use for roninObservationPulseOximetry`() {
         // Create PulseOximetry Obs with attributes you need, provide the tenant
-        val roninObsPulseOximetry = rcdmObservationPulseOximetry("test") {
-            // if you want to test for a specific status
-            status of Code("registered-different")
-            // test for a new or different code
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        version of "0.01"
-                        code of Code("94499-1")
-                        display of "Respiratory viral pathogens DNA and RNA panel - Respiratory specimen Qualitative by NAA with probe detection"
+        val roninObsPulseOximetry =
+            rcdmObservationPulseOximetry("test") {
+                // if you want to test for a specific status
+                status of Code("registered-different")
+                // test for a new or different code
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    version of "0.01"
+                                    code of Code("94499-1")
+                                    display of "Respiratory viral pathogens DNA and RNA panel - Respiratory specimen Qualitative by NAA with probe detection"
+                                },
+                            )
+                        text of "Respiratory viral pathogens DNA and RNA panel" // text is kept if provided otherwise only a code.coding is generated
                     }
-                )
-                text of "Respiratory viral pathogens DNA and RNA panel" // text is kept if provided otherwise only a code.coding is generated
             }
-        }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsPulseOximetryJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsPulseOximetry)
@@ -134,7 +144,7 @@ class RoninPulseOximetryGeneratorTest {
         assertNotNull(roninObsPulseOximetry.meta)
         assertEquals(
             roninObsPulseOximetry.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_PULSE_OXIMETRY.value
+            RoninProfile.OBSERVATION_PULSE_OXIMETRY.value,
         )
         assertNotNull(roninObsPulseOximetry.status)
         assertEquals(1, roninObsPulseOximetry.category.size)
@@ -160,7 +170,7 @@ class RoninPulseOximetryGeneratorTest {
         assertNotNull(roninObsPulseOx.meta)
         assertEquals(
             roninObsPulseOx.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_PULSE_OXIMETRY.value
+            RoninProfile.OBSERVATION_PULSE_OXIMETRY.value,
         )
         assertNull(roninObsPulseOx.implicitRules)
         assertNull(roninObsPulseOx.language)
@@ -192,14 +202,16 @@ class RoninPulseOximetryGeneratorTest {
 
     @Test
     fun `validation for roninObservationPulseOximetry with existing identifier`() {
-        val roninPulseOximetry = rcdmObservationPulseOximetry("test") {
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-        }
+        val roninPulseOximetry =
+            rcdmObservationPulseOximetry("test") {
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
+                    )
+            }
         val validation = roninPulseOx.validate(roninPulseOximetry, null)
         validation.alertIfErrors()
         assertNotNull(roninPulseOximetry.meta)
@@ -214,17 +226,20 @@ class RoninPulseOximetryGeneratorTest {
 
     @Test
     fun `validation fails for roninObservationPulseOximetry with bad code`() {
-        val roninPulseOximetry = rcdmObservationPulseOximetry("test") {
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        version of "1000000"
-                        code of Code("some code here")
+        val roninPulseOximetry =
+            rcdmObservationPulseOximetry("test") {
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    version of "1000000"
+                                    code of Code("some code here")
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = roninPulseOx.validate(roninPulseOximetry, null)
         assertTrue(validation.hasErrors())
 
@@ -234,96 +249,109 @@ class RoninPulseOximetryGeneratorTest {
 
     @Test
     fun `rcdmObservationPulseOximetry with custom value`() {
-        val valueQuantity = DynamicValue(
-            DynamicValueType.QUANTITY,
-            Quantity(
-                value = Decimal(94.toBigDecimal()),
-                unit = "% O2".asFHIR(),
-                system = CodeSystem.UCUM.uri,
-                code = Code("% 02")
+        val valueQuantity =
+            DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(94.toBigDecimal()),
+                    unit = "% O2".asFHIR(),
+                    system = CodeSystem.UCUM.uri,
+                    code = Code("% 02"),
+                ),
             )
-        )
 
-        val rcdmObservationPulseOximetry = rcdmObservationPulseOximetry("test") {
-            value of valueQuantity
-        }
+        val rcdmObservationPulseOximetry =
+            rcdmObservationPulseOximetry("test") {
+                value of valueQuantity
+            }
 
         assertEquals(valueQuantity, rcdmObservationPulseOximetry.value)
     }
 
     @Test
     fun `rcdmObservationPulseOximetry with custom component`() {
-        val pulseOxComponent = listOf(
-            ObservationComponent(
-                code = CodeableConcept(
-                    coding = flowRateCoding.codes,
-                    text = "Flow Rate".asFHIR()
+        val pulseOxComponent =
+            listOf(
+                ObservationComponent(
+                    code =
+                        CodeableConcept(
+                            coding = flowRateCoding.codes,
+                            text = "Flow Rate".asFHIR(),
+                        ),
+                    value =
+                        DynamicValue(
+                            DynamicValueType.QUANTITY,
+                            Quantity(
+                                value = Decimal(120.toBigDecimal()),
+                                unit = "L/min".asFHIR(),
+                                system = CodeSystem.UCUM.uri,
+                                code = Code("L/min"),
+                            ),
+                        ),
                 ),
-                value = DynamicValue(
-                    DynamicValueType.QUANTITY,
-                    Quantity(
-                        value = Decimal(120.toBigDecimal()),
-                        unit = "L/min".asFHIR(),
-                        system = CodeSystem.UCUM.uri,
-                        code = Code("L/min")
-                    )
-                )
-            ),
-            ObservationComponent(
-                code = CodeableConcept(
-                    coding = concentrationCoding.codes,
-                    text = "Concentration".asFHIR()
+                ObservationComponent(
+                    code =
+                        CodeableConcept(
+                            coding = concentrationCoding.codes,
+                            text = "Concentration".asFHIR(),
+                        ),
+                    value =
+                        DynamicValue(
+                            DynamicValueType.QUANTITY,
+                            Quantity(
+                                value = Decimal(63.toBigDecimal()),
+                                unit = "%".asFHIR(),
+                                system = CodeSystem.UCUM.uri,
+                                code = Code("%"),
+                            ),
+                        ),
                 ),
-                value = DynamicValue(
-                    DynamicValueType.QUANTITY,
-                    Quantity(
-                        value = Decimal(63.toBigDecimal()),
-                        unit = "%".asFHIR(),
-                        system = CodeSystem.UCUM.uri,
-                        code = Code("%")
-                    )
-                )
             )
-        )
 
-        val rcdmObservationPulseOximetry = rcdmObservationPulseOximetry("test") {
-            component of pulseOxComponent
-        }
+        val rcdmObservationPulseOximetry =
+            rcdmObservationPulseOximetry("test") {
+                component of pulseOxComponent
+            }
 
-        val expectedPulseOxComponent = listOf(
-            ObservationComponent(
-                extension = listOf(tenantSourceObservationComponentCodeExtension),
-                code = CodeableConcept(
-                    coding = flowRateCoding.codes,
-                    text = "Flow Rate".asFHIR()
+        val expectedPulseOxComponent =
+            listOf(
+                ObservationComponent(
+                    extension = listOf(tenantSourceObservationComponentCodeExtension),
+                    code =
+                        CodeableConcept(
+                            coding = flowRateCoding.codes,
+                            text = "Flow Rate".asFHIR(),
+                        ),
+                    value =
+                        DynamicValue(
+                            DynamicValueType.QUANTITY,
+                            Quantity(
+                                value = Decimal(120.toBigDecimal()),
+                                unit = "L/min".asFHIR(),
+                                system = CodeSystem.UCUM.uri,
+                                code = Code("L/min"),
+                            ),
+                        ),
                 ),
-                value = DynamicValue(
-                    DynamicValueType.QUANTITY,
-                    Quantity(
-                        value = Decimal(120.toBigDecimal()),
-                        unit = "L/min".asFHIR(),
-                        system = CodeSystem.UCUM.uri,
-                        code = Code("L/min")
-                    )
-                )
-            ),
-            ObservationComponent(
-                extension = listOf(tenantSourceObservationComponentCodeExtension),
-                code = CodeableConcept(
-                    coding = concentrationCoding.codes,
-                    text = "Concentration".asFHIR()
+                ObservationComponent(
+                    extension = listOf(tenantSourceObservationComponentCodeExtension),
+                    code =
+                        CodeableConcept(
+                            coding = concentrationCoding.codes,
+                            text = "Concentration".asFHIR(),
+                        ),
+                    value =
+                        DynamicValue(
+                            DynamicValueType.QUANTITY,
+                            Quantity(
+                                value = Decimal(63.toBigDecimal()),
+                                unit = "%".asFHIR(),
+                                system = CodeSystem.UCUM.uri,
+                                code = Code("%"),
+                            ),
+                        ),
                 ),
-                value = DynamicValue(
-                    DynamicValueType.QUANTITY,
-                    Quantity(
-                        value = Decimal(63.toBigDecimal()),
-                        unit = "%".asFHIR(),
-                        system = CodeSystem.UCUM.uri,
-                        code = Code("%")
-                    )
-                )
             )
-        )
         assertEquals(expectedPulseOxComponent, rcdmObservationPulseOximetry.component)
     }
 }

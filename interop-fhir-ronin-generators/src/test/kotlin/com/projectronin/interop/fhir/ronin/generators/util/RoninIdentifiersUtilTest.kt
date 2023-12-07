@@ -11,23 +11,25 @@ import org.junit.jupiter.api.Assertions.assertNotNull
 import org.junit.jupiter.api.Test
 
 class RoninIdentifiersUtilTest {
+    private val roninFhir =
+        Identifier(
+            system = CodeSystem.RONIN_FHIR_ID.uri,
+            value = "fhirId".asFHIR(),
+            type = CodeableConcepts.RONIN_FHIR_ID,
+        )
+    private val roninTenant =
+        Identifier(
+            system = CodeSystem.RONIN_TENANT.uri,
+            value = "tenantId".asFHIR(),
+            type = CodeableConcepts.RONIN_TENANT,
+        )
 
-    private val roninFhir = Identifier(
-        system = CodeSystem.RONIN_FHIR_ID.uri,
-        value = "fhirId".asFHIR(),
-        type = CodeableConcepts.RONIN_FHIR_ID
-    )
-    private val roninTenant = Identifier(
-        system = CodeSystem.RONIN_TENANT.uri,
-        value = "tenantId".asFHIR(),
-        type = CodeableConcepts.RONIN_TENANT
-    )
-
-    private val dataAuthorityIdentifier = Identifier(
-        value = "EHR Data Authority".asFHIR(),
-        system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-        type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID
-    )
+    private val dataAuthorityIdentifier =
+        Identifier(
+            value = "EHR Data Authority".asFHIR(),
+            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+        )
 
     @Test
     fun `generates ronin Identifiers if no ronin identifiers`() {

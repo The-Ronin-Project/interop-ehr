@@ -36,8 +36,8 @@ class CernerMedicationRequestServiceTest {
             httpResponse.body<MedicationRequest>(
                 TypeInfo(
                     MedicationRequest::class,
-                    MedicationRequest::class.java
-                )
+                    MedicationRequest::class.java,
+                ),
             )
         } returns mockMedicationRequest
         coEvery { cernerClient.get(tenant, "/MedicationRequest/fakeFaKEfAKefakE") } returns ehrResponse
@@ -52,13 +52,13 @@ class CernerMedicationRequestServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
         val service = mockk<MedicationRequestService>()
         every {
             service.getMedicationRequestById(
                 tenant,
-                "fakeFaKEfAKefakE"
+                "fakeFaKEfAKefakE",
             )
         } returns validMedIdReturn
 
@@ -77,7 +77,7 @@ class CernerMedicationRequestServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -88,15 +88,16 @@ class CernerMedicationRequestServiceTest {
                 "/MedicationRequest",
                 mapOf(
                     "patient" to "fakeFaKEfAKefakE",
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
-        val actual = medicationRequestService.getMedicationRequestByPatient(
-            tenant,
-            "fakeFaKEfAKefakE"
-        )
+        val actual =
+            medicationRequestService.getMedicationRequestByPatient(
+                tenant,
+                "fakeFaKEfAKefakE",
+            )
 
         assertEquals(validPatientIdBundle.entry.map { it.resource }, actual)
         assertEquals(25, actual.size)
@@ -112,38 +113,7 @@ class CernerMedicationRequestServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns validPatientIdBundle
-        coEvery {
-            cernerClient.get(
-                tenant,
-                "/MedicationRequest",
-                mapOf(
-                    "patient" to "fakeFaKEfAKefakE",
-                    "_count" to 20
-                )
-            )
-        } returns ehrResponse
-
-        val validResponse =
-            medicationRequestService.getMedicationRequestByPatient(
-                tenant,
-                "fakeFaKEfAKefakE"
-            )
-
-        assertEquals(validPatientIdBundle.entry.map { it.resource }, validResponse)
-    }
-
-    @Test
-    fun `getMedicationRequestByPatient succeeds with date`() {
-        val tenant =
-            createTestTenant(
-                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-                authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -155,8 +125,7 @@ class CernerMedicationRequestServiceTest {
                 mapOf(
                     "patient" to "fakeFaKEfAKefakE",
                     "_count" to 20,
-                    "-timing-boundsPeriod" to "ge2023-09-06T00:00:00Z"
-                )
+                ),
             )
         } returns ehrResponse
 
@@ -164,7 +133,39 @@ class CernerMedicationRequestServiceTest {
             medicationRequestService.getMedicationRequestByPatient(
                 tenant,
                 "fakeFaKEfAKefakE",
-                LocalDate.of(2023, 9, 6)
+            )
+
+        assertEquals(validPatientIdBundle.entry.map { it.resource }, validResponse)
+    }
+
+    @Test
+    fun `getMedicationRequestByPatient succeeds with date`() {
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns validPatientIdBundle
+        coEvery {
+            cernerClient.get(
+                tenant,
+                "/MedicationRequest",
+                mapOf(
+                    "patient" to "fakeFaKEfAKefakE",
+                    "_count" to 20,
+                    "-timing-boundsPeriod" to "ge2023-09-06T00:00:00Z",
+                ),
+            )
+        } returns ehrResponse
+
+        val validResponse =
+            medicationRequestService.getMedicationRequestByPatient(
+                tenant,
+                "fakeFaKEfAKefakE",
+                LocalDate.of(2023, 9, 6),
             )
 
         assertEquals(validPatientIdBundle.entry.map { it.resource }, validResponse)

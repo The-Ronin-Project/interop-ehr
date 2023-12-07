@@ -13,7 +13,7 @@ import org.springframework.stereotype.Repository
 @Repository
 class EHRTenantDAOFactory(
     private val epicTenantDAO: EpicTenantDAO,
-    private val cernerTenantDAO: CernerTenantDAO
+    private val cernerTenantDAO: CernerTenantDAO,
 ) {
     fun getEHRTenantDAO(tenantDO: TenantDO): EHRTenantDAO {
         return getEHRTenantDAOByVendorType(tenantDO.ehr.vendorType)

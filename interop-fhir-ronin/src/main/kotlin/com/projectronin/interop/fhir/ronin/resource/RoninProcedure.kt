@@ -28,31 +28,37 @@ import java.time.LocalDateTime
 class RoninProcedure(
     normalizer: Normalizer,
     localizer: Localizer,
-    protected val registryClient: NormalizationRegistryClient
+    protected val registryClient: NormalizationRegistryClient,
 ) :
     USCoreBasedProfile<Procedure>(
-        R4ProcedureValidator,
-        RoninProfile.PROCEDURE.value,
-        normalizer,
-        localizer
-    ) {
+            R4ProcedureValidator,
+            RoninProfile.PROCEDURE.value,
+            normalizer,
+            localizer,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_28_0
     override val profileVersion = 1
 
-    private val requiredExtensionCodeError = FHIRError(
-        code = "RONIN_PROC_001",
-        description = "Tenant source procedure code extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Procedure::extension)
-    )
-    private val requiredExtensionCategoryError = FHIRError(
-        code = "RONIN_PROC_002",
-        description = "Tenant source procedure category extension is invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Procedure::extension)
-    )
+    private val requiredExtensionCodeError =
+        FHIRError(
+            code = "RONIN_PROC_001",
+            description = "Tenant source procedure code extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Procedure::extension),
+        )
+    private val requiredExtensionCategoryError =
+        FHIRError(
+            code = "RONIN_PROC_002",
+            description = "Tenant source procedure category extension is invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Procedure::extension),
+        )
 
-    override fun validateRonin(element: Procedure, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: Procedure,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
@@ -65,33 +71,39 @@ class RoninProcedure(
                         it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 requiredExtensionCodeError,
-                parentContext
+                parentContext,
             )
 
             // extension may include procedure category
             checkTrue(
                 element.extension.filter { it.url == RoninExtension.TENANT_SOURCE_PROCEDURE_CATEGORY.uri }.size <= 1,
                 requiredExtensionCategoryError,
-                parentContext
+                parentContext,
             )
         }
     }
 
-    private val requiredPerformedError = FHIRError(
-        code = "USCORE_PROC_001",
-        description = "Performed SHALL be present if the status is 'completed' or 'in-progress'",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Procedure::performed)
-    )
+    private val requiredPerformedError =
+        FHIRError(
+            code = "USCORE_PROC_001",
+            description = "Performed SHALL be present if the status is 'completed' or 'in-progress'",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Procedure::performed),
+        )
 
-    private val requiredCodeError = FHIRError(
-        code = "USCORE_PROC_002",
-        description = "Procedure code is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Procedure::code)
-    )
+    private val requiredCodeError =
+        FHIRError(
+            code = "USCORE_PROC_002",
+            description = "Procedure code is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Procedure::code),
+        )
 
-    override fun validateUSCore(element: Procedure, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: Procedure,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             if (element.status?.value == EventStatus.COMPLETED.code || element.status?.value == EventStatus.IN_PROGRESS.code) {
                 checkNotNull(element.performed, requiredPerformedError, parentContext)
@@ -105,74 +117,85 @@ class RoninProcedure(
         normalized: Procedure,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<Procedure, Validation> {
         val validation = Validation()
 
         // Procedure.code is a single CodeableConcept
-        val mappedCodePair = normalized.code?.let { code ->
-            val codePair = registryClient.getConceptMapping(
-                tenant,
-                "Procedure.code",
-                code,
-                normalized,
-                forceCacheReloadTS
-            )
-            // validate the mapping we got, use code value to report issues
-            validation.apply {
-                checkNotNull(
-                    codePair,
-                    FailedConceptMapLookupError(
-                        LocationContext(Procedure::code),
-                        code.coding.mapNotNull { it.code?.value }
-                            .joinToString(", "),
-                        "any Procedure.code concept map for tenant '${tenant.mnemonic}'",
-                        codePair?.metadata
-                    ),
-                    parentContext
-                )
+        val mappedCodePair =
+            normalized.code?.let { code ->
+                val codePair =
+                    registryClient.getConceptMapping(
+                        tenant,
+                        "Procedure.code",
+                        code,
+                        normalized,
+                        forceCacheReloadTS,
+                    )
+                // validate the mapping we got, use code value to report issues
+                validation.apply {
+                    checkNotNull(
+                        codePair,
+                        FailedConceptMapLookupError(
+                            LocationContext(Procedure::code),
+                            code.coding.mapNotNull { it.code?.value }
+                                .joinToString(", "),
+                            "any Procedure.code concept map for tenant '${tenant.mnemonic}'",
+                            codePair?.metadata,
+                        ),
+                        parentContext,
+                    )
+                }
+                codePair
             }
-            codePair
-        }
 
         // Procedure.category is a single CodeableConcept
-        val mappedCategoryPair = normalized.category?.let { category ->
-            val categoryPair = registryClient.getConceptMapping(
-                tenant,
-                "Procedure.category",
-                category,
-                normalized,
-                forceCacheReloadTS
-            )
-            // validate the mapping we got, use category value to report issues
-            validation.apply {
-                checkNotNull(
-                    categoryPair,
-                    FailedConceptMapLookupError(
-                        LocationContext(Procedure::category),
-                        category.coding.mapNotNull { it.code?.value }
-                            .joinToString(", "),
-                        "any Procedure.category concept map for tenant '${tenant.mnemonic}'",
-                        categoryPair?.metadata
-                    ),
-                    parentContext
-                )
+        val mappedCategoryPair =
+            normalized.category?.let { category ->
+                val categoryPair =
+                    registryClient.getConceptMapping(
+                        tenant,
+                        "Procedure.category",
+                        category,
+                        normalized,
+                        forceCacheReloadTS,
+                    )
+                // validate the mapping we got, use category value to report issues
+                validation.apply {
+                    checkNotNull(
+                        categoryPair,
+                        FailedConceptMapLookupError(
+                            LocationContext(Procedure::category),
+                            category.coding.mapNotNull { it.code?.value }
+                                .joinToString(", "),
+                            "any Procedure.category concept map for tenant '${tenant.mnemonic}'",
+                            categoryPair?.metadata,
+                        ),
+                        parentContext,
+                    )
+                }
+                categoryPair
             }
-            categoryPair
-        }
 
-        val (finalCode, codeExtensions) = mappedCodePair?.let { Pair(it.codeableConcept, listOf(it.extension)) } ?: Pair(normalized.code, emptyList())
-        val (finalCategory, categoryExtensions) = mappedCategoryPair?.let { Pair(it.codeableConcept, listOf(it.extension)) } ?: Pair(normalized.category, emptyList())
+        val (finalCode, codeExtensions) =
+            mappedCodePair?.let {
+                Pair(it.codeableConcept, listOf(it.extension))
+            } ?: Pair(normalized.code, emptyList())
+        val (finalCategory, categoryExtensions) =
+            mappedCategoryPair?.let {
+                Pair(it.codeableConcept, listOf(it.extension))
+            } ?: Pair(normalized.category, emptyList())
 
-        val mappedProcedure = normalized.copy(
-            code = finalCode,
-            category = finalCategory,
-            extension = normalized.extension + codeExtensions + categoryExtensions
-        )
+        val mappedProcedure =
+            normalized.copy(
+                code = finalCode,
+                category = finalCategory,
+                extension = normalized.extension + codeExtensions + categoryExtensions,
+            )
 
         return Pair(
             mappedProcedure,
-            validation
+            validation,
         )
     }
 
@@ -180,12 +203,13 @@ class RoninProcedure(
         normalized: Procedure,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<Procedure>?, Validation> {
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant)
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+            )
         return Pair(TransformResponse(transformed), Validation())
     }
 }

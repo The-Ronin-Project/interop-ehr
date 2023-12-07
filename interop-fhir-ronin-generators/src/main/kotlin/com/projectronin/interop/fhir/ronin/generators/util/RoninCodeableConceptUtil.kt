@@ -9,7 +9,10 @@ import com.projectronin.interop.fhir.r4.datatype.Coding
  * [codeableconcept]. If the input [codeableconcept] is null, or non-null with
  * an empty coding list, use [possibleCoding] as a coding list and use any text.
  */
-fun generateCodeableConcept(codeableconcept: CodeableConcept?, possibleCoding: Coding): CodeableConcept {
+fun generateCodeableConcept(
+    codeableconcept: CodeableConcept?,
+    possibleCoding: Coding,
+): CodeableConcept {
     return when {
         codeableconcept == null -> {
             codeableConcept {
@@ -31,13 +34,16 @@ fun generateCodeableConcept(codeableconcept: CodeableConcept?, possibleCoding: C
  * [codeableConcepts] is empty, or all entries have empty coding lists,
  * generate a list of one CodeableConcept using [possibleCoding]
  */
-fun generateRequiredCodeableConceptList(codeableConcepts: List<CodeableConcept>, possibleCoding: Coding): List<CodeableConcept> {
+fun generateRequiredCodeableConceptList(
+    codeableConcepts: List<CodeableConcept>,
+    possibleCoding: Coding,
+): List<CodeableConcept> {
     val generated = codeableConcepts.filter { it.coding.isNotEmpty() }
     return generated.ifEmpty {
         listOf(
             codeableConcept {
                 coding of listOf(possibleCoding)
-            }
+            },
         )
     }
 }

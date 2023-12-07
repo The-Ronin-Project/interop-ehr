@@ -29,27 +29,28 @@ import kotlin.time.Duration
 abstract class EHRClient(
     private val client: HttpClient,
     private val authenticationBroker: EHRAuthenticationBroker,
-    private val datalakeService: DatalakePublishService
+    private val datalakeService: DatalakePublishService,
 ) {
     private val logger = KotlinLogging.logger { }
+
     suspend fun get(
         tenant: Tenant,
         urlPart: String,
         parameters: Map<String, Any?> = mapOf(),
         disableRetry: Boolean = false,
         acceptTypeOverride: ContentType = ContentType.Application.Json,
-        timeoutOverride: Duration? = null
+        timeoutOverride: Duration? = null,
     ): EHRResponse {
         return publishAndReturn(
             getImpl(tenant, urlPart, parameters, disableRetry, acceptTypeOverride, timeoutOverride),
             tenant,
-            disableRetry
+            disableRetry,
         )
     }
 
     suspend fun options(
         tenant: Tenant,
-        urlPart: String
+        urlPart: String,
     ): HttpResponse {
         return optionsImpl(tenant, urlPart)
     }
@@ -58,7 +59,7 @@ abstract class EHRClient(
         tenant: Tenant,
         urlPart: String,
         requestBody: Any,
-        parameters: Map<String, Any?> = mapOf()
+        parameters: Map<String, Any?> = mapOf(),
     ): EHRResponse {
         return publishAndReturn(postImpl(tenant, urlPart, requestBody, parameters), tenant)
     }
@@ -66,7 +67,7 @@ abstract class EHRClient(
     suspend fun put(
         tenant: Tenant,
         urlPart: String,
-        requestBody: Any
+        requestBody: Any,
     ): EHRResponse {
         return publishAndReturn(putImpl(tenant, urlPart, requestBody), tenant, true)
     }
@@ -79,13 +80,14 @@ abstract class EHRClient(
         tenant: Tenant,
         urlPart: String,
         requestBody: Any,
-        parameters: Map<String, Any?> = mapOf()
+        parameters: Map<String, Any?> = mapOf(),
     ): HttpResponse {
         logger.debug { "Started POST call to tenant: ${tenant.mnemonic}" }
 
         // Authenticate
-        val authentication = authenticationBroker.getAuthentication(tenant)
-            ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
+        val authentication =
+            authenticationBroker.getAuthentication(tenant)
+                ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
 
         // Make the call
         val response: HttpResponse =
@@ -108,7 +110,7 @@ abstract class EHRClient(
                                         // and then combines this in a comma separated list
                                         value.joinToString(separator = ",") { parameterValue ->
                                             parameterValue.toString().encodeURLParameter(spaceToPlus = true)
-                                        }
+                                        },
                                     )
                                 }
 
@@ -136,13 +138,14 @@ abstract class EHRClient(
         parameters: Map<String, Any?> = mapOf(),
         disableRetry: Boolean = false,
         acceptTypeOverride: ContentType = ContentType.Application.Json,
-        timeoutOverride: Duration?
+        timeoutOverride: Duration?,
     ): HttpResponse {
         logger.debug { "Started GET call to tenant: ${tenant.mnemonic}" }
 
         // Authenticate
-        val authentication = authenticationBroker.getAuthentication(tenant)
-            ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
+        val authentication =
+            authenticationBroker.getAuthentication(tenant)
+                ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
 
         val requestUrl =
             if (urlPart.first() == '/') {
@@ -151,42 +154,43 @@ abstract class EHRClient(
                 urlPart
             }
 
-        val response: HttpResponse = client.request("Organization: ${tenant.name}", requestUrl) { urlToCall ->
-            get(urlToCall) {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
-                    append(NO_RETRY_HEADER, "$disableRetry")
-                }
-                accept(acceptTypeOverride)
-                contentType(acceptTypeOverride)
-                url {
-                    parameters.map { parameterEntry ->
-                        val key = parameterEntry.key
-                        when (val value = parameterEntry.value) {
-                            is List<*> -> {
-                                encodedParameters.append(
-                                    key,
-                                    // tricky, but this takes a list of any objects, converts, them to string, encodes them
-                                    // and then combines this in a comma separated list
-                                    value.joinToString(separator = ",") { parameterValue ->
-                                        parameterValue.toString().encodeURLParameter(spaceToPlus = true)
-                                    }
-                                )
-                            }
+        val response: HttpResponse =
+            client.request("Organization: ${tenant.name}", requestUrl) { urlToCall ->
+                get(urlToCall) {
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+                        append(NO_RETRY_HEADER, "$disableRetry")
+                    }
+                    accept(acceptTypeOverride)
+                    contentType(acceptTypeOverride)
+                    url {
+                        parameters.map { parameterEntry ->
+                            val key = parameterEntry.key
+                            when (val value = parameterEntry.value) {
+                                is List<*> -> {
+                                    encodedParameters.append(
+                                        key,
+                                        // tricky, but this takes a list of any objects, converts, them to string, encodes them
+                                        // and then combines this in a comma separated list
+                                        value.joinToString(separator = ",") { parameterValue ->
+                                            parameterValue.toString().encodeURLParameter(spaceToPlus = true)
+                                        },
+                                    )
+                                }
 
-                            is RepeatingParameter -> url.parameters.appendAll(key, value.values)
-                            else -> parameter(key, value)
+                                is RepeatingParameter -> url.parameters.appendAll(key, value.values)
+                                else -> parameter(key, value)
+                            }
+                        }
+                    }
+                    // if we've got a timeout override add it
+                    timeoutOverride?.let {
+                        timeout {
+                            requestTimeoutMillis = it.inWholeMilliseconds
                         }
                     }
                 }
-                // if we've got a timeout override add it
-                timeoutOverride?.let {
-                    timeout {
-                        requestTimeoutMillis = it.inWholeMilliseconds
-                    }
-                }
             }
-        }
 
         logger.debug { "HTTP status, ${response.status}, returned for GET call to tenant: ${tenant.mnemonic}" }
 
@@ -195,13 +199,14 @@ abstract class EHRClient(
 
     protected open suspend fun optionsImpl(
         tenant: Tenant,
-        urlPart: String
+        urlPart: String,
     ): HttpResponse {
         logger.debug { "Started OPTIONS call to tenant: ${tenant.mnemonic}" }
 
         // Authenticate
-        val authentication = authenticationBroker.getAuthentication(tenant)
-            ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
+        val authentication =
+            authenticationBroker.getAuthentication(tenant)
+                ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
 
         val requestUrl =
             if (urlPart.first() == '/') {
@@ -210,13 +215,14 @@ abstract class EHRClient(
                 urlPart
             }
 
-        val response: HttpResponse = client.request("Organization: ${tenant.name}", requestUrl) { urlToCall ->
-            options(urlToCall) {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+        val response: HttpResponse =
+            client.request("Organization: ${tenant.name}", requestUrl) { urlToCall ->
+                options(urlToCall) {
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+                    }
                 }
             }
-        }
 
         logger.debug { "HTTP status, ${response.status}, returned for OPTIONS call to tenant: ${tenant.mnemonic}" }
 
@@ -230,13 +236,14 @@ abstract class EHRClient(
     protected open suspend fun putImpl(
         tenant: Tenant,
         urlPart: String,
-        requestBody: Any
+        requestBody: Any,
     ): HttpResponse {
         logger.debug { "Started PUT call to tenant: ${tenant.mnemonic}" }
 
         // Authenticate
-        val authentication = authenticationBroker.getAuthentication(tenant)
-            ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
+        val authentication =
+            authenticationBroker.getAuthentication(tenant)
+                ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
 
         // Make the call
         val response: HttpResponse =
@@ -260,18 +267,19 @@ abstract class EHRClient(
     private suspend fun publishAndReturn(
         response: HttpResponse,
         tenant: Tenant,
-        disablePublication: Boolean = false
+        disablePublication: Boolean = false,
     ): EHRResponse {
         if (disablePublication) {
             return EHRResponse(response, "")
         }
 
         // publish all responses to datalake
-        val transactionURL = datalakeService.publishRawData(
-            tenant.mnemonic,
-            response.bodyAsText(),
-            response.request.url.toString()
-        )
+        val transactionURL =
+            datalakeService.publishRawData(
+                tenant.mnemonic,
+                response.bodyAsText(),
+                response.request.url.toString(),
+            )
         return EHRResponse(response, transactionURL)
     }
 }

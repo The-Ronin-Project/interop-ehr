@@ -22,13 +22,13 @@ class EpicEncounterService(epicClient: EpicClient) : EncounterService, EpicFHIRS
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate,
-        endDate: LocalDate
-    ):
-        List<Encounter> {
-        val parameters = mapOf(
-            "patient" to patientFhirId,
-            "date" to RepeatingParameter(listOf("ge$startDate", "le$endDate"))
-        )
+        endDate: LocalDate,
+    ): List<Encounter> {
+        val parameters =
+            mapOf(
+                "patient" to patientFhirId,
+                "date" to RepeatingParameter(listOf("ge$startDate", "le$endDate")),
+            )
         return getResourceListFromSearch(tenant, parameters)
     }
 }

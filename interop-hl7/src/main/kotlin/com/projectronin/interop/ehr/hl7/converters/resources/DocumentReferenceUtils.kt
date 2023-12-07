@@ -24,9 +24,11 @@ fun DocumentReference.toCompleteStatus(): String =
 fun DocumentReference.toConfidentialityStatus(): String = "U"
 
 fun DocumentReference.toAvailableStatus(): String = if (this.toCompleteStatus() == "IP") "UN" else "AV"
+
 fun DocumentReference.getParentNoteID(): String? {
-    val parent = this.relatesTo.firstOrNull {
-        it.code.asEnum<DocumentRelationshipType>() == DocumentRelationshipType.APPENDS
-    }
+    val parent =
+        this.relatesTo.firstOrNull {
+            it.code.asEnum<DocumentRelationshipType>() == DocumentRelationshipType.APPENDS
+        }
     return parent?.target?.decomposedId()
 }

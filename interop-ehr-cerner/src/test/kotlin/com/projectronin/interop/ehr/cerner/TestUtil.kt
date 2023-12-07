@@ -30,7 +30,7 @@ fun createTestTenant(
     messageTopic: String? = "topic",
     messageCategory: String? = "category",
     messagePriority: String? = "priority",
-    monitoredIndicator: Boolean? = null
+    monitoredIndicator: Boolean? = null,
 ): Tenant {
     return Tenant(
         internalId,
@@ -47,9 +47,9 @@ fun createTestTenant(
             practitioner,
             messageTopic,
             messageCategory,
-            messagePriority
+            messagePriority,
         ),
-        monitoredIndicator
+        monitoredIndicator,
     )
 }
 
@@ -65,5 +65,4 @@ fun getClient(): HttpClient {
     }
 }
 
-inline fun <reified T> readResource(resource: String): T =
-    objectMapper.readValue(T::class.java.getResource(resource)!!.readText())
+inline fun <reified T> readResource(resource: String): T = objectMapper.readValue(T::class.java.getResource(resource)!!.readText())

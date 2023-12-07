@@ -11,8 +11,9 @@ data class CernerAuthentication(
     override val tokenType: String,
     private val expiresIn: Long,
     override val scope: String?,
-    override val refreshToken: String?
+    override val refreshToken: String?,
 ) : Authentication {
     override val expiresAt: Instant? = Instant.now().plusSeconds(expiresIn)
+
     override fun toString(): String = this::class.simpleName!!
 }

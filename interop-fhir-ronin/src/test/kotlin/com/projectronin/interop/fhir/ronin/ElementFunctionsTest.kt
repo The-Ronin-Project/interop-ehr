@@ -32,27 +32,31 @@ class ElementFunctionsTest {
 
     @Test
     fun `data absent reason`() {
-        val element = SampleElement(
-            extension = listOf(
-                Extension(
-                    url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason"),
-                    value = DynamicValue(DynamicValueType.CODE, Code(value = "asked-declined"))
-                )
+        val element =
+            SampleElement(
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason"),
+                            value = DynamicValue(DynamicValueType.CODE, Code(value = "asked-declined")),
+                        ),
+                    ),
             )
-        )
         assertTrue(element.hasDataAbsentReason())
     }
 
     @Test
     fun `data absent reason in list`() {
-        val element = SampleElement(
-            extension = listOf(
-                Extension(
-                    url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason"),
-                    value = DynamicValue(DynamicValueType.CODE, Code(value = "asked-declined"))
-                )
+        val element =
+            SampleElement(
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason"),
+                            value = DynamicValue(DynamicValueType.CODE, Code(value = "asked-declined")),
+                        ),
+                    ),
             )
-        )
         assertTrue(listOf(element).hasDataAbsentReason())
     }
 
@@ -65,5 +69,5 @@ class ElementFunctionsTest {
 
 private data class SampleElement(
     override val extension: List<Extension> = emptyList(),
-    override val id: FHIRString? = null
+    override val id: FHIRString? = null,
 ) : Element<SampleElement>

@@ -16,7 +16,10 @@ import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 
-fun rcdmMedicationRequest(tenant: String, block: MedicationRequestGenerator.() -> Unit): MedicationRequest {
+fun rcdmMedicationRequest(
+    tenant: String,
+    block: MedicationRequestGenerator.() -> Unit,
+): MedicationRequest {
     return medicationRequest {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.MEDICATION_REQUEST, tenant) {}
@@ -28,12 +31,13 @@ fun rcdmMedicationRequest(tenant: String, block: MedicationRequestGenerator.() -
         status of generateCode(status.generate(), possibleMedicationRequestStatusCodes.random())
         intent of generateCode(intent.generate(), possibleMedicationRequestIntentCodes.random())
         reported of generateOptionalDynamicValueReference(reported.generate(), reportedReferenceOptions, tenant)
-        medication of generateDynamicValueReference(
-            medication.generate(),
-            medicationReferenceOptions,
-            tenant,
-            "Medication"
-        )
+        medication of
+            generateDynamicValueReference(
+                medication.generate(),
+                medicationReferenceOptions,
+                tenant,
+                "Medication",
+            )
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
         encounter of generateOptionalReference(encounter.generate(), encounterReferenceOptions, tenant)
         requester of generateReference(requester.generate(), requesterReferenceOptions, tenant)
@@ -44,119 +48,137 @@ fun Patient.rcdmMedicationRequest(block: MedicationRequestGenerator.() -> Unit):
     val data = this.referenceData()
     return rcdmMedicationRequest(data.tenantId) {
         block.invoke(this)
-        subject of generateReference(
-            subject.generate(),
-            subjectReferenceOptions,
-            data.tenantId,
-            "Patient",
-            data.udpId
-        )
+        subject of
+            generateReference(
+                subject.generate(),
+                subjectReferenceOptions,
+                data.tenantId,
+                "Patient",
+                data.udpId,
+            )
     }
 }
 
-val reportedReferenceOptions = listOf(
-    "Practitioner",
-    "Organization",
-    "Patient",
-    "PractitionerRole"
-)
+val reportedReferenceOptions =
+    listOf(
+        "Practitioner",
+        "Organization",
+        "Patient",
+        "PractitionerRole",
+    )
 
-val medicationReferenceOptions = listOf(
-    "Medication"
-)
-val encounterReferenceOptions = listOf(
-    "Encounter"
-)
+val medicationReferenceOptions =
+    listOf(
+        "Medication",
+    )
+val encounterReferenceOptions =
+    listOf(
+        "Encounter",
+    )
 
-val requesterReferenceOptions = listOf(
-    "Patient",
-    "Practitioner",
-    "PractitionerRole",
-    "Organization",
-    "RelatedPerson",
-    "Device"
-)
+val requesterReferenceOptions =
+    listOf(
+        "Patient",
+        "Practitioner",
+        "PractitionerRole",
+        "Organization",
+        "RelatedPerson",
+        "Device",
+    )
 
-val performerReferenceOptions = listOf(
-    "Organization",
-    "PractitionerRole",
-    "Practitioner",
-    "Patient",
-    "CareTeam",
-    "RelatedPerson",
-    "Device"
-)
+val performerReferenceOptions =
+    listOf(
+        "Organization",
+        "PractitionerRole",
+        "Practitioner",
+        "Patient",
+        "CareTeam",
+        "RelatedPerson",
+        "Device",
+    )
 
-val recorderReferenceOptions = listOf(
-    "PractitionerRole",
-    "Practitioner"
-)
+val recorderReferenceOptions =
+    listOf(
+        "PractitionerRole",
+        "Practitioner",
+    )
 
-val reasonReferenceOptions = listOf(
-    "Condition",
-    "Observation"
-)
+val reasonReferenceOptions =
+    listOf(
+        "Condition",
+        "Observation",
+    )
 
-val basedOnReferenceOptions = listOf(
-    "CarePlan",
-    "MedicationRequest",
-    "ServiceRequest",
-    "ImmunizationRecommendation"
-)
+val basedOnReferenceOptions =
+    listOf(
+        "CarePlan",
+        "MedicationRequest",
+        "ServiceRequest",
+        "ImmunizationRecommendation",
+    )
 
-val insuranceReferenceOptions = listOf(
-    "Coverage",
-    "ClaimResponse"
-)
+val insuranceReferenceOptions =
+    listOf(
+        "Coverage",
+        "ClaimResponse",
+    )
 
-val priorPresciptionReferenceOptions = listOf(
-    "MedicationRequest"
-)
+val priorPresciptionReferenceOptions =
+    listOf(
+        "MedicationRequest",
+    )
 
-val detectedIssueReferenceOptions = listOf(
-    "DetectedIssue"
-)
+val detectedIssueReferenceOptions =
+    listOf(
+        "DetectedIssue",
+    )
 
-val eventHistoryReferenceOptions = listOf(
-    "Provenance"
-)
+val eventHistoryReferenceOptions =
+    listOf(
+        "Provenance",
+    )
 
-val possibleMedicationRequestStatusCodes = listOf(
-    Code("active"),
-    Code("on-hold"),
-    Code("cancelled"),
-    Code("completed"),
-    Code("entered-in-error"),
-    Code("stopped"),
-    Code("draft"),
-    Code("unknown")
-)
+val possibleMedicationRequestStatusCodes =
+    listOf(
+        Code("active"),
+        Code("on-hold"),
+        Code("cancelled"),
+        Code("completed"),
+        Code("entered-in-error"),
+        Code("stopped"),
+        Code("draft"),
+        Code("unknown"),
+    )
 
-val possibleMedicationRequestIntentCodes = listOf(
-    Code("proposal"),
-    Code("plan"),
-    Code("order"),
-    Code("original-order"),
-    Code("reflex-order"),
-    Code("filler-order"),
-    Code("instance-order"),
-    Code("option")
-)
+val possibleMedicationRequestIntentCodes =
+    listOf(
+        Code("proposal"),
+        Code("plan"),
+        Code("order"),
+        Code("original-order"),
+        Code("reflex-order"),
+        Code("filler-order"),
+        Code("instance-order"),
+        Code("option"),
+    )
 
-val possibleMedicationRequestCategoryCodes = listOf(
-    Code("inpatient"),
-    Code("outpatient"),
-    Code("community"),
-    Code("discharge")
-)
+val possibleMedicationRequestCategoryCodes =
+    listOf(
+        Code("inpatient"),
+        Code("outpatient"),
+        Code("community"),
+        Code("discharge"),
+    )
 
-val possibleMedicationRequestPriorityCodes = listOf(
-    Code("routine"),
-    Code("urgent"),
-    Code("asap"),
-    Code("stat")
-)
+val possibleMedicationRequestPriorityCodes =
+    listOf(
+        Code("routine"),
+        Code("urgent"),
+        Code("asap"),
+        Code("stat"),
+    )
 
-val dispenseRequestPerformerReferenceOptions = listOf(
-    "Organization"
-)
+val dispenseRequestPerformerReferenceOptions =
+    listOf(
+        "Organization",
+    )

@@ -17,11 +17,17 @@ class BaseFHIRServiceTest {
         BaseFHIRService<Location>() {
         override val fhirResourceType: Class<Location> = Location::class.java
 
-        override fun getByID(tenant: Tenant, resourceFHIRId: String): Location {
+        override fun getByID(
+            tenant: Tenant,
+            resourceFHIRId: String,
+        ): Location {
             TODO("Not yet implemented")
         }
 
-        override fun getByIDs(tenant: Tenant, resourceFHIRIds: List<String>): Map<String, Location> {
+        override fun getByIDs(
+            tenant: Tenant,
+            resourceFHIRIds: List<String>,
+        ): Map<String, Location> {
             TODO("Not yet implemented")
         }
 

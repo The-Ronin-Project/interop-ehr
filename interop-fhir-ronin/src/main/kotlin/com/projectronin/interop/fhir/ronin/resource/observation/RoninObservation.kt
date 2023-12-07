@@ -21,15 +21,15 @@ import org.springframework.stereotype.Component
 class RoninObservation(
     normalizer: Normalizer,
     localizer: Localizer,
-    registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient,
 ) :
     BaseRoninObservation(
-        R4ObservationValidator,
-        RoninProfile.OBSERVATION.value,
-        normalizer,
-        localizer,
-        registryClient
-    ) {
+            R4ObservationValidator,
+            RoninProfile.OBSERVATION.value,
+            normalizer,
+            localizer,
+            registryClient,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_29_0
     override val profileVersion = 5
 
@@ -46,7 +46,7 @@ class RoninObservation(
     override fun validateSpecificObservation(
         element: Observation,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
     }
 }

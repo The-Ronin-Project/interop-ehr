@@ -15,7 +15,6 @@ interface EncounterService : FHIRService<Encounter> {
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate,
-        endDate: LocalDate
-    ):
-        List<Encounter>
+        endDate: LocalDate,
+    ): List<Encounter>
 }

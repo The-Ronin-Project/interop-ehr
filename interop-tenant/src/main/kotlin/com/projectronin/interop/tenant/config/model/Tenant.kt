@@ -20,7 +20,7 @@ data class Tenant(
     val timezone: ZoneId,
     val batchConfig: BatchConfig?,
     val vendor: Vendor,
-    val monitoredIndicator: Boolean?
+    val monitoredIndicator: Boolean?,
 ) {
     inline fun <reified T : Vendor> vendorAs(): T {
         if (vendor !is T) throw RuntimeException("Vendor is not a ${T::class.java.simpleName}")

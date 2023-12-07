@@ -23,13 +23,15 @@ class TransformManagerTest {
         val tenant = mockk<Tenant>()
 
         val transformed = mockk<Patient>()
-        val validation = mockk<Validation> {
-            every { hasIssues() } returns false
-        }
+        val validation =
+            mockk<Validation> {
+                every { hasIssues() } returns false
+            }
 
-        val transformer = mockk<ProfileTransformer<Patient>> {
-            every { transform(resource, tenant) } returns Pair(TransformResponse(transformed), validation)
-        }
+        val transformer =
+            mockk<ProfileTransformer<Patient>> {
+                every { transform(resource, tenant) } returns Pair(TransformResponse(transformed), validation)
+            }
 
         val result = transformManager.transformResource(resource, transformer, tenant)
         assertEquals(transformed, result!!.resource)
@@ -40,19 +42,22 @@ class TransformManagerTest {
 
     @Test
     fun `transform with validation issues and no transformation`() {
-        val resource = mockk<Patient> {
-            every { resourceType } returns "Patient"
-        }
+        val resource =
+            mockk<Patient> {
+                every { resourceType } returns "Patient"
+            }
         val tenant = mockk<Tenant>()
 
-        val validation = mockk<Validation> {
-            every { hasIssues() } returns true
-            every { issues() } returns emptyList()
-        }
+        val validation =
+            mockk<Validation> {
+                every { hasIssues() } returns true
+                every { issues() } returns emptyList()
+            }
 
-        val transformer = mockk<ProfileTransformer<Patient>> {
-            every { transform(resource, tenant) } returns Pair(null, validation)
-        }
+        val transformer =
+            mockk<ProfileTransformer<Patient>> {
+                every { transform(resource, tenant) } returns Pair(null, validation)
+            }
 
         every { validationClient.reportIssues(validation, resource, tenant) } returns mockk()
 
@@ -64,20 +69,23 @@ class TransformManagerTest {
 
     @Test
     fun `transform with validation issues and a transformation`() {
-        val resource = mockk<Patient>() {
-            every { resourceType } returns "Patient"
-        }
+        val resource =
+            mockk<Patient> {
+                every { resourceType } returns "Patient"
+            }
         val tenant = mockk<Tenant>()
 
         val transformed = mockk<Patient>()
-        val validation = mockk<Validation> {
-            every { hasIssues() } returns true
-            every { issues() } returns emptyList()
-        }
+        val validation =
+            mockk<Validation> {
+                every { hasIssues() } returns true
+                every { issues() } returns emptyList()
+            }
 
-        val transformer = mockk<ProfileTransformer<Patient>> {
-            every { transform(resource, tenant) } returns Pair(TransformResponse(transformed), validation)
-        }
+        val transformer =
+            mockk<ProfileTransformer<Patient>> {
+                every { transform(resource, tenant) } returns Pair(TransformResponse(transformed), validation)
+            }
 
         every { validationClient.reportIssues(validation, transformed, tenant) } returns mockk()
 
@@ -96,13 +104,15 @@ class TransformManagerTest {
         val transformed = mockk<Patient>()
         val embedded = listOf(mockk<Organization>())
         val transformResponse = TransformResponse(transformed, embedded)
-        val validation = mockk<Validation> {
-            every { hasIssues() } returns false
-        }
+        val validation =
+            mockk<Validation> {
+                every { hasIssues() } returns false
+            }
 
-        val transformer = mockk<ProfileTransformer<Patient>> {
-            every { transform(resource, tenant) } returns Pair(transformResponse, validation)
-        }
+        val transformer =
+            mockk<ProfileTransformer<Patient>> {
+                every { transform(resource, tenant) } returns Pair(transformResponse, validation)
+            }
 
         val result = transformManager.transformResource(resource, transformer, tenant)
         assertEquals(transformResponse, result)
@@ -112,22 +122,25 @@ class TransformManagerTest {
 
     @Test
     fun `transform with validation issues and a transformation with embedded resources`() {
-        val resource = mockk<Patient>() {
-            every { resourceType } returns "Patient"
-        }
+        val resource =
+            mockk<Patient> {
+                every { resourceType } returns "Patient"
+            }
         val tenant = mockk<Tenant>()
 
         val transformed = mockk<Patient>()
         val embedded = listOf(mockk<Organization>())
         val transformResponse = TransformResponse(transformed, embedded)
-        val validation = mockk<Validation> {
-            every { hasIssues() } returns true
-            every { issues() } returns emptyList()
-        }
+        val validation =
+            mockk<Validation> {
+                every { hasIssues() } returns true
+                every { issues() } returns emptyList()
+            }
 
-        val transformer = mockk<ProfileTransformer<Patient>> {
-            every { transform(resource, tenant) } returns Pair(transformResponse, validation)
-        }
+        val transformer =
+            mockk<ProfileTransformer<Patient>> {
+                every { transform(resource, tenant) } returns Pair(transformResponse, validation)
+            }
 
         every { validationClient.reportIssues(validation, transformed, tenant) } returns mockk()
 

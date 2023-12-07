@@ -15,7 +15,6 @@ interface CarePlanService : FHIRService<CarePlan> {
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate,
-        endDate: LocalDate
-    ):
-        List<CarePlan>
+        endDate: LocalDate,
+    ): List<CarePlan>
 }

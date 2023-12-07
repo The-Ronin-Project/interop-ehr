@@ -21,9 +21,10 @@ import java.time.format.DateTimeFormatter
 @Component
 class EpicObservationService(
     epicClient: EpicClient,
-    @Value("\${epic.fhir.batchSize:1}") batchSize: Int, // This is currently ignored.  See findObservationsByPatientAndCategory() below.
+    // This is currently ignored.  See findObservationsByPatientAndCategory() below.
+    @Value("\${epic.fhir.batchSize:1}") batchSize: Int,
     private val tenantCodesDAO: TenantCodesDAO,
-    @Value("\${epic.fhir.observation.incrementalLoadDays:60}") private val incrementalLoadDays: Int
+    @Value("\${epic.fhir.observation.incrementalLoadDays:60}") private val incrementalLoadDays: Int,
 ) : ObservationService,
     EpicFHIRService<Observation>(epicClient, batchSize) {
     override val fhirURLSearchPart = "/api/FHIR/R4/Observation"
@@ -41,20 +42,22 @@ class EpicObservationService(
         patientFhirIds: List<String>,
         observationCategoryCodes: List<FHIRSearchToken>,
         startDate: LocalDate?,
-        endDate: LocalDate?
+        endDate: LocalDate?,
     ): List<Observation> {
         val dateParam =
             getDateParam(startDate, endDate) ?: "ge${daysToPastDate(incrementalLoadDays, dateFormat)}"
         // Epic has a problem handling multiple patients in 1 call, so in the meantime force batch size to 1.
         // See https://sherlock.epic.com/default.aspx?view=slg/home#id=6953019&rv=0
-        val observationResponses = patientFhirIds.chunked(1) {
-            val parameters = mapOf(
-                "patient" to it.joinToString(separator = ","),
-                "category" to observationCategoryCodes.toOrParams(),
-                "date" to dateParam
-            )
-            getResourceListFromSearch(tenant, parameters)
-        }
+        val observationResponses =
+            patientFhirIds.chunked(1) {
+                val parameters =
+                    mapOf(
+                        "patient" to it.joinToString(separator = ","),
+                        "category" to observationCategoryCodes.toOrParams(),
+                        "date" to dateParam,
+                    )
+                getResourceListFromSearch(tenant, parameters)
+            }
         return observationResponses.flatten()
     }
 
@@ -68,33 +71,36 @@ class EpicObservationService(
         patientFhirIds: List<String>,
         observationCategoryCodes: List<ObservationCategoryCodes>,
         startDate: LocalDate?,
-        endDate: LocalDate?
+        endDate: LocalDate?,
     ): List<Observation> {
-        val extraCodesToSearch = mutableListOf<String>().apply {
-            if (observationCategoryCodes.contains(ObservationCategoryCodes.VITAL_SIGNS)) {
-                tenantCodesDAO.getByTenantMnemonic(tenant.mnemonic)?.let { tenantCodes ->
-                    tenantCodes.bmiCode?.let(::add)
-                    tenantCodes.bsaCode?.let(::add)
+        val extraCodesToSearch =
+            mutableListOf<String>().apply {
+                if (observationCategoryCodes.contains(ObservationCategoryCodes.VITAL_SIGNS)) {
+                    tenantCodesDAO.getByTenantMnemonic(tenant.mnemonic)?.let { tenantCodes ->
+                        tenantCodes.bmiCode?.let(::add)
+                        tenantCodes.bsaCode?.let(::add)
+                    }
                 }
             }
-        }
         val dateParam =
             getDateParam(startDate, endDate) ?: "ge${daysToPastDate(incrementalLoadDays, dateFormat)}"
 
         val observationResponse = mutableListOf<List<Observation>>()
         patientFhirIds.forEach { patientId ->
-            var parameters = mapOf(
-                "patient" to patientId,
-                "category" to observationCategoryCodes.joinToString(separator = ",") { it.code },
-                "date" to dateParam
-            )
+            var parameters =
+                mapOf(
+                    "patient" to patientId,
+                    "category" to observationCategoryCodes.joinToString(separator = ",") { it.code },
+                    "date" to dateParam,
+                )
             observationResponse.add(getResourceListFromSearch(tenant, parameters))
             if (extraCodesToSearch.isNotEmpty()) {
-                parameters = mapOf(
-                    "patient" to patientId,
-                    "code" to extraCodesToSearch.joinToString(separator = ","),
-                    "date" to dateParam
-                )
+                parameters =
+                    mapOf(
+                        "patient" to patientId,
+                        "code" to extraCodesToSearch.joinToString(separator = ","),
+                        "date" to dateParam,
+                    )
                 observationResponse.add(getResourceListFromSearch(tenant, parameters))
             }
         }

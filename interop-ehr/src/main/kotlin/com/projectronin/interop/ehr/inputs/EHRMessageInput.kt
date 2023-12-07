@@ -6,5 +6,5 @@ package com.projectronin.interop.ehr.inputs
 data class EHRMessageInput(
     val text: String,
     val patientFHIRID: String,
-    val recipients: List<EHRRecipient>
+    val recipients: List<EHRRecipient>,
 )

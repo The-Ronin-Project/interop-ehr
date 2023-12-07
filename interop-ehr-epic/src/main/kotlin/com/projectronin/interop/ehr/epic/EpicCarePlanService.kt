@@ -21,14 +21,15 @@ class EpicCarePlanService(epicClient: EpicClient) : CarePlanService, EpicFHIRSer
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate,
-        endDate: LocalDate
-    ):
-        List<CarePlan> {
-        val parameters = mapOf(
-            "patient" to patientFhirId,
-            "category" to "736378000" // hard-coded: https://vendorservices.epic.com/Sandbox/Index?api=10074
-            // Epic doesn't support date
-        )
+        endDate: LocalDate,
+    ): List<CarePlan> {
+        val parameters =
+            mapOf(
+                "patient" to patientFhirId,
+                // hard-coded: https://vendorservices.epic.com/Sandbox/Index?api=10074
+                "category" to "736378000",
+                // Epic doesn't support date
+            )
         return getResourceListFromSearch(tenant, parameters)
     }
 }

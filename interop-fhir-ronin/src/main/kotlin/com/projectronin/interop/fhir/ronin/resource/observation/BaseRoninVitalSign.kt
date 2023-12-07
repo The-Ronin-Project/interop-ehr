@@ -27,39 +27,39 @@ abstract class BaseRoninVitalSign(
     profile: String,
     normalizer: Normalizer,
     localizer: Localizer,
-    registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient,
 ) :
     BaseRoninObservation(
-        extendedProfile,
-        profile,
-        normalizer,
-        localizer,
-        registryClient
-    ) {
-
-    override fun qualifyingCategories() =
-        listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("vital-signs")))
+            extendedProfile,
+            profile,
+            normalizer,
+            localizer,
+            registryClient,
+        ) {
+    override fun qualifyingCategories() = listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("vital-signs")))
 
     // Quantity unit codes - subclasses may override to modify validation logic for quantity units like "cm" "kg"
     open val validQuantityCodes: List<String> = emptyList()
 
     // Dynamic value checks - override BaseRoninObservation for BaseRoninVitalSign
-    override val acceptedEffectiveTypes = listOf(
-        DynamicValueType.DATE_TIME,
-        DynamicValueType.PERIOD
-    )
+    override val acceptedEffectiveTypes =
+        listOf(
+            DynamicValueType.DATE_TIME,
+            DynamicValueType.PERIOD,
+        )
 
-    private val singleObservationCodeError = FHIRError(
-        code = "RONIN_VSOBS_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Coding list must contain exactly 1 entry",
-        location = LocationContext(Observation::code)
-    )
+    private val singleObservationCodeError =
+        FHIRError(
+            code = "RONIN_VSOBS_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Coding list must contain exactly 1 entry",
+            location = LocationContext(Observation::code),
+        )
 
     final override fun validateSpecificObservation(
         element: Observation,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         validation.apply {
             element.code?.coding?.let {
@@ -71,9 +71,9 @@ abstract class BaseRoninVitalSign(
                     RoninInvalidDynamicValueError(
                         Observation::effective,
                         acceptedEffectiveTypes,
-                        "Ronin Vital Sign"
+                        "Ronin Vital Sign",
                     ),
-                    parentContext
+                    parentContext,
                 )
             }
         }
@@ -84,18 +84,23 @@ abstract class BaseRoninVitalSign(
     /**
      * Validates the [element] against Ronin rules for vital sign Observations.
      */
-    abstract fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation)
+    abstract fun validateVitalSign(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
+    )
 
     private val requiredQuantityValueError = RequiredFieldError(LocationContext("Observation", "valueQuantity.value"))
     private val requiredQuantityUnitError = RequiredFieldError(LocationContext("Observation", "valueQuantity.unit"))
     private val requiredQuantityCodeError = RequiredFieldError(LocationContext("Observation", "valueQuantity.code"))
 
-    private val invalidQuantitySystemError = FHIRError(
-        code = "USCORE_VSOBS_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Quantity system must be UCUM",
-        location = LocationContext("Observation", "valueQuantity.system")
-    )
+    private val invalidQuantitySystemError =
+        FHIRError(
+            code = "USCORE_VSOBS_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Quantity system must be UCUM",
+            location = LocationContext("Observation", "valueQuantity.system"),
+        )
 
     /**
      * Validates the dynamic [value] against Ronin rules for vital sign quantities.
@@ -106,7 +111,7 @@ abstract class BaseRoninVitalSign(
         value: DynamicValue<Any>?,
         parentContext: LocationContext,
         validation: Validation,
-        validUnitCodeList: List<String> = validQuantityCodes
+        validUnitCodeList: List<String> = validQuantityCodes,
     ) {
         validation.apply {
             value?.let {
@@ -120,7 +125,7 @@ abstract class BaseRoninVitalSign(
                         checkTrue(
                             quantity?.system == CodeSystem.UCUM.uri,
                             invalidQuantitySystemError,
-                            parentContext
+                            parentContext,
                         )
                     }
 
@@ -131,9 +136,9 @@ abstract class BaseRoninVitalSign(
                             validUnitCodeList.contains(quantityCode.value),
                             InvalidValueSetError(
                                 LocationContext("Observation", "valueQuantity.code"),
-                                quantityCode.value ?: ""
+                                quantityCode.value ?: "",
                             ),
-                            parentContext
+                            parentContext,
                         )
                     }
                 }

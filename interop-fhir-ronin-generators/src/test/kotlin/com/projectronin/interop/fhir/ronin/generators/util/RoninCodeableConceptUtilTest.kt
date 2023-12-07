@@ -19,15 +19,17 @@ class RoninObservationCodeUtilTest {
 
     @Test
     fun `keep provided code`() {
-        val providedCode = codeableConcept {
-            coding of listOf(
-                coding {
-                    system of "system"
-                    version of "version"
-                    code of Code("this could be anything")
-                }
-            )
-        }
+        val providedCode =
+            codeableConcept {
+                coding of
+                    listOf(
+                        coding {
+                            system of "system"
+                            version of "version"
+                            code of Code("this could be anything")
+                        },
+                    )
+            }
         val roninCode = generateCodeableConcept(providedCode, possibleCodes.random())
         assertEquals(providedCode, roninCode)
     }
@@ -47,17 +49,19 @@ class RoninObservationCodeUtilTest {
 
     @Test
     fun `keep provided coding list`() {
-        val providedList = listOf(
-            codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "system"
-                        version of "version"
-                        code of Code("this could be anything")
-                    }
-                )
-            }
-        )
+        val providedList =
+            listOf(
+                codeableConcept {
+                    coding of
+                        listOf(
+                            coding {
+                                system of "system"
+                                version of "version"
+                                code of Code("this could be anything")
+                            },
+                        )
+                },
+            )
         val roninCode = generateRequiredCodeableConceptList(providedList, possibleCodes.random())
         assertEquals(providedList, roninCode)
     }
@@ -70,17 +74,18 @@ class RoninObservationCodeUtilTest {
     }
 }
 
-val possibleCodes = listOf(
-    coding {
-        system of "test-system-green"
-        version of "version green"
-        code of Code("green-green")
-        display of "green is green"
-    },
-    coding {
-        system of "system-test-orange"
-        version of "version blue"
-        code of Code("fake-code")
-        display of "oranges are orange"
-    }
-)
+val possibleCodes =
+    listOf(
+        coding {
+            system of "test-system-green"
+            version of "version green"
+            code of Code("green-green")
+            display of "green is green"
+        },
+        coding {
+            system of "system-test-orange"
+            version of "version blue"
+            code of Code("fake-code")
+            display of "oranges are orange"
+        },
+    )

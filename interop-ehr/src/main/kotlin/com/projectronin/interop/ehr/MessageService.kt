@@ -7,5 +7,8 @@ interface MessageService {
     /**
      * Sends a specified message, [messageInput], to the specified [tenant] and returns the EHR id for the message.
      */
-    fun sendMessage(tenant: Tenant, messageInput: EHRMessageInput): String
+    fun sendMessage(
+        tenant: Tenant,
+        messageInput: EHRMessageInput,
+    ): String
 }

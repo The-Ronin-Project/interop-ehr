@@ -33,204 +33,238 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
+@Suppress("ktlint:standard:max-line-length")
 class RoninServiceRequestTest {
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
-    private val normalizer = mockk<Normalizer> {
-        every { normalize(any(), tenant) } answers { firstArg() }
-    }
-    private val localizer = mockk<Localizer> {
-        every { localize(any(), tenant) } answers { firstArg() }
-    }
-    private val unmappedCategory1 = CodeableConcept(
-        coding = listOf(
-            Coding(
-                system = Uri("UnmappedCategorySystem#1"),
-                code = Code(value = "UnmappedCategory#1")
-            )
-        )
-    )
-    private val mappedCategory1 = CodeableConcept(
-        coding = listOf(
-            Coding(
-                system = Uri("MappedCategorySystem#1"),
-                code = Code(value = "MappedCategory#1")
-            )
-        )
-    )
-
-    private val unmappedCode1 = CodeableConcept(
-        coding = listOf(
-            Coding(
-                system = Uri("UnmappedCodeSystem#1"),
-                code = Code(value = "UnmappedCode#1")
-            )
-        )
-    )
-
-    private val mappedCode1 = CodeableConcept(
-        coding = listOf(
-            Coding(
-                system = Uri("Code"),
-                code = Code(value = "normalizedCode")
-            )
-        )
-    )
-
-    private val normalizationRegistryClient = mockk<NormalizationRegistryClient> {
-        every {
-            getConceptMapping(
-                tenant,
-                "ServiceRequest.category",
-                unmappedCategory1,
-                any<ServiceRequest>()
-            )
-        } answers {
-            ConceptMapCodeableConcept(
-                codeableConcept = mappedCategory1,
-                extension = Extension(
-                    url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CATEGORY.uri,
-                    value = DynamicValue(
-                        type = DynamicValueType.CODEABLE_CONCEPT,
-                        value = unmappedCategory1
-                    )
-                ),
-                metadata = listOf()
-            )
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
         }
-        every {
-            getConceptMapping(
-                tenant,
-                "ServiceRequest.code",
-                unmappedCode1,
-                any<ServiceRequest>()
-            )
-        } answers {
-            ConceptMapCodeableConcept(
-                codeableConcept = mappedCode1,
-                extension = Extension(
-                    url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CODE.uri,
-                    value = DynamicValue(
-                        type = DynamicValueType.CODEABLE_CONCEPT,
-                        value = unmappedCode1
-                    )
-                ),
-                metadata = listOf()
-            )
+    private val normalizer =
+        mockk<Normalizer> {
+            every { normalize(any(), tenant) } answers { firstArg() }
         }
-        every {
-            getConceptMapping(
-                tenant,
-                "ServiceRequest.category",
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("MissedCategorySystem#1"),
-                            code = Code(value = "MissedCategory#1")
-                        )
-                    )
+    private val localizer =
+        mockk<Localizer> {
+            every { localize(any(), tenant) } answers { firstArg() }
+        }
+    private val unmappedCategory1 =
+        CodeableConcept(
+            coding =
+                listOf(
+                    Coding(
+                        system = Uri("UnmappedCategorySystem#1"),
+                        code = Code(value = "UnmappedCategory#1"),
+                    ),
                 ),
-                any<ServiceRequest>()
-            )
-        } answers { null }
-        every {
-            getConceptMapping(
-                tenant,
-                "ServiceRequest.code",
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("MissedCodeSystem#1"),
-                            code = Code(value = "MissedCode#1")
-                        )
-                    )
+        )
+    private val mappedCategory1 =
+        CodeableConcept(
+            coding =
+                listOf(
+                    Coding(
+                        system = Uri("MappedCategorySystem#1"),
+                        code = Code(value = "MappedCategory#1"),
+                    ),
                 ),
-                any<ServiceRequest>()
-            )
-        } answers { null }
-    }
+        )
+
+    private val unmappedCode1 =
+        CodeableConcept(
+            coding =
+                listOf(
+                    Coding(
+                        system = Uri("UnmappedCodeSystem#1"),
+                        code = Code(value = "UnmappedCode#1"),
+                    ),
+                ),
+        )
+
+    private val mappedCode1 =
+        CodeableConcept(
+            coding =
+                listOf(
+                    Coding(
+                        system = Uri("Code"),
+                        code = Code(value = "normalizedCode"),
+                    ),
+                ),
+        )
+
+    private val normalizationRegistryClient =
+        mockk<NormalizationRegistryClient> {
+            every {
+                getConceptMapping(
+                    tenant,
+                    "ServiceRequest.category",
+                    unmappedCategory1,
+                    any<ServiceRequest>(),
+                )
+            } answers {
+                ConceptMapCodeableConcept(
+                    codeableConcept = mappedCategory1,
+                    extension =
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CATEGORY.uri,
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODEABLE_CONCEPT,
+                                    value = unmappedCategory1,
+                                ),
+                        ),
+                    metadata = listOf(),
+                )
+            }
+            every {
+                getConceptMapping(
+                    tenant,
+                    "ServiceRequest.code",
+                    unmappedCode1,
+                    any<ServiceRequest>(),
+                )
+            } answers {
+                ConceptMapCodeableConcept(
+                    codeableConcept = mappedCode1,
+                    extension =
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CODE.uri,
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODEABLE_CONCEPT,
+                                    value = unmappedCode1,
+                                ),
+                        ),
+                    metadata = listOf(),
+                )
+            }
+            every {
+                getConceptMapping(
+                    tenant,
+                    "ServiceRequest.category",
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = Uri("MissedCategorySystem#1"),
+                                    code = Code(value = "MissedCategory#1"),
+                                ),
+                            ),
+                    ),
+                    any<ServiceRequest>(),
+                )
+            } answers { null }
+            every {
+                getConceptMapping(
+                    tenant,
+                    "ServiceRequest.code",
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = Uri("MissedCodeSystem#1"),
+                                    code = Code(value = "MissedCode#1"),
+                                ),
+                            ),
+                    ),
+                    any<ServiceRequest>(),
+                )
+            } answers { null }
+        }
 
     private val roninServiceRequest = RoninServiceRequest(normalizationRegistryClient, normalizer, localizer)
 
-    private val completeServiceRequest = ServiceRequest(
-        meta = Meta(
-            profile = listOf(Canonical(RoninProfile.SERVICE_REQUEST.value)),
-            source = Uri("source")
-        ),
-        extension = listOf(
-            Extension(
-                url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CODE.uri,
-                value = DynamicValue(
-                    type = DynamicValueType.CODEABLE_CONCEPT,
-                    value = CodeableConcept(
-                        coding = listOf(
+    private val completeServiceRequest =
+        ServiceRequest(
+            meta =
+                Meta(
+                    profile = listOf(Canonical(RoninProfile.SERVICE_REQUEST.value)),
+                    source = Uri("source"),
+                ),
+            extension =
+                listOf(
+                    Extension(
+                        url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CODE.uri,
+                        value =
+                            DynamicValue(
+                                type = DynamicValueType.CODEABLE_CONCEPT,
+                                value =
+                                    CodeableConcept(
+                                        coding =
+                                            listOf(
+                                                Coding(
+                                                    system = Uri("Test"),
+                                                    code = Code(value = "1234"),
+                                                ),
+                                            ),
+                                    ),
+                            ),
+                    ),
+                    Extension(
+                        url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CATEGORY.uri,
+                        value =
+                            DynamicValue(
+                                type = DynamicValueType.CODEABLE_CONCEPT,
+                                value =
+                                    CodeableConcept(
+                                        coding =
+                                            listOf(
+                                                Coding(
+                                                    system = Uri("Category"),
+                                                    code = Code(value = "9876"),
+                                                ),
+                                            ),
+                                    ),
+                            ),
+                    ),
+                ),
+            identifier =
+                listOf(
+                    Identifier(
+                        type = CodeableConcepts.RONIN_FHIR_ID,
+                        system = CodeSystem.RONIN_FHIR_ID.uri,
+                        value = "12345".asFHIR(),
+                    ),
+                    Identifier(
+                        type = CodeableConcepts.RONIN_TENANT,
+                        system = CodeSystem.RONIN_TENANT.uri,
+                        value = "test".asFHIR(),
+                    ),
+                    Identifier(
+                        type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                        system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                        value = "EHR Data Authority".asFHIR(),
+                    ),
+                ),
+            intent = RequestIntent.ORDER.asCode(),
+            status = RequestStatus.ACTIVE.asCode(),
+            subject =
+                Reference(
+                    id = "888".asFHIR(),
+                    type = Uri("Patient", extension = dataAuthorityExtension),
+                    reference = "Patient/888".asFHIR(),
+                ),
+            code =
+                CodeableConcept(
+                    coding =
+                        listOf(
                             Coding(
                                 system = Uri("Test"),
-                                code = Code(value = "1234")
-                            )
-                        )
-                    )
-                )
-            ),
-            Extension(
-                url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CATEGORY.uri,
-                value = DynamicValue(
-                    type = DynamicValueType.CODEABLE_CONCEPT,
-                    value = CodeableConcept(
-                        coding = listOf(
-                            Coding(
-                                system = Uri("Category"),
-                                code = Code(value = "9876")
-                            )
-                        )
-                    )
-                )
-            )
-        ),
-        identifier = listOf(
-            Identifier(
-                type = CodeableConcepts.RONIN_FHIR_ID,
-                system = CodeSystem.RONIN_FHIR_ID.uri,
-                value = "12345".asFHIR()
-            ),
-            Identifier(
-                type = CodeableConcepts.RONIN_TENANT,
-                system = CodeSystem.RONIN_TENANT.uri,
-                value = "test".asFHIR()
-            ),
-            Identifier(
-                type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                value = "EHR Data Authority".asFHIR()
-            )
-        ),
-        intent = RequestIntent.ORDER.asCode(),
-        status = RequestStatus.ACTIVE.asCode(),
-        subject = Reference(
-            id = "888".asFHIR(),
-            type = Uri("Patient", extension = dataAuthorityExtension),
-            reference = "Patient/888".asFHIR()
-        ),
-        code = CodeableConcept(
-            coding = listOf(
-                Coding(
-                    system = Uri("Test"),
-                    code = Code(value = "1234")
-                )
-            )
-        ),
-        category = listOf(
-            CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("Category"),
-                        code = Code(value = "9876")
-                    )
-                )
-            )
+                                code = Code(value = "1234"),
+                            ),
+                        ),
+                ),
+            category =
+                listOf(
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = Uri("Category"),
+                                    code = Code(value = "9876"),
+                                ),
+                            ),
+                    ),
+                ),
         )
-    )
 
     @Test
     fun `validation succeeds with required attributes`() {
@@ -240,52 +274,63 @@ class RoninServiceRequestTest {
     @Test
     fun `validation succeeds with multiple tenant categories, but only one normalized category`() {
         // Update the complete service request to have a second category extension
-        val serviceRequest = completeServiceRequest.copy(
-            extension = listOf(
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CODE.uri,
-                    value = DynamicValue(
-                        type = DynamicValueType.CODEABLE_CONCEPT,
-                        value = CodeableConcept(
-                            coding = listOf(
-                                Coding(
-                                    system = Uri("Test"),
-                                    code = Code(value = "1234")
-                                )
-                            )
-                        )
-                    )
-                ),
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CATEGORY.uri,
-                    value = DynamicValue(
-                        type = DynamicValueType.CODEABLE_CONCEPT,
-                        value = CodeableConcept(
-                            coding = listOf(
-                                Coding(
-                                    system = Uri("Category"),
-                                    code = Code(value = "9876")
-                                )
-                            )
-                        )
-                    )
-                ),
-                Extension(
-                    url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CATEGORY.uri,
-                    value = DynamicValue(
-                        type = DynamicValueType.CODEABLE_CONCEPT,
-                        value = CodeableConcept(
-                            coding = listOf(
-                                Coding(
-                                    system = Uri("Category"),
-                                    code = Code(value = "9998")
-                                )
-                            )
-                        )
-                    )
-                )
+        val serviceRequest =
+            completeServiceRequest.copy(
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CODE.uri,
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODEABLE_CONCEPT,
+                                    value =
+                                        CodeableConcept(
+                                            coding =
+                                                listOf(
+                                                    Coding(
+                                                        system = Uri("Test"),
+                                                        code = Code(value = "1234"),
+                                                    ),
+                                                ),
+                                        ),
+                                ),
+                        ),
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CATEGORY.uri,
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODEABLE_CONCEPT,
+                                    value =
+                                        CodeableConcept(
+                                            coding =
+                                                listOf(
+                                                    Coding(
+                                                        system = Uri("Category"),
+                                                        code = Code(value = "9876"),
+                                                    ),
+                                                ),
+                                        ),
+                                ),
+                        ),
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_SERVICE_REQUEST_CATEGORY.uri,
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODEABLE_CONCEPT,
+                                    value =
+                                        CodeableConcept(
+                                            coding =
+                                                listOf(
+                                                    Coding(
+                                                        system = Uri("Category"),
+                                                        code = Code(value = "9998"),
+                                                    ),
+                                                ),
+                                        ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         roninServiceRequest.validate(serviceRequest).alertIfErrors()
     }
@@ -293,33 +338,38 @@ class RoninServiceRequestTest {
     @Test
     fun `validation fails with multiple normalized categories`() {
         // Update the complete service request to have a second category
-        val serviceRequest = completeServiceRequest.copy(
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("Category"),
-                            code = Code(value = "9876")
-                        )
-                    )
-                ),
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("Category"),
-                            code = Code(value = "9998")
-                        )
-                    )
-                )
+        val serviceRequest =
+            completeServiceRequest.copy(
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("Category"),
+                                        code = Code(value = "9876"),
+                                    ),
+                                ),
+                        ),
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("Category"),
+                                        code = Code(value = "9998"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
-        val actualException = assertThrows<IllegalArgumentException> {
-            roninServiceRequest.validate(serviceRequest).alertIfErrors()
-        }
+        val actualException =
+            assertThrows<IllegalArgumentException> {
+                roninServiceRequest.validate(serviceRequest).alertIfErrors()
+            }
         assertEquals(
             "Encountered validation error(s):\n" + "ERROR RONIN_SERVREQ_004: Service Request requires exactly 1 Category element @ ServiceRequest.category",
-            actualException.message
+            actualException.message,
         )
     }
 
@@ -327,68 +377,76 @@ class RoninServiceRequestTest {
     fun `validation fails when missing tenant code or category extensions`() {
         val serviceRequest = completeServiceRequest.copy(extension = listOf())
 
-        val actualException = assertThrows<IllegalArgumentException> {
-            roninServiceRequest.validate(serviceRequest).alertIfErrors()
-        }
+        val actualException =
+            assertThrows<IllegalArgumentException> {
+                roninServiceRequest.validate(serviceRequest).alertIfErrors()
+            }
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_SERVREQ_001: Service Request must have at least two extensions @ ServiceRequest.extension\n" +
                 "ERROR RONIN_SERVREQ_002: Service Request extension Tenant Source Service Request Category is invalid @ ServiceRequest.extension\n" +
                 "ERROR RONIN_SERVREQ_003: Service Request extension Tenant Source Service Request Code is invalid @ ServiceRequest.extension",
-            actualException.message
+            actualException.message,
         )
     }
 
     @Test
     fun `validation fails when subject is wrong type`() {
-        val serviceRequest = completeServiceRequest.copy(
-            subject = Reference(
-                id = "888".asFHIR(),
-                type = Uri("Provider"),
-                reference = "Patient/888".asFHIR()
+        val serviceRequest =
+            completeServiceRequest.copy(
+                subject =
+                    Reference(
+                        id = "888".asFHIR(),
+                        type = Uri("Provider"),
+                        reference = "Patient/888".asFHIR(),
+                    ),
             )
-        )
 
-        val actualException = assertThrows<IllegalArgumentException> {
-            roninServiceRequest.validate(serviceRequest).alertIfErrors()
-        }
+        val actualException =
+            assertThrows<IllegalArgumentException> {
+                roninServiceRequest.validate(serviceRequest).alertIfErrors()
+            }
         assertEquals(
             "Encountered validation error(s):\n" + "ERROR RONIN_DAUTH_EX_001: Data Authority extension identifier is required for reference @ ServiceRequest.subject.type.extension",
-            actualException.message
+            actualException.message,
         )
     }
 
     @Test
     fun `validation fails when subject is null`() {
         val serviceRequest = completeServiceRequest.copy(subject = null)
-        val actualException = assertThrows<IllegalArgumentException> {
-            roninServiceRequest.validate(serviceRequest).alertIfErrors()
-        }
+        val actualException =
+            assertThrows<IllegalArgumentException> {
+                roninServiceRequest.validate(serviceRequest).alertIfErrors()
+            }
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: subject is a required element @ ServiceRequest.subject",
-            actualException.message
+            actualException.message,
         )
     }
 
     @Test
     fun `ensure transform completes and is valid`() {
-        val startingServiceRequest = ServiceRequest(
-            id = Id("ServiceRequest1"),
-            meta = Meta(
-                profile = listOf(Canonical("ServiceRequest")),
-                source = Uri("source")
-            ),
-            identifier = listOf(),
-            intent = RequestIntent.ORDER.asCode(),
-            status = RequestStatus.ACTIVE.asCode(),
-            subject = Reference(
-                reference = "Patient/Patient#1".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            ),
-            code = unmappedCode1,
-            category = listOf(unmappedCategory1)
-        )
+        val startingServiceRequest =
+            ServiceRequest(
+                id = Id("ServiceRequest1"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("ServiceRequest")),
+                        source = Uri("source"),
+                    ),
+                identifier = listOf(),
+                intent = RequestIntent.ORDER.asCode(),
+                status = RequestStatus.ACTIVE.asCode(),
+                subject =
+                    Reference(
+                        reference = "Patient/Patient#1".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
+                code = unmappedCode1,
+                category = listOf(unmappedCategory1),
+            )
 
         val actualTransformResult = roninServiceRequest.transform(startingServiceRequest, tenant)
         actualTransformResult.second.alertIfErrors()
@@ -410,43 +468,51 @@ class RoninServiceRequestTest {
 
     @Test
     fun `ensure missing mappings fail validation`() {
-        val startingServiceRequest = ServiceRequest(
-            id = Id("ServiceRequest1"),
-            meta = Meta(
-                profile = listOf(Canonical("ServiceRequest")),
-                source = Uri("source")
-            ),
-            identifier = listOf(),
-            intent = RequestIntent.ORDER.asCode(),
-            status = RequestStatus.ACTIVE.asCode(),
-            subject = Reference(
-                reference = "Patient/Patient#1".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            ),
-            code = CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("MissedCodeSystem#1"),
-                        code = Code(value = "MissedCode#1")
-                    )
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("MissedCategorySystem#1"),
-                            code = Code(value = "MissedCategory#1")
-                        )
-                    )
-                )
+        val startingServiceRequest =
+            ServiceRequest(
+                id = Id("ServiceRequest1"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("ServiceRequest")),
+                        source = Uri("source"),
+                    ),
+                identifier = listOf(),
+                intent = RequestIntent.ORDER.asCode(),
+                status = RequestStatus.ACTIVE.asCode(),
+                subject =
+                    Reference(
+                        reference = "Patient/Patient#1".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
+                code =
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = Uri("MissedCodeSystem#1"),
+                                    code = Code(value = "MissedCode#1"),
+                                ),
+                            ),
+                    ),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("MissedCategorySystem#1"),
+                                        code = Code(value = "MissedCategory#1"),
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
 
         val actualTransformResult = roninServiceRequest.transform(startingServiceRequest, tenant)
-        val actualException = assertThrows<IllegalArgumentException> {
-            actualTransformResult.second.alertIfErrors()
-        }
+        val actualException =
+            assertThrows<IllegalArgumentException> {
+                actualTransformResult.second.alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
@@ -455,39 +521,43 @@ class RoninServiceRequestTest {
                 "ERROR RONIN_SERVREQ_001: Service Request must have at least two extensions @ ServiceRequest.extension\n" +
                 "ERROR RONIN_SERVREQ_002: Service Request extension Tenant Source Service Request Category is invalid @ ServiceRequest.extension\n" +
                 "ERROR RONIN_SERVREQ_003: Service Request extension Tenant Source Service Request Code is invalid @ ServiceRequest.extension",
-            actualException.message
+            actualException.message,
         )
     }
 
     @Test
     fun `ensure transform does not throw NoSuchElement error if category is null`() {
-        val startingServiceRequest = ServiceRequest(
-            id = Id("ServiceRequest1"),
-            meta = Meta(
-                profile = listOf(Canonical("ServiceRequest")),
-                source = Uri("source")
-            ),
-            identifier = listOf(),
-            intent = RequestIntent.ORDER.asCode(),
-            status = RequestStatus.ACTIVE.asCode(),
-            subject = Reference(
-                reference = "Patient/Patient#1".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
-            ),
-            code = unmappedCode1,
-            category = listOf()
-        )
+        val startingServiceRequest =
+            ServiceRequest(
+                id = Id("ServiceRequest1"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("ServiceRequest")),
+                        source = Uri("source"),
+                    ),
+                identifier = listOf(),
+                intent = RequestIntent.ORDER.asCode(),
+                status = RequestStatus.ACTIVE.asCode(),
+                subject =
+                    Reference(
+                        reference = "Patient/Patient#1".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
+                code = unmappedCode1,
+                category = listOf(),
+            )
         val actualTransformResult = roninServiceRequest.transform(startingServiceRequest, tenant)
-        val actualException = assertThrows<IllegalArgumentException> {
-            actualTransformResult.second.alertIfErrors()
-        }
+        val actualException =
+            assertThrows<IllegalArgumentException> {
+                actualTransformResult.second.alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_SERVREQ_001: Service Request must have at least two extensions @ ServiceRequest.extension\n" +
                 "ERROR RONIN_SERVREQ_004: Service Request requires exactly 1 Category element @ ServiceRequest.category\n" +
                 "ERROR RONIN_SERVREQ_002: Service Request extension Tenant Source Service Request Category is invalid @ ServiceRequest.extension",
-            actualException.message
+            actualException.message,
         )
     }
 }

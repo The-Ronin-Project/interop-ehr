@@ -7,7 +7,6 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class GetAppointmentResponseTest {
-
     @Test
     fun `errorOrAppointments errors`() {
         val response = GetAppointmentsResponse(null, null)

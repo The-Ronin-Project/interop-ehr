@@ -37,41 +37,44 @@ class RoninMedicationAdministration(
     normalizer: Normalizer,
     localizer: Localizer,
     private val medicationExtractor: MedicationExtractor,
-    private val registryClient: NormalizationRegistryClient
+    private val registryClient: NormalizationRegistryClient,
 ) :
     BaseRoninProfile<MedicationAdministration>(
-        R4MedicationAdministrationValidator,
-        RoninProfile.MEDICATION_ADMINISTRATION.value,
-        normalizer,
-        localizer
-    ) {
+            R4MedicationAdministrationValidator,
+            RoninProfile.MEDICATION_ADMINISTRATION.value,
+            normalizer,
+            localizer,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_31_0
     override val profileVersion = 3
 
-    private val requiredCategoryError = FHIRError(
-        code = "RONIN_MEDADMIN_001",
-        description = "More than one category cannot be present if category is not null",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(MedicationAdministration::category)
-    )
+    private val requiredCategoryError =
+        FHIRError(
+            code = "RONIN_MEDADMIN_001",
+            description = "More than one category cannot be present if category is not null",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(MedicationAdministration::category),
+        )
 
-    private val requiredMedicationReferenceError = FHIRError(
-        code = "RONIN_MEDADMIN_002",
-        description = "Medication must be a Reference",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(MedicationAdministration::medication)
-    )
-    private val invalidAppointmentStatusExtensionError = FHIRError(
-        code = "RONIN_MEDADMIN_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Tenant source medication administration status extension is missing or invalid",
-        location = LocationContext(MedicationAdministration::extension)
-    )
+    private val requiredMedicationReferenceError =
+        FHIRError(
+            code = "RONIN_MEDADMIN_002",
+            description = "Medication must be a Reference",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(MedicationAdministration::medication),
+        )
+    private val invalidAppointmentStatusExtensionError =
+        FHIRError(
+            code = "RONIN_MEDADMIN_003",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Tenant source medication administration status extension is missing or invalid",
+            location = LocationContext(MedicationAdministration::extension),
+        )
 
     override fun validateRonin(
         element: MedicationAdministration,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
@@ -84,7 +87,7 @@ class RoninMedicationAdministration(
                 checkTrue(
                     medication.type == DynamicValueType.REFERENCE,
                     requiredMedicationReferenceError,
-                    parentContext
+                    parentContext,
                 )
             }
 
@@ -94,7 +97,7 @@ class RoninMedicationAdministration(
                 checkTrue(
                     categorySize,
                     requiredCategoryError,
-                    parentContext
+                    parentContext,
                 )
             }
 
@@ -104,7 +107,7 @@ class RoninMedicationAdministration(
                 requireDataAuthorityExtensionIdentifier(
                     element.subject,
                     LocationContext(MedicationAdministration::subject),
-                    validation
+                    validation,
                 )
             }
 
@@ -115,7 +118,7 @@ class RoninMedicationAdministration(
                         it.value?.type == DynamicValueType.CODING
                 },
                 invalidAppointmentStatusExtensionError,
-                parentContext
+                parentContext,
             )
         }
     }
@@ -124,59 +127,62 @@ class RoninMedicationAdministration(
         normalized: MedicationAdministration,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<MedicationAdministration?, Validation> {
         val validation = Validation()
 
-        val mappedStatusPair = normalized.status?.value?.let { statusValue ->
-            val statusCode = registryClient.getConceptMappingForEnum(
-                tenant,
-                "MedicationAdministration.status",
-                RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "MedicationAdministration.status", statusValue),
-                MedicationAdministrationStatus::class,
-                RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.value,
-                normalized,
-                forceCacheReloadTS
-            )
+        val mappedStatusPair =
+            normalized.status?.value?.let { statusValue ->
+                val statusCode =
+                    registryClient.getConceptMappingForEnum(
+                        tenant,
+                        "MedicationAdministration.status",
+                        RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "MedicationAdministration.status", statusValue),
+                        MedicationAdministrationStatus::class,
+                        RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.value,
+                        normalized,
+                        forceCacheReloadTS,
+                    )
 
-            if (statusCode == null) {
-                validation.checkTrue(
-                    false,
-                    FailedConceptMapLookupError(
-                        LocationContext(MedicationAdministration::status),
-                        statusValue,
-                        RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "MedicationAdministration.status")
-                    ),
-                    parentContext
-                )
-                null
-            } else {
-                val newCode = statusCode.coding.code
+                if (statusCode == null) {
+                    validation.checkTrue(
+                        false,
+                        FailedConceptMapLookupError(
+                            LocationContext(MedicationAdministration::status),
+                            statusValue,
+                            RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "MedicationAdministration.status"),
+                        ),
+                        parentContext,
+                    )
+                    null
+                } else {
+                    val newCode = statusCode.coding.code
 
-                validation.checkNotNull(
-                    getCodedEnumOrNull<MedicationAdministrationStatus>(newCode?.value),
-                    ConceptMapInvalidValueSetError(
-                        parentContext.append(LocationContext(MedicationAdministration::status)),
-                        RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "MedicationAdministration.status"),
-                        statusValue,
-                        newCode?.value,
-                        statusCode.metadata
-                    ),
-                    parentContext
-                )
-                Pair(
-                    newCode,
-                    statusCode.extension
-                )
+                    validation.checkNotNull(
+                        getCodedEnumOrNull<MedicationAdministrationStatus>(newCode?.value),
+                        ConceptMapInvalidValueSetError(
+                            parentContext.append(LocationContext(MedicationAdministration::status)),
+                            RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "MedicationAdministration.status"),
+                            statusValue,
+                            newCode?.value,
+                            statusCode.metadata,
+                        ),
+                        parentContext,
+                    )
+                    Pair(
+                        newCode,
+                        statusCode.extension,
+                    )
+                }
             }
-        }
 
-        val mapped = mappedStatusPair?.let {
-            normalized.copy(
-                status = it.first,
-                extension = normalized.extension + it.second
-            )
-        } ?: normalized
+        val mapped =
+            mappedStatusPair?.let {
+                normalized.copy(
+                    status = it.first,
+                    extension = normalized.extension + it.second,
+                )
+            } ?: normalized
         return Pair(mapped, validation)
     }
 
@@ -184,7 +190,7 @@ class RoninMedicationAdministration(
         normalized: MedicationAdministration,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<MedicationAdministration>?, Validation> {
         val medicationExtraction =
             medicationExtractor.extractMedication(normalized.medication, normalized.contained, normalized)
@@ -193,13 +199,15 @@ class RoninMedicationAdministration(
         val contained = medicationExtraction?.updatedContained ?: normalized.contained
         val embeddedMedications = medicationExtraction?.extractedMedication?.let { listOf(it) } ?: emptyList()
 
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant),
-            medication = medication,
-            contained = contained,
-            extension = normalized.extension + populateExtensionWithReference(normalized.medication) // populate extension based on medication[x]
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+                medication = medication,
+                contained = contained,
+                // populate extension based on medication[x]
+                extension = normalized.extension + populateExtensionWithReference(normalized.medication),
+            )
 
         return Pair(TransformResponse(transformed, embeddedMedications), Validation())
     }

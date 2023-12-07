@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 internal class GetFHIRIDResponseTest {
-
     @Test
     fun test() {
         val patient = Patient(id = Id("12345"))

@@ -25,33 +25,38 @@ import org.junit.jupiter.api.Test
 
 class RoninCarePlanGeneratorTest {
     private lateinit var rcdmCarePlan: RoninCarePlan
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
         rcdmCarePlan = RoninCarePlan(normalizer, localizer)
     }
 
     @Test
     fun `example use for rcdmCarePlan`() {
         // create care plan resource with attributes you need, provide the tenant
-        val rcdmCarePlan = rcdmCarePlan("test") {
-            // to test an attribute like status - provide the value
-            status of Code("on-hold")
-            created of dateTime {
-                year of 1990
-                day of 8
-                month of 4
+        val rcdmCarePlan =
+            rcdmCarePlan("test") {
+                // to test an attribute like status - provide the value
+                status of Code("on-hold")
+                created of
+                    dateTime {
+                        year of 1990
+                        day of 8
+                        month of 4
+                    }
             }
-        }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes will be generated
         val rcdmCarePlanJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmCarePlan)
@@ -79,7 +84,7 @@ class RoninCarePlanGeneratorTest {
         assertNotNull(rcdmCarePlan.meta)
         assertEquals(
             rcdmCarePlan.meta!!.profile[0].value,
-            RoninProfile.CARE_PLAN.value
+            RoninProfile.CARE_PLAN.value,
         )
         assertEquals(3, rcdmCarePlan.identifier.size)
         assertNotNull(rcdmCarePlan.status)
@@ -103,9 +108,10 @@ class RoninCarePlanGeneratorTest {
 
     @Test
     fun `rcdmCarePlan validates with identifier added`() {
-        val carePlan = rcdmCarePlan("test") {
-            identifier of listOf(Identifier(value = "identifier".asFHIR()))
-        }
+        val carePlan =
+            rcdmCarePlan("test") {
+                identifier of listOf(Identifier(value = "identifier".asFHIR()))
+            }
         val validation = rcdmCarePlan.validate(carePlan, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals(4, carePlan.identifier.size)
@@ -119,9 +125,10 @@ class RoninCarePlanGeneratorTest {
 
     @Test
     fun `generates rcdmCarePlan with given status but fails validation because status is bad`() {
-        val carePlan = rcdmCarePlan("test") {
-            status of Code("this is a bad status")
-        }
+        val carePlan =
+            rcdmCarePlan("test") {
+                status of Code("this is a bad status")
+            }
         assertEquals(carePlan.status, Code("this is a bad status"))
 
         // validate should fail
@@ -134,9 +141,10 @@ class RoninCarePlanGeneratorTest {
 
     @Test
     fun `rcdmCarePlan - valid subject input - validate succeeds`() {
-        val carePlan = rcdmCarePlan("test") {
-            subject of rcdmReference("Patient", "456")
-        }
+        val carePlan =
+            rcdmCarePlan("test") {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = rcdmCarePlan.validate(carePlan, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/456", carePlan.subject?.reference?.value)
@@ -154,9 +162,10 @@ class RoninCarePlanGeneratorTest {
     @Test
     fun `rcdmPatient rcdmCarePlan - valid subject input overrides base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val carePlan = rcdmPatient.rcdmCarePlan {
-            subject of rcdmReference("Patient", "456")
-        }
+        val carePlan =
+            rcdmPatient.rcdmCarePlan {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = rcdmCarePlan.validate(carePlan, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/456", carePlan.subject?.reference?.value)
@@ -165,9 +174,10 @@ class RoninCarePlanGeneratorTest {
     @Test
     fun `rcdmPatient rcdmCarePlan - base patient overrides invalid subject input - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val carePlan = rcdmPatient.rcdmCarePlan {
-            subject of reference("Patient", "456")
-        }
+        val carePlan =
+            rcdmPatient.rcdmCarePlan {
+                subject of reference("Patient", "456")
+            }
         val validation = rcdmCarePlan.validate(carePlan, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/${rcdmPatient.id?.value}", carePlan.subject?.reference?.value)
@@ -176,9 +186,10 @@ class RoninCarePlanGeneratorTest {
     @Test
     fun `rcdmPatient rcdmCarePlan - fhir id input for both - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") { id of "99" }
-        val carePlan = rcdmPatient.rcdmCarePlan {
-            id of "88"
-        }
+        val carePlan =
+            rcdmPatient.rcdmCarePlan {
+                id of "88"
+            }
         val validation = rcdmCarePlan.validate(carePlan, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals(3, carePlan.identifier.size)

@@ -40,10 +40,22 @@ class RoninContactPointUtilTest {
         val validation = roninContactPoint.validateRonin(roninContactPoint1, LocationContext(Patient::class), Validation()).hasErrors()
         assertEquals(false, validation)
         assertEquals(2, roninContactPoint1.size)
-        assertEquals("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem", roninContactPoint1[0].system!!.extension[0].url!!.value)
-        assertEquals("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomUse", roninContactPoint1[0].use!!.extension[0].url!!.value)
-        assertEquals("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem", roninContactPoint1[1].system!!.extension[0].url!!.value)
-        assertEquals("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomUse", roninContactPoint1[1].use!!.extension[0].url!!.value)
+        assertEquals(
+            "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem",
+            roninContactPoint1[0].system!!.extension[0].url!!.value,
+        )
+        assertEquals(
+            "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomUse",
+            roninContactPoint1[0].use!!.extension[0].url!!.value,
+        )
+        assertEquals(
+            "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomSystem",
+            roninContactPoint1[1].system!!.extension[0].url!!.value,
+        )
+        assertEquals(
+            "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceTelecomUse",
+            roninContactPoint1[1].use!!.extension[0].url!!.value,
+        )
     }
 
     @Test
@@ -57,23 +69,31 @@ class RoninContactPointUtilTest {
 
     @Test
     fun `does not generate contact point for invalid system and use codes`() {
-        val contactPoint1 = ContactPoint(
-            value = "123-456-7890".asFHIR(),
-            system = Code(ContactPointSystem.PHONE.code)
-        )
-        val contactPoint2 = ContactPoint(
-            value = "321-654-0987".asFHIR(),
-            system = Code(ContactPointSystem.PHONE.code),
-            use = Code(ContactPointUse.HOME.code)
-        )
-        val contactPoint3 = ContactPoint(
-            value = "098-765-4321".asFHIR(),
-            use = Code(ContactPointUse.HOME.code)
-        )
-        val contactPoint4 = ContactPoint(
-            value = "098-765-4321".asFHIR()
-        )
-        val contactPointList = ListDataGenerator(0, ContactPointGenerator()).plus(contactPoint1).plus(contactPoint2).plus(contactPoint3).plus(contactPoint4)
+        val contactPoint1 =
+            ContactPoint(
+                value = "123-456-7890".asFHIR(),
+                system = Code(ContactPointSystem.PHONE.code),
+            )
+        val contactPoint2 =
+            ContactPoint(
+                value = "321-654-0987".asFHIR(),
+                system = Code(ContactPointSystem.PHONE.code),
+                use = Code(ContactPointUse.HOME.code),
+            )
+        val contactPoint3 =
+            ContactPoint(
+                value = "098-765-4321".asFHIR(),
+                use = Code(ContactPointUse.HOME.code),
+            )
+        val contactPoint4 =
+            ContactPoint(
+                value = "098-765-4321".asFHIR(),
+            )
+        val contactPointList =
+            ListDataGenerator(
+                0,
+                ContactPointGenerator(),
+            ).plus(contactPoint1).plus(contactPoint2).plus(contactPoint3).plus(contactPoint4)
         val roninContactPoint1 = rcdmContactPoint("test", contactPointList).generate()
         val validation = roninContactPoint.validateRonin(roninContactPoint1, LocationContext(Patient::class), Validation()).hasErrors()
         assertEquals(false, validation)
@@ -84,47 +104,58 @@ class RoninContactPointUtilTest {
     fun `test extensions`() {
         val systemValue = ContactPointSystem.PHONE.code
         val systemUri = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.uri
-        val systemExt = DynamicValue(
-            type = DynamicValueType.CODING,
-            value = Coding(
-                system = Uri(
-                    value = "http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem"
-                ),
-                code = Code(value = systemValue)
+        val systemExt =
+            DynamicValue(
+                type = DynamicValueType.CODING,
+                value =
+                    Coding(
+                        system =
+                            Uri(
+                                value = "http://projectronin.io/fhir/CodeSystem/test/ContactPointSystem",
+                            ),
+                        code = Code(value = systemValue),
+                    ),
             )
-        )
         val useValue = ContactPointUse.HOME.code
         val useUri = RoninExtension.TENANT_SOURCE_TELECOM_USE.uri
-        val useExt = DynamicValue(
-            type = DynamicValueType.CODING,
-            value = Coding(
-                system = Uri(
-                    value = "http://projectronin.io/fhir/CodeSystem/test/ContactPointUse"
-                ),
-                code = Code(value = useValue)
+        val useExt =
+            DynamicValue(
+                type = DynamicValueType.CODING,
+                value =
+                    Coding(
+                        system =
+                            Uri(
+                                value = "http://projectronin.io/fhir/CodeSystem/test/ContactPointUse",
+                            ),
+                        code = Code(value = useValue),
+                    ),
             )
-        )
-        val contactPoint1 = ContactPoint(
-            value = "321-654-0987".asFHIR(),
-            system = Code(
-                value = systemValue,
-                extension = listOf(
-                    Extension(
-                        url = systemUri,
-                        value = systemExt
-                    )
-                )
-            ),
-            use = Code(
-                value = useValue,
-                extension = listOf(
-                    Extension(
-                        url = useUri,
-                        value = useExt
-                    )
-                )
+        val contactPoint1 =
+            ContactPoint(
+                value = "321-654-0987".asFHIR(),
+                system =
+                    Code(
+                        value = systemValue,
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = systemUri,
+                                    value = systemExt,
+                                ),
+                            ),
+                    ),
+                use =
+                    Code(
+                        value = useValue,
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = useUri,
+                                    value = useExt,
+                                ),
+                            ),
+                    ),
             )
-        )
         val contactPointList = ListDataGenerator(0, ContactPointGenerator()).plus(contactPoint1)
         val roninContactPoint1 = rcdmContactPoint("test", contactPointList).generate()
         val validation = roninContactPoint.validateRonin(roninContactPoint1, LocationContext(Patient::class), Validation()).hasErrors()

@@ -16,7 +16,10 @@ import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.test.data.generator.collection.ListDataGenerator
 import java.util.UUID
 
-fun rcdmPatient(tenant: String, block: PatientGenerator.() -> Unit): Patient {
+fun rcdmPatient(
+    tenant: String,
+    block: PatientGenerator.() -> Unit,
+): Patient {
     return patient {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.PATIENT, tenant) {}
@@ -38,7 +41,7 @@ internal fun rcdmMrn(identifiers: ListDataGenerator<Identifier>): List<Identifie
                 system of CodeSystem.RONIN_MRN.uri
                 value of UUID.randomUUID().toString()
                 type of CodeableConcepts.RONIN_MRN
-            }
+            },
         )
     } else {
         emptyList()
@@ -56,4 +59,5 @@ internal fun Patient.referenceData(): PatientReferenceData {
     }
     return PatientReferenceData(tenantId, udpId)
 }
+
 data class PatientReferenceData(val tenantId: String, val udpId: String)

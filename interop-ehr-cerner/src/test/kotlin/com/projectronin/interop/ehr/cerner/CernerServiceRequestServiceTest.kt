@@ -21,16 +21,17 @@ class CernerServiceRequestServiceTest {
 
     @Test
     fun `getById - works`() {
-        val serviceRequest = mockk<ServiceRequest>(relaxed = true) {
-            every { id!!.value } returns "12345"
-        }
+        val serviceRequest =
+            mockk<ServiceRequest>(relaxed = true) {
+                every { id!!.value } returns "12345"
+            }
         val mockedResponse: EHRResponse = mockk()
         coEvery { mockedResponse.body(any()) } returns serviceRequest
 
         coEvery {
             cernerClient.get(
                 tenant,
-                "/ServiceRequest/12345"
+                "/ServiceRequest/12345",
             )
         } returns mockedResponse
 
@@ -41,9 +42,10 @@ class CernerServiceRequestServiceTest {
 
     @Test
     fun `getByPatient - works`() {
-        val httpResponse = mockk<HttpResponse> {
-            every { status } returns HttpStatusCode.OK
-        }
+        val httpResponse =
+            mockk<HttpResponse> {
+                every { status } returns HttpStatusCode.OK
+            }
         coEvery { httpResponse.body<Bundle>() } returns validServiceRequestBundle
 
         val mockedResponse = EHRResponse(httpResponse, "12345")
@@ -54,8 +56,8 @@ class CernerServiceRequestServiceTest {
                 "/ServiceRequest",
                 mapOf(
                     "patient" to "patty",
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns mockedResponse
 

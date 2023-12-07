@@ -26,7 +26,7 @@ fun validateReferenceList(
     resourceTypesList: List<ResourceType>,
     context: LocationContext,
     validation: Validation,
-    containedResource: List<Resource<*>>? = listOf()
+    containedResource: List<Resource<*>>? = listOf(),
 ) {
     validation.apply {
         referenceList.forEachIndexed { index, reference ->
@@ -41,15 +41,16 @@ fun validateReference(
     resourceTypesList: List<ResourceType>,
     context: LocationContext,
     validation: Validation,
-    containedResource: List<Resource<*>>? = listOf()
+    containedResource: List<Resource<*>>? = listOf(),
 ) {
     val resourceTypesStringList = resourceTypesList.map { it.name }
-    val requiredContainedResource = FHIRError(
-        code = "RONIN_REQ_REF_1",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Contained resource is required if a local reference is provided",
-        location = LocationContext(context.element, context.field)
-    )
+    val requiredContainedResource =
+        FHIRError(
+            code = "RONIN_REQ_REF_1",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Contained resource is required if a local reference is provided",
+            location = LocationContext(context.element, context.field),
+        )
 
     validation.apply {
         reference?.let {
@@ -58,18 +59,18 @@ fun validateReference(
                 checkTrue(
                     !containedResource.isNullOrEmpty(),
                     requiredContainedResource,
-                    LocationContext(context.element, "")
+                    LocationContext(context.element, ""),
                 )
                 checkTrue(
                     resourceTypesStringList.contains(containedResource?.find { r -> r.id?.value == id }?.resourceType),
                     InvalidReferenceType(Reference::reference, resourceTypesList),
-                    context
+                    context,
                 )
             } else {
                 checkTrue(
                     reference.isInTypeList(resourceTypesStringList),
                     InvalidReferenceType(Reference::reference, resourceTypesList),
-                    context
+                    context,
                 )
             }
         }
@@ -114,7 +115,7 @@ fun List<CodeableConcept>?.validateCodeInValueSet(
     requiredValueSet: List<Coding>,
     actualLocation: KProperty1<*, *>,
     context: LocationContext,
-    validation: Validation
+    validation: Validation,
 ) {
     this?.let {
         validation.apply {
@@ -122,9 +123,15 @@ fun List<CodeableConcept>?.validateCodeInValueSet(
                 it.isEmpty() || it.qualifiesForValueSet(requiredValueSet),
                 InvalidValueSetError(
                     actualLocation,
-                    it.joinToString { codeableConcept -> codeableConcept.coding.joinToString { coding -> "${coding.system?.value ?: "null"}|${coding.code?.value ?: "null"}" } }
+                    it.joinToString {
+                            codeableConcept ->
+                        codeableConcept.coding.joinToString {
+                                coding ->
+                            "${coding.system?.value ?: "null"}|${coding.code?.value ?: "null"}"
+                        }
+                    },
                 ),
-                context
+                context,
             )
         }
     }

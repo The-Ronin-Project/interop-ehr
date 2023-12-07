@@ -25,13 +25,15 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class RoninDiagnosticReportsTest {
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
-    private val extension1 = Extension(
-        url = Uri("http://example.com/extension"),
-        value = DynamicValue(DynamicValueType.STRING, FHIRString("value"))
-    )
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
+    private val extension1 =
+        Extension(
+            url = Uri("http://example.com/extension"),
+            value = DynamicValue(DynamicValueType.STRING, FHIRString("value")),
+        )
     private val normalizer = mockk<Normalizer>()
     private val localizer = mockk<Localizer>()
     private val profile1 = mockk<RoninDiagnosticReportLaboratory>()
@@ -44,9 +46,9 @@ class RoninDiagnosticReportsTest {
             roninDiagnosticReports.qualifies(
                 DiagnosticReport(
                     code = CodeableConcept(text = "dx report".asFHIR()),
-                    status = Code("registered")
-                )
-            )
+                    status = Code("registered"),
+                ),
+            ),
         )
     }
 
@@ -63,40 +65,45 @@ class RoninDiagnosticReportsTest {
 
     @Test
     fun `can transform to profile`() {
-        val original = mockk<DiagnosticReport> {
-            every { id } returns Id("1234")
-        }
+        val original =
+            mockk<DiagnosticReport> {
+                every { id } returns Id("1234")
+            }
         every { normalizer.normalize(original, tenant) } returns original
 
-        val mappedDxReport = mockk<DiagnosticReport> {
-            every { id } returns Id("1234")
-            every { extension } returns listOf(extension1)
-        }
+        val mappedDxReport =
+            mockk<DiagnosticReport> {
+                every { id } returns Id("1234")
+                every { extension } returns listOf(extension1)
+            }
 
-        val roninDxReport = mockk<DiagnosticReport> {
-            every { id } returns Id("test-1234")
-            every { extension } returns listOf(extension1)
-        }
+        val roninDxReport =
+            mockk<DiagnosticReport> {
+                every { id } returns Id("test-1234")
+                every { extension } returns listOf(extension1)
+            }
         every { localizer.localize(roninDxReport, tenant) } returns roninDxReport
 
         every { profile1.qualifies(original) } returns false
         every { profile2.qualifies(original) } returns true
-        every { profile2.conceptMap(original, LocationContext(DiagnosticReport::class), tenant) } returns Pair(
-            mappedDxReport,
-            Validation()
-        )
+        every { profile2.conceptMap(original, LocationContext(DiagnosticReport::class), tenant) } returns
+            Pair(
+                mappedDxReport,
+                Validation(),
+            )
         every { profile1.qualifies(mappedDxReport) } returns false
         every { profile2.qualifies(mappedDxReport) } returns true
         every {
             profile2.transformInternal(
                 mappedDxReport,
                 LocationContext(DiagnosticReport::class),
-                tenant
+                tenant,
             )
-        } returns Pair(
-            TransformResponse(roninDxReport),
-            Validation()
-        )
+        } returns
+            Pair(
+                TransformResponse(roninDxReport),
+                Validation(),
+            )
         every { profile1.qualifies(roninDxReport) } returns false
         every { profile2.qualifies(roninDxReport) } returns true
         every { profile2.validate(roninDxReport, LocationContext(DiagnosticReport::class)) } returns Validation()

@@ -11,10 +11,11 @@ class IdentifierUtilsTest {
     @Test
     fun works() {
         val genericMessage = MDM_T02()
-        val identifier = Identifier(
-            value = "123".asFHIR(),
-            type = CodeableConcept(text = "text".asFHIR())
-        )
+        val identifier =
+            Identifier(
+                value = "123".asFHIR(),
+                type = CodeableConcept(text = "text".asFHIR()),
+            )
         val cx = identifier.toPID3(genericMessage)
 
         assertEquals("123", cx.idNumber.value)
@@ -24,9 +25,10 @@ class IdentifierUtilsTest {
     @Test
     fun `works with default`() {
         val genericMessage = MDM_T02()
-        val identifier = Identifier(
-            value = "123".asFHIR()
-        )
+        val identifier =
+            Identifier(
+                value = "123".asFHIR(),
+            )
         val cx = identifier.toPID3(genericMessage, "MRN")
 
         assertEquals("123", cx.idNumber.value)

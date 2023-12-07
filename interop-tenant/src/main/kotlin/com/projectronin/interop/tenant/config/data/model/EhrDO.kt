@@ -8,6 +8,7 @@ import org.ktorm.entity.Entity
  */
 interface EhrDO : Entity<EhrDO> {
     companion object : Entity.Factory<EhrDO>()
+
     var id: Int
     var instanceName: String
     var vendorType: VendorType

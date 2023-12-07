@@ -26,18 +26,21 @@ class RoninDiagnosticReportLaboratory(normalizer: Normalizer, localizer: Localiz
         R4DiagnosticReportValidator,
         RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value,
         normalizer,
-        localizer
+        localizer,
     ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
 
-    override fun qualifyingCategories() =
-        listOf(Coding(system = CodeSystem.DIAGNOSTIC_REPORT_LABORATORY.uri, code = Code("LAB")))
+    override fun qualifyingCategories() = listOf(Coding(system = CodeSystem.DIAGNOSTIC_REPORT_LABORATORY.uri, code = Code("LAB")))
 
     private val requiredSubjectFieldError = RequiredFieldError(DiagnosticReport::subject)
     private val requiredCategoryFieldError = RequiredFieldError(DiagnosticReport::category)
 
-    override fun validateUSCore(element: DiagnosticReport, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: DiagnosticReport,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         super.validateUSCore(element, parentContext, validation)
 
         validation.apply {
@@ -48,11 +51,11 @@ class RoninDiagnosticReportLaboratory(normalizer: Normalizer, localizer: Localiz
                     code = "USCORE_DX_RPT_001",
                     severity = ValidationIssueSeverity.ERROR,
                     description = "Must match this system|code: ${
-                    qualifyingCategories().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        qualifyingCategories().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                     }",
-                    location = LocationContext(DiagnosticReport::category)
+                    location = LocationContext(DiagnosticReport::category),
                 ),
-                parentContext
+                parentContext,
             )
 
             checkNotNull(element.subject, requiredSubjectFieldError, parentContext)

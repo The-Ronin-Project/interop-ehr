@@ -16,7 +16,7 @@ data class SetSmartDataValuesRequest(
     val userIDType: String = "External",
     val source: String = "Ronin",
     val contextName: String = "PATIENT",
-    val smartDataValues: List<SmartDataValue>
+    val smartDataValues: List<SmartDataValue>,
 )
 
 @Schema
@@ -25,5 +25,5 @@ data class SmartDataValue(
     val comments: List<String> = listOf(),
     val smartDataID: String,
     val smartDataIDType: String,
-    val values: List<String> = listOf()
+    val values: List<String> = listOf(),
 )

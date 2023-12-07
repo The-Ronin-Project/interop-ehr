@@ -9,10 +9,11 @@ import org.junit.jupiter.api.Test
 class RoninEffectiveUtilTest {
     @Test
     fun `keep provided effective element`() {
-        val effective = DynamicValue<Any>(
-            DynamicValueType.STRING,
-            "something here"
-        )
+        val effective =
+            DynamicValue<Any>(
+                DynamicValueType.STRING,
+                "something here",
+            )
         val roninEffective = generateEffectiveDateTime(effective, possibleDateTime)
         assertEquals(roninEffective, effective)
     }

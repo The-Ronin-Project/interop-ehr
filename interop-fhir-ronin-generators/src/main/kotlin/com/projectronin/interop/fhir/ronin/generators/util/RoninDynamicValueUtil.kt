@@ -13,7 +13,7 @@ fun generateDynamicValueReference(
     profileAllowedTypes: List<String>,
     tenantId: String,
     type: String? = null,
-    id: String? = null
+    id: String? = null,
 ): DynamicValue<Reference> {
     return DynamicValues.reference(
         when {
@@ -23,14 +23,14 @@ fun generateDynamicValueReference(
                     profileAllowedTypes,
                     tenantId,
                     type,
-                    id
+                    id,
                 )
             else ->
                 rcdmReference(
                     profileAllowedTypes.random(),
-                    udpIdValue(tenantId, id)
+                    udpIdValue(tenantId, id),
                 )
-        }
+        },
     )
 }
 
@@ -42,7 +42,7 @@ fun generateOptionalDynamicValueReference(
     profileAllowedTypes: List<String>,
     tenantId: String,
     type: String? = null,
-    id: String? = null
+    id: String? = null,
 ): DynamicValue<Any>? {
     return when {
         dynamicValue?.type == DynamicValueType.REFERENCE &&
@@ -54,7 +54,7 @@ fun generateOptionalDynamicValueReference(
                 profileAllowedTypes,
                 tenantId,
                 type,
-                id
+                id,
             ).let { if (it == null) null else DynamicValues.reference(it) }
     }
 }

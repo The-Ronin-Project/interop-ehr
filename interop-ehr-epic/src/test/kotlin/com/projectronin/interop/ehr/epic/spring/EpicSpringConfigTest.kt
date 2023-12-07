@@ -43,7 +43,6 @@ class EpicSpringConfigTest {
 
 @Configuration
 class TestConfig {
-
     @Bean
     fun interopQueue() = mockk<QueueService>(relaxed = true)
 

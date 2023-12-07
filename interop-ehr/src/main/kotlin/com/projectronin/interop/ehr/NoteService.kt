@@ -10,7 +10,7 @@ interface NoteService {
      */
     fun sendPatientNote(
         tenant: Tenant,
-        noteInput: NoteInput
+        noteInput: NoteInput,
     ): String
 
     /**
@@ -22,6 +22,6 @@ interface NoteService {
     fun sendPatientNoteAddendum(
         tenant: Tenant,
         noteInput: NoteInput,
-        parentDocumentId: String
+        parentDocumentId: String,
     ): String
 }

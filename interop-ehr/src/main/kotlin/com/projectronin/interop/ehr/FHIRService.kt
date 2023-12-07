@@ -7,8 +7,16 @@ import com.projectronin.interop.tenant.config.model.Tenant
 
 interface FHIRService<T : Resource<T>> {
     val fhirResourceType: Class<T>
-    fun getByID(tenant: Tenant, resourceFHIRId: String): T
-    fun getByIDs(tenant: Tenant, resourceFHIRIds: List<String>): Map<String, T>
+
+    fun getByID(
+        tenant: Tenant,
+        resourceFHIRId: String,
+    ): T
+
+    fun getByIDs(
+        tenant: Tenant,
+        resourceFHIRIds: List<String>,
+    ): Map<String, T>
 }
 
 /**
@@ -22,24 +30,23 @@ abstract class BaseFHIRService<T : Resource<T>> : FHIRService<T> {
      */
     protected fun standardizeParameters(parameters: Map<String, Any?>): Map<String, Any?> {
         val hasIds = parameters["_id"] != null
-        val parametersToAdd = standardParameters.mapNotNull {
-            if (parameters.containsKey(it.key)) {
-                null
-            } else if (hasIds && it.key == "_count") {
-                null
-            } else {
-                it.toPair()
+        val parametersToAdd =
+            standardParameters.mapNotNull {
+                if (parameters.containsKey(it.key)) {
+                    null
+                } else if (hasIds && it.key == "_count") {
+                    null
+                } else {
+                    it.toPair()
+                }
             }
-        }
         return parameters + parametersToAdd
     }
 
     /**
      * Merges the [responses] into a single [Bundle].
      */
-    protected fun mergeResponses(
-        responses: List<Bundle>
-    ): Bundle {
+    protected fun mergeResponses(responses: List<Bundle>): Bundle {
         var bundle = responses.first()
         responses.subList(1, responses.size).forEach { bundle = mergeBundles(bundle, it) }
         return bundle

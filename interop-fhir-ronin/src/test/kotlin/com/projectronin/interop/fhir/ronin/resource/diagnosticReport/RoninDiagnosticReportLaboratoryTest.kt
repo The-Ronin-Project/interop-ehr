@@ -46,21 +46,26 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
+@Suppress("ktlint:standard:max-line-length")
 class RoninDiagnosticReportLaboratoryTest {
     // using to double-check transformation for reference
-    private val mockReference = Reference(
-        display = "reference".asFHIR(), // r4 required?
-        reference = "Patient/123".asFHIR()
-    )
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
-    private val normalizer = mockk<Normalizer> {
-        every { normalize(any(), tenant) } answers { firstArg() }
-    }
-    private val localizer = mockk<Localizer> {
-        every { localize(any(), tenant) } answers { firstArg() }
-    }
+    private val mockReference =
+        Reference(
+            display = "reference".asFHIR(),
+            reference = "Patient/123".asFHIR(),
+        )
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
+    private val normalizer =
+        mockk<Normalizer> {
+            every { normalize(any(), tenant) } answers { firstArg() }
+        }
+    private val localizer =
+        mockk<Localizer> {
+            every { localize(any(), tenant) } answers { firstArg() }
+        }
     private val roninDiagnosticReport = RoninDiagnosticReportLaboratory(normalizer, localizer)
 
     @Test
@@ -70,82 +75,94 @@ class RoninDiagnosticReportLaboratoryTest {
                 DiagnosticReport(
                     code = CodeableConcept(text = "dx report".asFHIR()),
                     status = Code("registered"),
-                    category = listOf(
-                        CodeableConcept(
-                            coding = listOf(
-                                Coding(
-                                    system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
-                                    code = Code("LAB")
-                                )
-                            )
-                        )
-                    )
-                )
-            )
+                    category =
+                        listOf(
+                            CodeableConcept(
+                                coding =
+                                    listOf(
+                                        Coding(
+                                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                                            code = Code("LAB"),
+                                        ),
+                                    ),
+                            ),
+                        ),
+                ),
+            ),
         )
     }
 
     @Test
     fun `validate fails without ronin identifiers`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
-                source = Uri("source")
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
-                            code = Code("LAB")
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered"),
-            subject = Reference(
-                reference = "Patient/123".asFHIR(),
-                display = "display".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
+        val dxReport =
+            DiagnosticReport(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                        source = Uri("source"),
+                    ),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                                        code = Code("LAB"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                code = CodeableConcept(text = "dx report".asFHIR()),
+                status = Code("registered"),
+                subject =
+                    Reference(
+                        reference = "Patient/123".asFHIR(),
+                        display = "display".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
             )
-        )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninDiagnosticReport.validate(dxReport).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ DiagnosticReport.identifier\n" +
                 "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ DiagnosticReport.identifier\n" +
                 "ERROR RONIN_DAUTH_ID_001: Data Authority identifier required @ DiagnosticReport.identifier",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate fails without id`() {
-        val dxReport = DiagnosticReport(
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
-                            code = Code("LAB")
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered"),
-            subject = Reference(
-                reference = "Patient/123".asFHIR(),
-                display = "display".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
+        val dxReport =
+            DiagnosticReport(
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                                        code = Code("LAB"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                code = CodeableConcept(text = "dx report".asFHIR()),
+                status = Code("registered"),
+                subject =
+                    Reference(
+                        reference = "Patient/123".asFHIR(),
+                        display = "display".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
             )
-        )
 
         val (transformResponse, _) = roninDiagnosticReport.transform(dxReport, tenant)
 
@@ -154,329 +171,368 @@ class RoninDiagnosticReportLaboratoryTest {
 
     @Test
     fun `validate fails with no subject provided`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
-                source = Uri("source")
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
-                            code = Code("LAB")
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered")
-        )
+        val dxReport =
+            DiagnosticReport(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                        source = Uri("source"),
+                    ),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                                        code = Code("LAB"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                code = CodeableConcept(text = "dx report".asFHIR()),
+                status = Code("registered"),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninDiagnosticReport.validate(dxReport).alertIfErrors()
+            }
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: subject is a required element @ DiagnosticReport.subject",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate fails with subject type but no data authority extension identifier`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
-                source = Uri("source")
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
-                            code = Code("LAB")
-                        )
-                    )
-                )
-            ),
-            subject = Reference(reference = "Patient/something".asFHIR(), type = Uri("Patient")),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered")
-        )
+        val dxReport =
+            DiagnosticReport(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                        source = Uri("source"),
+                    ),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                                        code = Code("LAB"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                subject = Reference(reference = "Patient/something".asFHIR(), type = Uri("Patient")),
+                code = CodeableConcept(text = "dx report".asFHIR()),
+                status = Code("registered"),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninDiagnosticReport.validate(dxReport).alertIfErrors()
+            }
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_DAUTH_EX_001: Data Authority extension identifier is required for reference @ DiagnosticReport.subject.type.extension",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate fails with no category provided`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
-                source = Uri("source")
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered"),
-            subject = Reference(
-                reference = "Patient/123".asFHIR(),
-                display = "display".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
+        val dxReport =
+            DiagnosticReport(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                        source = Uri("source"),
+                    ),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                code = CodeableConcept(text = "dx report".asFHIR()),
+                status = Code("registered"),
+                subject =
+                    Reference(
+                        reference = "Patient/123".asFHIR(),
+                        display = "display".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
             )
-        )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninDiagnosticReport.validate(dxReport).alertIfErrors()
+            }
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: category is a required element @ DiagnosticReport.category\n" +
                 "ERROR USCORE_DX_RPT_001: Must match this system|code: http://terminology.hl7.org/CodeSystem/v2-0074|LAB @ DiagnosticReport.category",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate fails with wrong category code provided`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
-                source = Uri("source")
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
-                            code = Code("NOT-LAB")
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered"),
-            subject = Reference(
-                reference = "Patient/123".asFHIR(),
-                display = "display".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
+        val dxReport =
+            DiagnosticReport(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                        source = Uri("source"),
+                    ),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                                        code = Code("NOT-LAB"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                code = CodeableConcept(text = "dx report".asFHIR()),
+                status = Code("registered"),
+                subject =
+                    Reference(
+                        reference = "Patient/123".asFHIR(),
+                        display = "display".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
             )
-        )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninDiagnosticReport.validate(dxReport).alertIfErrors()
+            }
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR USCORE_DX_RPT_001: Must match this system|code: http://terminology.hl7.org/CodeSystem/v2-0074|LAB @ DiagnosticReport.category",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate fails with wrong category system provided`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
-                source = Uri("source")
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074-wrong"),
-                            code = Code("LAB")
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered"),
-            subject = Reference(
-                reference = "Patient/123".asFHIR(),
-                display = "display".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
+        val dxReport =
+            DiagnosticReport(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                        source = Uri("source"),
+                    ),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074-wrong"),
+                                        code = Code("LAB"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                code = CodeableConcept(text = "dx report".asFHIR()),
+                status = Code("registered"),
+                subject =
+                    Reference(
+                        reference = "Patient/123".asFHIR(),
+                        display = "display".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
             )
-        )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninDiagnosticReport.validate(dxReport).alertIfErrors()
+            }
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR USCORE_DX_RPT_001: Must match this system|code: " +
                 "http://terminology.hl7.org/CodeSystem/v2-0074|LAB @ DiagnosticReport.category",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate against R4 profile for DiagnosticReport with missing attributes`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
-                source = Uri("source")
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
-                            code = Code("LAB")
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered"),
-            subject = Reference(
-                reference = "Patient/123".asFHIR(),
-                display = "display".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
+        val dxReport =
+            DiagnosticReport(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                        source = Uri("source"),
+                    ),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                                        code = Code("LAB"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                code = CodeableConcept(text = "dx report".asFHIR()),
+                status = Code("registered"),
+                subject =
+                    Reference(
+                        reference = "Patient/123".asFHIR(),
+                        display = "display".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
             )
-        )
 
         mockkObject(R4DiagnosticReportValidator)
         every {
             R4DiagnosticReportValidator.validate(
                 dxReport,
-                LocationContext(DiagnosticReport::class)
+                LocationContext(DiagnosticReport::class),
             )
-        } returns validation {
-            checkTrue(
-                false,
-                RequiredFieldError(DiagnosticReport::category),
-                LocationContext(DiagnosticReport::class)
-            )
-            checkNotNull(
-                null,
-                RequiredFieldError(DiagnosticReport::subject),
-                LocationContext(DiagnosticReport::class)
-            )
-        }
+        } returns
+            validation {
+                checkTrue(
+                    false,
+                    RequiredFieldError(DiagnosticReport::category),
+                    LocationContext(DiagnosticReport::class),
+                )
+                checkNotNull(
+                    null,
+                    RequiredFieldError(DiagnosticReport::subject),
+                    LocationContext(DiagnosticReport::class),
+                )
+            }
 
-        val exception = assertThrows<java.lang.IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport).alertIfErrors()
-        }
+        val exception =
+            assertThrows<java.lang.IllegalArgumentException> {
+                roninDiagnosticReport.validate(dxReport).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: category is a required element @ DiagnosticReport.category\n" +
                 "ERROR REQ_FIELD: subject is a required element @ DiagnosticReport.subject",
-            exception.message
+            exception.message,
         )
 
         unmockkObject(R4OrganizationValidator)
@@ -484,178 +540,206 @@ class RoninDiagnosticReportLaboratoryTest {
 
     @Test
     fun `validate checks meta`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
-                            code = Code("LAB")
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered"),
-            subject = Reference(
-                reference = "Patient/123".asFHIR(),
-                display = "display".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
+        val dxReport =
+            DiagnosticReport(
+                id = Id("12345"),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                                        code = Code("LAB"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                code = CodeableConcept(text = "dx report".asFHIR()),
+                status = Code("registered"),
+                subject =
+                    Reference(
+                        reference = "Patient/123".asFHIR(),
+                        display = "display".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
             )
-        )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninDiagnosticReport.validate(dxReport).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninDiagnosticReport.validate(dxReport).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: meta is a required element @ DiagnosticReport.meta",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate is successful with required attributes`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
-                source = Uri("source")
-            ),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
-                            code = Code("LAB")
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered"),
-            subject = Reference(
-                reference = "Patient/123".asFHIR(),
-                display = "display".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
+        val dxReport =
+            DiagnosticReport(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)),
+                        source = Uri("source"),
+                    ),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                                        code = Code("LAB"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                code = CodeableConcept(text = "dx report".asFHIR()),
+                status = Code("registered"),
+                subject =
+                    Reference(
+                        reference = "Patient/123".asFHIR(),
+                        display = "display".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
             )
-        )
 
         roninDiagnosticReport.validate(dxReport).alertIfErrors()
     }
 
     @Test
     fun `transform diagnostic report with all attributes`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical("http://hl7.org/fhir/R4/diagnosticreport.html")),
-                source = Uri("source")
-            ),
-            implicitRules = Uri("implicit-rules"),
-            language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(Location(id = Id("67890"))),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://hl7.org/extension-1"),
-                    value = DynamicValue(DynamicValueType.STRING, "value")
-                )
-            ),
-            modifierExtension = listOf(
-                Extension(
-                    url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            identifier = listOf(Identifier(value = "id".asFHIR())),
-            basedOn = listOf(
-                Reference(id = "basedOnId".asFHIR(), display = "basedOnDisplay".asFHIR())
-            ),
-            status = Code("registered"),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
-                            code = Code("LAB")
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            subject = localizeReferenceTest(mockReference), // check it transforms correctly
-            encounter = Reference(id = "encounterReference".asFHIR(), display = "encounterDisplay".asFHIR()),
-            effective = DynamicValue(
-                type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
-            ),
-            issued = Instant("2018-02-02T00:00:00Z"),
-            performer = listOf(
-                Reference(id = "performerId".asFHIR(), display = "performerDisplay".asFHIR())
-            ),
-            resultsInterpreter = listOf(
-                Reference(id = "resultsInterpreter".asFHIR(), display = "resultsInterpreterDisplay".asFHIR())
-            ),
-            specimen = listOf(
-                Reference(id = "specimenId".asFHIR(), display = "specimenDisplay".asFHIR())
-            ),
-            result = listOf(
-                Reference(id = "resultId".asFHIR(), display = "resultDisplay".asFHIR())
-            ),
-            imagingStudy = listOf(
-                Reference(id = "imagingStudyId".asFHIR(), display = "imagingStudyDisplay".asFHIR())
-            ),
-            media = listOf(
-                DiagnosticReportMedia(
-                    id = "mediaId".asFHIR(),
-                    link = Reference(id = "linkId".asFHIR(), display = "linkDisplay".asFHIR())
-                )
-            ),
-            conclusion = "conclusionFhirString".asFHIR(),
-            conclusionCode = listOf(
-                CodeableConcept(text = "conclusionCode".asFHIR())
-            ),
-            presentedForm = listOf(
-                Attachment(id = "attachmentId".asFHIR())
+        val dxReport =
+            DiagnosticReport(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("http://hl7.org/fhir/R4/diagnosticreport.html")),
+                        source = Uri("source"),
+                    ),
+                implicitRules = Uri("implicit-rules"),
+                language = Code("en-US"),
+                text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
+                contained = listOf(Location(id = Id("67890"))),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/extension-1"),
+                            value = DynamicValue(DynamicValueType.STRING, "value"),
+                        ),
+                    ),
+                modifierExtension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/modifier-extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
+                identifier = listOf(Identifier(value = "id".asFHIR())),
+                basedOn =
+                    listOf(
+                        Reference(id = "basedOnId".asFHIR(), display = "basedOnDisplay".asFHIR()),
+                    ),
+                status = Code("registered"),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                                        code = Code("LAB"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                code = CodeableConcept(text = "dx report".asFHIR()),
+                subject = localizeReferenceTest(mockReference),
+                encounter = Reference(id = "encounterReference".asFHIR(), display = "encounterDisplay".asFHIR()),
+                effective =
+                    DynamicValue(
+                        type = DynamicValueType.DATE_TIME,
+                        "2022-01-01T00:00:00Z",
+                    ),
+                issued = Instant("2018-02-02T00:00:00Z"),
+                performer =
+                    listOf(
+                        Reference(id = "performerId".asFHIR(), display = "performerDisplay".asFHIR()),
+                    ),
+                resultsInterpreter =
+                    listOf(
+                        Reference(id = "resultsInterpreter".asFHIR(), display = "resultsInterpreterDisplay".asFHIR()),
+                    ),
+                specimen =
+                    listOf(
+                        Reference(id = "specimenId".asFHIR(), display = "specimenDisplay".asFHIR()),
+                    ),
+                result =
+                    listOf(
+                        Reference(id = "resultId".asFHIR(), display = "resultDisplay".asFHIR()),
+                    ),
+                imagingStudy =
+                    listOf(
+                        Reference(id = "imagingStudyId".asFHIR(), display = "imagingStudyDisplay".asFHIR()),
+                    ),
+                media =
+                    listOf(
+                        DiagnosticReportMedia(
+                            id = "mediaId".asFHIR(),
+                            link = Reference(id = "linkId".asFHIR(), display = "linkDisplay".asFHIR()),
+                        ),
+                    ),
+                conclusion = "conclusionFhirString".asFHIR(),
+                conclusionCode =
+                    listOf(
+                        CodeableConcept(text = "conclusionCode".asFHIR()),
+                    ),
+                presentedForm =
+                    listOf(
+                        Attachment(id = "attachmentId".asFHIR()),
+                    ),
             )
-        )
 
         val (transformResponse, validation) = roninDiagnosticReport.transform(dxReport, tenant)
         validation.alertIfErrors()
@@ -669,32 +753,32 @@ class RoninDiagnosticReportLaboratoryTest {
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(Location(id = Id("67890"))),
-            transformed.contained
+            transformed.contained,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://hl7.org/extension-1"),
-                    value = DynamicValue(DynamicValueType.STRING, "value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "value"),
+                ),
             ),
-            transformed.extension
+            transformed.extension,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "Value"),
+                ),
             ),
-            transformed.modifierExtension
+            transformed.modifierExtension,
         )
         assertEquals(
             listOf(
@@ -702,146 +786,150 @@ class RoninDiagnosticReportLaboratoryTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertEquals(
             listOf(
-                Reference(id = "basedOnId".asFHIR(), display = "basedOnDisplay".asFHIR())
+                Reference(id = "basedOnId".asFHIR(), display = "basedOnDisplay".asFHIR()),
             ),
-            transformed.basedOn
+            transformed.basedOn,
         )
         assertEquals(Code("registered"), transformed.status)
         assertEquals(
             listOf(
                 CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
-                            code = Code("LAB")
-                        )
-                    )
-                )
+                    coding =
+                        listOf(
+                            Coding(
+                                system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                                code = Code("LAB"),
+                            ),
+                        ),
+                ),
             ),
-            transformed.category
+            transformed.category,
         )
         assertEquals(
             CodeableConcept(
-                text = "dx report".asFHIR()
+                text = "dx report".asFHIR(),
             ),
-            transformed.code
+            transformed.code,
         )
         assertEquals(
             Reference(
                 reference = "Patient/test-123".asFHIR(),
                 display = "reference".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
+                type = Uri("Patient", extension = dataAuthorityExtension),
             ),
-            transformed.subject
+            transformed.subject,
         )
         assertEquals(
             Reference(
                 id = "encounterReference".asFHIR(),
-                display = "encounterDisplay".asFHIR()
+                display = "encounterDisplay".asFHIR(),
             ),
-            transformed.encounter
+            transformed.encounter,
         )
         assertEquals(
             DynamicValue(
                 type = DynamicValueType.DATE_TIME,
-                "2022-01-01T00:00:00Z"
+                "2022-01-01T00:00:00Z",
             ),
-            transformed.effective
+            transformed.effective,
         )
         assertEquals(
             Instant("2018-02-02T00:00:00Z"),
-            transformed.issued
+            transformed.issued,
         )
         assertEquals(
             listOf(
-                Reference(id = "performerId".asFHIR(), display = "performerDisplay".asFHIR())
+                Reference(id = "performerId".asFHIR(), display = "performerDisplay".asFHIR()),
             ),
-            transformed.performer
+            transformed.performer,
         )
         assertEquals(
             listOf(
-                Reference(id = "resultsInterpreter".asFHIR(), display = "resultsInterpreterDisplay".asFHIR())
+                Reference(id = "resultsInterpreter".asFHIR(), display = "resultsInterpreterDisplay".asFHIR()),
             ),
-            transformed.resultsInterpreter
+            transformed.resultsInterpreter,
         )
         assertEquals(
             listOf(
-                Reference(id = "specimenId".asFHIR(), display = "specimenDisplay".asFHIR())
+                Reference(id = "specimenId".asFHIR(), display = "specimenDisplay".asFHIR()),
             ),
-            transformed.specimen
+            transformed.specimen,
         )
         assertEquals(
             listOf(
-                Reference(id = "resultId".asFHIR(), display = "resultDisplay".asFHIR())
+                Reference(id = "resultId".asFHIR(), display = "resultDisplay".asFHIR()),
             ),
-            transformed.result
+            transformed.result,
         )
         assertEquals(
             listOf(
-                Reference(id = "imagingStudyId".asFHIR(), display = "imagingStudyDisplay".asFHIR())
+                Reference(id = "imagingStudyId".asFHIR(), display = "imagingStudyDisplay".asFHIR()),
             ),
-            transformed.imagingStudy
+            transformed.imagingStudy,
         )
         assertEquals(
             listOf(
                 DiagnosticReportMedia(
                     id = "mediaId".asFHIR(),
-                    link = Reference(id = "linkId".asFHIR(), display = "linkDisplay".asFHIR())
-                )
+                    link = Reference(id = "linkId".asFHIR(), display = "linkDisplay".asFHIR()),
+                ),
             ),
-            transformed.media
+            transformed.media,
         )
         assertEquals("conclusionFhirString".asFHIR(), transformed.conclusion)
         assertEquals(
             listOf(
-                CodeableConcept(text = "conclusionCode".asFHIR())
+                CodeableConcept(text = "conclusionCode".asFHIR()),
             ),
-            transformed.conclusionCode
+            transformed.conclusionCode,
         )
         assertEquals(
             listOf(
-                Attachment(id = "attachmentId".asFHIR())
+                Attachment(id = "attachmentId".asFHIR()),
             ),
-            transformed.presentedForm
+            transformed.presentedForm,
         )
     }
 
     @Test
     fun `transform diagnostic report with only required attributes`() {
-        val dxReport = DiagnosticReport(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            category = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
-                            code = Code("LAB")
-                        )
-                    )
-                )
-            ),
-            code = CodeableConcept(text = "dx report".asFHIR()),
-            status = Code("registered"),
-            subject = localizeReferenceTest(mockReference) // check that it transforms
-        )
+        val dxReport =
+            DiagnosticReport(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                                        code = Code("LAB"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                code = CodeableConcept(text = "dx report".asFHIR()),
+                status = Code("registered"),
+                subject = localizeReferenceTest(mockReference),
+            )
 
         val (transformResponse, validation) = roninDiagnosticReport.transform(dxReport, tenant)
         validation.alertIfErrors()
@@ -855,7 +943,7 @@ class RoninDiagnosticReportLaboratoryTest {
         assertEquals(Id(value = "12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.DIAGNOSTIC_REPORT_LABORATORY.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
@@ -867,49 +955,50 @@ class RoninDiagnosticReportLaboratoryTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertEquals(listOf<Reference>(), transformed.basedOn)
         assertEquals(Code("registered"), transformed.status)
         assertEquals(
             listOf(
                 CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
-                            code = Code("LAB")
-                        )
-                    )
-                )
+                    coding =
+                        listOf(
+                            Coding(
+                                system = Uri("http://terminology.hl7.org/CodeSystem/v2-0074"),
+                                code = Code("LAB"),
+                            ),
+                        ),
+                ),
             ),
-            transformed.category
+            transformed.category,
         )
         assertEquals(
             CodeableConcept(
-                text = "dx report".asFHIR()
+                text = "dx report".asFHIR(),
             ),
-            transformed.code
+            transformed.code,
         )
         assertEquals(
             Reference(
                 reference = "Patient/test-123".asFHIR(),
                 display = "reference".asFHIR(),
-                type = Uri("Patient", extension = dataAuthorityExtension)
+                type = Uri("Patient", extension = dataAuthorityExtension),
             ),
-            transformed.subject
+            transformed.subject,
         )
         assertEquals(null, transformed.encounter)
         assertEquals(null, transformed.effective)

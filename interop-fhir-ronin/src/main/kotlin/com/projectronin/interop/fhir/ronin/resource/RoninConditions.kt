@@ -17,7 +17,7 @@ class RoninConditions(
     normalizer: Normalizer,
     localizer: Localizer,
     roninConditionEncounterDiagnosis: RoninConditionEncounterDiagnosis,
-    roninConditionProblemsAndHealthConcerns: RoninConditionProblemsAndHealthConcerns
+    roninConditionProblemsAndHealthConcerns: RoninConditionProblemsAndHealthConcerns,
 ) :
     MultipleProfileResource<Condition>(normalizer, localizer) {
     override val potentialProfiles: List<BaseProfile<Condition>> =

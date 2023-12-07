@@ -10,6 +10,7 @@ import java.time.LocalDate
 
 class ProcedureServiceTest {
     abstract class ProcedureServiceMock : ProcedureService
+
     private val procedureService = spyk<ProcedureServiceMock>()
     private val startDate = mockk<LocalDate>()
     private val endDate = mockk<LocalDate>()

@@ -12,44 +12,68 @@ interface IdentifierService {
      * Determines the appropriate [Identifier] for a practitioner for this [tenant]. [identifiers] should be the List of
      * all identifiers returned from an API containing identifiers referencing a Practitioner.
      */
-    fun getPractitionerIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier
+    fun getPractitionerIdentifier(
+        tenant: Tenant,
+        identifiers: List<Identifier>,
+    ): Identifier
 
     /**
      * Determines the appropriate [Identifier] for a patient for this [tenant]. [identifiers] should be the List of
      * all identifiers returned from an API containing identifiers referencing a Patient.
      */
-    fun getPatientIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier
+    fun getPatientIdentifier(
+        tenant: Tenant,
+        identifiers: List<Identifier>,
+    ): Identifier
 
     /**
      * Determines the appropriate [Identifier] for a [tenant] based on the provided [identifiers]. The [identifiers]
      * represents all the FHIR identifiers associated to a Practitioner.
      */
-    fun getPractitionerProviderIdentifier(tenant: Tenant, identifiers: FHIRIdentifiers): Identifier
+    fun getPractitionerProviderIdentifier(
+        tenant: Tenant,
+        identifiers: FHIRIdentifiers,
+    ): Identifier
 
     /**
      * Determines the appropriate [Identifier] for a [tenant] based on the provided [identifiers]. The [identifiers]
      * represents all the FHIR identifiers associated to a Practitioner.
      */
-    fun getPractitionerUserIdentifier(tenant: Tenant, identifiers: FHIRIdentifiers): Identifier
+    fun getPractitionerUserIdentifier(
+        tenant: Tenant,
+        identifiers: FHIRIdentifiers,
+    ): Identifier
 
     /**
      * Determines the appropriate [Identifier] to use as a Ronin MRN for Patient based on the provided [identifiers] and [tenant].
      * The [identifiers] should be the List of all identifiers returned from an API for a patient.
      */
-    fun getMRNIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier
+    fun getMRNIdentifier(
+        tenant: Tenant,
+        identifiers: List<Identifier>,
+    ): Identifier
 
     /**
      * Determines the appropriate [Identifier] for a Location for this [tenant].
      */
-    fun getLocationIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier
+    fun getLocationIdentifier(
+        tenant: Tenant,
+        identifiers: List<Identifier>,
+    ): Identifier
 
     /**
      * Determines the Order System for the [tenant] given a list of identifiers.
      */
-    fun getOrderIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier
+    fun getOrderIdentifier(
+        tenant: Tenant,
+        identifiers: List<Identifier>,
+    ): Identifier
 
     /**
      * Determines the encounter identifier for the [tenant] given a list of identifiers.
      */
-    fun getEncounterIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier
+    fun getEncounterIdentifier(
+        tenant: Tenant,
+        identifiers: List<Identifier>,
+    ): Identifier
 }

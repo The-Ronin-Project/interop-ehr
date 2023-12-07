@@ -13,5 +13,5 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
 data class IDType(
     @JsonProperty("ID")
     val id: String,
-    val type: String
+    val type: String,
 )

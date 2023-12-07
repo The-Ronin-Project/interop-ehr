@@ -38,8 +38,8 @@ class EpicProcedureServiceTest {
             httpResponse.body<Procedure>(
                 TypeInfo(
                     Procedure::class,
-                    Procedure::class.java
-                )
+                    Procedure::class.java,
+                ),
             )
         } returns procedure
         coEvery { epicClient.get(tenant, "/api/FHIR/R4/Procedure/fakeFaKEfAKefakE") } returns ehrResponse
@@ -56,8 +56,8 @@ class EpicProcedureServiceTest {
             httpResponse.body<Procedure>(
                 TypeInfo(
                     Procedure::class,
-                    Procedure::class.java
-                )
+                    Procedure::class.java,
+                ),
             )
         } throws thrownException
         coEvery { epicClient.get(tenant, "/api/FHIR/R4/Procedure/fakeFaKEfAKefakE") } returns ehrResponse
@@ -66,7 +66,7 @@ class EpicProcedureServiceTest {
             assertThrows<ClientFailureException> {
                 procedureService.getByID(
                     tenant,
-                    "fakeFaKEfAKefakE"
+                    "fakeFaKEfAKefakE",
                 )
             }
 
@@ -80,27 +80,27 @@ class EpicProcedureServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery {
             httpResponse.body<Procedure>(
-                TypeInfo(Procedure::class, Procedure::class.java)
+                TypeInfo(Procedure::class, Procedure::class.java),
             )
         } returns procedureById
 
         coEvery {
             epicClient.get(
                 tenant,
-                "/api/FHIR/R4/Procedure/fakeFaKEfAKefakE"
+                "/api/FHIR/R4/Procedure/fakeFaKEfAKefakE",
             )
         } returns ehrResponse
 
         val resource =
             procedureService.getByID(
                 tenant,
-                "fakeFaKEfAKefakE"
+                "fakeFaKEfAKefakE",
             )
 
         assertEquals(procedureById, resource)
@@ -113,7 +113,7 @@ class EpicProcedureServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns procedureByPatient
@@ -125,8 +125,8 @@ class EpicProcedureServiceTest {
                 mapOf(
                     "patient" to "fakeFaKEfAKefakE",
                     "date" to RepeatingParameter(values = listOf("ge2023-09-01", "le2023-09-21")),
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
         val response =
@@ -134,7 +134,7 @@ class EpicProcedureServiceTest {
                 tenant,
                 "fakeFaKEfAKefakE",
                 LocalDate.of(2023, 9, 1),
-                LocalDate.of(2023, 9, 21)
+                LocalDate.of(2023, 9, 21),
             )
 
         assertEquals(procedureByPatient.entry.map { it.resource }, response)

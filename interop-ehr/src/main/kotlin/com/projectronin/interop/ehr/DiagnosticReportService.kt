@@ -8,7 +8,6 @@ import java.time.LocalDate
  * Defines the functionality for an EHR's Diagnostic Report service.
  */
 interface DiagnosticReportService : FHIRService<DiagnosticReport> {
-
     /**
      * Finds diagnostic report by [patientFhirId]
      */
@@ -16,6 +15,6 @@ interface DiagnosticReportService : FHIRService<DiagnosticReport> {
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate? = null,
-        endDate: LocalDate? = null
+        endDate: LocalDate? = null,
     ): List<DiagnosticReport>
 }

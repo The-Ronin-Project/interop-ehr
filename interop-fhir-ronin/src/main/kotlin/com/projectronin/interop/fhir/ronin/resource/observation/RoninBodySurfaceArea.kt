@@ -15,22 +15,26 @@ import org.springframework.stereotype.Component
 class RoninBodySurfaceArea(
     normalizer: Normalizer,
     localizer: Localizer,
-    registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient,
 ) :
     BaseRoninVitalSign(
-        R4ObservationValidator,
-        RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value,
-        normalizer,
-        localizer,
-        registryClient
-    ) {
+            R4ObservationValidator,
+            RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value,
+            normalizer,
+            localizer,
+            registryClient,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_26_1
     override val profileVersion = 3
 
     // Quantity unit codes
     override val validQuantityCodes = listOf("m2")
 
-    override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
+    override fun validateVitalSign(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validateVitalSignValue(element.value, parentContext, validation)
     }
 }

@@ -30,49 +30,53 @@ import java.time.LocalDateTime
 class RoninServiceRequest(
     private val registryClient: NormalizationRegistryClient,
     normalizer: Normalizer,
-    localizer: Localizer
+    localizer: Localizer,
 ) :
     USCoreBasedProfile<ServiceRequest>(
-        R4ServiceRequestValidator,
-        RoninProfile.SERVICE_REQUEST.value,
-        normalizer,
-        localizer
-    ) {
+            R4ServiceRequestValidator,
+            RoninProfile.SERVICE_REQUEST.value,
+            normalizer,
+            localizer,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_27_0
     override val profileVersion = 1
 
-    private val minimumExtensionError = FHIRError(
-        code = "RONIN_SERVREQ_001",
-        description = "Service Request must have at least two extensions",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(ServiceRequest::extension)
-    )
+    private val minimumExtensionError =
+        FHIRError(
+            code = "RONIN_SERVREQ_001",
+            description = "Service Request must have at least two extensions",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(ServiceRequest::extension),
+        )
 
-    private val invalidTenantSourceServiceRequestCategoryError = FHIRError(
-        code = "RONIN_SERVREQ_002",
-        description = "Service Request extension Tenant Source Service Request Category is invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(ServiceRequest::extension)
-    )
+    private val invalidTenantSourceServiceRequestCategoryError =
+        FHIRError(
+            code = "RONIN_SERVREQ_002",
+            description = "Service Request extension Tenant Source Service Request Category is invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(ServiceRequest::extension),
+        )
 
-    private val invalidTenantSourceServiceRequestCodeError = FHIRError(
-        code = "RONIN_SERVREQ_003",
-        description = "Service Request extension Tenant Source Service Request Code is invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(ServiceRequest::extension)
-    )
+    private val invalidTenantSourceServiceRequestCodeError =
+        FHIRError(
+            code = "RONIN_SERVREQ_003",
+            description = "Service Request extension Tenant Source Service Request Code is invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(ServiceRequest::extension),
+        )
 
-    private val invalidCategorySizeError = FHIRError(
-        code = "RONIN_SERVREQ_004",
-        description = "Service Request requires exactly 1 Category element",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(ServiceRequest::category)
-    )
+    private val invalidCategorySizeError =
+        FHIRError(
+            code = "RONIN_SERVREQ_004",
+            description = "Service Request requires exactly 1 Category element",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(ServiceRequest::category),
+        )
 
     override fun validateRonin(
         element: ServiceRequest,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
@@ -90,7 +94,7 @@ class RoninServiceRequest(
                         it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 invalidTenantSourceServiceRequestCategoryError,
-                parentContext
+                parentContext,
             )
 
             // Check the code field (R4 Requires a code).
@@ -100,24 +104,28 @@ class RoninServiceRequest(
                         it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 } == 1,
                 invalidTenantSourceServiceRequestCodeError,
-                parentContext
+                parentContext,
             )
 
             requireDataAuthorityExtensionIdentifier(
                 element.subject,
                 LocationContext(ServiceRequest::subject),
-                validation
+                validation,
             )
         }
     }
 
-    override fun validateUSCore(element: ServiceRequest, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: ServiceRequest,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             validateReference(
                 element.subject,
                 listOf(Patient),
                 LocationContext(ServiceRequest::subject),
-                this
+                this,
             )
             requireCodeableConcept("code", element.code, parentContext, this)
         }
@@ -127,7 +135,7 @@ class RoninServiceRequest(
         normalized: ServiceRequest,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<ServiceRequest?, Validation> {
         val validation = Validation()
 
@@ -141,14 +149,15 @@ class RoninServiceRequest(
                 parentContext,
                 tenant,
                 validation,
-                forceCacheReloadTS
+                forceCacheReloadTS,
             )
-        val mappedCategory = if (mapCategoryResponse == null) {
-            normalized.category
-        } else {
-            newExtensions.add(mapCategoryResponse.extension)
-            listOf(mapCategoryResponse.codeableConcept)
-        }
+        val mappedCategory =
+            if (mapCategoryResponse == null) {
+                normalized.category
+            } else {
+                newExtensions.add(mapCategoryResponse.extension)
+                listOf(mapCategoryResponse.codeableConcept)
+            }
 
         val mappedCodeResponse =
             mapElement(
@@ -158,24 +167,26 @@ class RoninServiceRequest(
                 parentContext,
                 tenant,
                 validation,
-                forceCacheReloadTS
+                forceCacheReloadTS,
             )
-        val mappedCode = if (mappedCodeResponse == null) {
-            normalized.code
-        } else {
-            newExtensions.add(mappedCodeResponse.extension)
-            mappedCodeResponse.codeableConcept
-        }
+        val mappedCode =
+            if (mappedCodeResponse == null) {
+                normalized.code
+            } else {
+                newExtensions.add(mappedCodeResponse.extension)
+                mappedCodeResponse.codeableConcept
+            }
 
-        val mappedServiceRequest = normalized.copy(
-            code = mappedCode,
-            category = mappedCategory,
-            extension = normalized.extension + newExtensions
-        )
+        val mappedServiceRequest =
+            normalized.copy(
+                code = mappedCode,
+                category = mappedCategory,
+                extension = normalized.extension + newExtensions,
+            )
 
         return Pair(
             mappedServiceRequest,
-            validation
+            validation,
         )
     }
 
@@ -186,16 +197,17 @@ class RoninServiceRequest(
         parentContext: LocationContext,
         tenant: Tenant,
         validation: Validation,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): ConceptMapCodeableConcept? {
         return normalizedCodeableConcept?.let { code ->
-            val serviceRequestCode = registryClient.getConceptMapping(
-                tenant,
-                elementName,
-                code,
-                serviceRequest,
-                forceCacheReloadTS
-            )
+            val serviceRequestCode =
+                registryClient.getConceptMapping(
+                    tenant,
+                    elementName,
+                    code,
+                    serviceRequest,
+                    forceCacheReloadTS,
+                )
             // validate the mapping we got, use code value to report issues
             validation.apply {
                 checkNotNull(
@@ -205,9 +217,9 @@ class RoninServiceRequest(
                         code.coding.mapNotNull { it.code?.value }
                             .joinToString(", "),
                         "any $elementName concept map for tenant '${tenant.mnemonic}'",
-                        serviceRequestCode?.metadata
+                        serviceRequestCode?.metadata,
                     ),
-                    parentContext
+                    parentContext,
                 )
             }
             serviceRequestCode
@@ -218,12 +230,13 @@ class RoninServiceRequest(
         normalized: ServiceRequest,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<ServiceRequest>?, Validation> {
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant)
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+            )
 
         return Pair(TransformResponse(transformed), Validation())
     }

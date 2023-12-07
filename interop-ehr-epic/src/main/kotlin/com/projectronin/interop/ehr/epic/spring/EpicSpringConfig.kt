@@ -12,13 +12,13 @@ import org.springframework.context.annotation.Import
 @ComponentScan(
     *[
         "com.projectronin.interop.ehr.epic",
-        "com.projectronin.ehr.dataauthority.client" // INT-2129
-    ]
+        "com.projectronin.ehr.dataauthority.client", // INT-2129
+    ],
 )
 @Import(
     EHRSpringConfig::class,
     DatalakeSpringConfig::class,
     TenantSpringConfig::class,
-    HL7SpringConfig::class
+    HL7SpringConfig::class,
 )
 class EpicSpringConfig

@@ -13,7 +13,7 @@ import java.time.LocalDate
  */
 @Component
 class EpicMedicationRequestService(
-    epicClient: EpicClient
+    epicClient: EpicClient,
 ) : MedicationRequestService, EpicFHIRService<MedicationRequest>(epicClient) {
     override val fhirURLSearchPart = "/api/FHIR/R4/MedicationRequest"
     override val fhirResourceType = MedicationRequest::class.java
@@ -21,7 +21,7 @@ class EpicMedicationRequestService(
     @Trace
     override fun getMedicationRequestById(
         tenant: Tenant,
-        medicationRequestId: String
+        medicationRequestId: String,
     ): MedicationRequest {
         return getByID(tenant, medicationRequestId)
     }
@@ -30,13 +30,15 @@ class EpicMedicationRequestService(
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate?,
-        endDate: LocalDate?
+        endDate: LocalDate?,
     ): List<MedicationRequest> {
-        val dateMap = getDateParam(startDate, endDate)?.let { mapOf("date" to it) }
-            ?: emptyMap()
-        val parameters = mapOf(
-            "patient" to patientFhirId
-        ) + dateMap
+        val dateMap =
+            getDateParam(startDate, endDate)?.let { mapOf("date" to it) }
+                ?: emptyMap()
+        val parameters =
+            mapOf(
+                "patient" to patientFhirId,
+            ) + dateMap
         return getResourceListFromSearch(tenant, parameters)
     }
 }

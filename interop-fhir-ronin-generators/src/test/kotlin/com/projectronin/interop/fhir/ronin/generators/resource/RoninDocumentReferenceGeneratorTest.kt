@@ -29,18 +29,21 @@ import org.junit.jupiter.api.Test
 
 class RoninDocumentReferenceGeneratorTest {
     private lateinit var rcdmDocumentReference: RoninDocumentReference
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
         val registryClient: NormalizationRegistryClient = mockk()
         rcdmDocumentReference = RoninDocumentReference(normalizer, localizer, registryClient)
     }
@@ -48,10 +51,11 @@ class RoninDocumentReferenceGeneratorTest {
     @Test
     fun `example use for rcdmDocumentReference`() {
         // create document reference resource with attributes you need, provide the tenant
-        val rcdmDocumentReference = rcdmDocumentReference("test", "binaryId") {
-            // to test an attribute like status - provide the value
-            status of Code("on-hold")
-        }
+        val rcdmDocumentReference =
+            rcdmDocumentReference("test", "binaryId") {
+                // to test an attribute like status - provide the value
+                status of Code("on-hold")
+            }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes will be generated
         val rcdmDocumentReferenceJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmDocumentReference)
@@ -79,7 +83,7 @@ class RoninDocumentReferenceGeneratorTest {
         assertNotNull(rcdmDocumentReference.meta)
         assertEquals(
             RoninProfile.DOCUMENT_REFERENCE.value,
-            rcdmDocumentReference.meta!!.profile[0].value
+            rcdmDocumentReference.meta!!.profile[0].value,
         )
         assertEquals(3, rcdmDocumentReference.identifier.size)
         assertNotNull(rcdmDocumentReference.status)
@@ -108,9 +112,10 @@ class RoninDocumentReferenceGeneratorTest {
 
     @Test
     fun `rcdmDocumentReference validates with identifier added`() {
-        val documentReference = rcdmDocumentReference("test", "binaryId") {
-            identifier of listOf(Identifier(value = "identifier".asFHIR()))
-        }
+        val documentReference =
+            rcdmDocumentReference("test", "binaryId") {
+                identifier of listOf(Identifier(value = "identifier".asFHIR()))
+            }
         val validation = rcdmDocumentReference.validate(documentReference, null)
         assertEquals(false, validation.hasErrors())
         assertEquals(4, documentReference.identifier.size)
@@ -124,9 +129,10 @@ class RoninDocumentReferenceGeneratorTest {
 
     @Test
     fun `generates rcdmDocumentReference with given status but fails validation because status is bad`() {
-        val documentReference = rcdmDocumentReference("test", "binaryId") {
-            status of Code("this is a bad status")
-        }
+        val documentReference =
+            rcdmDocumentReference("test", "binaryId") {
+                status of Code("this is a bad status")
+            }
         assertEquals(Code("this is a bad status"), documentReference.status)
 
         // validate should fail
@@ -139,9 +145,10 @@ class RoninDocumentReferenceGeneratorTest {
 
     @Test
     fun `rcdmDocumentReference - valid subject input - validate succeeds`() {
-        val documentReference = rcdmDocumentReference("test", "binaryId") {
-            subject of rcdmReference("Patient", "456")
-        }
+        val documentReference =
+            rcdmDocumentReference("test", "binaryId") {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = rcdmDocumentReference.validate(documentReference, null)
         assertEquals(false, validation.hasErrors())
         assertEquals("Patient/456", documentReference.subject?.reference?.value)
@@ -149,26 +156,30 @@ class RoninDocumentReferenceGeneratorTest {
 
     @Test
     fun `rcdmDocumentReference - invalid subject input - validate fails`() {
-        val documentReference = rcdmDocumentReference("test", "binaryId") {
-            subject of rcdmReference("Device", "456")
-        }
+        val documentReference =
+            rcdmDocumentReference("test", "binaryId") {
+                subject of rcdmReference("Device", "456")
+            }
         val validation = rcdmDocumentReference.validate(documentReference, null)
         assertTrue(validation.hasIssues())
     }
 
     @Test
     fun `rcdmDocumentReference - valid type input - validate succeeds`() {
-        val documentReference = rcdmDocumentReference("test", "binaryId") {
-            type of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of CodeSystem.LOINC.uri
-                        code of Code("100")
-                        display of "Fake"
+        val documentReference =
+            rcdmDocumentReference("test", "binaryId") {
+                type of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of CodeSystem.LOINC.uri
+                                    code of Code("100")
+                                    display of "Fake"
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = rcdmDocumentReference.validate(documentReference, null)
         assertEquals(false, validation.hasErrors())
         assertEquals(Code("100"), documentReference.type?.coding?.first()?.code)
@@ -176,47 +187,53 @@ class RoninDocumentReferenceGeneratorTest {
 
     @Test
     fun `rcdmDocumentReference - invalid type input - validate fails`() {
-        val documentReference = rcdmDocumentReference("test", "binaryId") {
-            type of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of CodeSystem.LOINC.uri
-                        code of Code("100")
-                        display of "Fake"
-                    },
-                    coding {
-                        system of CodeSystem.LOINC.uri
-                        code of Code("200")
-                        display of "Also Fake"
+        val documentReference =
+            rcdmDocumentReference("test", "binaryId") {
+                type of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of CodeSystem.LOINC.uri
+                                    code of Code("100")
+                                    display of "Fake"
+                                },
+                                coding {
+                                    system of CodeSystem.LOINC.uri
+                                    code of Code("200")
+                                    display of "Also Fake"
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = rcdmDocumentReference.validate(documentReference, null)
         assertEquals(true, validation.hasErrors())
         assertEquals("RONIN_DOCREF_002", validation.issues()[0].code)
         assertEquals("One, and only one, coding entry is allowed for type", validation.issues()[0].description)
         assertEquals(
             LocationContext(element = "DocumentReference", field = "type.coding"),
-            validation.issues()[0].location
+            validation.issues()[0].location,
         )
     }
 
     @Test
     fun `rcdmDocumentReference - valid category input - validate succeeds`() {
-        val documentReference = rcdmDocumentReference("test", "binaryId") {
-            category of listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.DOCUMENT_REFERENCE_CATEGORY.uri,
-                            code = Code("clinical-note"),
-                            display = "Clinical Note".asFHIR()
-                        )
+        val documentReference =
+            rcdmDocumentReference("test", "binaryId") {
+                category of
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.DOCUMENT_REFERENCE_CATEGORY.uri,
+                                        code = Code("clinical-note"),
+                                        display = "Clinical Note".asFHIR(),
+                                    ),
+                                ),
+                        ),
                     )
-                )
-            )
-        }
+            }
         val validation = rcdmDocumentReference.validate(documentReference, null)
         assertEquals(false, validation.hasErrors())
         assertEquals("Clinical Note", documentReference.category.first().coding.first().display?.value)
@@ -234,9 +251,10 @@ class RoninDocumentReferenceGeneratorTest {
     @Test
     fun `rcdmPatient rcdmDocumentReference - valid subject input overrides base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val documentReference = rcdmPatient.rcdmDocumentReference("binaryId") {
-            subject of rcdmReference("Patient", "456")
-        }
+        val documentReference =
+            rcdmPatient.rcdmDocumentReference("binaryId") {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = rcdmDocumentReference.validate(documentReference, null)
         assertEquals(false, validation.hasErrors())
         assertEquals("Patient/456", documentReference.subject?.reference?.value)
@@ -245,9 +263,10 @@ class RoninDocumentReferenceGeneratorTest {
     @Test
     fun `rcdmPatient rcdmDocumentReference - base patient overrides invalid subject input - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val documentReference = rcdmPatient.rcdmDocumentReference("binaryId") {
-            subject of reference("Patient", "456")
-        }
+        val documentReference =
+            rcdmPatient.rcdmDocumentReference("binaryId") {
+                subject of reference("Patient", "456")
+            }
         val validation = rcdmDocumentReference.validate(documentReference, null)
         assertEquals(false, validation.hasErrors())
         assertEquals("Patient/${rcdmPatient.id?.value}", documentReference.subject?.reference?.value)
@@ -256,9 +275,10 @@ class RoninDocumentReferenceGeneratorTest {
     @Test
     fun `rcdmPatient rcdmDocumentReference - fhir id input for both - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") { id of "99" }
-        val documentReference = rcdmPatient.rcdmDocumentReference("binaryId") {
-            id of "88"
-        }
+        val documentReference =
+            rcdmPatient.rcdmDocumentReference("binaryId") {
+                id of "88"
+            }
         val validation = rcdmDocumentReference.validate(documentReference, null)
         assertEquals(false, validation.hasErrors())
         assertEquals(3, documentReference.identifier.size)

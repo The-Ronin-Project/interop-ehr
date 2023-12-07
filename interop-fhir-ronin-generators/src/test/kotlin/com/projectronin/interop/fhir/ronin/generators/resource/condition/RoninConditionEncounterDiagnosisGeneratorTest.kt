@@ -33,26 +33,29 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
 class RoninConditionEncounterDiagnosisGeneratorTest {
-
     private lateinit var roninConditionEncounterDiagnosis: RoninConditionEncounterDiagnosis
     private lateinit var registry: NormalizationRegistryClient
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
-        registry = mockk<NormalizationRegistryClient> {
-            every {
-                getRequiredValueSet("Condition.code", RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value)
-            } returns possibleConditionCodes
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
+        registry =
+            mockk<NormalizationRegistryClient> {
+                every {
+                    getRequiredValueSet("Condition.code", RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value)
+                } returns possibleConditionCodes
+            }
 
         roninConditionEncounterDiagnosis = RoninConditionEncounterDiagnosis(normalizer, localizer, registry, "")
     }
@@ -87,27 +90,31 @@ class RoninConditionEncounterDiagnosisGeneratorTest {
     fun `example use for patient and condition encounter diagnosis with input parameters - missing required fields generated`() {
         // create patient and condition encounter diagnosis for tenant
         val rcdmPatient = rcdmPatient("test") {}
-        val roninCondition = rcdmPatient.rcdmConditionEncounterDiagnosis {
-            // add any attributes you need
-            id of Id("12345")
-            extension of listOf(conditionCodeExtension)
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-            category of listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = CodeSystem.CONDITION_CATEGORY.uri,
-                            code = Code("potatos")
-                        )
+        val roninCondition =
+            rcdmPatient.rcdmConditionEncounterDiagnosis {
+                // add any attributes you need
+                id of Id("12345")
+                extension of listOf(conditionCodeExtension)
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
                     )
-                )
-            )
-        }
+                category of
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.CONDITION_CATEGORY.uri,
+                                        code = Code("potatos"),
+                                    ),
+                                ),
+                        ),
+                    )
+            }
         val qualified = roninConditionEncounterDiagnosis.qualifies(roninCondition)
         val validate = roninConditionEncounterDiagnosis.validate(roninCondition).hasErrors()
         assertEquals(roninCondition.code?.coding?.size, 1)
@@ -124,17 +131,20 @@ class RoninConditionEncounterDiagnosisGeneratorTest {
 
     @Test
     fun `generates ronin condition encounter diagnosis with bad input code - fails validation`() {
-        val roninCondition = rcdmConditionEncounterDiagnosis("test") {
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "not valid system"
-                        version of "1"
-                        code of Code("bad code")
+        val roninCondition =
+            rcdmConditionEncounterDiagnosis("test") {
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "not valid system"
+                                    version of "1"
+                                    code of Code("bad code")
+                                },
+                            )
                     }
-                )
             }
-        }
         val qualified = roninConditionEncounterDiagnosis.qualifies(roninCondition)
         val validate = roninConditionEncounterDiagnosis.validate(roninCondition).hasErrors()
         assertTrue(validate)
@@ -143,9 +153,10 @@ class RoninConditionEncounterDiagnosisGeneratorTest {
 
     @Test
     fun `rcdmConditionEncounterDiagnosis - valid subject input - validate succeeds`() {
-        val roninCondition = rcdmConditionEncounterDiagnosis("test") {
-            subject of rcdmReference("Patient", "456")
-        }
+        val roninCondition =
+            rcdmConditionEncounterDiagnosis("test") {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = roninConditionEncounterDiagnosis.validate(roninCondition, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/456", roninCondition.subject?.reference?.value)
@@ -163,9 +174,10 @@ class RoninConditionEncounterDiagnosisGeneratorTest {
     @Test
     fun `rcdmPatient rcdmConditionEncounterDiagnosis - valid subject input overrides base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val roninCondition = rcdmPatient.rcdmConditionEncounterDiagnosis {
-            subject of rcdmReference("Patient", "456")
-        }
+        val roninCondition =
+            rcdmPatient.rcdmConditionEncounterDiagnosis {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = roninConditionEncounterDiagnosis.validate(roninCondition, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/456", roninCondition.subject?.reference?.value)
@@ -174,9 +186,10 @@ class RoninConditionEncounterDiagnosisGeneratorTest {
     @Test
     fun `rcdmPatient rcdmConditionEncounterDiagnosis - base patient overrides invalid subject input - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val roninCondition = rcdmPatient.rcdmConditionEncounterDiagnosis {
-            subject of reference("Patient", "456")
-        }
+        val roninCondition =
+            rcdmPatient.rcdmConditionEncounterDiagnosis {
+                subject of reference("Patient", "456")
+            }
         val validation = roninConditionEncounterDiagnosis.validate(roninCondition, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/${rcdmPatient.id?.value}", roninCondition.subject?.reference?.value)
@@ -185,9 +198,10 @@ class RoninConditionEncounterDiagnosisGeneratorTest {
     @Test
     fun `rcdmPatient rcdmConditionEncounterDiagnosis - fhir id input for both - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") { id of "99" }
-        val roninCondition = rcdmPatient.rcdmConditionEncounterDiagnosis {
-            id of "88"
-        }
+        val roninCondition =
+            rcdmPatient.rcdmConditionEncounterDiagnosis {
+                id of "88"
+            }
         val validation = roninConditionEncounterDiagnosis.validate(roninCondition, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals(3, roninCondition.identifier.size)

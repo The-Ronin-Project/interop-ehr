@@ -11,14 +11,17 @@ import org.springframework.stereotype.Component
 @Component
 class CernerLocationService(
     cernerClient: CernerClient,
-    @Value("\${cerner.fhir.batchSize:10}") private val batchSize: Int
+    @Value("\${cerner.fhir.batchSize:10}") private val batchSize: Int,
 ) : LocationService, CernerFHIRService<Location>(cernerClient, batchSize) {
     override val fhirURLSearchPart = "/Location"
     override val fhirResourceType = Location::class.java
 
     @Deprecated("Use getByIDs")
     @Trace
-    override fun getLocationsByFHIRId(tenant: Tenant, locationIds: List<String>): Map<String, Location> {
+    override fun getLocationsByFHIRId(
+        tenant: Tenant,
+        locationIds: List<String>,
+    ): Map<String, Location> {
         return getByIDs(tenant, locationIds)
     }
 }

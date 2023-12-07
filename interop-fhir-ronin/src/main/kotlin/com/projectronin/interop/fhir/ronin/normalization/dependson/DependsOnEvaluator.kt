@@ -13,5 +13,8 @@ interface DependsOnEvaluator<T : Resource<T>> {
     /**
      * Returns true if the [resource] meets the condition of the [dependsOn].
      */
-    fun meetsDependsOn(resource: T, dependsOn: List<ConceptMapDependsOn>): Boolean
+    fun meetsDependsOn(
+        resource: T,
+        dependsOn: List<ConceptMapDependsOn>,
+    ): Boolean
 }

@@ -19,7 +19,7 @@ class CernerIdentifierService : IdentifierService {
     @Trace
     override fun getPractitionerIdentifier(
         tenant: Tenant,
-        identifiers: List<Identifier>
+        identifiers: List<Identifier>,
     ): Identifier {
         throw NotImplementedError("getPractitionerIdentifier not implemented for Cerner, as they will always use the FHIR ID")
     }
@@ -27,7 +27,7 @@ class CernerIdentifierService : IdentifierService {
     @Trace
     override fun getPatientIdentifier(
         tenant: Tenant,
-        identifiers: List<Identifier>
+        identifiers: List<Identifier>,
     ): Identifier {
         throw NotImplementedError("getPatientIdentifier not implemented for Cerner, as they will always use the FHIR ID")
     }
@@ -35,7 +35,7 @@ class CernerIdentifierService : IdentifierService {
     @Trace
     override fun getPractitionerProviderIdentifier(
         tenant: Tenant,
-        identifiers: FHIRIdentifiers
+        identifiers: FHIRIdentifiers,
     ): Identifier {
         return getValidFHIRId(identifiers)
     }
@@ -43,7 +43,7 @@ class CernerIdentifierService : IdentifierService {
     @Trace
     override fun getPractitionerUserIdentifier(
         tenant: Tenant,
-        identifiers: FHIRIdentifiers
+        identifiers: FHIRIdentifiers,
     ): Identifier {
         return getValidFHIRId(identifiers)
     }
@@ -51,26 +51,34 @@ class CernerIdentifierService : IdentifierService {
     @Trace
     override fun getMRNIdentifier(
         tenant: Tenant,
-        identifiers: List<Identifier>
+        identifiers: List<Identifier>,
     ): Identifier {
         val system = Uri(tenant.vendorAs<Cerner>().patientMRNSystem)
         return identifiers.firstOrNull { it.system == system }
-            ?: throw VendorIdentifierNotFoundException("No MRN identifier with system '${tenant.vendorAs<Cerner>().patientMRNSystem}' found for Patient")
+            ?: throw VendorIdentifierNotFoundException(
+                "No MRN identifier with system '${tenant.vendorAs<Cerner>().patientMRNSystem}' found for Patient",
+            )
     }
 
     @Trace
     override fun getLocationIdentifier(
         tenant: Tenant,
-        identifiers: List<Identifier>
+        identifiers: List<Identifier>,
     ): Identifier {
         throw NotImplementedError("getLocationIdentifier not implemented for Cerner, as they will always use the FHIR ID")
     }
 
-    override fun getOrderIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
+    override fun getOrderIdentifier(
+        tenant: Tenant,
+        identifiers: List<Identifier>,
+    ): Identifier {
         throw NotImplementedError("getOrderIdentifier not implemented for Cerner")
     }
 
-    override fun getEncounterIdentifier(tenant: Tenant, identifiers: List<Identifier>): Identifier {
+    override fun getEncounterIdentifier(
+        tenant: Tenant,
+        identifiers: List<Identifier>,
+    ): Identifier {
         throw NotImplementedError("getEncounterIdentifier not implemented for Cerner")
     }
 
@@ -78,9 +86,7 @@ class CernerIdentifierService : IdentifierService {
      * Returns a valid FHIR Id as an [Identifier], or throws an exception.  An [Id] is required in [FHIRIdentifiers],
      * so it will never be null, but the value in the [Id] is nullable and might not be there.
      */
-    private fun getValidFHIRId(
-        identifiers: FHIRIdentifiers
-    ): Identifier {
+    private fun getValidFHIRId(identifiers: FHIRIdentifiers): Identifier {
         return identifiers.id.toFhirIdentifier().apply {
             this?.value ?: throw VendorIdentifierNotFoundException("No value on FHIR identifier")
         }

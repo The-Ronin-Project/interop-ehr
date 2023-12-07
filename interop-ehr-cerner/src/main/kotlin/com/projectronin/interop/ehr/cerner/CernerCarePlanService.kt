@@ -21,14 +21,15 @@ class CernerCarePlanService(cernerClient: CernerClient) : CarePlanService, Cerne
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate,
-        endDate: LocalDate
-    ):
-        List<CarePlan> {
-        val parameters = mapOf(
-            "patient" to patientFhirId,
-            "category" to "assess-plan", // hard-coded: https://fhir.cerner.com/millennium/r4/clinical/care-provision/care-plan/#:~:text=The-,category,-parameter
-            "date" to getAltDateParam(startDate, endDate, tenant)
-        )
+        endDate: LocalDate,
+    ): List<CarePlan> {
+        val parameters =
+            mapOf(
+                "patient" to patientFhirId,
+                // hard-coded: https://fhir.cerner.com/millennium/r4/clinical/care-provision/care-plan/#:~:text=The-,category,-parameter
+                "category" to "assess-plan",
+                "date" to getAltDateParam(startDate, endDate, tenant),
+            )
         return getResourceListFromSearch(tenant, parameters)
     }
 }

@@ -7,5 +7,5 @@ import com.projectronin.interop.fhir.r4.resource.Resource
  */
 data class TransformResponse<T : Resource<T>>(
     val resource: T,
-    val embeddedResources: List<Resource<*>> = emptyList()
+    val embeddedResources: List<Resource<*>> = emptyList(),
 )

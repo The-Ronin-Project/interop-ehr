@@ -29,14 +29,17 @@ import java.util.Base64
 
 class EpicNoteServiceTest {
     private val capturedDocumentReference = slot<DocumentReference>()
-    private val queueService = mockk<QueueService> {
-        every { enqueueMessages(any()) } just runs
-    }
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
-    private val mdmService = mockk<MDMService> {
-    }
+    private val queueService =
+        mockk<QueueService> {
+            every { enqueueMessages(any()) } just runs
+        }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
+    private val mdmService =
+        mockk<MDMService> {
+        }
     private val epicNoteService =
         EpicNoteService(mdmService, queueService)
 
@@ -50,7 +53,7 @@ class EpicNoteServiceTest {
                 patient = any(),
                 practitioner = any(),
                 documentReference = capture(capturedDocumentReference),
-                tenant = tenant
+                tenant = tenant,
             )
         } returns testMDM
     }
@@ -59,23 +62,27 @@ class EpicNoteServiceTest {
     fun `works for sendPatientNote`() {
         val createdTime =
             LocalDateTime.of(2023, Month.JUNE, 6, 9, 30, 22)
-        val noteInput = NoteInput(
-            dateTime = createdTime,
-            isAlert = true,
-            noteSender = NoteSender.PATIENT,
-            noteText = "Note Text",
-            patient = patient {
-                identifier generates 2
-                name of listOf(
-                    name {
-                        use of Code("Offical")
-                    }
-                )
-            },
-            practitioner = practitioner {
-                identifier generates 1
-            }
-        )
+        val noteInput =
+            NoteInput(
+                dateTime = createdTime,
+                isAlert = true,
+                noteSender = NoteSender.PATIENT,
+                noteText = "Note Text",
+                patient =
+                    patient {
+                        identifier generates 2
+                        name of
+                            listOf(
+                                name {
+                                    use of Code("Offical")
+                                },
+                            )
+                    },
+                practitioner =
+                    practitioner {
+                        identifier generates 1
+                    },
+            )
         val result = epicNoteService.sendPatientNote(tenant, noteInput)
         assertEquals("123", result)
         val docRef = capturedDocumentReference.captured
@@ -84,7 +91,7 @@ class EpicNoteServiceTest {
         assertEquals("2023-06-06T09:30:22.000Z", docRef.date?.value)
         assertEquals(
             Base64.getEncoder().encodeToString("Note Text".toByteArray()),
-            docRef.content.first().attachment?.data?.value
+            docRef.content.first().attachment?.data?.value,
         )
         assertEquals(0, docRef.relatesTo.size)
     }
@@ -92,23 +99,27 @@ class EpicNoteServiceTest {
     @Test
     fun `works for sendPatientNoteAddendum`() {
         val createdTime = LocalDateTime.of(2023, Month.JUNE, 6, 9, 30, 22)
-        val noteInput = NoteInput(
-            dateTime = createdTime,
-            isAlert = false,
-            noteSender = NoteSender.PRACTITIONER,
-            noteText = "Note Text",
-            patient = patient {
-                identifier generates 2
-                name of listOf(
-                    name {
-                        use of Code("Offical")
-                    }
-                )
-            },
-            practitioner = practitioner {
-                identifier generates 1
-            }
-        )
+        val noteInput =
+            NoteInput(
+                dateTime = createdTime,
+                isAlert = false,
+                noteSender = NoteSender.PRACTITIONER,
+                noteText = "Note Text",
+                patient =
+                    patient {
+                        identifier generates 2
+                        name of
+                            listOf(
+                                name {
+                                    use of Code("Offical")
+                                },
+                            )
+                    },
+                practitioner =
+                    practitioner {
+                        identifier generates 1
+                    },
+            )
         val result = epicNoteService.sendPatientNoteAddendum(tenant, noteInput, "oldId")
         assertEquals("123", result)
         val docRef = capturedDocumentReference.captured
@@ -117,7 +128,7 @@ class EpicNoteServiceTest {
         assertEquals("2023-06-06T09:30:22.000Z", docRef.date?.value)
         assertEquals(
             Base64.getEncoder().encodeToString("Note Text".toByteArray()),
-            docRef.content.first().attachment?.data?.value
+            docRef.content.first().attachment?.data?.value,
         )
         assertEquals(1, docRef.relatesTo.size)
         assertEquals(DocumentRelationshipType.APPENDS.code, docRef.relatesTo.first().code?.value)
@@ -127,23 +138,27 @@ class EpicNoteServiceTest {
     @Test
     fun `works for patients without alerts`() {
         val createdTime = LocalDateTime.of(2023, Month.JUNE, 6, 9, 30, 22)
-        val noteInput = NoteInput(
-            dateTime = createdTime,
-            isAlert = false,
-            noteSender = NoteSender.PATIENT,
-            noteText = "Note Text",
-            patient = patient {
-                identifier generates 2
-                name of listOf(
-                    name {
-                        use of Code("Offical")
-                    }
-                )
-            },
-            practitioner = practitioner {
-                identifier generates 1
-            }
-        )
+        val noteInput =
+            NoteInput(
+                dateTime = createdTime,
+                isAlert = false,
+                noteSender = NoteSender.PATIENT,
+                noteText = "Note Text",
+                patient =
+                    patient {
+                        identifier generates 2
+                        name of
+                            listOf(
+                                name {
+                                    use of Code("Offical")
+                                },
+                            )
+                    },
+                practitioner =
+                    practitioner {
+                        identifier generates 1
+                    },
+            )
         val result = epicNoteService.sendPatientNoteAddendum(tenant, noteInput, "oldId")
         assertEquals("123", result)
         val docRef = capturedDocumentReference.captured
@@ -152,7 +167,7 @@ class EpicNoteServiceTest {
         assertEquals("2023-06-06T09:30:22.000Z", docRef.date?.value)
         assertEquals(
             Base64.getEncoder().encodeToString("Note Text".toByteArray()),
-            docRef.content.first().attachment?.data?.value
+            docRef.content.first().attachment?.data?.value,
         )
         assertEquals(1, docRef.relatesTo.size)
         assertEquals(DocumentRelationshipType.APPENDS.code, docRef.relatesTo.first().code?.value)

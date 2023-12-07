@@ -23,26 +23,31 @@ internal class EpicDocumentReferenceTest {
     fun getDocumentReferencesByPatient() {
         val tenant = mockk<Tenant>()
 
-        val documentReference1 = mockk<BundleEntry> {
-            every { resource } returns mockk<DocumentReference>(relaxed = true) {
-                every { id!!.value } returns "12345"
+        val documentReference1 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<DocumentReference>(relaxed = true) {
+                        every { id!!.value } returns "12345"
+                    }
             }
-        }
-        val documentReference2 = mockk<BundleEntry> {
-            every { resource } returns mockk<DocumentReference>(relaxed = true) {
-                every { id!!.value } returns "67890"
+        val documentReference2 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<DocumentReference>(relaxed = true) {
+                        every { id!!.value } returns "67890"
+                    }
             }
-        }
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(documentReference1, documentReference2)
-            every { link } returns emptyList()
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(documentReference1, documentReference2)
+                every { link } returns emptyList()
+            }
 
         coEvery {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/DocumentReference",
-                any()
+                any(),
             )
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
 
@@ -51,7 +56,7 @@ internal class EpicDocumentReferenceTest {
                 tenant,
                 "12345",
                 LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
+                LocalDate.of(2015, 11, 1),
             )
 
         assertEquals(listOf(documentReference1.resource, documentReference2.resource), response)

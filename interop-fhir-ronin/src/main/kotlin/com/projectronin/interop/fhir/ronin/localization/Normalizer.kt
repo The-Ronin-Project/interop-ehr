@@ -21,12 +21,18 @@ class Normalizer : BaseGenericTransformer() {
     /**
      * Normalizes the [element] for the [tenant]
      */
-    fun <T : Any> normalize(element: T, tenant: Tenant): T {
+    fun <T : Any> normalize(
+        element: T,
+        tenant: Tenant,
+    ): T {
         val normalizedValues = getTransformedValues(element, tenant)
         return copy(element, normalizedValues)
     }
 
-    override fun transformType(element: Any, tenant: Tenant): TransformResult {
+    override fun transformType(
+        element: Any,
+        tenant: Tenant,
+    ): TransformResult {
         return when (element) {
             is Coding -> TransformResult(normalizeCoding(element, tenant))
             is Identifier -> TransformResult(normalizeIdentifier(element, tenant))
@@ -37,7 +43,10 @@ class Normalizer : BaseGenericTransformer() {
         }
     }
 
-    private fun normalizeExtension(extension: Extension, tenant: Tenant): TransformResult {
+    private fun normalizeExtension(
+        extension: Extension,
+        tenant: Tenant,
+    ): TransformResult {
         val normalizedExtension = transformOrNull(extension, tenant) ?: extension
         return if ((RoninExtension.values().find { it.value == normalizedExtension.url?.value } != null) ||
             (normalizedExtension.url != null && (normalizedExtension.value != null || normalizedExtension.extension.isNotEmpty()))
@@ -52,7 +61,10 @@ class Normalizer : BaseGenericTransformer() {
     /**
      * Normalizes the [coding] for the [tenant].
      */
-    private fun normalizeCoding(coding: Coding, tenant: Tenant): Coding? {
+    private fun normalizeCoding(
+        coding: Coding,
+        tenant: Tenant,
+    ): Coding? {
         val nonNormalizedCoding = transformOrNull(coding, tenant)
         val normalizedSystem = coding.system?.normalizeCoding()
         return if (normalizedSystem == coding.system) {
@@ -65,7 +77,10 @@ class Normalizer : BaseGenericTransformer() {
     /**
      * Normalizes the [identifier] for the [tenant].
      */
-    private fun normalizeIdentifier(identifier: Identifier, tenant: Tenant): Identifier? {
+    private fun normalizeIdentifier(
+        identifier: Identifier,
+        tenant: Tenant,
+    ): Identifier? {
         val nonNormalizedIdentifier = transformOrNull(identifier, tenant)
         val normalizedSystem = identifier.system?.normalizeIdentifier()
         return if (normalizedSystem == identifier.system) {
@@ -80,7 +95,7 @@ class Normalizer : BaseGenericTransformer() {
      */
     private fun normalizeCodeableConcept(
         codeableConcept: CodeableConcept,
-        tenant: Tenant
+        tenant: Tenant,
     ): CodeableConcept {
         val nonNormalizedCodeableConcept = transformOrNull(codeableConcept, tenant) ?: codeableConcept
 

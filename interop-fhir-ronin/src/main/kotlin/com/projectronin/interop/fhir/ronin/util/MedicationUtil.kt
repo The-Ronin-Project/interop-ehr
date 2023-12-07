@@ -12,16 +12,16 @@ enum class OriginalMedDataType(val value: Code) {
     LiteralReference(Code("literal reference")),
     LogicalReference(Code("logical reference")),
     ContainedReference(Code("contained reference")),
-    CodeableConcept(Code("codeable concept"));
+    CodeableConcept(Code("codeable concept")),
+    ;
 
     companion object { // helper to check value of extension populated from medication[x]
-        infix fun from(value: Any?): OriginalMedDataType? =
-            value?.let { OriginalMedDataType.values().firstOrNull { it.value == value } }
+        infix fun from(value: Any?): OriginalMedDataType? = value?.let { OriginalMedDataType.values().firstOrNull { it.value == value } }
     }
 }
 
 enum class OriginalDynamicType(val value: String) {
-    CodeableConcept("CODEABLE_CONCEPT")
+    CodeableConcept("CODEABLE_CONCEPT"),
 }
 
 /**
@@ -32,23 +32,22 @@ enum class OriginalDynamicType(val value: String) {
  * contained reference (e.g. "reference": "#00000000" starts with # |
  * codeable concept (e.g. type is codeable concept)
  */
-fun populateExtensionWithReference(
-    normalized: DynamicValue<Any>?
-): List<Extension> {
+fun populateExtensionWithReference(normalized: DynamicValue<Any>?): List<Extension> {
     val type = normalized?.type ?: return emptyList()
-    val extensionValue = when (type) {
-        DynamicValueType.CODEABLE_CONCEPT -> OriginalMedDataType.CodeableConcept.value
-        DynamicValueType.REFERENCE -> getReferenceType(normalized)
-        else -> null
-    }
+    val extensionValue =
+        when (type) {
+            DynamicValueType.CODEABLE_CONCEPT -> OriginalMedDataType.CodeableConcept.value
+            DynamicValueType.REFERENCE -> getReferenceType(normalized)
+            else -> null
+        }
     return if (extensionValue == null) {
         emptyList()
     } else {
         listOf(
             Extension(
                 url = Uri(RoninExtension.ORIGINAL_MEDICATION_DATATYPE.uri.value),
-                value = DynamicValue(type = DynamicValueType.CODE, value = extensionValue)
-            )
+                value = DynamicValue(type = DynamicValueType.CODE, value = extensionValue),
+            ),
         )
     }
 }

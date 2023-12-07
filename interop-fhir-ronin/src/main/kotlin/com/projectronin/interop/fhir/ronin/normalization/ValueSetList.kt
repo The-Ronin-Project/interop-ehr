@@ -5,5 +5,5 @@ import com.projectronin.interop.fhir.ronin.validation.ValueSetMetadata
 
 data class ValueSetList(
     val codes: List<Coding>,
-    val metadata: ValueSetMetadata? = null
+    val metadata: ValueSetMetadata? = null,
 )

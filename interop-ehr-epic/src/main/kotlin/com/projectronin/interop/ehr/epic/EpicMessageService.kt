@@ -31,25 +31,29 @@ class EpicMessageService(
     private val epicClient: EpicClient,
     private val providerPoolService: ProviderPoolService,
     private val ehrDataAuthorityClient: EHRDataAuthorityClient,
-    private val identifierService: EpicIdentifierService
+    private val identifierService: EpicIdentifierService,
 ) :
     MessageService {
     private val logger = KotlinLogging.logger { }
     private val sendMessageUrlPart = "/api/epic/2014/Common/Utility/SENDMESSAGE/Message"
 
     @Trace
-    override fun sendMessage(tenant: Tenant, messageInput: EHRMessageInput): String {
+    override fun sendMessage(
+        tenant: Tenant,
+        messageInput: EHRMessageInput,
+    ): String {
         val vendor = tenant.vendor
         if (vendor !is Epic) throw IllegalStateException("Tenant is not Epic vendor: ${tenant.mnemonic}")
         logger.info { "SendMessage started for ${tenant.mnemonic}" }
 
-        val patient = runBlocking {
-            ehrDataAuthorityClient.getResourceAs<Patient>(
-                tenant.mnemonic,
-                "Patient",
-                messageInput.patientFHIRID.localize(tenant)
-            ) ?: throw VendorIdentifierNotFoundException("No Patient found for ${messageInput.patientFHIRID}")
-        }
+        val patient =
+            runBlocking {
+                ehrDataAuthorityClient.getResourceAs<Patient>(
+                    tenant.mnemonic,
+                    "Patient",
+                    messageInput.patientFHIRID.localize(tenant),
+                ) ?: throw VendorIdentifierNotFoundException("No Patient found for ${messageInput.patientFHIRID}")
+            }
         val mrn = identifierService.getMRNIdentifier(tenant, patient.identifier)
         val mrnValue =
             mrn.value?.value ?: throw VendorIdentifierNotFoundException("Failed to find a value on Patient's MRN")
@@ -61,18 +65,20 @@ class EpicMessageService(
         span?.let {
             it.setTag(
                 "message.recipients",
-                sendMessageRequest.recipients?.joinToString { r -> "${if (r.isPool) "pool" else "user"}:${r.iD}" }
+                sendMessageRequest.recipients?.joinToString { r -> "${if (r.isPool) "pool" else "user"}:${r.iD}" },
             )
         }
 
-        val response = try {
-            runBlocking {
-                epicClient.post(tenant, sendMessageUrlPart, sendMessageRequest).body<SendMessageResponse>()
+        val response =
+            try {
+                runBlocking {
+                    epicClient.post(tenant, sendMessageUrlPart, sendMessageRequest).body<SendMessageResponse>()
+                }
+            } catch (e: Exception) {
+                // further investigation required to see if this is a sustainable solution
+                logger.error { "SendMessage failed for ${tenant.mnemonic}, with exception ${e.message}" }
+                throw e
             }
-        } catch (e: Exception) { // further investigation required to see if this is a sustainable solution
-            logger.error { "SendMessage failed for ${tenant.mnemonic}, with exception ${e.message}" }
-            throw e
-        }
         logger.info { "SendMessage completed for ${tenant.mnemonic}" }
 
         val resultId = response.idTypes[0].id
@@ -90,7 +96,7 @@ class EpicMessageService(
         userId: String,
         messageType: String,
         tenant: Tenant,
-        patientMRN: String
+        patientMRN: String,
     ): SendMessageRequest {
         return SendMessageRequest(
             patientID = patientMRN,
@@ -98,13 +104,13 @@ class EpicMessageService(
             recipients = translateRecipients(messageInput.recipients, tenant),
             messageText = messageInput.text.split("\r\n", "\n").map { if (it.isEmpty()) " " else it },
             senderID = userId,
-            messageType = messageType
+            messageType = messageType,
         )
     }
 
     private fun translateRecipients(
         recipients: List<EHRRecipient>,
-        tenant: Tenant
+        tenant: Tenant,
     ): List<SendMessageRecipient> {
         // The Epic implementation of sendMessage expects the VendorIdentifier to be an IdentifierVendorIdentifier.
         // with a value. If it isn't, this will rightfully throw an exception.
@@ -119,7 +125,7 @@ class EpicMessageService(
             val poolID = poolList[userID]
             SendMessageRecipient(
                 iD = poolID ?: userID,
-                isPool = (poolID != null)
+                isPool = (poolID != null),
             )
         }.toList().distinct() // deduplicate
     }

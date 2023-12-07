@@ -22,16 +22,18 @@ class EHRAuthenticationBroker(authenticationServices: List<AuthenticationService
      * Retrieves the current [Authentication] for the supplied [Tenant].
      */
     fun getAuthentication(tenant: Tenant): Authentication? {
-        val authentication = authenticationByTenant[tenant.mnemonic].takeIf {
-            it?.expiresAt?.isAfter(
-                Instant.now().plusSeconds(expirationBuffer)
-            ) ?: false
-        }
+        val authentication =
+            authenticationByTenant[tenant.mnemonic].takeIf {
+                it?.expiresAt?.isAfter(
+                    Instant.now().plusSeconds(expirationBuffer),
+                ) ?: false
+            }
 
         authentication?.let { return authentication }
 
-        val authenticationService = authenticationServiceByVendor[tenant.vendor.type]
-            ?: throw IllegalStateException("No AuthenticationService registered for ${tenant.vendor.type}")
+        val authenticationService =
+            authenticationServiceByVendor[tenant.vendor.type]
+                ?: throw IllegalStateException("No AuthenticationService registered for ${tenant.vendor.type}")
 
         val newAuthentication = authenticationService.getAuthentication(tenant)
         newAuthentication?.let { authenticationByTenant.put(tenant.mnemonic, newAuthentication) }

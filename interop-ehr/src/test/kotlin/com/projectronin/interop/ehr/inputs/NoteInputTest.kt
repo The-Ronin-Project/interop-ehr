@@ -10,18 +10,18 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 class NoteInputTest {
-
     @Test
     fun `can create object`() {
         val dt = LocalDateTime.now()
-        val test = NoteInput(
-            noteText = "123",
-            dateTime = dt,
-            noteSender = NoteSender.PRACTITIONER,
-            isAlert = false,
-            patient = mockk<Patient>(),
-            practitioner = mockk<Practitioner>()
-        )
+        val test =
+            NoteInput(
+                noteText = "123",
+                dateTime = dt,
+                noteSender = NoteSender.PRACTITIONER,
+                isAlert = false,
+                patient = mockk<Patient>(),
+                practitioner = mockk<Practitioner>(),
+            )
         assertEquals("123", test.noteText)
         assertEquals(dt, test.dateTime)
         assertEquals(NoteSender.PRACTITIONER, test.noteSender)

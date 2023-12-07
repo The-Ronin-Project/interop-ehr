@@ -31,68 +31,78 @@ import java.time.LocalDateTime
 class RoninLaboratoryResult(
     normalizer: Normalizer,
     localizer: Localizer,
-    registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient,
 ) :
     BaseRoninObservation(
-        R4ObservationValidator,
-        RoninProfile.OBSERVATION_LABORATORY_RESULT.value,
-        normalizer,
-        localizer,
-        registryClient
-    ) {
+            R4ObservationValidator,
+            RoninProfile.OBSERVATION_LABORATORY_RESULT.value,
+            normalizer,
+            localizer,
+            registryClient,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_29_0
     override val profileVersion = 4
 
-    override fun qualifyingCategories() =
-        listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("laboratory")))
+    override fun qualifyingCategories() = listOf(Coding(system = CodeSystem.OBSERVATION_CATEGORY.uri, code = Code("laboratory")))
 
     // Dynamic value checks - override BaseRoninObservation for RoninLaboratoryResult
-    override val acceptedEffectiveTypes = listOf(
-        DynamicValueType.DATE_TIME,
-        DynamicValueType.PERIOD
-    )
+    override val acceptedEffectiveTypes =
+        listOf(
+            DynamicValueType.DATE_TIME,
+            DynamicValueType.PERIOD,
+        )
 
     private val requiredCategoryError = RequiredFieldError(Observation::category)
-    private val invalidQuantitySystemError = FHIRError(
-        code = "USCORE_LABOBS_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Quantity system must be UCUM",
-        location = LocationContext("Observation", "valueQuantity.system")
-    )
-    private val noChildValueOrDataAbsentReasonError = FHIRError(
-        code = "USCORE_LABOBS_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "If there is no component or hasMember element then either a value[x] or a data absent reason must be present",
-        location = LocationContext(Observation::class)
-    )
-    private val invalidDateTimeError = FHIRError(
-        code = "USCORE_LABOBS_004",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Datetime must be at least to day",
-        location = LocationContext(Observation::effective)
-    )
-    private val invalidCodeSystemError = FHIRError(
-        code = "RONIN_LABOBS_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Code system must be LOINC",
-        location = LocationContext(Observation::code)
-    )
+    private val invalidQuantitySystemError =
+        FHIRError(
+            code = "USCORE_LABOBS_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Quantity system must be UCUM",
+            location = LocationContext("Observation", "valueQuantity.system"),
+        )
+    private val noChildValueOrDataAbsentReasonError =
+        FHIRError(
+            code = "USCORE_LABOBS_003",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "If there is no component or hasMember element then either a value[x] or a data absent reason must be present",
+            location = LocationContext(Observation::class),
+        )
+    private val invalidDateTimeError =
+        FHIRError(
+            code = "USCORE_LABOBS_004",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Datetime must be at least to day",
+            location = LocationContext(Observation::effective),
+        )
+    private val invalidCodeSystemError =
+        FHIRError(
+            code = "RONIN_LABOBS_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Code system must be LOINC",
+            location = LocationContext(Observation::code),
+        )
 
-    private val singleObservationCodeError = FHIRError(
-        code = "RONIN_LABOBS_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Coding list must contain exactly 1 entry",
-        location = LocationContext(Observation::code)
-    )
+    private val singleObservationCodeError =
+        FHIRError(
+            code = "RONIN_LABOBS_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Coding list must contain exactly 1 entry",
+            location = LocationContext(Observation::code),
+        )
 
-    private val invalidCodedValueSystemError = FHIRError(
-        code = "RONIN_LABOBS_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Value code system must be SNOMED CT",
-        location = LocationContext(Observation::value)
-    )
+    private val invalidCodedValueSystemError =
+        FHIRError(
+            code = "RONIN_LABOBS_003",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Value code system must be SNOMED CT",
+            location = LocationContext(Observation::value),
+        )
 
-    override fun validateRonin(element: Observation, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         super.validateRonin(element, parentContext, validation)
         validation.apply {
             if (element.code != null) {
@@ -100,14 +110,18 @@ class RoninLaboratoryResult(
                     checkTrue(
                         coding.all { it.system == CodeSystem.LOINC.uri },
                         invalidCodeSystemError,
-                        parentContext
+                        parentContext,
                     )
                 }
             }
         }
     }
 
-    override fun validateUSCore(element: Observation, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         super.validateUSCore(element, parentContext, validation)
         validation.apply {
             checkNotNull(element.category, requiredCategoryError, parentContext)
@@ -130,7 +144,7 @@ class RoninLaboratoryResult(
                     checkTrue(
                         quantity.coding.none { it.system?.value != CodeSystem.SNOMED_CT.uri.value },
                         invalidCodedValueSystemError,
-                        parentContext
+                        parentContext,
                     )
                 }
             }
@@ -139,7 +153,7 @@ class RoninLaboratoryResult(
                 checkTrue(
                     (element.value != null || element.dataAbsentReason != null),
                     noChildValueOrDataAbsentReasonError,
-                    parentContext
+                    parentContext,
                 )
             }
 
@@ -157,7 +171,7 @@ class RoninLaboratoryResult(
     override fun validateSpecificObservation(
         element: Observation,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         validation.apply {
             val codingList = element.code?.coding
@@ -170,9 +184,9 @@ class RoninLaboratoryResult(
                     RoninInvalidDynamicValueError(
                         Observation::effective,
                         acceptedEffectiveTypes,
-                        "Ronin Laboratory Result"
+                        "Ronin Laboratory Result",
                     ),
-                    parentContext
+                    parentContext,
                 )
             }
         }
@@ -184,18 +198,20 @@ class RoninLaboratoryResult(
         normalized: Observation,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<Observation>?, Validation> {
-        val validation = validation {
-            checkNotNull(normalized.id, requiredIdError, parentContext)
-        }
+        val validation =
+            validation {
+                checkNotNull(normalized.id, requiredIdError, parentContext)
+            }
 
         // TODO: specimen - requires url == http://projectronin.io/fhir/StructureDefinition/ronin-specimen
 
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant)
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+            )
         return Pair(TransformResponse(transformed), validation)
     }
 }

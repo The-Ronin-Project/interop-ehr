@@ -23,26 +23,31 @@ internal class EpicCarePlanServiceTest {
     fun getCarePlansByFHIRId() {
         val tenant = mockk<Tenant>()
 
-        val carePlan1 = mockk<BundleEntry> {
-            every { resource } returns mockk<CarePlan>(relaxed = true) {
-                every { id!!.value } returns "12345"
+        val carePlan1 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<CarePlan>(relaxed = true) {
+                        every { id!!.value } returns "12345"
+                    }
             }
-        }
-        val carePlan2 = mockk<BundleEntry> {
-            every { resource } returns mockk<CarePlan>(relaxed = true) {
-                every { id!!.value } returns "67890"
+        val carePlan2 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<CarePlan>(relaxed = true) {
+                        every { id!!.value } returns "67890"
+                    }
             }
-        }
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(carePlan1, carePlan2)
-            every { link } returns emptyList()
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(carePlan1, carePlan2)
+                every { link } returns emptyList()
+            }
 
         coEvery {
             epicClient.get(
                 tenant,
                 "/api/FHIR/R4/CarePlan",
-                mapOf("patient" to "12345", "category" to "736378000", "_count" to 50)
+                mapOf("patient" to "12345", "category" to "736378000", "_count" to 50),
             )
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
 
@@ -51,7 +56,7 @@ internal class EpicCarePlanServiceTest {
                 tenant,
                 "12345",
                 LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
+                LocalDate.of(2015, 11, 1),
             )
 
         assertEquals(listOf(carePlan1.resource, carePlan2.resource), response)

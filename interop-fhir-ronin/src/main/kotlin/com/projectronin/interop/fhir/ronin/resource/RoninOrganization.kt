@@ -28,7 +28,11 @@ class RoninOrganization(normalizer: Normalizer, localizer: Localizer) :
     private val requiredActiveFieldError = RequiredFieldError(Organization::active)
     private val requiredNameFieldError = RequiredFieldError(Organization::name)
 
-    override fun validateRonin(element: Organization, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: Organization,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
@@ -36,7 +40,11 @@ class RoninOrganization(normalizer: Normalizer, localizer: Localizer) :
         }
     }
 
-    override fun validateUSCore(element: Organization, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: Organization,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             checkNotNull(element.active, requiredActiveFieldError, parentContext)
 
@@ -50,12 +58,13 @@ class RoninOrganization(normalizer: Normalizer, localizer: Localizer) :
         normalized: Organization,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<Organization>?, Validation> {
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant)
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+            )
 
         return Pair(TransformResponse(transformed), Validation())
     }

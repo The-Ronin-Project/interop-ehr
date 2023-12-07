@@ -17,64 +17,75 @@ import org.junit.jupiter.api.assertThrows
 class EpicIdentifierServiceTest {
     private val epicDepartmentSystem = "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980"
     private val service = EpicIdentifierService()
-    private val tenant = createTestTenant(
-        practitionerProviderSystem = "practitionerProviderSystem",
-        practitionerUserSystem = "practitionerUserSystem",
-        mrnSystem = "mrnSystem",
-        internalSystem = "internalSystem",
-        departmentInternalSystem = epicDepartmentSystem
-    )
-    private val otherType = mockk<CodeableConcept> {
-        every { text } returns "Other".asFHIR()
-    }
-    private val otherValueType = mockk<Identifier> {
-        every { system } returns null
-        every { value } returns "other-value".asFHIR()
-        every { type } returns otherType
-    }
-    private val internalType = mockk<CodeableConcept> {
-        every { text } returns "Internal".asFHIR()
-    }
-    private val internalValueType = mockk<Identifier> {
-        every { system } returns null
-        every { value } returns "internal-value".asFHIR()
-        every { type } returns internalType
-    }
-    private val epiclocationIdentifier = mockk<Identifier> {
-        every { system } returns Uri(epicDepartmentSystem)
-        every { value } returns "internal-value".asFHIR()
-        every { type } returns internalType
-    }
-    private val epicOrderIdentifier = mockk<Identifier> {
-        every { system } returns Uri("orderSystem")
-        every { value } returns "orderID".asFHIR()
-    }
-    private val epicEncounterIdentifier = mockk<Identifier> {
-        every { system } returns Uri("csnSystem")
-        every { value?.value } returns "encCSN"
-    }
+    private val tenant =
+        createTestTenant(
+            practitionerProviderSystem = "practitionerProviderSystem",
+            practitionerUserSystem = "practitionerUserSystem",
+            mrnSystem = "mrnSystem",
+            internalSystem = "internalSystem",
+            departmentInternalSystem = epicDepartmentSystem,
+        )
+    private val otherType =
+        mockk<CodeableConcept> {
+            every { text } returns "Other".asFHIR()
+        }
+    private val otherValueType =
+        mockk<Identifier> {
+            every { system } returns null
+            every { value } returns "other-value".asFHIR()
+            every { type } returns otherType
+        }
+    private val internalType =
+        mockk<CodeableConcept> {
+            every { text } returns "Internal".asFHIR()
+        }
+    private val internalValueType =
+        mockk<Identifier> {
+            every { system } returns null
+            every { value } returns "internal-value".asFHIR()
+            every { type } returns internalType
+        }
+    private val epiclocationIdentifier =
+        mockk<Identifier> {
+            every { system } returns Uri(epicDepartmentSystem)
+            every { value } returns "internal-value".asFHIR()
+            every { type } returns internalType
+        }
+    private val epicOrderIdentifier =
+        mockk<Identifier> {
+            every { system } returns Uri("orderSystem")
+            every { value } returns "orderID".asFHIR()
+        }
+    private val epicEncounterIdentifier =
+        mockk<Identifier> {
+            every { system } returns Uri("csnSystem")
+            every { value?.value } returns "encCSN"
+        }
 
     @Test
     fun `getPractitionerIdentifier with no matching type`() {
         val identifiers = listOf(otherValueType, otherValueType)
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getPractitionerIdentifier(tenant, identifiers)
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getPractitionerIdentifier(tenant, identifiers)
+            }
         assertEquals(
             "No practitioner identifier with system 'practitionerProviderSystem' found",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `getPractitionerIdentifier properly finds external`() {
-        val externalIdentifier = mockk<Identifier> {
-            every { system } returns null
-            every { value } returns "external-value".asFHIR()
-            every { type } returns mockk {
-                every { text } returns "external".asFHIR()
+        val externalIdentifier =
+            mockk<Identifier> {
+                every { system } returns null
+                every { value } returns "external-value".asFHIR()
+                every { type } returns
+                    mockk {
+                        every { text } returns "external".asFHIR()
+                    }
             }
-        }
         val identifiers = listOf(otherValueType, otherValueType, externalIdentifier)
         val practitionerIdentifier = service.getPractitionerIdentifier(tenant, identifiers)
         assertEquals("practitionerProviderSystem", practitionerIdentifier.system?.value)
@@ -84,13 +95,15 @@ class EpicIdentifierServiceTest {
 
     @Test
     fun `getPractitionerIdentifier properly cascades`() {
-        val externalIdentifier = mockk<Identifier> {
-            every { system } returns null
-            every { value } returns "external-value".asFHIR()
-            every { type } returns mockk {
-                every { text } returns "external".asFHIR()
+        val externalIdentifier =
+            mockk<Identifier> {
+                every { system } returns null
+                every { value } returns "external-value".asFHIR()
+                every { type } returns
+                    mockk {
+                        every { text } returns "external".asFHIR()
+                    }
             }
-        }
         val identifiers = listOf(internalValueType, otherValueType, externalIdentifier)
         val practitionerIdentifier = service.getPractitionerIdentifier(tenant, identifiers)
         assertEquals("practitionerProviderSystem", practitionerIdentifier.system?.value)
@@ -110,52 +123,62 @@ class EpicIdentifierServiceTest {
 
     @Test
     fun `getPatientIdentifier with null type`() {
-        val identifier = mockk<Identifier> {
-            every { value } returns "other-value".asFHIR()
-            every { type } returns null
-        }
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getPatientIdentifier(tenant, listOf(identifier))
-        }
+        val identifier =
+            mockk<Identifier> {
+                every { value } returns "other-value".asFHIR()
+                every { type } returns null
+            }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getPatientIdentifier(tenant, listOf(identifier))
+            }
         assertEquals("No matching identifier for the patient with system internalSystem", exception.message)
     }
 
     @Test
     fun `getPatientIdentifier with type with null text`() {
-        val identifier = mockk<Identifier> {
-            every { value } returns "other-value".asFHIR()
-            every { type } returns mockk {
-                every { text } returns null
+        val identifier =
+            mockk<Identifier> {
+                every { value } returns "other-value".asFHIR()
+                every { type } returns
+                    mockk {
+                        every { text } returns null
+                    }
             }
-        }
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getPatientIdentifier(tenant, listOf(identifier))
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getPatientIdentifier(tenant, listOf(identifier))
+            }
         assertEquals("No matching identifier for the patient with system internalSystem", exception.message)
     }
 
     @Test
     fun `getPatientIdentifier with type with text with null value`() {
-        val identifier = mockk<Identifier> {
-            every { value } returns "other-value".asFHIR()
-            every { type } returns mockk {
-                every { text } returns mockk {
-                    every { value } returns null
-                }
+        val identifier =
+            mockk<Identifier> {
+                every { value } returns "other-value".asFHIR()
+                every { type } returns
+                    mockk {
+                        every { text } returns
+                            mockk {
+                                every { value } returns null
+                            }
+                    }
             }
-        }
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getPatientIdentifier(tenant, listOf(identifier))
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getPatientIdentifier(tenant, listOf(identifier))
+            }
         assertEquals("No matching identifier for the patient with system internalSystem", exception.message)
     }
 
     @Test
     fun `getPatientIdentifier with no matching type`() {
         val identifiers = listOf(otherValueType, otherValueType)
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getPatientIdentifier(tenant, identifiers)
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getPatientIdentifier(tenant, identifiers)
+            }
         assertEquals("No matching identifier for the patient with system internalSystem", exception.message)
     }
 
@@ -170,11 +193,12 @@ class EpicIdentifierServiceTest {
 
     @Test
     fun `getPatientIdentifier with internal type and system`() {
-        val internalIdentifierWithSystem = mockk<Identifier> {
-            every { value } returns "internal-value".asFHIR()
-            every { type } returns internalType
-            every { system } returns null
-        }
+        val internalIdentifierWithSystem =
+            mockk<Identifier> {
+                every { value } returns "internal-value".asFHIR()
+                every { type } returns internalType
+                every { system } returns null
+            }
 
         val identifiers = listOf(internalIdentifierWithSystem, otherValueType)
 
@@ -199,12 +223,13 @@ class EpicIdentifierServiceTest {
     @Test
     fun `getPractitionerProviderIdentifier with no matching system`() {
         val fhirIdentifiers = FHIRIdentifiers(Id("1234"), listOf(r4UnknownSystemExternal, r4UnknownSystemExternal))
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
+            }
         assertEquals(
             "No practitioner provider identifier with system 'practitionerProviderSystem' found for resource with FHIR id '1234'",
-            exception.message
+            exception.message,
         )
     }
 
@@ -213,16 +238,18 @@ class EpicIdentifierServiceTest {
         val identifier =
             Identifier(system = Uri("practitionerProviderSystem"), type = null)
 
-        val fhirIdentifiers = FHIRIdentifiers(
-            Id("1234"),
-            listOf(identifier)
-        )
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
-        }
+        val fhirIdentifiers =
+            FHIRIdentifiers(
+                Id("1234"),
+                listOf(identifier),
+            )
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
+            }
         assertEquals(
             "No practitioner provider identifier with system 'practitionerProviderSystem' found for resource with FHIR id '1234'",
-            exception.message
+            exception.message,
         )
     }
 
@@ -231,16 +258,18 @@ class EpicIdentifierServiceTest {
         val identifier =
             Identifier(system = Uri("practitionerProviderSystem"), type = CodeableConcept(text = null))
 
-        val fhirIdentifiers = FHIRIdentifiers(
-            Id("1234"),
-            listOf(identifier)
-        )
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
-        }
+        val fhirIdentifiers =
+            FHIRIdentifiers(
+                Id("1234"),
+                listOf(identifier),
+            )
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
+            }
         assertEquals(
             "No practitioner provider identifier with system 'practitionerProviderSystem' found for resource with FHIR id '1234'",
-            exception.message
+            exception.message,
         )
     }
 
@@ -249,40 +278,45 @@ class EpicIdentifierServiceTest {
         val identifier =
             Identifier(system = Uri("practitionerProviderSystem"), type = CodeableConcept(text = FHIRString(null)))
 
-        val fhirIdentifiers = FHIRIdentifiers(
-            Id("1234"),
-            listOf(identifier)
-        )
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
-        }
+        val fhirIdentifiers =
+            FHIRIdentifiers(
+                Id("1234"),
+                listOf(identifier),
+            )
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
+            }
         assertEquals(
             "No practitioner provider identifier with system 'practitionerProviderSystem' found for resource with FHIR id '1234'",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `getPractitionerProviderIdentifier with matching system and no External type`() {
-        val fhirIdentifiers = FHIRIdentifiers(
-            Id("1234"),
-            listOf(r4PractitionerProviderIdentifierInternal, r4PractitionerProviderIdentifierInternal)
-        )
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
-        }
+        val fhirIdentifiers =
+            FHIRIdentifiers(
+                Id("1234"),
+                listOf(r4PractitionerProviderIdentifierInternal, r4PractitionerProviderIdentifierInternal),
+            )
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
+            }
         assertEquals(
             "No practitioner provider identifier with system 'practitionerProviderSystem' found for resource with FHIR id '1234'",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `getPractitionerProviderIdentifier with matching system and External type`() {
-        val fhirIdentifiers = FHIRIdentifiers(
-            Id("1234"),
-            listOf(r4PractitionerProviderIdentifierExternal, r4PractitionerProviderIdentifierInternal)
-        )
+        val fhirIdentifiers =
+            FHIRIdentifiers(
+                Id("1234"),
+                listOf(r4PractitionerProviderIdentifierExternal, r4PractitionerProviderIdentifierInternal),
+            )
         val vendorIdentifier = service.getPractitionerProviderIdentifier(tenant, fhirIdentifiers)
         assertEquals(r4PractitionerProviderIdentifierExternal, vendorIdentifier)
     }
@@ -290,49 +324,54 @@ class EpicIdentifierServiceTest {
     @Test
     fun `getPractitionerUserIdentifier with no matching system`() {
         val fhirIdentifiers = FHIRIdentifiers(Id("1234"), listOf(r4UnknownSystemExternal, r4UnknownSystemExternal))
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getPractitionerUserIdentifier(tenant, fhirIdentifiers)
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getPractitionerUserIdentifier(tenant, fhirIdentifiers)
+            }
         assertEquals(
             "No practitioner user identifier with system 'practitionerUserSystem' found for resource with FHIR id '1234'",
             "No practitioner user identifier with system 'practitionerUserSystem' found for resource with FHIR id '1234'",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `getPractitionerUserIdentifier with matching system and no External type`() {
-        val fhirIdentifiers = FHIRIdentifiers(
-            Id("1234"),
-            listOf(r4PractitionerUserIdentifierInternal, r4PractitionerUserIdentifierInternal)
-        )
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getPractitionerUserIdentifier(tenant, fhirIdentifiers)
-        }
+        val fhirIdentifiers =
+            FHIRIdentifiers(
+                Id("1234"),
+                listOf(r4PractitionerUserIdentifierInternal, r4PractitionerUserIdentifierInternal),
+            )
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getPractitionerUserIdentifier(tenant, fhirIdentifiers)
+            }
         assertEquals(
             "No practitioner user identifier with system 'practitionerUserSystem' found for resource with FHIR id '1234'",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `getPractitionerUserIdentifier with matching system and External type`() {
-        val fhirIdentifiers = FHIRIdentifiers(
-            Id("1234"),
-            listOf(r4PractitionerUserIdentifierExternal, r4PractitionerUserIdentifierInternal)
-        )
+        val fhirIdentifiers =
+            FHIRIdentifiers(
+                Id("1234"),
+                listOf(r4PractitionerUserIdentifierExternal, r4PractitionerUserIdentifierInternal),
+            )
         val vendorIdentifier = service.getPractitionerUserIdentifier(tenant, fhirIdentifiers)
         assertEquals(r4PractitionerUserIdentifierExternal, vendorIdentifier)
     }
 
     @Test
     fun `getMRNIdentifier with no matching system`() {
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getMRNIdentifier(
-                tenant,
-                listOf(Identifier(system = Uri("notTheMRNSystem"), value = "mrn".asFHIR()))
-            )
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getMRNIdentifier(
+                    tenant,
+                    listOf(Identifier(system = Uri("notTheMRNSystem"), value = "mrn".asFHIR())),
+                )
+            }
         assertEquals("No MRN identifier with system 'mrnSystem' found for Patient", exception.message)
     }
 
@@ -345,24 +384,27 @@ class EpicIdentifierServiceTest {
     @Test
     fun `getLocationIdentifier with no matching type`() {
         val identifiers = listOf(otherValueType, otherValueType)
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getLocationIdentifier(tenant, identifiers)
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getLocationIdentifier(tenant, identifiers)
+            }
         assertEquals(
             "No location identifier with system 'urn:oid:1.2.840.114350.1.13.297.3.7.2.686980' found",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `getLocationIdentifier properly cascades`() {
-        val externalIdentifier = mockk<Identifier> {
-            every { system } returns null
-            every { value } returns "external-value".asFHIR()
-            every { type } returns mockk {
-                every { text } returns "external".asFHIR()
+        val externalIdentifier =
+            mockk<Identifier> {
+                every { system } returns null
+                every { value } returns "external-value".asFHIR()
+                every { type } returns
+                    mockk {
+                        every { text } returns "external".asFHIR()
+                    }
             }
-        }
         val identifiers = listOf(internalValueType, otherValueType, externalIdentifier)
         val practitionerIdentifier = service.getLocationIdentifier(tenant, identifiers)
         assertEquals(epicDepartmentSystem, practitionerIdentifier.system?.value)
@@ -383,12 +425,13 @@ class EpicIdentifierServiceTest {
     @Test
     fun `getLocationIdentifier with no matching system`() {
         val identifiers = listOf(Identifier(system = Uri("notTheLocationSystem"), value = "mrn".asFHIR()))
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getLocationIdentifier(tenant, identifiers)
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getLocationIdentifier(tenant, identifiers)
+            }
         assertEquals(
             "No location identifier with system 'urn:oid:1.2.840.114350.1.13.297.3.7.2.686980' found",
-            exception.message
+            exception.message,
         )
     }
 
@@ -407,24 +450,26 @@ class EpicIdentifierServiceTest {
     @Test
     fun `getOrderIdentifier with no matching system`() {
         val identifiers = listOf(Identifier(system = Uri("notTheOrderSystem"), value = "blah".asFHIR()))
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getOrderIdentifier(tenant, identifiers)
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getOrderIdentifier(tenant, identifiers)
+            }
         assertEquals(
             "No order identifier found for 'orderSystem'",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `getOrderIdentifier with null matching system`() {
         val identifiers = listOf(Identifier(system = Uri(null), value = null))
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getOrderIdentifier(tenant, identifiers)
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getOrderIdentifier(tenant, identifiers)
+            }
         assertEquals(
             "No order identifier found for 'orderSystem'",
-            exception.message
+            exception.message,
         )
     }
 
@@ -437,24 +482,26 @@ class EpicIdentifierServiceTest {
     @Test
     fun `getEncounterIdentifier with no matching system`() {
         val identifiers = listOf(Identifier(system = Uri("notTheEncounterIdentifier"), value = "blah".asFHIR()))
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getEncounterIdentifier(tenant, identifiers)
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getEncounterIdentifier(tenant, identifiers)
+            }
         assertEquals(
             "No encounter identifier found for 'csnSystem'",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `getEncounterIdentifier with null matching system`() {
         val identifiers = listOf(Identifier(system = Uri(null), value = null))
-        val exception = assertThrows<VendorIdentifierNotFoundException> {
-            service.getEncounterIdentifier(tenant, identifiers)
-        }
+        val exception =
+            assertThrows<VendorIdentifierNotFoundException> {
+                service.getEncounterIdentifier(tenant, identifiers)
+            }
         assertEquals(
             "No encounter identifier found for 'csnSystem'",
-            exception.message
+            exception.message,
         )
     }
 }

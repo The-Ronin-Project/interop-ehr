@@ -15,29 +15,35 @@ class EpicMedicationServiceTest {
     private val tenant = createTestTenant()
 
     private val med1Id = "123"
-    private val med1 = mockk<Medication> {
-        every { id } returns mockk {
-            every { value } returns med1Id
+    private val med1 =
+        mockk<Medication> {
+            every { id } returns
+                mockk {
+                    every { value } returns med1Id
+                }
+            every { resourceType } returns "Medication"
         }
-        every { resourceType } returns "Medication"
-    }
     private val med2Id = "456"
-    private val med2 = mockk<Medication> {
-        every { id } returns mockk {
-            every { value } returns med2Id
+    private val med2 =
+        mockk<Medication> {
+            every { id } returns
+                mockk {
+                    every { value } returns med2Id
+                }
+            every { resourceType } returns "Medication"
         }
-        every { resourceType } returns "Medication"
-    }
 
     @Test
     fun `getByIDs - works with one medication`() {
         val parameters = mapOf("_id" to listOf(med1Id))
 
-        val bundle = mockk<Bundle> {
-            every { entry } returns listOf(
-                mockk { every { resource } returns med1 }
-            )
-        }
+        val bundle =
+            mockk<Bundle> {
+                every { entry } returns
+                    listOf(
+                        mockk { every { resource } returns med1 },
+                    )
+            }
 
         every { medicationService.getBundleWithPaging(tenant, parameters) } returns bundle
 
@@ -51,19 +57,22 @@ class EpicMedicationServiceTest {
     fun `getByIDs - works with multiple medications`() {
         val parameters = mapOf("_id" to listOf(med1Id, med2Id))
 
-        val bundle = mockk<Bundle> {
-            every { entry } returns listOf(
-                mockk { every { resource } returns med1 },
-                mockk { every { resource } returns med2 }
-            )
-        }
+        val bundle =
+            mockk<Bundle> {
+                every { entry } returns
+                    listOf(
+                        mockk { every { resource } returns med1 },
+                        mockk { every { resource } returns med2 },
+                    )
+            }
 
         every { medicationService.getBundleWithPaging(tenant, parameters) } returns bundle
 
-        val results = medicationService.getByIDs(
-            tenant,
-            listOf(med1Id, med2Id)
-        ).values.toList()
+        val results =
+            medicationService.getByIDs(
+                tenant,
+                listOf(med1Id, med2Id),
+            ).values.toList()
 
         assertEquals(2, results.size)
         assertEquals(med1, results[0])
@@ -74,9 +83,10 @@ class EpicMedicationServiceTest {
     fun `getByIDs - works with no medications`() {
         val parameters = mapOf("_id" to "")
 
-        val bundle = mockk<Bundle> {
-            every { entry } returns listOf()
-        }
+        val bundle =
+            mockk<Bundle> {
+                every { entry } returns listOf()
+            }
 
         every { medicationService.getBundleWithPaging(tenant, parameters) } returns bundle
 
@@ -88,36 +98,43 @@ class EpicMedicationServiceTest {
     @Test
     fun `getByIDs - works with multiple batches`() {
         val med3Id = "789"
-        val med3 = mockk<Medication> {
-            every { id } returns mockk {
-                every { value } returns med3Id
+        val med3 =
+            mockk<Medication> {
+                every { id } returns
+                    mockk {
+                        every { value } returns med3Id
+                    }
+                every { resourceType } returns "Medication"
             }
-            every { resourceType } returns "Medication"
-        }
 
         val parameters1 = mapOf("_id" to listOf(med1Id, med2Id))
         val parameters2 = mapOf("_id" to listOf(med3Id))
 
-        val bundle1 = mockk<Bundle> {
-            every { entry } returns listOf(
-                mockk { every { resource } returns med1 },
-                mockk { every { resource } returns med2 }
-            )
-        }
-        val bundle2 = mockk<Bundle> {
-            every { entry } returns listOf(
-                mockk { every { resource } returns med3 }
-            )
-        }
+        val bundle1 =
+            mockk<Bundle> {
+                every { entry } returns
+                    listOf(
+                        mockk { every { resource } returns med1 },
+                        mockk { every { resource } returns med2 },
+                    )
+            }
+        val bundle2 =
+            mockk<Bundle> {
+                every { entry } returns
+                    listOf(
+                        mockk { every { resource } returns med3 },
+                    )
+            }
 
         val medicationService = spyk(EpicMedicationService(epicClient, 2))
         every { medicationService.getBundleWithPaging(tenant, parameters1) } returns bundle1
         every { medicationService.getBundleWithPaging(tenant, parameters2) } returns bundle2
 
-        val results = medicationService.getByIDs(
-            tenant,
-            listOf(med1Id, med2Id, med3Id)
-        ).values.toList()
+        val results =
+            medicationService.getByIDs(
+                tenant,
+                listOf(med1Id, med2Id, med3Id),
+            ).values.toList()
 
         assertEquals(3, results.size)
         assertEquals(med1, results[0])
@@ -129,11 +146,13 @@ class EpicMedicationServiceTest {
     fun `getMedicationsByFhirId - works with one medication`() {
         val parameters = mapOf("_id" to listOf(med1Id))
 
-        val bundle = mockk<Bundle> {
-            every { entry } returns listOf(
-                mockk { every { resource } returns med1 }
-            )
-        }
+        val bundle =
+            mockk<Bundle> {
+                every { entry } returns
+                    listOf(
+                        mockk { every { resource } returns med1 },
+                    )
+            }
 
         every { medicationService.getBundleWithPaging(tenant, parameters) } returns bundle
 
@@ -147,19 +166,22 @@ class EpicMedicationServiceTest {
     fun `getMedicationsByFhirId - works with multiple medications`() {
         val parameters = mapOf("_id" to listOf(med1Id, med2Id))
 
-        val bundle = mockk<Bundle> {
-            every { entry } returns listOf(
-                mockk { every { resource } returns med1 },
-                mockk { every { resource } returns med2 }
-            )
-        }
+        val bundle =
+            mockk<Bundle> {
+                every { entry } returns
+                    listOf(
+                        mockk { every { resource } returns med1 },
+                        mockk { every { resource } returns med2 },
+                    )
+            }
 
         every { medicationService.getBundleWithPaging(tenant, parameters) } returns bundle
 
-        val results = medicationService.getMedicationsByFhirId(
-            tenant,
-            listOf(med1Id, med2Id)
-        )
+        val results =
+            medicationService.getMedicationsByFhirId(
+                tenant,
+                listOf(med1Id, med2Id),
+            )
 
         assertEquals(2, results.size)
         assertEquals(med1, results[0])
@@ -170,9 +192,10 @@ class EpicMedicationServiceTest {
     fun `getMedicationsByFhirId - works with no medications`() {
         val parameters = mapOf("_id" to "")
 
-        val bundle = mockk<Bundle> {
-            every { entry } returns listOf()
-        }
+        val bundle =
+            mockk<Bundle> {
+                every { entry } returns listOf()
+            }
 
         every { medicationService.getBundleWithPaging(tenant, parameters) } returns bundle
 
@@ -184,36 +207,43 @@ class EpicMedicationServiceTest {
     @Test
     fun `getMedicationsByFhirId - works with multiple batches`() {
         val med3Id = "789"
-        val med3 = mockk<Medication> {
-            every { id } returns mockk {
-                every { value } returns med3Id
+        val med3 =
+            mockk<Medication> {
+                every { id } returns
+                    mockk {
+                        every { value } returns med3Id
+                    }
+                every { resourceType } returns "Medication"
             }
-            every { resourceType } returns "Medication"
-        }
 
         val parameters1 = mapOf("_id" to listOf(med1Id, med2Id))
         val parameters2 = mapOf("_id" to listOf(med3Id))
 
-        val bundle1 = mockk<Bundle> {
-            every { entry } returns listOf(
-                mockk { every { resource } returns med1 },
-                mockk { every { resource } returns med2 }
-            )
-        }
-        val bundle2 = mockk<Bundle> {
-            every { entry } returns listOf(
-                mockk { every { resource } returns med3 }
-            )
-        }
+        val bundle1 =
+            mockk<Bundle> {
+                every { entry } returns
+                    listOf(
+                        mockk { every { resource } returns med1 },
+                        mockk { every { resource } returns med2 },
+                    )
+            }
+        val bundle2 =
+            mockk<Bundle> {
+                every { entry } returns
+                    listOf(
+                        mockk { every { resource } returns med3 },
+                    )
+            }
 
         val medicationService = spyk(EpicMedicationService(epicClient, 2))
         every { medicationService.getBundleWithPaging(tenant, parameters1) } returns bundle1
         every { medicationService.getBundleWithPaging(tenant, parameters2) } returns bundle2
 
-        val results = medicationService.getMedicationsByFhirId(
-            tenant,
-            listOf(med1Id, med2Id, med3Id)
-        )
+        val results =
+            medicationService.getMedicationsByFhirId(
+                tenant,
+                listOf(med1Id, med2Id, med3Id),
+            )
 
         assertEquals(3, results.size)
         assertEquals(med1, results[0])

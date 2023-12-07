@@ -18,7 +18,7 @@ import java.time.LocalDateTime
 abstract class BaseProfile<T : Resource<T>>(
     extendedProfile: ProfileValidator<T>? = null,
     protected val normalizer: Normalizer,
-    protected val localizer: Localizer
+    protected val localizer: Localizer,
 ) : BaseValidator<T>(extendedProfile), ProfileTransformer<T>, ProfileQualifier<T> {
     protected val logger = KotlinLogging.logger(this::class.java.name)
 
@@ -33,7 +33,7 @@ abstract class BaseProfile<T : Resource<T>>(
         normalized: T,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime? = null
+        forceCacheReloadTS: LocalDateTime? = null,
     ): Pair<TransformResponse<T>?, Validation>
 
     /**
@@ -45,7 +45,7 @@ abstract class BaseProfile<T : Resource<T>>(
         normalized: T,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime? = null
+        forceCacheReloadTS: LocalDateTime? = null,
     ): Pair<T?, Validation> {
         return Pair(normalized, Validation())
     }
@@ -56,7 +56,7 @@ abstract class BaseProfile<T : Resource<T>>(
     private fun validateTransformation(
         resource: T,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         validation.merge(validate(resource, parentContext))
     }
@@ -64,35 +64,38 @@ abstract class BaseProfile<T : Resource<T>>(
     override fun transform(
         original: T,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<T>?, Validation> {
         val currentContext = LocationContext(original::class)
 
-        val validation = validation {
-            checkNotNull(
-                original.id,
-                RequiredFieldError(LocationContext(original::class.java.simpleName, "id")),
-                currentContext
-            )
-        }
+        val validation =
+            validation {
+                checkNotNull(
+                    original.id,
+                    RequiredFieldError(LocationContext(original::class.java.simpleName, "id")),
+                    currentContext,
+                )
+            }
 
         val normalized = normalizer.normalize(original, tenant)
 
         val (mapped, mappingValidation) = conceptMap(normalized, currentContext, tenant)
         validation.merge(mappingValidation)
 
-        val (transformResponse, transformValidation) = mapped?.let { transformInternal(mapped, currentContext, tenant) }
-            ?: Pair(null, null)
+        val (transformResponse, transformValidation) =
+            mapped?.let { transformInternal(mapped, currentContext, tenant) }
+                ?: Pair(null, null)
         transformValidation?.let { validation.merge(transformValidation) }
 
         val localized = transformResponse?.let { localizer.localize(transformResponse.resource, tenant) }
         localized?.let { validateTransformation(localized, currentContext, validation) }
 
-        val validatedResponse = if (validation.hasErrors()) {
-            null
-        } else {
-            localized?.let { TransformResponse(localized, transformResponse.embeddedResources) }
-        }
+        val validatedResponse =
+            if (validation.hasErrors()) {
+                null
+            } else {
+                localized?.let { TransformResponse(localized, transformResponse.embeddedResources) }
+            }
         return Pair(validatedResponse, validation)
     }
 }

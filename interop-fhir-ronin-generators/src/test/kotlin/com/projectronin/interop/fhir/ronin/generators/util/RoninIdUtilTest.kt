@@ -11,9 +11,10 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class RoninIdUtilTest {
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `generate fhir id value when no id input is provided`() {
@@ -47,9 +48,10 @@ class RoninIdUtilTest {
 
     @Test
     fun `fhir id value fails when id input is provided and is bad fhir`() {
-        val exception = assertThrows<IllegalArgumentException> {
-            fhirIdValue("name@org")
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                fhirIdValue("name@org")
+            }
         assertEquals("name@org is invalid as a FHIR id", exception.message)
     }
 

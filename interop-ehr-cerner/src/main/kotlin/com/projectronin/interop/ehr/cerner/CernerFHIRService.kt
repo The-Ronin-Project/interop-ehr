@@ -15,7 +15,7 @@ import java.time.LocalDateTime
 
 abstract class CernerFHIRService<T : Resource<T>>(
     val cernerClient: CernerClient,
-    private val batchSize: Int = 10
+    private val batchSize: Int = 10,
 ) : BaseFHIRService<T>() {
     private val logger = KotlinLogging.logger { }
     abstract val fhirURLSearchPart: String
@@ -27,7 +27,10 @@ abstract class CernerFHIRService<T : Resource<T>>(
     open val writeScope: Boolean = false
 
     @Trace
-    override fun getByID(tenant: Tenant, resourceFHIRId: String): T {
+    override fun getByID(
+        tenant: Tenant,
+        resourceFHIRId: String,
+    ): T {
         return runBlocking {
             cernerClient.get(tenant, "$fhirURLSearchPart/$resourceFHIRId")
                 .body(TypeInfo(fhirResourceType.kotlin, fhirResourceType))
@@ -35,13 +38,17 @@ abstract class CernerFHIRService<T : Resource<T>>(
     }
 
     @Trace
-    override fun getByIDs(tenant: Tenant, resourceFHIRIds: List<String>): Map<String, T> {
+    override fun getByIDs(
+        tenant: Tenant,
+        resourceFHIRIds: List<String>,
+    ): Map<String, T> {
         return runBlocking {
             val chunkedIds = resourceFHIRIds.toSet().chunked(batchSize)
-            val resource = chunkedIds.map { idSubset ->
-                val parameters = mapOf("_id" to idSubset)
-                getResourceListFromSearch(tenant, parameters)
-            }.flatten()
+            val resource =
+                chunkedIds.map { idSubset ->
+                    val parameters = mapOf("_id" to idSubset)
+                    getResourceListFromSearch(tenant, parameters)
+                }.flatten()
             resource.associateBy { it.id!!.value!! }
         }
     }
@@ -49,7 +56,7 @@ abstract class CernerFHIRService<T : Resource<T>>(
     internal fun getResourceListFromSearch(
         tenant: Tenant,
         parameters: Map<String, Any?>,
-        disableRetry: Boolean = false
+        disableRetry: Boolean = false,
     ): List<T> {
         return getBundleWithPaging(tenant, parameters, disableRetry).entry.mapNotNull { it.resource }
             .filterIsInstance(fhirResourceType)
@@ -58,7 +65,7 @@ abstract class CernerFHIRService<T : Resource<T>>(
     internal fun getBundleWithPaging(
         tenant: Tenant,
         parameters: Map<String, Any?>,
-        disableRetry: Boolean = false
+        disableRetry: Boolean = false,
     ): Bundle {
         logger.info { "Get started for ${tenant.mnemonic}" }
 
@@ -67,15 +74,16 @@ abstract class CernerFHIRService<T : Resource<T>>(
         val responses: MutableList<Bundle> = mutableListOf()
         var nextURL: String? = null
         do {
-            val bundle = runBlocking {
-                val httpResponse =
-                    if (nextURL == null) {
-                        cernerClient.get(tenant, fhirURLSearchPart, standardizedParameters, disableRetry)
-                    } else {
-                        cernerClient.get(tenant, nextURL!!, disableRetry = disableRetry)
-                    }
-                httpResponse.body<Bundle>()
-            }
+            val bundle =
+                runBlocking {
+                    val httpResponse =
+                        if (nextURL == null) {
+                            cernerClient.get(tenant, fhirURLSearchPart, standardizedParameters, disableRetry)
+                        } else {
+                            cernerClient.get(tenant, nextURL!!, disableRetry = disableRetry)
+                        }
+                    httpResponse.body<Bundle>()
+                }
             responses.add(bundle)
             nextURL = bundle.link.firstOrNull { it.relation?.value == "next" }?.url?.value
         } while (nextURL != null)
@@ -88,20 +96,24 @@ abstract class CernerFHIRService<T : Resource<T>>(
      * This function formats the date params correctly. Some resources (only CarePlan) use 'le' instead of 'lt'. Those
      * should use getAltDateParam
      */
-    protected fun getDateParam(startDate: LocalDate, endDate: LocalDate, tenant: Tenant): RepeatingParameter {
+    protected fun getDateParam(
+        startDate: LocalDate,
+        endDate: LocalDate,
+        tenant: Tenant,
+    ): RepeatingParameter {
         val offset = tenant.timezone.rules.getOffset(LocalDateTime.now())
         return RepeatingParameter(
             listOf(
                 "ge${startDate}T00:00:00$offset",
-                "lt${endDate.plusDays(1)}T00:00:00$offset"
-            )
+                "lt${endDate.plusDays(1)}T00:00:00$offset",
+            ),
         )
     }
 
     protected fun getOptionalDateParam(
         startDate: LocalDate?,
         endDate: LocalDate?,
-        tenant: Tenant
+        tenant: Tenant,
     ): RepeatingParameter? {
         val offset = tenant.timezone.rules.getOffset(LocalDateTime.now())
         val startDateString = startDate?.let { "ge${startDate}T00:00:00$offset" }
@@ -116,13 +128,17 @@ abstract class CernerFHIRService<T : Resource<T>>(
     /**
      * For use on resources that 'le' rather than 'lt'. Only CarePlan for now
      */
-    protected fun getAltDateParam(startDate: LocalDate, endDate: LocalDate, tenant: Tenant): RepeatingParameter {
+    protected fun getAltDateParam(
+        startDate: LocalDate,
+        endDate: LocalDate,
+        tenant: Tenant,
+    ): RepeatingParameter {
         val offset = tenant.timezone.rules.getOffset(LocalDateTime.now())
         return RepeatingParameter(
             listOf(
                 "ge${startDate}T00:00:00$offset",
-                "le${endDate.plusDays(1)}T00:00:00$offset"
-            )
+                "le${endDate.plusDays(1)}T00:00:00$offset",
+            ),
         )
     }
 }

@@ -57,7 +57,7 @@ class CernerVendorFactoryTest {
             medicationAdministrationService = medAdminService,
             serviceRequestService = serviceRequestService,
             diagnosticReportService = diagnosticReportService,
-            procedureService = procedureService
+            procedureService = procedureService,
         )
 
     @Test

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class CernerRequestGroupService(
-    cernerClient: CernerClient
+    cernerClient: CernerClient,
 ) : RequestGroupService,
     CernerFHIRService<RequestGroup>(cernerClient) {
     override val fhirURLSearchPart = ""
@@ -20,7 +20,7 @@ class CernerRequestGroupService(
      */
     override fun getByIDs(
         tenant: Tenant,
-        resourceFHIRIds: List<String>
+        resourceFHIRIds: List<String>,
     ): Map<String, RequestGroup> {
         return emptyMap()
     }
@@ -32,7 +32,7 @@ class CernerRequestGroupService(
     @Trace
     override fun getRequestGroupByFHIRId(
         tenant: Tenant,
-        requestGroupIds: List<String>
+        requestGroupIds: List<String>,
     ): Map<String, RequestGroup> {
         return emptyMap()
     }

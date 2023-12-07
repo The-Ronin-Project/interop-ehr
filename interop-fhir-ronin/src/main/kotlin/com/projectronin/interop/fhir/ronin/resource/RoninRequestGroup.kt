@@ -24,7 +24,11 @@ class RoninRequestGroup(normalizer: Normalizer, localizer: Localizer) :
 
     val requiredSubject = RequiredFieldError(RequestGroup::subject)
 
-    override fun validateRonin(element: RequestGroup, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: RequestGroup,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, validation)
@@ -35,7 +39,7 @@ class RoninRequestGroup(normalizer: Normalizer, localizer: Localizer) :
                 requireDataAuthorityExtensionIdentifier(
                     element.subject,
                     LocationContext(RequestGroup::subject),
-                    validation
+                    validation,
                 )
             }
         }
@@ -46,12 +50,13 @@ class RoninRequestGroup(normalizer: Normalizer, localizer: Localizer) :
         normalized: RequestGroup,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<RequestGroup>?, Validation> {
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant)
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+            )
 
         return Pair(TransformResponse(transformed), Validation())
     }

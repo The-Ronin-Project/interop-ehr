@@ -60,18 +60,22 @@ class EpicMessageServiceTest {
         span = mockk(relaxed = true)
 
         mockkStatic(GlobalTracer::class)
-        every { GlobalTracer.get() } returns mockk {
-            every { activeSpan() } returns span
-        }
-        val mockIdentifier = mockk<Identifier> {
-            every { value } returns mockk {
-                every { value } returns "MRN#1"
+        every { GlobalTracer.get() } returns
+            mockk {
+                every { activeSpan() } returns span
             }
-        }
+        val mockIdentifier =
+            mockk<Identifier> {
+                every { value } returns
+                    mockk {
+                        every { value } returns "MRN#1"
+                    }
+            }
         val mockIdentifierList = listOf(mockIdentifier)
-        val mockPatient = mockk<Patient> {
-            every { identifier } returns mockIdentifierList
-        }
+        val mockPatient =
+            mockk<Patient> {
+                every { identifier } returns mockIdentifierList
+            }
 
         coEvery { ehrDataAuthorityClient.getResourceAs<Patient>(any(), any(), any()) } returns mockPatient
         every { identifierService.getMRNIdentifier(any(), mockIdentifierList) } returns mockIdentifier
@@ -84,25 +88,27 @@ class EpicMessageServiceTest {
 
     @Test
     fun `ensure message can be sent`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
@@ -112,17 +118,18 @@ class EpicMessageServiceTest {
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
                     messageText = listOf("Message Text"),
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
             )
-        )
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
@@ -132,8 +139,8 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text",
                     "fhirId1",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
 
         assertEquals("130375", messageId)
@@ -141,25 +148,27 @@ class EpicMessageServiceTest {
 
     @Test
     fun `ensure multi-line message can be sent`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
@@ -169,17 +178,18 @@ class EpicMessageServiceTest {
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
                     messageText = listOf("Message Text", "Line 2", " ", "Line 4"),
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
             )
-        )
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
@@ -189,8 +199,8 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text\nLine 2\n\nLine 4",
                     "fhirId1",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
 
         assertEquals("130375", messageId)
@@ -198,25 +208,27 @@ class EpicMessageServiceTest {
 
     @Test
     fun `ensure multi-line messages with carriage returns can be sent`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
@@ -226,17 +238,18 @@ class EpicMessageServiceTest {
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
                     messageText = listOf("Message Text", "Line 2", " ", "Line 4"),
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
             )
-        )
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
@@ -246,8 +259,8 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text\r\nLine 2\r\n\r\nLine 4",
                     "fhirId1",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
 
         assertEquals("130375", messageId)
@@ -255,25 +268,27 @@ class EpicMessageServiceTest {
 
     @Test
     fun `ensure multi-line messages with mixed newlines and carriage returned newlines can be sent`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
@@ -283,17 +298,18 @@ class EpicMessageServiceTest {
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
                     messageText = listOf("Message Text", "Line 2", " ", "Line 4"),
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
             )
-        )
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
@@ -303,8 +319,8 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text\r\nLine 2\n\nLine 4",
                     "fhirId1",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
 
         assertEquals("130375", messageId)
@@ -318,30 +334,32 @@ class EpicMessageServiceTest {
         val messageText = messageInput.split("\r\n", "\n").map { if (it.isEmpty()) " " else it }
         assertEquals(
             listOf(" ", " ", "Message Text", " ", "Line 2", "Line 3", "Line 4", " ", " ", "Line 7", " ", "Line 8", " "),
-            messageText
+            messageText,
         )
 
         // now do the unit test with mocking
 
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
@@ -351,24 +369,25 @@ class EpicMessageServiceTest {
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
                     messageText = messageText,
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
             )
-        )
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
         val messageId =
             EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
                 tenant,
-                EHRMessageInput(messageInput, "fhirId1", recipientsList)
+                EHRMessageInput(messageInput, "fhirId1", recipientsList),
             )
 
         assertEquals("130375", messageId)
@@ -382,30 +401,32 @@ class EpicMessageServiceTest {
         val messageText = messageInput.split("\r\n", "\n").map { if (it.isEmpty()) " " else it }
         assertEquals(
             listOf(" ", " ", "Message Text", " ", "Line 2", "Line 3", "Line 4", " ", " ", "Line 7", " ", "Line 8", " "),
-            messageText
+            messageText,
         )
 
         // now do the unit test with mocking
 
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
@@ -415,24 +436,25 @@ class EpicMessageServiceTest {
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
                     messageText = messageText,
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
             )
-        )
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
         val messageId =
             EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
                 tenant,
-                EHRMessageInput(messageInput, "fhirId1", recipientsList)
+                EHRMessageInput(messageInput, "fhirId1", recipientsList),
             )
 
         assertEquals("130375", messageId)
@@ -446,30 +468,32 @@ class EpicMessageServiceTest {
         val messageText = messageInput.split("\r\n", "\n").map { if (it.isEmpty()) " " else it }
         assertEquals(
             listOf(" ", " ", "Message Text", " ", "Line 2", "Line 3", "Line 4", " ", " ", "Line 7", " ", "Line 8", " "),
-            messageText
+            messageText,
         )
 
         // now do the unit test with mocking
 
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
@@ -479,24 +503,25 @@ class EpicMessageServiceTest {
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
                     messageText = messageText,
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
             )
-        )
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
         val messageId =
             EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
                 tenant,
-                EHRMessageInput(messageInput, "fhirId1", recipientsList)
+                EHRMessageInput(messageInput, "fhirId1", recipientsList),
             )
 
         assertEquals("130375", messageId)
@@ -504,45 +529,48 @@ class EpicMessageServiceTest {
 
     @Test
     fun `ensure pool ID works can be sent`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
                 "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
-                    recipients = listOf(SendMessageRecipient("PoolID", true)), // this is an implied assertion
+                    recipients = listOf(SendMessageRecipient("PoolID", true)),
                     messageText = listOf("Message Text"),
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
             )
-        )
 
         every {
             providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID"))
@@ -554,8 +582,8 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text",
                     "fhirId1",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
 
         assertEquals("130375", messageId)
@@ -563,44 +591,47 @@ class EpicMessageServiceTest {
 
     @Test
     fun `ensure wrong identifier types fail`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
                 "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
-                    recipients = listOf(), // this is an implied assertion
+                    recipients = listOf(),
                     messageText = listOf("Message Text"),
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdVendorIdentifier(Id("1234"))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdVendorIdentifier(Id("1234")),
+                ),
             )
-        )
 
         assertThrows<ClassCastException> {
             EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
@@ -608,52 +639,55 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text",
                     "fhirId1",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
         }
     }
 
     @Test
     fun `ensure identifier without value fails`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
                 "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
-                    recipients = listOf(), // this is an implied assertion
+                    recipients = listOf(),
                     messageText = listOf("Message Text"),
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = null))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = null)),
+                ),
             )
-        )
 
         assertThrows<VendorIdentifierNotFoundException> {
             EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
@@ -661,52 +695,55 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text",
                     "fhirId1",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
         }
     }
 
     @Test
     fun `ensure identifier with value with null value fails`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
                 "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
-                    recipients = listOf(), // this is an implied assertion
+                    recipients = listOf(),
                     messageText = listOf("Message Text"),
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = FHIRString(null)))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = FHIRString(null))),
+                ),
             )
-        )
 
         assertThrows<VendorIdentifierNotFoundException> {
             EpicMessageService(epicClient, providerPoolService, ehrDataAuthorityClient, identifierService).sendMessage(
@@ -714,23 +751,24 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text",
                     "fhirId1",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
         }
     }
 
     @Test
     fun `ensure other error handled`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         coEvery {
             epicClient.post(
@@ -741,17 +779,18 @@ class EpicMessageServiceTest {
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
                     messageText = listOf("Message Text"),
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } throws Exception("something went wrong")
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
             )
-        )
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
@@ -761,33 +800,35 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text",
                     "fhirId1",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
         }
     }
 
     @Test
     fun `ensure span is configured when present and recipient is user`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
@@ -797,17 +838,18 @@ class EpicMessageServiceTest {
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
                     messageText = listOf("Message Text"),
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
             )
-        )
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
@@ -817,8 +859,8 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text",
                     "fhirId1",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
 
         assertEquals("130375", messageId)
@@ -829,25 +871,27 @@ class EpicMessageServiceTest {
 
     @Test
     fun `ensure span is configured when present and recipient is pool`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
@@ -857,22 +901,23 @@ class EpicMessageServiceTest {
                     recipients = listOf(SendMessageRecipient("PoolID", true)),
                     messageText = listOf("Message Text"),
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
             )
-        )
 
         every {
             providerPoolService.getPoolsForProviders(
                 tenant,
-                listOf("CorrectID")
+                listOf("CorrectID"),
             )
         } returns mapOf("CorrectID" to "PoolID")
 
@@ -882,8 +927,8 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text",
                     "fhirId1",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
 
         assertEquals("130375", messageId)
@@ -894,57 +939,61 @@ class EpicMessageServiceTest {
 
     @Test
     fun `ensure span is configured when present and multiple recipients`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
                 "/api/epic/2014/Common/Utility/SENDMESSAGE/Message",
                 SendMessageRequest(
                     patientID = "MRN#1",
-                    recipients = listOf(
-                        SendMessageRecipient("CorrectID", false),
-                        SendMessageRecipient("PoolID", true)
-                    ),
+                    recipients =
+                        listOf(
+                            SendMessageRecipient("CorrectID", false),
+                            SendMessageRecipient("PoolID", true),
+                        ),
                     messageText = listOf("Message Text"),
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
-            ),
-            EHRRecipient(
-                "PROV#2",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID2".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
+                EHRRecipient(
+                    "PROV#2",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID2".asFHIR())),
+                ),
             )
-        )
 
         every {
             providerPoolService.getPoolsForProviders(
                 tenant,
-                listOf("CorrectID", "CorrectID2")
+                listOf("CorrectID", "CorrectID2"),
             )
         } returns mapOf("CorrectID2" to "PoolID")
 
@@ -954,8 +1003,8 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text",
                     "fhirId1",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
 
         assertEquals("130375", messageId)
@@ -966,29 +1015,32 @@ class EpicMessageServiceTest {
 
     @Test
     fun `ensure span is ignored when no active span`() {
-        every { GlobalTracer.get() } returns mockk {
-            every { activeSpan() } returns null
-        }
+        every { GlobalTracer.get() } returns
+            mockk {
+                every { activeSpan() } returns null
+            }
 
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<SendMessageResponse>() } returns SendMessageResponse(
-            listOf(
-                IDType(
-                    "130375",
-                    "Type"
-                )
+        coEvery { httpResponse.body<SendMessageResponse>() } returns
+            SendMessageResponse(
+                listOf(
+                    IDType(
+                        "130375",
+                        "Type",
+                    ),
+                ),
             )
-        )
         coEvery {
             epicClient.post(
                 tenant,
@@ -998,17 +1050,18 @@ class EpicMessageServiceTest {
                     recipients = listOf(SendMessageRecipient("CorrectID", false)),
                     messageText = listOf("Message Text"),
                     senderID = "USER#1",
-                    messageType = "Symptom Alert"
-                )
+                    messageType = "Symptom Alert",
+                ),
             )
         } returns ehrResponse
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
             )
-        )
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
@@ -1018,8 +1071,8 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text",
                     "fhirId1",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
 
         assertEquals("130375", messageId)
@@ -1029,32 +1082,42 @@ class EpicMessageServiceTest {
 
     @Test
     fun `ensure ehrda bad mrn fails`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
-        val mockIdentifier = mockk<Identifier> {
-            every { value } returns null
-        }
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
+            )
+        val mockIdentifier =
+            mockk<Identifier> {
+                every { value } returns null
+            }
         val mockIdentifierList = listOf(mockIdentifier)
-        val mockPatient = mockk<Patient> {
-            every { identifier } returns mockIdentifierList
-        }
+        val mockPatient =
+            mockk<Patient> {
+                every { identifier } returns mockIdentifierList
+            }
 
-        coEvery { ehrDataAuthorityClient.getResourceAs<Patient>("TEST_TENANT", "Patient", "badId".localize(tenant)) } returns mockPatient
+        coEvery {
+            ehrDataAuthorityClient.getResourceAs<Patient>(
+                "TEST_TENANT",
+                "Patient",
+                "badId".localize(tenant),
+            )
+        } returns mockPatient
         every { identifierService.getMRNIdentifier(tenant, mockIdentifierList) } returns mockIdentifier
 
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
             )
-        )
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
@@ -1064,39 +1127,49 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text",
                     "badId",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
         }
     }
 
     @Test
     fun `ensure ehrda missing patient fails`() {
-        val tenant = createTestTenant(
-            "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-            "https://example.org",
-            testPrivateKey,
-            "TEST_TENANT",
-            "Test Tenant",
-            "USER#1",
-            "Symptom Alert"
-        )
-        val mockIdentifier = mockk<Identifier> {
-            every { value } returns null
-        }
-        val mockIdentifierList = listOf(mockIdentifier)
-        val mockPatient = mockk<Patient> {
-            every { identifier } returns mockIdentifierList
-        }
-
-        coEvery { ehrDataAuthorityClient.getResourceAs<Patient>("TEST_TENANT", "Patient", "badId".localize(tenant)) } returns null
-
-        val recipientsList = listOf(
-            EHRRecipient(
-                "PROV#1",
-                IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR()))
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                testPrivateKey,
+                "TEST_TENANT",
+                "Test Tenant",
+                "USER#1",
+                "Symptom Alert",
             )
-        )
+        val mockIdentifier =
+            mockk<Identifier> {
+                every { value } returns null
+            }
+        val mockIdentifierList = listOf(mockIdentifier)
+        val mockPatient =
+            mockk<Patient> {
+                every { identifier } returns mockIdentifierList
+            }
+
+        coEvery {
+            ehrDataAuthorityClient.getResourceAs<Patient>(
+                "TEST_TENANT",
+                "Patient",
+                "badId".localize(tenant),
+            )
+        } returns null
+
+        val recipientsList =
+            listOf(
+                EHRRecipient(
+                    "PROV#1",
+                    IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "CorrectID".asFHIR())),
+                ),
+            )
 
         every { providerPoolService.getPoolsForProviders(tenant, listOf("CorrectID")) } returns emptyMap()
 
@@ -1106,8 +1179,8 @@ class EpicMessageServiceTest {
                 EHRMessageInput(
                     "Message Text",
                     "badId",
-                    recipientsList
-                )
+                    recipientsList,
+                ),
             )
         }
     }

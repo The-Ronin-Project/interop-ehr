@@ -10,7 +10,8 @@ import kotlin.text.Regex.Companion.escape
  * Access to common Ronin-specific code systems
  */
 enum class RoninConceptMap(uriString: String) {
-    CODE_SYSTEMS("http://projectronin.io/fhir/CodeSystem");
+    CODE_SYSTEMS("http://projectronin.io/fhir/CodeSystem"),
+    ;
 
     val uri = Uri(uriString)
 
@@ -19,22 +20,29 @@ enum class RoninConceptMap(uriString: String) {
      * when the incoming data provides only a Code, with a string value, and no Coding.
      * The method derives the correct Coding.system and assigns the Code to Coding.code.
      */
-    fun toCoding(tenant: Tenant, fhirPath: String, value: String) =
-        Coding(system = this.toUri(tenant, fhirPath), code = Code(value = value))
+    fun toCoding(
+        tenant: Tenant,
+        fhirPath: String,
+        value: String,
+    ) = Coding(system = this.toUri(tenant, fhirPath), code = Code(value = value))
 
     /**
      * Create a [Uri] for the Coding.system input to a Concept Map Registry request,
      * when the incoming data provides only a Code value with no system value.
      */
-    fun toUri(tenant: Tenant, fhirPath: String) =
-        Uri(this.toUriString(tenant, fhirPath))
+    fun toUri(
+        tenant: Tenant,
+        fhirPath: String,
+    ) = Uri(this.toUriString(tenant, fhirPath))
 
     /**
      * Compose the string value for the Coding.system input to a Concept Map Registry request,
      * when the incoming data provides only a Code value with no system.
      */
-    fun toUriString(tenant: Tenant, fhirPath: String) =
-        "${this.uri.value}/${tenant.mnemonic}/${fhirPath.toUriName()}"
+    fun toUriString(
+        tenant: Tenant,
+        fhirPath: String,
+    ) = "${this.uri.value}/${tenant.mnemonic}/${fhirPath.toUriName()}"
 
     private val uriRegex = Regex("${escape(uri.value!!)}/(\\w+)/([A-Za-z]+)")
 

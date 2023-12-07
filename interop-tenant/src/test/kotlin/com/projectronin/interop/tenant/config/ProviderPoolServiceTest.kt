@@ -22,9 +22,10 @@ class ProviderPoolServiceTest {
 
     @Test
     fun `provider-pool request supports unknown providers`() {
-        val tenant = mockk<Tenant> {
-            every { internalId } returns 100
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { internalId } returns 100
+            }
         every { providerPoolDAO.getPoolsForProviders(100, listOf("unknown1", "unknown2")) } returns listOf()
 
         val poolsByProvider = service.getPoolsForProviders(tenant, listOf("unknown1", "unknown2"))
@@ -33,26 +34,28 @@ class ProviderPoolServiceTest {
 
     @Test
     fun `provider-pool request supports known providers`() {
-        val tenant = mockk<Tenant> {
-            every { internalId } returns 100
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { internalId } returns 100
+            }
         every {
             providerPoolDAO.getPoolsForProviders(
                 100,
-                listOf("known1", "known2")
+                listOf("known1", "known2"),
             )
-        } returns listOf(
-            ProviderPoolDO {
-                id = 1
-                providerId = "known1"
-                poolId = "pool1"
-            },
-            ProviderPoolDO {
-                id = 2
-                providerId = "known2"
-                poolId = "pool2"
-            }
-        )
+        } returns
+            listOf(
+                ProviderPoolDO {
+                    id = 1
+                    providerId = "known1"
+                    poolId = "pool1"
+                },
+                ProviderPoolDO {
+                    id = 2
+                    providerId = "known2"
+                    poolId = "pool2"
+                },
+            )
 
         val poolsByProvider = service.getPoolsForProviders(tenant, listOf("known1", "known2"))
         assertEquals(2, poolsByProvider.size)
@@ -62,21 +65,23 @@ class ProviderPoolServiceTest {
 
     @Test
     fun `provider-pool request supports known and unknown providers`() {
-        val tenant = mockk<Tenant> {
-            every { internalId } returns 100
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { internalId } returns 100
+            }
         every {
             providerPoolDAO.getPoolsForProviders(
                 100,
-                listOf("known1", "unknown2")
+                listOf("known1", "unknown2"),
             )
-        } returns listOf(
-            ProviderPoolDO {
-                id = 1
-                providerId = "known1"
-                poolId = "pool1"
-            }
-        )
+        } returns
+            listOf(
+                ProviderPoolDO {
+                    id = 1
+                    providerId = "known1"
+                    poolId = "pool1"
+                },
+            )
 
         val poolsByProvider = service.getPoolsForProviders(tenant, listOf("known1", "unknown2"))
         assertEquals(1, poolsByProvider.size)

@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Import
         "com.projectronin.interop.fhir.ronin.resource",
         "com.projectronin.interop.fhir.ronin.transform",
         "com.projectronin.interop.fhir.ronin.validation",
-        "com.projectronin.interop.validation.client" // INT-2128 modularize validation
-    ]
+        "com.projectronin.interop.validation.client", // INT-2128 modularize validation
+    ],
 )
 class RoninProfileConfig

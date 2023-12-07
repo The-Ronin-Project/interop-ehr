@@ -13,12 +13,13 @@ class EHRMessageInputTest {
             EHRMessageInput(
                 text = "Text",
                 patientFHIRID = "fhirID",
-                recipients = listOf(
-                    EHRRecipient(
-                        "ID",
-                        IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "Ident1".asFHIR()))
-                    )
-                )
+                recipients =
+                    listOf(
+                        EHRRecipient(
+                            "ID",
+                            IdentifierVendorIdentifier(Identifier(system = Uri("system"), value = "Ident1".asFHIR())),
+                        ),
+                    ),
             )
 
         assertEquals("Text", actualInput.text)

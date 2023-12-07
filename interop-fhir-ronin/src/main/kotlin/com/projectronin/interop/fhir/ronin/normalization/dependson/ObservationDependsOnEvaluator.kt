@@ -11,7 +11,11 @@ import org.springframework.stereotype.Component
  */
 @Component
 class ObservationDependsOnEvaluator : BaseDependsOnEvaluator<Observation>(Observation::class) {
-    override fun meetsDependsOn(resource: Observation, normalizedProperty: String, dependsOnValue: String): Boolean {
+    override fun meetsDependsOn(
+        resource: Observation,
+        normalizedProperty: String,
+        dependsOnValue: String,
+    ): Boolean {
         return when (normalizedProperty) {
             "observation.code.text" -> meetsCodeText(resource, dependsOnValue)
             "observation.code" -> meetsCode(resource, dependsOnValue)
@@ -19,11 +23,17 @@ class ObservationDependsOnEvaluator : BaseDependsOnEvaluator<Observation>(Observ
         }
     }
 
-    private fun meetsCodeText(resource: Observation, value: String?): Boolean {
+    private fun meetsCodeText(
+        resource: Observation,
+        value: String?,
+    ): Boolean {
         return resource.code?.text?.value == value
     }
 
-    private fun meetsCode(resource: Observation, value: String): Boolean {
+    private fun meetsCode(
+        resource: Observation,
+        value: String,
+    ): Boolean {
         return resource.code == JacksonManager.objectMapper.readValue<CodeableConcept>(value)
     }
 }

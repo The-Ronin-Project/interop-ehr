@@ -13,7 +13,10 @@ import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 
-fun rcdmRequestGroup(tenant: String, block: RequestGroupGenerator.() -> Unit): RequestGroup {
+fun rcdmRequestGroup(
+    tenant: String,
+    block: RequestGroupGenerator.() -> Unit,
+): RequestGroup {
     return requestGroup {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.REQUEST_GROUP, tenant) {}
@@ -31,57 +34,63 @@ fun Patient.rcdmRequestGroup(block: RequestGroupGenerator.() -> Unit): RequestGr
     val data = this.referenceData()
     return rcdmRequestGroup(data.tenantId) {
         block.invoke(this)
-        subject of generateReference(
-            subject.generate(),
-            subjectReferenceOptions,
-            data.tenantId,
-            "Patient",
-            data.udpId
-        )
+        subject of
+            generateReference(
+                subject.generate(),
+                subjectReferenceOptions,
+                data.tenantId,
+                "Patient",
+                data.udpId,
+            )
     }
 }
 
-val possibleRequestGroupStatusCodes = listOf(
-    Code("draft"),
-    Code("active"),
-    Code("on-hold"),
-    Code("revoked"),
-    Code("completed"),
-    Code("entered-in-error"),
-    Code("unknown")
-)
+val possibleRequestGroupStatusCodes =
+    listOf(
+        Code("draft"),
+        Code("active"),
+        Code("on-hold"),
+        Code("revoked"),
+        Code("completed"),
+        Code("entered-in-error"),
+        Code("unknown"),
+    )
 
-val possibleRequestGroupIntentCodes = listOf(
-    Code("proposal"),
-    Code("plan"),
-    Code("directive"),
-    Code("order"),
-    Code("original-order"),
-    Code("reflex-order"),
-    Code("filler-order"),
-    Code("instance-order"),
-    Code("option")
-)
+val possibleRequestGroupIntentCodes =
+    listOf(
+        Code("proposal"),
+        Code("plan"),
+        Code("directive"),
+        Code("order"),
+        Code("original-order"),
+        Code("reflex-order"),
+        Code("filler-order"),
+        Code("instance-order"),
+        Code("option"),
+    )
 
-val subjectRequestGroupReferenceOptions = listOf(
-    "Group",
-    "Patient"
-)
+val subjectRequestGroupReferenceOptions =
+    listOf(
+        "Group",
+        "Patient",
+    )
 
-val possibleRequestGroupActionConditionKindCodes = listOf(
-    Code("applicability"),
-    Code("start"),
-    Code("stop")
-)
+val possibleRequestGroupActionConditionKindCodes =
+    listOf(
+        Code("applicability"),
+        Code("start"),
+        Code("stop"),
+    )
 
-val possibleRequestGroupActionRelationshipCodes = listOf(
-    Code("before-start"),
-    Code("before"),
-    Code("before-end"),
-    Code("concurrent-with-start"),
-    Code("concurrent"),
-    Code("concurrent-with-end"),
-    Code("after-start"),
-    Code("after"),
-    Code("after-end")
-)
+val possibleRequestGroupActionRelationshipCodes =
+    listOf(
+        Code("before-start"),
+        Code("before"),
+        Code("before-end"),
+        Code("concurrent-with-start"),
+        Code("concurrent"),
+        Code("concurrent-with-end"),
+        Code("after-start"),
+        Code("after"),
+        Code("after-end"),
+    )

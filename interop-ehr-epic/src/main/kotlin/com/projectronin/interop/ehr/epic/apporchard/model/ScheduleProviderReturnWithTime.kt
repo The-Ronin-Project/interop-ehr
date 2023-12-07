@@ -15,5 +15,5 @@ data class ScheduleProviderReturnWithTime(
     val duration: String,
     val providerIDs: List<IDType> = listOf(),
     val providerName: String,
-    val time: String
+    val time: String,
 )

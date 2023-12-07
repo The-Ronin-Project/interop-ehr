@@ -7,7 +7,6 @@ import com.projectronin.interop.fhir.r4.resource.PractitionerRole
 import com.projectronin.interop.fhir.r4.resource.Resource
 
 class FindPractitionersResponse(val resource: Bundle) {
-
     /**
      *  Resources is a list of PractitionerRole, Practitioner, and Location resources.
      *  This simplifies merging bundles later when we have to deal with paging in FHIR results.

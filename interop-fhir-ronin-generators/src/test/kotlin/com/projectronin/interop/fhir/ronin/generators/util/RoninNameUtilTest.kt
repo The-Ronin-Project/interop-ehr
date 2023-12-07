@@ -19,32 +19,34 @@ class RoninNameUtilTest {
 
     @Test
     fun `doesnt generates a Ronin Official Name`() {
-        val testList = ListDataGenerator(0, HumanNameGenerator()).plus(
-            name {
-                use of Code("official")
-                family of "family"
-                given of listOf("given")
-            }
-        )
+        val testList =
+            ListDataGenerator(0, HumanNameGenerator()).plus(
+                name {
+                    use of Code("official")
+                    family of "family"
+                    given of listOf("given")
+                },
+            )
         val officialName = rcdmName(testList)
         assertEquals(testList.generate(), officialName)
     }
 
     @Test
     fun `doesnt generates a Ronin Official Name because the list of names all have uses`() {
-        val testList = ListDataGenerator(0, HumanNameGenerator()).plus(
-            name {
-                use of Code("usual")
-                family of "family"
-                given of listOf("given")
-            }
-        ).plus(
-            name {
-                use of Code("old")
-                family of "family"
-                given of listOf("given")
-            }
-        )
+        val testList =
+            ListDataGenerator(0, HumanNameGenerator()).plus(
+                name {
+                    use of Code("usual")
+                    family of "family"
+                    given of listOf("given")
+                },
+            ).plus(
+                name {
+                    use of Code("old")
+                    family of "family"
+                    given of listOf("given")
+                },
+            )
         val officialName = rcdmName(testList)
         assertEquals(testList.generate(), officialName)
     }

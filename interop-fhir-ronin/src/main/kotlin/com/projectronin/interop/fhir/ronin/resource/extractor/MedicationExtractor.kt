@@ -28,7 +28,7 @@ class MedicationExtractor {
     fun extractMedication(
         medication: DynamicValue<Any>?,
         contained: List<Resource<*>>,
-        resource: Resource<*>
+        resource: Resource<*>,
     ): MedicationExtraction? {
         val resourceIdString = resource.id?.value
         if (medication == null || resourceIdString == null) {
@@ -37,21 +37,25 @@ class MedicationExtractor {
 
         val source = resource.meta?.source
         return when (medication.type) {
-            DynamicValueType.CODEABLE_CONCEPT -> extractCodeableConcept(
-                medication.value as CodeableConcept,
-                resourceIdString,
-                source
-            )
+            DynamicValueType.CODEABLE_CONCEPT ->
+                extractCodeableConcept(
+                    medication.value as CodeableConcept,
+                    resourceIdString,
+                    source,
+                )
 
-            DynamicValueType.REFERENCE -> extractReference(
-                medication.value as Reference,
-                contained,
-                resourceIdString,
-                source
-            )
+            DynamicValueType.REFERENCE ->
+                extractReference(
+                    medication.value as Reference,
+                    contained,
+                    resourceIdString,
+                    source,
+                )
 
             else -> {
-                logger.warn { "Medication $resourceIdString supplied with an unknown type [${medication.type}] so no Medications were extracted" }
+                logger.warn {
+                    "Medication $resourceIdString supplied with an unknown type [${medication.type}] so no Medications were extracted"
+                }
                 null
             }
         }
@@ -63,7 +67,7 @@ class MedicationExtractor {
     private fun extractCodeableConcept(
         medicationCodeableConcept: CodeableConcept,
         resourceId: String,
-        source: Uri?
+        source: Uri?,
     ): MedicationExtraction {
         val codingsForId =
             medicationCodeableConcept.coding.filter { it.userSelected?.value ?: false }.takeIf { it.isNotEmpty() }
@@ -71,15 +75,16 @@ class MedicationExtractor {
         val codeableConceptId = codingsForId.mapNotNull { it.code?.value }.joinToString(separator = "-")
         val medicationId = "codeable-$resourceId-$codeableConceptId"
 
-        val medication = Medication(
-            id = Id(medicationId),
-            meta = Meta(source = source),
-            code = medicationCodeableConcept
-        )
+        val medication =
+            Medication(
+                id = Id(medicationId),
+                meta = Meta(source = source),
+                code = medicationCodeableConcept,
+            )
         val medicationReference = Reference(reference = FHIRString("Medication/$medicationId"))
         return MedicationExtraction(
             extractedMedication = medication,
-            updatedMedication = DynamicValue(DynamicValueType.REFERENCE, medicationReference)
+            updatedMedication = DynamicValue(DynamicValueType.REFERENCE, medicationReference),
         )
     }
 
@@ -91,7 +96,7 @@ class MedicationExtractor {
         medicationReference: Reference,
         contained: List<Resource<*>>,
         resourceId: String,
-        source: Uri?
+        source: Uri?,
     ): MedicationExtraction? {
         // If there's no contained, then we can't do anything
         if (contained.isEmpty()) {
@@ -105,9 +110,10 @@ class MedicationExtractor {
 
         val medication =
             contained.firstOrNull {
-                it.resourceType == "Medication" && it.id?.value == medicationReference.reference?.value?.removePrefix(
-                    "#"
-                )
+                it.resourceType == "Medication" && it.id?.value ==
+                    medicationReference.reference?.value?.removePrefix(
+                        "#",
+                    )
             } as? Medication
         return medication?.let {
             val newMeta = medication.meta?.copy(source = source) ?: Meta(source = source)
@@ -120,7 +126,7 @@ class MedicationExtractor {
             MedicationExtraction(
                 extractedMedication = newMedication,
                 updatedMedication = DynamicValue(DynamicValueType.REFERENCE, newMedicationReference),
-                updatedContained = newContained
+                updatedContained = newContained,
             )
         }
     }
@@ -129,5 +135,5 @@ class MedicationExtractor {
 data class MedicationExtraction(
     val extractedMedication: Medication,
     val updatedMedication: DynamicValue<Reference>,
-    val updatedContained: List<Resource<*>>? = null
+    val updatedContained: List<Resource<*>>? = null,
 )

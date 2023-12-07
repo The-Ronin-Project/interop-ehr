@@ -14,7 +14,7 @@ import org.springframework.stereotype.Component
 @Component
 class CernerOrganizationService(
     cernerClient: CernerClient,
-    @Value("\${cerner.fhir.batchSize:10}") private val batchSize: Int
+    @Value("\${cerner.fhir.batchSize:10}") private val batchSize: Int,
 ) : OrganizationService, CernerFHIRService<Organization>(cernerClient, batchSize) {
     override val fhirURLSearchPart = "/Organization"
     override val fhirResourceType = Organization::class.java
@@ -23,7 +23,7 @@ class CernerOrganizationService(
     @Trace
     override fun findOrganizationsByFHIRId(
         tenant: Tenant,
-        organizationFHIRIds: List<String>
+        organizationFHIRIds: List<String>,
     ): List<Organization> {
         return getByIDs(tenant, organizationFHIRIds).values.toList()
     }

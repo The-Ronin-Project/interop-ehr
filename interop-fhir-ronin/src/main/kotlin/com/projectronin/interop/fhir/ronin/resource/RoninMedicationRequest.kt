@@ -31,27 +31,32 @@ import java.time.LocalDateTime
 class RoninMedicationRequest(
     normalizer: Normalizer,
     localizer: Localizer,
-    private val medicationExtractor: MedicationExtractor
+    private val medicationExtractor: MedicationExtractor,
 ) :
     USCoreBasedProfile<MedicationRequest>(
-        R4MedicationRequestValidator,
-        RoninProfile.MEDICATION_REQUEST.value,
-        normalizer,
-        localizer
-    ) {
+            R4MedicationRequestValidator,
+            RoninProfile.MEDICATION_REQUEST.value,
+            normalizer,
+            localizer,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_29_0
     override val profileVersion = 3
 
     private val requiredRequesterError = RequiredFieldError(MedicationRequest::requester)
 
-    private val requiredMedicationReferenceError = FHIRError(
-        code = "RONIN_MEDREQ_001",
-        description = "Medication must be a Reference",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(MedicationRequest::medication)
-    )
+    private val requiredMedicationReferenceError =
+        FHIRError(
+            code = "RONIN_MEDREQ_001",
+            description = "Medication must be a Reference",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(MedicationRequest::medication),
+        )
 
-    override fun validateRonin(element: MedicationRequest, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: MedicationRequest,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
@@ -62,7 +67,7 @@ class RoninMedicationRequest(
                 requireDataAuthorityExtensionIdentifier(
                     element.subject,
                     LocationContext(MedicationRequest::subject),
-                    validation
+                    validation,
                 )
             }
 
@@ -74,7 +79,7 @@ class RoninMedicationRequest(
                 checkTrue(
                     medication.type == DynamicValueType.REFERENCE,
                     requiredMedicationReferenceError,
-                    parentContext
+                    parentContext,
                 )
             }
 
@@ -82,13 +87,17 @@ class RoninMedicationRequest(
         }
     }
 
-    override fun validateUSCore(element: MedicationRequest, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: MedicationRequest,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             validateReference(
                 element.subject,
                 listOf(ResourceType.Patient),
                 LocationContext(MedicationRequest::subject),
-                this
+                this,
             )
         }
     }
@@ -97,7 +106,7 @@ class RoninMedicationRequest(
         normalized: MedicationRequest,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<MedicationRequest>?, Validation> {
         val medicationExtraction =
             medicationExtractor.extractMedication(normalized.medication, normalized.contained, normalized)
@@ -106,13 +115,15 @@ class RoninMedicationRequest(
         val contained = medicationExtraction?.updatedContained ?: normalized.contained
         val embeddedMedications = medicationExtraction?.extractedMedication?.let { listOf(it) } ?: emptyList()
 
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant),
-            medication = medication,
-            contained = contained,
-            extension = normalized.extension + populateExtensionWithReference(normalized.medication) // populate extension based on medication[x]
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+                medication = medication,
+                contained = contained,
+                // populate extension based on medication[x]
+                extension = normalized.extension + populateExtensionWithReference(normalized.medication),
+            )
 
         return Pair(TransformResponse(transformed, embeddedMedications), Validation())
     }

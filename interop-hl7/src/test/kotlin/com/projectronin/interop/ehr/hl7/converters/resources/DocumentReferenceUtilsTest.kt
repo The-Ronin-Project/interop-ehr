@@ -16,28 +16,34 @@ import org.junit.jupiter.api.Test
 import java.util.Base64
 
 class DocumentReferenceUtilsTest {
-    val completedDocument = DocumentReference(
-        status = Code(DocumentReferenceStatus.CURRENT.code),
-        relatesTo = listOf(
-            DocumentReferenceRelatesTo(
-                code = Code(DocumentRelationshipType.APPENDS.code),
-                target = Reference(reference = "DocumentReference/parentID".asFHIR())
-            )
-        ),
-        content = listOf(
-            DocumentReferenceContent(
-                attachment = Attachment(
-                    data = Base64Binary(
-                        value = Base64.getEncoder().encodeToString("Cool Note!".toByteArray())
-                    )
-                )
-            )
+    val completedDocument =
+        DocumentReference(
+            status = Code(DocumentReferenceStatus.CURRENT.code),
+            relatesTo =
+                listOf(
+                    DocumentReferenceRelatesTo(
+                        code = Code(DocumentRelationshipType.APPENDS.code),
+                        target = Reference(reference = "DocumentReference/parentID".asFHIR()),
+                    ),
+                ),
+            content =
+                listOf(
+                    DocumentReferenceContent(
+                        attachment =
+                            Attachment(
+                                data =
+                                    Base64Binary(
+                                        value = Base64.getEncoder().encodeToString("Cool Note!".toByteArray()),
+                                    ),
+                            ),
+                    ),
+                ),
         )
-    )
-    val inProgressDocument = DocumentReference(
-        status = Code(DocumentReferenceStatus.CURRENT.code),
-        docStatus = Code(CompositionStatus.PRELIMINARY.code)
-    )
+    val inProgressDocument =
+        DocumentReference(
+            status = Code(DocumentReferenceStatus.CURRENT.code),
+            docStatus = Code(CompositionStatus.PRELIMINARY.code),
+        )
 
     @Test
     fun `toConfidentialityStatus status works`() {
@@ -68,25 +74,31 @@ class DocumentReferenceUtilsTest {
 
     @Test
     fun `getNote works for multiple lines`() {
-        val document = DocumentReference(
-            status = Code(DocumentReferenceStatus.CURRENT.code),
-            content = listOf(
-                DocumentReferenceContent(
-                    attachment = Attachment(
-                        data = Base64Binary(
-                            value = Base64.getEncoder().encodeToString("Cool Note!".toByteArray())
-                        )
-                    )
-                ),
-                DocumentReferenceContent(
-                    attachment = Attachment(
-                        data = Base64Binary(
-                            value = Base64.getEncoder().encodeToString("Second Line".toByteArray())
-                        )
-                    )
-                )
+        val document =
+            DocumentReference(
+                status = Code(DocumentReferenceStatus.CURRENT.code),
+                content =
+                    listOf(
+                        DocumentReferenceContent(
+                            attachment =
+                                Attachment(
+                                    data =
+                                        Base64Binary(
+                                            value = Base64.getEncoder().encodeToString("Cool Note!".toByteArray()),
+                                        ),
+                                ),
+                        ),
+                        DocumentReferenceContent(
+                            attachment =
+                                Attachment(
+                                    data =
+                                        Base64Binary(
+                                            value = Base64.getEncoder().encodeToString("Second Line".toByteArray()),
+                                        ),
+                                ),
+                        ),
+                    ),
             )
-        )
         assertEquals("Cool Note!\nSecond Line", document.getNote())
     }
 }

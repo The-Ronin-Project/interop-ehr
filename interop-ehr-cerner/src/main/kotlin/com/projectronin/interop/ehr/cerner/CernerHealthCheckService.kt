@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 class CernerHealthCheckService(
     private val authorizationService: CernerAuthenticationService,
     private val cernerClient: CernerClient,
-    private val tenantService: TenantService
+    private val tenantService: TenantService,
 ) : HealthCheckService {
     private val logger = KotlinLogging.logger { }
 
@@ -36,6 +36,5 @@ class CernerHealthCheckService(
         return true
     }
 
-    override fun healthCheck(): Map<Tenant, Boolean> =
-        tenantService.getMonitoredTenants().associateWith { healthCheck(it) }
+    override fun healthCheck(): Map<Tenant, Boolean> = tenantService.getMonitoredTenants().associateWith { healthCheck(it) }
 }

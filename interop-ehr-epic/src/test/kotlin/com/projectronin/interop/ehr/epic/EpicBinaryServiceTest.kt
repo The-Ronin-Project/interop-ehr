@@ -28,7 +28,7 @@ internal class EpicBinaryServiceTest {
                 "/api/FHIR/R4/Binary/12345",
                 acceptTypeOverride = ContentType.Application.FhirJson,
                 disableRetry = true,
-                timeoutOverride = 2.seconds
+                timeoutOverride = 2.seconds,
             )
         } returns mockedResponse
 

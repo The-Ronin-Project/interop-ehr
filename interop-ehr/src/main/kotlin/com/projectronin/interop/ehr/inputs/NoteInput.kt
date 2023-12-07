@@ -10,10 +10,10 @@ data class NoteInput(
     val noteSender: NoteSender,
     val isAlert: Boolean,
     val patient: Patient,
-    val practitioner: Practitioner
+    val practitioner: Practitioner,
 )
 
 enum class NoteSender {
     PATIENT,
-    PRACTITIONER
+    PRACTITIONER,
 }

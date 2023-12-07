@@ -14,7 +14,7 @@ interface MedicationAdministrationService : FHIRService<MedicationAdministration
      */
     fun findMedicationAdministrationsByRequest(
         tenant: Tenant,
-        medicationRequest: MedicationRequest
+        medicationRequest: MedicationRequest,
     ): List<MedicationAdministration>
 
     /**
@@ -25,6 +25,6 @@ interface MedicationAdministrationService : FHIRService<MedicationAdministration
         tenant: Tenant,
         patientFHIRId: String,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
     ): List<MedicationAdministration>
 }

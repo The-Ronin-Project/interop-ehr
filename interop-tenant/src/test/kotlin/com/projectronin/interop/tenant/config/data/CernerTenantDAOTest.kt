@@ -60,16 +60,17 @@ class CernerTenantDAOTest {
         val tenantDao = TenantDAO(KtormHelper.database())
         val tenant = tenantDao.getTenantForMnemonic("tenant")!!
         val dao = CernerTenantDAO(KtormHelper.database())
-        val testobj = CernerTenantDO {
-            tenantId = tenant.id
-            serviceEndpoint = "newServiceEndpoints"
-            patientMRNSystem = "mrnSystem"
-            authEndpoint = "newAuthEndpoint"
-            messagePractitioner = "practitioner"
-            messageTopic = "topic"
-            messageCategory = "category"
-            messagePriority = "priority"
-        }
+        val testobj =
+            CernerTenantDO {
+                tenantId = tenant.id
+                serviceEndpoint = "newServiceEndpoints"
+                patientMRNSystem = "mrnSystem"
+                authEndpoint = "newAuthEndpoint"
+                messagePractitioner = "practitioner"
+                messageTopic = "topic"
+                messageCategory = "category"
+                messagePriority = "priority"
+            }
 
         val result = dao.insert(testobj)
         assertEquals(testobj.serviceEndpoint, result.serviceEndpoint)
@@ -81,10 +82,11 @@ class CernerTenantDAOTest {
     @DataSet(value = ["/dbunit/cerner-tenants/Tenants.yaml"], cleanAfter = true)
     fun `insert cernerTenant fails`() {
         val dao = CernerTenantDAO(KtormHelper.database())
-        val testobj = CernerTenantDO {
-            tenantId = -1
-            patientMRNSystem = "mrnSystem"
-        }
+        val testobj =
+            CernerTenantDO {
+                tenantId = -1
+                patientMRNSystem = "mrnSystem"
+            }
 
         assertThrows<SQLIntegrityConstraintViolationException> { dao.insert(testobj) }
     }
@@ -96,16 +98,17 @@ class CernerTenantDAOTest {
         val tenantDao = TenantDAO(KtormHelper.database())
         val tenant = tenantDao.getTenantForMnemonic("tenant")!!
         val dao = CernerTenantDAO(KtormHelper.database())
-        val updated = CernerTenantDO {
-            tenantId = tenant.id
-            serviceEndpoint = "newServiceEndpoint"
-            patientMRNSystem = "mrnSystem"
-            authEndpoint = "newAuthEndpoint"
-            messagePractitioner = "Practitioner1"
-            messageTopic = null
-            messageCategory = null
-            messagePriority = null
-        }
+        val updated =
+            CernerTenantDO {
+                tenantId = tenant.id
+                serviceEndpoint = "newServiceEndpoint"
+                patientMRNSystem = "mrnSystem"
+                authEndpoint = "newAuthEndpoint"
+                messagePractitioner = "Practitioner1"
+                messageTopic = null
+                messageCategory = null
+                messagePriority = null
+            }
         val result = dao.update(updated)
         assertNotNull(result)
         assertEquals(1, result)

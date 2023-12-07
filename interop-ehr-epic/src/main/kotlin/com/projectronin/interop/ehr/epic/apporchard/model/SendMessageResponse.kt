@@ -8,4 +8,6 @@ import com.fasterxml.jackson.databind.annotation.JsonNaming
  * Data class for receiving responses from Epic's [SendMessage](https://apporchard.epic.com/Sandbox?api=384) api.
  */
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
-data class SendMessageResponse(@JsonProperty("IDTypes") val idTypes: List<IDType>)
+data class SendMessageResponse(
+    @JsonProperty("IDTypes") val idTypes: List<IDType>,
+)

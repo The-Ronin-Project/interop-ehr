@@ -35,37 +35,42 @@ class CernerFHIRServiceTest {
     private class TestService(
         cernerClient: CernerClient,
         override val fhirURLSearchPart: String = "url",
-        override val fhirResourceType: Class<Patient> = Patient::class.java
+        override val fhirResourceType: Class<Patient> = Patient::class.java,
     ) :
         CernerFHIRService<Patient>(cernerClient) {
-        fun getPatients(tenant: Tenant, overrideParameters: Map<String, Any?> = emptyMap()): List<Patient> {
+        fun getPatients(
+            tenant: Tenant,
+            overrideParameters: Map<String, Any?> = emptyMap(),
+        ): List<Patient> {
             return getResourceListFromSearch(tenant, overrideParameters)
         }
     }
 
     @Test
     fun `getById works`() {
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery {
             httpResponse.body<Patient>(
                 TypeInfo(
                     Patient::class,
-                    Patient::class.java
-                )
+                    Patient::class.java,
+                ),
             )
-        } returns mockk(relaxed = true) {
-            every { id } returns mockk { every { value } returns "difId" }
-        }
+        } returns
+            mockk(relaxed = true) {
+                every { id } returns mockk { every { value } returns "difId" }
+            }
         coEvery {
             cernerClient.get(
                 tenant,
-                "url/fhirId"
+                "url/fhirId",
             )
         } returns ehrResponse
 
@@ -76,11 +81,12 @@ class CernerFHIRServiceTest {
 
     @Test
     fun `getByIds works`() {
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns patientBundle
@@ -88,7 +94,7 @@ class CernerFHIRServiceTest {
             cernerClient.get(
                 tenant,
                 "url",
-                mapOf("_id" to listOf("12745871", "12745872"))
+                mapOf("_id" to listOf("12745871", "12745872")),
             )
         } returns ehrResponse
 
@@ -105,7 +111,7 @@ class CernerFHIRServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -115,8 +121,8 @@ class CernerFHIRServiceTest {
                 tenant,
                 "url",
                 mapOf(
-                    "_count" to 250
-                )
+                    "_count" to 250,
+                ),
             )
         } returns ehrResponse
 
@@ -131,7 +137,7 @@ class CernerFHIRServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -141,8 +147,8 @@ class CernerFHIRServiceTest {
                 tenant,
                 "url",
                 mapOf(
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
@@ -153,39 +159,47 @@ class CernerFHIRServiceTest {
 
     @Test
     fun `ensure bundle handles next link with URL`() {
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            )
 
-        val patient1 = mockk<Patient>(relaxed = true) {
-            every { id } returns Id("1234")
-        }
-        val patient2 = mockk<Patient>(relaxed = true) {
-            every { id } returns Id("5678")
-        }
-        val bundle1 = mockk<Bundle>(relaxed = true) {
-            every { link } returns listOf(
-                mockk {
-                    every { relation } returns FHIRString("next")
-                    every { url } returns Uri("http://test/1234")
-                }
-            )
-            every { entry } returns listOf(
-                mockk {
-                    every { resource } returns patient1
-                }
-            )
-        }
-        val bundle2 = mockk<Bundle>(relaxed = true) {
-            every { link } returns listOf()
-            every { entry } returns listOf(
-                mockk {
-                    every { resource } returns patient2
-                }
-            )
-        }
+        val patient1 =
+            mockk<Patient>(relaxed = true) {
+                every { id } returns Id("1234")
+            }
+        val patient2 =
+            mockk<Patient>(relaxed = true) {
+                every { id } returns Id("5678")
+            }
+        val bundle1 =
+            mockk<Bundle>(relaxed = true) {
+                every { link } returns
+                    listOf(
+                        mockk {
+                            every { relation } returns FHIRString("next")
+                            every { url } returns Uri("http://test/1234")
+                        },
+                    )
+                every { entry } returns
+                    listOf(
+                        mockk {
+                            every { resource } returns patient1
+                        },
+                    )
+            }
+        val bundle2 =
+            mockk<Bundle>(relaxed = true) {
+                every { link } returns listOf()
+                every { entry } returns
+                    listOf(
+                        mockk {
+                            every { resource } returns patient2
+                        },
+                    )
+            }
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns bundle1
@@ -194,15 +208,16 @@ class CernerFHIRServiceTest {
                 tenant,
                 "url",
                 mapOf(
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
-        val httpResponse2 = mockk<HttpResponse> {
-            every { status } returns HttpStatusCode.OK
-            coEvery { body<Bundle>() } returns bundle2
-        }
+        val httpResponse2 =
+            mockk<HttpResponse> {
+                every { status } returns HttpStatusCode.OK
+                coEvery { body<Bundle>() } returns bundle2
+            }
         val ehrResponse2 = EHRResponse(httpResponse2, "67890")
         coEvery { cernerClient.get(tenant, "http://test/1234") } returns ehrResponse2
 
@@ -217,18 +232,20 @@ class CernerFHIRServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         val patient = mockk<Patient>(relaxed = true)
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { link } returns listOf()
-            every { entry } returns listOf(
-                mockk {
-                    every { resource } returns patient
-                }
-            )
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { link } returns listOf()
+                every { entry } returns
+                    listOf(
+                        mockk {
+                            every { resource } returns patient
+                        },
+                    )
+            }
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns bundle
@@ -237,8 +254,8 @@ class CernerFHIRServiceTest {
                 tenant,
                 "url",
                 mapOf(
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
@@ -253,22 +270,25 @@ class CernerFHIRServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         val patient = mockk<Patient>(relaxed = true)
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { link } returns listOf(
-                mockk {
-                    every { relation } returns FHIRString("self")
-                }
-            )
-            every { entry } returns listOf(
-                mockk {
-                    every { resource } returns patient
-                }
-            )
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { link } returns
+                    listOf(
+                        mockk {
+                            every { relation } returns FHIRString("self")
+                        },
+                    )
+                every { entry } returns
+                    listOf(
+                        mockk {
+                            every { resource } returns patient
+                        },
+                    )
+            }
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns bundle
@@ -277,8 +297,8 @@ class CernerFHIRServiceTest {
                 tenant,
                 "url",
                 mapOf(
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
@@ -293,22 +313,25 @@ class CernerFHIRServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         val patient = mockk<Patient>(relaxed = true)
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { link } returns listOf(
-                mockk {
-                    every { relation } returns null
-                }
-            )
-            every { entry } returns listOf(
-                mockk {
-                    every { resource } returns patient
-                }
-            )
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { link } returns
+                    listOf(
+                        mockk {
+                            every { relation } returns null
+                        },
+                    )
+                every { entry } returns
+                    listOf(
+                        mockk {
+                            every { resource } returns patient
+                        },
+                    )
+            }
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns bundle
@@ -317,8 +340,8 @@ class CernerFHIRServiceTest {
                 tenant,
                 "url",
                 mapOf(
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
@@ -333,23 +356,26 @@ class CernerFHIRServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         val patient = mockk<Patient>(relaxed = true)
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { link } returns listOf(
-                mockk {
-                    every { relation } returns FHIRString("next")
-                    every { url } returns null
-                }
-            )
-            every { entry } returns listOf(
-                mockk {
-                    every { resource } returns patient
-                }
-            )
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { link } returns
+                    listOf(
+                        mockk {
+                            every { relation } returns FHIRString("next")
+                            every { url } returns null
+                        },
+                    )
+                every { entry } returns
+                    listOf(
+                        mockk {
+                            every { resource } returns patient
+                        },
+                    )
+            }
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns bundle
@@ -358,8 +384,8 @@ class CernerFHIRServiceTest {
                 tenant,
                 "url",
                 mapOf(
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
@@ -374,23 +400,26 @@ class CernerFHIRServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         val patient = mockk<Patient>(relaxed = true)
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { link } returns listOf(
-                mockk {
-                    every { relation } returns FHIRString("next")
-                    every { url } returns Uri(null)
-                }
-            )
-            every { entry } returns listOf(
-                mockk {
-                    every { resource } returns patient
-                }
-            )
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { link } returns
+                    listOf(
+                        mockk {
+                            every { relation } returns FHIRString("next")
+                            every { url } returns Uri(null)
+                        },
+                    )
+                every { entry } returns
+                    listOf(
+                        mockk {
+                            every { resource } returns patient
+                        },
+                    )
+            }
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns bundle
@@ -399,8 +428,8 @@ class CernerFHIRServiceTest {
                 tenant,
                 "url",
                 mapOf(
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 

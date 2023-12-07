@@ -17,6 +17,6 @@ interface ProfileTransformer<T : Resource<T>> {
     fun transform(
         original: T,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime? = null
+        forceCacheReloadTS: LocalDateTime? = null,
     ): Pair<TransformResponse<T>?, Validation>
 }

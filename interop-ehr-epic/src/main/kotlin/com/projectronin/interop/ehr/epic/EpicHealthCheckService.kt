@@ -13,7 +13,7 @@ import org.springframework.stereotype.Component
 class EpicHealthCheckService(
     private val authorizationService: EpicAuthenticationService,
     private val epicClient: EpicClient,
-    private val tenantService: TenantService
+    private val tenantService: TenantService,
 ) : HealthCheckService {
     private val logger = KotlinLogging.logger { }
 
@@ -36,6 +36,5 @@ class EpicHealthCheckService(
         return true
     }
 
-    override fun healthCheck(): Map<Tenant, Boolean> =
-        tenantService.getMonitoredTenants().associateWith { healthCheck(it) }
+    override fun healthCheck(): Map<Tenant, Boolean> = tenantService.getMonitoredTenants().associateWith { healthCheck(it) }
 }

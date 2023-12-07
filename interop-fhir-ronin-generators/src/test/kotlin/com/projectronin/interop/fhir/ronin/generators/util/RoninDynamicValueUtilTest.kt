@@ -18,28 +18,30 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class RoninDynamicValueUtilTest {
-
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `generate rcdm optional reference as null when null input and no type and no id`() {
-        val reported = generateOptionalDynamicValueReference(
-            null,
-            reportedReferenceOptions,
-            tenant.mnemonic
-        )
+        val reported =
+            generateOptionalDynamicValueReference(
+                null,
+                reportedReferenceOptions,
+                tenant.mnemonic,
+            )
         assertNull(reported)
     }
 
     @Test
     fun `generate rcdm optional reference as null when nullish input and no type and no id`() {
-        val reported = generateOptionalDynamicValueReference(
-            NullDataGenerator<DynamicValue<Any>>().generate(),
-            reportedReferenceOptions,
-            tenant.mnemonic
-        )
+        val reported =
+            generateOptionalDynamicValueReference(
+                NullDataGenerator<DynamicValue<Any>>().generate(),
+                reportedReferenceOptions,
+                tenant.mnemonic,
+            )
         assertNull(reported)
     }
 
@@ -48,11 +50,12 @@ class RoninDynamicValueUtilTest {
         val initialValue = DynamicValues.reference(reference("Patient"))
         assertNull(initialValue.value.type?.extension)
 
-        val reported = generateOptionalDynamicValueReference(
-            initialValue,
-            reportedReferenceOptions,
-            tenant.mnemonic
-        )
+        val reported =
+            generateOptionalDynamicValueReference(
+                initialValue,
+                reportedReferenceOptions,
+                tenant.mnemonic,
+            )
         assertNull(reported)
     }
 
@@ -61,12 +64,13 @@ class RoninDynamicValueUtilTest {
         val initialValue = DynamicValues.reference(reference("Patient"))
         assertNull(initialValue.value.type?.extension)
 
-        val reported = generateOptionalDynamicValueReference(
-            initialValue,
-            reportedReferenceOptions,
-            tenant.mnemonic,
-            "Patient"
-        )
+        val reported =
+            generateOptionalDynamicValueReference(
+                initialValue,
+                reportedReferenceOptions,
+                tenant.mnemonic,
+                "Patient",
+            )
         val actualValue = reported?.value as Reference
         assertEquals("Patient", actualValue.decomposedType())
         assertEquals(actualValue.type?.extension, dataAuthorityExtension)
@@ -77,17 +81,18 @@ class RoninDynamicValueUtilTest {
         val initialValue = DynamicValues.reference(reference("Medication"))
         assertNull(initialValue.value.type?.extension)
 
-        val exception = assertThrows<IllegalArgumentException> {
-            generateOptionalDynamicValueReference(
-                initialValue,
-                reportedReferenceOptions,
-                tenant.mnemonic,
-                "Medication"
-            )
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                generateOptionalDynamicValueReference(
+                    initialValue,
+                    reportedReferenceOptions,
+                    tenant.mnemonic,
+                    "Medication",
+                )
+            }
         assertEquals(
             "Medication is not one of Practitioner, Organization, Patient, PractitionerRole",
-            exception.message
+            exception.message,
         )
     }
 
@@ -96,13 +101,14 @@ class RoninDynamicValueUtilTest {
         val initialValue = DynamicValues.reference(reference("Medication"))
         assertNull(initialValue.value.type?.extension)
 
-        val reported = generateOptionalDynamicValueReference(
-            initialValue,
-            reportedReferenceOptions,
-            tenant.mnemonic,
-            "Patient",
-            ""
-        )
+        val reported =
+            generateOptionalDynamicValueReference(
+                initialValue,
+                reportedReferenceOptions,
+                tenant.mnemonic,
+                "Patient",
+                "",
+            )
         val actualValue = reported?.value as Reference
         assertEquals("Patient", actualValue.decomposedType())
         assertEquals(actualValue.type?.extension, dataAuthorityExtension)
@@ -113,13 +119,14 @@ class RoninDynamicValueUtilTest {
         val initialValue = DynamicValues.reference(reference("Medication"))
         assertNull(initialValue.value.type?.extension)
 
-        val reported = generateOptionalDynamicValueReference(
-            initialValue,
-            reportedReferenceOptions,
-            tenant.mnemonic,
-            "Patient",
-            "1234"
-        )
+        val reported =
+            generateOptionalDynamicValueReference(
+                initialValue,
+                reportedReferenceOptions,
+                tenant.mnemonic,
+                "Patient",
+                "1234",
+            )
         val actualValue = reported?.value as Reference
         assertEquals("Patient", actualValue.decomposedType())
         assertEquals(actualValue.type?.extension, dataAuthorityExtension)
@@ -129,11 +136,12 @@ class RoninDynamicValueUtilTest {
     @Test
     fun `accept valid rcdm required reference if provided`() {
         val initialValue = DynamicValues.reference(rcdmReference("Medication", "1234"))
-        val medication = generateDynamicValueReference(
-            initialValue,
-            medicationReferenceOptions,
-            tenant.mnemonic
-        )
+        val medication =
+            generateDynamicValueReference(
+                initialValue,
+                medicationReferenceOptions,
+                tenant.mnemonic,
+            )
         assertTrue(medication.value.decomposedType() in medicationReferenceOptions)
         assertEquals(dataAuthorityExtension, medication.value.type?.extension)
         assertEquals("Medication/1234".asFHIR(), medication.value.reference)
@@ -145,11 +153,12 @@ class RoninDynamicValueUtilTest {
         assertTrue(initialValue.value.decomposedType() in medicationReferenceOptions)
         assertNull(initialValue.value.type?.extension)
 
-        val medication = generateDynamicValueReference(
-            initialValue,
-            medicationReferenceOptions,
-            tenant.mnemonic
-        )
+        val medication =
+            generateDynamicValueReference(
+                initialValue,
+                medicationReferenceOptions,
+                tenant.mnemonic,
+            )
         assertTrue(medication.value.decomposedType() in medicationReferenceOptions)
         assertEquals(medication.value.type?.extension, dataAuthorityExtension)
     }
@@ -160,12 +169,13 @@ class RoninDynamicValueUtilTest {
         assertTrue(initialValue.value.decomposedType() in medicationReferenceOptions)
         assertNull(initialValue.value.type?.extension)
 
-        val medication = generateDynamicValueReference(
-            initialValue,
-            medicationReferenceOptions,
-            tenant.mnemonic,
-            "Medication"
-        )
+        val medication =
+            generateDynamicValueReference(
+                initialValue,
+                medicationReferenceOptions,
+                tenant.mnemonic,
+                "Medication",
+            )
         assertEquals("Medication", medication.value.decomposedType())
         assertEquals(medication.value.type?.extension, dataAuthorityExtension)
     }
@@ -176,17 +186,18 @@ class RoninDynamicValueUtilTest {
         assertTrue(initialValue.value.decomposedType() in medicationReferenceOptions)
         assertNull(initialValue.value.type?.extension)
 
-        val exception = assertThrows<IllegalArgumentException> {
-            generateDynamicValueReference(
-                initialValue,
-                medicationReferenceOptions,
-                tenant.mnemonic,
-                "Patient"
-            )
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                generateDynamicValueReference(
+                    initialValue,
+                    medicationReferenceOptions,
+                    tenant.mnemonic,
+                    "Patient",
+                )
+            }
         assertEquals(
             "Patient is not Medication",
-            exception.message
+            exception.message,
         )
     }
 
@@ -196,13 +207,14 @@ class RoninDynamicValueUtilTest {
         assertTrue(initialValue.value.decomposedType() in medicationReferenceOptions)
         assertNull(initialValue.value.type?.extension)
 
-        val medication = generateDynamicValueReference(
-            initialValue,
-            medicationReferenceOptions,
-            tenant.mnemonic,
-            "Medication",
-            ""
-        )
+        val medication =
+            generateDynamicValueReference(
+                initialValue,
+                medicationReferenceOptions,
+                tenant.mnemonic,
+                "Medication",
+                "",
+            )
         assertEquals("Medication", medication.value.decomposedType())
         assertEquals(medication.value.type?.extension, dataAuthorityExtension)
     }
@@ -213,13 +225,14 @@ class RoninDynamicValueUtilTest {
         assertTrue(initialValue.value.decomposedType() in medicationReferenceOptions)
         assertNull(initialValue.value.type?.extension)
 
-        val medication = generateDynamicValueReference(
-            initialValue,
-            medicationReferenceOptions,
-            tenant.mnemonic,
-            "Medication",
-            "1234"
-        )
+        val medication =
+            generateDynamicValueReference(
+                initialValue,
+                medicationReferenceOptions,
+                tenant.mnemonic,
+                "Medication",
+                "1234",
+            )
         assertEquals("Medication", medication.value.decomposedType())
         assertEquals(medication.value.type?.extension, dataAuthorityExtension)
         assertEquals("Medication/test-1234".asFHIR(), medication.value.reference)

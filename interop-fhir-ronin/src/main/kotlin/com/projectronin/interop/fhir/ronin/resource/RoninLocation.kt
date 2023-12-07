@@ -28,12 +28,16 @@ import java.time.LocalDateTime
 class RoninLocation(
     normalizer: Normalizer,
     localizer: Localizer,
-    private val contactPoint: RoninContactPoint
+    private val contactPoint: RoninContactPoint,
 ) : USCoreBasedProfile<Location>(R4LocationValidator, RoninProfile.LOCATION.value, normalizer, localizer) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
 
-    override fun validateRonin(element: Location, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: Location,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, validation)
@@ -49,21 +53,26 @@ class RoninLocation(
     }
 
     private val requiredNameError = RequiredFieldError(Location::name)
-    private val nameInvariantError = FHIRError(
-        code = "RONIN_LOC_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Either Location.name SHALL be present or a Data Absent Reason Extension SHALL be present.",
-        location = LocationContext(Location::name)
-    )
+    private val nameInvariantError =
+        FHIRError(
+            code = "RONIN_LOC_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Either Location.name SHALL be present or a Data Absent Reason Extension SHALL be present.",
+            location = LocationContext(Location::name),
+        )
 
-    override fun validateUSCore(element: Location, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: Location,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             checkNotNull(element.name, requiredNameError, parentContext)
             element.name?.let {
                 checkTrue(
                     (it.value != null) xor it.hasDataAbsentReason(),
                     nameInvariantError,
-                    parentContext
+                    parentContext,
                 )
             }
 
@@ -73,53 +82,57 @@ class RoninLocation(
         }
     }
 
-    private val DEFAULT_NAME = "Unnamed Location"
+    private val defaultName = "Unnamed Location"
 
-    private val unnamedWarning = FHIRError(
-        "RONIN_LOC_001",
-        ValidationIssueSeverity.WARNING,
-        "no name was provided, so the default name, $DEFAULT_NAME, has been used instead ",
-        LocationContext(Location::name)
-    )
+    private val unnamedWarning =
+        FHIRError(
+            "RONIN_LOC_001",
+            ValidationIssueSeverity.WARNING,
+            "no name was provided, so the default name, $defaultName, has been used instead ",
+            LocationContext(Location::name),
+        )
 
     override fun transformInternal(
         normalized: Location,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<Location>?, Validation> {
         val validation = Validation()
 
         val normalizedName = normalized.name
-        val name = if (normalizedName == null) {
-            validation.checkTrue(false, unnamedWarning, parentContext)
-            FHIRString(DEFAULT_NAME)
-        } else if (normalizedName.value.isNullOrEmpty()) {
-            validation.checkTrue(false, unnamedWarning, parentContext)
-            FHIRString(DEFAULT_NAME, normalizedName.id, normalizedName.extension)
-        } else {
-            normalized.name
-        }
+        val name =
+            if (normalizedName == null) {
+                validation.checkTrue(false, unnamedWarning, parentContext)
+                FHIRString(defaultName)
+            } else if (normalizedName.value.isNullOrEmpty()) {
+                validation.checkTrue(false, unnamedWarning, parentContext)
+                FHIRString(defaultName, normalizedName.id, normalizedName.extension)
+            } else {
+                normalized.name
+            }
 
-        val contactPointTransformed = if (normalized.telecom.isNotEmpty()) {
-            contactPoint.transform(
-                normalized.telecom,
-                normalized,
-                tenant,
-                LocationContext(Location::class),
-                validation,
-                forceCacheReloadTS
+        val contactPointTransformed =
+            if (normalized.telecom.isNotEmpty()) {
+                contactPoint.transform(
+                    normalized.telecom,
+                    normalized,
+                    tenant,
+                    LocationContext(Location::class),
+                    validation,
+                    forceCacheReloadTS,
+                )
+            } else {
+                Pair(normalized.telecom, validation)
+            }
+
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+                name = name,
+                telecom = contactPointTransformed.first ?: emptyList(),
             )
-        } else {
-            Pair(normalized.telecom, validation)
-        }
-
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant),
-            name = name,
-            telecom = contactPointTransformed.first ?: emptyList()
-        )
         return Pair(TransformResponse(transformed), contactPointTransformed.second)
     }
 }

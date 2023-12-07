@@ -18,7 +18,7 @@ class ConditionServiceTest {
             tenant: Tenant,
             patientFhirId: String,
             conditionCategoryCodes: List<FHIRSearchToken>,
-            clinicalStatusCodes: List<FHIRSearchToken>
+            clinicalStatusCodes: List<FHIRSearchToken>,
         ): List<Condition> {
             if (clinicalStatusCodes.isEmpty()) {
                 return listOf(mockk { every { id?.value } returns "mocked!" })
@@ -27,6 +27,7 @@ class ConditionServiceTest {
             }
         }
     }
+
     private val conditionService = spyk<ConditionServiceMock>()
 
     @Test

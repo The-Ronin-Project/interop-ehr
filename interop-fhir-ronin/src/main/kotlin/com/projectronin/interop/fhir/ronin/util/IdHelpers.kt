@@ -13,5 +13,5 @@ fun Tenant.toFhirIdentifier() =
     Identifier(
         type = CodeableConcepts.RONIN_TENANT,
         system = CodeSystem.RONIN_TENANT.uri,
-        value = FHIRString(mnemonic)
+        value = FHIRString(mnemonic),
     )

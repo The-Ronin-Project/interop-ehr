@@ -13,7 +13,9 @@ import java.time.LocalDate
  * Service providing access to Encounters within Cerner.
  */
 @Component
-class CernerMedicationAdministrationService(cernerClient: CernerClient) : MedicationAdministrationService, CernerFHIRService<MedicationAdministration>(cernerClient) {
+class CernerMedicationAdministrationService(
+    cernerClient: CernerClient,
+) : MedicationAdministrationService, CernerFHIRService<MedicationAdministration>(cernerClient) {
     override val fhirURLSearchPart = "/MedicationAdministration"
     override val fhirResourceType = MedicationAdministration::class.java
 
@@ -22,18 +24,19 @@ class CernerMedicationAdministrationService(cernerClient: CernerClient) : Medica
         tenant: Tenant,
         patientFHIRId: String,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
     ): List<MedicationAdministration> {
-        val parameters = mapOf(
-            "patient" to patientFHIRId,
-            "effective-time" to getDateParam(startDate, endDate, tenant)
-        )
+        val parameters =
+            mapOf(
+                "patient" to patientFHIRId,
+                "effective-time" to getDateParam(startDate, endDate, tenant),
+            )
         return getResourceListFromSearch(tenant, parameters)
     }
 
     override fun findMedicationAdministrationsByRequest(
         tenant: Tenant,
-        medicationRequest: MedicationRequest
+        medicationRequest: MedicationRequest,
     ): List<MedicationAdministration> {
         return listOf() // Not implemented for Cerner
     }

@@ -24,13 +24,18 @@ import org.springframework.stereotype.Repository
  * Provides data access operations for tenant server data models.
  */
 @Repository
-class TenantServerDAO(@Qualifier("ehr") private val database: Database) {
+class TenantServerDAO(
+    @Qualifier("ehr") private val database: Database,
+) {
     private val logger = KotlinLogging.logger { }
 
     /**
      * Retrieves all [TenantServerDO]s for a given tenant
      */
-    fun getTenantServers(tenantMnemonic: String, type: MessageType? = null): List<TenantServerDO> {
+    fun getTenantServers(
+        tenantMnemonic: String,
+        type: MessageType? = null,
+    ): List<TenantServerDO> {
         return database.from(TenantServerDOs)
             .leftJoin(TenantDOs, on = TenantServerDOs.tenantId eq TenantDOs.id)
             .joinReferencesAndSelect()
@@ -58,18 +63,19 @@ class TenantServerDAO(@Qualifier("ehr") private val database: Database) {
      * Create a new [TenantServerDO]
      */
     fun insertTenantServer(tenantServer: TenantServerDO): TenantServerDO {
-        val tenantKey = try {
-            database.insertAndGenerateKey(TenantServerDOs) {
-                set(it.tenantId, tenantServer.tenant.id)
-                set(it.messageType, tenantServer.messageType)
-                set(it.address, tenantServer.address)
-                set(it.port, tenantServer.port)
-                set(it.serverType, tenantServer.serverType)
+        val tenantKey =
+            try {
+                database.insertAndGenerateKey(TenantServerDOs) {
+                    set(it.tenantId, tenantServer.tenant.id)
+                    set(it.messageType, tenantServer.messageType)
+                    set(it.address, tenantServer.address)
+                    set(it.port, tenantServer.port)
+                    set(it.serverType, tenantServer.serverType)
+                }
+            } catch (e: Exception) {
+                logger.error(e) { "TenantServer insert failed: $e" }
+                throw e
             }
-        } catch (e: Exception) {
-            logger.error(e) { "TenantServer insert failed: $e" }
-            throw e
-        }
         tenantServer.id = tenantKey.toString().toInt()
         return tenantServer
     }

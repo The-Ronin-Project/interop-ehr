@@ -24,9 +24,10 @@ class RoninStringOrDARUtilTest {
 
     @Test
     fun `generates name if none is provided`() {
-        val roninLocation = rcdmLocation("test") {
-            name
-        }
+        val roninLocation =
+            rcdmLocation("test") {
+                name
+            }
         assertNotNull(roninLocation.name)
     }
 }

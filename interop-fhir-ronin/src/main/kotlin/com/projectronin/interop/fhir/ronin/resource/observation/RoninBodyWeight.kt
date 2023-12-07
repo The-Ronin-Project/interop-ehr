@@ -18,29 +18,34 @@ import org.springframework.stereotype.Component
 class RoninBodyWeight(
     normalizer: Normalizer,
     localizer: Localizer,
-    registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient,
 ) :
     BaseRoninVitalSign(
-        R4ObservationValidator,
-        RoninProfile.OBSERVATION_BODY_WEIGHT.value,
-        normalizer,
-        localizer,
-        registryClient
-    ) {
+            R4ObservationValidator,
+            RoninProfile.OBSERVATION_BODY_WEIGHT.value,
+            normalizer,
+            localizer,
+            registryClient,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_26_1
     override val profileVersion = 3
 
     // Quantity unit codes - [USCore Body Weight Units](http://hl7.org/fhir/R4/valueset-ucum-bodyweight.html)
     override val validQuantityCodes = listOf("kg", "[lb_av]", "g")
 
-    private val noBodySiteError = FHIRError(
-        code = "RONIN_WTOBS_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "bodySite not allowed for Body Weight observation",
-        location = LocationContext(Observation::bodySite)
-    )
+    private val noBodySiteError =
+        FHIRError(
+            code = "RONIN_WTOBS_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "bodySite not allowed for Body Weight observation",
+            location = LocationContext(Observation::bodySite),
+        )
 
-    override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
+    override fun validateVitalSign(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             validateVitalSignValue(element.value, parentContext, this)
 

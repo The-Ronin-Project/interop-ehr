@@ -52,12 +52,13 @@ class CernerPatientServiceTest {
     fun `findPatient patient is returned`() {
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-            mrnSystem = mrnSystem
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+                mrnSystem = mrnSystem,
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
@@ -69,27 +70,29 @@ class CernerPatientServiceTest {
                     "given" to "givenName",
                     "family:exact" to "familyName",
                     "birthdate" to "2015-01-01",
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
-        val bundle = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatient(
-            tenant,
-            LocalDate.of(2015, 1, 1),
-            "givenName",
-            "familyName"
-        )
+        val bundle =
+            CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatient(
+                tenant,
+                LocalDate.of(2015, 1, 1),
+                "givenName",
+                "familyName",
+            )
         assertEquals(validPatientBundle.entry.map { it.resource }.filterIsInstance<Patient>(), bundle)
     }
 
     @Test
     fun `getPatient - works`() {
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            )
         val fakePat = mockk<Patient>(relaxed = true)
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Patient>(TypeInfo(Patient::class, Patient::class.java)) } returns fakePat
@@ -102,12 +105,13 @@ class CernerPatientServiceTest {
     fun `findPatientsById returns single patient`() {
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-            mrnSystem = mrnSystem
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+                mrnSystem = mrnSystem,
+            )
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validPatientBundleSingle
         coEvery {
@@ -116,20 +120,22 @@ class CernerPatientServiceTest {
                 "/Patient",
                 mapOf(
                     "identifier" to "urn:oid:2.16.840.1.113883.6.1000|9299",
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
-        val resultPatientsByKey = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
-            tenant,
-            mapOf(
-                "patient#1" to Identifier(
-                    value = "9299".asFHIR(),
-                    system = Uri("urn:oid:2.16.840.1.113883.6.1000")
-                )
+        val resultPatientsByKey =
+            CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
+                tenant,
+                mapOf(
+                    "patient#1" to
+                        Identifier(
+                            value = "9299".asFHIR(),
+                            system = Uri("urn:oid:2.16.840.1.113883.6.1000"),
+                        ),
+                ),
             )
-        )
         assertEquals(mapOf("patient#1" to validPatientBundleSingle.entry.first().resource), resultPatientsByKey)
     }
 
@@ -137,33 +143,38 @@ class CernerPatientServiceTest {
     fun `findPatientsById returns patient with an identifier missing a system and value`() {
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-            mrnSystem = mrnSystem
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+                mrnSystem = mrnSystem,
+            )
 
-        val patient = mockk<Patient>(relaxed = true) {
-            every { identifier } returns listOf(
-                mockk {
-                    every { system } returns Uri("urn:oid:2.16.840.1.113883.6.1000")
-                    every { value } returns FHIRString("202497")
-                },
-                mockk {
-                    every { system } returns Uri("value-less")
-                    every { value } returns null
-                }
-            )
-        }
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { link } returns listOf()
-            every { entry } returns listOf(
-                mockk {
-                    every { resource } returns patient
-                }
-            )
-        }
+        val patient =
+            mockk<Patient>(relaxed = true) {
+                every { identifier } returns
+                    listOf(
+                        mockk {
+                            every { system } returns Uri("urn:oid:2.16.840.1.113883.6.1000")
+                            every { value } returns FHIRString("202497")
+                        },
+                        mockk {
+                            every { system } returns Uri("value-less")
+                            every { value } returns null
+                        },
+                    )
+            }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { link } returns listOf()
+                every { entry } returns
+                    listOf(
+                        mockk {
+                            every { resource } returns patient
+                        },
+                    )
+            }
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns bundle
         coEvery {
@@ -172,21 +183,23 @@ class CernerPatientServiceTest {
                 "/Patient",
                 mapOf(
                     "identifier" to "urn:oid:2.16.840.1.113883.6.1000|202497",
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
-        val resultPatientsByKey = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
-            tenant,
-            mapOf(
-                "patient#1" to Identifier(
-                    value = "202497".asFHIR(),
-                    system = Uri("urn:oid:2.16.840.1.113883.6.1000"),
-                    type = CodeableConcept(text = "MRN".asFHIR())
-                )
+        val resultPatientsByKey =
+            CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
+                tenant,
+                mapOf(
+                    "patient#1" to
+                        Identifier(
+                            value = "202497".asFHIR(),
+                            system = Uri("urn:oid:2.16.840.1.113883.6.1000"),
+                            type = CodeableConcept(text = "MRN".asFHIR()),
+                        ),
+                ),
             )
-        )
         assertEquals(1, resultPatientsByKey.size)
         assertNotNull(resultPatientsByKey["patient#1"])
     }
@@ -195,17 +208,19 @@ class CernerPatientServiceTest {
     fun `findPatientsById returns emptyMap when nothing found`() {
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-            mrnSystem = mrnSystem
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+                mrnSystem = mrnSystem,
+            )
 
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { link } returns listOf()
-            every { entry } returns emptyList()
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { link } returns listOf()
+                every { entry } returns emptyList()
+            }
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns bundle
         coEvery {
@@ -214,21 +229,23 @@ class CernerPatientServiceTest {
                 "/Patient",
                 mapOf(
                     "identifier" to "urn:oid:2.16.840.1.113883.6.1000|202497",
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
-        val resultPatientsByKey = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
-            tenant,
-            mapOf(
-                "patient#1" to Identifier(
-                    value = "202497".asFHIR(),
-                    system = Uri("urn:oid:2.16.840.1.113883.6.1000"),
-                    type = CodeableConcept(text = "MRN".asFHIR())
-                )
+        val resultPatientsByKey =
+            CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
+                tenant,
+                mapOf(
+                    "patient#1" to
+                        Identifier(
+                            value = "202497".asFHIR(),
+                            system = Uri("urn:oid:2.16.840.1.113883.6.1000"),
+                            type = CodeableConcept(text = "MRN".asFHIR()),
+                        ),
+                ),
             )
-        )
         assertEquals(0, resultPatientsByKey.size)
     }
 
@@ -236,12 +253,13 @@ class CernerPatientServiceTest {
     fun `findPatientsById request missing system is not returned`() {
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-            mrnSystem = mrnSystem
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+                mrnSystem = mrnSystem,
+            )
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validPatientBundleSingle
         coEvery {
@@ -250,25 +268,27 @@ class CernerPatientServiceTest {
                 "/Patient",
                 mapOf(
                     "identifier" to "urn:oid:2.16.840.1.113883.6.1000|9299",
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns ehrResponse
 
-        val resultPatientsByKey = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
-            tenant,
-            mapOf(
-                "goodIdentifier" to Identifier(
-                    value = "9299".asFHIR(),
-                    system = Uri("urn:oid:2.16.840.1.113883.6.1000"),
-                    type = CodeableConcept(text = "MRN".asFHIR())
+        val resultPatientsByKey =
+            CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
+                tenant,
+                mapOf(
+                    "goodIdentifier" to
+                        Identifier(
+                            value = "9299".asFHIR(),
+                            system = Uri("urn:oid:2.16.840.1.113883.6.1000"),
+                            type = CodeableConcept(text = "MRN".asFHIR()),
+                        ),
+                    "badIdentifier" to Identifier(value = "202497".asFHIR(), system = null),
                 ),
-                "badIdentifier" to Identifier(value = "202497".asFHIR(), system = null)
             )
-        )
         assertEquals(
             mapOf("goodIdentifier" to validPatientBundleSingle.entry.first().resource),
-            resultPatientsByKey
+            resultPatientsByKey,
         )
     }
 
@@ -276,18 +296,19 @@ class CernerPatientServiceTest {
     fun `findPatientsById throws error for bad input`() {
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-            mrnSystem = mrnSystem
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+                mrnSystem = mrnSystem,
+            )
         assertThrows<java.lang.NullPointerException> {
             CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatientsById(
                 tenant,
                 mapOf(
-                    "badIdentifier" to Identifier(value = null, system = Uri("Test"))
-                )
+                    "badIdentifier" to Identifier(value = null, system = Uri("Test")),
+                ),
             )
         }
     }
@@ -298,40 +319,44 @@ class CernerPatientServiceTest {
         val fhirID = "FHIRID"
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-        )
-        val mockResponse = listOf<IdentifierSearchResponse>(
-            mockk {
-                every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
-                every { foundResources } returns listOf(
-                    mockk {
-                        every { identifiers } returns listOf(
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            )
+        val mockResponse =
+            listOf<IdentifierSearchResponse>(
+                mockk {
+                    every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
+                    every { foundResources } returns
+                        listOf(
                             mockk {
-                                every { value } returns fhirID
-                                every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
-                            }
-
+                                every { identifiers } returns
+                                    listOf(
+                                        mockk {
+                                            every { value } returns fhirID
+                                            every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                                        },
+                                    )
+                            },
                         )
-                    }
-                )
-            }
-        )
+                },
+            )
         coEvery {
             ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
                 IdentifierSearchableResourceTypes.Patient,
-                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem))
+                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem)),
             )
         } returns mockResponse
 
-        val response = CernerPatientService(cernerClient, ehrDataAuthorityClient).getPatientsFHIRIds(
-            tenant,
-            mrnSystem,
-            listOf(mrn)
-        )
+        val response =
+            CernerPatientService(cernerClient, ehrDataAuthorityClient).getPatientsFHIRIds(
+                tenant,
+                mrnSystem,
+                listOf(mrn),
+            )
 
         assertEquals(fhirID, response[mrn]!!.fhirID)
     }
@@ -342,41 +367,45 @@ class CernerPatientServiceTest {
         val fhirID = "FHIRID"
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-            mrnSystem = mrnSystem
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+                mrnSystem = mrnSystem,
+            )
 
-        val mockResponse = listOf<IdentifierSearchResponse>(
-            mockk {
-                every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
-                every { foundResources } returns listOf(
-                    mockk {
-                        every { identifiers } returns listOf(
+        val mockResponse =
+            listOf<IdentifierSearchResponse>(
+                mockk {
+                    every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
+                    every { foundResources } returns
+                        listOf(
                             mockk {
-                                every { value } returns fhirID
-                                every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
-                            }
-
+                                every { identifiers } returns
+                                    listOf(
+                                        mockk {
+                                            every { value } returns fhirID
+                                            every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                                        },
+                                    )
+                            },
                         )
-                    }
-                )
-            }
-        )
+                },
+            )
         coEvery {
             ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
                 IdentifierSearchableResourceTypes.Patient,
-                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem))
+                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem)),
             )
         } returns mockResponse
 
-        val response = CernerPatientService(cernerClient, ehrDataAuthorityClient).getPatientFHIRId(
-            tenant,
-            mrn
-        )
+        val response =
+            CernerPatientService(cernerClient, ehrDataAuthorityClient).getPatientFHIRId(
+                tenant,
+                mrn,
+            )
 
         assertEquals(fhirID, response)
     }
@@ -388,38 +417,40 @@ class CernerPatientServiceTest {
 
         val cernerPatientService = spyk(CernerPatientService(cernerClient, ehrDataAuthorityClient))
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-            mrnSystem = mrnSystem
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+                mrnSystem = mrnSystem,
+            )
 
-        val mockResponse = listOf<IdentifierSearchResponse>(
-            mockk {
-                every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
-                every { foundResources } returns listOf()
-            }
-        )
+        val mockResponse =
+            listOf<IdentifierSearchResponse>(
+                mockk {
+                    every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
+                    every { foundResources } returns listOf()
+                },
+            )
         coEvery {
             ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
                 IdentifierSearchableResourceTypes.Patient,
-                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem))
+                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem)),
             )
         } returns mockResponse
 
         every {
             cernerPatientService.findPatientsById(
                 tenant,
-                mapOf(mrn to Identifier(value = mrn.asFHIR(), system = Uri(mrnSystem)))
+                mapOf(mrn to Identifier(value = mrn.asFHIR(), system = Uri(mrnSystem))),
             )
         } returns emptyMap()
 
         assertThrows<VendorIdentifierNotFoundException> {
             cernerPatientService.getPatientFHIRId(
                 tenant,
-                mrn
+                mrn,
             )
         }
     }
@@ -432,37 +463,40 @@ class CernerPatientServiceTest {
 
         val epicPatientService = spyk(CernerPatientService(cernerClient, ehrDataAuthorityClient))
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-        )
-        val mockResponse = listOf<IdentifierSearchResponse>(
-            mockk {
-                every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
-                every { foundResources } returns listOf()
-            }
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            )
+        val mockResponse =
+            listOf<IdentifierSearchResponse>(
+                mockk {
+                    every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
+                    every { foundResources } returns listOf()
+                },
+            )
         coEvery {
             ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
                 IdentifierSearchableResourceTypes.Patient,
-                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem))
+                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem)),
             )
         } returns mockResponse
 
         every {
             epicPatientService.findPatientsById(
                 tenant,
-                mapOf(mrn to Identifier(value = mrn.asFHIR(), system = Uri(mrnSystem)))
+                mapOf(mrn to Identifier(value = mrn.asFHIR(), system = Uri(mrnSystem))),
             )
         } returns mapOf(mrn to Patient(id = Id(fhirID)))
 
-        val response = epicPatientService.getPatientsFHIRIds(
-            tenant,
-            mrnSystem,
-            listOf(mrn)
-        )
+        val response =
+            epicPatientService.getPatientsFHIRIds(
+                tenant,
+                mrnSystem,
+                listOf(mrn),
+            )
 
         assertEquals(fhirID, response[mrn]!!.fhirID)
     }
@@ -481,64 +515,71 @@ class CernerPatientServiceTest {
 
         val epicPatientService = spyk(CernerPatientService(cernerClient, ehrDataAuthorityClient))
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            )
         val searchId1 = EHRDAIdentifier(value = aidBoxMRN1, system = mrnSystem)
         val searchId2 = EHRDAIdentifier(value = aidBoxMRN2, system = mrnSystem)
         val searchId3 = EHRDAIdentifier(value = ehrMRN1, system = mrnSystem)
         val searchId4 = EHRDAIdentifier(value = ehrMRN2, system = mrnSystem)
-        val mockResponse1 = listOf<IdentifierSearchResponse>(
-            mockk {
-                every { searchedIdentifier } returns searchId1
-                every { foundResources } returns listOf(
-                    mockk {
-                        every { identifiers } returns listOf(
+        val mockResponse1 =
+            listOf<IdentifierSearchResponse>(
+                mockk {
+                    every { searchedIdentifier } returns searchId1
+                    every { foundResources } returns
+                        listOf(
                             mockk {
-                                every { value } returns aidBoxFhirId1
-                                every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
-                            }
-
+                                every { identifiers } returns
+                                    listOf(
+                                        mockk {
+                                            every { value } returns aidBoxFhirId1
+                                            every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                                        },
+                                    )
+                            },
                         )
-                    }
-                )
-            }
-        )
-        val mockResponse2 = listOf<IdentifierSearchResponse>(
-            mockk {
-                every { searchedIdentifier } returns searchId2
-                every { foundResources } returns listOf(
-                    mockk {
-                        every { identifiers } returns listOf(
+                },
+            )
+        val mockResponse2 =
+            listOf<IdentifierSearchResponse>(
+                mockk {
+                    every { searchedIdentifier } returns searchId2
+                    every { foundResources } returns
+                        listOf(
                             mockk {
-                                every { value } returns aidBoxFhirId2
-                                every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
-                            }
-
+                                every { identifiers } returns
+                                    listOf(
+                                        mockk {
+                                            every { value } returns aidBoxFhirId2
+                                            every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                                        },
+                                    )
+                            },
                         )
-                    }
-                )
-            }
-        )
-        val mockResponse3 = listOf<IdentifierSearchResponse>(
-            mockk {
-                every { searchedIdentifier } returns searchId3
-                every { foundResources } returns listOf()
-            }
-        )
-        val mockResponse4 = listOf<IdentifierSearchResponse>(
-            mockk {
-                every { searchedIdentifier } returns searchId4
-                every { foundResources } returns listOf()
-            }
-        )
+                },
+            )
+        val mockResponse3 =
+            listOf<IdentifierSearchResponse>(
+                mockk {
+                    every { searchedIdentifier } returns searchId3
+                    every { foundResources } returns listOf()
+                },
+            )
+        val mockResponse4 =
+            listOf<IdentifierSearchResponse>(
+                mockk {
+                    every { searchedIdentifier } returns searchId4
+                    every { foundResources } returns listOf()
+                },
+            )
         coEvery {
             ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
                 IdentifierSearchableResourceTypes.Patient,
-                listOf(searchId1, searchId2, searchId3, searchId4)
+                listOf(searchId1, searchId2, searchId3, searchId4),
             )
         } returns mockResponse1 + mockResponse2 + mockResponse3 + mockResponse4
 
@@ -547,19 +588,21 @@ class CernerPatientServiceTest {
                 tenant,
                 mapOf(
                     ehrMRN1 to Identifier(value = ehrMRN1.asFHIR(), system = Uri(mrnSystem)),
-                    ehrMRN2 to Identifier(value = ehrMRN2.asFHIR(), system = Uri(mrnSystem))
-                )
+                    ehrMRN2 to Identifier(value = ehrMRN2.asFHIR(), system = Uri(mrnSystem)),
+                ),
             )
-        } returns mapOf(
-            ehrMRN1 to Patient(id = Id(ehrFhirId1)),
-            ehrMRN2 to Patient(id = Id(ehrFhirId2))
-        )
+        } returns
+            mapOf(
+                ehrMRN1 to Patient(id = Id(ehrFhirId1)),
+                ehrMRN2 to Patient(id = Id(ehrFhirId2)),
+            )
 
-        val response = epicPatientService.getPatientsFHIRIds(
-            tenant,
-            mrnSystem,
-            listOf(aidBoxMRN1, aidBoxMRN2, ehrMRN1, ehrMRN2)
-        )
+        val response =
+            epicPatientService.getPatientsFHIRIds(
+                tenant,
+                mrnSystem,
+                listOf(aidBoxMRN1, aidBoxMRN2, ehrMRN1, ehrMRN2),
+            )
 
         assertEquals(4, response.size)
         assertEquals(aidBoxFhirId1, response[aidBoxMRN1]!!.fhirID)
@@ -577,38 +620,41 @@ class CernerPatientServiceTest {
 
         val epicPatientService = spyk(CernerPatientService(cernerClient, ehrDataAuthorityClient))
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            )
 
-        val mockResponse = listOf<IdentifierSearchResponse>(
-            mockk {
-                every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
-                every { foundResources } returns listOf()
-            }
-        )
+        val mockResponse =
+            listOf<IdentifierSearchResponse>(
+                mockk {
+                    every { searchedIdentifier } returns EHRDAIdentifier(value = mrn, system = mrnSystem)
+                    every { foundResources } returns listOf()
+                },
+            )
         coEvery {
             ehrDataAuthorityClient.getResourceIdentifiers(
                 tenant.mnemonic,
                 IdentifierSearchableResourceTypes.Patient,
-                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem))
+                listOf(EHRDAIdentifier(value = mrn, system = mrnSystem)),
             )
         } returns mockResponse
 
         every {
             epicPatientService.findPatientsById(
                 tenant,
-                mapOf(mrn to Identifier(value = mrn.asFHIR(), system = Uri(mrnSystem)))
+                mapOf(mrn to Identifier(value = mrn.asFHIR(), system = Uri(mrnSystem))),
             )
         } returns mapOf()
 
-        val response = epicPatientService.getPatientsFHIRIds(
-            tenant,
-            mrnSystem,
-            listOf(mrn)
-        )
+        val response =
+            epicPatientService.getPatientsFHIRIds(
+                tenant,
+                mrnSystem,
+                listOf(mrn),
+            )
 
         assertEquals(0, response.size)
     }
@@ -617,12 +663,13 @@ class CernerPatientServiceTest {
     fun `findPatient supports disable retry being true`() {
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-            mrnSystem = mrnSystem
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+                mrnSystem = mrnSystem,
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
@@ -634,19 +681,20 @@ class CernerPatientServiceTest {
                     "given" to "givenName",
                     "family:exact" to "familyName",
                     "birthdate" to "2015-01-01",
-                    "_count" to 20
+                    "_count" to 20,
                 ),
-                true
+                true,
             )
         } returns ehrResponse
 
-        val bundle = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatient(
-            tenant,
-            LocalDate.of(2015, 1, 1),
-            "givenName",
-            "familyName",
-            true
-        )
+        val bundle =
+            CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatient(
+                tenant,
+                LocalDate.of(2015, 1, 1),
+                "givenName",
+                "familyName",
+                true,
+            )
         assertEquals(validPatientBundle.entry.map { it.resource }.filterIsInstance<Patient>(), bundle)
     }
 
@@ -654,12 +702,13 @@ class CernerPatientServiceTest {
     fun `findPatient supports disable retry being false`() {
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-            mrnSystem = mrnSystem
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+                mrnSystem = mrnSystem,
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
@@ -671,19 +720,20 @@ class CernerPatientServiceTest {
                     "given" to "givenName",
                     "family:exact" to "familyName",
                     "birthdate" to "2015-01-01",
-                    "_count" to 20
+                    "_count" to 20,
                 ),
-                false
+                false,
             )
         } returns ehrResponse
 
-        val bundle = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatient(
-            tenant,
-            LocalDate.of(2015, 1, 1),
-            "givenName",
-            "familyName",
-            false
-        )
+        val bundle =
+            CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatient(
+                tenant,
+                LocalDate.of(2015, 1, 1),
+                "givenName",
+                "familyName",
+                false,
+            )
         assertEquals(validPatientBundle.entry.map { it.resource }.filterIsInstance<Patient>(), bundle)
     }
 
@@ -691,12 +741,13 @@ class CernerPatientServiceTest {
     fun `findPatient supports disable retry being not set`() {
         val mrnSystem = "urn:oid:2.16.840.1.113883.6.1000"
 
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-            mrnSystem = mrnSystem
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+                mrnSystem = mrnSystem,
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validPatientBundle
@@ -708,18 +759,19 @@ class CernerPatientServiceTest {
                     "given" to "givenName",
                     "family:exact" to "familyName",
                     "birthdate" to "2015-01-01",
-                    "_count" to 20
+                    "_count" to 20,
                 ),
-                false
+                false,
             )
         } returns ehrResponse
 
-        val bundle = CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatient(
-            tenant,
-            LocalDate.of(2015, 1, 1),
-            "givenName",
-            "familyName"
-        )
+        val bundle =
+            CernerPatientService(cernerClient, ehrDataAuthorityClient).findPatient(
+                tenant,
+                LocalDate.of(2015, 1, 1),
+                "givenName",
+                "familyName",
+            )
         assertEquals(validPatientBundle.entry.map { it.resource }.filterIsInstance<Patient>(), bundle)
     }
 }

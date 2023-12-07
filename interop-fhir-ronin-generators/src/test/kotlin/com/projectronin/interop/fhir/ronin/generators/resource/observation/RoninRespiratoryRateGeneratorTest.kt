@@ -28,45 +28,52 @@ import org.junit.jupiter.api.Test
 class RoninRespiratoryRateGeneratorTest {
     private lateinit var roninRespRate: RoninRespiratoryRate
     private lateinit var registry: NormalizationRegistryClient
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
-        registry = mockk<NormalizationRegistryClient> {
-            every {
-                getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_RESPIRATORY_RATE.value)
-            } returns possibleRespiratoryRateCodes
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
+        registry =
+            mockk<NormalizationRegistryClient> {
+                every {
+                    getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_RESPIRATORY_RATE.value)
+                } returns possibleRespiratoryRateCodes
+            }
         roninRespRate = RoninRespiratoryRate(normalizer, localizer, registry)
     }
 
     @Test
     fun `example use for roninObservationRespiratoryRate`() {
         // Create RespiratoryRate Obs with attributes you need, provide the tenant
-        val roninObsRespiratoryRate = rcdmObservationRespiratoryRate("test") {
-            // if you want to test for a specific status
-            status of Code("unknown")
-            // test for a new or different code
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        version of "0.01"
-                        code of Code("00000-2")
-                        display of "Respiratory rate"
+        val roninObsRespiratoryRate =
+            rcdmObservationRespiratoryRate("test") {
+                // if you want to test for a specific status
+                status of Code("unknown")
+                // test for a new or different code
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    version of "0.01"
+                                    code of Code("00000-2")
+                                    display of "Respiratory rate"
+                                },
+                            )
+                        text of "Respiratory rate" // text is kept if provided otherwise only a code.coding is generated
                     }
-                )
-                text of "Respiratory rate" // text is kept if provided otherwise only a code.coding is generated
             }
-        }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsRespiratoryRateJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsRespiratoryRate)
@@ -91,7 +98,7 @@ class RoninRespiratoryRateGeneratorTest {
         assertNotNull(roninObsRespiratoryRate.meta)
         assertEquals(
             roninObsRespiratoryRate.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_RESPIRATORY_RATE.value
+            RoninProfile.OBSERVATION_RESPIRATORY_RATE.value,
         )
         assertNotNull(roninObsRespiratoryRate.status)
         assertEquals(1, roninObsRespiratoryRate.category.size)
@@ -117,7 +124,7 @@ class RoninRespiratoryRateGeneratorTest {
         assertNotNull(roninObsRespRate.meta)
         assertEquals(
             roninObsRespRate.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_RESPIRATORY_RATE.value
+            RoninProfile.OBSERVATION_RESPIRATORY_RATE.value,
         )
         assertNull(roninObsRespRate.implicitRules)
         assertNull(roninObsRespRate.language)
@@ -149,14 +156,16 @@ class RoninRespiratoryRateGeneratorTest {
 
     @Test
     fun `validation for roninObservationRespiratoryRate with existing identifier`() {
-        val roninObsRespRate = rcdmObservationRespiratoryRate("test") {
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-        }
+        val roninObsRespRate =
+            rcdmObservationRespiratoryRate("test") {
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
+                    )
+            }
         val validation = roninRespRate.validate(roninObsRespRate, null)
         validation.alertIfErrors()
         assertNotNull(roninObsRespRate.meta)
@@ -169,17 +178,20 @@ class RoninRespiratoryRateGeneratorTest {
 
     @Test
     fun `validation fails for roninObservationRespiratoryRate with bad code`() {
-        val roninObsRespRate = rcdmObservationRespiratoryRate("test") {
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        version of "1000000"
-                        code of Code("some code here")
+        val roninObsRespRate =
+            rcdmObservationRespiratoryRate("test") {
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    version of "1000000"
+                                    code of Code("some code here")
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = roninRespRate.validate(roninObsRespRate, null)
         assertTrue(validation.hasErrors())
 

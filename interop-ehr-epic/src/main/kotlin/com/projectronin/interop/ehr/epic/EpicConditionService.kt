@@ -42,26 +42,27 @@ class EpicConditionService(epicClient: EpicClient) : ConditionService, EpicFHIRS
     override val fhirURLSearchPart = "/api/FHIR/R4/Condition"
     override val fhirResourceType = Condition::class.java
     val clinicalSystem = CodeSystem.CONDITION_CLINICAL.uri.value
-    val searchableCodes = listOf(
-        ConditionClinicalStatusCodes.ACTIVE,
-        ConditionClinicalStatusCodes.INACTIVE,
-        ConditionClinicalStatusCodes.RESOLVED
-    ).map {
-        FHIRSearchToken(clinicalSystem, it.code)
-    }
+    val searchableCodes =
+        listOf(
+            ConditionClinicalStatusCodes.ACTIVE,
+            ConditionClinicalStatusCodes.INACTIVE,
+            ConditionClinicalStatusCodes.RESOLVED,
+        ).map {
+            FHIRSearchToken(clinicalSystem, it.code)
+        }
 
     @Trace
     override fun findConditions(
         tenant: Tenant,
         patientFhirId: String,
         conditionCategoryCode: String,
-        clinicalStatus: String
+        clinicalStatus: String,
     ): List<Condition> {
         return findConditionsByCodes(
             tenant,
             patientFhirId,
             listOf(conditionCategoryCode).toSearchTokens(),
-            listOf(clinicalStatus).toSearchTokens()
+            listOf(clinicalStatus).toSearchTokens(),
         )
     }
 
@@ -70,14 +71,15 @@ class EpicConditionService(epicClient: EpicClient) : ConditionService, EpicFHIRS
         tenant: Tenant,
         patientFhirId: String,
         conditionCategoryCodes: List<FHIRSearchToken>,
-        clinicalStatusCodes: List<FHIRSearchToken>
+        clinicalStatusCodes: List<FHIRSearchToken>,
     ): List<Condition> {
         val searchCodes = clinicalStatusCodes.ifEmpty { searchableCodes }
-        val parameters = mapOf(
-            "patient" to patientFhirId,
-            "category" to conditionCategoryCodes.toOrParams(),
-            "clinical-status" to searchCodes.toOrParams()
-        )
+        val parameters =
+            mapOf(
+                "patient" to patientFhirId,
+                "category" to conditionCategoryCodes.toOrParams(),
+                "clinical-status" to searchCodes.toOrParams(),
+            )
         return getResourceListFromSearch(tenant, parameters)
     }
 }

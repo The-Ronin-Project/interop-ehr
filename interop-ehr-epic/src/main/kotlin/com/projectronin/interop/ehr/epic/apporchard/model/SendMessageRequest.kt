@@ -37,5 +37,5 @@ data class SendMessageRequest(
     val patientIDType: String = "MRN",
     val contactID: String? = "",
     val contactIDType: String? = "",
-    val messagePriority: String? = ""
+    val messagePriority: String? = "",
 )

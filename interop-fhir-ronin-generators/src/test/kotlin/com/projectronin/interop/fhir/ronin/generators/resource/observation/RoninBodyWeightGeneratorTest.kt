@@ -25,55 +25,61 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class bodyWeight(
+class BodyWeight(
     normalizer: Normalizer,
     localizer: Localizer,
-    registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient,
 ) : RoninBodyWeight(
-    normalizer,
-    localizer,
-    registryClient
-) {
+        normalizer,
+        localizer,
+        registryClient,
+    ) {
     override fun qualifyingCodes() = possibleBodyWeightCodes
 }
 
 class RoninBodyWeightGeneratorTest {
     private lateinit var roninBodyWeight: RoninBodyWeight
     private lateinit var registry: NormalizationRegistryClient
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
         registry = mockk<NormalizationRegistryClient> {}
-        roninBodyWeight = bodyWeight(normalizer, localizer, registry)
+        roninBodyWeight = BodyWeight(normalizer, localizer, registry)
     }
 
     @Test
     fun `example use for roninObservationBodyWeight`() {
         // Create BodyWeight Obs with attributes you need, provide the tenant
-        val roninObsBodyWeight = rcdmObservationBodyWeight("test") {
-            // if you want to test for a specific status
-            status of Code("random-status")
-            // test for a new or different code
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        code of Code("89543-3")
-                        display of "Laboratory ask at order entry panel"
+        val roninObsBodyWeight =
+            rcdmObservationBodyWeight("test") {
+                // if you want to test for a specific status
+                status of Code("random-status")
+                // test for a new or different code
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    code of Code("89543-3")
+                                    display of "Laboratory ask at order entry panel"
+                                },
+                            )
+                        text of "Laboratory ask at order entry panel" // text is kept if provided otherwise only a code.coding is generated
                     }
-                )
-                text of "Laboratory ask at order entry panel" // text is kept if provided otherwise only a code.coding is generated
             }
-        }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsBodyWeightJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyWeight)
@@ -98,7 +104,7 @@ class RoninBodyWeightGeneratorTest {
         assertNotNull(roninObsBodyWeight.meta)
         assertEquals(
             roninObsBodyWeight.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_BODY_WEIGHT.value
+            RoninProfile.OBSERVATION_BODY_WEIGHT.value,
         )
         assertNotNull(roninObsBodyWeight.status)
         assertEquals(1, roninObsBodyWeight.category.size)
@@ -124,7 +130,7 @@ class RoninBodyWeightGeneratorTest {
         assertNotNull(roninObsWeight.meta)
         assertEquals(
             roninObsWeight.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_BODY_WEIGHT.value
+            RoninProfile.OBSERVATION_BODY_WEIGHT.value,
         )
         assertNull(roninObsWeight.implicitRules)
         assertNull(roninObsWeight.language)
@@ -156,14 +162,16 @@ class RoninBodyWeightGeneratorTest {
 
     @Test
     fun `validation for roninObservationBodyWeight with existing identifier`() {
-        val roninObsWeight = rcdmObservationBodyWeight("test") {
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-        }
+        val roninObsWeight =
+            rcdmObservationBodyWeight("test") {
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
+                    )
+            }
         val validation = roninBodyWeight.validate(roninObsWeight, null)
         val errors = validation.hasErrors()
         assertEquals(errors, false)
@@ -177,36 +185,42 @@ class RoninBodyWeightGeneratorTest {
 
     @Test
     fun `validation for roninObservationBodyWeight with code`() {
-        val roninObsWeight = rcdmObservationBodyWeight("test") {
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        version of "2.74"
-                        code of Code("3141-9")
-                        display of "Body weight Measured"
+        val roninObsWeight =
+            rcdmObservationBodyWeight("test") {
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    version of "2.74"
+                                    code of Code("3141-9")
+                                    display of "Body weight Measured"
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = roninBodyWeight.validate(roninObsWeight, null)
         validation.alertIfErrors()
     }
 
     @Test
     fun `validation for roninObservationBodyWeight fails with bad code`() {
-        val roninObsWeight = rcdmObservationBodyWeight("test") {
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "system"
-                        version of "version"
-                        code of Code("code")
-                        display of "display"
+        val roninObsWeight =
+            rcdmObservationBodyWeight("test") {
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "system"
+                                    version of "version"
+                                    code of Code("code")
+                                    display of "display"
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = roninBodyWeight.validate(roninObsWeight, null)
         assertEquals(validation.hasErrors(), true)
         assertEquals(validation.issues()[0].code, "RONIN_OBS_003")

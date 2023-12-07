@@ -14,19 +14,26 @@ abstract class USCoreBasedProfile<T : Resource<T>>(
     extendedProfile: ProfileValidator<T>,
     profile: String,
     normalizer: Normalizer,
-    localizer: Localizer
+    localizer: Localizer,
 ) :
     BaseRoninProfile<T>(extendedProfile, profile, normalizer, localizer) {
-
     /**
      * Validates the [element] against [USCore](https://build.fhir.org/ig/HL7/US-Core/profiles-and-extensions.html)
      */
-    abstract fun validateUSCore(element: T, parentContext: LocationContext, validation: Validation)
+    abstract fun validateUSCore(
+        element: T,
+        parentContext: LocationContext,
+        validation: Validation,
+    )
 
     /**
      * Validates both Ronin and USCore against their respective rules.
      */
-    override fun validate(element: T, parentContext: LocationContext, validation: Validation) {
+    override fun validate(
+        element: T,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validateRonin(element, parentContext, validation)
         validateUSCore(element, parentContext, validation)
     }

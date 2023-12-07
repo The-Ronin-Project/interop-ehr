@@ -10,5 +10,8 @@ interface MedicationService : FHIRService<Medication> {
     /**
      * Finds medications for the given [tenant] associated with the given [medicationFhirIds]
      */
-    fun getMedicationsByFhirId(tenant: Tenant, medicationFhirIds: List<String>): List<Medication>
+    fun getMedicationsByFhirId(
+        tenant: Tenant,
+        medicationFhirIds: List<String>,
+    ): List<Medication>
 }

@@ -13,5 +13,5 @@ import org.springframework.stereotype.Component
 class EpicClient(
     client: HttpClient,
     authenticationBroker: EHRAuthenticationBroker,
-    datalakeService: DatalakePublishService
+    datalakeService: DatalakePublishService,
 ) : EHRClient(client, authenticationBroker, datalakeService)

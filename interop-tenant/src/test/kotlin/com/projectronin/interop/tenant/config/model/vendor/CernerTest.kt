@@ -9,17 +9,18 @@ class CernerTest {
     @Test
     fun `check getters`() {
         val authenticationConfig = CernerAuthenticationConfig("authEndpoint", "accountId", "secret")
-        val cerner = Cerner(
-            "instanceName",
-            "clientId",
-            authenticationConfig,
-            "https://localhost:8080/serviceEndpoint",
-            "mrn",
-            "practitioner",
-            "topic",
-            "category",
-            "priority"
-        )
+        val cerner =
+            Cerner(
+                "instanceName",
+                "clientId",
+                authenticationConfig,
+                "https://localhost:8080/serviceEndpoint",
+                "mrn",
+                "practitioner",
+                "topic",
+                "category",
+                "priority",
+            )
         assertEquals(VendorType.CERNER, cerner.type)
         assertEquals("clientId", cerner.clientId)
         assertEquals(authenticationConfig, cerner.authenticationConfig)

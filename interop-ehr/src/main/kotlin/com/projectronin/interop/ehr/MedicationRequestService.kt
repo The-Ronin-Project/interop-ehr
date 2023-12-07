@@ -13,7 +13,7 @@ interface MedicationRequestService : FHIRService<MedicationRequest> {
      */
     fun getMedicationRequestById(
         tenant: Tenant,
-        medicationRequestId: String
+        medicationRequestId: String,
     ): MedicationRequest
 
     /**
@@ -23,6 +23,6 @@ interface MedicationRequestService : FHIRService<MedicationRequest> {
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate? = null,
-        endDate: LocalDate? = null
+        endDate: LocalDate? = null,
     ): List<MedicationRequest>
 }

@@ -9,7 +9,6 @@ interface ServiceRequestService : FHIRService<ServiceRequest> {
      */
     fun getServiceRequestsForPatient(
         tenant: Tenant,
-        patientFhirId: String
-    ):
-        List<ServiceRequest>
+        patientFhirId: String,
+    ): List<ServiceRequest>
 }

@@ -20,83 +20,96 @@ class DecoratorPatientServiceTest {
     private val tenant = mockk<Tenant>()
 
     private val patientService = mockk<PatientService>()
-    private val identifierService = mockk<IdentifierService> {
-        every { getMRNIdentifier(tenant, any()) } returns mockk {
-            every { value } returns FHIRString("mrn")
+    private val identifierService =
+        mockk<IdentifierService> {
+            every { getMRNIdentifier(tenant, any()) } returns
+                mockk {
+                    every { value } returns FHIRString("mrn")
+                }
         }
-    }
 
-    private val mrnIdentifier = Identifier(
-        system = CodeSystem.RONIN_MRN.uri,
-        value = FHIRString("mrn"),
-        type = CodeableConcepts.RONIN_MRN
-    )
+    private val mrnIdentifier =
+        Identifier(
+            system = CodeSystem.RONIN_MRN.uri,
+            value = FHIRString("mrn"),
+            type = CodeableConcepts.RONIN_MRN,
+        )
 
     private val decorator = DecoratorPatientService(patientService, identifierService)
 
     @Test
     fun `handles decorating when finding MRN throws an exception`() {
         val identifiers = listOf(Identifier(system = Uri("http://example.org/not-mrn"), value = FHIRString("value")))
-        val patient1234 = Patient(
-            id = Id("1234"),
-            identifier = identifiers
-        )
+        val patient1234 =
+            Patient(
+                id = Id("1234"),
+                identifier = identifiers,
+            )
 
         every { identifierService.getMRNIdentifier(tenant, identifiers) } throws IllegalStateException()
         every { patientService.getByID(tenant, "1234") } returns patient1234
 
         val response = decorator.getByID(tenant, "1234")
 
-        val expectedPatient = Patient(
-            id = Id("1234"),
-            identifier = identifiers + Identifier(
-                system = CodeSystem.RONIN_FHIR_ID.uri,
-                value = FHIRString("1234"),
-                type = CodeableConcepts.RONIN_FHIR_ID
+        val expectedPatient =
+            Patient(
+                id = Id("1234"),
+                identifier =
+                    identifiers +
+                        Identifier(
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = FHIRString("1234"),
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                        ),
             )
-        )
         assertEquals(expectedPatient, response)
     }
 
     @Test
     fun `handles decorating when MRN is found`() {
         val identifiers = listOf(Identifier(system = Uri("http://example.org/mrn"), value = FHIRString("value")))
-        val patient1234 = Patient(
-            id = Id("1234"),
-            identifier = identifiers
-        )
+        val patient1234 =
+            Patient(
+                id = Id("1234"),
+                identifier = identifiers,
+            )
 
         every { patientService.getByID(tenant, "1234") } returns patient1234
 
         val response = decorator.getByID(tenant, "1234")
 
-        val expectedPatient = Patient(
-            id = Id("1234"),
-            identifier = identifiers + Identifier(
-                system = CodeSystem.RONIN_FHIR_ID.uri,
-                value = FHIRString("1234"),
-                type = CodeableConcepts.RONIN_FHIR_ID
-            ) + mrnIdentifier
-        )
+        val expectedPatient =
+            Patient(
+                id = Id("1234"),
+                identifier =
+                    identifiers +
+                        Identifier(
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = FHIRString("1234"),
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                        ) + mrnIdentifier,
+            )
         assertEquals(expectedPatient, response)
     }
 
     @Test
     fun `handles decorating when ID is null`() {
         val identifiers = listOf(Identifier(system = Uri("http://example.org/mrn"), value = FHIRString("value")))
-        val patient1234 = Patient(
-            id = null,
-            identifier = identifiers
-        )
+        val patient1234 =
+            Patient(
+                id = null,
+                identifier = identifiers,
+            )
 
         every { patientService.getByID(tenant, "1234") } returns patient1234
 
         val response = decorator.getByID(tenant, "1234")
 
-        val expectedPatient = Patient(
-            id = null,
-            identifier = identifiers + mrnIdentifier
-        )
+        val expectedPatient =
+            Patient(
+                id = null,
+                identifier = identifiers + mrnIdentifier,
+            )
         assertEquals(expectedPatient, response)
     }
 

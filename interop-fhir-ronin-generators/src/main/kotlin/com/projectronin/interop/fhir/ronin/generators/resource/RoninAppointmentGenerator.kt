@@ -25,7 +25,10 @@ import com.projectronin.interop.fhir.ronin.generators.util.udpIdValue
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 
-fun rcdmAppointment(tenant: String, block: AppointmentGenerator.() -> Unit): Appointment {
+fun rcdmAppointment(
+    tenant: String,
+    block: AppointmentGenerator.() -> Unit,
+): Appointment {
     return appointment {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.APPOINTMENT, tenant) {}
@@ -55,67 +58,74 @@ fun Patient.rcdmAppointment(block: AppointmentGenerator.() -> Unit): Appointment
     val data = this.referenceData()
     return rcdmAppointment(data.tenantId) {
         block.invoke(this)
-        participant of rcdmParticipant(
-            participant.generate(),
-            data.tenantId,
-            "Patient",
-            data.udpId
-        )
+        participant of
+            rcdmParticipant(
+                participant.generate(),
+                data.tenantId,
+                "Patient",
+                data.udpId,
+            )
     }
 }
 
-val possibleAppointmentStatusCodes = listOf(
-    Code("proposed"),
-    Code("pending"),
-    Code("booked"),
-    Code("arrived"),
-    Code("fulfilled"),
-    Code("cancelled"),
-    Code("noshow"),
-    Code("entered-in-error"),
-    Code("checked-in"),
-    Code("waitlist")
-)
+val possibleAppointmentStatusCodes =
+    listOf(
+        Code("proposed"),
+        Code("pending"),
+        Code("booked"),
+        Code("arrived"),
+        Code("fulfilled"),
+        Code("cancelled"),
+        Code("noshow"),
+        Code("entered-in-error"),
+        Code("checked-in"),
+        Code("waitlist"),
+    )
 
 val acceptedForNullStartAndEnd = listOf("proposed", "cancelled", "waitlist")
 val canceledReasonsCodes = listOf("cancelled", "noshow")
-val possibleParticipantStatus = listOf(
-    Code("accepted"),
-    Code("declined"),
-    Code("tentative"),
-    Code("needs-action")
-)
-
-val cancelationReasonCodeableConcept = CodeableConcept(
-    coding = listOf(
-        Coding(
-            system = Uri("http://terminology.hl7.org/CodeSystem/appointment-cancellation-reason"),
-            code = Code("oth-weath"),
-            display = "Other: Weather".asFHIR()
-        )
+val possibleParticipantStatus =
+    listOf(
+        Code("accepted"),
+        Code("declined"),
+        Code("tentative"),
+        Code("needs-action"),
     )
-)
 
-val participantActorReferenceOptions = listOf(
-    "Patient",
-    "PractitionerRole",
-    "Practitioner",
-    "Location",
-    "RelatedPerson",
-    "Device",
-    "HealthcareService"
-)
+val cancelationReasonCodeableConcept =
+    CodeableConcept(
+        coding =
+            listOf(
+                Coding(
+                    system = Uri("http://terminology.hl7.org/CodeSystem/appointment-cancellation-reason"),
+                    code = Code("oth-weath"),
+                    display = "Other: Weather".asFHIR(),
+                ),
+            ),
+    )
+
+val participantActorReferenceOptions =
+    listOf(
+        "Patient",
+        "PractitionerRole",
+        "Practitioner",
+        "Location",
+        "RelatedPerson",
+        "Device",
+        "HealthcareService",
+    )
 
 fun tenantSourceAppointmentStatus(status: String): Extension {
     return Extension(
         url = Uri(RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value),
-        value = DynamicValue(
-            DynamicValueType.CODING,
-            Coding(
-                code = Code(status),
-                system = Uri("http://appointmentStatus/localCodeSystem")
-            )
-        )
+        value =
+            DynamicValue(
+                DynamicValueType.CODING,
+                Coding(
+                    code = Code(status),
+                    system = Uri("http://appointmentStatus/localCodeSystem"),
+                ),
+            ),
     )
 }
 
@@ -131,28 +141,32 @@ fun rcdmParticipant(
     participant: List<Participant>,
     tenantId: String,
     type: String? = null,
-    id: String? = null
+    id: String? = null,
 ): List<Participant> {
     val validList = participant.filter { it.actor?.decomposedType()?.isNotEmpty() == true }
     return if (!validList.isEmpty() && type.isNullOrEmpty()) {
         validList
     } else {
-        validList + Participant(
-            status = possibleParticipantStatus.random(),
-            type = listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = UriGenerator().generate(),
-                            code = CodeGenerator().generate()
-                        )
-                    )
-                )
-            ),
-            actor = rcdmReference(
-                if (type.isNullOrEmpty()) participantActorReferenceOptions.random() else type,
-                if (id.isNullOrEmpty()) udpIdValue(tenantId) else udpIdValue(tenantId, id)
+        validList +
+            Participant(
+                status = possibleParticipantStatus.random(),
+                type =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = UriGenerator().generate(),
+                                        code = CodeGenerator().generate(),
+                                    ),
+                                ),
+                        ),
+                    ),
+                actor =
+                    rcdmReference(
+                        if (type.isNullOrEmpty()) participantActorReferenceOptions.random() else type,
+                        if (id.isNullOrEmpty()) udpIdValue(tenantId) else udpIdValue(tenantId, id),
+                    ),
             )
-        )
     }
 }

@@ -29,43 +29,50 @@ import org.junit.jupiter.api.Test
 class RoninBodyMassIndexGeneratorTest {
     private lateinit var roninBodyMassIndex: RoninBodyMassIndex
     private lateinit var registry: NormalizationRegistryClient
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
     private val bodyMassIndexCodes = possibleBodyMassIndexCodes
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
-        registry = mockk<NormalizationRegistryClient> {
-            every {
-                getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_MASS_INDEX.value)
-            } returns bodyMassIndexCodes
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
+        registry =
+            mockk<NormalizationRegistryClient> {
+                every {
+                    getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_MASS_INDEX.value)
+                } returns bodyMassIndexCodes
+            }
         roninBodyMassIndex = RoninBodyMassIndex(normalizer, localizer, registry)
     }
 
     @Test
     fun `example use for roninObservationBodyMassIndex`() {
         // Create BodyMassIndex Obs with attributes you need, provide the tenant
-        val roninObsBodyMassIndex = rcdmObservationBodyMassIndex("test") {
-            status of Code("new-status")
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        code of Code("55418-8")
-                        display of "Weight and Height tracking panel"
+        val roninObsBodyMassIndex =
+            rcdmObservationBodyMassIndex("test") {
+                status of Code("new-status")
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    code of Code("55418-8")
+                                    display of "Weight and Height tracking panel"
+                                },
+                            )
+                        text of "Weight and Height tracking panel" // text is kept if provided otherwise only a code.coding is generated
                     }
-                )
-                text of "Weight and Height tracking panel" // text is kept if provided otherwise only a code.coding is generated
             }
-        }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsBodyMassIndexJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyMassIndex)
@@ -90,7 +97,7 @@ class RoninBodyMassIndexGeneratorTest {
         assertNotNull(roninObsBodyMassIndex.meta)
         assertEquals(
             roninObsBodyMassIndex.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_BODY_MASS_INDEX.value
+            RoninProfile.OBSERVATION_BODY_MASS_INDEX.value,
         )
         assertNotNull(roninObsBodyMassIndex.status)
         assertEquals(1, roninObsBodyMassIndex.category.size)
@@ -116,7 +123,7 @@ class RoninBodyMassIndexGeneratorTest {
         assertNotNull(roninObsBodyMassIndex.meta)
         assertEquals(
             roninObsBodyMassIndex.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_BODY_MASS_INDEX.value
+            RoninProfile.OBSERVATION_BODY_MASS_INDEX.value,
         )
         assertNull(roninObsBodyMassIndex.implicitRules)
         assertNull(roninObsBodyMassIndex.language)
@@ -148,14 +155,16 @@ class RoninBodyMassIndexGeneratorTest {
 
     @Test
     fun `validates rcdmObservationBodyMassIndex with provided identifier`() {
-        val roninObsBodyMassIndex = rcdmObservationBodyMassIndex("test") {
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-        }
+        val roninObsBodyMassIndex =
+            rcdmObservationBodyMassIndex("test") {
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
+                    )
+            }
         val validation = roninBodyMassIndex.validate(roninObsBodyMassIndex, null)
         validation.alertIfErrors()
         assertNotNull(roninObsBodyMassIndex.meta)
@@ -168,9 +177,10 @@ class RoninBodyMassIndexGeneratorTest {
 
     @Test
     fun `validates rcdmObservationBodyMassIndex fails with bad status`() {
-        val roninObsBodyMassIndex = rcdmObservationBodyMassIndex("test") {
-            status of Code("fake-status")
-        }
+        val roninObsBodyMassIndex =
+            rcdmObservationBodyMassIndex("test") {
+                status of Code("fake-status")
+            }
         val validation = roninBodyMassIndex.validate(roninObsBodyMassIndex, null)
         assertEquals(validation.hasErrors(), true)
         assertEquals(validation.issues()[0].code, "INV_VALUE_SET")

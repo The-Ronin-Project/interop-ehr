@@ -14,11 +14,17 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.test.data.generator.collection.ListDataGenerator
 
-fun rcdmContactPoint(tenant: String, contactPoints: ListDataGenerator<ContactPoint>): ListDataGenerator<ContactPoint> {
+fun rcdmContactPoint(
+    tenant: String,
+    contactPoints: ListDataGenerator<ContactPoint>,
+): ListDataGenerator<ContactPoint> {
     return filterTelecoms(tenant, contactPoints.generate())
 }
 
-fun rcdmOptionalContactPoint(tenant: String, contactPoints: ListDataGenerator<ContactPoint?>): ListDataGenerator<ContactPoint> {
+fun rcdmOptionalContactPoint(
+    tenant: String,
+    contactPoints: ListDataGenerator<ContactPoint?>,
+): ListDataGenerator<ContactPoint> {
     return filterTelecoms(tenant, contactPoints.generate().mapNotNull { it })
 }
 
@@ -27,7 +33,10 @@ fun rcdmOptionalContactPoint(tenant: String, contactPoints: ListDataGenerator<Co
  * if do not have valid system or use, null out the extensions and
  * do not add it to return list, telecom is not a required field.
  */
-internal fun filterTelecoms(tenant: String, input: List<ContactPoint>): ListDataGenerator<ContactPoint> {
+internal fun filterTelecoms(
+    tenant: String,
+    input: List<ContactPoint>,
+): ListDataGenerator<ContactPoint> {
     val contactPointList = ListDataGenerator(0, ContactPointGenerator())
     input.forEach {
         var sysExt = systemExtension(it.system?.value.toString(), tenant)
@@ -40,15 +49,17 @@ internal fun filterTelecoms(tenant: String, input: List<ContactPoint>): ListData
                 contactPointList.plus(
                     contactPoint {
                         value of it.value!!.value!!.asFHIR()
-                        system of Code(
-                            value = it.system?.value,
-                            extension = listOf(sysExt)
-                        )
-                        use of Code(
-                            value = it.use?.value,
-                            extension = listOf(useExt)
-                        )
-                    }
+                        system of
+                            Code(
+                                value = it.system?.value,
+                                extension = listOf(sysExt),
+                            )
+                        use of
+                            Code(
+                                value = it.use?.value,
+                                extension = listOf(useExt),
+                            )
+                    },
                 )
             } else {
                 contactPointList.plus(it)
@@ -58,32 +69,44 @@ internal fun filterTelecoms(tenant: String, input: List<ContactPoint>): ListData
     return contactPointList
 }
 
-internal fun systemExtension(sysValue: String, tenant: String): Extension {
+internal fun systemExtension(
+    sysValue: String,
+    tenant: String,
+): Extension {
     return extension {
         url of Uri(value = RoninExtension.TENANT_SOURCE_TELECOM_SYSTEM.value)
-        value of DynamicValue(
-            type = DynamicValueType.CODING,
-            value = Coding(
-                system = Uri(
-                    value = "http://projectronin.io/fhir/CodeSystem/$tenant/ContactPointSystem"
-                ),
-                code = Code(value = sysValue)
+        value of
+            DynamicValue(
+                type = DynamicValueType.CODING,
+                value =
+                    Coding(
+                        system =
+                            Uri(
+                                value = "http://projectronin.io/fhir/CodeSystem/$tenant/ContactPointSystem",
+                            ),
+                        code = Code(value = sysValue),
+                    ),
             )
-        )
     }
 }
 
-internal fun useExtension(useValue: String, tenant: String): Extension {
+internal fun useExtension(
+    useValue: String,
+    tenant: String,
+): Extension {
     return extension {
         url of Uri(value = RoninExtension.TENANT_SOURCE_TELECOM_USE.value)
-        value of DynamicValue(
-            type = DynamicValueType.CODING,
-            value = Coding(
-                system = Uri(
-                    value = "http://projectronin.io/fhir/CodeSystem/$tenant/ContactPointUse"
-                ),
-                code = Code(value = useValue)
+        value of
+            DynamicValue(
+                type = DynamicValueType.CODING,
+                value =
+                    Coding(
+                        system =
+                            Uri(
+                                value = "http://projectronin.io/fhir/CodeSystem/$tenant/ContactPointUse",
+                            ),
+                        code = Code(value = useValue),
+                    ),
             )
-        )
     }
 }

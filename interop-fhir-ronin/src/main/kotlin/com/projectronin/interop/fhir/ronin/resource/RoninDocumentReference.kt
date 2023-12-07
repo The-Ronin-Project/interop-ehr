@@ -37,14 +37,14 @@ import java.time.LocalDateTime
 class RoninDocumentReference(
     normalizer: Normalizer,
     localizer: Localizer,
-    protected val registryClient: NormalizationRegistryClient
+    protected val registryClient: NormalizationRegistryClient,
 ) :
     USCoreBasedProfile<DocumentReference>(
-        R4DocumentReferenceValidator,
-        RoninProfile.DOCUMENT_REFERENCE.value,
-        normalizer,
-        localizer
-    ) {
+            R4DocumentReferenceValidator,
+            RoninProfile.DOCUMENT_REFERENCE.value,
+            normalizer,
+            localizer,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_25_0
     override val profileVersion = 5
 
@@ -54,32 +54,40 @@ class RoninDocumentReference(
     private val requiredTypeError = RequiredFieldError(DocumentReference::type)
     private val requiredUrlError = RequiredFieldError(Attachment::url)
 
-    private val requiredDocumentReferenceTypeExtension = FHIRError(
-        code = "RONIN_DOCREF_001",
-        description = "Tenant source Document Reference extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(DocumentReference::extension)
-    )
-    private val requiredCodingSize = FHIRError(
-        code = "RONIN_DOCREF_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "One, and only one, coding entry is allowed for type",
-        location = LocationContext(CodeableConcept::coding)
-    )
-    private val requiredDatalakeAttachmentExtension = FHIRError(
-        code = "RONIN_DOCREF_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Datalake Attachment URL extension is missing or invalid",
-        location = LocationContext(Url::extension)
-    )
-    private val requiredEncounter = FHIRError(
-        code = "RONIN_DOCREF_004",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "No more than one encounter is allowed for this type",
-        location = LocationContext(DocumentReferenceContext::encounter)
-    )
+    private val requiredDocumentReferenceTypeExtension =
+        FHIRError(
+            code = "RONIN_DOCREF_001",
+            description = "Tenant source Document Reference extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(DocumentReference::extension),
+        )
+    private val requiredCodingSize =
+        FHIRError(
+            code = "RONIN_DOCREF_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "One, and only one, coding entry is allowed for type",
+            location = LocationContext(CodeableConcept::coding),
+        )
+    private val requiredDatalakeAttachmentExtension =
+        FHIRError(
+            code = "RONIN_DOCREF_003",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Datalake Attachment URL extension is missing or invalid",
+            location = LocationContext(Url::extension),
+        )
+    private val requiredEncounter =
+        FHIRError(
+            code = "RONIN_DOCREF_004",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "No more than one encounter is allowed for this type",
+            location = LocationContext(DocumentReferenceContext::encounter),
+        )
 
-    override fun validateRonin(element: DocumentReference, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: DocumentReference,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
@@ -92,15 +100,15 @@ class RoninDocumentReference(
                         it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 requiredDocumentReferenceTypeExtension,
-                parentContext
+                parentContext,
             )
 
             checkNotNull(element.type, requiredTypeError, parentContext)
             ifNotNull(element.type) {
                 checkTrue(
-                    element.type!!.coding.size == 1, // coding is required
+                    element.type!!.coding.size == 1,
                     requiredCodingSize,
-                    parentContext.append(LocationContext(DocumentReference::type))
+                    parentContext.append(LocationContext(DocumentReference::type)),
                 )
             }
 
@@ -132,13 +140,17 @@ class RoninDocumentReference(
         }
     }
 
-    override fun validateUSCore(element: DocumentReference, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: DocumentReference,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             validateReference(
                 element.subject,
                 listOf(ResourceType.Patient),
                 LocationContext(DocumentReference::subject),
-                validation
+                validation,
             )
 
             element.context?.let { context ->
@@ -150,7 +162,7 @@ class RoninDocumentReference(
                     context.encounter,
                     listOf(ResourceType.Encounter),
                     contextLocationContext.append(LocationContext("", "encounter")),
-                    validation
+                    validation,
                 )
             }
 
@@ -165,44 +177,46 @@ class RoninDocumentReference(
         normalized: DocumentReference,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<DocumentReference, Validation> {
         val validation = Validation()
 
         // DocumentReference.type is a single CodeableConcept
-        val mappedTypePair = normalized.type?.let { type ->
-            val typePair = registryClient.getConceptMapping(
-                tenant,
-                "DocumentReference.type",
-                type,
-                normalized,
-                forceCacheReloadTS
-            )
-            // validate the mapping we got, use type value to report issues
-            validation.apply {
-                checkNotNull(
-                    typePair,
-                    FailedConceptMapLookupError(
-                        LocationContext(DocumentReference::type),
-                        type.coding.mapNotNull { it.code?.value }
-                            .joinToString(", "),
-                        "any DocumentReference.type concept map for tenant '${tenant.mnemonic}'",
-                        typePair?.metadata
-                    ),
-                    parentContext
-                )
+        val mappedTypePair =
+            normalized.type?.let { type ->
+                val typePair =
+                    registryClient.getConceptMapping(
+                        tenant,
+                        "DocumentReference.type",
+                        type,
+                        normalized,
+                        forceCacheReloadTS,
+                    )
+                // validate the mapping we got, use type value to report issues
+                validation.apply {
+                    checkNotNull(
+                        typePair,
+                        FailedConceptMapLookupError(
+                            LocationContext(DocumentReference::type),
+                            type.coding.mapNotNull { it.code?.value }
+                                .joinToString(", "),
+                            "any DocumentReference.type concept map for tenant '${tenant.mnemonic}'",
+                            typePair?.metadata,
+                        ),
+                        parentContext,
+                    )
+                }
+                typePair
             }
-            typePair
-        }
 
         return Pair(
             mappedTypePair?.let {
                 normalized.copy(
                     type = it.codeableConcept,
-                    extension = normalized.extension + it.extension
+                    extension = normalized.extension + it.extension,
                 )
             } ?: normalized,
-            validation
+            validation,
         )
     }
 
@@ -210,12 +224,13 @@ class RoninDocumentReference(
         normalized: DocumentReference,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<DocumentReference>?, Validation> {
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant)
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+            )
 
         return Pair(TransformResponse(transformed), Validation())
     }

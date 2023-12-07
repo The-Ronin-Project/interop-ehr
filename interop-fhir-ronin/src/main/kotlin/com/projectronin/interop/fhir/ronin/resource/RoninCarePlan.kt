@@ -31,7 +31,11 @@ class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
 
     private val epicCycleExtension = "http://open.epic.com/FHIR/StructureDefinition/extension/cycle"
 
-    override fun validateRonin(element: CarePlan, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: CarePlan,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, validation)
@@ -52,43 +56,47 @@ class RoninCarePlan(normalizer: Normalizer, localizer: Localizer) :
         normalized: CarePlan,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<CarePlan>?, Validation> {
-        val categoryExtensions = normalized.category.map {
-            Extension(
-                url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
-                value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, it)
-            )
-        }
-
-        // Epic includes a Cycle extension that we need to normalize here.
-        val normalizedActivities = normalized.activity.map { activity ->
-            val cycleExtensions = activity.extension.filter { it.url?.value == epicCycleExtension }
-            if (cycleExtensions.isEmpty()) {
-                activity
-            } else {
-                activity.copy(
-                    extension = activity.extension.map { extension ->
-                        if (extension.url?.value == epicCycleExtension && extension.value?.type == DynamicValueType.REFERENCE) {
-                            val reference = extension.value?.value as Reference
-                            val normalizedReference = normalizer.normalize(reference, tenant)
-                            extension.copy(
-                                value = DynamicValue(DynamicValueType.REFERENCE, normalizedReference)
-                            )
-                        } else {
-                            extension
-                        }
-                    }
+        val categoryExtensions =
+            normalized.category.map {
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                    value = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, it),
                 )
             }
-        }
 
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant),
-            extension = normalized.extension + categoryExtensions,
-            activity = normalizedActivities
-        )
+        // Epic includes a Cycle extension that we need to normalize here.
+        val normalizedActivities =
+            normalized.activity.map { activity ->
+                val cycleExtensions = activity.extension.filter { it.url?.value == epicCycleExtension }
+                if (cycleExtensions.isEmpty()) {
+                    activity
+                } else {
+                    activity.copy(
+                        extension =
+                            activity.extension.map { extension ->
+                                if (extension.url?.value == epicCycleExtension && extension.value?.type == DynamicValueType.REFERENCE) {
+                                    val reference = extension.value?.value as Reference
+                                    val normalizedReference = normalizer.normalize(reference, tenant)
+                                    extension.copy(
+                                        value = DynamicValue(DynamicValueType.REFERENCE, normalizedReference),
+                                    )
+                                } else {
+                                    extension
+                                }
+                            },
+                    )
+                }
+            }
+
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+                extension = normalized.extension + categoryExtensions,
+                activity = normalizedActivities,
+            )
 
         return Pair(TransformResponse(transformed), Validation())
     }

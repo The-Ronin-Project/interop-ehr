@@ -12,7 +12,7 @@ import java.time.LocalDate
  */
 @Component
 class EpicDiagnosticReportService(
-    epicClient: EpicClient
+    epicClient: EpicClient,
 ) : DiagnosticReportService, EpicFHIRService<DiagnosticReport>(epicClient) {
     override val fhirURLSearchPart = "/api/FHIR/R4/DiagnosticReport"
     override val fhirResourceType = DiagnosticReport::class.java
@@ -21,13 +21,15 @@ class EpicDiagnosticReportService(
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate?,
-        endDate: LocalDate?
+        endDate: LocalDate?,
     ): List<DiagnosticReport> {
-        val dateMap = getDateParam(startDate, endDate)?.let { mapOf("date" to it) }
-            ?: emptyMap()
-        val parameters = mapOf(
-            "patient" to patientFhirId
-        ) + dateMap
+        val dateMap =
+            getDateParam(startDate, endDate)?.let { mapOf("date" to it) }
+                ?: emptyMap()
+        val parameters =
+            mapOf(
+                "patient" to patientFhirId,
+            ) + dateMap
         return getResourceListFromSearch(tenant, parameters)
     }
 }

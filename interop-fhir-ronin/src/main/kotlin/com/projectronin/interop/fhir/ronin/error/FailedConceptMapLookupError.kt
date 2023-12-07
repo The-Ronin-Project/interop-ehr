@@ -15,15 +15,15 @@ class FailedConceptMapLookupError(
     actualLocation: LocationContext,
     sourceValue: String,
     conceptMapName: String,
-    metadata: List<ConceptMapMetadata>? = listOf()
+    metadata: List<ConceptMapMetadata>? = listOf(),
 ) :
     FHIRError(
-        "NOV_CONMAP_LOOKUP",
-        ValidationIssueSeverity.ERROR,
-        "Tenant source value '$sourceValue' has no target defined in $conceptMapName",
-        actualLocation,
-        metadata
-    ) {
+            "NOV_CONMAP_LOOKUP",
+            ValidationIssueSeverity.ERROR,
+            "Tenant source value '$sourceValue' has no target defined in $conceptMapName",
+            actualLocation,
+            metadata,
+        ) {
     /**
      * Creates an FailedConceptMapLookupError based off an explicit property.
      */
@@ -31,6 +31,6 @@ class FailedConceptMapLookupError(
         LocationContext(actualLocation),
         sourceValue,
         conceptMapName,
-        metadata
+        metadata,
     )
 }

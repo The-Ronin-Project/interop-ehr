@@ -9,5 +9,5 @@ import java.time.LocalTime
  */
 data class BatchConfig(
     val availableStart: LocalTime,
-    val availableEnd: LocalTime
+    val availableEnd: LocalTime,
 )

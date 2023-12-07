@@ -14,9 +14,15 @@ enum class RoninExtension(val value: String) {
     TENANT_SOURCE_CONDITION_CODE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceConditionCode"),
     TENANT_SOURCE_MEDICATION_CODE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceMedicationCode"),
     TENANT_SOURCE_OBSERVATION_CODE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationCode"),
-    TENANT_SOURCE_OBSERVATION_VALUE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationValueCodeableConcept"),
-    TENANT_SOURCE_OBSERVATION_COMPONENT_CODE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationComponentCode"),
-    TENANT_SOURCE_OBSERVATION_COMPONENT_VALUE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationComponentValueCodeableConcept"),
+    TENANT_SOURCE_OBSERVATION_VALUE(
+        "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationValueCodeableConcept",
+    ),
+    TENANT_SOURCE_OBSERVATION_COMPONENT_CODE(
+        "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationComponentCode",
+    ),
+    TENANT_SOURCE_OBSERVATION_COMPONENT_VALUE(
+        "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceObservationComponentValueCodeableConcept",
+    ),
     TENANT_SOURCE_PROCEDURE_CODE("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceProcedureCode"),
     TENANT_SOURCE_PROCEDURE_CATEGORY("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceProcedureCategory"),
     TENANT_SOURCE_SERVICE_REQUEST_CATEGORY("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceServiceRequestCategory"),
@@ -36,7 +42,10 @@ enum class RoninExtension(val value: String) {
 
     TENANT_SOURCE_CARE_PLAN_CATEGORY("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceCarePlanCategory"),
     ORIGINAL_MEDICATION_DATATYPE("http://projectronin.io/fhir/StructureDefinition/Extension/originalMedicationDatatype"),
-    TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS("http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceMedicationAdministrationStatus");
+    TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS(
+        "http://projectronin.io/fhir/StructureDefinition/Extension/tenant-sourceMedicationAdministrationStatus",
+    ),
+    ;
 
     val uri = Uri(value)
 }

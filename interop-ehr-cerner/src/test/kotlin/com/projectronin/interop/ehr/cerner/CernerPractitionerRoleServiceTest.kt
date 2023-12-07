@@ -46,11 +46,12 @@ class CernerPractitionerRoleServiceTest {
     fun `findPractitionersByLocation returns empty result`() {
         val actualResult = practitionerRoleService.findPractitionersByLocation(tenant, listOf("123", "321"))
 
-        val expectedResult = FindPractitionersResponse(
-            Bundle(
-                type = null
+        val expectedResult =
+            FindPractitionersResponse(
+                Bundle(
+                    type = null,
+                ),
             )
-        )
 
         assertEquals(expectedResult.resource, actualResult.resource)
         assertEquals(emptyList<Resource<*>>(), actualResult.resources)

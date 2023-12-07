@@ -17,5 +17,5 @@ data class SendMessageRecipient(
     @JsonProperty("IsPool")
     val isPool: Boolean,
     @JsonProperty("IDType")
-    val iDType: String = "External"
+    val iDType: String = "External",
 )

@@ -48,15 +48,16 @@ internal class CernerOrganizationServiceTest {
                 tenant,
                 "/Organization",
                 mapOf(
-                    "_id" to listOf(fhirId)
-                )
+                    "_id" to listOf(fhirId),
+                ),
             )
         } returns ehrResponse
 
-        val bundle = organizationService.getByIDs(
-            tenant,
-            listOf(fhirId)
-        ).values.toList()
+        val bundle =
+            organizationService.getByIDs(
+                tenant,
+                listOf(fhirId),
+            ).values.toList()
 
         val expectedOrganizationBundle = validOrganizationResponse.entry.map { it.resource }
         assertEquals(expectedOrganizationBundle, bundle)
@@ -73,8 +74,8 @@ internal class CernerOrganizationServiceTest {
                 tenant,
                 "/Organization",
                 mapOf(
-                    "_id" to fhirIds
-                )
+                    "_id" to fhirIds,
+                ),
             )
         } returns ehrPagingResponse
 
@@ -83,17 +84,19 @@ internal class CernerOrganizationServiceTest {
         coEvery {
             cernerClient.get(
                 tenant,
-                "https://fhir-ehr-code.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701bf7583d/Organization?-offset=100"
+                "https://fhir-ehr-code.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701bf7583d/Organization?-offset=100",
             )
         } returns ehrResponse
 
-        val bundle = organizationService.getByIDs(
-            tenant,
-            fhirIds
-        ).values.toList()
+        val bundle =
+            organizationService.getByIDs(
+                tenant,
+                fhirIds,
+            ).values.toList()
 
-        val expectedBundle = validOrganizationResponseWithPaging.entry.map { it.resource } +
-            validOrganizationResponse.entry.map { it.resource }
+        val expectedBundle =
+            validOrganizationResponseWithPaging.entry.map { it.resource } +
+                validOrganizationResponse.entry.map { it.resource }
         assertEquals(2, bundle.size)
         assertEquals(expectedBundle, bundle)
     }
@@ -109,15 +112,16 @@ internal class CernerOrganizationServiceTest {
                 tenant,
                 "/Organization",
                 mapOf(
-                    "_id" to listOf(fhirId)
-                )
+                    "_id" to listOf(fhirId),
+                ),
             )
         } returns ehrResponse
 
-        val bundle = organizationService.findOrganizationsByFHIRId(
-            tenant,
-            listOf(fhirId)
-        )
+        val bundle =
+            organizationService.findOrganizationsByFHIRId(
+                tenant,
+                listOf(fhirId),
+            )
 
         val expectedOrganizationBundle = validOrganizationResponse.entry.map { it.resource }
         assertEquals(expectedOrganizationBundle, bundle)
@@ -134,8 +138,8 @@ internal class CernerOrganizationServiceTest {
                 tenant,
                 "/Organization",
                 mapOf(
-                    "_id" to fhirIds
-                )
+                    "_id" to fhirIds,
+                ),
             )
         } returns ehrPagingResponse
 
@@ -144,17 +148,19 @@ internal class CernerOrganizationServiceTest {
         coEvery {
             cernerClient.get(
                 tenant,
-                "https://fhir-ehr-code.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701bf7583d/Organization?-offset=100"
+                "https://fhir-ehr-code.cerner.com/r4/ec2458f2-1e24-41c8-b71b-0e701bf7583d/Organization?-offset=100",
             )
         } returns ehrResponse
 
-        val bundle = organizationService.findOrganizationsByFHIRId(
-            tenant,
-            fhirIds
-        )
+        val bundle =
+            organizationService.findOrganizationsByFHIRId(
+                tenant,
+                fhirIds,
+            )
 
-        val expectedBundle = validOrganizationResponseWithPaging.entry.map { it.resource } +
-            validOrganizationResponse.entry.map { it.resource }
+        val expectedBundle =
+            validOrganizationResponseWithPaging.entry.map { it.resource } +
+                validOrganizationResponse.entry.map { it.resource }
         assertEquals(2, bundle.size)
         assertEquals(expectedBundle, bundle)
     }

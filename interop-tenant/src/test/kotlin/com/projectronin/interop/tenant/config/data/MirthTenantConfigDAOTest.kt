@@ -24,28 +24,31 @@ import java.sql.SQLIntegrityConstraintViolationException
 class MirthTenantConfigDAOTest {
     @DBRiderConnection
     lateinit var connectionHolder: ConnectionHolder
-    private val ehrDO = mockk<EhrDO> {
-        every { id } returns 101
-        every { vendorType } returns VendorType.EPIC
-        every { clientId } returns "client"
-        every { publicKey } returns "public"
-        every { privateKey } returns "private"
-    }
-    private val tenantDO = mockk<TenantDO> {
-        every { id } returns 1001
-        every { mnemonic } returns "apposend"
-        every { name } returns "Epic AppOrchard Sandbox"
-        every { ehr } returns ehrDO
-        every { availableBatchStart } returns null
-        every { availableBatchEnd } returns null
-    }
-    private val tenantDO2 = mockk<TenantDO> {
-        every { id } returns 1002
-        every { mnemonic } returns "apposend2"
-        every { ehr } returns ehrDO
-        every { availableBatchStart } returns null
-        every { availableBatchEnd } returns null
-    }
+    private val ehrDO =
+        mockk<EhrDO> {
+            every { id } returns 101
+            every { vendorType } returns VendorType.EPIC
+            every { clientId } returns "client"
+            every { publicKey } returns "public"
+            every { privateKey } returns "private"
+        }
+    private val tenantDO =
+        mockk<TenantDO> {
+            every { id } returns 1001
+            every { mnemonic } returns "apposend"
+            every { name } returns "Epic AppOrchard Sandbox"
+            every { ehr } returns ehrDO
+            every { availableBatchStart } returns null
+            every { availableBatchEnd } returns null
+        }
+    private val tenantDO2 =
+        mockk<TenantDO> {
+            every { id } returns 1002
+            every { mnemonic } returns "apposend2"
+            every { ehr } returns ehrDO
+            every { availableBatchStart } returns null
+            every { availableBatchEnd } returns null
+        }
 
     @Test
     @DataSet(value = ["/dbunit/mirth-tenant-config/MirthTenantConfig.yaml"], cleanAfter = true)
@@ -91,11 +94,12 @@ class MirthTenantConfigDAOTest {
         val locationIds = "blarn,blurn,blorn"
         val blockedResources = "patient,encounter"
 
-        val testobj = MirthTenantConfigDO {
-            this.tenant = tenantDO
-            this.locationIds = locationIds
-            this.blockedResources = blockedResources
-        }
+        val testobj =
+            MirthTenantConfigDO {
+                this.tenant = tenantDO
+                this.locationIds = locationIds
+                this.blockedResources = blockedResources
+            }
         val result = dao.updateConfig(testobj)!!
         assertEquals(tenantDO.id, result.tenant.id)
         assertEquals(locationIds, result.locationIds)
@@ -107,11 +111,12 @@ class MirthTenantConfigDAOTest {
     @ExpectedDataSet(value = ["/dbunit/mirth-tenant-config/MirthTenantConfig.yaml"])
     fun `updateConfig fails correctly`() {
         val dao = MirthTenantConfigDAO(KtormHelper.database())
-        val testobj = MirthTenantConfigDO {
-            tenant = tenantDO2
-            locationIds = "blarn,blurn,blorn"
-            blockedResources = "patient,encounter"
-        }
+        val testobj =
+            MirthTenantConfigDO {
+                tenant = tenantDO2
+                locationIds = "blarn,blurn,blorn"
+                blockedResources = "patient,encounter"
+            }
         val result = dao.updateConfig(testobj)
         assertNull(result)
     }
@@ -121,11 +126,12 @@ class MirthTenantConfigDAOTest {
     @ExpectedDataSet(value = ["/dbunit/mirth-tenant-config/ExpectedAfterInsert.yaml"])
     fun `insert works correctly`() {
         val dao = MirthTenantConfigDAO(KtormHelper.database())
-        val testobj = MirthTenantConfigDO {
-            tenant = tenantDO2
-            locationIds = "blart,bleet,blurt"
-            blockedResources = "patient,encounter"
-        }
+        val testobj =
+            MirthTenantConfigDO {
+                tenant = tenantDO2
+                locationIds = "blart,bleet,blurt"
+                blockedResources = "patient,encounter"
+            }
         val result = dao.insertConfig(testobj)
         assertEquals(testobj.locationIds, result.locationIds)
         assertEquals(testobj.tenant.id, result.tenant.id)
@@ -136,18 +142,20 @@ class MirthTenantConfigDAOTest {
     @DataSet(value = ["/dbunit/mirth-tenant-config/MirthTenantConfig.yaml"], cleanAfter = true)
     fun `insert fails correctly`() {
         val dao = MirthTenantConfigDAO(KtormHelper.database())
-        val fakeTenantDO = mockk<TenantDO> {
-            every { id } returns -1
-            every { mnemonic } returns "no"
-            every { ehr } returns ehrDO
-            every { availableBatchStart } returns null
-            every { availableBatchEnd } returns null
-        }
-        val testobj = MirthTenantConfigDO {
-            tenant = fakeTenantDO
-            locationIds = "no"
-            blockedResources = "nada"
-        }
+        val fakeTenantDO =
+            mockk<TenantDO> {
+                every { id } returns -1
+                every { mnemonic } returns "no"
+                every { ehr } returns ehrDO
+                every { availableBatchStart } returns null
+                every { availableBatchEnd } returns null
+            }
+        val testobj =
+            MirthTenantConfigDO {
+                tenant = fakeTenantDO
+                locationIds = "no"
+                blockedResources = "nada"
+            }
         assertThrows<SQLIntegrityConstraintViolationException> { dao.insertConfig(testobj) }
     }
 }

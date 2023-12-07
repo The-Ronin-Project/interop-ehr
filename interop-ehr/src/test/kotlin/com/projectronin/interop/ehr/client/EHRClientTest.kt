@@ -30,27 +30,30 @@ import kotlin.time.Duration.Companion.seconds
 
 class EHRClientTest {
     private val authenticationBroker = mockk<EHRAuthenticationBroker>()
-    private val datalakePublishService = mockk<DatalakePublishService> {
-        every { publishRawData(any(), any(), any()) } returns "12345"
-    }
-    private val httpClient = HttpClient(OkHttp) {
-        install(ContentNegotiation) {
-            jackson {
-                disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
-                setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
-            }
+    private val datalakePublishService =
+        mockk<DatalakePublishService> {
+            every { publishRawData(any(), any(), any()) } returns "12345"
         }
-        install(HttpTimeout)
-    }
+    private val httpClient =
+        HttpClient(OkHttp) {
+            install(ContentNegotiation) {
+                jackson {
+                    disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                    setSerializationInclusion(JsonInclude.Include.NON_EMPTY)
+                }
+            }
+            install(HttpTimeout)
+        }
     private val client = TestEHRClient(httpClient, authenticationBroker, datalakePublishService)
 
     private lateinit var mockWebServer: MockWebServer
 
     private val basicJson = "{\"success\":true}"
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "tenant"
-        every { name } returns "Test Tenant"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "tenant"
+            every { name } returns "Test Tenant"
+        }
 
     @BeforeEach
     fun setUp() {
@@ -68,21 +71,24 @@ class EHRClientTest {
     @Test
     fun `get works with no parameters`() {
         mockWebServer.enqueue(
-            MockResponse().setBody(basicJson).setHeader("Content-Type", "application/json")
+            MockResponse().setBody(basicJson).setHeader("Content-Type", "application/json"),
         )
 
-        val authentication = mockk<Authentication> {
-            every { accessToken } returns "access-token"
-        }
+        val authentication =
+            mockk<Authentication> {
+                every { accessToken } returns "access-token"
+            }
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = runBlocking {
-            val httpResponse = client.get(
-                tenant,
-                "/Patient/12724066"
-            )
-            httpResponse.httpResponse.bodyAsText()
-        }
+        val response =
+            runBlocking {
+                val httpResponse =
+                    client.get(
+                        tenant,
+                        "/Patient/12724066",
+                    )
+                httpResponse.httpResponse.bodyAsText()
+            }
         assertEquals(basicJson, response)
         val request = mockWebServer.takeRequest()
         assertEquals("GET", request.method)
@@ -92,22 +98,25 @@ class EHRClientTest {
     @Test
     fun `get works with string parameter`() {
         mockWebServer.enqueue(
-            MockResponse().setBody(basicJson).setHeader("Content-Type", "application/json")
+            MockResponse().setBody(basicJson).setHeader("Content-Type", "application/json"),
         )
 
-        val authentication = mockk<Authentication> {
-            every { accessToken } returns "access-token"
-        }
+        val authentication =
+            mockk<Authentication> {
+                every { accessToken } returns "access-token"
+            }
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = runBlocking {
-            val httpResponse = client.get(
-                tenant,
-                "/Patient",
-                mapOf("_id" to "123456")
-            )
-            httpResponse.httpResponse.bodyAsText()
-        }
+        val response =
+            runBlocking {
+                val httpResponse =
+                    client.get(
+                        tenant,
+                        "/Patient",
+                        mapOf("_id" to "123456"),
+                    )
+                httpResponse.httpResponse.bodyAsText()
+            }
         assertEquals(basicJson, response)
         val request = mockWebServer.takeRequest()
         assertEquals("GET", request.method)
@@ -117,22 +126,25 @@ class EHRClientTest {
     @Test
     fun `get works with list parameter`() {
         mockWebServer.enqueue(
-            MockResponse().setBody(basicJson).setHeader("Content-Type", "application/json")
+            MockResponse().setBody(basicJson).setHeader("Content-Type", "application/json"),
         )
 
-        val authentication = mockk<Authentication> {
-            every { accessToken } returns "access-token"
-        }
+        val authentication =
+            mockk<Authentication> {
+                every { accessToken } returns "access-token"
+            }
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = runBlocking {
-            val httpResponse = client.get(
-                tenant,
-                "/Patient",
-                mapOf("_id" to listOf("12345", "67890"))
-            )
-            httpResponse.httpResponse.bodyAsText()
-        }
+        val response =
+            runBlocking {
+                val httpResponse =
+                    client.get(
+                        tenant,
+                        "/Patient",
+                        mapOf("_id" to listOf("12345", "67890")),
+                    )
+                httpResponse.httpResponse.bodyAsText()
+            }
         assertEquals(basicJson, response)
         val request = mockWebServer.takeRequest()
         assertEquals("GET", request.method)
@@ -142,22 +154,25 @@ class EHRClientTest {
     @Test
     fun `get works with repeating parameter`() {
         mockWebServer.enqueue(
-            MockResponse().setBody(basicJson).setHeader("Content-Type", "application/json")
+            MockResponse().setBody(basicJson).setHeader("Content-Type", "application/json"),
         )
 
-        val authentication = mockk<Authentication> {
-            every { accessToken } returns "access-token"
-        }
+        val authentication =
+            mockk<Authentication> {
+                every { accessToken } returns "access-token"
+            }
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = runBlocking {
-            val httpResponse = client.get(
-                tenant,
-                "/Patient",
-                mapOf("_id" to RepeatingParameter(listOf("12345", "67890")))
-            )
-            httpResponse.httpResponse.bodyAsText()
-        }
+        val response =
+            runBlocking {
+                val httpResponse =
+                    client.get(
+                        tenant,
+                        "/Patient",
+                        mapOf("_id" to RepeatingParameter(listOf("12345", "67890"))),
+                    )
+                httpResponse.httpResponse.bodyAsText()
+            }
         assertEquals(basicJson, response)
         val request = mockWebServer.takeRequest()
         assertEquals("GET", request.method)
@@ -170,12 +185,13 @@ class EHRClientTest {
             MockResponse()
                 .setBody(basicJson)
                 .setHeader("Content-Type", "application/json")
-                .setBodyDelay(4, TimeUnit.SECONDS)
+                .setBodyDelay(4, TimeUnit.SECONDS),
         )
 
-        val authentication = mockk<Authentication> {
-            every { accessToken } returns "access-token"
-        }
+        val authentication =
+            mockk<Authentication> {
+                every { accessToken } returns "access-token"
+            }
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
         assertThrows<RequestFailureException> {
@@ -183,7 +199,7 @@ class EHRClientTest {
                 client.get(
                     tenant,
                     "/Patient/12724066",
-                    timeoutOverride = 1.seconds // ktor default is 15 seconds
+                    timeoutOverride = 1.seconds,
                 )
             }
         }
@@ -195,21 +211,24 @@ class EHRClientTest {
             MockResponse()
                 .setBody(basicJson)
                 .setHeader("Content-Type", "application/json")
-                .setBodyDelay(4, TimeUnit.SECONDS)
+                .setBodyDelay(4, TimeUnit.SECONDS),
         )
 
-        val authentication = mockk<Authentication> {
-            every { accessToken } returns "access-token"
-        }
+        val authentication =
+            mockk<Authentication> {
+                every { accessToken } returns "access-token"
+            }
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = runBlocking {
-            val httpResponse = client.get(
-                tenant,
-                "/Patient/12724066"
-            )
-            httpResponse.httpResponse.bodyAsText()
-        }
+        val response =
+            runBlocking {
+                val httpResponse =
+                    client.get(
+                        tenant,
+                        "/Patient/12724066",
+                    )
+                httpResponse.httpResponse.bodyAsText()
+            }
         assertEquals(basicJson, response)
         val request = mockWebServer.takeRequest()
         assertEquals("GET", request.method)
@@ -219,21 +238,23 @@ class EHRClientTest {
     @Test
     fun `post works with no parameters`() {
         mockWebServer.enqueue(
-            MockResponse().setResponseCode(HttpStatusCode.Created.value)
+            MockResponse().setResponseCode(HttpStatusCode.Created.value),
         )
 
-        val authentication = mockk<Authentication> {
-            every { accessToken } returns "access-token"
-        }
+        val authentication =
+            mockk<Authentication> {
+                every { accessToken } returns "access-token"
+            }
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = runBlocking {
-            client.post(
-                tenant,
-                "/Patient/12724066",
-                basicJson
-            )
-        }
+        val response =
+            runBlocking {
+                client.post(
+                    tenant,
+                    "/Patient/12724066",
+                    basicJson,
+                )
+            }
         assertEquals(HttpStatusCode.Created, response.httpResponse.status)
 
         val request = mockWebServer.takeRequest()
@@ -248,22 +269,24 @@ class EHRClientTest {
     @Test
     fun `post works with string parameter`() {
         mockWebServer.enqueue(
-            MockResponse().setResponseCode(HttpStatusCode.Created.value)
+            MockResponse().setResponseCode(HttpStatusCode.Created.value),
         )
 
-        val authentication = mockk<Authentication> {
-            every { accessToken } returns "access-token"
-        }
+        val authentication =
+            mockk<Authentication> {
+                every { accessToken } returns "access-token"
+            }
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = runBlocking {
-            client.post(
-                tenant,
-                "/Patient",
-                basicJson,
-                mapOf("_id" to "12345")
-            )
-        }
+        val response =
+            runBlocking {
+                client.post(
+                    tenant,
+                    "/Patient",
+                    basicJson,
+                    mapOf("_id" to "12345"),
+                )
+            }
         assertEquals(HttpStatusCode.Created, response.httpResponse.status)
 
         val request = mockWebServer.takeRequest()
@@ -278,22 +301,24 @@ class EHRClientTest {
     @Test
     fun `post works with list parameter`() {
         mockWebServer.enqueue(
-            MockResponse().setResponseCode(HttpStatusCode.Created.value)
+            MockResponse().setResponseCode(HttpStatusCode.Created.value),
         )
 
-        val authentication = mockk<Authentication> {
-            every { accessToken } returns "access-token"
-        }
+        val authentication =
+            mockk<Authentication> {
+                every { accessToken } returns "access-token"
+            }
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = runBlocking {
-            client.post(
-                tenant,
-                "/Patient",
-                basicJson,
-                mapOf("_id" to listOf("12345", "67890"))
-            )
-        }
+        val response =
+            runBlocking {
+                client.post(
+                    tenant,
+                    "/Patient",
+                    basicJson,
+                    mapOf("_id" to listOf("12345", "67890")),
+                )
+            }
         assertEquals(HttpStatusCode.Created, response.httpResponse.status)
 
         val request = mockWebServer.takeRequest()
@@ -308,22 +333,24 @@ class EHRClientTest {
     @Test
     fun `post works with repeating parameter`() {
         mockWebServer.enqueue(
-            MockResponse().setResponseCode(HttpStatusCode.Created.value)
+            MockResponse().setResponseCode(HttpStatusCode.Created.value),
         )
 
-        val authentication = mockk<Authentication> {
-            every { accessToken } returns "access-token"
-        }
+        val authentication =
+            mockk<Authentication> {
+                every { accessToken } returns "access-token"
+            }
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = runBlocking {
-            client.post(
-                tenant,
-                "/Patient",
-                basicJson,
-                mapOf("_id" to RepeatingParameter(listOf("12345", "67890")))
-            )
-        }
+        val response =
+            runBlocking {
+                client.post(
+                    tenant,
+                    "/Patient",
+                    basicJson,
+                    mapOf("_id" to RepeatingParameter(listOf("12345", "67890"))),
+                )
+            }
         assertEquals(HttpStatusCode.Created, response.httpResponse.status)
 
         val request = mockWebServer.takeRequest()
@@ -338,6 +365,6 @@ class EHRClientTest {
     private class TestEHRClient(
         client: HttpClient,
         authenticationBroker: EHRAuthenticationBroker,
-        datalakeService: DatalakePublishService
+        datalakeService: DatalakePublishService,
     ) : EHRClient(client, authenticationBroker, datalakeService)
 }

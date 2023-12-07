@@ -18,7 +18,8 @@ data class GetProviderAppointmentRequest(
     val startDate: String?,
     @field:Schema(example = "05/01/2022", type = "string")
     val endDate: String?,
-    val combineDepartments: String? = "true", // This is a Boolean in the AppOrchard spec, but a string in their sample data
+    // This is a Boolean in the AppOrchard spec, but a string in their sample data
+    val combineDepartments: String? = "true",
     val resourceType: String? = "",
     val specialty: String? = "",
     val extraItems: List<Any>? = listOf(),
@@ -26,5 +27,5 @@ data class GetProviderAppointmentRequest(
     val departments: List<IDType>? = listOf(),
     val subgroups: List<Any>? = listOf(),
     val extraExtensions: List<Any>? = listOf(),
-    val includeAllStatuses: String? = "true"
+    val includeAllStatuses: String? = "true",
 )

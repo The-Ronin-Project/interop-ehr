@@ -6,5 +6,5 @@ data class ValueSetMetadata(
     override val registryEntryType: String,
     val valueSetName: String,
     val valueSetUuid: String,
-    val version: String
+    val version: String,
 ) : IssueMetadata

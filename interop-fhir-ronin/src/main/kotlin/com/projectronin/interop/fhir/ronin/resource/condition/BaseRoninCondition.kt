@@ -33,9 +33,8 @@ abstract class BaseRoninCondition(
     normalizer: Normalizer,
     localizer: Localizer,
     protected val registryClient: NormalizationRegistryClient,
-    private val tenantsNotConditionMapped: String
+    private val tenantsNotConditionMapped: String,
 ) : USCoreBasedProfile<Condition>(extendedProfile, profile, normalizer, localizer) {
-
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
     open fun qualifyingCategories(): List<Coding> = emptyList()
 
@@ -45,14 +44,19 @@ abstract class BaseRoninCondition(
 
     private val requiredCodeError = RequiredFieldError(Condition::code)
 
-    private val requiredConditionCodeExtension = FHIRError(
-        code = "RONIN_CND_001",
-        description = "Tenant source condition code extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Condition::extension)
-    )
+    private val requiredConditionCodeExtension =
+        FHIRError(
+            code = "RONIN_CND_001",
+            description = "Tenant source condition code extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Condition::extension),
+        )
 
-    override fun validateRonin(element: Condition, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: Condition,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, validation)
@@ -63,7 +67,7 @@ abstract class BaseRoninCondition(
                 requireDataAuthorityExtensionIdentifier(
                     element.subject,
                     LocationContext(Condition::subject),
-                    validation
+                    validation,
                 )
             }
 
@@ -73,11 +77,11 @@ abstract class BaseRoninCondition(
                     code = "RONIN_CND_001",
                     severity = ValidationIssueSeverity.ERROR,
                     description = "Must match this system|code: ${
-                    qualifyingCategories().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                        qualifyingCategories().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                     }",
-                    location = LocationContext(Condition::category)
+                    location = LocationContext(Condition::category),
                 ),
-                parentContext
+                parentContext,
             )
 
             checkNotNull(element.code, requiredCodeError, parentContext)
@@ -93,18 +97,22 @@ abstract class BaseRoninCondition(
                         it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 requiredConditionCodeExtension,
-                parentContext
+                parentContext,
             )
         }
     }
 
-    override fun validateUSCore(element: Condition, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: Condition,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             validateReference(
                 element.subject,
                 listOf(ResourceType.Patient),
                 LocationContext(Condition::subject),
-                validation
+                validation,
             )
         }
     }
@@ -113,54 +121,58 @@ abstract class BaseRoninCondition(
         normalized: Condition,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<Condition, Validation> {
         val validation = Validation()
         if (tenant.mnemonic in tenantsNotConditionMapped) {
-            val tenantSourceConditionCode = getExtensionOrEmptyList(
-                RoninExtension.TENANT_SOURCE_CONDITION_CODE,
-                normalized.code
-            )
+            val tenantSourceConditionCode =
+                getExtensionOrEmptyList(
+                    RoninExtension.TENANT_SOURCE_CONDITION_CODE,
+                    normalized.code,
+                )
 
-            val mapped = normalized.copy(
-                extension = normalized.extension + tenantSourceConditionCode
-            )
+            val mapped =
+                normalized.copy(
+                    extension = normalized.extension + tenantSourceConditionCode,
+                )
             return Pair(mapped, validation)
         }
         // Condition.code is a single CodeableConcept
-        val mappedCode = normalized.code?.let { code ->
-            val conditionCode = registryClient.getConceptMapping(
-                tenant,
-                "Condition.code",
-                code,
-                normalized,
-                forceCacheReloadTS
-            )
-            // validate the mapping we got, use code value to report issues
-            validation.apply {
-                checkNotNull(
-                    conditionCode,
-                    FailedConceptMapLookupError(
-                        LocationContext(Condition::code),
-                        code.coding.mapNotNull { it.code?.value }
-                            .joinToString(", "),
-                        "any Condition.code concept map for tenant '${tenant.mnemonic}'",
-                        conditionCode?.metadata
-                    ),
-                    parentContext
-                )
+        val mappedCode =
+            normalized.code?.let { code ->
+                val conditionCode =
+                    registryClient.getConceptMapping(
+                        tenant,
+                        "Condition.code",
+                        code,
+                        normalized,
+                        forceCacheReloadTS,
+                    )
+                // validate the mapping we got, use code value to report issues
+                validation.apply {
+                    checkNotNull(
+                        conditionCode,
+                        FailedConceptMapLookupError(
+                            LocationContext(Condition::code),
+                            code.coding.mapNotNull { it.code?.value }
+                                .joinToString(", "),
+                            "any Condition.code concept map for tenant '${tenant.mnemonic}'",
+                            conditionCode?.metadata,
+                        ),
+                        parentContext,
+                    )
+                }
+                conditionCode
             }
-            conditionCode
-        }
 
         return Pair(
             mappedCode?.let {
                 normalized.copy(
                     code = it.codeableConcept,
-                    extension = normalized.extension + it.extension
+                    extension = normalized.extension + it.extension,
                 )
             } ?: normalized,
-            validation
+            validation,
         )
     }
 
@@ -170,16 +182,18 @@ abstract class BaseRoninCondition(
         normalized: Condition,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<Condition>?, Validation> {
-        val validation = validation {
-            checkNotNull(normalized.id, requiredIdError, parentContext)
-        }
+        val validation =
+            validation {
+                checkNotNull(normalized.id, requiredIdError, parentContext)
+            }
 
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant)
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+            )
         return Pair(TransformResponse(transformed), validation)
     }
 }

@@ -19,54 +19,62 @@ import org.springframework.stereotype.Component
 class RoninBloodPressure(
     normalizer: Normalizer,
     localizer: Localizer,
-    registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient,
 ) :
     BaseRoninVitalSign(
-        R4ObservationValidator,
-        RoninProfile.OBSERVATION_BLOOD_PRESSURE.value,
-        normalizer,
-        localizer,
-        registryClient
-    ) {
+            R4ObservationValidator,
+            RoninProfile.OBSERVATION_BLOOD_PRESSURE.value,
+            normalizer,
+            localizer,
+            registryClient,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_26_1
     override val profileVersion = 4
 
     // Multipart qualifying codes for RoninBloodPressure
-    fun validSystolicCodes(): ValueSetList = registryClient.getRequiredValueSet(
-        "Observation.component:systolic.code",
-        profile
-    )
+    fun validSystolicCodes(): ValueSetList =
+        registryClient.getRequiredValueSet(
+            "Observation.component:systolic.code",
+            profile,
+        )
 
-    fun validDiastolicCodes(): ValueSetList = registryClient.getRequiredValueSet(
-        "Observation.component:diastolic.code",
-        profile
-    )
+    fun validDiastolicCodes(): ValueSetList =
+        registryClient.getRequiredValueSet(
+            "Observation.component:diastolic.code",
+            profile,
+        )
 
     // Quantity unit codes - [USCore Blood Pressure Units](http://hl7.org/fhir/us/core/STU5.0.1/StructureDefinition-us-core-blood-pressure.html)
     override val validQuantityCodes = listOf("mm[Hg]")
 
-    override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
+    override fun validateVitalSign(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         if (element.dataAbsentReason == null) {
             val components = element.component
-            val systolic = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(validSystolicCodes().codes) } ?: false
-            }
-            val diastolic = components.filter { comp ->
-                comp.code?.coding?.any { it.isInValueSet(validDiastolicCodes().codes) } ?: false
-            }
+            val systolic =
+                components.filter { comp ->
+                    comp.code?.coding?.any { it.isInValueSet(validSystolicCodes().codes) } ?: false
+                }
+            val diastolic =
+                components.filter { comp ->
+                    comp.code?.coding?.any { it.isInValueSet(validDiastolicCodes().codes) } ?: false
+                }
 
             if (systolic.size == 1) {
                 validateVitalSignValue(
                     systolic.first().value,
                     LocationContext("Observation", "component:systolic"),
-                    validation
+                    validation,
                 )
             }
             if (diastolic.size == 1) {
                 validateVitalSignValue(
                     diastolic.first().value,
                     LocationContext("Observation", "component:diastolic"),
-                    validation
+                    validation,
                 )
             }
             validation.apply {
@@ -77,12 +85,12 @@ class RoninBloodPressure(
                         code = "USCORE_BPOBS_001",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        validSystolicCodes().codes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                            validSystolicCodes().codes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
                         location = componentSystolicCodeContext,
-                        metadata = listOf(validSystolicCodes().metadata!!)
+                        metadata = listOf(validSystolicCodes().metadata!!),
                     ),
-                    parentContext
+                    parentContext,
                 )
                 checkTrue(
                     systolic.size <= 1,
@@ -91,9 +99,9 @@ class RoninBloodPressure(
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Only 1 entry is allowed for systolic blood pressure",
                         location = componentSystolicCodeContext,
-                        metadata = listOf(validSystolicCodes().metadata!!)
+                        metadata = listOf(validSystolicCodes().metadata!!),
                     ),
-                    parentContext
+                    parentContext,
                 )
 
                 val componentDiastolicCodeContext = LocationContext("Observation", "component:diastolic.code")
@@ -103,12 +111,12 @@ class RoninBloodPressure(
                         code = "USCORE_BPOBS_002",
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Must match this system|code: ${
-                        validDiastolicCodes().codes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
+                            validDiastolicCodes().codes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
                         }",
                         location = componentDiastolicCodeContext,
-                        metadata = listOf(validDiastolicCodes().metadata!!)
+                        metadata = listOf(validDiastolicCodes().metadata!!),
                     ),
-                    parentContext
+                    parentContext,
                 )
                 checkTrue(
                     diastolic.size <= 1,
@@ -117,9 +125,9 @@ class RoninBloodPressure(
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Only 1 entry is allowed for diastolic blood pressure",
                         location = componentDiastolicCodeContext,
-                        metadata = listOf(validDiastolicCodes().metadata!!)
+                        metadata = listOf(validDiastolicCodes().metadata!!),
                     ),
-                    parentContext
+                    parentContext,
                 )
             }
         }

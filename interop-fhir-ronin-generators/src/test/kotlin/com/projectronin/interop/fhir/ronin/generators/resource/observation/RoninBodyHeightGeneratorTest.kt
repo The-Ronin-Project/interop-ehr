@@ -26,55 +26,61 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
-class bodyHeight(
+class BodyHeight(
     normalizer: Normalizer,
     localizer: Localizer,
-    registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient,
 ) : RoninBodyHeight(
-    normalizer,
-    localizer,
-    registryClient
-) {
+        normalizer,
+        localizer,
+        registryClient,
+    ) {
     override fun qualifyingCodes() = possibleBodyHeightCodes
 }
 
 class RoninBodyHeightGeneratorTest {
     private lateinit var roninBodyHeight: RoninBodyHeight
     private lateinit var registry: NormalizationRegistryClient
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
         registry = mockk<NormalizationRegistryClient> {}
-        roninBodyHeight = bodyHeight(normalizer, localizer, registry)
+        roninBodyHeight = BodyHeight(normalizer, localizer, registry)
     }
 
     @Test
     fun `example use for roninObservationBodyHeight`() {
         // Create BodyHeight Obs with attributes you need, provide the tenant
-        val roninObsBodyHeight = rcdmObservationBodyHeight("test") {
-            // if you want to test for a specific status
-            status of Code("random-status")
-            // test for a new or different code
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        code of Code("8304-8")
-                        display of "Body height special circumstances"
+        val roninObsBodyHeight =
+            rcdmObservationBodyHeight("test") {
+                // if you want to test for a specific status
+                status of Code("random-status")
+                // test for a new or different code
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    code of Code("8304-8")
+                                    display of "Body height special circumstances"
+                                },
+                            )
+                        text of "Body height special circumstances" // text is kept if provided otherwise only a code.coding is generated
                     }
-                )
-                text of "Body height special circumstances" // text is kept if provided otherwise only a code.coding is generated
             }
-        }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsBodyHeightJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyHeight)
@@ -99,7 +105,7 @@ class RoninBodyHeightGeneratorTest {
         assertNotNull(roninObsBodyHeight.meta)
         assertEquals(
             roninObsBodyHeight.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_BODY_HEIGHT.value
+            RoninProfile.OBSERVATION_BODY_HEIGHT.value,
         )
         assertNotNull(roninObsBodyHeight.status)
         assertEquals(1, roninObsBodyHeight.category.size)
@@ -125,7 +131,7 @@ class RoninBodyHeightGeneratorTest {
         assertNotNull(roninObsBodyHeight.meta)
         assertEquals(
             roninObsBodyHeight.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_BODY_HEIGHT.value
+            RoninProfile.OBSERVATION_BODY_HEIGHT.value,
         )
         assertNull(roninObsBodyHeight.implicitRules)
         assertNull(roninObsBodyHeight.language)
@@ -157,24 +163,28 @@ class RoninBodyHeightGeneratorTest {
 
     @Test
     fun `validation for rcdmObservationBodyHeight with provided identifier and code`() {
-        val roninObsBodyHeight = rcdmObservationBodyHeight("test") {
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        version of "2.74"
-                        code of Code("8302-2")
-                        display of "Body height"
+        val roninObsBodyHeight =
+            rcdmObservationBodyHeight("test") {
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
+                    )
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    version of "2.74"
+                                    code of Code("8302-2")
+                                    display of "Body height"
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = roninBodyHeight.validate(roninObsBodyHeight, null).hasErrors()
         assertEquals(validation, false)
         assertNotNull(roninObsBodyHeight.meta)
@@ -187,15 +197,17 @@ class RoninBodyHeightGeneratorTest {
 
     @Test
     fun `validation fails rcdmObservationBodyHeight with incorrect params`() {
-        val roninObsBodyHeight = rcdmObservationBodyHeight("test") {
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-            status of Code("fake-status")
-        }
+        val roninObsBodyHeight =
+            rcdmObservationBodyHeight("test") {
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
+                    )
+                status of Code("fake-status")
+            }
         val validation = roninBodyHeight.validate(roninObsBodyHeight, null)
         assertEquals(validation.hasErrors(), true)
         assertEquals(validation.issues()[0].code, "INV_VALUE_SET")

@@ -20,7 +20,7 @@ class RoninDiagnosticReportNoteExchange(normalizer: Normalizer, localizer: Local
         R4DiagnosticReportValidator,
         RoninProfile.DIAGNOSTIC_REPORT_NOTE_EXCHANGE.value,
         normalizer,
-        localizer
+        localizer,
     ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
@@ -28,7 +28,11 @@ class RoninDiagnosticReportNoteExchange(normalizer: Normalizer, localizer: Local
     private val requiredCategoryFieldError = RequiredFieldError(DiagnosticReport::category)
     private val requiredSubjectFieldError = RequiredFieldError(DiagnosticReport::subject)
 
-    override fun validateUSCore(element: DiagnosticReport, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: DiagnosticReport,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         super.validateUSCore(element, parentContext, validation)
 
         validation.apply {

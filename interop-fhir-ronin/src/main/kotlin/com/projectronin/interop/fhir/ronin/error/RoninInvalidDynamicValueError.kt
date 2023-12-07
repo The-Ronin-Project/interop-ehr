@@ -15,20 +15,20 @@ import kotlin.reflect.KProperty1
 class RoninInvalidDynamicValueError(
     actualLocation: LocationContext,
     validTypes: List<DynamicValueType>,
-    profileName: String? = "Ronin"
+    profileName: String? = "Ronin",
 ) :
     FHIRError(
-        "RONIN_INV_DYN_VAL",
-        ValidationIssueSeverity.ERROR,
-        "$profileName profile restricts ${actualLocation.field} to one of: ${validTypes.joinToString { it.code }}",
-        actualLocation
-    ) {
+            "RONIN_INV_DYN_VAL",
+            ValidationIssueSeverity.ERROR,
+            "$profileName profile restricts ${actualLocation.field} to one of: ${validTypes.joinToString { it.code }}",
+            actualLocation,
+        ) {
     /**
      * Creates a RoninInvalidDynamicValueError based off an explicit property.
      */
     constructor(actualLocation: KProperty1<*, DynamicValue<*>?>, validTypes: List<DynamicValueType>, profileName: String) : this(
         LocationContext(actualLocation),
         validTypes,
-        profileName
+        profileName,
     )
 }

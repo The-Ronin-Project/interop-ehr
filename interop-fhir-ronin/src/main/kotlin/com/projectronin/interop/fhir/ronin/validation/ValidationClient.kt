@@ -24,14 +24,22 @@ class ValidationClient(private val resourceClient: ResourceClient) {
     /**
      * Reports [validation] issues for the [resource] for [tenant].
      */
-    fun <T : Resource<T>> reportIssues(validation: Validation, resource: T, tenant: Tenant): UUID {
+    fun <T : Resource<T>> reportIssues(
+        validation: Validation,
+        resource: T,
+        tenant: Tenant,
+    ): UUID {
         return reportIssues(validation, resource, tenant.mnemonic)
     }
 
     /**
      * Reports [validation] issues for the [resource] for [tenantMnemonic].
      */
-    fun <T : Resource<T>> reportIssues(validation: Validation, resource: T, tenantMnemonic: String): UUID {
+    fun <T : Resource<T>> reportIssues(
+        validation: Validation,
+        resource: T,
+        tenantMnemonic: String,
+    ): UUID {
         val newResource = validation.asNewResource(resource, tenantMnemonic)
         val generatedId = runBlocking { resourceClient.addResource(newResource) }
         return generatedId.id!!
@@ -40,12 +48,15 @@ class ValidationClient(private val resourceClient: ResourceClient) {
     /**
      * Converts this [Validation] into a [NewResource].
      */
-    private fun <T : Resource<T>> Validation.asNewResource(resource: T, tenantMnemonic: String): NewResource =
+    private fun <T : Resource<T>> Validation.asNewResource(
+        resource: T,
+        tenantMnemonic: String,
+    ): NewResource =
         NewResource(
             organizationId = tenantMnemonic,
             resourceType = resource.resourceType,
             resource = objectMapper.writeValueAsString(resource),
-            issues = this.issues().map { it.asNewIssue() }
+            issues = this.issues().map { it.asNewIssue() },
         )
 
     /**
@@ -57,7 +68,7 @@ class ValidationClient(private val resourceClient: ResourceClient) {
             type = this.code,
             description = this.description,
             location = this.location.toString(),
-            metadata = this.metadata?.map { it.asNewMetadata() }
+            metadata = this.metadata?.map { it.asNewMetadata() },
         )
 
     /**
@@ -83,14 +94,15 @@ class ValidationClient(private val resourceClient: ResourceClient) {
             registryEntryType = this.registryEntryType,
             conceptMapName = this.conceptMapName,
             conceptMapUuid = UUID.fromString(this.conceptMapUuid),
-            version = this.version
+            version = this.version,
         )
+
     private fun ValueSetMetadata.asNewValueSetMetadata(): NewMetadata =
         NewMetadata(
             registryEntryType = this.registryEntryType,
             valueSetName = this.valueSetName,
             valueSetUuid = UUID.fromString(this.valueSetUuid),
-            version = this.version
+            version = this.version,
         )
 
     /**

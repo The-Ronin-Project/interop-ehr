@@ -8,12 +8,12 @@ import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 
 internal class DateTimeUtilTest {
-
     @Test
     fun `dateInDaysFromToday() returns`() {
-        val mockDateFormat = mockk<DateTimeFormatter> {
-            every { format(any<LocalTime>()) } returns "2003-04-05"
-        }
+        val mockDateFormat =
+            mockk<DateTimeFormatter> {
+                every { format(any<LocalTime>()) } returns "2003-04-05"
+            }
         assertEquals("2003-04-05", daysToPastDate(60, mockDateFormat))
     }
 }

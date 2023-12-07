@@ -21,33 +21,41 @@ import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
 
 class BaseProfileTest {
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
-    private val normalizer = mockk<Normalizer> {
-        every { normalize(any(), tenant) } answers { firstArg() }
-    }
-    private val localizer = mockk<Localizer> {
-        every { localize(any(), tenant) } answers { firstArg() }
-    }
+    private val normalizer =
+        mockk<Normalizer> {
+            every { normalize(any(), tenant) } answers { firstArg() }
+        }
+    private val localizer =
+        mockk<Localizer> {
+            every { localize(any(), tenant) } answers { firstArg() }
+        }
 
     @Test
     fun `handles a successful transformation with no validation errors for a resource with no ID`() {
-        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
-            override fun transformInternal(
-                normalized: Location,
-                parentContext: LocationContext,
-                tenant: Tenant,
-                forceCacheReloadTS: LocalDateTime?
-            ): Pair<TransformResponse<Location>?, Validation> {
-                return Pair(TransformResponse(normalized), Validation())
-            }
+        val profile =
+            object : BaseProfile<Location>(null, normalizer, localizer) {
+                override fun transformInternal(
+                    normalized: Location,
+                    parentContext: LocationContext,
+                    tenant: Tenant,
+                    forceCacheReloadTS: LocalDateTime?,
+                ): Pair<TransformResponse<Location>?, Validation> {
+                    return Pair(TransformResponse(normalized), Validation())
+                }
 
-            override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
-                // do nothing
+                override fun validate(
+                    element: Location,
+                    parentContext: LocationContext,
+                    validation: Validation,
+                ) {
+                    // do nothing
+                }
             }
-        }
 
         val original = Location()
         val (transformResponse, _) = profile.transform(original, tenant)
@@ -56,20 +64,25 @@ class BaseProfileTest {
 
     @Test
     fun `handles a null transformation with no validation errors`() {
-        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
-            override fun transformInternal(
-                normalized: Location,
-                parentContext: LocationContext,
-                tenant: Tenant,
-                forceCacheReloadTS: LocalDateTime?
-            ): Pair<TransformResponse<Location>?, Validation> {
-                return Pair(null, Validation())
-            }
+        val profile =
+            object : BaseProfile<Location>(null, normalizer, localizer) {
+                override fun transformInternal(
+                    normalized: Location,
+                    parentContext: LocationContext,
+                    tenant: Tenant,
+                    forceCacheReloadTS: LocalDateTime?,
+                ): Pair<TransformResponse<Location>?, Validation> {
+                    return Pair(null, Validation())
+                }
 
-            override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
-                fail<Nothing> { "Validate should not be called" }
+                override fun validate(
+                    element: Location,
+                    parentContext: LocationContext,
+                    validation: Validation,
+                ) {
+                    fail<Nothing> { "Validate should not be called" }
+                }
             }
-        }
 
         val original = Location(id = Id("1234"))
         val (transformResponse, _) = profile.transform(original, tenant)
@@ -78,24 +91,30 @@ class BaseProfileTest {
 
     @Test
     fun `handles a null transformation with validation errors`() {
-        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
-            override fun transformInternal(
-                normalized: Location,
-                parentContext: LocationContext,
-                tenant: Tenant,
-                forceCacheReloadTS: LocalDateTime?
-            ): Pair<TransformResponse<Location>?, Validation> {
-                val validation = validation {
-                    checkNotNull(null, RequiredFieldError(Location::id), parentContext)
+        val profile =
+            object : BaseProfile<Location>(null, normalizer, localizer) {
+                override fun transformInternal(
+                    normalized: Location,
+                    parentContext: LocationContext,
+                    tenant: Tenant,
+                    forceCacheReloadTS: LocalDateTime?,
+                ): Pair<TransformResponse<Location>?, Validation> {
+                    val validation =
+                        validation {
+                            checkNotNull(null, RequiredFieldError(Location::id), parentContext)
+                        }
+
+                    return Pair(null, validation)
                 }
 
-                return Pair(null, validation)
+                override fun validate(
+                    element: Location,
+                    parentContext: LocationContext,
+                    validation: Validation,
+                ) {
+                    fail<Nothing> { "Validate should not be called" }
+                }
             }
-
-            override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
-                fail<Nothing> { "Validate should not be called" }
-            }
-        }
 
         val original = Location(id = Id("1234"))
         val (transformResponse, _) = profile.transform(original, tenant)
@@ -104,20 +123,25 @@ class BaseProfileTest {
 
     @Test
     fun `handles a successful transformation with no validation errors`() {
-        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
-            override fun transformInternal(
-                normalized: Location,
-                parentContext: LocationContext,
-                tenant: Tenant,
-                forceCacheReloadTS: LocalDateTime?
-            ): Pair<TransformResponse<Location>?, Validation> {
-                return Pair(TransformResponse(normalized), Validation())
-            }
+        val profile =
+            object : BaseProfile<Location>(null, normalizer, localizer) {
+                override fun transformInternal(
+                    normalized: Location,
+                    parentContext: LocationContext,
+                    tenant: Tenant,
+                    forceCacheReloadTS: LocalDateTime?,
+                ): Pair<TransformResponse<Location>?, Validation> {
+                    return Pair(TransformResponse(normalized), Validation())
+                }
 
-            override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
-                // do nothing
+                override fun validate(
+                    element: Location,
+                    parentContext: LocationContext,
+                    validation: Validation,
+                ) {
+                    // do nothing
+                }
             }
-        }
 
         val original = Location(id = Id("1234"))
         val (transformResponse, _) = profile.transform(original, tenant)
@@ -129,20 +153,25 @@ class BaseProfileTest {
     fun `handles a successful transformation with embedded resources and no validation errors`() {
         val embedded = listOf(mockk<Organization>())
 
-        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
-            override fun transformInternal(
-                normalized: Location,
-                parentContext: LocationContext,
-                tenant: Tenant,
-                forceCacheReloadTS: LocalDateTime?
-            ): Pair<TransformResponse<Location>?, Validation> {
-                return Pair(TransformResponse(normalized, embedded), Validation())
-            }
+        val profile =
+            object : BaseProfile<Location>(null, normalizer, localizer) {
+                override fun transformInternal(
+                    normalized: Location,
+                    parentContext: LocationContext,
+                    tenant: Tenant,
+                    forceCacheReloadTS: LocalDateTime?,
+                ): Pair<TransformResponse<Location>?, Validation> {
+                    return Pair(TransformResponse(normalized, embedded), Validation())
+                }
 
-            override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
-                // do nothing
+                override fun validate(
+                    element: Location,
+                    parentContext: LocationContext,
+                    validation: Validation,
+                ) {
+                    // do nothing
+                }
             }
-        }
 
         val original = Location(id = Id("1234"))
         val (transformResponse, _) = profile.transform(original, tenant)
@@ -152,24 +181,30 @@ class BaseProfileTest {
 
     @Test
     fun `handles a successful transformation with validation errors`() {
-        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
-            override fun transformInternal(
-                normalized: Location,
-                parentContext: LocationContext,
-                tenant: Tenant,
-                forceCacheReloadTS: LocalDateTime?
-            ): Pair<TransformResponse<Location>?, Validation> {
-                val validation = validation {
-                    checkNotNull(null, RequiredFieldError(Location::id), parentContext)
+        val profile =
+            object : BaseProfile<Location>(null, normalizer, localizer) {
+                override fun transformInternal(
+                    normalized: Location,
+                    parentContext: LocationContext,
+                    tenant: Tenant,
+                    forceCacheReloadTS: LocalDateTime?,
+                ): Pair<TransformResponse<Location>?, Validation> {
+                    val validation =
+                        validation {
+                            checkNotNull(null, RequiredFieldError(Location::id), parentContext)
+                        }
+
+                    return Pair(TransformResponse(normalized), validation)
                 }
 
-                return Pair(TransformResponse(normalized), validation)
+                override fun validate(
+                    element: Location,
+                    parentContext: LocationContext,
+                    validation: Validation,
+                ) {
+                    // do nothing
+                }
             }
-
-            override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
-                // do nothing
-            }
-        }
 
         val original = Location(id = Id("1234"))
         val (transformResponse, _) = profile.transform(original, tenant)
@@ -178,20 +213,25 @@ class BaseProfileTest {
 
     @Test
     fun `handles a successful transformation that results in a failed validation`() {
-        val profile = object : BaseProfile<Location>(null, normalizer, localizer) {
-            override fun transformInternal(
-                normalized: Location,
-                parentContext: LocationContext,
-                tenant: Tenant,
-                forceCacheReloadTS: LocalDateTime?
-            ): Pair<TransformResponse<Location>?, Validation> {
-                return Pair(TransformResponse(normalized), Validation())
-            }
+        val profile =
+            object : BaseProfile<Location>(null, normalizer, localizer) {
+                override fun transformInternal(
+                    normalized: Location,
+                    parentContext: LocationContext,
+                    tenant: Tenant,
+                    forceCacheReloadTS: LocalDateTime?,
+                ): Pair<TransformResponse<Location>?, Validation> {
+                    return Pair(TransformResponse(normalized), Validation())
+                }
 
-            override fun validate(element: Location, parentContext: LocationContext, validation: Validation) {
-                validation.checkNotNull(null, RequiredFieldError(Location::id), parentContext)
+                override fun validate(
+                    element: Location,
+                    parentContext: LocationContext,
+                    validation: Validation,
+                ) {
+                    validation.checkNotNull(null, RequiredFieldError(Location::id), parentContext)
+                }
             }
-        }
 
         val original = Location(id = Id("1234"))
         val (transformResponse, _) = profile.transform(original, tenant)

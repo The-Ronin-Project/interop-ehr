@@ -15,14 +15,12 @@ import io.ktor.serialization.jackson.jackson
 import java.time.LocalTime
 import java.time.ZoneId
 
-inline fun <reified T> readResource(resource: String): T =
-    objectMapper.readValue(T::class.java.getResource(resource)!!.readText())
+inline fun <reified T> readResource(resource: String): T = objectMapper.readValue(T::class.java.getResource(resource)!!.readText())
 
 /**
  * Removes all formatting from a supplied JSON string.
  */
-fun deformat(json: String): String =
-    objectMapper.writeValueAsString(objectMapper.readValue<Any>(json))
+fun deformat(json: String): String = objectMapper.writeValueAsString(objectMapper.readValue<Any>(json))
 
 fun createTestTenant(
     clientId: String = "clientId",
@@ -45,7 +43,7 @@ fun createTestTenant(
     departmentInternalSystem: String = "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980",
     patientOnboardedFlagId: String? = null,
     timezone: String = "Etc/UTC",
-    monitoredIndicator: Boolean? = null
+    monitoredIndicator: Boolean? = null,
 ): Tenant {
     return Tenant(
         internalId,
@@ -70,9 +68,9 @@ fun createTestTenant(
             hsi,
             departmentInternalSystem,
             patientOnboardedFlagId,
-            orderSystem
+            orderSystem,
         ),
-        monitoredIndicator
+        monitoredIndicator,
     )
 }
 

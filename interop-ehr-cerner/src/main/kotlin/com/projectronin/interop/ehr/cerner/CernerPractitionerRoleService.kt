@@ -10,7 +10,7 @@ import org.springframework.stereotype.Component
 
 @Component
 class CernerPractitionerRoleService(
-    cernerClient: CernerClient
+    cernerClient: CernerClient,
 ) : PractitionerRoleService,
     CernerFHIRService<PractitionerRole>(cernerClient) {
     override val fhirURLSearchPart = ""
@@ -19,7 +19,10 @@ class CernerPractitionerRoleService(
     /**
      * Cerner does not support PractitionerRole, simply returning an empty role
      */
-    override fun getByID(tenant: Tenant, resourceFHIRId: String): PractitionerRole {
+    override fun getByID(
+        tenant: Tenant,
+        resourceFHIRId: String,
+    ): PractitionerRole {
         return PractitionerRole()
     }
 
@@ -28,16 +31,19 @@ class CernerPractitionerRoleService(
      */
     override fun getByIDs(
         tenant: Tenant,
-        resourceFHIRIds: List<String>
+        resourceFHIRIds: List<String>,
     ): Map<String, PractitionerRole> {
         return emptyMap()
     }
 
-    override fun findPractitionersByLocation(tenant: Tenant, locationIds: List<String>): FindPractitionersResponse {
+    override fun findPractitionersByLocation(
+        tenant: Tenant,
+        locationIds: List<String>,
+    ): FindPractitionersResponse {
         return FindPractitionersResponse(
             Bundle(
-                type = null
-            )
+                type = null,
+            ),
         )
     }
 }

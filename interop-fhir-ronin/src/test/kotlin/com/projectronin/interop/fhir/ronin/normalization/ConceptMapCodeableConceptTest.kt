@@ -16,33 +16,39 @@ import org.junit.jupiter.api.Test
 class ConceptMapCodeableConceptTest {
     @Test
     fun `serialize and deserialize JSON`() {
-        val conceptMapCodeableConcept = ConceptMapCodeableConcept(
-            codeableConcept = CodeableConcept(
-                id = FHIRString("12345"),
-                extension = listOf(
+        val conceptMapCodeableConcept =
+            ConceptMapCodeableConcept(
+                codeableConcept =
+                    CodeableConcept(
+                        id = FHIRString("12345"),
+                        extension =
+                            listOf(
+                                Extension(
+                                    url = Uri("http://localhost/extension"),
+                                    value = DynamicValue(DynamicValueType.STRING, FHIRString("Value")),
+                                ),
+                            ),
+                        coding = listOf(Coding(system = Uri("coding-system"))),
+                        text = FHIRString("concept"),
+                    ),
+                extension =
                     Extension(
                         url = Uri("http://localhost/extension"),
-                        value = DynamicValue(DynamicValueType.STRING, FHIRString("Value"))
-                    )
-                ),
-                coding = listOf(Coding(system = Uri("coding-system"))),
-                text = FHIRString("concept")
-            ),
-            extension = Extension(
-                url = Uri("http://localhost/extension"),
-                value = DynamicValue(DynamicValueType.STRING, FHIRString("Value"))
-            ),
-            metadata = listOf(
-                ConceptMapMetadata(
-                    registryEntryType = "concept-map",
-                    conceptMapName = "test-concept-map",
-                    conceptMapUuid = "573b456efca5-03d51d53-1a31-49a9-af74",
-                    version = "1"
-                )
+                        value = DynamicValue(DynamicValueType.STRING, FHIRString("Value")),
+                    ),
+                metadata =
+                    listOf(
+                        ConceptMapMetadata(
+                            registryEntryType = "concept-map",
+                            conceptMapName = "test-concept-map",
+                            conceptMapUuid = "573b456efca5-03d51d53-1a31-49a9-af74",
+                            version = "1",
+                        ),
+                    ),
             )
-        )
         val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(conceptMapCodeableConcept)
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "codeableConcept" : {
                 "id" : "12345",
@@ -66,7 +72,7 @@ class ConceptMapCodeableConceptTest {
                 "version" : "1"
               } ]
             }
-        """.trimIndent()
+            """.trimIndent()
         Assertions.assertEquals(expectedJson, json)
         val deserializedConceptMap = JacksonManager.objectMapper.readValue<ConceptMapCodeableConcept>(json)
         Assertions.assertEquals(deserializedConceptMap, conceptMapCodeableConcept)

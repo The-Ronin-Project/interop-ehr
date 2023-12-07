@@ -25,33 +25,38 @@ import org.junit.jupiter.api.Test
 
 class RoninRequestGroupGeneratorTest {
     private lateinit var rcdmRequestGroup: RoninRequestGroup
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
         rcdmRequestGroup = RoninRequestGroup(normalizer, localizer)
     }
 
     @Test
     fun `example use for rcdmRequestGroup`() {
         // create request group resource with attributes you need, provide the tenant
-        val rcdmRequestGroup = rcdmRequestGroup("test") {
-            // to test an attribute like status - provide the value
-            status of Code("on-hold")
-            authoredOn of dateTime {
-                year of 1990
-                day of 8
-                month of 4
+        val rcdmRequestGroup =
+            rcdmRequestGroup("test") {
+                // to test an attribute like status - provide the value
+                status of Code("on-hold")
+                authoredOn of
+                    dateTime {
+                        year of 1990
+                        day of 8
+                        month of 4
+                    }
             }
-        }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes will be generated
         val rcdmRequestGroupJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(rcdmRequestGroup)
@@ -77,7 +82,7 @@ class RoninRequestGroupGeneratorTest {
         assertNotNull(rcdmRequestGroup.meta)
         assertEquals(
             rcdmRequestGroup.meta!!.profile[0].value,
-            RoninProfile.REQUEST_GROUP.value
+            RoninProfile.REQUEST_GROUP.value,
         )
         assertEquals(3, rcdmRequestGroup.identifier.size)
         assertNotNull(rcdmRequestGroup.status)
@@ -101,9 +106,10 @@ class RoninRequestGroupGeneratorTest {
 
     @Test
     fun `rcdmRequestGroup validates with identifier added`() {
-        val requestGroup = rcdmRequestGroup("test") {
-            identifier of listOf(Identifier(value = "identifier".asFHIR()))
-        }
+        val requestGroup =
+            rcdmRequestGroup("test") {
+                identifier of listOf(Identifier(value = "identifier".asFHIR()))
+            }
         val validation = rcdmRequestGroup.validate(requestGroup, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals(4, requestGroup.identifier.size)
@@ -117,9 +123,10 @@ class RoninRequestGroupGeneratorTest {
 
     @Test
     fun `generates rcdmRequestGroup with given status but fails validation because status is bad`() {
-        val requestGroup = rcdmRequestGroup("test") {
-            status of Code("this is a bad status")
-        }
+        val requestGroup =
+            rcdmRequestGroup("test") {
+                status of Code("this is a bad status")
+            }
         assertEquals(requestGroup.status, Code("this is a bad status"))
 
         // validate should fail
@@ -132,9 +139,10 @@ class RoninRequestGroupGeneratorTest {
 
     @Test
     fun `rcdmRequestGroup - valid subject input - validate succeeds`() {
-        val requestGroup = rcdmRequestGroup("test") {
-            subject of rcdmReference("Patient", "456")
-        }
+        val requestGroup =
+            rcdmRequestGroup("test") {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = rcdmRequestGroup.validate(requestGroup, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/456", requestGroup.subject?.reference?.value)
@@ -152,9 +160,10 @@ class RoninRequestGroupGeneratorTest {
     @Test
     fun `rcdmPatient rcdmRequestGroup - valid subject input overrides base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val requestGroup = rcdmPatient.rcdmRequestGroup {
-            subject of rcdmReference("Patient", "456")
-        }
+        val requestGroup =
+            rcdmPatient.rcdmRequestGroup {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = rcdmRequestGroup.validate(requestGroup, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/456", requestGroup.subject?.reference?.value)
@@ -163,9 +172,10 @@ class RoninRequestGroupGeneratorTest {
     @Test
     fun `rcdmPatient rcdmRequestGroup - base patient overrides invalid subject input - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val requestGroup = rcdmPatient.rcdmRequestGroup {
-            subject of reference("Patient", "456")
-        }
+        val requestGroup =
+            rcdmPatient.rcdmRequestGroup {
+                subject of reference("Patient", "456")
+            }
         val validation = rcdmRequestGroup.validate(requestGroup, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals("Patient/${rcdmPatient.id?.value}", requestGroup.subject?.reference?.value)
@@ -174,9 +184,10 @@ class RoninRequestGroupGeneratorTest {
     @Test
     fun `rcdmPatient rcdmRequestGroup - fhir id input for both - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") { id of "99" }
-        val requestGroup = rcdmPatient.rcdmRequestGroup {
-            id of "88"
-        }
+        val requestGroup =
+            rcdmPatient.rcdmRequestGroup {
+                id of "88"
+            }
         val validation = rcdmRequestGroup.validate(requestGroup, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals(3, requestGroup.identifier.size)

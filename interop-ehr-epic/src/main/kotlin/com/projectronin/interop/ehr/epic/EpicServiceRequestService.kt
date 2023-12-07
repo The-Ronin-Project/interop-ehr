@@ -11,13 +11,16 @@ import org.springframework.stereotype.Component
 @Component
 class EpicServiceRequestService(
     epicClient: EpicClient,
-    @Value("\${epic.fhir.batchSize:10}") batchSize: Int
+    @Value("\${epic.fhir.batchSize:10}") batchSize: Int,
 ) : ServiceRequestService, EpicFHIRService<ServiceRequest>(epicClient, batchSize) {
     override val fhirURLSearchPart = "/api/FHIR/R4/ServiceRequest"
     override val fhirResourceType = ServiceRequest::class.java
 
     @Trace
-    override fun getServiceRequestsForPatient(tenant: Tenant, patientFhirId: String): List<ServiceRequest> {
+    override fun getServiceRequestsForPatient(
+        tenant: Tenant,
+        patientFhirId: String,
+    ): List<ServiceRequest> {
         val parameters = mapOf("patient" to patientFhirId)
         return getResourceListFromSearch(tenant, parameters)
     }

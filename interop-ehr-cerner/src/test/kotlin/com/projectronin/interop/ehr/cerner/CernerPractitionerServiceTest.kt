@@ -57,8 +57,8 @@ class CernerPractitionerServiceTest {
             httpResponse.body<Practitioner>(
                 TypeInfo(
                     Practitioner::class,
-                    Practitioner::class.java
-                )
+                    Practitioner::class.java,
+                ),
             )
         } returns mockPractitioner
         coEvery { cernerClient.get(tenant, "/Practitioner/PractitionerFHIRID") } returns ehrResponse
@@ -74,8 +74,8 @@ class CernerPractitionerServiceTest {
             httpResponse.body<Practitioner>(
                 TypeInfo(
                     Practitioner::class,
-                    Practitioner::class.java
-                )
+                    Practitioner::class.java,
+                ),
             )
         } throws thrownException
         coEvery { cernerClient.get(tenant, "/Practitioner/PractitionerFHIRID") } returns ehrResponse
@@ -97,7 +97,7 @@ class CernerPractitionerServiceTest {
             cernerClient.get(
                 tenant,
                 "/Practitioner",
-                mapOf("_id" to "ProviderId")
+                mapOf("_id" to "ProviderId"),
             )
         } returns ehrResponse
 
@@ -112,7 +112,7 @@ class CernerPractitionerServiceTest {
             cernerClient.get(
                 tenant,
                 "/Practitioner",
-                mapOf("_id" to "ProviderId")
+                mapOf("_id" to "ProviderId"),
             )
         } returns ehrResponse
 
@@ -125,16 +125,17 @@ class CernerPractitionerServiceTest {
         val mockPractitioner2 = mockk<Practitioner>(relaxed = true)
         val mockPractitioner3 = mockk<Practitioner>(relaxed = true)
 
-        coEvery { httpResponse.body<Bundle>() } returns mockBundle(
-            mockPractitioner1,
-            mockPractitioner2,
-            mockPractitioner3
-        )
+        coEvery { httpResponse.body<Bundle>() } returns
+            mockBundle(
+                mockPractitioner1,
+                mockPractitioner2,
+                mockPractitioner3,
+            )
         coEvery {
             cernerClient.get(
                 tenant,
                 "/Practitioner",
-                mapOf("_id" to "ProviderId")
+                mapOf("_id" to "ProviderId"),
             )
         } returns ehrResponse
 
@@ -149,7 +150,7 @@ class CernerPractitionerServiceTest {
             cernerClient.get(
                 tenant,
                 "/Practitioner",
-                mapOf("_id" to "ProviderId")
+                mapOf("_id" to "ProviderId"),
             )
         } returns ehrResponse
 
@@ -163,11 +164,12 @@ class CernerPractitionerServiceTest {
     fun `findPractitionerByLocation returns empty result`() {
         val actualResult = practitionerRoleService.findPractitionersByLocation(tenant, listOf("123", "321"))
 
-        var expectedResult = FindPractitionersResponse(
-            Bundle(
-                type = null
+        var expectedResult =
+            FindPractitionersResponse(
+                Bundle(
+                    type = null,
+                ),
             )
-        )
 
         assertEquals(expectedResult.resource, actualResult.resource)
         assertEquals(emptyList<Resource<*>>(), actualResult.resources)
@@ -182,7 +184,7 @@ class CernerPractitionerServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         // Mock response with paging
@@ -193,45 +195,47 @@ class CernerPractitionerServiceTest {
                 tenant,
                 "/Practitioner",
                 mapOf(
-                    "_count" to 20
-                )
+                    "_count" to 20,
+                ),
             )
         } returns EHRResponse(pagingHttpResponse, "67890")
 
-        val parameters = mapOf(
-            "_count" to 20
-        )
+        val parameters =
+            mapOf(
+                "_count" to 20,
+            )
         val bundle = practitionerService.getResourceListFromSearch(tenant, parameters)
 
         assertEquals(10, bundle.size)
         assertTrue(
             bundle.any {
                 it.resourceType == "Practitioner"
-            }
+            },
         )
         assertTrue(
             bundle.any {
                 it.active?.value is Boolean
-            }
+            },
         )
         assertTrue(
             bundle.any {
                 it.id?.value!!.isNotEmpty()
-            }
+            },
         )
         assertTrue(
             bundle.any {
                 it.name.isNotEmpty()
-            }
+            },
         )
     }
 
     private fun <R : Resource<R>> mockBundle(vararg resources: R): Bundle {
-        val entries = resources.map {
-            mockk<BundleEntry>(relaxed = true) {
-                every { resource } returns it
+        val entries =
+            resources.map {
+                mockk<BundleEntry>(relaxed = true) {
+                    every { resource } returns it
+                }
             }
-        }
 
         return mockk(relaxed = true) {
             every { entry } returns entries
@@ -241,32 +245,35 @@ class CernerPractitionerServiceTest {
 
     @Test
     fun `getResourceListFromSearch responds`() {
-        val tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "https://example.org",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-        )
+        val tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "https://example.org",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            )
         val mockPractitioner1 = mockk<Practitioner>(relaxed = true)
         val mockPractitioner2 = mockk<Practitioner>(relaxed = true)
         val mockPractitioner3 = mockk<Practitioner>(relaxed = true)
-        coEvery { httpResponse.body<Bundle>() } returns mockBundle(
-            mockPractitioner1,
-            mockPractitioner2,
-            mockPractitioner3
-        )
+        coEvery { httpResponse.body<Bundle>() } returns
+            mockBundle(
+                mockPractitioner1,
+                mockPractitioner2,
+                mockPractitioner3,
+            )
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery {
             cernerClient.get(
                 tenant,
                 "/Practitioner",
                 mapOf(
-                    "_id" to "1,2,3"
-                )
+                    "_id" to "1,2,3",
+                ),
             )
         } returns EHRResponse(httpResponse, "/Practitioner?_id=1,2,3")
-        val parameters = mapOf(
-            "_id" to "1,2,3"
-        )
+        val parameters =
+            mapOf(
+                "_id" to "1,2,3",
+            )
 
         val bundle = practitionerService.getResourceListFromSearch(tenant, parameters)
         assertEquals(3, bundle.size)
@@ -279,31 +286,35 @@ class CernerPractitionerServiceTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 authEndpoint = "https://example.org",
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
-        val mockPractitioner1 = mockk<Practitioner>(relaxed = true) {
-            every { id } returns Id("1")
-        }
-        val mockPractitioner2 = mockk<Practitioner>(relaxed = true) {
-            every { id } returns Id("2")
-        }
-        val mockPractitioner3 = mockk<Practitioner>(relaxed = true) {
-            every { id } returns Id("3")
-        }
-        coEvery { httpResponse.body<Bundle>() } returns mockBundle(
-            mockPractitioner1,
-            mockPractitioner2,
-            mockPractitioner3
-        )
+        val mockPractitioner1 =
+            mockk<Practitioner>(relaxed = true) {
+                every { id } returns Id("1")
+            }
+        val mockPractitioner2 =
+            mockk<Practitioner>(relaxed = true) {
+                every { id } returns Id("2")
+            }
+        val mockPractitioner3 =
+            mockk<Practitioner>(relaxed = true) {
+                every { id } returns Id("3")
+            }
+        coEvery { httpResponse.body<Bundle>() } returns
+            mockBundle(
+                mockPractitioner1,
+                mockPractitioner2,
+                mockPractitioner3,
+            )
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery {
             cernerClient.get(
                 tenant,
                 "/Practitioner",
                 mapOf(
-                    "_id" to listOf("1", "2", "3")
-                )
+                    "_id" to listOf("1", "2", "3"),
+                ),
             )
         } returns EHRResponse(httpResponse, "/Practitioner?_id=1,2,3")
 
@@ -315,18 +326,19 @@ class CernerPractitionerServiceTest {
                 tenant,
                 "/Practitioner",
                 mapOf(
-                    "_id" to listOf("4", "5")
-                )
+                    "_id" to listOf("4", "5"),
+                ),
             )
         } returns EHRResponse(httpResponse2, "/Practitioner?_id=4,5")
 
         // batchPractitioners is 3 which chunks the 5 IDs:
         // IDs 1,2,3 return 3 mocked Practitioners, each having an Id value
         // IDs 4,5 returns our test resource JSON Bundle with 1 Practitioner
-        val map = practitionerService.getByIDs(
-            tenant,
-            listOf("1", "2", "3", "4", "5")
-        )
+        val map =
+            practitionerService.getByIDs(
+                tenant,
+                listOf("1", "2", "3", "4", "5"),
+            )
         assertEquals(4, map.size)
         assertTrue("1" in map.keys)
         assertTrue("2" in map.keys)
@@ -344,17 +356,18 @@ class CernerPractitionerServiceTest {
                 tenant,
                 "/Practitioner",
                 mapOf(
-                    "_id" to listOf("1", "2")
-                )
+                    "_id" to listOf("1", "2"),
+                ),
             )
         } returns ehrResponse
 
-        val exception = assertThrows<ClientFailureException> {
-            practitionerService.getByIDs(
-                tenant,
-                listOf("1", "2")
-            )
-        }
+        val exception =
+            assertThrows<ClientFailureException> {
+                practitionerService.getByIDs(
+                    tenant,
+                    listOf("1", "2"),
+                )
+            }
         assertEquals(thrownException, exception)
     }
 }

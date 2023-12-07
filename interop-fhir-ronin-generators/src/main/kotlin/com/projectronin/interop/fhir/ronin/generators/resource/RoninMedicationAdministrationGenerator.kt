@@ -21,7 +21,7 @@ import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 
 fun rcdmMedicationAdministration(
     tenant: String,
-    block: MedicationAdministrationGenerator.() -> Unit
+    block: MedicationAdministrationGenerator.() -> Unit,
 ): MedicationAdministration {
     return medicationAdministration {
         block.invoke(this)
@@ -40,42 +40,47 @@ fun Patient.rcdmMedicationAdministration(block: MedicationAdministrationGenerato
     val data = this.referenceData()
     return rcdmMedicationAdministration(data.tenantId) {
         block.invoke(this)
-        subject of generateReference(
-            subject.generate(),
-            subjectReferenceOptions,
-            data.tenantId,
-            "Patient",
-            data.udpId
-        )
+        subject of
+            generateReference(
+                subject.generate(),
+                subjectReferenceOptions,
+                data.tenantId,
+                "Patient",
+                data.udpId,
+            )
     }
 }
 
-val possibleMedicationDatatypeCodes = listOf(
-    Code("literal reference"),
-    Code("logical reference"),
-    Code("contained reference"),
-    Code("codeable concept")
-)
+val possibleMedicationDatatypeCodes =
+    listOf(
+        Code("literal reference"),
+        Code("logical reference"),
+        Code("contained reference"),
+        Code("codeable concept"),
+    )
 
 fun originalMedicationDatatype(): Extension {
     return Extension(
         url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/originalMedicationDatatype"),
-        value = DynamicValue(
-            DynamicValueType.CODE,
-            possibleMedicationDatatypeCodes.random()
-        )
+        value =
+            DynamicValue(
+                DynamicValueType.CODE,
+                possibleMedicationDatatypeCodes.random(),
+            ),
     )
 }
 
 fun originalMedicationAdministrationStatus(): Extension {
     return Extension(
         url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_ADMINISTRATION_STATUS.value),
-        value = DynamicValue(
-            DynamicValueType.CODING,
-            value = Coding(
-                // system = Uri("http://projectronin.io/fhir/CodeSystem/test/MedicationAdministrationStatus"),
-                code = Code("original-status")
-            )
-        )
+        value =
+            DynamicValue(
+                DynamicValueType.CODING,
+                value =
+                    Coding(
+                        // system = Uri("http://projectronin.io/fhir/CodeSystem/test/MedicationAdministrationStatus"),
+                        code = Code("original-status"),
+                    ),
+            ),
     )
 }

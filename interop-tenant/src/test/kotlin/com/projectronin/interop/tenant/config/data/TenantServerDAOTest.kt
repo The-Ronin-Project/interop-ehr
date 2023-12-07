@@ -20,17 +20,18 @@ import java.sql.SQLIntegrityConstraintViolationException
 
 @LiquibaseTest(changeLog = "ehr/db/changelog/ehr.db.changelog-master.yaml")
 class TenantServerDAOTest {
-
     @DBRiderConnection
     lateinit var connectionHolder: ConnectionHolder
-    private val mockTenantDO1 = mockk<TenantDO> {
-        every { id } returns 1002
-        every { mnemonic } returns "tenant"
-    }
-    private val mockTenantDO2 = mockk<TenantDO> {
-        every { id } returns 2001
-        every { mnemonic } returns "tnanet"
-    }
+    private val mockTenantDO1 =
+        mockk<TenantDO> {
+            every { id } returns 1002
+            every { mnemonic } returns "tenant"
+        }
+    private val mockTenantDO2 =
+        mockk<TenantDO> {
+            every { id } returns 2001
+            every { mnemonic } returns "tnanet"
+        }
 
     @Test
     @DataSet(value = ["/dbunit/tenant-server/StartingTenantServer.yaml"], cleanAfter = true)
@@ -90,14 +91,15 @@ class TenantServerDAOTest {
     @DataSet(value = ["/dbunit/tenant-server/StartingTenantServer.yaml"], cleanAfter = true)
     fun `update works`() {
         val dao = TenantServerDAO(KtormHelper.database())
-        val tenantServerDO = TenantServerDO {
-            id = 1
-            tenant = mockTenantDO1
-            messageType = MessageType.MDM
-            address = "changed!"
-            port = 8080
-            serverType = ProcessingID.NONPRODUCTIONTESTING
-        }
+        val tenantServerDO =
+            TenantServerDO {
+                id = 1
+                tenant = mockTenantDO1
+                messageType = MessageType.MDM
+                address = "changed!"
+                port = 8080
+                serverType = ProcessingID.NONPRODUCTIONTESTING
+            }
         val tenantServer = dao.updateTenantServer(tenantServerDO)
         assertNotNull(tenantServer)
         assertEquals(1, tenantServer?.id)
@@ -112,14 +114,15 @@ class TenantServerDAOTest {
     @DataSet(value = ["/dbunit/tenant-server/StartingTenantServer.yaml"], cleanAfter = true)
     fun `update won't update a non-existent server`() {
         val dao = TenantServerDAO(KtormHelper.database())
-        val tenantServerDO = TenantServerDO {
-            id = 2
-            tenant = mockTenantDO2
-            messageType = MessageType.MDM
-            address = "changed!"
-            port = 8080
-            serverType = ProcessingID.NONPRODUCTIONTESTING
-        }
+        val tenantServerDO =
+            TenantServerDO {
+                id = 2
+                tenant = mockTenantDO2
+                messageType = MessageType.MDM
+                address = "changed!"
+                port = 8080
+                serverType = ProcessingID.NONPRODUCTIONTESTING
+            }
         assertNull(dao.updateTenantServer(tenantServerDO))
         val tenantServer = dao.getTenantServer(1)
         assertNotNull(tenantServer)
@@ -130,13 +133,14 @@ class TenantServerDAOTest {
     @DataSet(value = ["/dbunit/tenant-server/StartingTenantServer.yaml"], cleanAfter = true)
     fun `insert works`() {
         val dao = TenantServerDAO(KtormHelper.database())
-        val tenantServerDO = TenantServerDO {
-            tenant = mockTenantDO2
-            messageType = MessageType.MDM
-            address = "www.zombo.com"
-            port = 8080
-            serverType = ProcessingID.NONPRODUCTIONTESTING
-        }
+        val tenantServerDO =
+            TenantServerDO {
+                tenant = mockTenantDO2
+                messageType = MessageType.MDM
+                address = "www.zombo.com"
+                port = 8080
+                serverType = ProcessingID.NONPRODUCTIONTESTING
+            }
         val tenantServer = dao.insertTenantServer(tenantServerDO)
         assertNotNull(tenantServer)
         assertNotNull(tenantServer.id)
@@ -147,13 +151,14 @@ class TenantServerDAOTest {
     @DataSet(value = ["/dbunit/tenant-server/StartingTenantServer.yaml"], cleanAfter = true)
     fun `insert works fails on duplicate`() {
         val dao = TenantServerDAO(KtormHelper.database())
-        val tenantServerDO = TenantServerDO {
-            tenant = mockTenantDO1
-            messageType = MessageType.MDM
-            address = "www.zombo.com"
-            port = 8080
-            serverType = ProcessingID.NONPRODUCTIONTESTING
-        }
+        val tenantServerDO =
+            TenantServerDO {
+                tenant = mockTenantDO1
+                messageType = MessageType.MDM
+                address = "www.zombo.com"
+                port = 8080
+                serverType = ProcessingID.NONPRODUCTIONTESTING
+            }
         assertThrows<SQLIntegrityConstraintViolationException> { dao.insertTenantServer(tenantServerDO) }
     }
 }

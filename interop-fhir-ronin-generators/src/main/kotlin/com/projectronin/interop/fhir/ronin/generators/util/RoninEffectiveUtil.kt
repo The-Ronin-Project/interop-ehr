@@ -5,7 +5,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.DateTime
 
 fun generateEffectiveDateTime(
     dateTime: DynamicValue<Any>?,
-    possibleDateTime: DynamicValue<DateTime>
+    possibleDateTime: DynamicValue<DateTime>,
 ): DynamicValue<Any> {
     return dateTime ?: possibleDateTime
 }

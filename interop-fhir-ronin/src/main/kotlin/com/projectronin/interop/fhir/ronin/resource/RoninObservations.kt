@@ -40,7 +40,7 @@ class RoninObservations(
     roninPulseOximetry: RoninPulseOximetry,
     roninLaboratoryResult: RoninLaboratoryResult,
     roninStagingRelated: RoninStagingRelated,
-    roninObservation: RoninObservation
+    roninObservation: RoninObservation,
 ) : MultipleProfileResource<Observation>(normalizer, localizer) {
     override val potentialProfiles: List<BaseProfile<Observation>> =
         listOf(
@@ -54,7 +54,7 @@ class RoninObservations(
             roninRespiratoryRate,
             roninHeartRate,
             roninPulseOximetry,
-            roninStagingRelated
+            roninStagingRelated,
         )
     override val defaultProfile: BaseProfile<Observation>? = roninObservation
 }

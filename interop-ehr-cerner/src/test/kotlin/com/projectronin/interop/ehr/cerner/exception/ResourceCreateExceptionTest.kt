@@ -8,9 +8,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class ResourceCreateExceptionTest {
-    val tenant: Tenant = mockk() {
-        every { mnemonic } returns "test"
-    }
+    val tenant: Tenant =
+        mockk {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `creates the proper message`() {

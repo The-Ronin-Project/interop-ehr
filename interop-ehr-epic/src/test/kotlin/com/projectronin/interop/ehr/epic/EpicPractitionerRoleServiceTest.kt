@@ -54,7 +54,7 @@ class EpicPractitionerRoleServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -64,22 +64,23 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to RepeatingParameter(
-                        listOf(
-                            "PractitionerRole:practitioner",
-                            "PractitionerRole:location"
-                        )
-                    ),
+                    "_include" to
+                        RepeatingParameter(
+                            listOf(
+                                "PractitionerRole:practitioner",
+                                "PractitionerRole:location",
+                            ),
+                        ),
                     "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
         val bundle =
             practitionerService.findPractitionersByLocation(
                 tenant,
-                listOf("e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03")
+                listOf("e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"),
             )
         val expected = FindPractitionersResponse(validPractitionerSearchBundle)
         assertEquals(expected.practitionerRoles, bundle.practitionerRoles)
@@ -95,7 +96,7 @@ class EpicPractitionerRoleServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -105,15 +106,16 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to RepeatingParameter(
-                        listOf(
-                            "PractitionerRole:practitioner",
-                            "PractitionerRole:location"
-                        )
-                    ),
+                    "_include" to
+                        RepeatingParameter(
+                            listOf(
+                                "PractitionerRole:practitioner",
+                                "PractitionerRole:location",
+                            ),
+                        ),
                     "location" to "abc",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
         coEvery {
@@ -121,22 +123,23 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to RepeatingParameter(
-                        listOf(
-                            "PractitionerRole:practitioner",
-                            "PractitionerRole:location"
-                        )
-                    ),
+                    "_include" to
+                        RepeatingParameter(
+                            listOf(
+                                "PractitionerRole:practitioner",
+                                "PractitionerRole:location",
+                            ),
+                        ),
                     "location" to "123",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
         val bundle =
             practitionerService.findPractitionersByLocation(
                 tenant,
-                listOf("abc", "123")
+                listOf("abc", "123"),
             )
 
         // 142 = 71 practitioner roles from each of 2 locations, remove duplicates = 71
@@ -156,7 +159,7 @@ class EpicPractitionerRoleServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -179,15 +182,16 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to RepeatingParameter(
-                        listOf(
-                            "PractitionerRole:practitioner",
-                            "PractitionerRole:location"
-                        )
-                    ),
+                    "_include" to
+                        RepeatingParameter(
+                            listOf(
+                                "PractitionerRole:practitioner",
+                                "PractitionerRole:location",
+                            ),
+                        ),
                     "location" to "loc1",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
         coEvery {
@@ -195,15 +199,16 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to RepeatingParameter(
-                        listOf(
-                            "PractitionerRole:practitioner",
-                            "PractitionerRole:location"
-                        )
-                    ),
+                    "_include" to
+                        RepeatingParameter(
+                            listOf(
+                                "PractitionerRole:practitioner",
+                                "PractitionerRole:location",
+                            ),
+                        ),
                     "location" to "loc2",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
         coEvery {
@@ -211,22 +216,23 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to RepeatingParameter(
-                        listOf(
-                            "PractitionerRole:practitioner",
-                            "PractitionerRole:location"
-                        )
-                    ),
+                    "_include" to
+                        RepeatingParameter(
+                            listOf(
+                                "PractitionerRole:practitioner",
+                                "PractitionerRole:location",
+                            ),
+                        ),
                     "location" to "loc3",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
         val bundle =
             batchingPractitionerService.findPractitionersByLocation(
                 tenant,
-                listOf("loc1", "loc2", "loc3")
+                listOf("loc1", "loc2", "loc3"),
             )
 
         // 142 = 71 practitioner roles from each of 3 batch calls, remove duplicates = 71
@@ -244,7 +250,7 @@ class EpicPractitionerRoleServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
 
         // Mock response with paging
@@ -255,32 +261,34 @@ class EpicPractitionerRoleServiceTest {
                 tenant,
                 "/api/FHIR/R4/PractitionerRole",
                 mapOf(
-                    "_include" to RepeatingParameter(
-                        listOf(
-                            "PractitionerRole:practitioner",
-                            "PractitionerRole:location"
-                        )
-                    ),
+                    "_include" to
+                        RepeatingParameter(
+                            listOf(
+                                "PractitionerRole:practitioner",
+                                "PractitionerRole:location",
+                            ),
+                        ),
                     "location" to "e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns EHRResponse(pagingHttpResponse, "67890")
 
         // Mock response without paging
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validPractitionerSearchBundle
+        @Suppress("ktlint:standard:max-line-length")
         coEvery {
             epicClient.get(
                 tenant,
-                "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole?_include=PractitionerRole:practitioner,PractitionerRole:location&location=e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
+                "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/PractitionerRole?_include=PractitionerRole:practitioner,PractitionerRole:location&location=e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6",
             )
         } returns ehrResponse
 
         val bundle =
             practitionerService.findPractitionersByLocation(
                 tenant,
-                listOf("e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03")
+                listOf("e4W4rmGe9QzuGm2Dy4NBqVc0KDe6yGld6HW95UuN-Qd03"),
             )
 
         // 2 Resources from the first query, 71 from the second, remove duplicates = 71

@@ -25,47 +25,55 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 
+@Suppress("ktlint:standard:max-line-length")
 class RoninBodyTemperatureGeneratorTest {
     private lateinit var roninBodyTemp: RoninBodyTemperature
     private lateinit var registry: NormalizationRegistryClient
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
-        registry = mockk<NormalizationRegistryClient> {
-            every {
-                getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_TEMPERATURE.value)
-            } returns possibleBodyTemperatureCodes
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
+        registry =
+            mockk<NormalizationRegistryClient> {
+                every {
+                    getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_TEMPERATURE.value)
+                } returns possibleBodyTemperatureCodes
+            }
         roninBodyTemp = RoninBodyTemperature(normalizer, localizer, registry)
     }
 
     @Test
     fun `example use for roninObservationBodyTemperature`() {
         // Create BodyTemperature Obs with attributes you need, provide the tenant
-        val roninObsBodyTemperature = rcdmObservationBodyTemperature("test") {
-            // if you want to test for a specific status
-            status of Code("status")
-            // test for a new or different code
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        code of Code("9848-3")
-                        display of "Body temperature special circumstances"
+        val roninObsBodyTemperature =
+            rcdmObservationBodyTemperature("test") {
+                // if you want to test for a specific status
+                status of Code("status")
+                // test for a new or different code
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    code of Code("9848-3")
+                                    display of "Body temperature special circumstances"
+                                },
+                            )
+                        text of "Body temperature special circumstances" // text is kept if provided otherwise only a code.coding is generated
                     }
-                )
-                text of "Body temperature special circumstances" // text is kept if provided otherwise only a code.coding is generated
             }
-        }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsBodyTemperatureJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodyTemperature)
@@ -90,7 +98,7 @@ class RoninBodyTemperatureGeneratorTest {
         assertNotNull(roninObsBodyTemperature.meta)
         assertEquals(
             roninObsBodyTemperature.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_BODY_TEMPERATURE.value
+            RoninProfile.OBSERVATION_BODY_TEMPERATURE.value,
         )
         assertNotNull(roninObsBodyTemperature.status)
         assertEquals(1, roninObsBodyTemperature.category.size)
@@ -116,7 +124,7 @@ class RoninBodyTemperatureGeneratorTest {
         assertNotNull(roninObsBodyTemp.meta)
         assertEquals(
             roninObsBodyTemp.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_BODY_TEMPERATURE.value
+            RoninProfile.OBSERVATION_BODY_TEMPERATURE.value,
         )
         assertNull(roninObsBodyTemp.implicitRules)
         assertNull(roninObsBodyTemp.language)
@@ -148,14 +156,16 @@ class RoninBodyTemperatureGeneratorTest {
 
     @Test
     fun `validation for roninObservationBodyTemperature with existing identifier`() {
-        val bodyTemp = rcdmObservationBodyTemperature("test") {
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-        }
+        val bodyTemp =
+            rcdmObservationBodyTemperature("test") {
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
+                    )
+            }
         val validation = roninBodyTemp.validate(bodyTemp, null)
         validation.alertIfErrors()
         assertNotNull(bodyTemp.meta)
@@ -168,35 +178,41 @@ class RoninBodyTemperatureGeneratorTest {
 
     @Test
     fun `validation passed for roninObservationBodyTemperature with code`() {
-        val bodyTemp = rcdmObservationBodyTemperature("test") {
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        version of "2.74"
-                        code of Code("8333-7")
-                        display of "Tympanic membrane temperature"
+        val bodyTemp =
+            rcdmObservationBodyTemperature("test") {
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    version of "2.74"
+                                    code of Code("8333-7")
+                                    display of "Tympanic membrane temperature"
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = roninBodyTemp.validate(bodyTemp, null)
         validation.alertIfErrors()
     }
 
     @Test
     fun `validation fails for roninObservationBodyTemperature with bad code`() {
-        val bodyTemp = rcdmObservationBodyTemperature("test") {
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        version of "1000000"
-                        code of Code("some code here")
+        val bodyTemp =
+            rcdmObservationBodyTemperature("test") {
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    version of "1000000"
+                                    code of Code("some code here")
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = roninBodyTemp.validate(bodyTemp, null)
         assertTrue(validation.hasErrors())
 

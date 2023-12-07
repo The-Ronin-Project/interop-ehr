@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Configuration
 @ComponentScan(
     *[
         "com.projectronin.interop.ehr.factory",
-        "com.projectronin.interop.ehr.auth"
-    ]
+        "com.projectronin.interop.ehr.auth",
+    ],
 )
 class EHRSpringConfig

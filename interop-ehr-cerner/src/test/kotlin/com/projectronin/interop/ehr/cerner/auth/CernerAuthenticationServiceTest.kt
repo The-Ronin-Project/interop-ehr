@@ -64,11 +64,12 @@ class CernerAuthenticationServiceTest {
     @BeforeEach
     fun setUp() {
         mockWebServer = MockWebServer()
-        tenant = createTestTenant(
-            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-            authEndpoint = "${mockWebServer.url("/protocols")}/oauth2/profiles/smart-v1/token",
-            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
-        )
+        tenant =
+            createTestTenant(
+                clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+                authEndpoint = "${mockWebServer.url("/protocols")}/oauth2/profiles/smart-v1/token",
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            )
     }
 
     @AfterEach
@@ -78,14 +79,15 @@ class CernerAuthenticationServiceTest {
 
     @Test
     fun `can read auth request from server`() {
-        val responseJson = """
+        val responseJson =
+            """
             |{
             |    "access_token": "accesstoken",
             |    "scope": "system/Read.read",
             |    "token_type": "Bearer",
             |    "expires_in": 570
             |}
-        """.trimMargin()
+            """.trimMargin()
         mockWebServer.enqueue(MockResponse().setBody(responseJson).setHeader("Content-Type", "application/json"))
 
         every { applicationContext.getBeansOfType<CernerFHIRService<*>>() } returns mapOf("CernerReadService" to ReadService())
@@ -97,7 +99,7 @@ class CernerAuthenticationServiceTest {
         assertEquals("Bearer", authResponse?.tokenType)
         assertEquals(
             "accesstoken",
-            authResponse?.accessToken
+            authResponse?.accessToken,
         )
     }
 
@@ -123,14 +125,15 @@ class CernerAuthenticationServiceTest {
 
     @Test
     fun `sends read scope`() {
-        val responseJson = """
+        val responseJson =
+            """
             |{
             |    "access_token": "accesstoken",
             |    "scope": "system/Read.read",
             |    "token_type": "Bearer",
             |    "expires_in": 570
             |}}
-        """.trimMargin()
+            """.trimMargin()
         mockWebServer.enqueue(MockResponse().setBody(responseJson).setHeader("Content-Type", "application/json"))
 
         every { applicationContext.getBeansOfType<CernerFHIRService<*>>() } returns mapOf("CernerReadService" to ReadService())
@@ -144,14 +147,15 @@ class CernerAuthenticationServiceTest {
 
     @Test
     fun `sends write scope`() {
-        val responseJson = """
+        val responseJson =
+            """
             |{
             |    "access_token": "accesstoken",
             |    "scope": "system/Write.write",
             |    "token_type": "Bearer",
             |    "expires_in": 570
             |}}
-        """.trimMargin()
+            """.trimMargin()
         mockWebServer.enqueue(MockResponse().setBody(responseJson).setHeader("Content-Type", "application/json"))
 
         every { applicationContext.getBeansOfType<CernerFHIRService<*>>() } returns mapOf("CernerWriteService" to WriteService())
@@ -165,20 +169,22 @@ class CernerAuthenticationServiceTest {
 
     @Test
     fun `sends combination of scopes`() {
-        val responseJson = """
+        val responseJson =
+            """
             |{
             |    "access_token": "accesstoken",
             |    "scope": "system/Write.write system/ReadAndWrite.read system/ReadAndWrite.write",
             |    "token_type": "Bearer",
             |    "expires_in": 570
             |}}
-        """.trimMargin()
+            """.trimMargin()
         mockWebServer.enqueue(MockResponse().setBody(responseJson).setHeader("Content-Type", "application/json"))
 
-        every { applicationContext.getBeansOfType<CernerFHIRService<*>>() } returns mapOf(
-            "CernerWriteService" to WriteService(),
-            "CernerReadAndWriteService" to ReadAndWriteService()
-        )
+        every { applicationContext.getBeansOfType<CernerFHIRService<*>>() } returns
+            mapOf(
+                "CernerWriteService" to WriteService(),
+                "CernerReadAndWriteService" to ReadAndWriteService(),
+            )
 
         runBlocking { authenticationService.getAuthentication(tenant) }
         val recordedRequest = mockWebServer.takeRequest()
@@ -191,14 +197,15 @@ class CernerAuthenticationServiceTest {
 
     @Test
     fun `sends retry header when true`() {
-        val responseJson = """
+        val responseJson =
+            """
             |{
             |    "access_token": "accesstoken",
             |    "scope": "system/Read.read",
             |    "token_type": "Bearer",
             |    "expires_in": 570
             |}}
-        """.trimMargin()
+            """.trimMargin()
         mockWebServer.enqueue(MockResponse().setBody(responseJson).setHeader("Content-Type", "application/json"))
 
         every { applicationContext.getBeansOfType<CernerFHIRService<*>>() } returns mapOf("CernerReadService" to ReadService())
@@ -211,14 +218,15 @@ class CernerAuthenticationServiceTest {
 
     @Test
     fun `sends retry header when false`() {
-        val responseJson = """
+        val responseJson =
+            """
             |{
             |    "access_token": "accesstoken",
             |    "scope": "system/Read.read",
             |    "token_type": "Bearer",
             |    "expires_in": 570
             |}}
-        """.trimMargin()
+            """.trimMargin()
         mockWebServer.enqueue(MockResponse().setBody(responseJson).setHeader("Content-Type", "application/json"))
 
         every { applicationContext.getBeansOfType<CernerFHIRService<*>>() } returns mapOf("CernerReadService" to ReadService())
@@ -231,14 +239,15 @@ class CernerAuthenticationServiceTest {
 
     @Test
     fun `sends retry header when not provided`() {
-        val responseJson = """
+        val responseJson =
+            """
             |{
             |    "access_token": "accesstoken",
             |    "scope": "system/Read.read",
             |    "token_type": "Bearer",
             |    "expires_in": 570
             |}}
-        """.trimMargin()
+            """.trimMargin()
         mockWebServer.enqueue(MockResponse().setBody(responseJson).setHeader("Content-Type", "application/json"))
 
         every { applicationContext.getBeansOfType<CernerFHIRService<*>>() } returns mapOf("CernerReadService" to ReadService())
@@ -252,10 +261,11 @@ class CernerAuthenticationServiceTest {
     private fun getScopeFromRequest(request: RecordedRequest): String? {
         // There's probably a built in function to do this, but I couldn't find it
         val requestBody = URLDecoder.decode(request.body.readUtf8(), "UTF-8")
-        val parameters = requestBody.split("&").associate {
-            val paramParts = it.split("=")
-            Pair(paramParts[0], paramParts[1])
-        }
+        val parameters =
+            requestBody.split("&").associate {
+                val paramParts = it.split("=")
+                Pair(paramParts[0], paramParts[1])
+            }
         return parameters["scope"]
     }
 }

@@ -103,30 +103,33 @@ class ProviderPoolDAOTest {
     @DataSet(value = ["/dbunit/provider-pool/ProviderPools.yaml"], cleanAfter = true)
     @ExpectedDataSet(
         value = ["/dbunit/provider-pool/ExpectedProviderPoolsAfterInsert.yaml"],
-        ignoreCols = ["io_tenant_provider_pool_id"]
+        ignoreCols = ["io_tenant_provider_pool_id"],
     )
     fun `insert provider`() {
         val providerdao = ProviderPoolDAO(KtormHelper.database())
-        val ehrDO = mockk<EhrDO> {
-            every { id } returns 101
-            every { vendorType } returns VendorType.EPIC
-            every { clientId } returns "12345"
-            every { publicKey } returns "public"
-            every { privateKey } returns "private"
-        }
-        val tenantDO = mockk<TenantDO> {
-            every { id } returns 1001
-            every { mnemonic } returns "mdaoc"
-            every { ehr } returns ehrDO
-            every { availableBatchStart } returns null
-            every { availableBatchEnd } returns null
-        }
-        val insertedProviderPoolDO = ProviderPoolDO {
-            id = 0
-            tenant = tenantDO
-            providerId = "provider5"
-            poolId = "pool4"
-        }
+        val ehrDO =
+            mockk<EhrDO> {
+                every { id } returns 101
+                every { vendorType } returns VendorType.EPIC
+                every { clientId } returns "12345"
+                every { publicKey } returns "public"
+                every { privateKey } returns "private"
+            }
+        val tenantDO =
+            mockk<TenantDO> {
+                every { id } returns 1001
+                every { mnemonic } returns "mdaoc"
+                every { ehr } returns ehrDO
+                every { availableBatchStart } returns null
+                every { availableBatchEnd } returns null
+            }
+        val insertedProviderPoolDO =
+            ProviderPoolDO {
+                id = 0
+                tenant = tenantDO
+                providerId = "provider5"
+                poolId = "pool4"
+            }
         val actualProviderPoolDO = providerdao.insert(insertedProviderPoolDO)
 
         assertNotEquals(insertedProviderPoolDO.id, actualProviderPoolDO.id)
@@ -140,26 +143,29 @@ class ProviderPoolDAOTest {
     @ExpectedDataSet(value = ["/dbunit/provider-pool/ProviderPools.yaml"])
     fun `insert provider fails`() {
         val dao = ProviderPoolDAO(KtormHelper.database())
-        val ehrDO = mockk<EhrDO> {
-            every { id } returns 1
-            every { vendorType } returns VendorType.EPIC
-            every { clientId } returns "client"
-            every { publicKey } returns "public"
-            every { privateKey } returns "private"
-        }
-        val tenantDO = mockk<TenantDO> {
-            every { id } returns 1
-            every { mnemonic } returns "blah"
-            every { ehr } returns ehrDO
-            every { availableBatchStart } returns null
-            every { availableBatchEnd } returns null
-        }
-        val insertedProviderPoolDO = ProviderPoolDO {
-            id = 0
-            tenant = tenantDO
-            providerId = "provider1"
-            poolId = "poolId"
-        }
+        val ehrDO =
+            mockk<EhrDO> {
+                every { id } returns 1
+                every { vendorType } returns VendorType.EPIC
+                every { clientId } returns "client"
+                every { publicKey } returns "public"
+                every { privateKey } returns "private"
+            }
+        val tenantDO =
+            mockk<TenantDO> {
+                every { id } returns 1
+                every { mnemonic } returns "blah"
+                every { ehr } returns ehrDO
+                every { availableBatchStart } returns null
+                every { availableBatchEnd } returns null
+            }
+        val insertedProviderPoolDO =
+            ProviderPoolDO {
+                id = 0
+                tenant = tenantDO
+                providerId = "provider1"
+                poolId = "poolId"
+            }
 
         assertThrows<SQLIntegrityConstraintViolationException> {
             dao.insert(insertedProviderPoolDO)
@@ -171,27 +177,30 @@ class ProviderPoolDAOTest {
     @ExpectedDataSet("/dbunit/provider-pool/ExpectedProviderPoolsAfterUpdate.yaml")
     fun `update provider`() {
         val dao = ProviderPoolDAO(KtormHelper.database())
-        val ehrDO = mockk<EhrDO> {
-            every { id } returns 101
-            every { vendorType } returns VendorType.EPIC
-            every { clientId } returns "client"
-            every { publicKey } returns "public"
-            every { privateKey } returns "private"
-        }
-        val tenantDO = mockk<TenantDO> {
-            every { id } returns 1001
-            every { mnemonic } returns "blah"
-            every { timezone } returns ZoneId.of("America/New_York")
-            every { ehr } returns ehrDO
-            every { availableBatchStart } returns null
-            every { availableBatchEnd } returns null
-        }
-        val updatedProviderPoolDO = ProviderPoolDO {
-            id = 10001
-            tenant = tenantDO
-            providerId = "provider20"
-            poolId = "pool1"
-        }
+        val ehrDO =
+            mockk<EhrDO> {
+                every { id } returns 101
+                every { vendorType } returns VendorType.EPIC
+                every { clientId } returns "client"
+                every { publicKey } returns "public"
+                every { privateKey } returns "private"
+            }
+        val tenantDO =
+            mockk<TenantDO> {
+                every { id } returns 1001
+                every { mnemonic } returns "blah"
+                every { timezone } returns ZoneId.of("America/New_York")
+                every { ehr } returns ehrDO
+                every { availableBatchStart } returns null
+                every { availableBatchEnd } returns null
+            }
+        val updatedProviderPoolDO =
+            ProviderPoolDO {
+                id = 10001
+                tenant = tenantDO
+                providerId = "provider20"
+                poolId = "pool1"
+            }
         val updated = dao.update(updatedProviderPoolDO)!!
         assertEquals(10001, updated.id)
         assertEquals(1001, updated.tenant.id)
@@ -204,26 +213,29 @@ class ProviderPoolDAOTest {
     @ExpectedDataSet(value = ["/dbunit/provider-pool/ProviderPools.yaml"])
     fun `update provider fails`() {
         val dao = ProviderPoolDAO(KtormHelper.database())
-        val ehrDO = mockk<EhrDO> {
-            every { id } returns 101
-            every { vendorType } returns VendorType.EPIC
-            every { clientId } returns "client"
-            every { publicKey } returns "public"
-            every { privateKey } returns "private"
-        }
-        val tenantDO = mockk<TenantDO> {
-            every { id } returns 1001
-            every { mnemonic } returns "blah"
-            every { ehr } returns ehrDO
-            every { availableBatchStart } returns null
-            every { availableBatchEnd } returns null
-        }
-        val updatedProviderPoolDO = ProviderPoolDO {
-            id = 10001
-            tenant = tenantDO
-            providerId = "provider2"
-            poolId = "pool4"
-        }
+        val ehrDO =
+            mockk<EhrDO> {
+                every { id } returns 101
+                every { vendorType } returns VendorType.EPIC
+                every { clientId } returns "client"
+                every { publicKey } returns "public"
+                every { privateKey } returns "private"
+            }
+        val tenantDO =
+            mockk<TenantDO> {
+                every { id } returns 1001
+                every { mnemonic } returns "blah"
+                every { ehr } returns ehrDO
+                every { availableBatchStart } returns null
+                every { availableBatchEnd } returns null
+            }
+        val updatedProviderPoolDO =
+            ProviderPoolDO {
+                id = 10001
+                tenant = tenantDO
+                providerId = "provider2"
+                poolId = "pool4"
+            }
 
         assertThrows<SQLIntegrityConstraintViolationException> {
             dao.update(updatedProviderPoolDO)

@@ -24,20 +24,25 @@ internal class EpicEncounterServiceTest {
     fun getEncountersByFHIRId() {
         val tenant = mockk<Tenant>()
 
-        val encounter1 = mockk<BundleEntry> {
-            every { resource } returns mockk<Encounter>(relaxed = true) {
-                every { id!!.value } returns "12345"
+        val encounter1 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Encounter>(relaxed = true) {
+                        every { id!!.value } returns "12345"
+                    }
             }
-        }
-        val encounter2 = mockk<BundleEntry> {
-            every { resource } returns mockk<Encounter>(relaxed = true) {
-                every { id!!.value } returns "67890"
+        val encounter2 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Encounter>(relaxed = true) {
+                        every { id!!.value } returns "67890"
+                    }
             }
-        }
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(encounter1, encounter2)
-            every { link } returns emptyList()
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(encounter1, encounter2)
+                every { link } returns emptyList()
+            }
 
         coEvery {
             epicClient.get(
@@ -46,8 +51,8 @@ internal class EpicEncounterServiceTest {
                 mapOf(
                     "patient" to "12345",
                     "date" to RepeatingParameter(listOf("ge2015-01-01", "le2015-11-01")),
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
 
@@ -56,7 +61,7 @@ internal class EpicEncounterServiceTest {
                 tenant,
                 "12345",
                 LocalDate.of(2015, 1, 1),
-                LocalDate.of(2015, 11, 1)
+                LocalDate.of(2015, 11, 1),
             ) // test de-duplicate
 
         assertEquals(listOf(encounter1.resource, encounter2.resource), response)

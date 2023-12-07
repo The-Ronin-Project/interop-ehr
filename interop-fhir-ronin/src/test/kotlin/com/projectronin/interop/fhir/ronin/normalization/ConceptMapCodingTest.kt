@@ -18,28 +18,33 @@ import org.junit.jupiter.api.Test
 class ConceptMapCodingTest {
     @Test
     fun `serialize and deserialize JSON`() {
-        val conceptMapCoding = ConceptMapCoding(
-            coding = Coding(
-                system = CodeSystem.SNOMED_CT.uri,
-                version = "2023-03-01".asFHIR(),
-                code = Code("442327001"),
-                display = "Twin liveborn born in hospital (situation)".asFHIR()
-            ),
-            extension = Extension(
-                url = Uri("http://localhost/extension"),
-                value = DynamicValue(DynamicValueType.STRING, FHIRString("Value"))
-            ),
-            metadata = listOf(
-                ConceptMapMetadata(
-                    registryEntryType = "concept-map",
-                    conceptMapName = "test-concept-map",
-                    conceptMapUuid = "573b456efca5-03d51d53-1a31-49a9-af74",
-                    version = "1"
-                )
+        val conceptMapCoding =
+            ConceptMapCoding(
+                coding =
+                    Coding(
+                        system = CodeSystem.SNOMED_CT.uri,
+                        version = "2023-03-01".asFHIR(),
+                        code = Code("442327001"),
+                        display = "Twin liveborn born in hospital (situation)".asFHIR(),
+                    ),
+                extension =
+                    Extension(
+                        url = Uri("http://localhost/extension"),
+                        value = DynamicValue(DynamicValueType.STRING, FHIRString("Value")),
+                    ),
+                metadata =
+                    listOf(
+                        ConceptMapMetadata(
+                            registryEntryType = "concept-map",
+                            conceptMapName = "test-concept-map",
+                            conceptMapUuid = "573b456efca5-03d51d53-1a31-49a9-af74",
+                            version = "1",
+                        ),
+                    ),
             )
-        )
         val json = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(conceptMapCoding)
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "coding" : {
                 "system" : "http://snomed.info/sct",
@@ -58,7 +63,7 @@ class ConceptMapCodingTest {
                 "version" : "1"
               } ]
             }
-        """.trimIndent()
+            """.trimIndent()
         Assertions.assertEquals(expectedJson, json)
         val deserializedConceptMap = JacksonManager.objectMapper.readValue<ConceptMapCoding>(json)
         Assertions.assertEquals(deserializedConceptMap, conceptMapCoding)

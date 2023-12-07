@@ -7,5 +7,5 @@ import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
 data class ConceptMapCoding(
     val coding: Coding,
     val extension: Extension,
-    val metadata: List<ConceptMapMetadata>? = listOf()
+    val metadata: List<ConceptMapMetadata>? = listOf(),
 )

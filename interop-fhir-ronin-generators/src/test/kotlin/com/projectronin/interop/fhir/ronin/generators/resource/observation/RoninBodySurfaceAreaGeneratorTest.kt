@@ -28,45 +28,52 @@ import org.junit.jupiter.api.Test
 class RoninBodySurfaceAreaGeneratorTest {
     private lateinit var roninBodySurfaceArea: RoninBodySurfaceArea
     private lateinit var registry: NormalizationRegistryClient
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
-        registry = mockk<NormalizationRegistryClient> {
-            every {
-                getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value)
-            } returns possibleBodySurfaceAreaCodes
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
+        registry =
+            mockk<NormalizationRegistryClient> {
+                every {
+                    getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value)
+                } returns possibleBodySurfaceAreaCodes
+            }
         roninBodySurfaceArea = RoninBodySurfaceArea(normalizer, localizer, registry)
     }
 
     @Test
     fun `example use for roninObservationBodySurfaceArea`() {
         // Create BodySurfaceArea Obs with attributes you need, provide the tenant
-        val roninObsBodySurfaceArea = rcdmObservationBodySurfaceArea("test") {
-            // if you want to test for a specific status
-            status of Code("registered")
-            // test for a new or different code
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        version of "0.01"
-                        code of Code("123456")
-                        display of "New Body Surface code"
+        val roninObsBodySurfaceArea =
+            rcdmObservationBodySurfaceArea("test") {
+                // if you want to test for a specific status
+                status of Code("registered")
+                // test for a new or different code
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    version of "0.01"
+                                    code of Code("123456")
+                                    display of "New Body Surface code"
+                                },
+                            )
+                        text of "New Body Surface code" // text is kept if provided otherwise only a code.coding is generated
                     }
-                )
-                text of "New Body Surface code" // text is kept if provided otherwise only a code.coding is generated
             }
-        }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsBodySurfaceAreaJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsBodySurfaceArea)
@@ -91,7 +98,7 @@ class RoninBodySurfaceAreaGeneratorTest {
         assertNotNull(roninObsBodySurfaceArea.meta)
         assertEquals(
             roninObsBodySurfaceArea.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value
+            RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value,
         )
         assertNotNull(roninObsBodySurfaceArea.status)
         assertEquals(1, roninObsBodySurfaceArea.category.size)
@@ -117,7 +124,7 @@ class RoninBodySurfaceAreaGeneratorTest {
         assertNotNull(roninObsSurfaceArea.meta)
         assertEquals(
             roninObsSurfaceArea.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value
+            RoninProfile.OBSERVATION_BODY_SURFACE_AREA.value,
         )
         assertNull(roninObsSurfaceArea.implicitRules)
         assertNull(roninObsSurfaceArea.language)
@@ -149,14 +156,16 @@ class RoninBodySurfaceAreaGeneratorTest {
 
     @Test
     fun `validation for rcdmObservationBodySurfaceArea with existing identifier`() {
-        val bodySurfaceArea = rcdmObservationBodySurfaceArea("test") {
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-        }
+        val bodySurfaceArea =
+            rcdmObservationBodySurfaceArea("test") {
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
+                    )
+            }
         val validation = roninBodySurfaceArea.validate(bodySurfaceArea, null)
         validation.alertIfErrors()
         assertNotNull(bodySurfaceArea.meta)
@@ -169,17 +178,20 @@ class RoninBodySurfaceAreaGeneratorTest {
 
     @Test
     fun `validation fails for rcdmObservationBodySurfaceArea with bad code`() {
-        val bodySurfaceArea = rcdmObservationBodySurfaceArea("test") {
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "something here"
-                        version of "1000000"
-                        code of Code("some code here")
+        val bodySurfaceArea =
+            rcdmObservationBodySurfaceArea("test") {
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "something here"
+                                    version of "1000000"
+                                    code of Code("some code here")
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = roninBodySurfaceArea.validate(bodySurfaceArea, null)
         assertTrue(validation.hasErrors())
 

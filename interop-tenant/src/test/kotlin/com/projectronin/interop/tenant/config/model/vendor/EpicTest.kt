@@ -27,7 +27,7 @@ class EpicTest {
                 "hsiValue",
                 "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980",
                 "E8675309",
-                "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268"
+                "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
             )
 
         assertEquals(VendorType.EPIC, epic.type)

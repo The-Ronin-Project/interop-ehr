@@ -31,51 +31,59 @@ import org.junit.jupiter.api.Test
 class RoninAppointmentGeneratorTest {
     private lateinit var roninAppointment: RoninAppointment
     private lateinit var registry: NormalizationRegistryClient
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
     var participant = ListDataGenerator(0, ParticipantGenerator())
-    private val providedParticipant = listOf(
-        Participant(
-            status = possibleParticipantStatus.random(),
-            type = listOf(
-                CodeableConcept(
-                    coding = listOf(Coding(system = Uri("some-system"), code = Code("some-code")))
-                )
+    private val providedParticipant =
+        listOf(
+            Participant(
+                status = possibleParticipantStatus.random(),
+                type =
+                    listOf(
+                        CodeableConcept(
+                            coding = listOf(Coding(system = Uri("some-system"), code = Code("some-code"))),
+                        ),
+                    ),
+                actor = rcdmReference("Patient", "test-1234"),
             ),
-            actor = rcdmReference("Patient", "test-1234")
         )
-    )
 
     @BeforeEach
     fun setup() {
         registry = mockk()
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
         roninAppointment = RoninAppointment(registry, normalizer, localizer)
     }
 
     @Test
     fun `example use for roninAppointment`() {
         // create appointment resource with attributes you need, provide the tenant
-        val roninAppointment = rcdmAppointment("test") {
-            // to test an attribute like status - provide the value
-            status of Code("testing-this-status")
-            serviceCategory of listOf(
-                CodeableConcept(
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://example.org/service-category"),
-                            code = Code("gp")
-                        )
+        val roninAppointment =
+            rcdmAppointment("test") {
+                // to test an attribute like status - provide the value
+                status of Code("testing-this-status")
+                serviceCategory of
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://example.org/service-category"),
+                                        code = Code("gp"),
+                                    ),
+                                ),
+                        ),
                     )
-                )
-            )
-        }
+            }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes will be generated
         val roninAppointmentJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninAppointment)
 
@@ -99,7 +107,7 @@ class RoninAppointmentGeneratorTest {
         assertNotNull(roninAppointment.meta)
         assertEquals(
             roninAppointment.meta!!.profile[0].value,
-            RoninProfile.APPOINTMENT.value
+            RoninProfile.APPOINTMENT.value,
         )
         assertEquals(3, roninAppointment.identifier.size)
         assertNotNull(roninAppointment.status)
@@ -121,9 +129,10 @@ class RoninAppointmentGeneratorTest {
 
     @Test
     fun `validates with identifier added`() {
-        val appointment = rcdmAppointment("test") {
-            identifier of listOf(Identifier(id = "ID-Id".asFHIR()))
-        }
+        val appointment =
+            rcdmAppointment("test") {
+                identifier of listOf(Identifier(id = "ID-Id".asFHIR()))
+            }
         val validation = roninAppointment.validate(appointment, null).hasErrors()
         assertEquals(validation, false)
         assertEquals(4, appointment.identifier.size)
@@ -133,9 +142,10 @@ class RoninAppointmentGeneratorTest {
 
     @Test
     fun `generates rcdm appointmant with given status but fails validation`() {
-        val appointment = rcdmAppointment("test") {
-            status of Code("this is a bad status")
-        }
+        val appointment =
+            rcdmAppointment("test") {
+                status of Code("this is a bad status")
+            }
         assertEquals(appointment.status, Code("this is a bad status"))
 
         // validate appointment should fail
@@ -148,9 +158,10 @@ class RoninAppointmentGeneratorTest {
 
     @Test
     fun `generates rcdm appointment and validates with appointment status extension`() {
-        val appointment = rcdmAppointment("test") {
-            status of Code("booked")
-        }
+        val appointment =
+            rcdmAppointment("test") {
+                status of Code("booked")
+            }
         val validation = roninAppointment.validate(appointment, null)
         assertEquals(validation.hasErrors(), false)
         assertNotNull(appointment.meta)
@@ -165,9 +176,10 @@ class RoninAppointmentGeneratorTest {
 
     @Test
     fun `generates rcdm appointment with cancelationReason if status requires`() {
-        val appointment = rcdmAppointment("test") {
-            status of Code("noshow")
-        }
+        val appointment =
+            rcdmAppointment("test") {
+                status of Code("noshow")
+            }
         val validation = roninAppointment.validate(appointment, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals(appointment.status?.value, "noshow")
@@ -176,18 +188,21 @@ class RoninAppointmentGeneratorTest {
 
     @Test
     fun `generates rcdm appointment with status requiring cancelationReason and keeps provided cancelationReason`() {
-        val appointment = rcdmAppointment("test") {
-            status of Code("cancelled")
-            cancelationReason of CodeableConcept(
-                coding = listOf(
-                    Coding(
-                        system = Uri("http://terminology.hl7.org/CodeSystem/appointment-cancellation-reason"),
-                        code = Code("some-code-here"),
-                        display = "some-display-here".asFHIR()
+        val appointment =
+            rcdmAppointment("test") {
+                status of Code("cancelled")
+                cancelationReason of
+                    CodeableConcept(
+                        coding =
+                            listOf(
+                                Coding(
+                                    system = Uri("http://terminology.hl7.org/CodeSystem/appointment-cancellation-reason"),
+                                    code = Code("some-code-here"),
+                                    display = "some-display-here".asFHIR(),
+                                ),
+                            ),
                     )
-                )
-            )
-        }
+            }
         val validation = roninAppointment.validate(appointment, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals(appointment.status?.value, "cancelled")
@@ -198,15 +213,16 @@ class RoninAppointmentGeneratorTest {
 
     @Test
     fun `rcdmAppointment - valid participant actor input - validate succeeds`() {
-        val appointment = rcdmAppointment("test") {
-            participant of
-                rcdmParticipant(emptyList(), "test", "Patient", "456")
-        }
+        val appointment =
+            rcdmAppointment("test") {
+                participant of
+                    rcdmParticipant(emptyList(), "test", "Patient", "456")
+            }
         val validation = roninAppointment.validate(appointment, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals(
             "Patient/test-456",
-            appointment.participant.first().actor?.reference?.value
+            appointment.participant.first().actor?.reference?.value,
         )
     }
 
@@ -221,10 +237,11 @@ class RoninAppointmentGeneratorTest {
     @Test
     fun `rcdmPatient rcdmAppointment - valid participant actor input - adds base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val appointment = rcdmPatient.rcdmAppointment {
-            participant of
-                rcdmParticipant(emptyList(), "test", "Practitioner", "456")
-        }
+        val appointment =
+            rcdmPatient.rcdmAppointment {
+                participant of
+                    rcdmParticipant(emptyList(), "test", "Practitioner", "456")
+            }
         val validation = roninAppointment.validate(appointment, null)
         assertEquals(validation.hasErrors(), false)
         assertNotNull(appointment.participant.firstOrNull { it.actor?.reference?.value == "Practitioner/test-456" })
@@ -234,9 +251,10 @@ class RoninAppointmentGeneratorTest {
     @Test
     fun `rcdmPatient rcdmCarePlan - fhir id input for both - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") { id of "99" }
-        val appointment = rcdmPatient.rcdmAppointment {
-            id of "88"
-        }
+        val appointment =
+            rcdmPatient.rcdmAppointment {
+                id of "88"
+            }
         val validation = roninAppointment.validate(appointment, null)
         assertEquals(validation.hasErrors(), false)
         assertEquals(3, appointment.identifier.size)

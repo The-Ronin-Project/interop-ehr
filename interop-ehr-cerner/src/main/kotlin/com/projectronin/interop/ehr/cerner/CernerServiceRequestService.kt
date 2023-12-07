@@ -9,13 +9,16 @@ import org.springframework.stereotype.Component
 
 @Component
 class CernerServiceRequestService(
-    cernerClient: CernerClient
+    cernerClient: CernerClient,
 ) : ServiceRequestService, CernerFHIRService<ServiceRequest>(cernerClient) {
     override val fhirURLSearchPart = "/ServiceRequest"
     override val fhirResourceType = ServiceRequest::class.java
 
     @Trace
-    override fun getServiceRequestsForPatient(tenant: Tenant, patientFhirId: String): List<ServiceRequest> {
+    override fun getServiceRequestsForPatient(
+        tenant: Tenant,
+        patientFhirId: String,
+    ): List<ServiceRequest> {
         val parameters = mapOf("patient" to patientFhirId)
         return getResourceListFromSearch(tenant, parameters)
     }

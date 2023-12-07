@@ -30,20 +30,21 @@ import java.util.Base64
 @Component
 class EpicNoteService(
     private val mdmService: MDMService,
-    private val queueService: QueueService
+    private val queueService: QueueService,
 ) : NoteService {
     companion object {
-        private val instantFormatter = DateTimeFormatterBuilder()
-            .appendPattern("yyyy-MM-dd")
-            .appendLiteral("T")
-            .appendPattern("HH:mm:ss.SSS")
-            .optionalStart()
-            .appendLiteral("Z")
-            .optionalEnd()
-            .optionalStart()
-            .appendOffset("+HH:mm", "+00:00")
-            .optionalEnd()
-            .toFormatter()
+        private val instantFormatter =
+            DateTimeFormatterBuilder()
+                .appendPattern("yyyy-MM-dd")
+                .appendLiteral("T")
+                .appendPattern("HH:mm:ss.SSS")
+                .optionalStart()
+                .appendLiteral("Z")
+                .optionalEnd()
+                .optionalStart()
+                .appendOffset("+HH:mm", "+00:00")
+                .optionalEnd()
+                .toFormatter()
 
         fun fromLocalDate(localDateTime: LocalDateTime): Instant {
             val formattedString = instantFormatter.format(localDateTime)
@@ -53,7 +54,7 @@ class EpicNoteService(
 
     override fun sendPatientNote(
         tenant: Tenant,
-        noteInput: NoteInput
+        noteInput: NoteInput,
     ): String {
         return sendNoteInternal(tenant, noteInput, null)
     }
@@ -61,7 +62,7 @@ class EpicNoteService(
     override fun sendPatientNoteAddendum(
         tenant: Tenant,
         noteInput: NoteInput,
-        parentDocumentId: String
+        parentDocumentId: String,
     ): String {
         return sendNoteInternal(tenant, noteInput, parentDocumentId)
     }
@@ -69,38 +70,44 @@ class EpicNoteService(
     private fun sendNoteInternal(
         tenant: Tenant,
         noteInput: NoteInput,
-        parentDocumentId: String?
+        parentDocumentId: String?,
     ): String {
-        val documentStatus = if (noteInput.noteSender == NoteSender.PATIENT && noteInput.isAlert) {
-            Code(CompositionStatus.PRELIMINARY.code)
-        } else {
-            Code(CompositionStatus.FINAL.code)
-        }
-        val parentDocumentReference = parentDocumentId?.let {
-            listOf(
-                DocumentReferenceRelatesTo(
-                    code = Code(DocumentRelationshipType.APPENDS.code),
-                    target = Reference(reference = "DocumentReference/$it".asFHIR())
+        val documentStatus =
+            if (noteInput.noteSender == NoteSender.PATIENT && noteInput.isAlert) {
+                Code(CompositionStatus.PRELIMINARY.code)
+            } else {
+                Code(CompositionStatus.FINAL.code)
+            }
+        val parentDocumentReference =
+            parentDocumentId?.let {
+                listOf(
+                    DocumentReferenceRelatesTo(
+                        code = Code(DocumentRelationshipType.APPENDS.code),
+                        target = Reference(reference = "DocumentReference/$it".asFHIR()),
+                    ),
                 )
-            )
-        }
+            }
         val instant = fromLocalDate(noteInput.dateTime)
         val noteText = Base64.getEncoder().encodeToString(noteInput.noteText.toByteArray())
-        val documentReference = DocumentReference(
-            status = Code(DocumentReferenceStatus.CURRENT.code),
-            docStatus = documentStatus,
-            date = instant,
-            content = listOf(
-                DocumentReferenceContent(
-                    attachment = Attachment(
-                        data = Base64Binary(
-                            value = noteText
-                        )
-                    )
-                )
-            ),
-            relatesTo = parentDocumentReference ?: emptyList()
-        )
+        val documentReference =
+            DocumentReference(
+                status = Code(DocumentReferenceStatus.CURRENT.code),
+                docStatus = documentStatus,
+                date = instant,
+                content =
+                    listOf(
+                        DocumentReferenceContent(
+                            attachment =
+                                Attachment(
+                                    data =
+                                        Base64Binary(
+                                            value = noteText,
+                                        ),
+                                ),
+                        ),
+                    ),
+                relatesTo = parentDocumentReference ?: emptyList(),
+            )
         val mdm = mdmService.generateMDM(noteInput.patient, noteInput.practitioner, documentReference, tenant)
         val encodedMessage = DefaultHapiContext().pipeParser.encode(mdm)
         queueService.enqueueMessages(
@@ -110,9 +117,9 @@ class EpicNoteService(
                     tenant = tenant.mnemonic,
                     text = encodedMessage,
                     hl7Type = MessageType.MDM,
-                    hl7Event = parentDocumentId?.let { EventType.MDMT08 } ?: EventType.MDMT02
-                )
-            )
+                    hl7Event = parentDocumentId?.let { EventType.MDMT08 } ?: EventType.MDMT02,
+                ),
+            ),
         )
         return mdm.txa.uniqueDocumentNumber.universalID.value
     }

@@ -26,10 +26,11 @@ class EpicMedicationStatementService(epicClient: EpicClient) : MedicationStateme
         tenant: Tenant,
         patientFHIRId: String,
         startDate: LocalDate?,
-        endDate: LocalDate?
+        endDate: LocalDate?,
     ): List<MedicationStatement> {
-        val dateMap = startDate?.let { mapOf("date" to "ge$startDate") }
-            ?: endDate?.let { mapOf("date" to "le$endDate") } ?: emptyMap()
+        val dateMap =
+            startDate?.let { mapOf("date" to "ge$startDate") }
+                ?: endDate?.let { mapOf("date" to "le$endDate") } ?: emptyMap()
         val parameters = mapOf("patient" to patientFHIRId) + dateMap
         return getResourceListFromSearchSTU3(tenant, parameters)
     }

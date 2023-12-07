@@ -23,7 +23,7 @@ fun List<String>.toSearchTokens(): List<FHIRSearchToken> {
             }
         FHIRSearchToken(
             system = systemValue,
-            code = codeValue
+            code = codeValue,
         )
     }
 }

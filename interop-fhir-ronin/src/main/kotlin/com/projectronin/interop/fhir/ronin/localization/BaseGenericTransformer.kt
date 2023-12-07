@@ -18,12 +18,18 @@ abstract class BaseGenericTransformer {
     /**
      * Transforms a specific [element] for the [tenant]. If unable to transform, null be returned.
      */
-    protected abstract fun transformType(element: Any, tenant: Tenant): TransformResult
+    protected abstract fun transformType(
+        element: Any,
+        tenant: Tenant,
+    ): TransformResult
 
     /**
      * Transforms the [element] for [tenant] if transformation is needed or returns null if it's already transformed.
      */
-    protected fun <T : Any> transformOrNull(element: T, tenant: Tenant): T? {
+    protected fun <T : Any> transformOrNull(
+        element: T,
+        tenant: Tenant,
+    ): T? {
         val transformedValues = getTransformedValues(element, tenant)
         return if (transformedValues.isEmpty()) null else copy(element, transformedValues)
     }
@@ -31,21 +37,25 @@ abstract class BaseGenericTransformer {
     /**
      * Gets the map of transformed values for the [element] with respect to the [tenant]. Only values that were transformed will be returned in the response.
      */
-    protected fun <T : Any> getTransformedValues(element: T, tenant: Tenant): Map<String, Any> {
+    protected fun <T : Any> getTransformedValues(
+        element: T,
+        tenant: Tenant,
+    ): Map<String, Any> {
         return element.javaClass.kotlin.memberProperties.mapNotNull { property ->
             if (property.visibility != KVisibility.PRIVATE) {
                 val value = property.get(element)
                 val propertyName = property.name
 
                 value?.let {
-                    val transformedValue = if (propertyName in ignoredFieldNames) {
-                        null
-                    } else if (value is List<*>) {
-                        val collectionType = property.returnType.arguments.first().type!!.jvmErasure
-                        transformList(value, collectionType, tenant)
-                    } else {
-                        transformType(value, tenant).element
-                    }
+                    val transformedValue =
+                        if (propertyName in ignoredFieldNames) {
+                            null
+                        } else if (value is List<*>) {
+                            val collectionType = property.returnType.arguments.first().type!!.jvmErasure
+                            transformList(value, collectionType, tenant)
+                        } else {
+                            transformType(value, tenant).element
+                        }
                     transformedValue?.let { propertyName to transformedValue }
                 }
             } else {
@@ -60,11 +70,12 @@ abstract class BaseGenericTransformer {
     private fun transformList(
         collection: List<*>,
         collectionType: KClass<*>,
-        tenant: Tenant
+        tenant: Tenant,
     ): List<*>? {
-        val originalAndLocalizedItems = collection.filter { it != null && it::class == collectionType }.map {
-            it to transformType(it!!, tenant)
-        }.filter { !it.second.removeFromElement }
+        val originalAndLocalizedItems =
+            collection.filter { it != null && it::class == collectionType }.map {
+                it to transformType(it!!, tenant)
+            }.filter { !it.second.removeFromElement }
         return if (collection.isNotEmpty() && originalAndLocalizedItems.isEmpty()) {
             originalAndLocalizedItems
         } else if (originalAndLocalizedItems.all { it.second.element == null }) {
@@ -79,13 +90,17 @@ abstract class BaseGenericTransformer {
     /**
      * Copies the [element] with the [transformedValues] updated.
      */
-    protected fun <T : Any> copy(element: T, transformedValues: Map<String, Any>): T {
+    protected fun <T : Any> copy(
+        element: T,
+        transformedValues: Map<String, Any>,
+    ): T {
         if (transformedValues.isEmpty()) {
             return element
         }
 
-        val copyFunction = element::class.memberFunctions.firstOrNull { it.name == "copy" } as? KFunction<T>
-            ?: throw IllegalStateException()
+        val copyFunction =
+            element::class.memberFunctions.firstOrNull { it.name == "copy" } as? KFunction<T>
+                ?: throw IllegalStateException()
         val parameters = copyFunction.parameters.filter { it.name != null }.associateBy { it.name }
 
         val copyArguments =
@@ -96,5 +111,5 @@ abstract class BaseGenericTransformer {
 
 data class TransformResult(
     val element: Any?,
-    val removeFromElement: Boolean = false
+    val removeFromElement: Boolean = false,
 )

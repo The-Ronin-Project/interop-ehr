@@ -14,7 +14,10 @@ import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 
-fun rcdmMedicationStatement(tenant: String, block: MedicationStatementGenerator.() -> Unit): MedicationStatement {
+fun rcdmMedicationStatement(
+    tenant: String,
+    block: MedicationStatementGenerator.() -> Unit,
+): MedicationStatement {
     return medicationStatement {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.MEDICATION_STATEMENT, tenant) {}
@@ -24,12 +27,13 @@ fun rcdmMedicationStatement(tenant: String, block: MedicationStatementGenerator.
         }
         extension.plus(originalMedicationDatatype())
         status of generateCode(status.generate(), possibleMedicationStatementStatusCodes.random())
-        medication of generateDynamicValueReference(
-            medication.generate(),
-            medicationReferenceOptions,
-            tenant,
-            "Medication"
-        )
+        medication of
+            generateDynamicValueReference(
+                medication.generate(),
+                medicationReferenceOptions,
+                tenant,
+                "Medication",
+            )
         subject of generateReference(subject.generate(), subjectReferenceOptions, tenant, "Patient")
     }
 }
@@ -38,23 +42,25 @@ fun Patient.rcdmMedicationStatement(block: MedicationStatementGenerator.() -> Un
     val data = this.referenceData()
     return rcdmMedicationStatement(data.tenantId) {
         block.invoke(this)
-        subject of generateReference(
-            subject.generate(),
-            subjectReferenceOptions,
-            data.tenantId,
-            "Patient",
-            data.udpId
-        )
+        subject of
+            generateReference(
+                subject.generate(),
+                subjectReferenceOptions,
+                data.tenantId,
+                "Patient",
+                data.udpId,
+            )
     }
 }
 
-val possibleMedicationStatementStatusCodes = listOf(
-    Code("active"),
-    Code("completed"),
-    Code("entered-in-error"),
-    Code("intended"),
-    Code("stopped"),
-    Code("on-hold"),
-    Code("unknown"),
-    Code("not-taken")
-)
+val possibleMedicationStatementStatusCodes =
+    listOf(
+        Code("active"),
+        Code("completed"),
+        Code("entered-in-error"),
+        Code("intended"),
+        Code("stopped"),
+        Code("on-hold"),
+        Code("unknown"),
+        Code("not-taken"),
+    )

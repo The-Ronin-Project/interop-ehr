@@ -123,15 +123,16 @@ class TenantDAOTest {
         val tenantDAO = TenantDAO(database)
         val ehrDAO = EhrDAO(database)
 
-        val insertedTenantDO = TenantDO {
-            id = 0
-            mnemonic = "mnemonic"
-            name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
-            timezone = ZoneId.of("America/Chicago")
-            ehr = ehrDAO.read().first()
-            availableBatchStart = LocalTime.of(22, 0, 0)
-            availableBatchEnd = LocalTime.of(6, 0, 0)
-        }
+        val insertedTenantDO =
+            TenantDO {
+                id = 0
+                mnemonic = "mnemonic"
+                name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
+                timezone = ZoneId.of("America/Chicago")
+                ehr = ehrDAO.read().first()
+                availableBatchStart = LocalTime.of(22, 0, 0)
+                availableBatchEnd = LocalTime.of(6, 0, 0)
+            }
         val actualTenantDO = tenantDAO.insertTenant(insertedTenantDO)
 
         assertSame(insertedTenantDO, actualTenantDO)
@@ -143,22 +144,24 @@ class TenantDAOTest {
     fun `handles failed insert tenant`() {
         val tenantDAO = TenantDAO(KtormHelper.database())
 
-        val fakeEhrDO = EhrDO {
-            vendorType = VendorType.EPIC
-            clientId = "12345"
-            publicKey = "public"
-            privateKey = "private"
-        }
+        val fakeEhrDO =
+            EhrDO {
+                vendorType = VendorType.EPIC
+                clientId = "12345"
+                publicKey = "public"
+                privateKey = "private"
+            }
 
-        val insertedTenantDO = TenantDO {
-            id = 0
-            mnemonic = "mnemonic"
-            name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
-            timezone = ZoneId.of("America/Chicago")
-            ehr = fakeEhrDO
-            availableBatchStart = LocalTime.of(22, 0)
-            availableBatchEnd = LocalTime.of(6, 0, 0)
-        }
+        val insertedTenantDO =
+            TenantDO {
+                id = 0
+                mnemonic = "mnemonic"
+                name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
+                timezone = ZoneId.of("America/Chicago")
+                ehr = fakeEhrDO
+                availableBatchStart = LocalTime.of(22, 0)
+                availableBatchEnd = LocalTime.of(6, 0, 0)
+            }
 
         assertThrows<SQLIntegrityConstraintViolationException> {
             tenantDAO.insertTenant(insertedTenantDO)
@@ -173,15 +176,16 @@ class TenantDAOTest {
         val tenantDAO = TenantDAO(database)
         val ehrDAO = EhrDAO(database)
 
-        val updatedTenantDO = TenantDO {
-            id = 1001
-            mnemonic = "mnemonic"
-            name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
-            timezone = ZoneId.of("America/Denver")
-            ehr = ehrDAO.read().first()
-            availableBatchStart = LocalTime.of(23, 0)
-            availableBatchEnd = LocalTime.of(5, 0, 0)
-        }
+        val updatedTenantDO =
+            TenantDO {
+                id = 1001
+                mnemonic = "mnemonic"
+                name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
+                timezone = ZoneId.of("America/Denver")
+                ehr = ehrDAO.read().first()
+                availableBatchStart = LocalTime.of(23, 0)
+                availableBatchEnd = LocalTime.of(5, 0, 0)
+            }
         val rowCount = tenantDAO.updateTenant(updatedTenantDO)
 
         assertEquals(1, rowCount)
@@ -195,15 +199,16 @@ class TenantDAOTest {
         val tenantDAO = TenantDAO(database)
         val ehrDAO = EhrDAO(database)
 
-        val updatedTenantDO = TenantDO {
-            id = 54321
-            mnemonic = "mnemonic"
-            name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
-            timezone = ZoneId.of("America/Denver")
-            ehr = ehrDAO.read().first()
-            availableBatchStart = LocalTime.of(23, 0)
-            availableBatchEnd = LocalTime.of(5, 0, 0)
-        }
+        val updatedTenantDO =
+            TenantDO {
+                id = 54321
+                mnemonic = "mnemonic"
+                name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
+                timezone = ZoneId.of("America/Denver")
+                ehr = ehrDAO.read().first()
+                availableBatchStart = LocalTime.of(23, 0)
+                availableBatchEnd = LocalTime.of(5, 0, 0)
+            }
         val rowCount = tenantDAO.updateTenant(updatedTenantDO)
 
         assertEquals(0, rowCount)
@@ -216,16 +221,17 @@ class TenantDAOTest {
         val tenantDAO = TenantDAO(database)
         val ehrDAO = EhrDAO(KtormHelper.database())
 
-        val updatedTenantDO = TenantDO {
-            id = 54321
-            mnemonic = "mnemonic"
-            name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
-            timezone = ZoneId.of("America/Los_Angeles")
-            ehr = ehrDAO.read().first()
-            availableBatchStart = LocalTime.of(23, 0)
-            availableBatchEnd = LocalTime.of(5, 0, 0)
-            monitoredIndicator = true
-        }
+        val updatedTenantDO =
+            TenantDO {
+                id = 54321
+                mnemonic = "mnemonic"
+                name = "Memorial National Eastern Masonic Oncology Naturopathic Institute, Consolidated"
+                timezone = ZoneId.of("America/Los_Angeles")
+                ehr = ehrDAO.read().first()
+                availableBatchStart = LocalTime.of(23, 0)
+                availableBatchEnd = LocalTime.of(5, 0, 0)
+                monitoredIndicator = true
+            }
 
         every {
             database.update(TenantDOs) {
@@ -242,9 +248,10 @@ class TenantDAOTest {
             }
         }.throws(Exception("Error"))
 
-        val exception = assertThrows<Exception> {
-            tenantDAO.updateTenant(updatedTenantDO)
-        }
+        val exception =
+            assertThrows<Exception> {
+                tenantDAO.updateTenant(updatedTenantDO)
+            }
         assertEquals("Error", exception.message)
     }
 }

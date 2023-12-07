@@ -22,12 +22,13 @@ class CernerLocationServiceTest {
     private lateinit var ehrResponse: EHRResponse
     private lateinit var locationService: CernerLocationService
     private val locationBundle = readResource<Bundle>("/ExampleLocationBundle.json")
-    private val testTenant = createTestTenant(
-        clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
-        authEndpoint = "https://example.org",
-        secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
-        mrnSystem = "mrn"
-    )
+    private val testTenant =
+        createTestTenant(
+            clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
+            authEndpoint = "https://example.org",
+            secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
+            mrnSystem = "mrn",
+        )
 
     @BeforeEach
     fun setup() {
@@ -46,7 +47,7 @@ class CernerLocationServiceTest {
             cernerClient.get(
                 testTenant,
                 "/Location",
-                mapOf("_id" to listOf("123", "456"))
+                mapOf("_id" to listOf("123", "456")),
             )
         } returns ehrResponse
 
@@ -59,30 +60,38 @@ class CernerLocationServiceTest {
         val smallLocationService = CernerLocationService(cernerClient, 2)
         val tenant = mockk<Tenant>()
 
-        val location1 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "123"
+        val location1 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "123"
+                    }
             }
-        }
-        val location2 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "456"
+        val location2 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "456"
+                    }
             }
-        }
 
-        val location3 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "789"
+        val location3 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "789"
+                    }
             }
-        }
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(location1, location2)
-            every { link } returns emptyList()
-        }
-        val bundle2 = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(location3)
-            every { link } returns emptyList()
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(location1, location2)
+                every { link } returns emptyList()
+            }
+        val bundle2 =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(location3)
+                every { link } returns emptyList()
+            }
 
         coEvery {
             cernerClient.get(tenant, "/Location", mapOf("_id" to listOf("123", "456")))
@@ -97,7 +106,7 @@ class CernerLocationServiceTest {
 
         assertEquals(
             mapOf("123" to location1.resource, "456" to location2.resource, "789" to location3.resource),
-            response
+            response,
         )
     }
 
@@ -109,7 +118,7 @@ class CernerLocationServiceTest {
             cernerClient.get(
                 testTenant,
                 "/Location",
-                mapOf("_id" to listOf("123", "456"))
+                mapOf("_id" to listOf("123", "456")),
             )
         } returns ehrResponse
 
@@ -122,30 +131,38 @@ class CernerLocationServiceTest {
         val smallLocationService = CernerLocationService(cernerClient, 2)
         val tenant = mockk<Tenant>()
 
-        val location1 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "123"
+        val location1 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "123"
+                    }
             }
-        }
-        val location2 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "456"
+        val location2 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "456"
+                    }
             }
-        }
 
-        val location3 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "789"
+        val location3 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "789"
+                    }
             }
-        }
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(location1, location2)
-            every { link } returns emptyList()
-        }
-        val bundle2 = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(location3)
-            every { link } returns emptyList()
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(location1, location2)
+                every { link } returns emptyList()
+            }
+        val bundle2 =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(location3)
+                every { link } returns emptyList()
+            }
 
         coEvery {
             cernerClient.get(tenant, "/Location", mapOf("_id" to listOf("123", "456")))
@@ -160,7 +177,7 @@ class CernerLocationServiceTest {
 
         assertEquals(
             mapOf("123" to location1.resource, "456" to location2.resource, "789" to location3.resource),
-            response
+            response,
         )
     }
 }

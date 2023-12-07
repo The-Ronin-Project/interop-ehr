@@ -9,7 +9,7 @@ package com.projectronin.interop.tenant.config.model
 data class CernerAuthenticationConfig(
     override val authEndpoint: String,
     val accountId: String = "",
-    val secret: String = ""
+    val secret: String = "",
 ) : AuthenticationConfig {
     override fun toString(): String = this::class.simpleName!!
 }

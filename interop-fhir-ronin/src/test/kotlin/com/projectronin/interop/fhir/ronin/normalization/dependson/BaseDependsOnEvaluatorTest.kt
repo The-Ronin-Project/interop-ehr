@@ -15,10 +15,11 @@ class BaseDependsOnEvaluatorTest {
     @Test
     fun `throws exception if no property is set on dependsOn`() {
         val evaluator = CapturingDependsOnEvaluator()
-        val dependsOn = ConceptMapDependsOn(
-            property = null,
-            value = FHIRString("value")
-        )
+        val dependsOn =
+            ConceptMapDependsOn(
+                property = null,
+                value = FHIRString("value"),
+            )
         val exception = assertThrows<IllegalStateException> { evaluator.meetsDependsOn(mockk(), listOf(dependsOn)) }
         assertEquals("Null property found for DependsOn: $dependsOn", exception.message)
     }
@@ -26,10 +27,11 @@ class BaseDependsOnEvaluatorTest {
     @Test
     fun `throws exception if no value is set on dependsOn`() {
         val evaluator = CapturingDependsOnEvaluator()
-        val dependsOn = ConceptMapDependsOn(
-            property = Uri("observation.code"),
-            value = null
-        )
+        val dependsOn =
+            ConceptMapDependsOn(
+                property = Uri("observation.code"),
+                value = null,
+            )
         val exception = assertThrows<IllegalStateException> { evaluator.meetsDependsOn(mockk(), listOf(dependsOn)) }
         assertEquals("Null value found for DependsOn: $dependsOn", exception.message)
     }
@@ -37,10 +39,11 @@ class BaseDependsOnEvaluatorTest {
     @Test
     fun `treats properties as case-sensitive`() {
         val evaluator = CapturingDependsOnEvaluator()
-        val dependsOn = ConceptMapDependsOn(
-            property = Uri("Observation.cOdE"),
-            value = FHIRString("value")
-        )
+        val dependsOn =
+            ConceptMapDependsOn(
+                property = Uri("Observation.cOdE"),
+                value = FHIRString("value"),
+            )
         val met = evaluator.meetsDependsOn(mockk(), listOf(dependsOn))
         assertTrue(met)
 
@@ -50,14 +53,16 @@ class BaseDependsOnEvaluatorTest {
     @Test
     fun `returns true when all dependsOn are met`() {
         val evaluator = CapturingDependsOnEvaluator()
-        val dependsOn1 = ConceptMapDependsOn(
-            property = Uri("Observation.cOdE"),
-            value = FHIRString("value")
-        )
-        val dependsOn2 = ConceptMapDependsOn(
-            property = Uri("observation.code"),
-            value = FHIRString("true")
-        )
+        val dependsOn1 =
+            ConceptMapDependsOn(
+                property = Uri("Observation.cOdE"),
+                value = FHIRString("value"),
+            )
+        val dependsOn2 =
+            ConceptMapDependsOn(
+                property = Uri("observation.code"),
+                value = FHIRString("true"),
+            )
         val met = evaluator.meetsDependsOn(mockk(), listOf(dependsOn1, dependsOn2))
         assertTrue(met)
 
@@ -67,14 +72,16 @@ class BaseDependsOnEvaluatorTest {
     @Test
     fun `returns false when single dependsOn is not met`() {
         val evaluator = CapturingDependsOnEvaluator()
-        val dependsOn1 = ConceptMapDependsOn(
-            property = Uri("Observation.cOdE"),
-            value = FHIRString("value")
-        )
-        val dependsOn2 = ConceptMapDependsOn(
-            property = Uri("observation.code"),
-            value = FHIRString("false")
-        )
+        val dependsOn1 =
+            ConceptMapDependsOn(
+                property = Uri("Observation.cOdE"),
+                value = FHIRString("value"),
+            )
+        val dependsOn2 =
+            ConceptMapDependsOn(
+                property = Uri("observation.code"),
+                value = FHIRString("false"),
+            )
         val met = evaluator.meetsDependsOn(mockk(), listOf(dependsOn1, dependsOn2))
         assertFalse(met)
 
@@ -87,7 +94,7 @@ class BaseDependsOnEvaluatorTest {
         override fun meetsDependsOn(
             resource: Observation,
             normalizedProperty: String,
-            dependsOnValue: String
+            dependsOnValue: String,
         ): Boolean {
             propertyToValue.computeIfAbsent(normalizedProperty) { mutableListOf() }.add(dependsOnValue)
             return dependsOnValue != "false"

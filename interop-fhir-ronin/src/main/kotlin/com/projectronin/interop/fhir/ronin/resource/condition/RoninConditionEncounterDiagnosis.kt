@@ -18,19 +18,18 @@ class RoninConditionEncounterDiagnosis(
     localizer: Localizer,
     registryClient: NormalizationRegistryClient,
     @Value("\${ronin.fhir.conditions.tenantsNotConditionMapped:mdaoc,1xrekpx5}")
-    tenantsNotConditionMapped: String
+    tenantsNotConditionMapped: String,
 ) :
     BaseRoninCondition(
-        R4ConditionValidator,
-        RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value,
-        normalizer,
-        localizer,
-        registryClient,
-        tenantsNotConditionMapped
-    ) {
+            R4ConditionValidator,
+            RoninProfile.CONDITION_ENCOUNTER_DIAGNOSIS.value,
+            normalizer,
+            localizer,
+            registryClient,
+            tenantsNotConditionMapped,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 3
 
-    override fun qualifyingCategories() =
-        listOf(Coding(system = CodeSystem.CONDITION_CATEGORY.uri, code = Code("encounter-diagnosis")))
+    override fun qualifyingCategories() = listOf(Coding(system = CodeSystem.CONDITION_CATEGORY.uri, code = Code("encounter-diagnosis")))
 }

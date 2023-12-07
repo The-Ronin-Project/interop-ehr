@@ -24,19 +24,23 @@ import java.time.LocalDateTime
 class RoninPractitionerRole(
     normalizer: Normalizer,
     localizer: Localizer,
-    private val roninContactPoint: RoninContactPoint
+    private val roninContactPoint: RoninContactPoint,
 ) : USCoreBasedProfile<PractitionerRole>(
-    R4PractitionerRoleValidator,
-    RoninProfile.PRACTITIONER_ROLE.value,
-    normalizer,
-    localizer
-) {
+        R4PractitionerRoleValidator,
+        RoninProfile.PRACTITIONER_ROLE.value,
+        normalizer,
+        localizer,
+    ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
 
     private val requiredPractitionerError = RequiredFieldError(PractitionerRole::practitioner)
 
-    override fun validateRonin(element: PractitionerRole, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: PractitionerRole,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
@@ -50,7 +54,11 @@ class RoninPractitionerRole(
         }
     }
 
-    override fun validateUSCore(element: PractitionerRole, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: PractitionerRole,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         if (element.telecom.isNotEmpty()) {
             roninContactPoint.validateUSCore(element.telecom, parentContext, validation)
         }
@@ -60,7 +68,7 @@ class RoninPractitionerRole(
         normalized: PractitionerRole,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<PractitionerRole>?, Validation> {
         val validation = Validation()
 
@@ -71,21 +79,25 @@ class RoninPractitionerRole(
                 tenant,
                 parentContext,
                 validation,
-                forceCacheReloadTS
+                forceCacheReloadTS,
             ).let {
                 validation.merge(it.second)
                 it.first
             }
 
         if (telecoms.size != normalized.telecom.size) {
-            logger.info { "${normalized.telecom.size - telecoms.size} telecoms removed from PractitionerRole ${normalized.id?.value} due to failed transformations" }
+            @Suppress("ktlint:standard:max-line-length")
+            logger.info {
+                "${normalized.telecom.size - telecoms.size} telecoms removed from PractitionerRole ${normalized.id?.value} due to failed transformations"
+            }
         }
 
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant),
-            telecom = telecoms
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+                telecom = telecoms,
+            )
         return Pair(TransformResponse(transformed), validation)
     }
 }

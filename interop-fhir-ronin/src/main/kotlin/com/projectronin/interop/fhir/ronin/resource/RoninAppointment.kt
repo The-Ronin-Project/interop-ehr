@@ -34,26 +34,32 @@ import java.time.LocalDateTime
 class RoninAppointment(
     private val registryClient: NormalizationRegistryClient,
     normalizer: Normalizer,
-    localizer: Localizer
+    localizer: Localizer,
 ) :
     BaseRoninProfile<Appointment>(R4AppointmentValidator, RoninProfile.APPOINTMENT.value, normalizer, localizer) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 2
 
-    private val requiredAppointmentExtensionError = FHIRError(
-        code = "RONIN_APPT_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Appointment extension list may not be empty",
-        location = LocationContext(Appointment::status)
-    )
-    private val invalidAppointmentStatusExtensionError = FHIRError(
-        code = "RONIN_APPT_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Tenant source appointment status extension is missing or invalid",
-        location = LocationContext(Appointment::status)
-    )
+    private val requiredAppointmentExtensionError =
+        FHIRError(
+            code = "RONIN_APPT_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Appointment extension list may not be empty",
+            location = LocationContext(Appointment::status),
+        )
+    private val invalidAppointmentStatusExtensionError =
+        FHIRError(
+            code = "RONIN_APPT_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Tenant source appointment status extension is missing or invalid",
+            location = LocationContext(Appointment::status),
+        )
 
-    override fun validateRonin(element: Appointment, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: Appointment,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
@@ -72,7 +78,7 @@ class RoninAppointment(
                             it.value?.type == DynamicValueType.CODING
                     },
                     invalidAppointmentStatusExtensionError,
-                    parentContext
+                    parentContext,
                 )
             }
 
@@ -81,7 +87,7 @@ class RoninAppointment(
                     requireDataAuthorityExtensionIdentifier(
                         it.actor,
                         LocationContext(Participant::actor),
-                        validation
+                        validation,
                     )
                 }
             }
@@ -92,63 +98,66 @@ class RoninAppointment(
         normalized: Appointment,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<Appointment, Validation> {
         val validation = Validation()
 
         // Appointment.status is a single Code
-        val mappedStatusPair = normalized.status?.value?.let { statusValue ->
-            val statusCode = registryClient.getConceptMappingForEnum(
-                tenant,
-                "Appointment.status",
-                RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "Appointment.status", statusValue),
-                AppointmentStatus::class,
-                RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
-                normalized,
-                forceCacheReloadTS
-            )
-            // validate the mapping we got, use statusValue to report issues
-            validation.apply {
-                checkNotNull(
-                    statusCode,
-                    FailedConceptMapLookupError(
-                        LocationContext(Appointment::status),
-                        statusValue,
-                        RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "Appointment.status")
-                    ),
-                    parentContext
-                )
-                ifNotNull(statusCode) {
-                    statusCode.coding.let { coding ->
-                        val statusCodeValue = coding.code
-                        val statusTarget = statusCodeValue?.value
-                        val statusMapName = RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "Appointment.status")
-                        val statusContext = parentContext.append(LocationContext("Appointment", "status"))
-                        validation.apply {
-                            checkNotNull(
-                                getCodedEnumOrNull<AppointmentStatus>(statusTarget),
-                                ConceptMapInvalidValueSetError(
-                                    statusContext,
-                                    statusMapName,
-                                    statusValue,
-                                    statusTarget,
-                                    statusCode.metadata
-                                ),
-                                parentContext
-                            )
+        val mappedStatusPair =
+            normalized.status?.value?.let { statusValue ->
+                val statusCode =
+                    registryClient.getConceptMappingForEnum(
+                        tenant,
+                        "Appointment.status",
+                        RoninConceptMap.CODE_SYSTEMS.toCoding(tenant, "Appointment.status", statusValue),
+                        AppointmentStatus::class,
+                        RoninExtension.TENANT_SOURCE_APPOINTMENT_STATUS.value,
+                        normalized,
+                        forceCacheReloadTS,
+                    )
+                // validate the mapping we got, use statusValue to report issues
+                validation.apply {
+                    checkNotNull(
+                        statusCode,
+                        FailedConceptMapLookupError(
+                            LocationContext(Appointment::status),
+                            statusValue,
+                            RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "Appointment.status"),
+                        ),
+                        parentContext,
+                    )
+                    ifNotNull(statusCode) {
+                        statusCode.coding.let { coding ->
+                            val statusCodeValue = coding.code
+                            val statusTarget = statusCodeValue?.value
+                            val statusMapName = RoninConceptMap.CODE_SYSTEMS.toUriString(tenant, "Appointment.status")
+                            val statusContext = parentContext.append(LocationContext("Appointment", "status"))
+                            validation.apply {
+                                checkNotNull(
+                                    getCodedEnumOrNull<AppointmentStatus>(statusTarget),
+                                    ConceptMapInvalidValueSetError(
+                                        statusContext,
+                                        statusMapName,
+                                        statusValue,
+                                        statusTarget,
+                                        statusCode.metadata,
+                                    ),
+                                    parentContext,
+                                )
+                            }
                         }
                     }
                 }
+                statusCode
             }
-            statusCode
-        }
 
-        val mapped = mappedStatusPair?.let {
-            normalized.copy(
-                status = it.coding.code,
-                extension = normalized.extension + it.extension
-            )
-        } ?: normalized
+        val mapped =
+            mappedStatusPair?.let {
+                normalized.copy(
+                    status = it.coding.code,
+                    extension = normalized.extension + it.extension,
+                )
+            } ?: normalized
         return Pair(mapped, validation)
     }
 
@@ -156,14 +165,15 @@ class RoninAppointment(
         normalized: Appointment,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<Appointment>?, Validation> {
         val validation = Validation()
 
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant)
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+            )
         return Pair(TransformResponse(transformed), validation)
     }
 }

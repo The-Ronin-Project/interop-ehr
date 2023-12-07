@@ -20,37 +20,51 @@ import java.time.LocalDate
  */
 class DecoratorPatientService(
     private val patientService: PatientService,
-    private val identifierService: IdentifierService
+    private val identifierService: IdentifierService,
 ) : PatientService {
     override val fhirResourceType: Class<Patient> by lazy { patientService.fhirResourceType }
 
-    override fun getPatientFHIRId(tenant: Tenant, patientIDValue: String): String =
-        patientService.getPatientFHIRId(tenant, patientIDValue)
+    override fun getPatientFHIRId(
+        tenant: Tenant,
+        patientIDValue: String,
+    ): String = patientService.getPatientFHIRId(tenant, patientIDValue)
 
     override fun findPatient(
         tenant: Tenant,
         birthDate: LocalDate,
         givenName: String,
-        familyName: String
+        familyName: String,
     ): List<Patient> {
         return patientService.findPatient(tenant, birthDate, givenName, familyName)
             .map { it.decorateWithCommonIds(tenant) }
     }
 
-    override fun <K> findPatientsById(tenant: Tenant, patientIdsByKey: Map<K, Identifier>): Map<K, Patient> {
+    override fun <K> findPatientsById(
+        tenant: Tenant,
+        patientIdsByKey: Map<K, Identifier>,
+    ): Map<K, Patient> {
         return patientService.findPatientsById(tenant, patientIdsByKey)
             .mapValues { it.value.decorateWithCommonIds(tenant) }
     }
 
-    override fun getPatient(tenant: Tenant, patientFHIRID: String): Patient {
+    override fun getPatient(
+        tenant: Tenant,
+        patientFHIRID: String,
+    ): Patient {
         return patientService.getPatient(tenant, patientFHIRID).decorateWithCommonIds(tenant)
     }
 
-    override fun getByID(tenant: Tenant, resourceFHIRId: String): Patient {
+    override fun getByID(
+        tenant: Tenant,
+        resourceFHIRId: String,
+    ): Patient {
         return patientService.getByID(tenant, resourceFHIRId).decorateWithCommonIds(tenant)
     }
 
-    override fun getByIDs(tenant: Tenant, resourceFHIRIds: List<String>): Map<String, Patient> {
+    override fun getByIDs(
+        tenant: Tenant,
+        resourceFHIRIds: List<String>,
+    ): Map<String, Patient> {
         return patientService.getByIDs(tenant, resourceFHIRIds).mapValues { it.value.decorateWithCommonIds(tenant) }
     }
 
@@ -64,8 +78,8 @@ class DecoratorPatientService(
                     Identifier(
                         value = it.value,
                         system = CodeSystem.RONIN_MRN.uri,
-                        type = CodeableConcepts.RONIN_MRN
-                    )
+                        type = CodeableConcepts.RONIN_MRN,
+                    ),
                 )
             } ?: emptyList()
 

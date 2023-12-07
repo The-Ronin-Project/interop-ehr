@@ -43,7 +43,6 @@ class CernerSpringConfigTest {
 
 @Configuration
 class TestConfig {
-
     @Bean
     fun httpClient() = mockk<HttpClient>(relaxed = true)
 

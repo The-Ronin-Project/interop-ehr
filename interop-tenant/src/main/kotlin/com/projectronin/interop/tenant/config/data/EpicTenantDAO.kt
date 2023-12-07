@@ -21,7 +21,9 @@ import org.springframework.stereotype.Repository
  * Provides data access operations for Epic tenant data models.
  */
 @Repository
-class EpicTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTenantDAO {
+class EpicTenantDAO(
+    @Qualifier("ehr") private val database: Database,
+) : EHRTenantDAO {
     /**
      * inserts a new [EpicTenantDO]
      */
@@ -45,10 +47,11 @@ class EpicTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTenan
             set(it.patientOnboardedFlagId, epicTenant.patientOnboardedFlagId)
             set(it.orderSystem, epicTenant.orderSystem)
         }
-        val epicTenants = database.from(EpicTenantDOs)
-            .select()
-            .where(EpicTenantDOs.tenantId eq epicTenant.tenantId)
-            .map { EpicTenantDOs.createEntity(it) }
+        val epicTenants =
+            database.from(EpicTenantDOs)
+                .select()
+                .where(EpicTenantDOs.tenantId eq epicTenant.tenantId)
+                .map { EpicTenantDOs.createEntity(it) }
         return epicTenants.single()
     }
 

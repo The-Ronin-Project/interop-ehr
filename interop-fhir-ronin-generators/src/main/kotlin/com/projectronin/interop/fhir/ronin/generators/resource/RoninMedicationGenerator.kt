@@ -20,7 +20,10 @@ import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.test.data.generator.faker.WordGenerator
 
-fun rcdmMedication(tenant: String, block: MedicationGenerator.() -> Unit): Medication {
+fun rcdmMedication(
+    tenant: String,
+    block: MedicationGenerator.() -> Unit,
+): Medication {
     val medCode = rcdmMedicationCode()
     return medication {
         block.invoke(this)
@@ -36,29 +39,33 @@ fun rcdmMedication(tenant: String, block: MedicationGenerator.() -> Unit): Medic
     }
 }
 
-val possibleMedicationStatusCodes = listOf(
-    Code("active"),
-    Code("inactive"),
-    Code("entered-in-error")
-)
+val possibleMedicationStatusCodes =
+    listOf(
+        Code("active"),
+        Code("inactive"),
+        Code("entered-in-error"),
+    )
 
 fun tenantSourceMedicationCode(codeableConcept: CodeableConcept): Extension {
     return Extension(
         url = Uri(RoninExtension.TENANT_SOURCE_MEDICATION_CODE.value),
-        value = DynamicValue(
-            DynamicValueType.CODEABLE_CONCEPT,
-            codeableConcept
-        )
+        value =
+            DynamicValue(
+                DynamicValueType.CODEABLE_CONCEPT,
+                codeableConcept,
+            ),
     )
 }
 
-fun rcdmMedicationCode(): CodeableConcept = CodeableConcept(
-    coding = listOf(
-        Coding(
-            system = UriGenerator().generate(),
-            code = Code(WordGenerator().generate()),
-            display = WordGenerator().generate().asFHIR()
-        )
-    ),
-    text = WordGenerator().generate().asFHIR()
-)
+fun rcdmMedicationCode(): CodeableConcept =
+    CodeableConcept(
+        coding =
+            listOf(
+                Coding(
+                    system = UriGenerator().generate(),
+                    code = Code(WordGenerator().generate()),
+                    display = WordGenerator().generate().asFHIR(),
+                ),
+            ),
+        text = WordGenerator().generate().asFHIR(),
+    )

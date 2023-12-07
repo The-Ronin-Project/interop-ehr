@@ -7,5 +7,5 @@ import com.projectronin.interop.fhir.ronin.validation.ConceptMapMetadata
 data class ConceptMapCodeableConcept(
     val codeableConcept: CodeableConcept,
     val extension: Extension,
-    val metadata: List<ConceptMapMetadata>
+    val metadata: List<ConceptMapMetadata>,
 )

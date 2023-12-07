@@ -9,10 +9,10 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class RoninMetaUtilTest {
-
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @Test
     fun `generate meta`() {
@@ -23,9 +23,10 @@ class RoninMetaUtilTest {
 
     @Test
     fun `generates meta with additional values`() {
-        val roninMeta = rcdmMeta(RoninProfile.APPOINTMENT, tenant.mnemonic) {
-            versionId of Id("x")
-        }
+        val roninMeta =
+            rcdmMeta(RoninProfile.APPOINTMENT, tenant.mnemonic) {
+                versionId of Id("x")
+            }
         assertEquals("http://projectronin.io/fhir/StructureDefinition/ronin-appointment", roninMeta.profile[0].value)
         assertEquals("test", roninMeta.source!!.value)
         assertEquals("x", roninMeta.versionId!!.value)

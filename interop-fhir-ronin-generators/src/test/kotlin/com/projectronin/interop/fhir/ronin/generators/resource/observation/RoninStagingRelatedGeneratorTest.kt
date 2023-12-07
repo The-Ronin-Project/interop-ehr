@@ -29,43 +29,50 @@ import org.junit.jupiter.api.Test
 class RoninStagingRelatedGeneratorTest {
     private lateinit var roninStageRelated: RoninStagingRelated
     private lateinit var registry: NormalizationRegistryClient
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
-        registry = mockk<NormalizationRegistryClient> {
-            every {
-                getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_STAGING_RELATED.value)
-            } returns possibleStagingRelatedCodes
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
+        registry =
+            mockk<NormalizationRegistryClient> {
+                every {
+                    getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_STAGING_RELATED.value)
+                } returns possibleStagingRelatedCodes
+            }
         roninStageRelated = RoninStagingRelated(normalizer, localizer, registry)
     }
 
     @Test
     fun `example use for roninObservationStagingRelated`() {
         // Create StagingRelated Obs with attributes you need, provide the tenant
-        val roninObsStagingRelated = rcdmObservationStagingRelated("test") {
-            // if you want to test for a specific status
-            status of Code("registered-different")
-            // test for a new or different code
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://could-be-anything"
-                        code of Code("1234567-8")
-                        display of "Staging related code"
+        val roninObsStagingRelated =
+            rcdmObservationStagingRelated("test") {
+                // if you want to test for a specific status
+                status of Code("registered-different")
+                // test for a new or different code
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://could-be-anything"
+                                    code of Code("1234567-8")
+                                    display of "Staging related code"
+                                },
+                            )
                     }
-                )
             }
-        }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsStagingRelatedJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsStagingRelated)
@@ -90,7 +97,7 @@ class RoninStagingRelatedGeneratorTest {
         assertNotNull(roninObsStagingRelated.meta)
         assertEquals(
             roninObsStagingRelated.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_STAGING_RELATED.value
+            RoninProfile.OBSERVATION_STAGING_RELATED.value,
         )
         assertNotNull(roninObsStagingRelated.status)
         assertEquals(1, roninObsStagingRelated.category.size)
@@ -117,7 +124,7 @@ class RoninStagingRelatedGeneratorTest {
         assertNotNull(roninObsStagingRelated.meta)
         assertEquals(
             roninObsStagingRelated.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_STAGING_RELATED.value
+            RoninProfile.OBSERVATION_STAGING_RELATED.value,
         )
         assertNull(roninObsStagingRelated.implicitRules)
         assertNull(roninObsStagingRelated.language)
@@ -149,35 +156,41 @@ class RoninStagingRelatedGeneratorTest {
 
     @Test
     fun `validation passed for roninObservationStagingRelated with code`() {
-        val roninObsStagingRelated = rcdmObservationStagingRelated("test") {
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://snomed.info/sct"
-                        version of "2023-03-01"
-                        code of Code("60333009")
-                        display of "Clinical stage II (finding)"
+        val roninObsStagingRelated =
+            rcdmObservationStagingRelated("test") {
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://snomed.info/sct"
+                                    version of "2023-03-01"
+                                    code of Code("60333009")
+                                    display of "Clinical stage II (finding)"
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = roninStageRelated.validate(roninObsStagingRelated, null)
         assertFalse(validation.hasErrors())
     }
 
     @Test
     fun `validation fails for roninObservationStagingRelated with bad code`() {
-        val roninObsStagingRelated = rcdmObservationStagingRelated("test") {
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        version of "1000000"
-                        code of Code("some code here")
+        val roninObsStagingRelated =
+            rcdmObservationStagingRelated("test") {
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    version of "1000000"
+                                    code of Code("some code here")
+                                },
+                            )
                     }
-                )
             }
-        }
         val validation = roninStageRelated.validate(roninObsStagingRelated, null)
         assertTrue(validation.hasErrors())
 
@@ -187,9 +200,10 @@ class RoninStagingRelatedGeneratorTest {
 
     @Test
     fun `valid subject input - validation succeeds`() {
-        val roninObsStagingRelated = rcdmObservationStagingRelated("test") {
-            subject of rcdmReference("Patient", "456")
-        }
+        val roninObsStagingRelated =
+            rcdmObservationStagingRelated("test") {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = roninStageRelated.validate(roninObsStagingRelated, null)
         validation.alertIfErrors()
         assertTrue(roninObsStagingRelated.subject?.reference?.value == "Patient/456")
@@ -213,9 +227,10 @@ class RoninStagingRelatedGeneratorTest {
     @Test
     fun `rcdmPatient rcdmObservationStagingRelated - valid subject input overrides base patient - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val roninObsStagingRelated = rcdmPatient.rcdmObservationStagingRelated {
-            subject of rcdmReference("Patient", "456")
-        }
+        val roninObsStagingRelated =
+            rcdmPatient.rcdmObservationStagingRelated {
+                subject of rcdmReference("Patient", "456")
+            }
         val validation = roninStageRelated.validate(roninObsStagingRelated, null)
         validation.alertIfErrors()
         assertEquals("Patient/456", roninObsStagingRelated.subject?.reference?.value)
@@ -224,9 +239,10 @@ class RoninStagingRelatedGeneratorTest {
     @Test
     fun `rcdmPatient rcdmObservationStagingRelated - base patient overrides invalid subject input - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") {}
-        val roninObsStagingRelated = rcdmPatient.rcdmObservationStagingRelated {
-            subject of reference("Patient", "456")
-        }
+        val roninObsStagingRelated =
+            rcdmPatient.rcdmObservationStagingRelated {
+                subject of reference("Patient", "456")
+            }
         val validation = roninStageRelated.validate(roninObsStagingRelated, null)
         validation.alertIfErrors()
         assertEquals("Patient/${rcdmPatient.id?.value}", roninObsStagingRelated.subject?.reference?.value)
@@ -235,9 +251,10 @@ class RoninStagingRelatedGeneratorTest {
     @Test
     fun `rcdmPatient rcdmObservationStagingRelated - fhir id input for both - validate succeeds`() {
         val rcdmPatient = rcdmPatient("test") { id of "99" }
-        val roninObsStagingRelated = rcdmPatient.rcdmObservationStagingRelated {
-            id of "88"
-        }
+        val roninObsStagingRelated =
+            rcdmPatient.rcdmObservationStagingRelated {
+                id of "88"
+            }
         val validation = roninStageRelated.validate(roninObsStagingRelated, null)
         validation.alertIfErrors()
         assertEquals(3, roninObsStagingRelated.identifier.size)

@@ -14,7 +14,10 @@ import com.projectronin.interop.fhir.ronin.generators.util.rcdmOptionalContactPo
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import java.util.UUID
 
-fun rcdmPractitioner(tenant: String, block: PractitionerGenerator.() -> Unit): Practitioner {
+fun rcdmPractitioner(
+    tenant: String,
+    block: PractitionerGenerator.() -> Unit,
+): Practitioner {
     return practitioner {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.PRACTITIONER, tenant) {}

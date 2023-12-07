@@ -10,7 +10,6 @@ import java.time.LocalDate
  * Defines the functionality for an EHR's appointment service.
  */
 interface AppointmentService : FHIRService<Appointment> {
-
     /**
      * Finds the appointments at a given [tenant] for a patient identified by the [patientFHIRId] between
      * the [startDate] and [endDate] from an EHR tenant. Optionally takes a [patientMRN] if available,
@@ -22,7 +21,7 @@ interface AppointmentService : FHIRService<Appointment> {
         startDate: LocalDate,
         endDate: LocalDate,
         patientMRN: String? = null,
-        useEHRFallback: Boolean = true
+        useEHRFallback: Boolean = true,
     ): List<Appointment>
 
     /**
@@ -32,7 +31,7 @@ interface AppointmentService : FHIRService<Appointment> {
         tenant: Tenant,
         providerIDs: List<FHIRIdentifiers>,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
     ): AppointmentsWithNewPatients
 
     /**
@@ -42,6 +41,6 @@ interface AppointmentService : FHIRService<Appointment> {
         tenant: Tenant,
         locationFHIRIds: List<String>,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
     ): AppointmentsWithNewPatients
 }

@@ -31,43 +31,50 @@ import org.junit.jupiter.api.Test
 
 class RoninLaboratoryResultGeneratorTest {
     private lateinit var roninLabResult: RoninLaboratoryResult
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
-        val registry = mockk<NormalizationRegistryClient> {
-            every {
-                getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_LABORATORY_RESULT.value)
-            } returns possibleLaboratoryResultCodes
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
+        val registry =
+            mockk<NormalizationRegistryClient> {
+                every {
+                    getRequiredValueSet("Observation.code", RoninProfile.OBSERVATION_LABORATORY_RESULT.value)
+                } returns possibleLaboratoryResultCodes
+            }
         roninLabResult = RoninLaboratoryResult(normalizer, localizer, registry)
     }
 
     @Test
     fun `example use for roninObservationLaboratoryResult`() {
         // Create LaboratoryResult Obs with attributes you need, provide the tenant
-        val roninObsLaboratoryResult = rcdmObservationLaboratoryResult("test") {
-            // if you want to test for a specific status
-            status of Code("corrected")
-            // test for a new or different code
-            code of codeableConcept {
-                coding of listOf(
-                    coding {
-                        system of "http://loinc.org"
-                        code of Code("89263-8")
-                        display of "Special circumstances associated observations panel"
+        val roninObsLaboratoryResult =
+            rcdmObservationLaboratoryResult("test") {
+                // if you want to test for a specific status
+                status of Code("corrected")
+                // test for a new or different code
+                code of
+                    codeableConcept {
+                        coding of
+                            listOf(
+                                coding {
+                                    system of "http://loinc.org"
+                                    code of Code("89263-8")
+                                    display of "Special circumstances associated observations panel"
+                                },
+                            )
                     }
-                )
             }
-        }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes wil be generated
         val roninObsLaboratoryResultJSON =
             JacksonManager.objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(roninObsLaboratoryResult)
@@ -92,7 +99,7 @@ class RoninLaboratoryResultGeneratorTest {
         assertNotNull(roninObsLaboratoryResult.meta)
         assertEquals(
             roninObsLaboratoryResult.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_LABORATORY_RESULT.value
+            RoninProfile.OBSERVATION_LABORATORY_RESULT.value,
         )
         assertNotNull(roninObsLaboratoryResult.status)
         assertEquals(1, roninObsLaboratoryResult.category.size)
@@ -118,7 +125,7 @@ class RoninLaboratoryResultGeneratorTest {
         assertNotNull(roninObsLabResult.meta)
         assertEquals(
             roninObsLabResult.meta!!.profile[0].value,
-            RoninProfile.OBSERVATION_LABORATORY_RESULT.value
+            RoninProfile.OBSERVATION_LABORATORY_RESULT.value,
         )
         assertNull(roninObsLabResult.implicitRules)
         assertNull(roninObsLabResult.language)
@@ -150,14 +157,16 @@ class RoninLaboratoryResultGeneratorTest {
 
     @Test
     fun `validation for roninObservationLaboratoryResult with existing identifier`() {
-        val roninLab = rcdmObservationLaboratoryResult("test") {
-            identifier of listOf(
-                Identifier(
-                    system = Uri("testsystem"),
-                    value = "tomato".asFHIR()
-                )
-            )
-        }
+        val roninLab =
+            rcdmObservationLaboratoryResult("test") {
+                identifier of
+                    listOf(
+                        Identifier(
+                            system = Uri("testsystem"),
+                            value = "tomato".asFHIR(),
+                        ),
+                    )
+            }
         val validation = roninLabResult.validate(roninLab, null)
         validation.alertIfErrors()
         assertNotNull(roninLab.meta)
@@ -170,19 +179,21 @@ class RoninLaboratoryResultGeneratorTest {
 
     @Test
     fun `rcdmObservationLaboratoryResult with custom value`() {
-        val valueQuantity = DynamicValue(
-            DynamicValueType.QUANTITY,
-            Quantity(
-                value = Decimal(100.toBigDecimal()),
-                unit = "mg".asFHIR(),
-                system = CodeSystem.UCUM.uri,
-                code = Code("mg")
+        val valueQuantity =
+            DynamicValue(
+                DynamicValueType.QUANTITY,
+                Quantity(
+                    value = Decimal(100.toBigDecimal()),
+                    unit = "mg".asFHIR(),
+                    system = CodeSystem.UCUM.uri,
+                    code = Code("mg"),
+                ),
             )
-        )
 
-        val roninObsLaboratoryResult = rcdmObservationLaboratoryResult("test") {
-            value of valueQuantity
-        }
+        val roninObsLaboratoryResult =
+            rcdmObservationLaboratoryResult("test") {
+                value of valueQuantity
+            }
 
         assertEquals(valueQuantity, roninObsLaboratoryResult.value)
     }

@@ -10,21 +10,29 @@ import com.projectronin.interop.fhir.validate.validation
  * Base class supporting validation. If supplied with an optional [extendedProfile], this validator will also validate against it.
  */
 abstract class BaseValidator<T : Validatable<T>>(
-    private val extendedProfile: ProfileValidator<T>?
+    private val extendedProfile: ProfileValidator<T>?,
 ) :
     ProfileValidator<T> {
     /**
      * Validates the [element] on the [validation] using the [parentContext].
      */
-    abstract fun validate(element: T, parentContext: LocationContext, validation: Validation)
+    abstract fun validate(
+        element: T,
+        parentContext: LocationContext,
+        validation: Validation,
+    )
 
-    override fun validate(element: T, parentContext: LocationContext?): Validation = validation {
-        val currentContext = parentContext ?: LocationContext(element::class)
+    override fun validate(
+        element: T,
+        parentContext: LocationContext?,
+    ): Validation =
+        validation {
+            val currentContext = parentContext ?: LocationContext(element::class)
 
-        validate(element, currentContext, this)
+            validate(element, currentContext, this)
 
-        extendedProfile?.let {
-            merge(element.validate(it, currentContext))
+            extendedProfile?.let {
+                merge(element.validate(it, currentContext))
+            }
         }
-    }
 }

@@ -19,20 +19,24 @@ import kotlin.time.Duration.Companion.seconds
 class CernerBinaryService(
     cernerClient: CernerClient,
     @Value("\${cerner.fhir.binaryTimeout:20}")
-    val timeout: Int
+    val timeout: Int,
 ) : BinaryService, CernerFHIRService<Binary>(cernerClient) {
     override val fhirURLSearchPart = "/Binary"
     override val fhirResourceType = Binary::class.java
 
     // Binary requires a different Accept header
-    override fun getByID(tenant: Tenant, resourceFHIRId: String): Binary {
+    override fun getByID(
+        tenant: Tenant,
+        resourceFHIRId: String,
+    ): Binary {
         return runBlocking {
             cernerClient.get(
                 tenant = tenant,
                 urlPart = "$fhirURLSearchPart/$resourceFHIRId",
                 acceptTypeOverride = ContentType.Application.FhirJson,
                 disableRetry = true,
-                timeoutOverride = timeout.seconds // default is 15 seconds
+                // default is 15 seconds
+                timeoutOverride = timeout.seconds,
             ).body(TypeInfo(fhirResourceType.kotlin, fhirResourceType))
         }
     }

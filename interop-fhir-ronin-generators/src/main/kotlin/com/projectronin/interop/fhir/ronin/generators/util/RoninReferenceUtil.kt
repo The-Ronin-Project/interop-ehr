@@ -25,7 +25,7 @@ fun generateReference(
     profileAllowedTypes: List<String>,
     tenantId: String,
     type: String? = null,
-    id: String? = null
+    id: String? = null,
 ): Reference {
     return when {
         (type.isNullOrEmpty() || id.isNullOrEmpty()) &&
@@ -36,10 +36,10 @@ fun generateReference(
                 profileAllowedTypes,
                 tenantId,
                 type,
-                id
+                id,
             ) ?: rcdmReference(
                 profileAllowedTypes.random(),
-                udpIdValue(tenantId, id)
+                udpIdValue(tenantId, id),
             )
     }
 }
@@ -56,23 +56,24 @@ fun generateOptionalReference(
     profileAllowedTypes: List<String>,
     tenantId: String,
     type: String? = null,
-    id: String? = null
+    id: String? = null,
 ): Reference? {
     return when {
         reference?.type?.extension == dataAuthorityExtension -> reference
-        !type.isNullOrEmpty() -> when {
-            profileAllowedTypes.isEmpty() || type in profileAllowedTypes ->
-                rcdmReference(
-                    type,
-                    udpIdValue(tenantId, id)
-                )
-            else ->
-                throw IllegalArgumentException(
-                    "${ if (type.isNullOrEmpty()) "The type provided" else type } is not ${
-                    if (profileAllowedTypes.size > 1) "one of " else ""
-                    }${profileAllowedTypes.joinToString(", ")}"
-                )
-        }
+        !type.isNullOrEmpty() ->
+            when {
+                profileAllowedTypes.isEmpty() || type in profileAllowedTypes ->
+                    rcdmReference(
+                        type,
+                        udpIdValue(tenantId, id),
+                    )
+                else ->
+                    throw IllegalArgumentException(
+                        "${ if (type.isNullOrEmpty()) "The type provided" else type } is not ${
+                            if (profileAllowedTypes.size > 1) "one of " else ""
+                        }${profileAllowedTypes.joinToString(", ")}",
+                    )
+            }
         else -> null
     }
 }
@@ -80,22 +81,28 @@ fun generateOptionalReference(
 /**
  * ronin reference generator that returns the reference with the data authority identifier
  */
-fun rcdmReference(type: String, id: String): Reference {
+fun rcdmReference(
+    type: String,
+    id: String,
+): Reference {
     val reference = ReferenceGenerator()
     reference.reference of "$type/$id".asFHIR()
-    reference.type of Uri(
-        type,
-        extension = dataAuthorityExtension
-    )
+    reference.type of
+        Uri(
+            type,
+            extension = dataAuthorityExtension,
+        )
     return reference.generate()
 }
 
-val dataAuthorityExtension = listOf(
-    Extension(
-        url = RoninExtension.RONIN_DATA_AUTHORITY_EXTENSION.uri,
-        value = DynamicValue(
-            type = DynamicValueType.IDENTIFIER,
-            dataAuthorityIdentifier
-        )
+val dataAuthorityExtension =
+    listOf(
+        Extension(
+            url = RoninExtension.RONIN_DATA_AUTHORITY_EXTENSION.uri,
+            value =
+                DynamicValue(
+                    type = DynamicValueType.IDENTIFIER,
+                    dataAuthorityIdentifier,
+                ),
+        ),
     )
-)

@@ -22,19 +22,22 @@ import org.junit.jupiter.api.Test
 class RoninServiceRequestGeneratorTest {
     private lateinit var roninServiceRequest: RoninServiceRequest
     private lateinit var registry: NormalizationRegistryClient
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
         registry = mockk()
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
         roninServiceRequest =
             RoninServiceRequest(registry, normalizer, localizer)
     }
@@ -42,13 +45,15 @@ class RoninServiceRequestGeneratorTest {
     @Test
     fun `example use for roninServiceRequest`() {
         // create serviceRequest resource with attributes you need, provide the tenant
-        val roninServiceRequest = rcdmServiceRequest("test") {
-            // to test an attribute like status - provide the value
-            status of Code("testing-this-status")
-        }
+        val roninServiceRequest =
+            rcdmServiceRequest("test") {
+                // to test an attribute like status - provide the value
+                status of Code("testing-this-status")
+            }
         // This object can be serialized to JSON to be injected into your workflow, all required R4 attributes will be generated
-        val roninServiceRequestJSON = JacksonManager.objectMapper.writerWithDefaultPrettyPrinter()
-            .writeValueAsString(roninServiceRequest)
+        val roninServiceRequestJSON =
+            JacksonManager.objectMapper.writerWithDefaultPrettyPrinter()
+                .writeValueAsString(roninServiceRequest)
 
         // Uncomment to take a peek at the JSON
         // println(roninServiceRequestJSON)
@@ -65,9 +70,10 @@ class RoninServiceRequestGeneratorTest {
 
     @Test
     fun `validates with identifier added`() {
-        val serviceRequest = rcdmServiceRequest("test") {
-            identifier of listOf(Identifier(id = "ID-Id".asFHIR()))
-        }
+        val serviceRequest =
+            rcdmServiceRequest("test") {
+                identifier of listOf(Identifier(id = "ID-Id".asFHIR()))
+            }
         val validation = roninServiceRequest.validate(serviceRequest, null).hasErrors()
         assertEquals(false, validation)
         assertEquals(4, serviceRequest.identifier.size)
@@ -77,9 +83,10 @@ class RoninServiceRequestGeneratorTest {
 
     @Test
     fun `generates rcdmServiceRequest with given status but fails validation because status is bad`() {
-        val serviceRequest = rcdmServiceRequest("test") {
-            status of Code("this is a bad status")
-        }
+        val serviceRequest =
+            rcdmServiceRequest("test") {
+                status of Code("this is a bad status")
+            }
 
         assertEquals(Code("this is a bad status"), serviceRequest.status)
 
@@ -89,11 +96,11 @@ class RoninServiceRequestGeneratorTest {
         assertEquals("INV_VALUE_SET", validation.issues()[0].code)
         assertEquals(
             "'this is a bad status' is outside of required value set",
-            validation.issues()[0].description
+            validation.issues()[0].description,
         )
         assertEquals(
             LocationContext(element = "ServiceRequest", field = "status"),
-            validation.issues()[0].location
+            validation.issues()[0].location,
         )
     }
 

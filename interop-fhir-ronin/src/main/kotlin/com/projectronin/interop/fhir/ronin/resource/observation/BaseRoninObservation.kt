@@ -39,86 +39,97 @@ abstract class BaseRoninObservation(
     profile: String,
     normalizer: Normalizer,
     localizer: Localizer,
-    protected val registryClient: NormalizationRegistryClient
+    protected val registryClient: NormalizationRegistryClient,
 ) : USCoreBasedProfile<Observation>(extendedProfile, profile, normalizer, localizer) {
-
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
     open fun qualifyingCategories(): List<Coding> = emptyList()
 
     // Subclasses may override - either with static values, or by calling getValueSet() on the DataNormalizationRegistry
-    open fun qualifyingCodes(): ValueSetList = registryClient.getRequiredValueSet(
-        "Observation.code",
-        profile
-    )
+    open fun qualifyingCodes(): ValueSetList =
+        registryClient.getRequiredValueSet(
+            "Observation.code",
+            profile,
+        )
 
     override fun qualifies(resource: Observation): Boolean {
         return (
             resource.category.qualifiesForValueSet(qualifyingCategories()) &&
                 resource.code.qualifiesForValueSet(qualifyingCodes().codes)
-            )
+        )
     }
 
     // Reference checks - subclasses may override lists to modify validation logic for reference attributes
     open val validSubjectValues = listOf(ResourceType.Patient)
 
     // Dynamic value checks - subclasses may override lists
-    open val acceptedEffectiveTypes = listOf(
-        DynamicValueType.DATE_TIME,
-        DynamicValueType.PERIOD,
-        DynamicValueType.TIMING,
-        DynamicValueType.INSTANT
-    )
+    open val acceptedEffectiveTypes =
+        listOf(
+            DynamicValueType.DATE_TIME,
+            DynamicValueType.PERIOD,
+            DynamicValueType.TIMING,
+            DynamicValueType.INSTANT,
+        )
 
     // Dynamic value checks - same for all subclasses
-    private val acceptedAuthorTypes = listOf(
-        DynamicValueType.STRING,
-        DynamicValueType.REFERENCE
-    )
+    private val acceptedAuthorTypes =
+        listOf(
+            DynamicValueType.STRING,
+            DynamicValueType.REFERENCE,
+        )
 
     private val requiredSubjectError = RequiredFieldError(Observation::subject)
 
     private val requiredCodeError = RequiredFieldError(Observation::code)
 
-    private val singleObservationCodeError = FHIRError(
-        code = "RONIN_OBS_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Coding list is restricted to 1 entry",
-        location = LocationContext(Observation::code)
-    )
+    private val singleObservationCodeError =
+        FHIRError(
+            code = "RONIN_OBS_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Coding list is restricted to 1 entry",
+            location = LocationContext(Observation::code),
+        )
 
-    private val requiredExtensionCodeError = FHIRError(
-        code = "RONIN_OBS_004",
-        description = "Tenant source observation code extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Observation::extension)
-    )
+    private val requiredExtensionCodeError =
+        FHIRError(
+            code = "RONIN_OBS_004",
+            description = "Tenant source observation code extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Observation::extension),
+        )
 
-    private val requiredExtensionValueError = FHIRError(
-        code = "RONIN_OBS_005",
-        description = "Tenant source observation value extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(Observation::extension)
-    )
+    private val requiredExtensionValueError =
+        FHIRError(
+            code = "RONIN_OBS_005",
+            description = "Tenant source observation value extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(Observation::extension),
+        )
 
-    private val requiredComponentExtensionCodeError = FHIRError(
-        code = "RONIN_OBS_006",
-        description = "Tenant source observation component code extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(ObservationComponent::extension)
-    )
+    private val requiredComponentExtensionCodeError =
+        FHIRError(
+            code = "RONIN_OBS_006",
+            description = "Tenant source observation component code extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(ObservationComponent::extension),
+        )
 
-    private val requiredComponentExtensionValueError = FHIRError(
-        code = "RONIN_OBS_007",
-        description = "Tenant source observation component value extension is missing or invalid",
-        severity = ValidationIssueSeverity.ERROR,
-        location = LocationContext(ObservationComponent::extension)
-    )
+    private val requiredComponentExtensionValueError =
+        FHIRError(
+            code = "RONIN_OBS_007",
+            description = "Tenant source observation component value extension is missing or invalid",
+            severity = ValidationIssueSeverity.ERROR,
+            location = LocationContext(ObservationComponent::extension),
+        )
 
     /**
      * Validates the [element] against RoninObservation rules. Validation logic for reference attributes may vary by
      * Observation type. This logic is controlled by overriding the open val variables like [validSubjectValues].
      */
-    override fun validateRonin(element: Observation, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, validation)
@@ -134,7 +145,7 @@ abstract class BaseRoninObservation(
                 requireDataAuthorityExtensionIdentifier(
                     element.subject,
                     LocationContext(Observation::subject),
-                    validation
+                    validation,
                 )
             }
 
@@ -145,10 +156,12 @@ abstract class BaseRoninObservation(
                     FHIRError(
                         code = "RONIN_OBS_002",
                         severity = ValidationIssueSeverity.ERROR,
-                        description = "Must match this system|code: ${qualifyingCategories().joinToString(", ") { "${it.system?.value}|${it.code?.value}" }}",
-                        location = LocationContext(Observation::category)
+                        description = "Must match this system|code: ${qualifyingCategories().joinToString(
+                            ", ",
+                        ) { "${it.system?.value}|${it.code?.value}" }}",
+                        location = LocationContext(Observation::category),
                     ),
-                    parentContext
+                    parentContext,
                 )
             }
 
@@ -160,10 +173,12 @@ abstract class BaseRoninObservation(
                         FHIRError(
                             code = "RONIN_OBS_003",
                             severity = ValidationIssueSeverity.ERROR,
-                            description = "Must match this system|code: ${qualifyingCodes().codes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }}",
-                            location = LocationContext(Observation::code)
+                            description = "Must match this system|code: ${qualifyingCodes().codes.joinToString(
+                                ", ",
+                            ) { "${it.system?.value}|${it.code?.value}" }}",
+                            location = LocationContext(Observation::code),
                         ),
-                        parentContext
+                        parentContext,
                     )
                 }
             }
@@ -174,7 +189,7 @@ abstract class BaseRoninObservation(
                         it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                 },
                 requiredExtensionCodeError,
-                parentContext
+                parentContext,
             )
             if (element.value?.type == DynamicValueType.CODEABLE_CONCEPT) {
                 checkTrue(
@@ -183,7 +198,7 @@ abstract class BaseRoninObservation(
                             it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                     },
                     requiredExtensionValueError,
-                    parentContext
+                    parentContext,
                 )
             }
 
@@ -195,7 +210,7 @@ abstract class BaseRoninObservation(
                             it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                     },
                     requiredComponentExtensionCodeError,
-                    componentContext
+                    componentContext,
                 )
                 if (observationComponent.value?.type == DynamicValueType.CODEABLE_CONCEPT) {
                     checkTrue(
@@ -204,7 +219,7 @@ abstract class BaseRoninObservation(
                                 it.value?.type == DynamicValueType.CODEABLE_CONCEPT
                         },
                         requiredComponentExtensionValueError,
-                        componentContext
+                        componentContext,
                     )
                 }
             }
@@ -218,7 +233,11 @@ abstract class BaseRoninObservation(
     /**
      * Validates the [element] against USCore Observation rules.
      */
-    override fun validateUSCore(element: Observation, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             validateReference(element.subject, validSubjectValues, LocationContext(Observation::subject), validation)
         }
@@ -230,14 +249,14 @@ abstract class BaseRoninObservation(
     abstract fun validateSpecificObservation(
         element: Observation,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     )
 
     override fun conceptMap(
         normalized: Observation,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<Observation, Validation> {
         val validation = Validation()
 
@@ -251,14 +270,15 @@ abstract class BaseRoninObservation(
                 parentContext,
                 tenant,
                 validation,
-                forceCacheReloadTS
+                forceCacheReloadTS,
             )
-        val mappedCode = if (mapCodeResponse == null) {
-            normalized.code
-        } else {
-            newExtensions.add(mapCodeResponse.extension)
-            mapCodeResponse.codeableConcept
-        }
+        val mappedCode =
+            if (mapCodeResponse == null) {
+                normalized.code
+            } else {
+                newExtensions.add(mapCodeResponse.extension)
+                mapCodeResponse.codeableConcept
+            }
 
         val mapValueResponse =
             mapValue(
@@ -268,70 +288,76 @@ abstract class BaseRoninObservation(
                 parentContext,
                 tenant,
                 validation,
-                forceCacheReloadTS
+                forceCacheReloadTS,
             )
-        val mappedValue = if (mapValueResponse == null) {
-            normalized.value
-        } else {
-            newExtensions.add(mapValueResponse.extension)
-            DynamicValue(DynamicValueType.CODEABLE_CONCEPT, mapValueResponse.codeableConcept)
-        }
+        val mappedValue =
+            if (mapValueResponse == null) {
+                normalized.value
+            } else {
+                newExtensions.add(mapValueResponse.extension)
+                DynamicValue(DynamicValueType.CODEABLE_CONCEPT, mapValueResponse.codeableConcept)
+            }
 
         // Now we need to do similar to above to each component.
-        val mappedComponents = normalized.component.mapIndexed { index, normalizedComponent ->
-            val componentContext = parentContext.append(LocationContext("", "component[$index]"))
+        val mappedComponents =
+            normalized.component.mapIndexed { index, normalizedComponent ->
+                val componentContext = parentContext.append(LocationContext("", "component[$index]"))
 
-            val newComponentExtensions = mutableListOf<Extension>()
+                val newComponentExtensions = mutableListOf<Extension>()
 
-            val mapComponentCodeResponse = mapCode(
-                normalizedComponent.code,
-                normalized,
-                "Observation.component.code",
-                componentContext,
-                tenant,
-                validation,
-                forceCacheReloadTS
-            )
-            val mappedComponentCode = if (mapComponentCodeResponse == null) {
-                normalizedComponent.code
-            } else {
-                newComponentExtensions.add(mapComponentCodeResponse.extension)
-                mapComponentCodeResponse.codeableConcept
-            }
+                val mapComponentCodeResponse =
+                    mapCode(
+                        normalizedComponent.code,
+                        normalized,
+                        "Observation.component.code",
+                        componentContext,
+                        tenant,
+                        validation,
+                        forceCacheReloadTS,
+                    )
+                val mappedComponentCode =
+                    if (mapComponentCodeResponse == null) {
+                        normalizedComponent.code
+                    } else {
+                        newComponentExtensions.add(mapComponentCodeResponse.extension)
+                        mapComponentCodeResponse.codeableConcept
+                    }
 
-            val mapComponentValueResponse =
-                mapValue(
-                    normalizedComponent.value,
-                    normalized,
-                    "Observation.component.valueCodeableConcept",
-                    componentContext,
-                    tenant,
-                    validation,
-                    forceCacheReloadTS
+                val mapComponentValueResponse =
+                    mapValue(
+                        normalizedComponent.value,
+                        normalized,
+                        "Observation.component.valueCodeableConcept",
+                        componentContext,
+                        tenant,
+                        validation,
+                        forceCacheReloadTS,
+                    )
+                val mappedComponentValue =
+                    if (mapComponentValueResponse == null) {
+                        normalizedComponent.value
+                    } else {
+                        newComponentExtensions.add(mapComponentValueResponse.extension)
+                        DynamicValue(DynamicValueType.CODEABLE_CONCEPT, mapComponentValueResponse.codeableConcept)
+                    }
+
+                normalizedComponent.copy(
+                    code = mappedComponentCode,
+                    value = mappedComponentValue,
+                    extension = normalizedComponent.extension + newComponentExtensions,
                 )
-            val mappedComponentValue = if (mapComponentValueResponse == null) {
-                normalizedComponent.value
-            } else {
-                newComponentExtensions.add(mapComponentValueResponse.extension)
-                DynamicValue(DynamicValueType.CODEABLE_CONCEPT, mapComponentValueResponse.codeableConcept)
             }
 
-            normalizedComponent.copy(
-                code = mappedComponentCode,
-                value = mappedComponentValue,
-                extension = normalizedComponent.extension + newComponentExtensions
+        val mappedObservation =
+            normalized.copy(
+                code = mappedCode,
+                value = mappedValue,
+                component = mappedComponents,
+                extension = normalized.extension + newExtensions,
             )
-        }
-
-        val mappedObservation = normalized.copy(
-            code = mappedCode,
-            value = mappedValue,
-            component = mappedComponents,
-            extension = normalized.extension + newExtensions
-        )
         return Pair(
             mappedObservation,
-            validation
+            validation,
         )
     }
 
@@ -342,16 +368,17 @@ abstract class BaseRoninObservation(
         parentContext: LocationContext,
         tenant: Tenant,
         validation: Validation,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): ConceptMapCodeableConcept? {
         return normalizedCodeableConcept?.let { code ->
-            val observationCode = registryClient.getConceptMapping(
-                tenant,
-                elementName,
-                code,
-                observation,
-                forceCacheReloadTS
-            )
+            val observationCode =
+                registryClient.getConceptMapping(
+                    tenant,
+                    elementName,
+                    code,
+                    observation,
+                    forceCacheReloadTS,
+                )
             // validate the mapping we got, use code value to report issues
             validation.apply {
                 checkNotNull(
@@ -361,9 +388,9 @@ abstract class BaseRoninObservation(
                         code.coding.mapNotNull { it.code?.value }
                             .joinToString(", "),
                         "any $elementName concept map for tenant '${tenant.mnemonic}'",
-                        observationCode?.metadata
+                        observationCode?.metadata,
                     ),
-                    parentContext
+                    parentContext,
                 )
             }
             observationCode
@@ -377,19 +404,20 @@ abstract class BaseRoninObservation(
         parentContext: LocationContext,
         tenant: Tenant,
         validation: Validation,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): ConceptMapCodeableConcept? {
         return normalizedValue?.let { dyanmicValue ->
             if (dyanmicValue.type == DynamicValueType.CODEABLE_CONCEPT) {
                 val valueCodeableConcept = dyanmicValue.value as CodeableConcept
 
-                val observationValue = registryClient.getConceptMapping(
-                    tenant,
-                    elementName,
-                    valueCodeableConcept,
-                    observation,
-                    forceCacheReloadTS
-                )
+                val observationValue =
+                    registryClient.getConceptMapping(
+                        tenant,
+                        elementName,
+                        valueCodeableConcept,
+                        observation,
+                        forceCacheReloadTS,
+                    )
                 // validate the mapping we got, use code value to report issues
                 validation.apply {
                     checkNotNull(
@@ -399,9 +427,9 @@ abstract class BaseRoninObservation(
                             valueCodeableConcept.coding.mapNotNull { it.code?.value }
                                 .joinToString(", "),
                             "any $elementName concept map for tenant '${tenant.mnemonic}'",
-                            observationValue?.metadata
+                            observationValue?.metadata,
                         ),
-                        parentContext
+                        parentContext,
                     )
                 }
                 observationValue
@@ -419,17 +447,19 @@ abstract class BaseRoninObservation(
         normalized: Observation,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<Observation>?, Validation> {
-        val validation = validation {
-            checkNotNull(normalized.id, requiredIdError, parentContext)
-        }
+        val validation =
+            validation {
+                checkNotNull(normalized.id, requiredIdError, parentContext)
+            }
 
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            identifier = normalized.getRoninIdentifiersForResource(tenant),
-            bodySite = getTransformedBodySite(normalized.bodySite)
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                identifier = normalized.getRoninIdentifiersForResource(tenant),
+                bodySite = getTransformedBodySite(normalized.bodySite),
+            )
         return Pair(TransformResponse(transformed), validation)
     }
 }

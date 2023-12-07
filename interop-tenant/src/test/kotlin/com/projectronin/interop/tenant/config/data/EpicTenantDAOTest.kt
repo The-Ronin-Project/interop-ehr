@@ -67,24 +67,25 @@ class EpicTenantDAOTest {
         val tenantDao = TenantDAO(KtormHelper.database())
         val tenant = tenantDao.getTenantForMnemonic("tenant")!!
         val dao = EpicTenantDAO(KtormHelper.database())
-        val testobj = EpicTenantDO {
-            tenantId = tenant.id
-            release = "release"
-            serviceEndpoint = "serviceEndpoint"
-            authEndpoint = "authEndpoint"
-            ehrUserId = "userID"
-            messageType = "messageType"
-            practitionerProviderSystem = "providerSystem"
-            practitionerUserSystem = "userSystem"
-            patientMRNSystem = "mrnSystem"
-            patientMRNTypeText = "MRN"
-            patientInternalSystem = "internalSystem"
-            encounterCSNSystem = "csnSystem"
-            hsi = "hsi"
-            departmentInternalSystem = "departmentSystem"
-            patientOnboardedFlagId = "flagID"
-            orderSystem = "urn:order.system3"
-        }
+        val testobj =
+            EpicTenantDO {
+                tenantId = tenant.id
+                release = "release"
+                serviceEndpoint = "serviceEndpoint"
+                authEndpoint = "authEndpoint"
+                ehrUserId = "userID"
+                messageType = "messageType"
+                practitionerProviderSystem = "providerSystem"
+                practitionerUserSystem = "userSystem"
+                patientMRNSystem = "mrnSystem"
+                patientMRNTypeText = "MRN"
+                patientInternalSystem = "internalSystem"
+                encounterCSNSystem = "csnSystem"
+                hsi = "hsi"
+                departmentInternalSystem = "departmentSystem"
+                patientOnboardedFlagId = "flagID"
+                orderSystem = "urn:order.system3"
+            }
 
         val result = dao.insert(testobj)
         assertEquals(testobj.release, result.release)
@@ -108,20 +109,21 @@ class EpicTenantDAOTest {
     @DataSet(value = ["/dbunit/epic-tenants/Tenants.yaml"], cleanAfter = true)
     fun `insert epicTenant fails`() {
         val dao = EpicTenantDAO(KtormHelper.database())
-        val testobj = EpicTenantDO {
-            tenantId = -1
-            release = "release"
-            ehrUserId = "userID"
-            messageType = "messageType"
-            practitionerProviderSystem = "providerSystem"
-            practitionerUserSystem = "userSystem"
-            patientMRNSystem = "mrnSystem"
-            patientInternalSystem = "internalSystem"
-            encounterCSNSystem = "csnSystem"
-            patientMRNTypeText = "MRN"
-            hsi = "hsi"
-            orderSystem = "urn:order.system1"
-        }
+        val testobj =
+            EpicTenantDO {
+                tenantId = -1
+                release = "release"
+                ehrUserId = "userID"
+                messageType = "messageType"
+                practitionerProviderSystem = "providerSystem"
+                practitionerUserSystem = "userSystem"
+                patientMRNSystem = "mrnSystem"
+                patientInternalSystem = "internalSystem"
+                encounterCSNSystem = "csnSystem"
+                patientMRNTypeText = "MRN"
+                hsi = "hsi"
+                orderSystem = "urn:order.system1"
+            }
 
         assertThrows<SQLIntegrityConstraintViolationException> { dao.insert(testobj) }
     }
@@ -133,24 +135,25 @@ class EpicTenantDAOTest {
         val tenantDao = TenantDAO(KtormHelper.database())
         val tenant = tenantDao.getTenantForMnemonic("tenant")!!
         val dao = EpicTenantDAO(KtormHelper.database())
-        val updated = EpicTenantDO {
-            tenantId = tenant.id
-            release = "release"
-            serviceEndpoint = "serviceEndpoint"
-            authEndpoint = "authEndpoint"
-            ehrUserId = "userID"
-            messageType = "messageType"
-            practitionerProviderSystem = "providerSystem"
-            practitionerUserSystem = "userSystem"
-            patientMRNSystem = "mrnSystem"
-            patientMRNTypeText = "MRN"
-            patientInternalSystem = "internalSystem"
-            encounterCSNSystem = "csnSystem"
-            hsi = "hsi"
-            departmentInternalSystem = "departmentSystem"
-            patientOnboardedFlagId = "flagID"
-            orderSystem = "urn:order.system4"
-        }
+        val updated =
+            EpicTenantDO {
+                tenantId = tenant.id
+                release = "release"
+                serviceEndpoint = "serviceEndpoint"
+                authEndpoint = "authEndpoint"
+                ehrUserId = "userID"
+                messageType = "messageType"
+                practitionerProviderSystem = "providerSystem"
+                practitionerUserSystem = "userSystem"
+                patientMRNSystem = "mrnSystem"
+                patientMRNTypeText = "MRN"
+                patientInternalSystem = "internalSystem"
+                encounterCSNSystem = "csnSystem"
+                hsi = "hsi"
+                departmentInternalSystem = "departmentSystem"
+                patientOnboardedFlagId = "flagID"
+                orderSystem = "urn:order.system4"
+            }
         val result = dao.update(updated)
         assertNotNull(result)
         assertEquals(1, result)

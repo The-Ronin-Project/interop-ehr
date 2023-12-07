@@ -26,13 +26,15 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class MultipleProfileResourceTest {
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
-    private val extension1 = Extension(
-        url = Uri("http://example.com/extension"),
-        value = DynamicValue(DynamicValueType.STRING, FHIRString("value"))
-    )
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
+    private val extension1 =
+        Extension(
+            url = Uri("http://example.com/extension"),
+            value = DynamicValue(DynamicValueType.STRING, FHIRString("value")),
+        )
 
     private lateinit var normalizer: Normalizer
     private lateinit var localizer: Localizer
@@ -43,12 +45,14 @@ class MultipleProfileResourceTest {
 
     @BeforeEach
     fun setup() {
-        normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
+        normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
         testProfile1 = mockk()
         testProfile2 = mockk()
         testProfile3 = mockk()
@@ -63,14 +67,15 @@ class MultipleProfileResourceTest {
         every { testProfile2.qualifies(location) } returns false
         every { testProfile3.qualifies(location) } returns false
 
-        val exception = assertThrows<IllegalArgumentException> {
-            profile.validate(location).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                profile.validate(location).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_PROFILE_001: No profiles qualified @ Location",
-            exception.message
+            exception.message,
         )
     }
 
@@ -88,13 +93,14 @@ class MultipleProfileResourceTest {
         val validation = profiles.validate(observation)
         assertTrue(validation.hasIssues())
         assertFalse(validation.hasErrors())
-        val issueList = validation.issues().map {
-            "${it.severity} ${it.code}: ${it.description}"
-        }.joinToString()
+        val issueList =
+            validation.issues().map {
+                "${it.severity} ${it.code}: ${it.description}"
+            }.joinToString()
 
         assertEquals(
             "WARNING RONIN_PROFILE_003: No profiles qualified, the default profile was used",
-            issueList
+            issueList,
         )
     }
 
@@ -136,7 +142,7 @@ class MultipleProfileResourceTest {
             testProfile1.transformInternal(
                 mappedLocation,
                 any(),
-                tenant
+                tenant,
             )
         } returns Pair(TransformResponse(transformedLocation), Validation())
 
@@ -159,19 +165,22 @@ class MultipleProfileResourceTest {
 
     @Test
     fun `transform with no qualifying profiles and default profile`() {
-        val original = mockk<Observation> {
-            every { id } returns Id("1234")
-        }
+        val original =
+            mockk<Observation> {
+                every { id } returns Id("1234")
+            }
         every { normalizer.normalize(original, tenant) } returns original
 
-        val mappedObservation = mockk<Observation> {
-            every { id } returns Id("1234")
-            every { extension } returns listOf(extension1)
-        }
-        val roninObservation = mockk<Observation> {
-            every { id } returns Id("test-1234")
-            every { extension } returns listOf(extension1)
-        }
+        val mappedObservation =
+            mockk<Observation> {
+                every { id } returns Id("1234")
+                every { extension } returns listOf(extension1)
+            }
+        val roninObservation =
+            mockk<Observation> {
+                every { id } returns Id("test-1234")
+                every { extension } returns listOf(extension1)
+            }
         every { localizer.localize(roninObservation, tenant) } returns roninObservation
 
         val profile1 = mockk<BaseProfile<Observation>>()
@@ -183,10 +192,11 @@ class MultipleProfileResourceTest {
         every { profile2.qualifies(original) } returns false
         every { profile3.qualifies(original) } returns true
 
-        every { profile3.conceptMap(original, LocationContext(Observation::class), tenant) } returns Pair(
-            mappedObservation,
-            Validation()
-        )
+        every { profile3.conceptMap(original, LocationContext(Observation::class), tenant) } returns
+            Pair(
+                mappedObservation,
+                Validation(),
+            )
 
         every { profile1.qualifies(mappedObservation) } returns false
         every { profile2.qualifies(mappedObservation) } returns false
@@ -196,12 +206,13 @@ class MultipleProfileResourceTest {
             profile3.transformInternal(
                 mappedObservation,
                 LocationContext(Observation::class),
-                tenant
+                tenant,
             )
-        } returns Pair(
-            TransformResponse(roninObservation),
-            Validation()
-        )
+        } returns
+            Pair(
+                TransformResponse(roninObservation),
+                Validation(),
+            )
         every { profile1.qualifies(roninObservation) } returns false
         every { profile2.qualifies(roninObservation) } returns false
         every { profile3.qualifies(roninObservation) } returns true
@@ -220,19 +231,19 @@ class MultipleProfileResourceTest {
     private class TestMultipleProfileResource(
         normalizer: Normalizer,
         localizer: Localizer,
-        override val potentialProfiles: List<BaseProfile<Location>>
+        override val potentialProfiles: List<BaseProfile<Location>>,
     ) : MultipleProfileResource<Location>(normalizer, localizer)
 
     private class TestMultipleProfileResourceObs(
         normalizer: Normalizer,
         localizer: Localizer,
-        override val potentialProfiles: List<BaseProfile<Observation>>
+        override val potentialProfiles: List<BaseProfile<Observation>>,
     ) : MultipleProfileResource<Observation>(normalizer, localizer)
 
     private class TestProfileWithDefault(
         normalizer: Normalizer,
         localizer: Localizer,
         override val potentialProfiles: List<BaseProfile<Observation>>,
-        override val defaultProfile: BaseProfile<Observation>?
+        override val defaultProfile: BaseProfile<Observation>?,
     ) : MultipleProfileResource<Observation>(normalizer, localizer)
 }

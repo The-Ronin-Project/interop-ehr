@@ -28,12 +28,13 @@ class EpicMedicationStatementTest {
 
     @BeforeEach
     fun setup() {
-        tenant = createTestTenant(
-            "clientId",
-            "https://example.org",
-            "testPrivateKey",
-            "tenantId"
-        )
+        tenant =
+            createTestTenant(
+                "clientId",
+                "https://example.org",
+                "testPrivateKey",
+                "tenantId",
+            )
         epicClient = mockk()
         httpResponse = mockk()
         ehrResponse = EHRResponse(httpResponse, "12345")
@@ -47,11 +48,12 @@ class EpicMedicationStatementTest {
         val validMedicationStatement1 = readResource<MedicationStatement>("/ExampleMedicationStatement1.json")
         val validMedicationStatement2 = readResource<MedicationStatement>("/ExampleMedicationStatement2.json")
         val validMedicationStatement3 = readResource<MedicationStatement>("/ExampleMedicationStatement3.json")
-        val validMedicationStatementList = listOf(
-            validMedicationStatement1,
-            validMedicationStatement2,
-            validMedicationStatement3
-        )
+        val validMedicationStatementList =
+            listOf(
+                validMedicationStatement1,
+                validMedicationStatement2,
+                validMedicationStatement3,
+            )
         val patientFhirId = "abc"
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -60,19 +62,21 @@ class EpicMedicationStatementTest {
             epicClient.get(
                 tenant,
                 searchUrlPart,
-                mapOf("patient" to patientFhirId, "_count" to 50)
+                mapOf("patient" to patientFhirId, "_count" to 50),
             )
         } returns ehrResponse
 
-        val medicationStatements = medicationStatementService.getMedicationStatementsByPatientFHIRId(
-            tenant,
-            patientFhirId
-        )
+        val medicationStatements =
+            medicationStatementService.getMedicationStatementsByPatientFHIRId(
+                tenant,
+                patientFhirId,
+            )
 
-        val metaLessMedicationStatements = medicationStatements.map {
-            assertNotNull(it.meta?.source)
-            it.copy(meta = null)
-        }
+        val metaLessMedicationStatements =
+            medicationStatements.map {
+                assertNotNull(it.meta?.source)
+                it.copy(meta = null)
+            }
         assertEquals(validMedicationStatementList, metaLessMedicationStatements)
     }
 
@@ -82,11 +86,12 @@ class EpicMedicationStatementTest {
         val validMedicationStatement1 = readResource<MedicationStatement>("/ExampleMedicationStatement1.json")
         val validMedicationStatement2 = readResource<MedicationStatement>("/ExampleMedicationStatement2.json")
         val validMedicationStatement3 = readResource<MedicationStatement>("/ExampleMedicationStatement3.json")
-        val validMedicationStatementList = listOf(
-            validMedicationStatement1,
-            validMedicationStatement2,
-            validMedicationStatement3
-        )
+        val validMedicationStatementList =
+            listOf(
+                validMedicationStatement1,
+                validMedicationStatement2,
+                validMedicationStatement3,
+            )
         val patientFhirId = "abc"
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -95,20 +100,22 @@ class EpicMedicationStatementTest {
             epicClient.get(
                 tenant,
                 searchUrlPart,
-                mapOf("patient" to patientFhirId, "_count" to 50, "date" to "ge2023-09-21")
+                mapOf("patient" to patientFhirId, "_count" to 50, "date" to "ge2023-09-21"),
             )
         } returns ehrResponse
 
-        val medicationStatements = medicationStatementService.getMedicationStatementsByPatientFHIRId(
-            tenant,
-            patientFhirId,
-            LocalDate.of(2023, 9, 21)
-        )
+        val medicationStatements =
+            medicationStatementService.getMedicationStatementsByPatientFHIRId(
+                tenant,
+                patientFhirId,
+                LocalDate.of(2023, 9, 21),
+            )
 
-        val metaLessMedicationStatements = medicationStatements.map {
-            assertNotNull(it.meta?.source)
-            it.copy(meta = null)
-        }
+        val metaLessMedicationStatements =
+            medicationStatements.map {
+                assertNotNull(it.meta?.source)
+                it.copy(meta = null)
+            }
         assertEquals(validMedicationStatementList, metaLessMedicationStatements)
     }
 
@@ -118,11 +125,12 @@ class EpicMedicationStatementTest {
         val validMedicationStatement1 = readResource<MedicationStatement>("/ExampleMedicationStatement1.json")
         val validMedicationStatement2 = readResource<MedicationStatement>("/ExampleMedicationStatement2.json")
         val validMedicationStatement3 = readResource<MedicationStatement>("/ExampleMedicationStatement3.json")
-        val validMedicationStatementList = listOf(
-            validMedicationStatement1,
-            validMedicationStatement2,
-            validMedicationStatement3
-        )
+        val validMedicationStatementList =
+            listOf(
+                validMedicationStatement1,
+                validMedicationStatement2,
+                validMedicationStatement3,
+            )
         val patientFhirId = "abc"
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -131,21 +139,23 @@ class EpicMedicationStatementTest {
             epicClient.get(
                 tenant,
                 searchUrlPart,
-                mapOf("patient" to patientFhirId, "_count" to 50, "date" to "le2023-09-21")
+                mapOf("patient" to patientFhirId, "_count" to 50, "date" to "le2023-09-21"),
             )
         } returns ehrResponse
 
-        val medicationStatements = medicationStatementService.getMedicationStatementsByPatientFHIRId(
-            tenant,
-            patientFhirId,
-            null,
-            LocalDate.of(2023, 9, 21)
-        )
+        val medicationStatements =
+            medicationStatementService.getMedicationStatementsByPatientFHIRId(
+                tenant,
+                patientFhirId,
+                null,
+                LocalDate.of(2023, 9, 21),
+            )
 
-        val metaLessMedicationStatements = medicationStatements.map {
-            assertNotNull(it.meta?.source)
-            it.copy(meta = null)
-        }
+        val metaLessMedicationStatements =
+            medicationStatements.map {
+                assertNotNull(it.meta?.source)
+                it.copy(meta = null)
+            }
         assertEquals(validMedicationStatementList, metaLessMedicationStatements)
     }
 
@@ -160,14 +170,15 @@ class EpicMedicationStatementTest {
             epicClient.get(
                 tenant,
                 searchUrlPart,
-                mapOf("patient" to patientFhirId, "_count" to 50)
+                mapOf("patient" to patientFhirId, "_count" to 50),
             )
         } returns ehrResponse
 
-        val medicationStatements = medicationStatementService.getMedicationStatementsByPatientFHIRId(
-            tenant,
-            patientFhirId
-        )
+        val medicationStatements =
+            medicationStatementService.getMedicationStatementsByPatientFHIRId(
+                tenant,
+                patientFhirId,
+            )
 
         assertEquals(emptyList<MedicationStatement>(), medicationStatements)
     }

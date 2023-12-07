@@ -5,10 +5,8 @@ import com.projectronin.ehr.dataauthority.models.IdentifierSearchResponse
 import com.projectronin.interop.common.exceptions.VendorIdentifierNotFoundException
 import com.projectronin.interop.fhir.r4.CodeSystem
 
-/**
- * Convenience functions for the return object from Ehr Data Authority's "getResourceIdentifiers" API.
- * Could potentially be moved to EHRDA repo in the future.
- */
+// Convenience functions for the return object from Ehr Data Authority's "getResourceIdentifiers" API.
+// Could potentially be moved to EHRDA repo in the future.
 
 /**
  * Finds the FHIR ID among the list of identifiers

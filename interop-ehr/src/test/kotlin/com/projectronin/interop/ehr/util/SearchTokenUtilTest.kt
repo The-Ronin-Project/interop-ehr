@@ -24,7 +24,7 @@ internal class SearchTokenUtilTest {
         val tokenList = listOf(token1, token2, token3)
         assertEquals(
             "$clinicalSystem|active,resolved,$clinicalSystem|recurrence",
-            tokenList.toOrParams()
+            tokenList.toOrParams(),
         )
     }
 }

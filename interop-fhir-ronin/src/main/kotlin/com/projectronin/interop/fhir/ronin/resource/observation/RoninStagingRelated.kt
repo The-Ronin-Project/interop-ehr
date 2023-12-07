@@ -18,15 +18,15 @@ import org.springframework.stereotype.Component
 class RoninStagingRelated(
     normalizer: Normalizer,
     localizer: Localizer,
-    registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient,
 ) :
     BaseRoninObservation(
-        R4ObservationValidator,
-        RoninProfile.OBSERVATION_STAGING_RELATED.value,
-        normalizer,
-        localizer,
-        registryClient
-    ) {
+            R4ObservationValidator,
+            RoninProfile.OBSERVATION_STAGING_RELATED.value,
+            normalizer,
+            localizer,
+            registryClient,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_26_1
     override val profileVersion = 3
 
@@ -36,13 +36,13 @@ class RoninStagingRelated(
         return (
             (resource.code?.qualifiesForValueSet(qualifyingCodes().codes) == true) &&
                 resource.category.isNotEmpty() && resource.category.any { category -> category.coding.isNotEmpty() }
-            )
+        )
     }
 
     override fun validateSpecificObservation(
         element: Observation,
         parentContext: LocationContext,
-        validation: Validation
+        validation: Validation,
     ) {
         validation.apply {
             element.code?.coding?.let {
@@ -53,9 +53,9 @@ class RoninStagingRelated(
                         severity = ValidationIssueSeverity.ERROR,
                         description = "Coding list must contain exactly 1 entry",
                         location = LocationContext(Observation::code),
-                        metadata = listOf(qualifyingCodes().metadata!!)
+                        metadata = listOf(qualifyingCodes().metadata!!),
                     ),
-                    parentContext
+                    parentContext,
                 )
             }
 
@@ -66,9 +66,9 @@ class RoninStagingRelated(
                     severity = ValidationIssueSeverity.ERROR,
                     description = "Coding is required",
                     location = LocationContext(Observation::category),
-                    metadata = listOf(qualifyingCodes().metadata!!)
+                    metadata = listOf(qualifyingCodes().metadata!!),
                 ),
-                parentContext
+                parentContext,
             )
         }
     }

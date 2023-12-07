@@ -24,22 +24,26 @@ import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
 
 class MDAStageHL7Test {
-    val mdaTenantDO = TenantMDMConfigDO {
-        mdmDocumentTypeID = "3000326"
-        providerIdentifierSystem = "urn:oid:1.2.840.114350.1.13.412.3.7.5.737384.6"
-        receivingSystem = "TenantApplication"
-    }
-    val mdmTenant = mockk<Tenant> {
-        every { mnemonic } returns "mdaoc"
-        every { name } returns "mda"
-        every { vendor } returns mockk<Epic> {
-            every { type } returns VendorType.EPIC
-            every { patientMRNSystem } returns "urn:oid:1.2.840.114350.1.13.412.3.7.5.737384.14"
+    val mdaTenantDO =
+        TenantMDMConfigDO {
+            mdmDocumentTypeID = "3000326"
+            providerIdentifierSystem = "urn:oid:1.2.840.114350.1.13.412.3.7.5.737384.6"
+            receivingSystem = "TenantApplication"
         }
-    }
-    private val mockMDMConfigDAO = mockk<TenantMDMConfigDAO> {
-        every { getByTenantMnemonic(any()) } returns mdaTenantDO
-    }
+    val mdmTenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "mdaoc"
+            every { name } returns "mda"
+            every { vendor } returns
+                mockk<Epic> {
+                    every { type } returns VendorType.EPIC
+                    every { patientMRNSystem } returns "urn:oid:1.2.840.114350.1.13.412.3.7.5.737384.14"
+                }
+        }
+    private val mockMDMConfigDAO =
+        mockk<TenantMDMConfigDAO> {
+            every { getByTenantMnemonic(any()) } returns mdaTenantDO
+        }
     private val mdmConfigService = MDMConfigService(mockMDMConfigDAO)
     val service = MDMService(mdmConfigService)
 
@@ -53,23 +57,29 @@ class MDAStageHL7Test {
         val patient = JacksonUtil.readJsonObject(patientString, Patient::class)
         val practitionerString = this.javaClass.getResource("/mda-stage/practitioner1.json")!!.readText()
         val practitioner = JacksonUtil.readJsonObject(practitionerString, Practitioner::class)
-        val documentReference = DocumentReference(
-            status = Code("notUsed"),
-            docStatus = Code(CompositionStatus.PRELIMINARY.code),
-            date = Instant("2023-05-26T05:43:52.239+02:00"),
-            content = listOf(
-                DocumentReferenceContent(
-                    attachment = Attachment(
-                        data = Base64Binary(
-                            value = "TU9OIDA1LzE1LzIzIDk6MzUgQU0gQ0RUCkxhdXJlbiBEVU1NWQogMzcgeS5vIE1STjogMjgyMjczCi1CbG9hdGluZwogCiBCbG9hdGluZwogCiBGcmVxdWVuY3k6IE9mdGVuCiAKIFNldmVyaXR5OiBNb2RlcmF0ZQogCiBOZXcgcHJvYmxlbTogWWVzCiAKIEludGVyZmVyZXMgd2l0aCBlYXRpbmcgb3IgZHJpbmtpbmc6IFllcwogClBhdGllbnQgYWxzbyB3cm90ZSBpbjoKSSdtIHRha2luZyBtZWRpY2luZSBidXQgSSBuZWVkIG1vcmUgcHJpbG9zZWM="
-                        )
-                    )
-                )
+        val documentReference =
+            DocumentReference(
+                status = Code("notUsed"),
+                docStatus = Code(CompositionStatus.PRELIMINARY.code),
+                date = Instant("2023-05-26T05:43:52.239+02:00"),
+                content =
+                    listOf(
+                        DocumentReferenceContent(
+                            attachment =
+                                Attachment(
+                                    data =
+                                        @Suppress("ktlint:standard:max-line-length")
+                                        Base64Binary(
+                                            value = "TU9OIDA1LzE1LzIzIDk6MzUgQU0gQ0RUCkxhdXJlbiBEVU1NWQogMzcgeS5vIE1STjogMjgyMjczCi1CbG9hdGluZwogCiBCbG9hdGluZwogCiBGcmVxdWVuY3k6IE9mdGVuCiAKIFNldmVyaXR5OiBNb2RlcmF0ZQogCiBOZXcgcHJvYmxlbTogWWVzCiAKIEludGVyZmVyZXMgd2l0aCBlYXRpbmcgb3IgZHJpbmtpbmc6IFllcwogClBhdGllbnQgYWxzbyB3cm90ZSBpbjoKSSdtIHRha2luZyBtZWRpY2luZSBidXQgSSBuZWVkIG1vcmUgcHJpbG9zZWM=",
+                                        ),
+                                ),
+                        ),
+                    ),
             )
-        )
-        val expectedMDM = this.javaClass.getResource("/mda-stage/MDM1.txt")!!
-            .readText()
-            .replace("\n", "\r") // hapi hl7 garbage
+        val expectedMDM =
+            this.javaClass.getResource("/mda-stage/MDM1.txt")!!
+                .readText()
+                .replace("\n", "\r") // hapi hl7 garbage
 
         val mdm = service.generateMDM(patient, practitioner, documentReference, mdmTenant)
         // these are generated during construction, so we have to inject them back

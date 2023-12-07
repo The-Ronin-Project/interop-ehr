@@ -21,7 +21,9 @@ import org.springframework.stereotype.Repository
  * Provides data access operations for Cerner tenant data models.
  */
 @Repository
-class CernerTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTenantDAO {
+class CernerTenantDAO(
+    @Qualifier("ehr") private val database: Database,
+) : EHRTenantDAO {
     override fun insert(ehrTenantDO: EHRTenantDO): CernerTenantDO {
         val cernerTenant = ehrTenantDO as CernerTenantDO
         database.insert(CernerTenantDOs) {
@@ -34,10 +36,11 @@ class CernerTenantDAO(@Qualifier("ehr") private val database: Database) : EHRTen
             set(it.messageCategory, cernerTenant.messageCategory)
             set(it.messagePriority, cernerTenant.messagePriority)
         }
-        val cernerTenants = database.from(CernerTenantDOs)
-            .select()
-            .where(CernerTenantDOs.tenantId eq cernerTenant.tenantId)
-            .map { CernerTenantDOs.createEntity(it) }
+        val cernerTenants =
+            database.from(CernerTenantDOs)
+                .select()
+                .where(CernerTenantDOs.tenantId eq cernerTenant.tenantId)
+                .map { CernerTenantDOs.createEntity(it) }
         return cernerTenants.single()
     }
 

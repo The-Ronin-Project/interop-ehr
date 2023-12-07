@@ -20,7 +20,7 @@ import java.time.format.DateTimeFormatter
 class CernerObservationService(
     cernerClient: CernerClient,
     private val tenantCodesDAO: TenantCodesDAO,
-    @Value("\${cerner.fhir.observation.incrementalLoadDays:60}") private val incrementalLoadDays: Int
+    @Value("\${cerner.fhir.observation.incrementalLoadDays:60}") private val incrementalLoadDays: Int,
 ) : ObservationService, CernerFHIRService<Observation>(cernerClient) {
     override val fhirURLSearchPart = "/Observation"
     override val fhirResourceType = Observation::class.java
@@ -32,19 +32,21 @@ class CernerObservationService(
         patientFhirIds: List<String>,
         observationCategoryCodes: List<FHIRSearchToken>,
         startDate: LocalDate?,
-        endDate: LocalDate?
+        endDate: LocalDate?,
     ): List<Observation> {
         val dateParam =
             getOptionalDateParam(startDate, endDate, tenant) ?: "ge${daysToPastDate(incrementalLoadDays, dateFormat)}"
         // Cerner doesn't support bundling multiple patients together, so run one patient at a time.
-        val observationResponses = patientFhirIds.map {
-            val parameters = mapOf(
-                "patient" to it,
-                "category" to observationCategoryCodes.toOrParams(),
-                "date" to dateParam
-            )
-            getResourceListFromSearch(tenant, parameters)
-        }
+        val observationResponses =
+            patientFhirIds.map {
+                val parameters =
+                    mapOf(
+                        "patient" to it,
+                        "category" to observationCategoryCodes.toOrParams(),
+                        "date" to dateParam,
+                    )
+                getResourceListFromSearch(tenant, parameters)
+            }
         return observationResponses.flatten()
     }
 
@@ -54,7 +56,7 @@ class CernerObservationService(
         patientFhirIds: List<String>,
         observationCategoryCodes: List<ObservationCategoryCodes>,
         startDate: LocalDate?,
-        endDate: LocalDate?
+        endDate: LocalDate?,
     ): List<Observation> {
         val extraCodesToSearch = mutableListOf<String>()
         if (observationCategoryCodes.contains(ObservationCategoryCodes.VITAL_SIGNS)) {
@@ -74,18 +76,20 @@ class CernerObservationService(
         // Cerner doesn't support bundling multiple patients together, so run one patient at a time.
         val observationResponse = mutableListOf<List<Observation>>()
         patientFhirIds.forEach { patientId ->
-            var parameters = mapOf(
-                "patient" to patientId,
-                "category" to observationCategoryCodes.joinToString(separator = ",") { it.code },
-                "date" to dateParam
-            )
+            var parameters =
+                mapOf(
+                    "patient" to patientId,
+                    "category" to observationCategoryCodes.joinToString(separator = ",") { it.code },
+                    "date" to dateParam,
+                )
             observationResponse.add(getResourceListFromSearch(tenant, parameters))
             if (extraCodesToSearch.isNotEmpty()) {
-                parameters = mapOf(
-                    "patient" to patientId,
-                    "code" to extraCodesToSearch.joinToString(separator = ","),
-                    "date" to dateParam
-                )
+                parameters =
+                    mapOf(
+                        "patient" to patientId,
+                        "code" to extraCodesToSearch.joinToString(separator = ","),
+                        "date" to dateParam,
+                    )
                 observationResponse.add(getResourceListFromSearch(tenant, parameters))
             }
         }

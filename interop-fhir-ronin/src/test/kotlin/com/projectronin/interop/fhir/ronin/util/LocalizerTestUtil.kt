@@ -8,9 +8,10 @@ import io.mockk.mockk
 import kotlin.reflect.full.functions
 import kotlin.reflect.jvm.isAccessible
 
-private val tenant = mockk<Tenant> {
-    every { mnemonic } returns "test"
-}
+private val tenant =
+    mockk<Tenant> {
+        every { mnemonic } returns "test"
+    }
 
 private val localizer = Localizer()
 

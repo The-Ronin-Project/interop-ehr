@@ -51,35 +51,39 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 class RoninPractitionerTest {
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
-
-    private val normalizer = mockk<Normalizer> {
-        every { normalize(any(), tenant) } answers { firstArg() }
-    }
-    private val localizer = mockk<Localizer> {
-        every { localize(any(), tenant) } answers { firstArg() }
-    }
-    private val roninContactPoint = mockk<RoninContactPoint> {
-        every { validateRonin(any(), LocationContext(Practitioner::class), any()) } answers { thirdArg() }
-        every { validateUSCore(any(), LocationContext(Practitioner::class), any()) } answers { thirdArg() }
-        every {
-            transform(
-                any(),
-                any<Practitioner>(),
-                tenant,
-                LocationContext(Practitioner::class),
-                any(),
-                any()
-            )
-        } answers {
-            Pair(
-                firstArg(),
-                arg(4)
-            )
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
         }
-    }
+
+    private val normalizer =
+        mockk<Normalizer> {
+            every { normalize(any(), tenant) } answers { firstArg() }
+        }
+    private val localizer =
+        mockk<Localizer> {
+            every { localize(any(), tenant) } answers { firstArg() }
+        }
+    private val roninContactPoint =
+        mockk<RoninContactPoint> {
+            every { validateRonin(any(), LocationContext(Practitioner::class), any()) } answers { thirdArg() }
+            every { validateUSCore(any(), LocationContext(Practitioner::class), any()) } answers { thirdArg() }
+            every {
+                transform(
+                    any(),
+                    any<Practitioner>(),
+                    tenant,
+                    LocationContext(Practitioner::class),
+                    any(),
+                    any(),
+                )
+            } answers {
+                Pair(
+                    firstArg(),
+                    arg(4),
+                )
+            }
+        }
     private val roninPractitioner = RoninPractitioner(normalizer, localizer, roninContactPoint)
 
     @Test
@@ -89,185 +93,201 @@ class RoninPractitionerTest {
 
     @Test
     fun `validate checks ronin identifiers`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-            name = listOf(HumanName(family = "Doe".asFHIR()))
-        )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
+                name = listOf(HumanName(family = "Doe".asFHIR())),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninPractitioner.validate(practitioner).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninPractitioner.validate(practitioner).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_TNNT_ID_001: Tenant identifier is required @ Practitioner.identifier\n" +
                 "ERROR RONIN_FHIR_ID_001: FHIR identifier is required @ Practitioner.identifier\n" +
                 "ERROR RONIN_DAUTH_ID_001: Data Authority identifier required @ Practitioner.identifier",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate fails if no name`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = listOf()
-        )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = listOf(),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninPractitioner.validate(practitioner).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninPractitioner.validate(practitioner).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: name is a required element @ Practitioner.name",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate fails if no family name`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = listOf(HumanName(given = listOf("George".asFHIR())))
-        )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = listOf(HumanName(given = listOf("George".asFHIR()))),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninPractitioner.validate(practitioner).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninPractitioner.validate(practitioner).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: family is a required element @ Practitioner.name[0].family",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate fails for multiple names with no family name`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = listOf(
-                HumanName(given = listOf("George").asFHIR()),
-                HumanName(family = "Smith".asFHIR()),
-                HumanName(given = listOf("John").asFHIR())
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name =
+                    listOf(
+                        HumanName(given = listOf("George").asFHIR()),
+                        HumanName(family = "Smith".asFHIR()),
+                        HumanName(given = listOf("John").asFHIR()),
+                    ),
             )
-        )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninPractitioner.validate(practitioner).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninPractitioner.validate(practitioner).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: family is a required element @ Practitioner.name[0].family\n" +
                 "ERROR REQ_FIELD: family is a required element @ Practitioner.name[2].family",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate checks R4 profile`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = listOf(HumanName(family = "Doe".asFHIR()))
-        )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = listOf(HumanName(family = "Doe".asFHIR())),
+            )
 
         mockkObject(R4PractitionerValidator)
         every {
             R4PractitionerValidator.validate(
                 practitioner,
-                LocationContext(Practitioner::class)
+                LocationContext(Practitioner::class),
             )
-        } returns validation {
-            checkNotNull(
-                null,
-                RequiredFieldError(Practitioner::address),
-                LocationContext(Practitioner::class)
-            )
-        }
+        } returns
+            validation {
+                checkNotNull(
+                    null,
+                    RequiredFieldError(Practitioner::address),
+                    LocationContext(Practitioner::class),
+                )
+            }
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninPractitioner.validate(practitioner).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninPractitioner.validate(practitioner).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: address is a required element @ Practitioner.address",
-            exception.message
+            exception.message,
         )
 
         unmockkObject(R4PractitionerValidator)
@@ -275,67 +295,73 @@ class RoninPractitionerTest {
 
     @Test
     fun `validate checks meta`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = listOf(HumanName(family = "Doe".asFHIR()))
-        )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = listOf(HumanName(family = "Doe".asFHIR())),
+            )
 
-        val exception = assertThrows<IllegalArgumentException> {
-            roninPractitioner.validate(practitioner).alertIfErrors()
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninPractitioner.validate(practitioner).alertIfErrors()
+            }
 
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR REQ_FIELD: meta is a required element @ Practitioner.meta",
-            exception.message
+            exception.message,
         )
     }
 
     @Test
     fun `validate checks telecom if provided`() {
-        val telecoms = listOf(
-            ContactPoint(system = Code("email"), value = FHIRString("value"))
-        )
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
-            telecom = telecoms
-        )
+        val telecoms =
+            listOf(
+                ContactPoint(system = Code("email"), value = FHIRString("value")),
+            )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = listOf(HumanName(family = "Doe".asFHIR())),
+                telecom = telecoms,
+            )
 
         roninPractitioner.validate(practitioner).alertIfErrors()
 
@@ -343,42 +369,44 @@ class RoninPractitionerTest {
             roninContactPoint.validateRonin(
                 telecoms,
                 LocationContext(Practitioner::class),
-                any()
+                any(),
             )
         }
         verify(exactly = 1) {
             roninContactPoint.validateUSCore(
                 telecoms,
                 LocationContext(Practitioner::class),
-                any()
+                any(),
             )
         }
     }
 
     @Test
     fun `validate succeeds`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-            identifier = listOf(
-                Identifier(
-                    type = CodeableConcepts.RONIN_TENANT,
-                    system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_FHIR_ID,
-                    system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
-                ),
-                Identifier(
-                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
-            ),
-            name = listOf(HumanName(family = "Doe".asFHIR()))
-        )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                name = listOf(HumanName(family = "Doe".asFHIR())),
+            )
 
         roninPractitioner.validate(practitioner).alertIfErrors()
     }
@@ -393,39 +421,43 @@ class RoninPractitionerTest {
 
     @Test
     fun `transforms practitioner with all attributes`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(
-                profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner")),
-                source = Uri("source")
-            ),
-            implicitRules = Uri("implicit-rules"),
-            language = Code("en-US"),
-            text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
-            contained = listOf(Location(id = Id("67890"))),
-            extension = listOf(
-                Extension(
-                    url = Uri("http://localhost/extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            modifierExtension = listOf(
-                Extension(
-                    url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
-            ),
-            identifier = listOf(Identifier(value = "id".asFHIR())),
-            active = FHIRBoolean.TRUE,
-            name = listOf(HumanName(family = "Doe".asFHIR())),
-            telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR())),
-            address = listOf(Address(country = "USA".asFHIR())),
-            gender = AdministrativeGender.FEMALE.asCode(),
-            birthDate = Date("1975-07-05"),
-            photo = listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
-            qualification = listOf(Qualification(code = CodeableConcept(text = "code".asFHIR()))),
-            communication = listOf(CodeableConcept(text = "communication".asFHIR()))
-        )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta =
+                    Meta(
+                        profile = listOf(Canonical("https://www.hl7.org/fhir/practitioner")),
+                        source = Uri("source"),
+                    ),
+                implicitRules = Uri("implicit-rules"),
+                language = Code("en-US"),
+                text = Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()),
+                contained = listOf(Location(id = Id("67890"))),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
+                modifierExtension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://localhost/modifier-extension"),
+                            value = DynamicValue(DynamicValueType.STRING, "Value"),
+                        ),
+                    ),
+                identifier = listOf(Identifier(value = "id".asFHIR())),
+                active = FHIRBoolean.TRUE,
+                name = listOf(HumanName(family = "Doe".asFHIR())),
+                telecom = listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR())),
+                address = listOf(Address(country = "USA".asFHIR())),
+                gender = AdministrativeGender.FEMALE.asCode(),
+                birthDate = Date("1975-07-05"),
+                photo = listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
+                qualification = listOf(Qualification(code = CodeableConcept(text = "code".asFHIR()))),
+                communication = listOf(CodeableConcept(text = "communication".asFHIR())),
+            )
 
         val (transformResponse, validation) = roninPractitioner.transform(practitioner, tenant)
         validation.alertIfErrors()
@@ -438,32 +470,32 @@ class RoninPractitionerTest {
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertEquals(Uri("implicit-rules"), transformed.implicitRules)
         assertEquals(Code("en-US"), transformed.language)
         assertEquals(Narrative(status = NarrativeStatus.GENERATED.asCode(), div = "div".asFHIR()), transformed.text)
         assertEquals(
             listOf(Location(id = Id("67890"))),
-            transformed.contained
+            transformed.contained,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://localhost/extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "Value"),
+                ),
             ),
-            transformed.extension
+            transformed.extension,
         )
         assertEquals(
             listOf(
                 Extension(
                     url = Uri("http://localhost/modifier-extension"),
-                    value = DynamicValue(DynamicValueType.STRING, "Value")
-                )
+                    value = DynamicValue(DynamicValueType.STRING, "Value"),
+                ),
             ),
-            transformed.modifierExtension
+            transformed.modifierExtension,
         )
         assertEquals(
             listOf(
@@ -471,33 +503,33 @@ class RoninPractitionerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertEquals(FHIRBoolean.TRUE, transformed.active)
         assertEquals(listOf(HumanName(family = "Doe".asFHIR())), transformed.name)
         assertEquals(
             listOf(ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR())),
-            transformed.telecom
+            transformed.telecom,
         )
         assertEquals(listOf(Address(country = "USA".asFHIR())), transformed.address)
         assertEquals(AdministrativeGender.FEMALE.asCode(), transformed.gender)
         assertEquals(Date("1975-07-05"), transformed.birthDate)
         assertEquals(
             listOf(Attachment(contentType = Code("text"), data = Base64Binary("abcd"))),
-            transformed.photo
+            transformed.photo,
         )
         assertEquals(listOf(Qualification(code = CodeableConcept(text = "code".asFHIR()))), transformed.qualification)
         assertEquals(listOf(CodeableConcept(text = "communication".asFHIR())), transformed.communication)
@@ -505,11 +537,12 @@ class RoninPractitionerTest {
 
     @Test
     fun `transforms practitioner with only required attributes`() {
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            name = listOf(HumanName(family = "Doe".asFHIR()))
-        )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                name = listOf(HumanName(family = "Doe".asFHIR())),
+            )
 
         val (transformResponse, validation) = roninPractitioner.transform(practitioner, tenant)
         validation.alertIfErrors()
@@ -522,7 +555,7 @@ class RoninPractitionerTest {
         assertEquals(Id("12345"), transformed.id)
         assertEquals(
             Meta(profile = listOf(Canonical(RoninProfile.PRACTITIONER.value)), source = Uri("source")),
-            transformed.meta
+            transformed.meta,
         )
         assertNull(transformed.implicitRules)
         assertNull(transformed.language)
@@ -535,20 +568,20 @@ class RoninPractitionerTest {
                 Identifier(
                     type = CodeableConcepts.RONIN_FHIR_ID,
                     system = CodeSystem.RONIN_FHIR_ID.uri,
-                    value = "12345".asFHIR()
+                    value = "12345".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_TENANT,
                     system = CodeSystem.RONIN_TENANT.uri,
-                    value = "test".asFHIR()
+                    value = "test".asFHIR(),
                 ),
                 Identifier(
                     type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                     system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                    value = "EHR Data Authority".asFHIR()
-                )
+                    value = "EHR Data Authority".asFHIR(),
+                ),
             ),
-            transformed.identifier
+            transformed.identifier,
         )
         assertNull(transformed.active)
         assertEquals(listOf(HumanName(family = "Doe".asFHIR())), transformed.name)
@@ -571,21 +604,22 @@ class RoninPractitionerTest {
                 tenant,
                 LocationContext(Practitioner::class),
                 any(),
-                any()
+                any(),
             )
         } answers {
             Pair(
                 emptyList(),
-                arg(4)
+                arg(4),
             )
         }
 
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
-            telecom = initialTelecoms
-        )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                name = listOf(HumanName(family = "Doe".asFHIR())),
+                telecom = initialTelecoms,
+            )
 
         val (transformResponse, validation) = roninPractitioner.transform(practitioner, tenant)
         validation.alertIfErrors()
@@ -599,16 +633,18 @@ class RoninPractitionerTest {
 
     @Test
     fun `transforms practitioner with some telecoms filtered`() {
-        val initialTelecoms = listOf(
-            ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
-            ContactPoint(id = "second".asFHIR()),
-            ContactPoint(id = "third".asFHIR()),
-            ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR())
-        )
-        val finalTelecoms = listOf(
-            ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
-            ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR())
-        )
+        val initialTelecoms =
+            listOf(
+                ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
+                ContactPoint(id = "second".asFHIR()),
+                ContactPoint(id = "third".asFHIR()),
+                ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR()),
+            )
+        val finalTelecoms =
+            listOf(
+                ContactPoint(system = ContactPointSystem.PHONE.asCode(), value = "8675309".asFHIR()),
+                ContactPoint(system = ContactPointSystem.EMAIL.asCode(), value = "doctor@hospital.org".asFHIR()),
+            )
         every {
             roninContactPoint.transform(
                 initialTelecoms,
@@ -616,20 +652,21 @@ class RoninPractitionerTest {
                 tenant,
                 LocationContext(Practitioner::class),
                 any(),
-                any()
+                any(),
             )
         } answers {
             Pair(
                 finalTelecoms,
-                arg(4)
+                arg(4),
             )
         }
-        val practitioner = Practitioner(
-            id = Id("12345"),
-            meta = Meta(source = Uri("source")),
-            name = listOf(HumanName(family = "Doe".asFHIR())),
-            telecom = initialTelecoms
-        )
+        val practitioner =
+            Practitioner(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                name = listOf(HumanName(family = "Doe".asFHIR())),
+                telecom = initialTelecoms,
+            )
 
         val (transformResponse, validation) = roninPractitioner.transform(practitioner, tenant)
         validation.alertIfErrors()

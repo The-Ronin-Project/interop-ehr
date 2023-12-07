@@ -45,39 +45,45 @@ class ValidationClientTest {
 
     @Test
     fun `reports resource with single issue`() {
-        val issue = mockk<ValidationIssue> {
-            every { severity } returns ValidationIssueSeverity.ERROR
-            every { code } returns "Error Code"
-            every { description } returns "Error Description"
-            every { location } returns LocationContext(Patient::name)
-            every { metadata } returns null
-        }
-        val validation = mockk<Validation> {
-            every { issues() } returns listOf(issue)
-        }
+        val issue =
+            mockk<ValidationIssue> {
+                every { severity } returns ValidationIssueSeverity.ERROR
+                every { code } returns "Error Code"
+                every { description } returns "Error Description"
+                every { location } returns LocationContext(Patient::name)
+                every { metadata } returns null
+            }
+        val validation =
+            mockk<Validation> {
+                every { issues() } returns listOf(issue)
+            }
 
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "test"
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns "test"
+            }
 
-        val resource = mockk<Patient>() {
-            every { resourceType } returns "Patient"
-        }
+        val resource =
+            mockk<Patient> {
+                every { resourceType } returns "Patient"
+            }
         every { jsonMapper.writeValueAsString(resource) } returns "{}"
 
-        val expectedResource = NewResource(
-            organizationId = "test",
-            resourceType = "Patient",
-            resource = "{}",
-            issues = listOf(
-                NewIssue(
-                    severity = Severity.FAILED,
-                    type = "Error Code",
-                    description = "Error Description",
-                    location = "Patient.name"
-                )
+        val expectedResource =
+            NewResource(
+                organizationId = "test",
+                resourceType = "Patient",
+                resource = "{}",
+                issues =
+                    listOf(
+                        NewIssue(
+                            severity = Severity.FAILED,
+                            type = "Error Code",
+                            description = "Error Description",
+                            location = "Patient.name",
+                        ),
+                    ),
             )
-        )
         val uuid = UUID.randomUUID()
         coEvery { resourceClient.addResource(expectedResource) } returns GeneratedId(uuid)
 
@@ -87,52 +93,59 @@ class ValidationClientTest {
 
     @Test
     fun `reports resource with multiple issues`() {
-        val issue1 = mockk<ValidationIssue> {
-            every { severity } returns ValidationIssueSeverity.ERROR
-            every { code } returns "Error Code"
-            every { description } returns "Error Description"
-            every { location } returns LocationContext(Patient::name)
-            every { metadata } returns null
-        }
-        val issue2 = mockk<ValidationIssue> {
-            every { severity } returns ValidationIssueSeverity.WARNING
-            every { code } returns "Error Code 2"
-            every { description } returns "Error Description 2"
-            every { location } returns LocationContext(Patient::identifier)
-            every { metadata } returns null
-        }
-        val validation = mockk<Validation> {
-            every { issues() } returns listOf(issue1, issue2)
-        }
+        val issue1 =
+            mockk<ValidationIssue> {
+                every { severity } returns ValidationIssueSeverity.ERROR
+                every { code } returns "Error Code"
+                every { description } returns "Error Description"
+                every { location } returns LocationContext(Patient::name)
+                every { metadata } returns null
+            }
+        val issue2 =
+            mockk<ValidationIssue> {
+                every { severity } returns ValidationIssueSeverity.WARNING
+                every { code } returns "Error Code 2"
+                every { description } returns "Error Description 2"
+                every { location } returns LocationContext(Patient::identifier)
+                every { metadata } returns null
+            }
+        val validation =
+            mockk<Validation> {
+                every { issues() } returns listOf(issue1, issue2)
+            }
 
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "test"
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns "test"
+            }
 
-        val resource = mockk<Patient>() {
-            every { resourceType } returns "Patient"
-        }
+        val resource =
+            mockk<Patient> {
+                every { resourceType } returns "Patient"
+            }
         every { jsonMapper.writeValueAsString(resource) } returns "{}"
 
-        val expectedResource = NewResource(
-            organizationId = "test",
-            resourceType = "Patient",
-            resource = "{}",
-            issues = listOf(
-                NewIssue(
-                    severity = Severity.FAILED,
-                    type = "Error Code",
-                    description = "Error Description",
-                    location = "Patient.name"
-                ),
-                NewIssue(
-                    severity = Severity.WARNING,
-                    type = "Error Code 2",
-                    description = "Error Description 2",
-                    location = "Patient.identifier"
-                )
+        val expectedResource =
+            NewResource(
+                organizationId = "test",
+                resourceType = "Patient",
+                resource = "{}",
+                issues =
+                    listOf(
+                        NewIssue(
+                            severity = Severity.FAILED,
+                            type = "Error Code",
+                            description = "Error Description",
+                            location = "Patient.name",
+                        ),
+                        NewIssue(
+                            severity = Severity.WARNING,
+                            type = "Error Code 2",
+                            description = "Error Description 2",
+                            location = "Patient.identifier",
+                        ),
+                    ),
             )
-        )
         val uuid = UUID.randomUUID()
         coEvery { resourceClient.addResource(expectedResource) } returns GeneratedId(uuid)
 
@@ -142,35 +155,40 @@ class ValidationClientTest {
 
     @Test
     fun `reports resource using just mnemonic`() {
-        val issue = mockk<ValidationIssue> {
-            every { severity } returns ValidationIssueSeverity.ERROR
-            every { code } returns "Error Code"
-            every { description } returns "Error Description"
-            every { location } returns LocationContext(Patient::name)
-            every { metadata } returns null
-        }
-        val validation = mockk<Validation> {
-            every { issues() } returns listOf(issue)
-        }
+        val issue =
+            mockk<ValidationIssue> {
+                every { severity } returns ValidationIssueSeverity.ERROR
+                every { code } returns "Error Code"
+                every { description } returns "Error Description"
+                every { location } returns LocationContext(Patient::name)
+                every { metadata } returns null
+            }
+        val validation =
+            mockk<Validation> {
+                every { issues() } returns listOf(issue)
+            }
 
-        val resource = mockk<Patient>() {
-            every { resourceType } returns "Patient"
-        }
+        val resource =
+            mockk<Patient> {
+                every { resourceType } returns "Patient"
+            }
         every { jsonMapper.writeValueAsString(resource) } returns "{}"
 
-        val expectedResource = NewResource(
-            organizationId = "tenant",
-            resourceType = "Patient",
-            resource = "{}",
-            issues = listOf(
-                NewIssue(
-                    severity = Severity.FAILED,
-                    type = "Error Code",
-                    description = "Error Description",
-                    location = "Patient.name"
-                )
+        val expectedResource =
+            NewResource(
+                organizationId = "tenant",
+                resourceType = "Patient",
+                resource = "{}",
+                issues =
+                    listOf(
+                        NewIssue(
+                            severity = Severity.FAILED,
+                            type = "Error Code",
+                            description = "Error Description",
+                            location = "Patient.name",
+                        ),
+                    ),
             )
-        )
         val uuid = UUID.randomUUID()
         coEvery { resourceClient.addResource(expectedResource) } returns GeneratedId(uuid)
 
@@ -180,53 +198,61 @@ class ValidationClientTest {
 
     @Test
     fun `testing concept map metadata`() {
-        val meta = mockk<ConceptMapMetadata> {
-            every { registryEntryType } returns "concept-map"
-            every { conceptMapName } returns "test-concept-map"
-            every { conceptMapUuid } returns "573b456efca5-03d51d53-1a31-49a9-af74"
-            every { version } returns "1"
-        }
-        val issue = mockk<ValidationIssue> {
-            every { severity } returns ValidationIssueSeverity.ERROR
-            every { code } returns "Error Code"
-            every { description } returns "Error Description"
-            every { location } returns LocationContext(Patient::name)
-            every { metadata } returns listOf(meta)
-        }
-        val validation = mockk<Validation> {
-            every { issues() } returns listOf(issue)
-        }
+        val meta =
+            mockk<ConceptMapMetadata> {
+                every { registryEntryType } returns "concept-map"
+                every { conceptMapName } returns "test-concept-map"
+                every { conceptMapUuid } returns "573b456efca5-03d51d53-1a31-49a9-af74"
+                every { version } returns "1"
+            }
+        val issue =
+            mockk<ValidationIssue> {
+                every { severity } returns ValidationIssueSeverity.ERROR
+                every { code } returns "Error Code"
+                every { description } returns "Error Description"
+                every { location } returns LocationContext(Patient::name)
+                every { metadata } returns listOf(meta)
+            }
+        val validation =
+            mockk<Validation> {
+                every { issues() } returns listOf(issue)
+            }
 
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "test"
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns "test"
+            }
 
-        val resource = mockk<Patient>() {
-            every { resourceType } returns "Patient"
-        }
+        val resource =
+            mockk<Patient> {
+                every { resourceType } returns "Patient"
+            }
         every { jsonMapper.writeValueAsString(resource) } returns "{}"
 
-        val expectedResource = NewResource(
-            organizationId = "test",
-            resourceType = "Patient",
-            resource = "{}",
-            issues = listOf(
-                NewIssue(
-                    severity = Severity.FAILED,
-                    type = "Error Code",
-                    description = "Error Description",
-                    location = "Patient.name",
-                    metadata = listOf(
-                        NewMetadata(
-                            registryEntryType = "concept-map",
-                            conceptMapName = "test-concept-map",
-                            conceptMapUuid = UUID.fromString("573b456efca5-03d51d53-1a31-49a9-af74"),
-                            version = "1"
-                        )
-                    )
-                )
+        val expectedResource =
+            NewResource(
+                organizationId = "test",
+                resourceType = "Patient",
+                resource = "{}",
+                issues =
+                    listOf(
+                        NewIssue(
+                            severity = Severity.FAILED,
+                            type = "Error Code",
+                            description = "Error Description",
+                            location = "Patient.name",
+                            metadata =
+                                listOf(
+                                    NewMetadata(
+                                        registryEntryType = "concept-map",
+                                        conceptMapName = "test-concept-map",
+                                        conceptMapUuid = UUID.fromString("573b456efca5-03d51d53-1a31-49a9-af74"),
+                                        version = "1",
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
         val uuid = UUID.randomUUID()
         coEvery { resourceClient.addResource(expectedResource) } returns GeneratedId(uuid)
 
@@ -236,53 +262,61 @@ class ValidationClientTest {
 
     @Test
     fun `testing value set metadata`() {
-        val meta = mockk<ValueSetMetadata> {
-            every { registryEntryType } returns "value_set"
-            every { valueSetName } returns "test-value-set"
-            every { valueSetUuid } returns "573b456efca5-03d51d53-1a31-49a9-af74"
-            every { version } returns "1"
-        }
-        val issue = mockk<ValidationIssue> {
-            every { severity } returns ValidationIssueSeverity.ERROR
-            every { code } returns "Error Code"
-            every { description } returns "Error Description"
-            every { location } returns LocationContext(Patient::name)
-            every { metadata } returns listOf(meta)
-        }
-        val validation = mockk<Validation> {
-            every { issues() } returns listOf(issue)
-        }
+        val meta =
+            mockk<ValueSetMetadata> {
+                every { registryEntryType } returns "value_set"
+                every { valueSetName } returns "test-value-set"
+                every { valueSetUuid } returns "573b456efca5-03d51d53-1a31-49a9-af74"
+                every { version } returns "1"
+            }
+        val issue =
+            mockk<ValidationIssue> {
+                every { severity } returns ValidationIssueSeverity.ERROR
+                every { code } returns "Error Code"
+                every { description } returns "Error Description"
+                every { location } returns LocationContext(Patient::name)
+                every { metadata } returns listOf(meta)
+            }
+        val validation =
+            mockk<Validation> {
+                every { issues() } returns listOf(issue)
+            }
 
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "test"
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns "test"
+            }
 
-        val resource = mockk<Patient>() {
-            every { resourceType } returns "Patient"
-        }
+        val resource =
+            mockk<Patient> {
+                every { resourceType } returns "Patient"
+            }
         every { jsonMapper.writeValueAsString(resource) } returns "{}"
 
-        val expectedResource = NewResource(
-            organizationId = "test",
-            resourceType = "Patient",
-            resource = "{}",
-            issues = listOf(
-                NewIssue(
-                    severity = Severity.FAILED,
-                    type = "Error Code",
-                    description = "Error Description",
-                    location = "Patient.name",
-                    metadata = listOf(
-                        NewMetadata(
-                            registryEntryType = "value_set",
-                            valueSetName = "test-value-set",
-                            valueSetUuid = UUID.fromString("573b456efca5-03d51d53-1a31-49a9-af74"),
-                            version = "1"
-                        )
-                    )
-                )
+        val expectedResource =
+            NewResource(
+                organizationId = "test",
+                resourceType = "Patient",
+                resource = "{}",
+                issues =
+                    listOf(
+                        NewIssue(
+                            severity = Severity.FAILED,
+                            type = "Error Code",
+                            description = "Error Description",
+                            location = "Patient.name",
+                            metadata =
+                                listOf(
+                                    NewMetadata(
+                                        registryEntryType = "value_set",
+                                        valueSetName = "test-value-set",
+                                        valueSetUuid = UUID.fromString("573b456efca5-03d51d53-1a31-49a9-af74"),
+                                        version = "1",
+                                    ),
+                                ),
+                        ),
+                    ),
             )
-        )
         val uuid = UUID.randomUUID()
         coEvery { resourceClient.addResource(expectedResource) } returns GeneratedId(uuid)
 
@@ -292,46 +326,53 @@ class ValidationClientTest {
 
     @Test
     fun `testing empty metadata`() {
-        val meta = mockk<ValueSetMetadata> {
-            every { registryEntryType } returns "potato-set"
-            every { valueSetName } returns "test-value-set"
-            every { valueSetUuid } returns "573b456efca5-03d51d53-1a31-49a9-af74"
-            every { version } returns "1"
-        }
-        val issue = mockk<ValidationIssue> {
-            every { severity } returns ValidationIssueSeverity.ERROR
-            every { code } returns "Error Code"
-            every { description } returns "Error Description"
-            every { location } returns LocationContext(Patient::name)
-            every { metadata } returns listOf(meta)
-        }
-        val validation = mockk<Validation> {
-            every { issues() } returns listOf(issue)
-        }
+        val meta =
+            mockk<ValueSetMetadata> {
+                every { registryEntryType } returns "potato-set"
+                every { valueSetName } returns "test-value-set"
+                every { valueSetUuid } returns "573b456efca5-03d51d53-1a31-49a9-af74"
+                every { version } returns "1"
+            }
+        val issue =
+            mockk<ValidationIssue> {
+                every { severity } returns ValidationIssueSeverity.ERROR
+                every { code } returns "Error Code"
+                every { description } returns "Error Description"
+                every { location } returns LocationContext(Patient::name)
+                every { metadata } returns listOf(meta)
+            }
+        val validation =
+            mockk<Validation> {
+                every { issues() } returns listOf(issue)
+            }
 
-        val tenant = mockk<Tenant> {
-            every { mnemonic } returns "test"
-        }
+        val tenant =
+            mockk<Tenant> {
+                every { mnemonic } returns "test"
+            }
 
-        val resource = mockk<Patient>() {
-            every { resourceType } returns "Patient"
-        }
+        val resource =
+            mockk<Patient> {
+                every { resourceType } returns "Patient"
+            }
         every { jsonMapper.writeValueAsString(resource) } returns "{}"
 
-        val expectedResource = NewResource(
-            organizationId = "test",
-            resourceType = "Patient",
-            resource = "{}",
-            issues = listOf(
-                NewIssue(
-                    severity = Severity.FAILED,
-                    type = "Error Code",
-                    description = "Error Description",
-                    location = "Patient.name",
-                    metadata = listOf(NewMetadata())
-                )
+        val expectedResource =
+            NewResource(
+                organizationId = "test",
+                resourceType = "Patient",
+                resource = "{}",
+                issues =
+                    listOf(
+                        NewIssue(
+                            severity = Severity.FAILED,
+                            type = "Error Code",
+                            description = "Error Description",
+                            location = "Patient.name",
+                            metadata = listOf(NewMetadata()),
+                        ),
+                    ),
             )
-        )
         val uuid = UUID.randomUUID()
         coEvery { resourceClient.addResource(expectedResource) } returns GeneratedId(uuid)
 

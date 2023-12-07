@@ -20,7 +20,7 @@ class TenantService(
     private val tenantDAO: TenantDAO,
     private val ehrDAO: EhrDAO,
     private val ehrTenantDAOFactory: EHRTenantDAOFactory,
-    private val tenantCodesDao: TenantCodesDAO
+    private val tenantCodesDao: TenantCodesDAO,
 ) {
     private val logger = KotlinLogging.logger { }
 
@@ -74,11 +74,13 @@ class TenantService(
 
         val allEhrDAO = VendorType.values().map { ehrTenantDAOFactory.getEHRTenantDAOByVendorType(it) }
 
-        val ehrTenantDOListMap = allEhrDAO.map {
-            it.getAll().associateBy { it.tenantId }
-        }
-        val ehrTenantDOMap = ehrTenantDOListMap.flatMap { it.entries }
-            .associate { it.key to it.value }
+        val ehrTenantDOListMap =
+            allEhrDAO.map {
+                it.getAll().associateBy { it.tenantId }
+            }
+        val ehrTenantDOMap =
+            ehrTenantDOListMap.flatMap { it.entries }
+                .associate { it.key to it.value }
 
         logger.debug { "Found ${ehrTenantDOMap.size} EhrTenantDOs" }
 
@@ -96,8 +98,9 @@ class TenantService(
     fun insertTenant(tenant: Tenant): Tenant {
         logger.info { "Creating new tenant for mnemonic : ${tenant.mnemonic}" }
 
-        val ehrDO = ehrDAO.getByInstance(tenant.vendor.instanceName)
-            ?: throw NoEHRFoundException("No EHR found with instance: ${tenant.vendor.instanceName}")
+        val ehrDO =
+            ehrDAO.getByInstance(tenant.vendor.instanceName)
+                ?: throw NoEHRFoundException("No EHR found with instance: ${tenant.vendor.instanceName}")
 
         val newTenantDO = tenant.toTenantDO(ehrDO)
         logger.debug { "Inserting into tenantDAO" }
@@ -118,10 +121,12 @@ class TenantService(
     fun updateTenant(tenant: Tenant): Tenant {
         logger.info { "Updating tenant for mnemonic : ${tenant.mnemonic}" }
 
-        val existingId = tenantDAO.getTenantForId(tenant.internalId)?.id
-            ?: throw NoTenantFoundException("No tenant found with id: ${tenant.internalId}")
-        val ehrDO = ehrDAO.getByInstance(tenant.vendor.instanceName)
-            ?: throw NoEHRFoundException("No EHR found with instance: ${tenant.vendor.instanceName}")
+        val existingId =
+            tenantDAO.getTenantForId(tenant.internalId)?.id
+                ?: throw NoTenantFoundException("No tenant found with id: ${tenant.internalId}")
+        val ehrDO =
+            ehrDAO.getByInstance(tenant.vendor.instanceName)
+                ?: throw NoEHRFoundException("No EHR found with instance: ${tenant.vendor.instanceName}")
 
         val updatedTenantDO = tenant.toTenantDO(ehrDO)
         updatedTenantDO.id = existingId

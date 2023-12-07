@@ -18,22 +18,26 @@ import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
+@Suppress("ktlint:standard:max-line-length")
 class RoninReferenceUtilTest {
     private val subjectOptions = listOf("Location", "Group")
     private val subject = ReferenceGenerator()
     private lateinit var roninObs: RoninObservation
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "test"
-    }
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "test"
+        }
 
     @BeforeEach
     fun setup() {
-        val normalizer: Normalizer = mockk {
-            every { normalize(any(), tenant) } answers { firstArg() }
-        }
-        val localizer: Localizer = mockk {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
+        val normalizer: Normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        val localizer: Localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
         roninObs = RoninObservation(normalizer, localizer, mockk())
     }
 
@@ -162,12 +166,13 @@ class RoninReferenceUtilTest {
         assertEquals("Practitioner/123", subjectReference.reference?.value)
         assertNull(subjectReference.type)
 
-        val exception = assertThrows<IllegalArgumentException> {
-            generateReference(subjectReference, subjectOptions, tenant.mnemonic, "Patient", "")
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                generateReference(subjectReference, subjectOptions, tenant.mnemonic, "Patient", "")
+            }
         assertEquals(
             "Patient is not one of Location, Group",
-            exception.message
+            exception.message,
         )
     }
 
@@ -177,12 +182,13 @@ class RoninReferenceUtilTest {
         assertEquals("Practitioner/123", subjectReference.reference?.value)
         assertNull(subjectReference.type)
 
-        val exception = assertThrows<IllegalArgumentException> {
-            generateReference(subjectReference, subjectOptions, tenant.mnemonic, "Patient", "")
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                generateReference(subjectReference, subjectOptions, tenant.mnemonic, "Patient", "")
+            }
         assertEquals(
             "Patient is not one of Location, Group",
-            exception.message
+            exception.message,
         )
     }
 
@@ -199,12 +205,13 @@ class RoninReferenceUtilTest {
     fun `throw error from generate optional reference with bad (non-empty) initial input and type is not in allowed types and non-null id`() {
         val subjectReference = Reference(reference = "ref".asFHIR())
 
-        val exception = assertThrows<IllegalArgumentException> {
-            generateOptionalReference(subjectReference, listOf("Patient"), "test", "Practitioner", "1234")
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                generateOptionalReference(subjectReference, listOf("Patient"), "test", "Practitioner", "1234")
+            }
         assertEquals(
             "Practitioner is not Patient",
-            exception.message
+            exception.message,
         )
     }
 
@@ -221,12 +228,13 @@ class RoninReferenceUtilTest {
     fun `throw error from generate optional reference with bad (non-empty) initial input and type is not in allowed types and empty id`() {
         val subjectReference = Reference(reference = "ref".asFHIR())
 
-        val exception = assertThrows<IllegalArgumentException> {
-            generateOptionalReference(subjectReference, listOf("Patient"), "test", "Practitioner", "")
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                generateOptionalReference(subjectReference, listOf("Patient"), "test", "Practitioner", "")
+            }
         assertEquals(
             "Practitioner is not Patient",
-            exception.message
+            exception.message,
         )
     }
 
@@ -243,12 +251,13 @@ class RoninReferenceUtilTest {
     fun `throw error from optional reference with bad (non-empty) initial input and type is not in allowed types and non-null id`() {
         val subjectReference = Reference(reference = "ref".asFHIR())
 
-        val exception = assertThrows<IllegalArgumentException> {
-            generateOptionalReference(subjectReference, listOf("Patient"), "test", "Practitioner", "1234")
-        }
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                generateOptionalReference(subjectReference, listOf("Patient"), "test", "Practitioner", "1234")
+            }
         assertEquals(
             "Practitioner is not Patient",
-            exception.message
+            exception.message,
         )
     }
 }

@@ -9,31 +9,34 @@ import org.junit.jupiter.api.Test
 class GetProviderAppointmentRequestTest {
     @Test
     fun `can serialize and deserialize JSON`() {
-        val getProviderAppointmentRequest = GetProviderAppointmentRequest(
-            userID = "1",
-            userIDType = "External",
-            startDate = "t-7",
-            endDate = "t",
-            combineDepartments = "true",
-            resourceType = "",
-            specialty = "",
-            extraItems = listOf(),
-            providers = listOf(
-                ScheduleProvider(
-                    id = "E1000",
-                    idType = "external",
-                    departmentID = "",
-                    departmentIDType = ""
-                )
-            ),
-            departments = listOf(),
-            subgroups = listOf(),
-            extraExtensions = listOf()
-        )
+        val getProviderAppointmentRequest =
+            GetProviderAppointmentRequest(
+                userID = "1",
+                userIDType = "External",
+                startDate = "t-7",
+                endDate = "t",
+                combineDepartments = "true",
+                resourceType = "",
+                specialty = "",
+                extraItems = listOf(),
+                providers =
+                    listOf(
+                        ScheduleProvider(
+                            id = "E1000",
+                            idType = "external",
+                            departmentID = "",
+                            departmentIDType = "",
+                        ),
+                    ),
+                departments = listOf(),
+                subgroups = listOf(),
+                extraExtensions = listOf(),
+            )
         val actualJson =
             jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(getProviderAppointmentRequest)
 
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "UserID" : "1",
               "UserIDType" : "External",
@@ -54,7 +57,7 @@ class GetProviderAppointmentRequestTest {
               "ExtraExtensions" : [ ],
               "IncludeAllStatuses" : "true"
             }
-        """.trimIndent()
+            """.trimIndent()
         assertEquals(expectedJson, actualJson)
 
         val deserializedProviderAppointmentRequest =
@@ -64,21 +67,24 @@ class GetProviderAppointmentRequestTest {
 
     @Test
     fun `can serialize and deserialize with default values`() {
-        val getProviderAppointmentRequest = GetProviderAppointmentRequest(
-            userID = "1",
-            startDate = "t-7",
-            endDate = "t",
-            providers = listOf(
-                ScheduleProvider(
-                    id = "E1000",
-                    idType = "external"
-                )
+        val getProviderAppointmentRequest =
+            GetProviderAppointmentRequest(
+                userID = "1",
+                startDate = "t-7",
+                endDate = "t",
+                providers =
+                    listOf(
+                        ScheduleProvider(
+                            id = "E1000",
+                            idType = "external",
+                        ),
+                    ),
             )
-        )
         val actualJson =
             jacksonObjectMapper().writerWithDefaultPrettyPrinter().writeValueAsString(getProviderAppointmentRequest)
 
-        val expectedJson = """
+        val expectedJson =
+            """
             {
               "UserID" : "1",
               "UserIDType" : "External",
@@ -99,7 +105,7 @@ class GetProviderAppointmentRequestTest {
               "ExtraExtensions" : [ ],
               "IncludeAllStatuses" : "true"
             }
-        """.trimIndent()
+            """.trimIndent()
         assertEquals(expectedJson, actualJson)
 
         val deserializedProviderAppointmentRequest =

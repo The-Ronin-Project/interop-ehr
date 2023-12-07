@@ -18,24 +18,25 @@ class RoninConditionProblemsAndHealthConcerns(
     localizer: Localizer,
     registryClient: NormalizationRegistryClient,
     @Value("\${ronin.fhir.conditions.tenantsNotConditionMapped:mdaoc,1xrekpx5}")
-    tenantsNotConditionMapped: String
+    tenantsNotConditionMapped: String,
 ) :
     BaseRoninCondition(
-        R4ConditionValidator,
-        RoninProfile.CONDITION_PROBLEMS_CONCERNS.value,
-        normalizer,
-        localizer,
-        registryClient,
-        tenantsNotConditionMapped
-    ) {
+            R4ConditionValidator,
+            RoninProfile.CONDITION_PROBLEMS_CONCERNS.value,
+            normalizer,
+            localizer,
+            registryClient,
+            tenantsNotConditionMapped,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 3
 
     private val qualifyingCodeProblemListItem = Code("problem-list-item")
     private val qualifyingCodeHealthConcerns = Code("health-concern")
 
-    override fun qualifyingCategories() = listOf(
-        Coding(system = CodeSystem.CONDITION_CATEGORY.uri, code = qualifyingCodeProblemListItem),
-        Coding(system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri, code = qualifyingCodeHealthConcerns)
-    )
+    override fun qualifyingCategories() =
+        listOf(
+            Coding(system = CodeSystem.CONDITION_CATEGORY.uri, code = qualifyingCodeProblemListItem),
+            Coding(system = CodeSystem.CONDITION_CATEGORY_HEALTH_CONCERN.uri, code = qualifyingCodeHealthConcerns),
+        )
 }

@@ -12,7 +12,7 @@ import java.time.LocalDate
  */
 @Component
 class CernerProcedureService(
-    cernerClient: CernerClient
+    cernerClient: CernerClient,
 ) : ProcedureService, CernerFHIRService<Procedure>(cernerClient) {
     override val fhirURLSearchPart = "/Procedure"
     override val fhirResourceType = Procedure::class.java
@@ -21,12 +21,13 @@ class CernerProcedureService(
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
     ): List<Procedure> {
-        val parameters = mapOf(
-            "patient" to patientFhirId,
-            "date" to getAltDateParam(startDate, endDate, tenant)
-        )
+        val parameters =
+            mapOf(
+                "patient" to patientFhirId,
+                "date" to getAltDateParam(startDate, endDate, tenant),
+            )
         return getResourceListFromSearch(tenant, parameters)
     }
 }

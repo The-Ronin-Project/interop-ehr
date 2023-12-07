@@ -42,51 +42,61 @@ class RoninPatient(
     private val ehrFactory: EHRFactory,
     private val contactPoint: RoninContactPoint,
     normalizer: Normalizer,
-    localizer: Localizer
+    localizer: Localizer,
 ) : USCoreBasedProfile<Patient>(R4PatientValidator, RoninProfile.PATIENT.value, normalizer, localizer) {
     override val rcdmVersion = RCDMVersion.V3_19_0
     override val profileVersion = 3
 
     private val requiredBirthDateError = RequiredFieldError(Patient::birthDate)
 
-    private val requiredMrnIdentifierError = FHIRError(
-        code = "RONIN_PAT_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "MRN identifier is required",
-        location = LocationContext(Patient::identifier)
-    )
-    private val wrongMrnIdentifierTypeError = FHIRError(
-        code = "RONIN_PAT_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "MRN identifier type defined without proper CodeableConcept",
-        location = LocationContext(Patient::identifier)
-    )
-    private val requiredMRNIdentifierValueError = FHIRError(
-        code = "RONIN_PAT_003",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "MRN identifier value is required",
-        location = LocationContext(Patient::identifier)
-    )
-    private val invalidBirthDateError = FHIRError(
-        code = "RONIN_PAT_004",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Birth date is invalid",
-        location = LocationContext(Patient::birthDate)
-    )
-    private val invalidOfficialNameError = FHIRError(
-        code = "RONIN_PAT_005",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "A name for official use must be present",
-        location = LocationContext(Patient::name)
-    )
-    private val requiredIdentifierSystemValueError = FHIRError(
-        code = "RONIN_PAT_006",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Identifier system or data absent reason is required",
-        location = LocationContext(Identifier::system)
-    )
+    private val requiredMrnIdentifierError =
+        FHIRError(
+            code = "RONIN_PAT_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "MRN identifier is required",
+            location = LocationContext(Patient::identifier),
+        )
+    private val wrongMrnIdentifierTypeError =
+        FHIRError(
+            code = "RONIN_PAT_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "MRN identifier type defined without proper CodeableConcept",
+            location = LocationContext(Patient::identifier),
+        )
+    private val requiredMRNIdentifierValueError =
+        FHIRError(
+            code = "RONIN_PAT_003",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "MRN identifier value is required",
+            location = LocationContext(Patient::identifier),
+        )
+    private val invalidBirthDateError =
+        FHIRError(
+            code = "RONIN_PAT_004",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Birth date is invalid",
+            location = LocationContext(Patient::birthDate),
+        )
+    private val invalidOfficialNameError =
+        FHIRError(
+            code = "RONIN_PAT_005",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "A name for official use must be present",
+            location = LocationContext(Patient::name),
+        )
+    private val requiredIdentifierSystemValueError =
+        FHIRError(
+            code = "RONIN_PAT_006",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Identifier system or data absent reason is required",
+            location = LocationContext(Identifier::system),
+        )
 
-    override fun validateRonin(element: Patient, parentContext: LocationContext, validation: Validation) {
+    override fun validateRonin(
+        element: Patient,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             requireMeta(element.meta, parentContext, this)
             requireRoninIdentifiers(element.identifier, parentContext, this)
@@ -108,7 +118,7 @@ class RoninPatient(
                 checkTrue(
                     identifier.system?.value != null || identifier.system.hasDataAbsentReason(),
                     requiredIdentifierSystemValueError,
-                    context
+                    context,
                 )
             }
 
@@ -130,22 +140,30 @@ class RoninPatient(
 
     private val requiredGenderError = RequiredFieldError(Patient::gender)
 
-    private val requiredNameError = FHIRError(
-        code = "USCORE_PAT_001",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "At least one name must be provided",
-        location = LocationContext(Patient::name)
-    )
-    private val requiredFamilyOrGivenError = FHIRError(
-        code = "USCORE_PAT_002",
-        severity = ValidationIssueSeverity.ERROR,
-        description = "Either Patient.name.given and/or Patient.name.family SHALL be present or a Data Absent Reason Extension SHALL be present.",
-        location = LocationContext(Patient::name)
-    )
+    private val requiredNameError =
+        FHIRError(
+            code = "USCORE_PAT_001",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "At least one name must be provided",
+            location = LocationContext(Patient::name),
+        )
+
+    @Suppress("ktlint:standard:max-line-length")
+    private val requiredFamilyOrGivenError =
+        FHIRError(
+            code = "USCORE_PAT_002",
+            severity = ValidationIssueSeverity.ERROR,
+            description = "Either Patient.name.given and/or Patient.name.family SHALL be present or a Data Absent Reason Extension SHALL be present.",
+            location = LocationContext(Patient::name),
+        )
 
     private val requiredIdentifierValueError = RequiredFieldError(Identifier::value)
 
-    override fun validateUSCore(element: Patient, parentContext: LocationContext, validation: Validation) {
+    override fun validateUSCore(
+        element: Patient,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validation.apply {
             checkTrue(element.name.isNotEmpty(), requiredNameError, parentContext)
             // Each human name should have a first or last name populated, otherwise a data absent reason.
@@ -153,7 +171,7 @@ class RoninPatient(
                 checkTrue(
                     ((humanName.family != null) or (humanName.given.isNotEmpty())) xor humanName.hasDataAbsentReason(),
                     requiredFamilyOrGivenError,
-                    parentContext.append(LocationContext("Patient", "name[$index]"))
+                    parentContext.append(LocationContext("Patient", "name[$index]")),
                 )
             }
 
@@ -181,22 +199,25 @@ class RoninPatient(
         normalized: Patient,
         parentContext: LocationContext,
         tenant: Tenant,
-        forceCacheReloadTS: LocalDateTime?
+        forceCacheReloadTS: LocalDateTime?,
     ): Pair<TransformResponse<Patient>?, Validation> {
-        val maritalStatus = normalized.maritalStatus ?: CodeableConcept(
-            coding = listOf(
-                Coding(
-                    system = CodeSystem.NULL_FLAVOR.uri,
-                    code = Code("NI"),
-                    display = FHIRString("NoInformation")
-                )
+        val maritalStatus =
+            normalized.maritalStatus ?: CodeableConcept(
+                coding =
+                    listOf(
+                        Coding(
+                            system = CodeSystem.NULL_FLAVOR.uri,
+                            code = Code("NI"),
+                            display = FHIRString("NoInformation"),
+                        ),
+                    ),
             )
-        )
-        val gender = normalized.gender.takeIf { !it.hasDataAbsentReason() } ?: Code(
-            AdministrativeGender.UNKNOWN.code,
-            normalized.gender!!.id,
-            normalized.gender!!.extension
-        )
+        val gender =
+            normalized.gender.takeIf { !it.hasDataAbsentReason() } ?: Code(
+                AdministrativeGender.UNKNOWN.code,
+                normalized.gender!!.id,
+                normalized.gender!!.extension,
+            )
         val validation = Validation()
 
         val telecoms =
@@ -206,30 +227,37 @@ class RoninPatient(
                 tenant,
                 parentContext,
                 validation,
-                forceCacheReloadTS
+                forceCacheReloadTS,
             ).let {
                 validation.merge(it.second)
                 it.first
             }
 
         if (telecoms.size != normalized.telecom.size) {
-            logger.info { "${normalized.telecom.size - telecoms.size} telecoms removed from Patient ${normalized.id?.value} due to failed transformations" }
+            @Suppress("ktlint:standard:max-line-length")
+            logger.info {
+                "${normalized.telecom.size - telecoms.size} telecoms removed from Patient ${normalized.id?.value} due to failed transformations"
+            }
         }
 
         val normalizedIdentifiers = normalizeIdentifierSystems(normalized.identifier)
 
-        val transformed = normalized.copy(
-            meta = normalized.meta.transform(),
-            gender = gender,
-            identifier = normalizedIdentifiers + tenant.toFhirIdentifier() + dataAuthorityIdentifier,
-            maritalStatus = maritalStatus,
-            telecom = telecoms
-        )
+        val transformed =
+            normalized.copy(
+                meta = normalized.meta.transform(),
+                gender = gender,
+                identifier = normalizedIdentifiers + tenant.toFhirIdentifier() + dataAuthorityIdentifier,
+                maritalStatus = maritalStatus,
+                telecom = telecoms,
+            )
         return Pair(TransformResponse(transformed), validation)
     }
 
     @Deprecated(message = "These values are now placed on the Patient by the DecoratorPatientService, so this method is no longer needed.")
-    fun getRoninIdentifiers(patient: Patient, tenant: Tenant): List<Identifier> = emptyList()
+    fun getRoninIdentifiers(
+        patient: Patient,
+        tenant: Tenant,
+    ): List<Identifier> = emptyList()
 
     private fun normalizeIdentifierSystems(identifiers: List<Identifier>): List<Identifier> {
         return identifiers.map {

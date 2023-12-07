@@ -13,7 +13,7 @@ import java.time.LocalDateTime
  */
 @Component
 class CernerDiagnosticReportService(
-    cernerClient: CernerClient
+    cernerClient: CernerClient,
 ) : DiagnosticReportService, CernerFHIRService<DiagnosticReport>(cernerClient) {
     override val fhirURLSearchPart = "/DiagnosticReport"
     override val fhirResourceType = DiagnosticReport::class.java
@@ -22,14 +22,16 @@ class CernerDiagnosticReportService(
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate?,
-        endDate: LocalDate?
+        endDate: LocalDate?,
     ): List<DiagnosticReport> {
         val offset = tenant.timezone.rules.getOffset(LocalDateTime.now())
-        val dateMap = startDate?.let { mapOf("-timing-boundsPeriod" to "ge${startDate}T00:00:00$offset") }
-            ?: emptyMap()
-        val parameters = mapOf(
-            "patient" to patientFhirId
-        ) + dateMap
+        val dateMap =
+            startDate?.let { mapOf("-timing-boundsPeriod" to "ge${startDate}T00:00:00$offset") }
+                ?: emptyMap()
+        val parameters =
+            mapOf(
+                "patient" to patientFhirId,
+            ) + dateMap
         return getResourceListFromSearch(tenant, parameters)
     }
 }

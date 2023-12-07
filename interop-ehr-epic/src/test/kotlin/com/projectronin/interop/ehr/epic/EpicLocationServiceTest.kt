@@ -22,20 +22,25 @@ internal class EpicLocationServiceTest {
     fun getByIDs() {
         val tenant = mockk<Tenant>()
 
-        val location1 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "12345"
+        val location1 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "12345"
+                    }
             }
-        }
-        val location2 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "67890"
+        val location2 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "67890"
+                    }
             }
-        }
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(location1, location2)
-            every { link } returns emptyList()
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(location1, location2)
+                every { link } returns emptyList()
+            }
 
         coEvery {
             epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to listOf("12345", "67890")))
@@ -52,30 +57,38 @@ internal class EpicLocationServiceTest {
         val smallLocationService = EpicLocationService(epicClient, 2)
         val tenant = mockk<Tenant>()
 
-        val location1 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "12345"
+        val location1 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "12345"
+                    }
             }
-        }
-        val location2 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "67890"
+        val location2 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "67890"
+                    }
             }
-        }
 
-        val location3 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "456"
+        val location3 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "456"
+                    }
             }
-        }
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(location1, location2)
-            every { link } returns emptyList()
-        }
-        val bundle2 = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(location3)
-            every { link } returns emptyList()
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(location1, location2)
+                every { link } returns emptyList()
+            }
+        val bundle2 =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(location3)
+                every { link } returns emptyList()
+            }
 
         coEvery {
             epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to listOf("12345", "67890")))
@@ -89,7 +102,7 @@ internal class EpicLocationServiceTest {
 
         assertEquals(
             mapOf("12345" to location1.resource, "67890" to location2.resource, "456" to location3.resource),
-            response
+            response,
         )
     }
 
@@ -97,20 +110,25 @@ internal class EpicLocationServiceTest {
     fun getLocationsByFHIRId() {
         val tenant = mockk<Tenant>()
 
-        val location1 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "12345"
+        val location1 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "12345"
+                    }
             }
-        }
-        val location2 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "67890"
+        val location2 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "67890"
+                    }
             }
-        }
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(location1, location2)
-            every { link } returns emptyList()
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(location1, location2)
+                every { link } returns emptyList()
+            }
 
         coEvery {
             epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to listOf("12345", "67890")))
@@ -127,30 +145,38 @@ internal class EpicLocationServiceTest {
         val smallLocationService = EpicLocationService(epicClient, 2)
         val tenant = mockk<Tenant>()
 
-        val location1 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "12345"
+        val location1 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "12345"
+                    }
             }
-        }
-        val location2 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "67890"
+        val location2 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "67890"
+                    }
             }
-        }
 
-        val location3 = mockk<BundleEntry> {
-            every { resource } returns mockk<Location>(relaxed = true) {
-                every { id!!.value } returns "456"
+        val location3 =
+            mockk<BundleEntry> {
+                every { resource } returns
+                    mockk<Location>(relaxed = true) {
+                        every { id!!.value } returns "456"
+                    }
             }
-        }
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(location1, location2)
-            every { link } returns emptyList()
-        }
-        val bundle2 = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(location3)
-            every { link } returns emptyList()
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(location1, location2)
+                every { link } returns emptyList()
+            }
+        val bundle2 =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(location3)
+                every { link } returns emptyList()
+            }
 
         coEvery {
             epicClient.get(tenant, "/api/FHIR/R4/Location", mapOf("_id" to listOf("12345", "67890")))
@@ -164,7 +190,7 @@ internal class EpicLocationServiceTest {
 
         assertEquals(
             mapOf("12345" to location1.resource, "67890" to location2.resource, "456" to location3.resource),
-            response
+            response,
         )
     }
 }

@@ -6,5 +6,5 @@ data class ConceptMapMetadata(
     override val registryEntryType: String,
     val conceptMapName: String,
     val conceptMapUuid: String,
-    val version: String
+    val version: String,
 ) : IssueMetadata

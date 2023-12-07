@@ -18,7 +18,9 @@ import org.springframework.stereotype.Repository
  * Provides data access operations for tenant data models.
  */
 @Repository
-class TenantDAO(@Qualifier("ehr") private val database: Database) {
+class TenantDAO(
+    @Qualifier("ehr") private val database: Database,
+) {
     private val logger = KotlinLogging.logger { }
 
     /**
@@ -65,20 +67,21 @@ class TenantDAO(@Qualifier("ehr") private val database: Database) {
      * the same tenant with the new id inserted.
      */
     fun insertTenant(tenant: TenantDO): TenantDO {
-        val tenantKey = try {
-            database.insertAndGenerateKey(TenantDOs) {
-                set(it.mnemonic, tenant.mnemonic)
-                set(it.name, tenant.name)
-                set(it.ehr, tenant.ehr.id)
-                set(it.timezone, tenant.timezone)
-                set(it.availableBatchStart, tenant.availableBatchStart)
-                set(it.availableBatchEnd, tenant.availableBatchEnd)
-                set(it.monitoredIndicator, tenant.monitoredIndicator)
+        val tenantKey =
+            try {
+                database.insertAndGenerateKey(TenantDOs) {
+                    set(it.mnemonic, tenant.mnemonic)
+                    set(it.name, tenant.name)
+                    set(it.ehr, tenant.ehr.id)
+                    set(it.timezone, tenant.timezone)
+                    set(it.availableBatchStart, tenant.availableBatchStart)
+                    set(it.availableBatchEnd, tenant.availableBatchEnd)
+                    set(it.monitoredIndicator, tenant.monitoredIndicator)
+                }
+            } catch (e: Exception) {
+                logger.error(e) { "Tenant insert failed: $e" }
+                throw e
             }
-        } catch (e: Exception) {
-            logger.error(e) { "Tenant insert failed: $e" }
-            throw e
-        }
         tenant.id = tenantKey.toString().toInt()
         return tenant
     }

@@ -31,9 +31,10 @@ import kotlin.time.Duration.Companion.seconds
 class CernerClientTest {
     private val patientResult = this::class.java.getResource("/ExamplePatientResponse.json")!!.readText()
     private val authenticationBroker = mockk<EHRAuthenticationBroker>()
-    private val datalakePublishService = mockk<DatalakePublishService> {
-        every { publishRawData(any(), any(), any()) } returns "12345"
-    }
+    private val datalakePublishService =
+        mockk<DatalakePublishService> {
+            every { publishRawData(any(), any(), any()) } returns "12345"
+        }
     private val cernerClient = CernerClient(getClient(), authenticationBroker, datalakePublishService)
     private lateinit var mockWebServer: MockWebServer
 
@@ -54,7 +55,7 @@ class CernerClientTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns null
 
@@ -62,7 +63,7 @@ class CernerClientTest {
             runBlocking {
                 cernerClient.get(
                     tenant,
-                    "/Patient/12724066"
+                    "/Patient/12724066",
                 )
             }
         }
@@ -71,25 +72,27 @@ class CernerClientTest {
     @Test
     fun `ensure get operation returns correctly`() {
         mockWebServer.enqueue(
-            MockResponse().setBody(patientResult).setHeader("Content-Type", "application/json")
+            MockResponse().setBody(patientResult).setHeader("Content-Type", "application/json"),
         )
         val tenant =
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = runBlocking {
-            val httpResponse = cernerClient.get(
-                tenant,
-                "/Patient/12724066"
-            )
-            httpResponse.httpResponse.bodyAsText()
-        }
+        val response =
+            runBlocking {
+                val httpResponse =
+                    cernerClient.get(
+                        tenant,
+                        "/Patient/12724066",
+                    )
+                httpResponse.httpResponse.bodyAsText()
+            }
         assertEquals(patientResult, response)
         val requestUrl = mockWebServer.takeRequest().path
         assertTrue(requestUrl?.contains("/Patient/12724066") == true)
@@ -98,31 +101,34 @@ class CernerClientTest {
     @Test
     fun `ensure get operation returns correctly with parameters`() {
         mockWebServer.enqueue(
-            MockResponse().setBody(patientResult).setHeader("Content-Type", "application/json")
+            MockResponse().setBody(patientResult).setHeader("Content-Type", "application/json"),
         )
         val tenant =
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = runBlocking {
-            val httpResponse = cernerClient.get(
-                tenant,
-                "/Patient/12724066",
-                parameters = mapOf(
-                    "simple" to "simple",
-                    "single" to listOf("1", "b", "special="),
-                    "repeating" to RepeatingParameter(listOf("first", "second")),
-                    "noValue" to null
-                )
-            )
-            httpResponse.httpResponse.bodyAsText()
-        }
+        val response =
+            runBlocking {
+                val httpResponse =
+                    cernerClient.get(
+                        tenant,
+                        "/Patient/12724066",
+                        parameters =
+                            mapOf(
+                                "simple" to "simple",
+                                "single" to listOf("1", "b", "special="),
+                                "repeating" to RepeatingParameter(listOf("first", "second")),
+                                "noValue" to null,
+                            ),
+                    )
+                httpResponse.httpResponse.bodyAsText()
+            }
         assertEquals(patientResult, response)
         val requestUrl = mockWebServer.takeRequest().path
         assertEquals(true, requestUrl?.contains("/Patient/12724066"))
@@ -139,25 +145,27 @@ class CernerClientTest {
             MockResponse()
                 .setBody(patientResult)
                 .setHeader("Content-Type", "application/json")
-                .setBodyDelay(4, TimeUnit.SECONDS)
+                .setBodyDelay(4, TimeUnit.SECONDS),
         )
         val tenant =
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = runBlocking {
-            val httpResponse = cernerClient.get(
-                tenant,
-                "/Patient/12724066"
-            )
-            httpResponse.httpResponse.bodyAsText()
-        }
+        val response =
+            runBlocking {
+                val httpResponse =
+                    cernerClient.get(
+                        tenant,
+                        "/Patient/12724066",
+                    )
+                httpResponse.httpResponse.bodyAsText()
+            }
         assertEquals(patientResult, response)
         val requestUrl = mockWebServer.takeRequest().path
         assertTrue(requestUrl?.contains("/Patient/12724066") == true)
@@ -169,13 +177,13 @@ class CernerClientTest {
             MockResponse()
                 .setBody(patientResult)
                 .setHeader("Content-Type", "application/json")
-                .setBodyDelay(4, TimeUnit.SECONDS)
+                .setBodyDelay(4, TimeUnit.SECONDS),
         )
         val tenant =
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
@@ -186,7 +194,7 @@ class CernerClientTest {
                 cernerClient.get(
                     tenant,
                     "/Patient/12724066",
-                    timeoutOverride = 1.seconds
+                    timeoutOverride = 1.seconds,
                 )
             }
         }
@@ -198,13 +206,14 @@ class CernerClientTest {
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns null
 
-        val communication = Communication(
-            status = EventStatus.COMPLETED.asCode()
-        )
+        val communication =
+            Communication(
+                status = EventStatus.COMPLETED.asCode(),
+            )
 
         assertThrows<IllegalStateException> {
             runBlocking {
@@ -216,25 +225,27 @@ class CernerClientTest {
     @Test
     fun `ensure post operation submits to server correctly`() {
         mockWebServer.enqueue(
-            MockResponse().setResponseCode(HttpStatusCode.Created.value)
+            MockResponse().setResponseCode(HttpStatusCode.Created.value),
         )
 
         val tenant =
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
         val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Location.write", "")
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val communication = Communication(
-            status = EventStatus.COMPLETED.asCode()
-        )
+        val communication =
+            Communication(
+                status = EventStatus.COMPLETED.asCode(),
+            )
 
-        val response = runBlocking {
-            cernerClient.post(tenant, "/Communication", communication)
-        }
+        val response =
+            runBlocking {
+                cernerClient.post(tenant, "/Communication", communication)
+            }
         assertEquals(HttpStatusCode.Created, response.httpResponse.status)
 
         val request = mockWebServer.takeRequest()
@@ -249,31 +260,33 @@ class CernerClientTest {
     @Test
     fun `ensure get operation accept header is correct when changing accept type override`() {
         mockWebServer.enqueue(
-            MockResponse().setBody(patientResult).setHeader("Content-Type", "application/json")
+            MockResponse().setBody(patientResult).setHeader("Content-Type", "application/json"),
         )
         val tenant =
             createTestTenant(
                 clientId = "XhwIjoxNjU0Nzk1NTQ4LCJhenAiOiJEaWNtODQ",
                 serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
-                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z"
+                secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
 
         val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
         every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
 
-        val response = runBlocking {
-            cernerClient.get(
-                tenant,
-                "/Patient/12724066",
-                parameters = mapOf(
-                    "simple" to "simple",
-                    "single" to listOf("1", "b", "special="),
-                    "repeating" to RepeatingParameter(listOf("first", "second")),
-                    "noValue" to null
-                ),
-                acceptTypeOverride = ContentType.Application.FhirJson
-            )
-        }
+        val response =
+            runBlocking {
+                cernerClient.get(
+                    tenant,
+                    "/Patient/12724066",
+                    parameters =
+                        mapOf(
+                            "simple" to "simple",
+                            "single" to listOf("1", "b", "special="),
+                            "repeating" to RepeatingParameter(listOf("first", "second")),
+                            "noValue" to null,
+                        ),
+                    acceptTypeOverride = ContentType.Application.FhirJson,
+                )
+            }
         assertEquals(HttpStatusCode.OK, response.httpResponse.status)
 
         val request = mockWebServer.takeRequest()

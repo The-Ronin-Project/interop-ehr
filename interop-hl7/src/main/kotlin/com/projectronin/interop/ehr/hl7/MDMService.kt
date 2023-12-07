@@ -37,7 +37,7 @@ class MDMService(private val mdmConfigService: MDMConfigService) {
         patient: Patient,
         practitioner: Practitioner,
         documentReference: DocumentReference,
-        tenant: Tenant
+        tenant: Tenant,
     ): MDM_T02 {
         val mdm = MDM_T02()
         val parentNote = documentReference.getParentNoteID()
@@ -51,12 +51,13 @@ class MDMService(private val mdmConfigService: MDMConfigService) {
         mdm.evn.eventTypeCode.value = eventType
         mdm.evn.recordedDateTime.time.value = formattedDateTime
 
-        val noteID = if (parentNote != null) {
-            parentNote
-        } else {
-            val re = Regex(pattern = "[^A-Za-z0-9 ]")
-            "RoninNote" + re.replace(mdm.msh.dateTimeOfMessage.time.value, "") + "-" + mdm.msh.messageControlID.value
-        }
+        val noteID =
+            if (parentNote != null) {
+                parentNote
+            } else {
+                val re = Regex(pattern = "[^A-Za-z0-9 ]")
+                "RoninNote" + re.replace(mdm.msh.dateTimeOfMessage.time.value, "") + "-" + mdm.msh.messageControlID.value
+            }
 
         // Populate PID Segment
         mdm.pid.buildPID(patient, tenant)
@@ -75,7 +76,10 @@ class MDMService(private val mdmConfigService: MDMConfigService) {
     }
 
     // In the event that we start generating other types of messages, this could easily be re-used
-    private fun PID.buildPID(patient: Patient, tenant: Tenant) {
+    private fun PID.buildPID(
+        patient: Patient,
+        tenant: Tenant,
+    ) {
         // that determines which identifiers we should send back in PID3
         val identifiersToSend = mdmConfigService.getIdentifiersToSend(tenant, patient.identifier)
         identifiersToSend.forEachIndexed { index, it ->
@@ -109,13 +113,15 @@ class MDMService(private val mdmConfigService: MDMConfigService) {
         }
 
         // PID-13 Phone
-        val phonesToBeSend = patient.telecom.filter {
-            it.use.asEnum<ContactPointUse>() in listOf(
-                ContactPointUse.HOME,
-                ContactPointUse.WORK,
-                ContactPointUse.MOBILE
-            )
-        }
+        val phonesToBeSend =
+            patient.telecom.filter {
+                it.use.asEnum<ContactPointUse>() in
+                    listOf(
+                        ContactPointUse.HOME,
+                        ContactPointUse.WORK,
+                        ContactPointUse.MOBILE,
+                    )
+            }
         phonesToBeSend.forEachIndexed { index, contactPoint ->
             this.getPhoneNumberHome(index).telephoneNumber.value = contactPoint.value?.value
             this.getPhoneNumberHome(index).telecommunicationUseCode.value =
@@ -128,7 +134,7 @@ class MDMService(private val mdmConfigService: MDMConfigService) {
         documentReference: DocumentReference,
         formattedDate: String,
         noteId: String?,
-        tenant: Tenant
+        tenant: Tenant,
     ) {
         this.setIDTXA.value = "1"
 
@@ -184,7 +190,10 @@ class MDMService(private val mdmConfigService: MDMConfigService) {
         }
     }
 
-    private fun splitIntoChunks(max: Int = 65535, string: String): List<String> =
+    private fun splitIntoChunks(
+        max: Int = 65535,
+        string: String,
+    ): List<String> =
         ArrayList<String>(string.length / max + 1).also {
             var firstWord = true
             val builder = StringBuilder()

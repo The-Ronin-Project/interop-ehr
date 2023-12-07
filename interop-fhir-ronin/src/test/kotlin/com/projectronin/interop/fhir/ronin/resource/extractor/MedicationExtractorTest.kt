@@ -29,9 +29,10 @@ class MedicationExtractorTest {
     fun `null medication returns null`() {
         val medicationDynamicValue: DynamicValue<Any>? = null
         val contained = listOf<Resource<*>>(mockk<Medication>())
-        val resource = mockk<MedicationRequest> {
-            every { id?.value } returns "1234"
-        }
+        val resource =
+            mockk<MedicationRequest> {
+                every { id?.value } returns "1234"
+            }
 
         val extraction = extractor.extractMedication(medicationDynamicValue, contained, resource)
         assertNull(extraction)
@@ -42,9 +43,10 @@ class MedicationExtractorTest {
         val medicationDynamicValue =
             DynamicValue(DynamicValueType.REFERENCE, Reference(reference = FHIRString("Medication/1234")))
         val contained = listOf<Resource<*>>()
-        val resource = mockk<MedicationRequest> {
-            every { id } returns null
-        }
+        val resource =
+            mockk<MedicationRequest> {
+                every { id } returns null
+            }
 
         val extraction = extractor.extractMedication(medicationDynamicValue, contained, resource)
         assertNull(extraction)
@@ -55,9 +57,10 @@ class MedicationExtractorTest {
         val medicationDynamicValue =
             DynamicValue(DynamicValueType.REFERENCE, Reference(reference = FHIRString("Medication/1234")))
         val contained = listOf<Resource<*>>()
-        val resource = mockk<MedicationRequest> {
-            every { id?.value } returns null
-        }
+        val resource =
+            mockk<MedicationRequest> {
+                every { id?.value } returns null
+            }
 
         val extraction = extractor.extractMedication(medicationDynamicValue, contained, resource)
         assertNull(extraction)
@@ -67,10 +70,11 @@ class MedicationExtractorTest {
     fun `medication with unsupported type returns null`() {
         val medicationDynamicValue = DynamicValue(DynamicValueType.BOOLEAN, FHIRBoolean.TRUE)
         val contained = listOf<Resource<*>>()
-        val resource = mockk<MedicationRequest> {
-            every { id?.value } returns "1234"
-            every { meta?.source } returns Uri("source")
-        }
+        val resource =
+            mockk<MedicationRequest> {
+                every { id?.value } returns "1234"
+                every { meta?.source } returns Uri("source")
+            }
 
         val extraction = extractor.extractMedication(medicationDynamicValue, contained, resource)
         assertNull(extraction)
@@ -78,90 +82,98 @@ class MedicationExtractorTest {
 
     @Test
     fun `medication codeable concept with user selected coding generates id based off user selected`() {
-        val codeableConcept = CodeableConcept(
-            text = FHIRString("acetaminophen"),
-            coding = listOf(
-                Coding(
-                    system = Uri("http://www.nlm.nih.gov/research/umls/rxnorm"),
-                    code = Code("161"),
-                    display = FHIRString("Acetaminophen"),
-                    userSelected = FHIRBoolean.FALSE
-                ),
-                Coding(
-                    system = Uri("https://fhir.cerner.com/accountId/synonym"),
-                    code = Code("2748023"),
-                    display = FHIRString("acetaminophen"),
-                    userSelected = FHIRBoolean.TRUE
-                )
+        val codeableConcept =
+            CodeableConcept(
+                text = FHIRString("acetaminophen"),
+                coding =
+                    listOf(
+                        Coding(
+                            system = Uri("http://www.nlm.nih.gov/research/umls/rxnorm"),
+                            code = Code("161"),
+                            display = FHIRString("Acetaminophen"),
+                            userSelected = FHIRBoolean.FALSE,
+                        ),
+                        Coding(
+                            system = Uri("https://fhir.cerner.com/accountId/synonym"),
+                            code = Code("2748023"),
+                            display = FHIRString("acetaminophen"),
+                            userSelected = FHIRBoolean.TRUE,
+                        ),
+                    ),
             )
-        )
         val medicationDynamicValue = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, codeableConcept)
         val contained = listOf<Resource<*>>()
-        val resource = mockk<MedicationRequest> {
-            every { id?.value } returns "1234"
-            every { meta?.source } returns Uri("source")
-        }
+        val resource =
+            mockk<MedicationRequest> {
+                every { id?.value } returns "1234"
+                every { meta?.source } returns Uri("source")
+            }
 
         val extraction = extractor.extractMedication(medicationDynamicValue, contained, resource)
         extraction!!
 
-        val expectedMedication = Medication(
-            id = Id("codeable-1234-2748023"),
-            meta = Meta(source = Uri("source")),
-            code = codeableConcept
-        )
+        val expectedMedication =
+            Medication(
+                id = Id("codeable-1234-2748023"),
+                meta = Meta(source = Uri("source")),
+                code = codeableConcept,
+            )
         assertEquals(expectedMedication, extraction.extractedMedication)
         assertEquals(
             DynamicValue(
                 DynamicValueType.REFERENCE,
-                Reference(reference = FHIRString("Medication/codeable-1234-2748023"))
+                Reference(reference = FHIRString("Medication/codeable-1234-2748023")),
             ),
-            extraction.updatedMedication
+            extraction.updatedMedication,
         )
         assertNull(extraction.updatedContained)
     }
 
     @Test
     fun `medication codeable concept with no user selected codings generates id based off all codings`() {
-        val codeableConcept = CodeableConcept(
-            text = FHIRString("acetaminophen"),
-            coding = listOf(
-                Coding(
-                    system = Uri("http://www.nlm.nih.gov/research/umls/rxnorm"),
-                    code = Code("161"),
-                    display = FHIRString("Acetaminophen"),
-                    userSelected = FHIRBoolean.FALSE
-                ),
-                Coding(
-                    system = Uri("https://fhir.cerner.com/accountId/synonym"),
-                    code = Code("2748023"),
-                    display = FHIRString("acetaminophen"),
-                    userSelected = null
-                )
+        val codeableConcept =
+            CodeableConcept(
+                text = FHIRString("acetaminophen"),
+                coding =
+                    listOf(
+                        Coding(
+                            system = Uri("http://www.nlm.nih.gov/research/umls/rxnorm"),
+                            code = Code("161"),
+                            display = FHIRString("Acetaminophen"),
+                            userSelected = FHIRBoolean.FALSE,
+                        ),
+                        Coding(
+                            system = Uri("https://fhir.cerner.com/accountId/synonym"),
+                            code = Code("2748023"),
+                            display = FHIRString("acetaminophen"),
+                            userSelected = null,
+                        ),
+                    ),
             )
-        )
         val medicationDynamicValue = DynamicValue(DynamicValueType.CODEABLE_CONCEPT, codeableConcept)
         val contained = listOf<Resource<*>>()
-        val resource = mockk<MedicationRequest> {
-            every { id?.value } returns "1234"
-            every { meta?.source } returns Uri("source")
-        }
+        val resource =
+            mockk<MedicationRequest> {
+                every { id?.value } returns "1234"
+                every { meta?.source } returns Uri("source")
+            }
 
         val extraction = extractor.extractMedication(medicationDynamicValue, contained, resource)
         extraction!!
 
-        val expectedMedication = Medication(
-            id = Id("codeable-1234-161-2748023"),
-            meta = Meta(source = Uri("source")),
-            code = codeableConcept
-        )
+        val expectedMedication =
+            Medication(
+                id = Id("codeable-1234-161-2748023"),
+                meta = Meta(source = Uri("source")),
+                code = codeableConcept,
+            )
         assertEquals(expectedMedication, extraction.extractedMedication)
         assertEquals(
             DynamicValue(
                 DynamicValueType.REFERENCE,
-                Reference(reference = FHIRString("Medication/codeable-1234-161-2748023"))
+                Reference(reference = FHIRString("Medication/codeable-1234-161-2748023")),
             ),
-            extraction.updatedMedication
+            extraction.updatedMedication,
         )
         assertNull(extraction.updatedContained)
     }
@@ -171,10 +183,11 @@ class MedicationExtractorTest {
         val medicationDynamicValue =
             DynamicValue(DynamicValueType.REFERENCE, Reference(reference = FHIRString("Medication/1234")))
         val contained = listOf<Resource<*>>()
-        val resource = mockk<MedicationRequest> {
-            every { id?.value } returns "1234"
-            every { meta?.source } returns Uri("source")
-        }
+        val resource =
+            mockk<MedicationRequest> {
+                every { id?.value } returns "1234"
+                every { meta?.source } returns Uri("source")
+            }
 
         val extraction = extractor.extractMedication(medicationDynamicValue, contained, resource)
         assertNull(extraction)
@@ -185,10 +198,11 @@ class MedicationExtractorTest {
         val medicationDynamicValue =
             DynamicValue(DynamicValueType.REFERENCE, Reference(reference = FHIRString("Medication/1234")))
         val contained = listOf<Resource<*>>(mockk<Medication>())
-        val resource = mockk<MedicationRequest> {
-            every { id?.value } returns "1234"
-            every { meta?.source } returns Uri("source")
-        }
+        val resource =
+            mockk<MedicationRequest> {
+                every { id?.value } returns "1234"
+                every { meta?.source } returns Uri("source")
+            }
 
         val extraction = extractor.extractMedication(medicationDynamicValue, contained, resource)
         assertNull(extraction)
@@ -199,56 +213,62 @@ class MedicationExtractorTest {
         val medicationDynamicValue =
             DynamicValue(DynamicValueType.REFERENCE, Reference(reference = FHIRString("#5678")))
 
-        val ingredient = Ingredient(
-            item = DynamicValue(
-                DynamicValueType.CODEABLE_CONCEPT,
-                CodeableConcept(
-                    text = FHIRString("acetaminophen"),
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://www.nlm.nih.gov/research/umls/rxnorm"),
-                            code = Code("161"),
-                            display = FHIRString("Acetaminophen"),
-                            userSelected = FHIRBoolean.FALSE
+        val ingredient =
+            Ingredient(
+                item =
+                    DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = FHIRString("acetaminophen"),
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://www.nlm.nih.gov/research/umls/rxnorm"),
+                                        code = Code("161"),
+                                        display = FHIRString("Acetaminophen"),
+                                        userSelected = FHIRBoolean.FALSE,
+                                    ),
+                                    Coding(
+                                        system = Uri("https://fhir.cerner.com/accountId/synonym"),
+                                        code = Code("2748023"),
+                                        display = FHIRString("acetaminophen"),
+                                        userSelected = FHIRBoolean.TRUE,
+                                    ),
+                                ),
                         ),
-                        Coding(
-                            system = Uri("https://fhir.cerner.com/accountId/synonym"),
-                            code = Code("2748023"),
-                            display = FHIRString("acetaminophen"),
-                            userSelected = FHIRBoolean.TRUE
-                        )
-                    )
-                )
+                    ),
             )
-        )
-        val containedMedication = Medication(
-            id = Id("5678"),
-            code = CodeableConcept(text = FHIRString("acetaminophen")),
-            ingredient = listOf(ingredient)
-        )
+        val containedMedication =
+            Medication(
+                id = Id("5678"),
+                code = CodeableConcept(text = FHIRString("acetaminophen")),
+                ingredient = listOf(ingredient),
+            )
         val otherContained = mockk<Organization>()
         val contained = listOf<Resource<*>>(containedMedication, otherContained)
-        val resource = mockk<MedicationRequest> {
-            every { id?.value } returns "1234"
-            every { meta?.source } returns Uri("source")
-        }
+        val resource =
+            mockk<MedicationRequest> {
+                every { id?.value } returns "1234"
+                every { meta?.source } returns Uri("source")
+            }
 
         val extraction = extractor.extractMedication(medicationDynamicValue, contained, resource)
         extraction!!
 
-        val expectedMedication = Medication(
-            id = Id("contained-1234-5678"),
-            meta = Meta(source = Uri("source")),
-            code = CodeableConcept(text = FHIRString("acetaminophen")),
-            ingredient = listOf(ingredient)
-        )
+        val expectedMedication =
+            Medication(
+                id = Id("contained-1234-5678"),
+                meta = Meta(source = Uri("source")),
+                code = CodeableConcept(text = FHIRString("acetaminophen")),
+                ingredient = listOf(ingredient),
+            )
         assertEquals(expectedMedication, extraction.extractedMedication)
         assertEquals(
             DynamicValue(
                 DynamicValueType.REFERENCE,
-                Reference(reference = FHIRString("Medication/contained-1234-5678"))
+                Reference(reference = FHIRString("Medication/contained-1234-5678")),
             ),
-            extraction.updatedMedication
+            extraction.updatedMedication,
         )
         assertEquals(listOf(otherContained), extraction.updatedContained)
     }
@@ -258,57 +278,63 @@ class MedicationExtractorTest {
         val medicationDynamicValue =
             DynamicValue(DynamicValueType.REFERENCE, Reference(reference = FHIRString("#5678")))
 
-        val ingredient = Ingredient(
-            item = DynamicValue(
-                DynamicValueType.CODEABLE_CONCEPT,
-                CodeableConcept(
-                    text = FHIRString("acetaminophen"),
-                    coding = listOf(
-                        Coding(
-                            system = Uri("http://www.nlm.nih.gov/research/umls/rxnorm"),
-                            code = Code("161"),
-                            display = FHIRString("Acetaminophen"),
-                            userSelected = FHIRBoolean.FALSE
+        val ingredient =
+            Ingredient(
+                item =
+                    DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = FHIRString("acetaminophen"),
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = Uri("http://www.nlm.nih.gov/research/umls/rxnorm"),
+                                        code = Code("161"),
+                                        display = FHIRString("Acetaminophen"),
+                                        userSelected = FHIRBoolean.FALSE,
+                                    ),
+                                    Coding(
+                                        system = Uri("https://fhir.cerner.com/accountId/synonym"),
+                                        code = Code("2748023"),
+                                        display = FHIRString("acetaminophen"),
+                                        userSelected = FHIRBoolean.TRUE,
+                                    ),
+                                ),
                         ),
-                        Coding(
-                            system = Uri("https://fhir.cerner.com/accountId/synonym"),
-                            code = Code("2748023"),
-                            display = FHIRString("acetaminophen"),
-                            userSelected = FHIRBoolean.TRUE
-                        )
-                    )
-                )
+                    ),
             )
-        )
-        val containedMedication = Medication(
-            id = Id("5678"),
-            meta = Meta(versionId = Id("23")),
-            code = CodeableConcept(text = FHIRString("acetaminophen")),
-            ingredient = listOf(ingredient)
-        )
+        val containedMedication =
+            Medication(
+                id = Id("5678"),
+                meta = Meta(versionId = Id("23")),
+                code = CodeableConcept(text = FHIRString("acetaminophen")),
+                ingredient = listOf(ingredient),
+            )
         val otherContained = mockk<Organization>()
         val contained = listOf<Resource<*>>(containedMedication, otherContained)
-        val resource = mockk<MedicationRequest> {
-            every { id?.value } returns "1234"
-            every { meta?.source } returns Uri("source")
-        }
+        val resource =
+            mockk<MedicationRequest> {
+                every { id?.value } returns "1234"
+                every { meta?.source } returns Uri("source")
+            }
 
         val extraction = extractor.extractMedication(medicationDynamicValue, contained, resource)
         extraction!!
 
-        val expectedMedication = Medication(
-            id = Id("contained-1234-5678"),
-            meta = Meta(versionId = Id("23"), source = Uri("source")),
-            code = CodeableConcept(text = FHIRString("acetaminophen")),
-            ingredient = listOf(ingredient)
-        )
+        val expectedMedication =
+            Medication(
+                id = Id("contained-1234-5678"),
+                meta = Meta(versionId = Id("23"), source = Uri("source")),
+                code = CodeableConcept(text = FHIRString("acetaminophen")),
+                ingredient = listOf(ingredient),
+            )
         assertEquals(expectedMedication, extraction.extractedMedication)
         assertEquals(
             DynamicValue(
                 DynamicValueType.REFERENCE,
-                Reference(reference = FHIRString("Medication/contained-1234-5678"))
+                Reference(reference = FHIRString("Medication/contained-1234-5678")),
             ),
-            extraction.updatedMedication
+            extraction.updatedMedication,
         )
         assertEquals(listOf(otherContained), extraction.updatedContained)
     }

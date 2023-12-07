@@ -11,12 +11,12 @@ import org.springframework.context.annotation.Import
 @ComponentScan(
     *[
         "com.projectronin.interop.ehr.cerner",
-        "com.projectronin.ehr.dataauthority.client" // INT-2129
-    ]
+        "com.projectronin.ehr.dataauthority.client", // INT-2129
+    ],
 )
 @Import(
     EHRSpringConfig::class,
     DatalakeSpringConfig::class,
-    TenantSpringConfig::class
+    TenantSpringConfig::class,
 )
 class CernerSpringConfig

@@ -20,7 +20,7 @@ import java.time.LocalDate
 class CernerAppointmentService(
     cernerClient: CernerClient,
     private val ehrdaClient: EHRDataAuthorityClient,
-    private val cernerPatientService: CernerPatientService
+    private val cernerPatientService: CernerPatientService,
 ) : AppointmentService, CernerFHIRService<Appointment>(cernerClient) {
     override val fhirURLSearchPart = "/Appointment"
     override val fhirResourceType = Appointment::class.java
@@ -30,13 +30,14 @@ class CernerAppointmentService(
         patientFHIRId: String,
         startDate: LocalDate,
         endDate: LocalDate,
-        patientMRN: String?, // unused for cerner
-        useEHRFallback: Boolean // unused for cerner
+        patientMRN: String?,
+        useEHRFallback: Boolean,
     ): List<Appointment> {
-        val parameters = mapOf(
-            "patient" to patientFHIRId,
-            "date" to getDateParam(startDate, endDate, tenant)
-        )
+        val parameters =
+            mapOf(
+                "patient" to patientFHIRId,
+                "date" to getDateParam(startDate, endDate, tenant),
+            )
         return getResourceListFromSearch(tenant, parameters)
     }
 
@@ -44,13 +45,14 @@ class CernerAppointmentService(
         tenant: Tenant,
         providerIDs: List<FHIRIdentifiers>,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
     ): AppointmentsWithNewPatients {
         val providerFhirIDs = providerIDs.map { it.id.value!! }
-        val parameters = mapOf(
-            "practitioner" to providerFhirIDs.joinToString(separator = ","),
-            "date" to getDateParam(startDate, endDate, tenant)
-        )
+        val parameters =
+            mapOf(
+                "practitioner" to providerFhirIDs.joinToString(separator = ","),
+                "date" to getDateParam(startDate, endDate, tenant),
+            )
         val appointments = getResourceListFromSearch(tenant, parameters)
         val newPatients = appointments.findNewPatients(tenant)
         return AppointmentsWithNewPatients(appointments, newPatients)
@@ -60,12 +62,13 @@ class CernerAppointmentService(
         tenant: Tenant,
         locationFHIRIds: List<String>,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
     ): AppointmentsWithNewPatients {
-        val parameters = mapOf(
-            "location" to locationFHIRIds.joinToString(separator = ","),
-            "date" to getDateParam(startDate, endDate, tenant)
-        )
+        val parameters =
+            mapOf(
+                "location" to locationFHIRIds.joinToString(separator = ","),
+                "date" to getDateParam(startDate, endDate, tenant),
+            )
         val appointments = getResourceListFromSearch(tenant, parameters)
         val newPatients = appointments.findNewPatients(tenant)
         return AppointmentsWithNewPatients(appointments, newPatients)
@@ -86,21 +89,22 @@ class CernerAppointmentService(
         }
 
         // lookup the fhir IDs found in the appointments against EHRDA and filter out the existing patients
-        val newPatientFHIRIds = runBlocking {
-            val foundFhirIds =
-                ehrdaClient.getResourceIdentifiers(
-                    tenant.mnemonic,
-                    IdentifierSearchableResourceTypes.Patient,
-                    patientFhirIds.map {
-                        Identifier(
-                            system = CodeSystem.RONIN_FHIR_ID.uri.value!!,
-                            value = it
-                        )
-                    }
-                ).map { it.searchedIdentifier.value }
-            // we want the ones we didn't find
-            patientFhirIds - foundFhirIds.toSet()
-        }
+        val newPatientFHIRIds =
+            runBlocking {
+                val foundFhirIds =
+                    ehrdaClient.getResourceIdentifiers(
+                        tenant.mnemonic,
+                        IdentifierSearchableResourceTypes.Patient,
+                        patientFhirIds.map {
+                            Identifier(
+                                system = CodeSystem.RONIN_FHIR_ID.uri.value!!,
+                                value = it,
+                            )
+                        },
+                    ).map { it.searchedIdentifier.value }
+                // we want the ones we didn't find
+                patientFhirIds - foundFhirIds.toSet()
+            }
 
         return newPatientFHIRIds.map {
             cernerPatientService.getPatient(tenant, it)

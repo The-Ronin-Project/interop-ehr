@@ -38,8 +38,8 @@ class EpicDiagnosticReportServiceTest {
             httpResponse.body<DiagnosticReport>(
                 TypeInfo(
                     DiagnosticReport::class,
-                    DiagnosticReport::class.java
-                )
+                    DiagnosticReport::class.java,
+                ),
             )
         } returns diagnosticReport
         coEvery { epicClient.get(tenant, "/api/FHIR/R4/DiagnosticReport/fakeFaKEfAKefakE") } returns ehrResponse
@@ -56,8 +56,8 @@ class EpicDiagnosticReportServiceTest {
             httpResponse.body<DiagnosticReport>(
                 TypeInfo(
                     DiagnosticReport::class,
-                    DiagnosticReport::class.java
-                )
+                    DiagnosticReport::class.java,
+                ),
             )
         } throws thrownException
         coEvery { epicClient.get(tenant, "/api/FHIR/R4/DiagnosticReport/fakeFaKEfAKefakE") } returns ehrResponse
@@ -66,7 +66,7 @@ class EpicDiagnosticReportServiceTest {
             assertThrows<ClientFailureException> {
                 diagnosticReportService.getByID(
                     tenant,
-                    "fakeFaKEfAKefakE"
+                    "fakeFaKEfAKefakE",
                 )
             }
 
@@ -80,27 +80,27 @@ class EpicDiagnosticReportServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery {
             httpResponse.body<DiagnosticReport>(
-                TypeInfo(DiagnosticReport::class, DiagnosticReport::class.java)
+                TypeInfo(DiagnosticReport::class, DiagnosticReport::class.java),
             )
         } returns diagnosticReportById
 
         coEvery {
             epicClient.get(
                 tenant,
-                "/api/FHIR/R4/DiagnosticReport/fakeFaKEfAKefakE"
+                "/api/FHIR/R4/DiagnosticReport/fakeFaKEfAKefakE",
             )
         } returns ehrResponse
 
         val resource =
             diagnosticReportService.getByID(
                 tenant,
-                "fakeFaKEfAKefakE"
+                "fakeFaKEfAKefakE",
             )
 
         assertEquals(diagnosticReportById, resource)
@@ -113,40 +113,7 @@ class EpicDiagnosticReportServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns diagnosticReportByPatient
-
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/DiagnosticReport",
-                mapOf(
-                    "patient" to "fakeFaKEfAKefakE",
-                    "_count" to 50
-                )
-            )
-        } returns ehrResponse
-
-        val bundle =
-            diagnosticReportService.getDiagnosticReportByPatient(
-                tenant,
-                "fakeFaKEfAKefakE"
-            )
-
-        assertEquals(diagnosticReportByPatient.entry.map { it.resource }, bundle)
-    }
-
-    @Test
-    fun `getDiagnosticReportByPatient returns patient diagnostic report bundle with dates`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -159,9 +126,41 @@ class EpicDiagnosticReportServiceTest {
                 mapOf(
                     "patient" to "fakeFaKEfAKefakE",
                     "_count" to 50,
-                    "date" to RepeatingParameter(values = listOf("ge2023-09-01", "le2023-09-21"))
+                ),
+            )
+        } returns ehrResponse
 
-                )
+        val bundle =
+            diagnosticReportService.getDiagnosticReportByPatient(
+                tenant,
+                "fakeFaKEfAKefakE",
+            )
+
+        assertEquals(diagnosticReportByPatient.entry.map { it.resource }, bundle)
+    }
+
+    @Test
+    fun `getDiagnosticReportByPatient returns patient diagnostic report bundle with dates`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                "testPrivateKey",
+                "TEST_TENANT",
+            )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns diagnosticReportByPatient
+
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/DiagnosticReport",
+                mapOf(
+                    "patient" to "fakeFaKEfAKefakE",
+                    "_count" to 50,
+                    "date" to RepeatingParameter(values = listOf("ge2023-09-01", "le2023-09-21")),
+                ),
             )
         } returns ehrResponse
 
@@ -170,7 +169,7 @@ class EpicDiagnosticReportServiceTest {
                 tenant,
                 "fakeFaKEfAKefakE",
                 LocalDate.of(2023, 9, 1),
-                LocalDate.of(2023, 9, 21)
+                LocalDate.of(2023, 9, 21),
             )
 
         assertEquals(diagnosticReportByPatient.entry.map { it.resource }, bundle)

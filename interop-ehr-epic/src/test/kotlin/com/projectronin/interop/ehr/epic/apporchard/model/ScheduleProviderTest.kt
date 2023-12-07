@@ -9,17 +9,18 @@ import org.junit.jupiter.api.Test
 class ScheduleProviderTest {
     @Test
     fun `can serialize and deserialize JSON`() {
-        val scheduleProvider = ScheduleProvider(
-            id = "E1000",
-            idType = "external",
-            departmentID = "",
-            departmentIDType = ""
-        )
+        val scheduleProvider =
+            ScheduleProvider(
+                id = "E1000",
+                idType = "external",
+                departmentID = "",
+                departmentIDType = "",
+            )
         val actualJson = jacksonObjectMapper().writeValueAsString(scheduleProvider)
 
         assertEquals(
             """{"ID":"E1000","IDType":"external","DepartmentID":"","DepartmentIDType":""}""",
-            actualJson
+            actualJson,
         )
 
         val deserializedScheduleProvider = JacksonManager.objectMapper.readValue<ScheduleProvider>(actualJson)
@@ -28,14 +29,15 @@ class ScheduleProviderTest {
 
     @Test
     fun `can serialize and deserialize with default values`() {
-        val scheduleProvider = ScheduleProvider(
-            id = "E1000"
-        )
+        val scheduleProvider =
+            ScheduleProvider(
+                id = "E1000",
+            )
         val actualJson = jacksonObjectMapper().writeValueAsString(scheduleProvider)
 
         assertEquals(
             """{"ID":"E1000","IDType":"External","DepartmentID":"","DepartmentIDType":""}""",
-            actualJson
+            actualJson,
         )
 
         val deserializedScheduleProvider = JacksonManager.objectMapper.readValue<ScheduleProvider>(actualJson)

@@ -12,21 +12,24 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 /**
  * Data Authority Identifier.
  */
-val dataAuthorityIdentifier = Identifier(
-    value = "EHR Data Authority".asFHIR(),
-    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID
-)
+val dataAuthorityIdentifier =
+    Identifier(
+        value = "EHR Data Authority".asFHIR(),
+        system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+        type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+    )
 
 /**
  * Data Authority Extension.
  */
-val dataAuthorityExtension = listOf(
-    Extension(
-        url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/ronin-dataAuthorityIdentifier"),
-        value = DynamicValue(
-            type = DynamicValueType.IDENTIFIER,
-            dataAuthorityIdentifier
-        )
+val dataAuthorityExtension =
+    listOf(
+        Extension(
+            url = Uri("http://projectronin.io/fhir/StructureDefinition/Extension/ronin-dataAuthorityIdentifier"),
+            value =
+                DynamicValue(
+                    type = DynamicValueType.IDENTIFIER,
+                    dataAuthorityIdentifier,
+                ),
+        ),
     )
-)

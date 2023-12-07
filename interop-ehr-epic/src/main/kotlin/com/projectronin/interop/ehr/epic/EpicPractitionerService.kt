@@ -13,24 +13,32 @@ import org.springframework.stereotype.Component
 class EpicPractitionerService(
     epicClient: EpicClient,
     private val practitionerRoleService: EpicPractitionerRoleService,
-    @Value("\${epic.fhir.batchSize:10}") batchSize: Int
+    @Value("\${epic.fhir.batchSize:10}") batchSize: Int,
 ) : PractitionerService,
     EpicFHIRService<Practitioner>(epicClient, batchSize) {
     override val fhirURLSearchPart = "/api/FHIR/R4/Practitioner"
     override val fhirResourceType = Practitioner::class.java
 
     @Trace
-    override fun getPractitioner(tenant: Tenant, practitionerFHIRId: String): Practitioner =
-        getByID(tenant, practitionerFHIRId)
+    override fun getPractitioner(
+        tenant: Tenant,
+        practitionerFHIRId: String,
+    ): Practitioner = getByID(tenant, practitionerFHIRId)
 
     @Trace
-    override fun getPractitionerByProvider(tenant: Tenant, providerId: String): Practitioner {
+    override fun getPractitionerByProvider(
+        tenant: Tenant,
+        providerId: String,
+    ): Practitioner {
         val parameters = mapOf("identifier" to "External|$providerId")
 
         return getResourceListFromSearch(tenant, parameters).single()
     }
 
-    override fun findPractitionersByLocation(tenant: Tenant, locationIds: List<String>): FindPractitionersResponse {
+    override fun findPractitionersByLocation(
+        tenant: Tenant,
+        locationIds: List<String>,
+    ): FindPractitionersResponse {
         return practitionerRoleService.findPractitionersByLocation(tenant, locationIds)
     }
 }

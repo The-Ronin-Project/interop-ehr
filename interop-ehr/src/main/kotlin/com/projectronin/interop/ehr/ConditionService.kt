@@ -13,8 +13,12 @@ interface ConditionService : FHIRService<Condition> {
      * [conditionCategoryCode] and [clinicalStatus].
      * Supports one code or system|value token for category or clinicalStatus.
      */
-    fun findConditions(tenant: Tenant, patientFhirId: String, conditionCategoryCode: String, clinicalStatus: String):
-        List<Condition>
+    fun findConditions(
+        tenant: Tenant,
+        patientFhirId: String,
+        conditionCategoryCode: String,
+        clinicalStatus: String,
+    ): List<Condition>
 
     /**
      * Finds the [List] of [Condition]s associated with the requested [tenant], [patientFhirId],
@@ -25,7 +29,6 @@ interface ConditionService : FHIRService<Condition> {
         tenant: Tenant,
         patientFhirId: String,
         conditionCategoryCodes: List<FHIRSearchToken>,
-        clinicalStatusCodes: List<FHIRSearchToken> = emptyList()
-    ):
-        List<Condition>
+        clinicalStatusCodes: List<FHIRSearchToken> = emptyList(),
+    ): List<Condition>
 }

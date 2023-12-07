@@ -48,7 +48,7 @@ class EpicObservationServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -61,8 +61,8 @@ class EpicObservationServiceTest {
                     "patient" to "em2zwhHegmZEu39N4dUEIYA3",
                     "category" to "social-history",
                     "date" to "ge$pastDate",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
@@ -70,7 +70,7 @@ class EpicObservationServiceTest {
             observationService.findObservationsByPatient(
                 tenant,
                 listOf("em2zwhHegmZEu39N4dUEIYA3"),
-                listOf("social-history")
+                listOf("social-history"),
             )
 
         val expectedObservationBundle = (validObservationSearchBundle).entry.map { it.resource }
@@ -85,7 +85,7 @@ class EpicObservationServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -98,8 +98,8 @@ class EpicObservationServiceTest {
                     "patient" to "em2zwhHegmZEu39N4dUEIYA3",
                     "category" to "social-history",
                     "date" to RepeatingParameter(values = listOf("ge2023-09-01", "le2023-09-21")),
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
@@ -109,7 +109,7 @@ class EpicObservationServiceTest {
                 listOf("em2zwhHegmZEu39N4dUEIYA3"),
                 listOf("social-history"),
                 LocalDate.of(2023, 9, 1),
-                LocalDate.of(2023, 9, 21)
+                LocalDate.of(2023, 9, 21),
             )
 
         val expectedObservationBundle = (validObservationSearchBundle).entry.map { it.resource }
@@ -124,7 +124,7 @@ class EpicObservationServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -137,8 +137,8 @@ class EpicObservationServiceTest {
                     "patient" to "abc",
                     "category" to "social-history",
                     "date" to "ge$pastDate",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
         coEvery {
@@ -149,8 +149,8 @@ class EpicObservationServiceTest {
                     "patient" to "123",
                     "category" to "social-history",
                     "date" to "ge$pastDate",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
@@ -158,7 +158,7 @@ class EpicObservationServiceTest {
             observationService.findObservationsByPatient(
                 tenant,
                 listOf("abc", "123"),
-                listOf("social-history")
+                listOf("social-history"),
             )
 
         // each of 2 patients had 4 social-history observations
@@ -172,12 +172,13 @@ class EpicObservationServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
-        val categoryCodes = listOf(
-            FHIRSearchToken(system = categorySystem, code = "social-history"),
-            FHIRSearchToken(system = categorySystem, code = "laboratory")
-        )
+        val categoryCodes =
+            listOf(
+                FHIRSearchToken(system = categorySystem, code = "social-history"),
+                FHIRSearchToken(system = categorySystem, code = "laboratory"),
+            )
         val categoryTokens = "$categorySystem|social-history,$categorySystem|laboratory"
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -190,8 +191,8 @@ class EpicObservationServiceTest {
                     "patient" to "abc",
                     "category" to categoryTokens,
                     "date" to "ge$pastDate",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
@@ -199,7 +200,7 @@ class EpicObservationServiceTest {
             observationService.findObservationsByPatientAndCategory(
                 tenant,
                 listOf("abc"),
-                categoryCodes
+                categoryCodes,
             )
 
         // 1 patient had 4 social-history observations and 0 laboratory observations
@@ -213,12 +214,13 @@ class EpicObservationServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
-        val categoryCodes = listOf(
-            ObservationCategoryCodes.SOCIAL_HISTORY,
-            ObservationCategoryCodes.LABORATORY
-        )
+        val categoryCodes =
+            listOf(
+                ObservationCategoryCodes.SOCIAL_HISTORY,
+                ObservationCategoryCodes.LABORATORY,
+            )
         val categoryTokens = "social-history,laboratory"
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -231,8 +233,8 @@ class EpicObservationServiceTest {
                     "patient" to "abc",
                     "category" to categoryTokens,
                     "date" to "ge$pastDate",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
@@ -240,7 +242,7 @@ class EpicObservationServiceTest {
             observationService.findObservationsByCategory(
                 tenant,
                 listOf("abc"),
-                categoryCodes
+                categoryCodes,
             )
 
         // 1 patient had 4 social-history observations and 0 laboratory observations
@@ -254,12 +256,13 @@ class EpicObservationServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
-        val categoryCodes = listOf(
-            ObservationCategoryCodes.SOCIAL_HISTORY,
-            ObservationCategoryCodes.LABORATORY
-        )
+        val categoryCodes =
+            listOf(
+                ObservationCategoryCodes.SOCIAL_HISTORY,
+                ObservationCategoryCodes.LABORATORY,
+            )
         val categoryTokens = "social-history,laboratory"
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -272,8 +275,8 @@ class EpicObservationServiceTest {
                     "patient" to "abc",
                     "category" to categoryTokens,
                     "date" to RepeatingParameter(values = listOf("ge2023-09-01", "le2023-09-21")),
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
@@ -283,7 +286,7 @@ class EpicObservationServiceTest {
                 listOf("abc"),
                 categoryCodes,
                 LocalDate.of(2023, 9, 1),
-                LocalDate.of(2023, 9, 21)
+                LocalDate.of(2023, 9, 21),
             )
 
         // 1 patient had 4 social-history observations and 0 laboratory observations
@@ -297,12 +300,13 @@ class EpicObservationServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
-        val categoryCodes = listOf(
-            ObservationCategoryCodes.VITAL_SIGNS,
-            ObservationCategoryCodes.LABORATORY
-        )
+        val categoryCodes =
+            listOf(
+                ObservationCategoryCodes.VITAL_SIGNS,
+                ObservationCategoryCodes.LABORATORY,
+            )
         val categoryTokens = "vital-signs,laboratory"
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -315,13 +319,14 @@ class EpicObservationServiceTest {
                     "patient" to "abc",
                     "category" to categoryTokens,
                     "date" to "ge$pastDate",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
-        val httpResponse2 = mockk<HttpResponse> {
-            every { status } returns HttpStatusCode.OK
-        }
+        val httpResponse2 =
+            mockk<HttpResponse> {
+                every { status } returns HttpStatusCode.OK
+            }
         coEvery { httpResponse2.body<Bundle>() } returns validObservationSearchBundle
         coEvery {
             epicClient.get(
@@ -331,22 +336,23 @@ class EpicObservationServiceTest {
                     "patient" to "abc",
                     "code" to "12345,23456",
                     "date" to "ge$pastDate",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns EHRResponse(httpResponse2, "67890")
 
         every {
             codesDAO.getByTenantMnemonic("TEST_TENANT")
-        } returns mockk {
-            every { bmiCode } returns "12345"
-            every { bsaCode } returns "23456"
-        }
+        } returns
+            mockk {
+                every { bmiCode } returns "12345"
+                every { bsaCode } returns "23456"
+            }
         val bundle =
             observationService.findObservationsByCategory(
                 tenant,
                 listOf("abc"),
-                categoryCodes
+                categoryCodes,
             )
 
         // 1 patient had 4 social-history observations and 0 laboratory observations
@@ -360,11 +366,12 @@ class EpicObservationServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
-        val categoryCodes = listOf(
-            FHIRSearchToken(system = categorySystem, code = "social-history")
-        )
+        val categoryCodes =
+            listOf(
+                FHIRSearchToken(system = categorySystem, code = "social-history"),
+            )
 
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validObservationSearchBundle
@@ -376,8 +383,8 @@ class EpicObservationServiceTest {
                     "patient" to "abc",
                     "category" to "$categorySystem|social-history",
                     "date" to "ge$pastDate",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns ehrResponse
 
@@ -385,7 +392,7 @@ class EpicObservationServiceTest {
             observationService.findObservationsByPatientAndCategory(
                 tenant,
                 listOf("abc"),
-                categoryCodes
+                categoryCodes,
             )
 
         // 1 patient had 4 social-history observations
@@ -399,11 +406,12 @@ class EpicObservationServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
-        val categoryCodes = listOf(
-            FHIRSearchToken(system = categorySystem, code = "social-history")
-        )
+        val categoryCodes =
+            listOf(
+                FHIRSearchToken(system = categorySystem, code = "social-history"),
+            )
 
         // Mock response with paging
         every { pagingHttpResponse.status } returns HttpStatusCode.OK
@@ -416,18 +424,19 @@ class EpicObservationServiceTest {
                     "patient" to "em2zwhHegmZEu39N4dUEIYA3",
                     "category" to "$categorySystem|social-history",
                     "date" to "ge$pastDate",
-                    "_count" to 50
-                )
+                    "_count" to 50,
+                ),
             )
         } returns EHRResponse(pagingHttpResponse, "67890")
 
         // Mock response without paging
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<Bundle>() } returns validObservationSearchBundle
+        @Suppress("ktlint:standard:max-line-length")
         coEvery {
             epicClient.get(
                 tenant,
-                "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation?patient=em2zwhHegmZEu39N4dUEIYA3&category=social-history&date=ge2023-02-20&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6"
+                "https://apporchard.epic.com/interconnect-aocurprd-oauth/api/FHIR/R4/Observation?patient=em2zwhHegmZEu39N4dUEIYA3&category=social-history&date=ge2023-02-20&sessionID=10-57E8BB9A4D4211EC94270050568B7BE6",
             )
         } returns ehrResponse
 
@@ -435,7 +444,7 @@ class EpicObservationServiceTest {
             observationService.findObservationsByPatientAndCategory(
                 tenant,
                 listOf("em2zwhHegmZEu39N4dUEIYA3"),
-                categoryCodes
+                categoryCodes,
             )
 
         // 4 observations on the first page + 2 observations on the second page, remove duplicates = 4

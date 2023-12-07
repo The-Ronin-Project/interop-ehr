@@ -19,7 +19,9 @@ import org.springframework.stereotype.Repository
  * Provides data access operations for EHR data models.
  */
 @Repository
-class EhrDAO(@Qualifier("ehr") private val database: Database) {
+class EhrDAO(
+    @Qualifier("ehr") private val database: Database,
+) {
     private val logger = KotlinLogging.logger { }
 
     /**

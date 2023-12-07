@@ -12,7 +12,7 @@ import java.time.LocalDate
  */
 @Component
 class CernerMedicationStatementService(
-    cernerClient: CernerClient
+    cernerClient: CernerClient,
 ) : MedicationStatementService, CernerFHIRService<MedicationStatement>(cernerClient) {
     override val fhirURLSearchPart = ""
     override val fhirResourceType = MedicationStatement::class.java
@@ -24,21 +24,21 @@ class CernerMedicationStatementService(
         tenant: Tenant,
         patientFHIRId: String,
         startDate: LocalDate?,
-        endDate: LocalDate?
+        endDate: LocalDate?,
     ): List<MedicationStatement> {
         return emptyList()
     }
 
     override fun getByID(
         tenant: Tenant,
-        resourceFHIRId: String
+        resourceFHIRId: String,
     ): MedicationStatement {
         return MedicationStatement()
     }
 
     override fun getByIDs(
         tenant: Tenant,
-        resourceFHIRIds: List<String>
+        resourceFHIRIds: List<String>,
     ): Map<String, MedicationStatement> {
         return emptyMap()
     }

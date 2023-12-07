@@ -16,22 +16,25 @@ import org.junit.jupiter.api.Test
 
 class RoninExtensionUtilTest {
     var extension = ListDataGenerator(0, ExtensionGenerator())
-    private val providedExtension = listOf(
-        Extension(
-            url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
-            value = DynamicValue(
-                DynamicValueType.CODEABLE_CONCEPT,
-                CodeableConcept(
-                    text = "something-to-test".asFHIR(),
-                    coding = listOf(
-                        Coding(
-                            code = Code("tenant-source-code-test-extension")
-                        )
-                    )
-                )
-            )
+    private val providedExtension =
+        listOf(
+            Extension(
+                url = Uri(RoninExtension.TENANT_SOURCE_OBSERVATION_CODE.value),
+                value =
+                    DynamicValue(
+                        DynamicValueType.CODEABLE_CONCEPT,
+                        CodeableConcept(
+                            text = "something-to-test".asFHIR(),
+                            coding =
+                                listOf(
+                                    Coding(
+                                        code = Code("tenant-source-code-test-extension"),
+                                    ),
+                                ),
+                        ),
+                    ),
+            ),
         )
-    )
 
     @Test
     fun `include rcdm extension when none is provided`() {

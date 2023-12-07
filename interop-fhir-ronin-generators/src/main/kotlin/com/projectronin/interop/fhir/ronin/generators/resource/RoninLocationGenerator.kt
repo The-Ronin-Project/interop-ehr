@@ -12,7 +12,10 @@ import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 
-fun rcdmLocation(tenant: String, block: LocationGenerator.() -> Unit): Location {
+fun rcdmLocation(
+    tenant: String,
+    block: LocationGenerator.() -> Unit,
+): Location {
     return location {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.LOCATION, tenant) {}
@@ -27,13 +30,15 @@ fun rcdmLocation(tenant: String, block: LocationGenerator.() -> Unit): Location 
     }
 }
 
-val possibleLocationStatus = listOf(
-    Code("active"),
-    Code("suspended"),
-    Code("inactive")
-)
+val possibleLocationStatus =
+    listOf(
+        Code("active"),
+        Code("suspended"),
+        Code("inactive"),
+    )
 
-val modeValues = listOf(
-    Code("instance"),
-    Code("kind")
-)
+val modeValues =
+    listOf(
+        Code("instance"),
+        Code("kind"),
+    )

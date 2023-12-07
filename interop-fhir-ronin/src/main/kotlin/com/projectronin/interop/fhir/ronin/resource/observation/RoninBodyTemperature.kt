@@ -15,22 +15,26 @@ import org.springframework.stereotype.Component
 class RoninBodyTemperature(
     normalizer: Normalizer,
     localizer: Localizer,
-    registryClient: NormalizationRegistryClient
+    registryClient: NormalizationRegistryClient,
 ) :
     BaseRoninVitalSign(
-        R4ObservationValidator,
-        RoninProfile.OBSERVATION_BODY_TEMPERATURE.value,
-        normalizer,
-        localizer,
-        registryClient
-    ) {
+            R4ObservationValidator,
+            RoninProfile.OBSERVATION_BODY_TEMPERATURE.value,
+            normalizer,
+            localizer,
+            registryClient,
+        ) {
     override val rcdmVersion = RCDMVersion.V3_26_1
     override val profileVersion = 3
 
     // Quantity unit codes - [USCore Body Temperature Units](http://hl7.org/fhir/R4/valueset-ucum-bodytemp.html)
     override val validQuantityCodes = listOf("Cel", "[degF]")
 
-    override fun validateVitalSign(element: Observation, parentContext: LocationContext, validation: Validation) {
+    override fun validateVitalSign(
+        element: Observation,
+        parentContext: LocationContext,
+        validation: Validation,
+    ) {
         validateVitalSignValue(element.value, parentContext, validation)
     }
 }

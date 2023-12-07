@@ -21,22 +21,27 @@ class CernerObservationServiceTest {
     private val codesDAO = mockk<TenantCodesDAO>()
     private val cernerObservationService = spyk(CernerObservationService(client, codesDAO, 60))
     private val pastDate = LocalDate.now().minusDays(60).toString()
-    private val tenant = mockk<Tenant> {
-        every { mnemonic } returns "ronin"
-        every { timezone } returns ZoneId.of("Africa/Dakar")
-    }
-
-    private val observation = mockk<Observation> {
-        every { id } returns mockk {
-            every { value } returns "observation"
+    private val tenant =
+        mockk<Tenant> {
+            every { mnemonic } returns "ronin"
+            every { timezone } returns ZoneId.of("Africa/Dakar")
         }
-    }
 
-    private val observation2 = mockk<Observation> {
-        every { id } returns mockk {
-            every { value } returns "observation2"
+    private val observation =
+        mockk<Observation> {
+            every { id } returns
+                mockk {
+                    every { value } returns "observation"
+                }
         }
-    }
+
+    private val observation2 =
+        mockk<Observation> {
+            every { id } returns
+                mockk {
+                    every { value } returns "observation2"
+                }
+        }
 
     @Test
     fun `findObservationsByPatientAndCategory works`() {
@@ -46,16 +51,17 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "code",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation)
 
-        val results = cernerObservationService.findObservationsByPatientAndCategory(
-            tenant,
-            listOf("fhirId"),
-            listOf(FHIRSearchToken(system = null, code = "code"))
-        )
+        val results =
+            cernerObservationService.findObservationsByPatientAndCategory(
+                tenant,
+                listOf("fhirId"),
+                listOf(FHIRSearchToken(system = null, code = "code")),
+            )
 
         assertEquals(1, results.size)
         assertEquals(observation, results[0])
@@ -69,18 +75,19 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "code",
-                    "date" to RepeatingParameter(values = listOf("ge2023-09-01T00:00:00Z", "lt2023-09-22T00:00:00Z"))
-                )
+                    "date" to RepeatingParameter(values = listOf("ge2023-09-01T00:00:00Z", "lt2023-09-22T00:00:00Z")),
+                ),
             )
         } returns listOf(observation)
 
-        val results = cernerObservationService.findObservationsByPatientAndCategory(
-            tenant,
-            listOf("fhirId"),
-            listOf(FHIRSearchToken(system = null, code = "code")),
-            LocalDate.of(2023, 9, 1),
-            LocalDate.of(2023, 9, 21)
-        )
+        val results =
+            cernerObservationService.findObservationsByPatientAndCategory(
+                tenant,
+                listOf("fhirId"),
+                listOf(FHIRSearchToken(system = null, code = "code")),
+                LocalDate.of(2023, 9, 1),
+                LocalDate.of(2023, 9, 21),
+            )
 
         assertEquals(1, results.size)
         assertEquals(observation, results[0])
@@ -94,19 +101,20 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "code,system2|code2",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation)
 
-        val results = cernerObservationService.findObservationsByPatientAndCategory(
-            tenant,
-            listOf("fhirId"),
-            listOf(
-                FHIRSearchToken(system = null, code = "code"),
-                FHIRSearchToken(system = "system2", code = "code2")
+        val results =
+            cernerObservationService.findObservationsByPatientAndCategory(
+                tenant,
+                listOf("fhirId"),
+                listOf(
+                    FHIRSearchToken(system = null, code = "code"),
+                    FHIRSearchToken(system = "system2", code = "code2"),
+                ),
             )
-        )
 
         assertEquals(1, results.size)
         assertEquals(observation, results[0])
@@ -120,20 +128,21 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "exam,laboratory",
-                    "date" to RepeatingParameter(values = listOf("ge2023-09-01T00:00:00Z"))
-                )
+                    "date" to RepeatingParameter(values = listOf("ge2023-09-01T00:00:00Z")),
+                ),
             )
         } returns listOf(observation)
 
-        val results = cernerObservationService.findObservationsByCategory(
-            tenant,
-            listOf("fhirId"),
-            listOf(
-                ObservationCategoryCodes.EXAM,
-                ObservationCategoryCodes.LABORATORY
-            ),
-            LocalDate.of(2023, 9, 1)
-        )
+        val results =
+            cernerObservationService.findObservationsByCategory(
+                tenant,
+                listOf("fhirId"),
+                listOf(
+                    ObservationCategoryCodes.EXAM,
+                    ObservationCategoryCodes.LABORATORY,
+                ),
+                LocalDate.of(2023, 9, 1),
+            )
 
         assertEquals(1, results.size)
         assertEquals(observation, results[0])
@@ -147,19 +156,20 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "exam,laboratory",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation)
 
-        val results = cernerObservationService.findObservationsByCategory(
-            tenant,
-            listOf("fhirId"),
-            listOf(
-                ObservationCategoryCodes.EXAM,
-                ObservationCategoryCodes.LABORATORY
+        val results =
+            cernerObservationService.findObservationsByCategory(
+                tenant,
+                listOf("fhirId"),
+                listOf(
+                    ObservationCategoryCodes.EXAM,
+                    ObservationCategoryCodes.LABORATORY,
+                ),
             )
-        )
 
         assertEquals(1, results.size)
         assertEquals(observation, results[0])
@@ -173,8 +183,8 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "vital-signs,laboratory",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation)
 
@@ -184,27 +194,29 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "code" to "12345,09876",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation2)
 
         every {
             codesDAO.getByTenantMnemonic("ronin")
-        } returns mockk {
-            every { bmiCode } returns "12345"
-            every { bsaCode } returns "09876"
-            every { stageCodes } returns null
-        }
+        } returns
+            mockk {
+                every { bmiCode } returns "12345"
+                every { bsaCode } returns "09876"
+                every { stageCodes } returns null
+            }
 
-        val results = cernerObservationService.findObservationsByCategory(
-            tenant,
-            listOf("fhirId"),
-            listOf(
-                ObservationCategoryCodes.VITAL_SIGNS,
-                ObservationCategoryCodes.LABORATORY
+        val results =
+            cernerObservationService.findObservationsByCategory(
+                tenant,
+                listOf("fhirId"),
+                listOf(
+                    ObservationCategoryCodes.VITAL_SIGNS,
+                    ObservationCategoryCodes.LABORATORY,
+                ),
             )
-        )
 
         assertEquals(2, results.size)
         assertEquals(observation, results[0])
@@ -219,8 +231,8 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId1",
                     "category" to "code",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation)
 
@@ -230,16 +242,17 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId2",
                     "category" to "code",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation2)
 
-        val results = cernerObservationService.findObservationsByPatientAndCategory(
-            tenant,
-            listOf("fhirId1", "fhirId2"),
-            listOf(FHIRSearchToken(system = null, code = "code"))
-        )
+        val results =
+            cernerObservationService.findObservationsByPatientAndCategory(
+                tenant,
+                listOf("fhirId1", "fhirId2"),
+                listOf(FHIRSearchToken(system = null, code = "code")),
+            )
 
         assertEquals(2, results.size)
         assertTrue(results.contains(observation))
@@ -254,8 +267,8 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "vital-signs",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation)
 
@@ -265,26 +278,28 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "code" to "12345,09876,9988",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation2)
 
         every {
             codesDAO.getByTenantMnemonic("ronin")
-        } returns mockk {
-            every { bmiCode } returns "12345"
-            every { bsaCode } returns "09876"
-            every { stageCodes } returns "9988"
-        }
+        } returns
+            mockk {
+                every { bmiCode } returns "12345"
+                every { bsaCode } returns "09876"
+                every { stageCodes } returns "9988"
+            }
 
-        val results = cernerObservationService.findObservationsByCategory(
-            tenant,
-            listOf("fhirId"),
-            listOf(
-                ObservationCategoryCodes.VITAL_SIGNS
+        val results =
+            cernerObservationService.findObservationsByCategory(
+                tenant,
+                listOf("fhirId"),
+                listOf(
+                    ObservationCategoryCodes.VITAL_SIGNS,
+                ),
             )
-        )
 
         assertEquals(2, results.size)
         assertEquals(observation, results[0])
@@ -299,8 +314,8 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "vital-signs",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf()
 
@@ -310,26 +325,28 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "code" to "9988",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation)
 
         every {
             codesDAO.getByTenantMnemonic("ronin")
-        } returns mockk {
-            every { bmiCode } returns null
-            every { bsaCode } returns null
-            every { stageCodes } returns "9988"
-        }
+        } returns
+            mockk {
+                every { bmiCode } returns null
+                every { bsaCode } returns null
+                every { stageCodes } returns "9988"
+            }
 
-        val results = cernerObservationService.findObservationsByCategory(
-            tenant,
-            listOf("fhirId"),
-            listOf(
-                ObservationCategoryCodes.VITAL_SIGNS
+        val results =
+            cernerObservationService.findObservationsByCategory(
+                tenant,
+                listOf("fhirId"),
+                listOf(
+                    ObservationCategoryCodes.VITAL_SIGNS,
+                ),
             )
-        )
 
         assertEquals(1, results.size)
         assertEquals(observation, results[0])
@@ -343,8 +360,8 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "vital-signs",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation)
 
@@ -354,26 +371,28 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "code" to "12345,09876,9988,45446",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation2)
 
         every {
             codesDAO.getByTenantMnemonic("ronin")
-        } returns mockk {
-            every { bmiCode } returns "12345"
-            every { bsaCode } returns "09876"
-            every { stageCodes } returns "9988,45446"
-        }
+        } returns
+            mockk {
+                every { bmiCode } returns "12345"
+                every { bsaCode } returns "09876"
+                every { stageCodes } returns "9988,45446"
+            }
 
-        val results = cernerObservationService.findObservationsByCategory(
-            tenant,
-            listOf("fhirId"),
-            listOf(
-                ObservationCategoryCodes.VITAL_SIGNS
+        val results =
+            cernerObservationService.findObservationsByCategory(
+                tenant,
+                listOf("fhirId"),
+                listOf(
+                    ObservationCategoryCodes.VITAL_SIGNS,
+                ),
             )
-        )
 
         assertEquals(2, results.size)
         assertEquals(observation, results[0])
@@ -388,8 +407,8 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "vital-signs",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation)
 
@@ -399,26 +418,28 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "code" to "12345,09876,9988,45446",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation2)
 
         every {
             codesDAO.getByTenantMnemonic("ronin")
-        } returns mockk {
-            every { bmiCode } returns "12345"
-            every { bsaCode } returns "09876"
-            every { stageCodes } returns "9988, 45446"
-        }
+        } returns
+            mockk {
+                every { bmiCode } returns "12345"
+                every { bsaCode } returns "09876"
+                every { stageCodes } returns "9988, 45446"
+            }
 
-        val results = cernerObservationService.findObservationsByCategory(
-            tenant,
-            listOf("fhirId"),
-            listOf(
-                ObservationCategoryCodes.VITAL_SIGNS
+        val results =
+            cernerObservationService.findObservationsByCategory(
+                tenant,
+                listOf("fhirId"),
+                listOf(
+                    ObservationCategoryCodes.VITAL_SIGNS,
+                ),
             )
-        )
 
         assertEquals(2, results.size)
         assertEquals(observation, results[0])
@@ -433,8 +454,8 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "category" to "vital-signs",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation)
 
@@ -444,26 +465,28 @@ class CernerObservationServiceTest {
                 mapOf(
                     "patient" to "fhirId",
                     "code" to "12345,09876",
-                    "date" to "ge$pastDate"
-                )
+                    "date" to "ge$pastDate",
+                ),
             )
         } returns listOf(observation2)
 
         every {
             codesDAO.getByTenantMnemonic("ronin")
-        } returns mockk {
-            every { bmiCode } returns "12345"
-            every { bsaCode } returns "09876"
-            every { stageCodes } returns " , "
-        }
+        } returns
+            mockk {
+                every { bmiCode } returns "12345"
+                every { bsaCode } returns "09876"
+                every { stageCodes } returns " , "
+            }
 
-        val results = cernerObservationService.findObservationsByCategory(
-            tenant,
-            listOf("fhirId"),
-            listOf(
-                ObservationCategoryCodes.VITAL_SIGNS
+        val results =
+            cernerObservationService.findObservationsByCategory(
+                tenant,
+                listOf("fhirId"),
+                listOf(
+                    ObservationCategoryCodes.VITAL_SIGNS,
+                ),
             )
-        )
 
         assertEquals(2, results.size)
         assertEquals(observation, results[0])

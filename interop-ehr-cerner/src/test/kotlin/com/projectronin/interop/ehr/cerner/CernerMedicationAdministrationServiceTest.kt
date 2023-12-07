@@ -19,41 +19,48 @@ import java.time.ZoneId
 internal class CernerMedicationAdministrationServiceTest {
     private val client: CernerClient = mockk()
     private val service = CernerMedicationAdministrationService(client)
-    private val testTenant: Tenant = mockk {
-        every { mnemonic } returns "testTenant"
-        every { timezone } returns ZoneId.of("Etc/UTC")
-    }
+    private val testTenant: Tenant =
+        mockk {
+            every { mnemonic } returns "testTenant"
+            every { timezone } returns ZoneId.of("Etc/UTC")
+        }
 
     @Test
     fun `happy path`() {
-        val medAdmin1 = mockk<BundleEntry>(relaxed = true) {
-            every { resource } returns mockk<MedicationAdministration>(relaxed = true) {
-                every { id } returns Id("medAdmin1")
+        val medAdmin1 =
+            mockk<BundleEntry>(relaxed = true) {
+                every { resource } returns
+                    mockk<MedicationAdministration>(relaxed = true) {
+                        every { id } returns Id("medAdmin1")
+                    }
             }
-        }
-        val medAdmin2 = mockk<BundleEntry>(relaxed = true) {
-            every { resource } returns mockk<MedicationAdministration>(relaxed = true) {
-                every { id } returns Id("medAdmin2")
+        val medAdmin2 =
+            mockk<BundleEntry>(relaxed = true) {
+                every { resource } returns
+                    mockk<MedicationAdministration>(relaxed = true) {
+                        every { id } returns Id("medAdmin2")
+                    }
             }
-        }
 
-        val bundle = mockk<Bundle>(relaxed = true) {
-            every { entry } returns listOf(medAdmin1, medAdmin2)
-            every { link } returns emptyList()
-        }
+        val bundle =
+            mockk<Bundle>(relaxed = true) {
+                every { entry } returns listOf(medAdmin1, medAdmin2)
+                every { link } returns emptyList()
+            }
         coEvery {
             client.get(
                 testTenant,
                 "/MedicationAdministration",
-                any()
+                any(),
             )
         } returns EHRResponse(mockk { coEvery { body<Bundle>() } returns bundle }, "12345")
-        val result = service.findMedicationAdministrationsByPatient(
-            testTenant,
-            "patID",
-            LocalDate.now().minusYears(1),
-            LocalDate.now()
-        )
+        val result =
+            service.findMedicationAdministrationsByPatient(
+                testTenant,
+                "patID",
+                LocalDate.now().minusYears(1),
+                LocalDate.now(),
+            )
         assertEquals(2, result.size)
     }
 
@@ -61,7 +68,7 @@ internal class CernerMedicationAdministrationServiceTest {
     fun `find by request returns empty list`() {
         assertEquals(
             emptyList<MedicationAdministration>(),
-            service.findMedicationAdministrationsByRequest(testTenant, mockk())
+            service.findMedicationAdministrationsByRequest(testTenant, mockk()),
         )
     }
 }

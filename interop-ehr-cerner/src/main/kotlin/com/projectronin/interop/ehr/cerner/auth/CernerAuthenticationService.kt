@@ -47,31 +47,35 @@ class CernerAuthenticationService(private val client: HttpClient, private val ap
         scopes.joinToString(separator = " ")
     }
 
-    override fun getAuthentication(tenant: Tenant, disableRetry: Boolean): Authentication? {
+    override fun getAuthentication(
+        tenant: Tenant,
+        disableRetry: Boolean,
+    ): Authentication? {
         val vendor = tenant.vendorAs<Cerner>()
         val authURL = vendor.authenticationConfig.authEndpoint
         val clientIdWithSecret = "${vendor.authenticationConfig.accountId}:${vendor.authenticationConfig.secret}"
         val encodedSecret = Base64.getEncoder().encodeToString(clientIdWithSecret.toByteArray())
 
-        val httpResponse = runBlocking {
-            client.request("Cerner Auth for ${tenant.name}", authURL) { authURL ->
-                post(authURL) {
-                    headers {
-                        append(HttpHeaders.ContentType, "application/x-www-form-urlencoded")
-                        append(HttpHeaders.Authorization, "Basic $encodedSecret")
-                        append(NO_RETRY_HEADER, "$disableRetry")
-                    }
-                    setBody(
-                        FormDataContent(
-                            Parameters.build {
-                                append("grant_type", "client_credentials")
-                                append("scope", scope)
-                            }
+        val httpResponse =
+            runBlocking {
+                client.request("Cerner Auth for ${tenant.name}", authURL) { authURL ->
+                    post(authURL) {
+                        headers {
+                            append(HttpHeaders.ContentType, "application/x-www-form-urlencoded")
+                            append(HttpHeaders.Authorization, "Basic $encodedSecret")
+                            append(NO_RETRY_HEADER, "$disableRetry")
+                        }
+                        setBody(
+                            FormDataContent(
+                                Parameters.build {
+                                    append("grant_type", "client_credentials")
+                                    append("scope", scope)
+                                },
+                            ),
                         )
-                    )
+                    }
                 }
             }
-        }
         val response = runBlocking { httpResponse.body<CernerAuthentication>() }
 
         logger.debug { "Completed authentication for $authURL" }

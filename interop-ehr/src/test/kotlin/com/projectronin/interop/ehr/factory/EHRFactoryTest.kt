@@ -14,9 +14,10 @@ import java.time.ZoneOffset
 class EHRFactoryTest {
     @Test
     fun `vendor factory found for tenant`() {
-        val epicVendorFactory = mockk<VendorFactory> {
-            every { vendorType } returns VendorType.EPIC
-        }
+        val epicVendorFactory =
+            mockk<VendorFactory> {
+                every { vendorType } returns VendorType.EPIC
+            }
         val ehrFactory = EHRFactory(listOf(epicVendorFactory))
         val vendor =
             Epic(
@@ -34,7 +35,7 @@ class EHRFactoryTest {
                 "csnSystem",
                 "patientMRNTypeText",
                 "urn:epic:apporchard.curprod",
-                "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980"
+                "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980",
             )
         val tenant = Tenant(1, "TENANT", "Test Tenant", ZoneOffset.UTC, null, vendor, null)
 
@@ -62,13 +63,14 @@ class EHRFactoryTest {
                 "csnSystem",
                 "patientMRNTypeText",
                 "urn:epic:apporchard.curprod",
-                "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980"
+                "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980",
             )
         val tenant = Tenant(1, "TENANT", "Test Tenant", ZoneOffset.UTC, null, vendor, null)
 
-        val exception = assertThrows(IllegalStateException::class.java) {
-            ehrFactory.getVendorFactory(tenant)
-        }
+        val exception =
+            assertThrows(IllegalStateException::class.java) {
+                ehrFactory.getVendorFactory(tenant)
+            }
         assertEquals("No VendorFactory registered for EPIC", exception.message)
     }
 }

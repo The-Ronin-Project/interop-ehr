@@ -11,14 +11,17 @@ import org.springframework.stereotype.Component
 @Component
 class CernerMedicationService(
     cernerClient: CernerClient,
-    @Value("\${cerner.fhir.batchSize:10}") private val batchSize: Int
+    @Value("\${cerner.fhir.batchSize:10}") private val batchSize: Int,
 ) : MedicationService, CernerFHIRService<Medication>(cernerClient, batchSize) {
     override val fhirURLSearchPart = "/Medication"
     override val fhirResourceType = Medication::class.java
 
     @Deprecated("Use getByIDs")
     @Trace
-    override fun getMedicationsByFhirId(tenant: Tenant, medicationFhirIds: List<String>): List<Medication> {
+    override fun getMedicationsByFhirId(
+        tenant: Tenant,
+        medicationFhirIds: List<String>,
+    ): List<Medication> {
         return getByIDs(tenant, medicationFhirIds).values.toList()
     }
 }

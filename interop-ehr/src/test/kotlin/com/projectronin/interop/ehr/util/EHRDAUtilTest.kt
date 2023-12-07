@@ -11,13 +11,13 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
 internal class EHRDAUtilTest {
-
     @Test
     fun `getFHIRId - multiple resources`() {
-        val mockResponse = mockk<IdentifierSearchResponse> {
-            every { searchedIdentifier } returns mockk()
-            every { foundResources.size } returns 2
-        }
+        val mockResponse =
+            mockk<IdentifierSearchResponse> {
+                every { searchedIdentifier } returns mockk()
+                every { foundResources.size } returns 2
+            }
         assertThrows<VendorIdentifierNotFoundException> {
             mockResponse.getFHIRId()
         }
@@ -25,10 +25,11 @@ internal class EHRDAUtilTest {
 
     @Test
     fun `getFHIRId - weird coverage`() {
-        val mockResponse = mockk<IdentifierSearchResponse> {
-            every { searchedIdentifier } returns mockk()
-            every { foundResources } returns listOf()
-        }
+        val mockResponse =
+            mockk<IdentifierSearchResponse> {
+                every { searchedIdentifier } returns mockk()
+                every { foundResources } returns listOf()
+            }
         assertThrows<NoSuchElementException> {
             mockResponse.getFHIRId()
         }
@@ -36,14 +37,16 @@ internal class EHRDAUtilTest {
 
     @Test
     fun `getFHIRId - no FHIR ID`() {
-        val mockResponse = mockk<IdentifierSearchResponse> {
-            every { searchedIdentifier } returns mockk()
-            every { foundResources } returns listOf(
-                mockk {
-                    every { identifiers } returns listOf()
-                }
-            )
-        }
+        val mockResponse =
+            mockk<IdentifierSearchResponse> {
+                every { searchedIdentifier } returns mockk()
+                every { foundResources } returns
+                    listOf(
+                        mockk {
+                            every { identifiers } returns listOf()
+                        },
+                    )
+            }
         assertThrows<VendorIdentifierNotFoundException> {
             mockResponse.getFHIRId()
         }
@@ -51,40 +54,46 @@ internal class EHRDAUtilTest {
 
     @Test
     fun `getFHIRId - works`() {
-        val mockResponse = mockk<IdentifierSearchResponse> {
-            every { searchedIdentifier } returns mockk()
-            every { foundResources } returns listOf(
-                mockk {
-                    every { identifiers } returns listOf(
+        val mockResponse =
+            mockk<IdentifierSearchResponse> {
+                every { searchedIdentifier } returns mockk()
+                every { foundResources } returns
+                    listOf(
                         mockk {
-                            every { value } returns "FHIRID"
-                            every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
-                        }
+                            every { identifiers } returns
+                                listOf(
+                                    mockk {
+                                        every { value } returns "FHIRID"
+                                        every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                                    },
+                                )
+                        },
                     )
-                }
-            )
-        }
+            }
         assertEquals("FHIRID", mockResponse.getFHIRId())
     }
 
     @Test
     fun `associateFHIRId - works`() {
         val id = Identifier("SYSTEM", "ID")
-        val mockResponse = listOf<IdentifierSearchResponse>(
-            mockk {
-                every { searchedIdentifier } returns id
-                every { foundResources } returns listOf(
-                    mockk {
-                        every { identifiers } returns listOf(
+        val mockResponse =
+            listOf<IdentifierSearchResponse>(
+                mockk {
+                    every { searchedIdentifier } returns id
+                    every { foundResources } returns
+                        listOf(
                             mockk {
-                                every { value } returns "FHIRID"
-                                every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
-                            }
+                                every { identifiers } returns
+                                    listOf(
+                                        mockk {
+                                            every { value } returns "FHIRID"
+                                            every { system } returns CodeSystem.RONIN_FHIR_ID.uri.value!!
+                                        },
+                                    )
+                            },
                         )
-                    }
-                )
-            }
-        )
+                },
+            )
         val map = mockResponse.associateFHIRId()
         assertEquals("FHIRID", map[id])
     }

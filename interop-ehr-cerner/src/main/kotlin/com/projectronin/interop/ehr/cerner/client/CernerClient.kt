@@ -22,7 +22,7 @@ import org.springframework.stereotype.Component
 class CernerClient(
     private val client: HttpClient,
     private val authenticationBroker: EHRAuthenticationBroker,
-    datalakePublishService: DatalakePublishService
+    datalakePublishService: DatalakePublishService,
 ) : EHRClient(client, authenticationBroker, datalakePublishService) {
     private val logger = KotlinLogging.logger { }
 
@@ -30,12 +30,13 @@ class CernerClient(
         tenant: Tenant,
         urlPart: String,
         requestBody: Any,
-        parameters: Map<String, Any?>
+        parameters: Map<String, Any?>,
     ): HttpResponse {
         logger.debug { "Started POST call to tenant: ${tenant.mnemonic}" }
 
-        val authentication = authenticationBroker.getAuthentication(tenant)
-            ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
+        val authentication =
+            authenticationBroker.getAuthentication(tenant)
+                ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
 
         val response: HttpResponse =
             client.request("Cerner Organization: ${tenant.name}", tenant.vendor.serviceEndpoint + urlPart) { url ->

@@ -12,11 +12,12 @@ fun generateStringOrDAR(name: String): FHIRString {
     if (name.isNotEmpty()) return name.asFHIR()
     return FHIRString(
         value = null,
-        extension = listOf(
-            Extension(
-                url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason"),
-                value = DynamicValue(DynamicValueType.CODE, Code("unknown"))
-            )
-        )
+        extension =
+            listOf(
+                Extension(
+                    url = Uri("http://hl7.org/fhir/StructureDefinition/data-absent-reason"),
+                    value = DynamicValue(DynamicValueType.CODE, Code("unknown")),
+                ),
+            ),
     )
 }

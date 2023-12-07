@@ -13,7 +13,10 @@ import com.projectronin.interop.fhir.ronin.generators.util.rcdmIdentifiers
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmMeta
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 
-fun rcdmCarePlan(tenant: String, block: CarePlanGenerator.() -> Unit): CarePlan {
+fun rcdmCarePlan(
+    tenant: String,
+    block: CarePlanGenerator.() -> Unit,
+): CarePlan {
     return carePlan {
         block.invoke(this)
         meta of rcdmMeta(RoninProfile.CARE_PLAN, tenant) {}
@@ -31,29 +34,32 @@ fun Patient.rcdmCarePlan(block: CarePlanGenerator.() -> Unit): CarePlan {
     val data = this.referenceData()
     return rcdmCarePlan(data.tenantId) {
         block.invoke(this)
-        subject of generateReference(
-            subject.generate(),
-            subjectReferenceOptions,
-            data.tenantId,
-            "Patient",
-            data.udpId
-        )
+        subject of
+            generateReference(
+                subject.generate(),
+                subjectReferenceOptions,
+                data.tenantId,
+                "Patient",
+                data.udpId,
+            )
     }
 }
 
-val possibleCarePlanStatusCodes = listOf(
-    Code("draft"),
-    Code("active"),
-    Code("on-hold"),
-    Code("revoked"),
-    Code("completed"),
-    Code("entered-in-error"),
-    Code("unknown")
-)
+val possibleCarePlanStatusCodes =
+    listOf(
+        Code("draft"),
+        Code("active"),
+        Code("on-hold"),
+        Code("revoked"),
+        Code("completed"),
+        Code("entered-in-error"),
+        Code("unknown"),
+    )
 
-val possibleCarePlanIntentCodes = listOf(
-    Code("proposal"),
-    Code("plan"),
-    Code("order"),
-    Code("option")
-)
+val possibleCarePlanIntentCodes =
+    listOf(
+        Code("proposal"),
+        Code("plan"),
+        Code("order"),
+        Code("option"),
+    )

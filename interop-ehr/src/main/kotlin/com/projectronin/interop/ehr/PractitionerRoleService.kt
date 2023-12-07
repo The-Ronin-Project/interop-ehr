@@ -8,5 +8,8 @@ import com.projectronin.interop.tenant.config.model.Tenant
  * Defines the functionality of an EHR's practitioner service.
  */
 interface PractitionerRoleService : FHIRService<PractitionerRole> {
-    fun findPractitionersByLocation(tenant: Tenant, locationIds: List<String>): FindPractitionersResponse
+    fun findPractitionersByLocation(
+        tenant: Tenant,
+        locationIds: List<String>,
+    ): FindPractitionersResponse
 }

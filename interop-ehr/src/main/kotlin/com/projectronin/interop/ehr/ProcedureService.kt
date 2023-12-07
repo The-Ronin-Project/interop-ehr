@@ -8,7 +8,6 @@ import java.time.LocalDate
  * Defines the functionality for an EHR's Procedure service.
  */
 interface ProcedureService : FHIRService<Procedure> {
-
     /**
      * Finds procedures by [patientFhirId]
      * */
@@ -16,6 +15,6 @@ interface ProcedureService : FHIRService<Procedure> {
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate,
-        endDate: LocalDate
+        endDate: LocalDate,
     ): List<Procedure>
 }

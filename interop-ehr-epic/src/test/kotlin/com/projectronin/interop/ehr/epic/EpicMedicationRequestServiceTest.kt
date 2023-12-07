@@ -37,8 +37,8 @@ class EpicMedicationRequestServiceTest {
             httpResponse.body<MedicationRequest>(
                 TypeInfo(
                     MedicationRequest::class,
-                    MedicationRequest::class.java
-                )
+                    MedicationRequest::class.java,
+                ),
             )
         } returns medicationRequest
         coEvery { epicClient.get(tenant, "/api/FHIR/R4/MedicationRequest/fakeFaKEfAKefakE") } returns ehrResponse
@@ -55,8 +55,8 @@ class EpicMedicationRequestServiceTest {
             httpResponse.body<MedicationRequest>(
                 TypeInfo(
                     MedicationRequest::class,
-                    MedicationRequest::class.java
-                )
+                    MedicationRequest::class.java,
+                ),
             )
         } throws thrownException
         coEvery { epicClient.get(tenant, "/api/FHIR/R4/MedicationRequest/fakeFaKEfAKefakE") } returns ehrResponse
@@ -65,7 +65,7 @@ class EpicMedicationRequestServiceTest {
             assertThrows<ClientFailureException> {
                 medicationRequestService.getMedicationRequestById(
                     tenant,
-                    "fakeFaKEfAKefakE"
+                    "fakeFaKEfAKefakE",
                 )
             }
 
@@ -79,40 +79,7 @@ class EpicMedicationRequestServiceTest {
                 "d45049c3-3441-40ef-ab4d-b9cd86a17225",
                 "https://example.org",
                 "testPrivateKey",
-                "TEST_TENANT"
-            )
-
-        every { httpResponse.status } returns HttpStatusCode.OK
-        coEvery { httpResponse.body<Bundle>() } returns medicationRequestReturnBundle
-
-        coEvery {
-            epicClient.get(
-                tenant,
-                "/api/FHIR/R4/MedicationRequest",
-                mapOf(
-                    "patient" to "fakeFaKEfAKefakE",
-                    "_count" to 50
-                )
-            )
-        } returns ehrResponse
-
-        val bundle =
-            medicationRequestService.getMedicationRequestByPatient(
-                tenant,
-                "fakeFaKEfAKefakE"
-            )
-
-        assertEquals(medicationRequestReturnBundle.entry.map { it.resource }, bundle)
-    }
-
-    @Test
-    fun `getMedicationRequestByPatient returns patient medication request bundle with dates`() {
-        val tenant =
-            createTestTenant(
-                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
-                "https://example.org",
-                "testPrivateKey",
-                "TEST_TENANT"
+                "TEST_TENANT",
             )
 
         every { httpResponse.status } returns HttpStatusCode.OK
@@ -125,9 +92,41 @@ class EpicMedicationRequestServiceTest {
                 mapOf(
                     "patient" to "fakeFaKEfAKefakE",
                     "_count" to 50,
-                    "date" to RepeatingParameter(values = listOf("ge2023-09-01", "le2023-09-21"))
+                ),
+            )
+        } returns ehrResponse
 
-                )
+        val bundle =
+            medicationRequestService.getMedicationRequestByPatient(
+                tenant,
+                "fakeFaKEfAKefakE",
+            )
+
+        assertEquals(medicationRequestReturnBundle.entry.map { it.resource }, bundle)
+    }
+
+    @Test
+    fun `getMedicationRequestByPatient returns patient medication request bundle with dates`() {
+        val tenant =
+            createTestTenant(
+                "d45049c3-3441-40ef-ab4d-b9cd86a17225",
+                "https://example.org",
+                "testPrivateKey",
+                "TEST_TENANT",
+            )
+
+        every { httpResponse.status } returns HttpStatusCode.OK
+        coEvery { httpResponse.body<Bundle>() } returns medicationRequestReturnBundle
+
+        coEvery {
+            epicClient.get(
+                tenant,
+                "/api/FHIR/R4/MedicationRequest",
+                mapOf(
+                    "patient" to "fakeFaKEfAKefakE",
+                    "_count" to 50,
+                    "date" to RepeatingParameter(values = listOf("ge2023-09-01", "le2023-09-21")),
+                ),
             )
         } returns ehrResponse
 
@@ -136,7 +135,7 @@ class EpicMedicationRequestServiceTest {
                 tenant,
                 "fakeFaKEfAKefakE",
                 LocalDate.of(2023, 9, 1),
-                LocalDate.of(2023, 9, 21)
+                LocalDate.of(2023, 9, 21),
             )
 
         assertEquals(medicationRequestReturnBundle.entry.map { it.resource }, bundle)

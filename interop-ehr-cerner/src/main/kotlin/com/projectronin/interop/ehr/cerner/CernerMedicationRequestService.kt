@@ -13,7 +13,7 @@ import java.time.LocalDateTime
  */
 @Component
 class CernerMedicationRequestService(
-    cernerClient: CernerClient
+    cernerClient: CernerClient,
 ) : MedicationRequestService, CernerFHIRService<MedicationRequest>(cernerClient) {
     override val fhirURLSearchPart = "/MedicationRequest"
     override val fhirResourceType = MedicationRequest::class.java
@@ -21,7 +21,7 @@ class CernerMedicationRequestService(
     @Deprecated("Use getByID")
     override fun getMedicationRequestById(
         tenant: Tenant,
-        medicationRequestId: String
+        medicationRequestId: String,
     ): MedicationRequest {
         return getByID(tenant, medicationRequestId)
     }
@@ -30,14 +30,17 @@ class CernerMedicationRequestService(
         tenant: Tenant,
         patientFhirId: String,
         startDate: LocalDate?,
-        endDate: LocalDate? // ignored since cerner doesn't support multiple dates
+        // ignored since cerner doesn't support multiple dates
+        endDate: LocalDate?,
     ): List<MedicationRequest> {
         val offset = tenant.timezone.rules.getOffset(LocalDateTime.now())
-        val dateMap = startDate?.let { mapOf("-timing-boundsPeriod" to "ge${startDate}T00:00:00$offset") }
-            ?: emptyMap()
-        val parameters = mapOf(
-            "patient" to patientFhirId
-        ) + dateMap
+        val dateMap =
+            startDate?.let { mapOf("-timing-boundsPeriod" to "ge${startDate}T00:00:00$offset") }
+                ?: emptyMap()
+        val parameters =
+            mapOf(
+                "patient" to patientFhirId,
+            ) + dateMap
         return getResourceListFromSearch(tenant, parameters)
     }
 }
