@@ -88,19 +88,6 @@ class RoninPulseOximetry(
             validation.apply {
                 val flowRateCodeContext = LocationContext("Observation", "component:FlowRate.code")
                 checkTrue(
-                    flowRate.isNotEmpty(),
-                    FHIRError(
-                        code = "RONIN_PXOBS_004",
-                        severity = ValidationIssueSeverity.ERROR,
-                        description = "Must match this system|code: ${
-                            qualifyingFlowRateCodes().codes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
-                        }",
-                        location = flowRateCodeContext,
-                        metadata = listOf(qualifyingFlowRateCodes().metadata!!),
-                    ),
-                    parentContext,
-                )
-                checkTrue(
                     flowRate.size <= 1,
                     FHIRError(
                         code = "USCORE_PXOBS_005",
@@ -113,16 +100,15 @@ class RoninPulseOximetry(
                 )
 
                 val concentrationCodeContext = LocationContext("Observation", "component:Concentration.code")
+
                 checkTrue(
-                    concentration.isNotEmpty(),
+                    (components - flowRate.toSet() - concentration.toSet()).isEmpty(),
                     FHIRError(
-                        code = "RONIN_PXOBS_005",
+                        code = "RONIN_PXOBS_007",
                         severity = ValidationIssueSeverity.ERROR,
-                        description = "Must match this system|code: ${
-                            qualifyingConcentrationCodes().codes.joinToString(", ") { "${it.system?.value}|${it.code?.value}" }
-                        }",
-                        location = concentrationCodeContext,
-                        metadata = listOf(qualifyingConcentrationCodes().metadata!!),
+                        description = "Pulse Oximetry components must be either a Flow Rate or Concentration",
+                        location = LocationContext("Observation", "component"),
+                        metadata = emptyList(),
                     ),
                     parentContext,
                 )

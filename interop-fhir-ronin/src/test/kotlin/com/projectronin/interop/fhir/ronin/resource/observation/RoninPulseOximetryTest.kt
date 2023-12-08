@@ -709,7 +709,7 @@ class RoninPulseOximetryTest {
     }
 
     @Test
-    fun `validate fails if no components and no data absent reason for pulse oximetry`() {
+    fun `validate succeeds if no components`() {
         val observation =
             Observation(
                 id = Id("123"),
@@ -753,17 +753,7 @@ class RoninPulseOximetryTest {
                     ),
             )
 
-        val exception =
-            assertThrows<IllegalArgumentException> {
-                roninPulseOximetry.validate(observation).alertIfErrors()
-            }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_PXOBS_004: Must match this system|code: http://loinc.org|3151-8 @ Observation.component:FlowRate.code\n" +
-                "ERROR RONIN_PXOBS_005: Must match this system|code: http://loinc.org|3150-0 @ Observation.component:Concentration.code",
-            exception.message,
-        )
+        roninPulseOximetry.validate(observation).alertIfErrors()
     }
 
     @Test
@@ -3147,7 +3137,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_PXOBS_004: Must match this system|code: http://loinc.org|3151-8 @ Observation.component:FlowRate.code",
+                "ERROR RONIN_PXOBS_007: Pulse Oximetry components must be either a Flow Rate or Concentration @ Observation.component",
             exception.message,
         )
     }
@@ -3265,7 +3255,7 @@ class RoninPulseOximetryTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR RONIN_PXOBS_005: Must match this system|code: http://loinc.org|3150-0 @ Observation.component:Concentration.code",
+                "ERROR RONIN_PXOBS_007: Pulse Oximetry components must be either a Flow Rate or Concentration @ Observation.component",
             exception.message,
         )
     }
