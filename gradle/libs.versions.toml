@@ -1,20 +1,19 @@
 [versions]
 caffeine = "3.1.8"
 commons = "1.11.0"
-datadog = "1.24.2"
+datadog = "1.25.1"
 ehrda = "1.6.0"
 hapi = "2.5.1"
-interop-common = "3.13.4"
+interop-common = "4.0.0"
+interop-datalake = "9.0.0"
 interop-event-resource-internal = "1.2.3"
-interop-fhir = "8.11.0"
-interop-gradle = "3.4.0"
-interop-publish = "8.4.2"
-interop-queue = "2.0.0"
-interop-validation = "3.2.2"
+interop-fhir = "9.0.0"
+interop-gradle = "4.0.0"
+interop-queue = "3.0.0"
+interop-validation = "4.0.0"
 jackson = "2.16.0"
 kotlinx-coroutines = "1.7.3"
-# @pin INT-2283
-ktor = "2.3.4"
+ktor = "2.3.7"
 ktorm = "3.6.0"
 mockk = "1.13.8"
 mockwebserver = "4.12.0"
@@ -22,7 +21,7 @@ mysql-connector = "8.2.0"
 opentracing = "0.33.0"
 ronin-test = "0.2.0"
 swagger-annotations = "2.2.19"
-testcontainers-mysql = "1.19.2"
+testcontainers-mysql = "1.19.3"
 
 [libraries]
 caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
@@ -40,7 +39,7 @@ interop-commonKtorm = { module = "com.projectronin.interop:interop-common-ktorm"
 interop-commonTestDb = { module = "com.projectronin.interop:interop-common-test-db", version.ref = "interop-common" }
 interop-fhir = { module = "com.projectronin.interop.fhir:interop-fhir", version.ref = "interop-fhir" }
 interop-fhir-generators = { module = "com.projectronin.interop.fhir:interop-fhir-generators", version.ref = "interop-fhir" }
-interop-publishers-datalake = { module = "com.projectronin.interop.publish:interop-datalake", version.ref = "interop-publish" }
+interop-publishers-datalake = { module = "com.projectronin.interop.publish:interop-datalake", version.ref = "interop-datalake" }
 interop-queue-api = { module = "com.projectronin.interop.queue:interop-queue", version.ref = "interop-queue" }
 interop-validation-client = { module = "com.projectronin.interop.validation:interop-validation-client", version.ref = "interop-validation" }
 jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
