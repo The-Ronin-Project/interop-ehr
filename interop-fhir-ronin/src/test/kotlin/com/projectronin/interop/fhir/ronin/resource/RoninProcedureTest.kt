@@ -48,27 +48,6 @@ class RoninProcedureTest {
             every { mnemonic } returns "test"
         }
 
-    private val unmappedCategory1 =
-        CodeableConcept(
-            coding =
-                listOf(
-                    Coding(
-                        system = Uri("UnmappedCategorySystem#1"),
-                        code = Code(value = "UnmappedCategory#1"),
-                    ),
-                ),
-        )
-    private val mappedCategory1 =
-        CodeableConcept(
-            coding =
-                listOf(
-                    Coding(
-                        system = Uri("MappedCategorySystem#1"),
-                        code = Code(value = "MappedCategory#1"),
-                    ),
-                ),
-        )
-
     private val unmappedCode1 =
         CodeableConcept(
             coding =
@@ -113,20 +92,6 @@ class RoninProcedureTest {
                 ),
         )
 
-    private fun procedureExtensionCategory() =
-        Extension(
-            url = RoninExtension.TENANT_SOURCE_PROCEDURE_CATEGORY.uri,
-            value =
-                DynamicValue(
-                    type = DynamicValueType.CODEABLE_CONCEPT,
-                    value =
-                        Coding(
-                            system = Uri("system"),
-                            code = Code(value = "code"),
-                        ),
-                ),
-        )
-
     @BeforeEach
     fun setup() {
         registryClient =
@@ -147,29 +112,8 @@ class RoninProcedureTest {
                 every {
                     getConceptMapping(
                         tenant,
-                        "Procedure.category",
-                        mappedCategory1,
-                        any<DocumentReference>(),
-                    )
-                } returns
-                    ConceptMapCodeableConcept(
-                        CodeableConcept(),
-                        procedureExtensionCategory(),
-                        listOf(conceptMapMetadata),
-                    )
-                every {
-                    getConceptMapping(
-                        tenant,
                         "Procedure.code",
                         unmappedCode1,
-                        any<DocumentReference>(),
-                    )
-                } returns null
-                every {
-                    getConceptMapping(
-                        tenant,
-                        "Procedure.category",
-                        unmappedCategory1,
                         any<DocumentReference>(),
                     )
                 } returns null
@@ -288,7 +232,7 @@ class RoninProcedureTest {
                             value = "EHR Data Authority".asFHIR(),
                         ),
                     ),
-                extension = listOf(procedureExtensionCategory()),
+                extension = emptyList(),
                 status = EventStatus.ON_HOLD.asCode(),
                 subject = Reference(reference = FHIRString("Patient/123123")),
                 code = CodeableConcept(),
@@ -302,53 +246,6 @@ class RoninProcedureTest {
         assertEquals(
             "Encountered validation error(s):\n" +
                 "ERROR RONIN_PROC_001: Tenant source procedure code extension is missing or invalid @ Procedure.extension",
-            exception.message,
-        )
-    }
-
-    @Test
-    fun `validate fails with more than one extension category`() {
-        val procedure =
-            Procedure(
-                id = Id("12345"),
-                meta = Meta(profile = listOf(Canonical(RoninProfile.PROCEDURE.value)), source = Uri("source")),
-                identifier =
-                    listOf(
-                        Identifier(
-                            type = CodeableConcepts.RONIN_FHIR_ID,
-                            system = CodeSystem.RONIN_FHIR_ID.uri,
-                            value = "12345".asFHIR(),
-                        ),
-                        Identifier(
-                            type = CodeableConcepts.RONIN_TENANT,
-                            system = CodeSystem.RONIN_TENANT.uri,
-                            value = "test".asFHIR(),
-                        ),
-                        Identifier(
-                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
-                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
-                            value = "EHR Data Authority".asFHIR(),
-                        ),
-                    ),
-                extension =
-                    listOf(
-                        procedureExtensionCode(),
-                        procedureExtensionCategory(),
-                        procedureExtensionCategory(),
-                    ),
-                status = EventStatus.ON_HOLD.asCode(),
-                subject = Reference(reference = FHIRString("Patient/123123")),
-                code = CodeableConcept(),
-            )
-
-        val exception =
-            assertThrows<IllegalArgumentException> {
-                roninProcedure.validate(procedure).alertIfErrors()
-            }
-
-        assertEquals(
-            "Encountered validation error(s):\n" +
-                "ERROR RONIN_PROC_002: Tenant source procedure category extension is invalid @ Procedure.extension",
             exception.message,
         )
     }
@@ -377,7 +274,7 @@ class RoninProcedureTest {
                             value = "EHR Data Authority".asFHIR(),
                         ),
                     ),
-                extension = listOf(procedureExtensionCode(), procedureExtensionCategory()),
+                extension = listOf(procedureExtensionCode()),
                 status = EventStatus.COMPLETED.asCode(),
                 subject = Reference(reference = FHIRString("Patient/123123")),
                 code = CodeableConcept(),
@@ -419,7 +316,7 @@ class RoninProcedureTest {
                             value = "EHR Data Authority".asFHIR(),
                         ),
                     ),
-                extension = listOf(procedureExtensionCode(), procedureExtensionCategory()),
+                extension = listOf(procedureExtensionCode()),
                 status = EventStatus.ON_HOLD.asCode(),
                 subject = Reference(reference = FHIRString("Patient/123123")),
             )
@@ -460,7 +357,7 @@ class RoninProcedureTest {
                             value = "EHR Data Authority".asFHIR(),
                         ),
                     ),
-                extension = listOf(procedureExtensionCode(), procedureExtensionCategory()),
+                extension = listOf(procedureExtensionCode()),
                 status = EventStatus.ON_HOLD.asCode(),
                 subject = Reference(reference = FHIRString("Appointment/123123")),
                 code = CodeableConcept(),
@@ -498,7 +395,7 @@ class RoninProcedureTest {
                             value = "EHR Data Authority".asFHIR(),
                         ),
                     ),
-                extension = listOf(procedureExtensionCode(), procedureExtensionCategory()),
+                extension = listOf(procedureExtensionCode()),
                 status = EventStatus.ON_HOLD.asCode(),
                 subject = Reference(reference = FHIRString("Patient/123123")),
                 code = CodeableConcept(),
@@ -535,7 +432,7 @@ class RoninProcedureTest {
                             value = "EHR Data Authority".asFHIR(),
                         ),
                     ),
-                extension = listOf(procedureExtensionCode(), procedureExtensionCategory()),
+                extension = listOf(procedureExtensionCode()),
                 status = EventStatus.ON_HOLD.asCode(),
                 subject = Reference(reference = FHIRString("Patient/123123")),
                 code = CodeableConcept(),
@@ -561,7 +458,7 @@ class RoninProcedureTest {
                 status = EventStatus.ON_HOLD.asCode(),
                 subject = Reference(reference = FHIRString("Patient/123123")),
                 code = mappedCode1,
-                category = mappedCategory1,
+                category = CodeableConcept(),
             )
 
         val (transformed, validation) = roninProcedure.transform(procedure, tenant)
@@ -578,7 +475,7 @@ class RoninProcedureTest {
             transformed.resource.meta,
         )
         assertEquals(
-            listOf(procedureExtensionCode(), procedureExtensionCategory()),
+            listOf(procedureExtensionCode()),
             transformed.resource.extension,
         )
         assertEquals(
@@ -639,7 +536,7 @@ class RoninProcedureTest {
                 status = EventStatus.ON_HOLD.asCode(),
                 subject = Reference(reference = FHIRString("Patient/123123")),
                 code = unmappedCode1,
-                category = unmappedCategory1,
+                category = CodeableConcept(),
             )
 
         val actualTransformResult = roninProcedure.transform(procedure, tenant)
@@ -650,8 +547,7 @@ class RoninProcedureTest {
 
         assertEquals(
             "Encountered validation error(s):\n" +
-                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'UnmappedCode#1' has no target defined in any Procedure.code concept map for tenant 'test' @ Procedure.code\n" +
-                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'UnmappedCategory#1' has no target defined in any Procedure.category concept map for tenant 'test' @ Procedure.category",
+                "ERROR NOV_CONMAP_LOOKUP: Tenant source value 'UnmappedCode#1' has no target defined in any Procedure.code concept map for tenant 'test' @ Procedure.code",
             actualException.message,
         )
     }
