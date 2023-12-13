@@ -1,9 +1,12 @@
 package com.projectronin.interop.ehr.cerner.client
 
+import com.projectronin.interop.common.auth.Authentication
 import com.projectronin.interop.common.http.FhirJson
 import com.projectronin.interop.common.http.exceptions.RequestFailureException
 import com.projectronin.interop.datalake.DatalakePublishService
+import com.projectronin.interop.ehr.auth.AuthenticationService
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
+import com.projectronin.interop.ehr.auth.TenantAuthenticationBroker
 import com.projectronin.interop.ehr.cerner.auth.CernerAuthentication
 import com.projectronin.interop.ehr.cerner.createTestTenant
 import com.projectronin.interop.ehr.cerner.getClient
@@ -11,6 +14,7 @@ import com.projectronin.interop.ehr.client.RepeatingParameter
 import com.projectronin.interop.fhir.r4.resource.Communication
 import com.projectronin.interop.fhir.r4.valueset.EventStatus
 import com.projectronin.interop.fhir.util.asCode
+import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.statement.bodyAsText
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
@@ -57,7 +61,7 @@ class CernerClientTest {
                 serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
                 secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
-        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns null
+        setupMockAuthenticationBroker(tenant, null)
 
         assertThrows<IllegalStateException> {
             runBlocking {
@@ -82,7 +86,7 @@ class CernerClientTest {
             )
 
         val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
-        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         val response =
             runBlocking {
@@ -111,7 +115,7 @@ class CernerClientTest {
             )
 
         val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
-        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         val response =
             runBlocking {
@@ -155,7 +159,7 @@ class CernerClientTest {
             )
 
         val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
-        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         val response =
             runBlocking {
@@ -187,7 +191,7 @@ class CernerClientTest {
             )
 
         val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
-        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         assertThrows<RequestFailureException> {
             runBlocking {
@@ -208,7 +212,7 @@ class CernerClientTest {
                 serviceEndpoint = mockWebServer.url("/r4/ec2458f2-1e24-41c8-b71b-0e701af7583d").toString(),
                 secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
-        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns null
+        setupMockAuthenticationBroker(tenant, null)
 
         val communication =
             Communication(
@@ -235,7 +239,7 @@ class CernerClientTest {
                 secret = "GYtOGM3YS1hNmRmYjc5OWUzYjAiLCJ0Z",
             )
         val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Location.write", "")
-        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         val communication =
             Communication(
@@ -270,7 +274,7 @@ class CernerClientTest {
             )
 
         val authentication = CernerAuthentication("accessToken", "Bearer", 570, "system/Patient.read", "")
-        every { runBlocking { authenticationBroker.getAuthentication(tenant) } } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         val response =
             runBlocking {
@@ -293,5 +297,17 @@ class CernerClientTest {
 
         assertTrue(request.headers["Accept"]!!.contains("application/fhir+json"))
         assertTrue(request.headers["Content-Type"]!!.startsWith("application/fhir+json"))
+    }
+
+    private fun setupMockAuthenticationBroker(
+        tenant: Tenant,
+        authentication: Authentication?,
+    ) {
+        val service =
+            mockk<AuthenticationService> {
+                every { getAuthentication(tenant) } returns authentication
+            }
+        val authenticator = TenantAuthenticationBroker(service, tenant)
+        every { authenticationBroker.getAuthenticator(tenant) } returns authenticator
     }
 }

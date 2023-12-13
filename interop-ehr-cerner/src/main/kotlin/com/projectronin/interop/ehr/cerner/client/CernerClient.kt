@@ -34,15 +34,19 @@ class CernerClient(
     ): HttpResponse {
         logger.debug { "Started POST call to tenant: ${tenant.mnemonic}" }
 
-        val authentication =
-            authenticationBroker.getAuthentication(tenant)
-                ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
+        val authenticator = authenticationBroker.getAuthenticator(tenant)
 
         val response: HttpResponse =
-            client.request("Cerner Organization: ${tenant.name}", tenant.vendor.serviceEndpoint + urlPart) { url ->
+            client.request(
+                "Cerner Organization: ${tenant.name}",
+                tenant.vendor.serviceEndpoint + urlPart,
+                authenticator,
+                1,
+                logger,
+            ) { url, authentication ->
                 post(url) {
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+                        append(HttpHeaders.Authorization, "Bearer ${authentication?.accessToken}")
                     }
                     accept(ContentType.Application.FhirJson)
                     contentType(ContentType.Application.FhirJson)

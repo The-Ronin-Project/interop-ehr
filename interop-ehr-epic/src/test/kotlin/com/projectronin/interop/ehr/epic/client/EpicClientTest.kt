@@ -1,12 +1,16 @@
 package com.projectronin.interop.ehr.epic.client
 
+import com.projectronin.interop.common.auth.Authentication
 import com.projectronin.interop.common.http.exceptions.ServerFailureException
 import com.projectronin.interop.datalake.DatalakePublishService
+import com.projectronin.interop.ehr.auth.AuthenticationService
 import com.projectronin.interop.ehr.auth.EHRAuthenticationBroker
+import com.projectronin.interop.ehr.auth.TenantAuthenticationBroker
 import com.projectronin.interop.ehr.epic.apporchard.model.GetProviderAppointmentRequest
 import com.projectronin.interop.ehr.epic.auth.EpicAuthentication
 import com.projectronin.interop.ehr.epic.createTestTenant
 import com.projectronin.interop.ehr.epic.getClient
+import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.statement.bodyAsText
 import io.ktor.client.statement.request
 import io.ktor.http.HttpStatusCode
@@ -42,7 +46,7 @@ class EpicClientTest {
                 tenantMnemonic = tenantId,
             )
 
-        every { authenticationBroker.getAuthentication(tenant) } returns null
+        setupMockAuthenticationBroker(tenant, null)
 
         // Execute test
         val exception =
@@ -79,7 +83,7 @@ class EpicClientTest {
             )
 
         val authentication = EpicAuthentication("accessToken", "tokenType", 3600, "scope")
-        every { authenticationBroker.getAuthentication(tenant) } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         // Execute test
         val response =
@@ -116,7 +120,7 @@ class EpicClientTest {
             )
 
         val authentication = EpicAuthentication("accessToken", "tokenType", 3600, "scope")
-        every { authenticationBroker.getAuthentication(tenant) } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         // Execute test
         val response =
@@ -153,7 +157,7 @@ class EpicClientTest {
             )
 
         val authentication = EpicAuthentication("accessToken", "tokenType", 3600, "scope")
-        every { authenticationBroker.getAuthentication(tenant) } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         // Execute test
         val response =
@@ -189,7 +193,7 @@ class EpicClientTest {
             )
 
         val authentication = EpicAuthentication("accessToken", "tokenType", 3600, "scope")
-        every { authenticationBroker.getAuthentication(tenant) } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         // Execute test
         val response =
@@ -227,7 +231,7 @@ class EpicClientTest {
             )
 
         val authentication = EpicAuthentication("accessToken", "tokenType", 3600, "scope")
-        every { authenticationBroker.getAuthentication(tenant) } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         // Execute test
         assertThrows<ServerFailureException> {
@@ -264,7 +268,7 @@ class EpicClientTest {
             )
 
         val authentication = EpicAuthentication("accessToken", "tokenType", 3600, "scope")
-        every { authenticationBroker.getAuthentication(tenant) } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         // Execute test
         assertThrows<ServerFailureException> {
@@ -304,9 +308,8 @@ class EpicClientTest {
                 privateKey = "testPrivateKey",
                 tenantMnemonic = tenantId,
             )
-
         val authentication = EpicAuthentication("accessToken", "tokenType", 3600, "scope")
-        every { authenticationBroker.getAuthentication(tenant) } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         // Execute test
         val response =
@@ -350,7 +353,7 @@ class EpicClientTest {
             )
 
         val authentication = EpicAuthentication("accessToken", "tokenType", 3600, "scope")
-        every { authenticationBroker.getAuthentication(tenant) } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         // Execute test
         val response =
@@ -394,7 +397,7 @@ class EpicClientTest {
             )
 
         val authentication = EpicAuthentication("accessToken", "tokenType", 3600, "scope")
-        every { authenticationBroker.getAuthentication(tenant) } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         // Execute test
         var url: Url
@@ -441,7 +444,7 @@ class EpicClientTest {
             )
 
         val authentication = EpicAuthentication("accessToken", "tokenType", 3600, "scope")
-        every { authenticationBroker.getAuthentication(tenant) } returns authentication
+        setupMockAuthenticationBroker(tenant, authentication)
 
         // Execute test
         var url: Url
@@ -463,5 +466,17 @@ class EpicClientTest {
         assertTrue(url.toString().endsWith("?list=one,two&nonList=nonList"))
         // Validate Response
         assertEquals(validPatientSearchJson, response)
+    }
+
+    private fun setupMockAuthenticationBroker(
+        tenant: Tenant,
+        authentication: Authentication?,
+    ) {
+        val service =
+            mockk<AuthenticationService> {
+                every { getAuthentication(tenant) } returns authentication
+            }
+        val authenticator = TenantAuthenticationBroker(service, tenant)
+        every { authenticationBroker.getAuthenticator(tenant) } returns authenticator
     }
 }

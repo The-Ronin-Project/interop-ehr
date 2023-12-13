@@ -85,16 +85,20 @@ abstract class EHRClient(
         logger.debug { "Started POST call to tenant: ${tenant.mnemonic}" }
 
         // Authenticate
-        val authentication =
-            authenticationBroker.getAuthentication(tenant)
-                ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
+        val authenticator = authenticationBroker.getAuthenticator(tenant)
 
         // Make the call
         val response: HttpResponse =
-            client.request("Organization: ${tenant.name}", tenant.vendor.serviceEndpoint + urlPart) { urlToCall ->
+            client.request(
+                "Organization: ${tenant.name}",
+                tenant.vendor.serviceEndpoint + urlPart,
+                authenticator,
+                1,
+                logger,
+            ) { urlToCall, authentication ->
                 post(urlToCall) {
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+                        append(HttpHeaders.Authorization, "Bearer ${authentication?.accessToken}")
                     }
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
@@ -143,9 +147,7 @@ abstract class EHRClient(
         logger.debug { "Started GET call to tenant: ${tenant.mnemonic}" }
 
         // Authenticate
-        val authentication =
-            authenticationBroker.getAuthentication(tenant)
-                ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
+        val authenticator = authenticationBroker.getAuthenticator(tenant)
 
         val requestUrl =
             if (urlPart.first() == '/') {
@@ -155,10 +157,16 @@ abstract class EHRClient(
             }
 
         val response: HttpResponse =
-            client.request("Organization: ${tenant.name}", requestUrl) { urlToCall ->
+            client.request(
+                "Organization: ${tenant.name}",
+                requestUrl,
+                authenticator,
+                1,
+                logger,
+            ) { urlToCall, authentication ->
                 get(urlToCall) {
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+                        append(HttpHeaders.Authorization, "Bearer ${authentication?.accessToken}")
                         append(NO_RETRY_HEADER, "$disableRetry")
                     }
                     accept(acceptTypeOverride)
@@ -204,9 +212,7 @@ abstract class EHRClient(
         logger.debug { "Started OPTIONS call to tenant: ${tenant.mnemonic}" }
 
         // Authenticate
-        val authentication =
-            authenticationBroker.getAuthentication(tenant)
-                ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
+        val authenticator = authenticationBroker.getAuthenticator(tenant)
 
         val requestUrl =
             if (urlPart.first() == '/') {
@@ -216,10 +222,16 @@ abstract class EHRClient(
             }
 
         val response: HttpResponse =
-            client.request("Organization: ${tenant.name}", requestUrl) { urlToCall ->
+            client.request(
+                "Organization: ${tenant.name}",
+                requestUrl,
+                authenticator,
+                1,
+                logger,
+            ) { urlToCall, authentication ->
                 options(urlToCall) {
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+                        append(HttpHeaders.Authorization, "Bearer ${authentication?.accessToken}")
                     }
                 }
             }
@@ -241,17 +253,20 @@ abstract class EHRClient(
         logger.debug { "Started PUT call to tenant: ${tenant.mnemonic}" }
 
         // Authenticate
-        val authentication =
-            authenticationBroker.getAuthentication(tenant)
-                ?: throw IllegalStateException("Unable to retrieve authentication for ${tenant.mnemonic}")
+        val authenticator = authenticationBroker.getAuthenticator(tenant)
 
         // Make the call
         val response: HttpResponse =
-            client.request("Organization: ${tenant.name}", tenant.vendor.serviceEndpoint + urlPart) { urlToCall ->
-
+            client.request(
+                "Organization: ${tenant.name}",
+                tenant.vendor.serviceEndpoint + urlPart,
+                authenticator,
+                1,
+                logger,
+            ) { urlToCall, authentication ->
                 put(urlToCall) {
                     headers {
-                        append(HttpHeaders.Authorization, "Bearer ${authentication.accessToken}")
+                        append(HttpHeaders.Authorization, "Bearer ${authentication?.accessToken}")
                     }
                     accept(ContentType.Application.Json)
                     contentType(ContentType.Application.Json)
