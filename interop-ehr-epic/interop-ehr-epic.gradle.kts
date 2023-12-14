@@ -15,7 +15,6 @@ dependencies {
 
     implementation(project(":interop-tenant"))
     implementation(project(":interop-ehr"))
-    implementation(project(":interop-fhir-ronin"))
     implementation(project(":interop-hl7"))
     implementation("org.springframework:spring-context")
     implementation(libs.ktor.server.auth.jwt) {

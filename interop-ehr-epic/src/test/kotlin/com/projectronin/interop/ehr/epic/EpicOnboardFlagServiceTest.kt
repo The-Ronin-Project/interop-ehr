@@ -11,7 +11,6 @@ import com.projectronin.interop.ehr.outputs.EHRResponse
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
 import com.projectronin.interop.fhir.r4.resource.Patient
-import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.tenant.config.model.Tenant
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
@@ -82,7 +81,7 @@ class EpicOnboardFlagServiceTest {
             ehrDataAuthorityClient.getResourceAs<Patient>(
                 "mnemonic",
                 "Patient",
-                "fhirId".localize(tenant),
+                "mnemonic-fhirId",
             )
         } returns patient
         every { identifierService.getMRNIdentifier(tenant, listOf(patientMRN)) } returns patientMRN
@@ -127,7 +126,7 @@ class EpicOnboardFlagServiceTest {
             ehrDataAuthorityClient.getResourceAs<Patient>(
                 "mnemonic",
                 "Patient",
-                "fhirId".localize(tenant),
+                "mnemonic-fhirId",
             )
         } returns patient
         every { identifierService.getMRNIdentifier(tenant, listOf(patientMRN)) } returns patientMRN
@@ -163,7 +162,7 @@ class EpicOnboardFlagServiceTest {
             ehrDataAuthorityClient.getResourceAs<Patient>(
                 "mnemonic",
                 "Patient",
-                "fhirId".localize(tenant),
+                "mnemonic-fhirId",
             )
         } returns null
 
@@ -179,7 +178,7 @@ class EpicOnboardFlagServiceTest {
             ehrDataAuthorityClient.getResourceAs<Patient>(
                 "mnemonic",
                 "Patient",
-                "fhirId".localize(tenant),
+                "mnemonic-fhirId",
             )
         } returns null
 

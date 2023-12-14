@@ -30,9 +30,9 @@ import com.projectronin.interop.fhir.r4.resource.BundleEntry
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.r4.valueset.BundleType
-import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.stu3.resource.STU3Bundle
 import com.projectronin.interop.fhir.util.asCode
+import com.projectronin.interop.fhir.util.localizeFhirId
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import io.ktor.client.call.body
@@ -3028,7 +3028,7 @@ class EpicAppointmentServiceTest {
                             listOf(
                                 mockk {
                                     every { searchedIdentifier } returns mockSystemValue
-                                    every { udpId } returns mockFhirID.localize(tenant)
+                                    every { udpId } returns mockFhirID.localizeFhirId(tenant.mnemonic)
                                     every { identifiers } returns
                                         listOf(
                                             mockk {
@@ -3098,7 +3098,7 @@ class EpicAppointmentServiceTest {
                                 listOf(
                                     mockk {
                                         every { searchedIdentifier } returns mockSystemValue
-                                        every { udpId } returns mockFhirID.localize(tenant)
+                                        every { udpId } returns mockFhirID.localizeFhirId(tenant.mnemonic)
                                         every { identifiers } returns
                                             listOf(
                                                 mockk {

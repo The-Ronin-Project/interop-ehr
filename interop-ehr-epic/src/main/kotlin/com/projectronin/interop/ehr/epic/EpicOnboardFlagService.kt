@@ -8,7 +8,7 @@ import com.projectronin.interop.ehr.epic.apporchard.model.SetSmartDataValuesResu
 import com.projectronin.interop.ehr.epic.apporchard.model.SmartDataValue
 import com.projectronin.interop.ehr.epic.apporchard.model.exceptions.AppOrchardError
 import com.projectronin.interop.ehr.epic.client.EpicClient
-import com.projectronin.interop.fhir.ronin.util.localize
+import com.projectronin.interop.fhir.util.localizeFhirId
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import kotlinx.coroutines.runBlocking
@@ -39,7 +39,7 @@ class EpicOnboardFlagService(
                 ehrDataAuthorityClient.getResourceAs(
                     tenant.mnemonic,
                     "Patient",
-                    patientFhirID.localize(tenant),
+                    patientFhirID.localizeFhirId(tenant.mnemonic),
                 ) ?: run {
                     // attempt to get patient from EHR if not in EHRDA
                     runCatching { epicPatientService.getPatient(tenant, patientFhirID) }.getOrNull()

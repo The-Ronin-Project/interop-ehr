@@ -32,8 +32,8 @@ import com.projectronin.interop.fhir.r4.resource.Participant
 import com.projectronin.interop.fhir.r4.resource.Patient
 import com.projectronin.interop.fhir.r4.valueset.AppointmentStatus
 import com.projectronin.interop.fhir.r4.valueset.ParticipationStatus
-import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.fhir.stu3.resource.STU3Appointment
+import com.projectronin.interop.fhir.util.localizeFhirId
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
 import datadog.trace.api.Trace
@@ -124,7 +124,7 @@ class EpicAppointmentService(
                     ehrdaClient.getResource(
                         tenant.mnemonic,
                         "Patient",
-                        patientFHIRId.localize(tenant),
+                        patientFHIRId.localizeFhirId(tenant.mnemonic),
                     ) as Patient
                 }
                     // try EHR next

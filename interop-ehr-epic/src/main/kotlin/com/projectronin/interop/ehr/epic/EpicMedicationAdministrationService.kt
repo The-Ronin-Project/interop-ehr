@@ -22,8 +22,8 @@ import com.projectronin.interop.fhir.r4.resource.MedicationAdministration
 import com.projectronin.interop.fhir.r4.resource.MedicationAdministrationDosage
 import com.projectronin.interop.fhir.r4.resource.MedicationRequest
 import com.projectronin.interop.fhir.r4.resource.Patient
-import com.projectronin.interop.fhir.ronin.util.localize
-import com.projectronin.interop.fhir.ronin.util.unlocalize
+import com.projectronin.interop.fhir.util.localizeFhirId
+import com.projectronin.interop.fhir.util.unlocalizeFhirId
 import com.projectronin.interop.tenant.config.model.Tenant
 import datadog.trace.api.Trace
 import kotlinx.coroutines.runBlocking
@@ -75,15 +75,17 @@ class EpicMedicationAdministrationService(
         tenant: Tenant,
         medicationRequest: MedicationRequest,
     ): List<MedicationAdministration> {
-        val patientID = medicationRequest.subject?.decomposedId()?.unlocalize(tenant) ?: return emptyList()
-        val encounterID = medicationRequest.encounter?.decomposedId()?.unlocalize(tenant) ?: return emptyList()
+        val patientID =
+            medicationRequest.subject?.decomposedId()?.unlocalizeFhirId(tenant.mnemonic) ?: return emptyList()
+        val encounterID =
+            medicationRequest.encounter?.decomposedId()?.unlocalizeFhirId(tenant.mnemonic) ?: return emptyList()
         val medicationRequestID = medicationRequest.findFhirId() ?: return emptyList()
         val patient =
             runBlocking {
                 ehrDataAuthorityClient.getResourceAs<Patient>(
                     tenant.mnemonic,
                     "Patient",
-                    patientID.localize(tenant),
+                    patientID.localizeFhirId(tenant.mnemonic),
                 )
             } ?: return emptyList()
         val mrn =
@@ -94,7 +96,7 @@ class EpicMedicationAdministrationService(
                 ehrDataAuthorityClient.getResourceAs<Encounter>(
                     tenant.mnemonic,
                     "Encounter",
-                    encounterID.localize(tenant),
+                    encounterID.localizeFhirId(tenant.mnemonic),
                 )
             } ?: return emptyList()
 

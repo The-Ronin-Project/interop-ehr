@@ -5,7 +5,7 @@ import com.projectronin.interop.ehr.IdentifierService
 import com.projectronin.interop.ehr.inputs.FHIRIdentifiers
 import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
-import com.projectronin.interop.fhir.ronin.toFhirIdentifier
+import com.projectronin.interop.fhir.util.toFhirIdentifier
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Cerner
 import datadog.trace.api.Trace

@@ -14,7 +14,6 @@ dependencies {
     implementation(libs.interop.publishers.datalake)
     implementation(project(":interop-tenant"))
     implementation(project(":interop-ehr"))
-    implementation(project(":interop-fhir-ronin"))
     implementation("org.springframework:spring-context")
     implementation(libs.opentracing.api)
     implementation(libs.opentracing.util)

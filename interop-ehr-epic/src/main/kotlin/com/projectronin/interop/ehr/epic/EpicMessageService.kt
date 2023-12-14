@@ -11,7 +11,7 @@ import com.projectronin.interop.ehr.inputs.EHRMessageInput
 import com.projectronin.interop.ehr.inputs.EHRRecipient
 import com.projectronin.interop.ehr.inputs.IdentifierVendorIdentifier
 import com.projectronin.interop.fhir.r4.resource.Patient
-import com.projectronin.interop.fhir.ronin.util.localize
+import com.projectronin.interop.fhir.util.localizeFhirId
 import com.projectronin.interop.tenant.config.ProviderPoolService
 import com.projectronin.interop.tenant.config.model.Tenant
 import com.projectronin.interop.tenant.config.model.vendor.Epic
@@ -51,7 +51,7 @@ class EpicMessageService(
                 ehrDataAuthorityClient.getResourceAs<Patient>(
                     tenant.mnemonic,
                     "Patient",
-                    messageInput.patientFHIRID.localize(tenant),
+                    messageInput.patientFHIRID.localizeFhirId(tenant.mnemonic),
                 ) ?: throw VendorIdentifierNotFoundException("No Patient found for ${messageInput.patientFHIRID}")
             }
         val mrn = identifierService.getMRNIdentifier(tenant, patient.identifier)

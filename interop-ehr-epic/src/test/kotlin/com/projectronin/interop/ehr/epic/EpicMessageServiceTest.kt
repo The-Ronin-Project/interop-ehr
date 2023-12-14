@@ -18,7 +18,6 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.r4.resource.Patient
-import com.projectronin.interop.fhir.ronin.util.localize
 import com.projectronin.interop.tenant.config.ProviderPoolService
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
@@ -1106,7 +1105,7 @@ class EpicMessageServiceTest {
             ehrDataAuthorityClient.getResourceAs<Patient>(
                 "TEST_TENANT",
                 "Patient",
-                "badId".localize(tenant),
+                "TEST_TENANT-badId",
             )
         } returns mockPatient
         every { identifierService.getMRNIdentifier(tenant, mockIdentifierList) } returns mockIdentifier
@@ -1159,7 +1158,7 @@ class EpicMessageServiceTest {
             ehrDataAuthorityClient.getResourceAs<Patient>(
                 "TEST_TENANT",
                 "Patient",
-                "badId".localize(tenant),
+                "TEST_TENANT-badId",
             )
         } returns null
 

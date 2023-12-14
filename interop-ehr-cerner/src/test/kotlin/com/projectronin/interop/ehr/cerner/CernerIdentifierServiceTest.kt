@@ -6,7 +6,7 @@ import com.projectronin.interop.fhir.r4.datatype.Identifier
 import com.projectronin.interop.fhir.r4.datatype.primitive.Id
 import com.projectronin.interop.fhir.r4.datatype.primitive.Uri
 import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
-import com.projectronin.interop.fhir.ronin.toFhirIdentifier
+import com.projectronin.interop.fhir.util.toFhirIdentifier
 import com.projectronin.interop.tenant.config.model.vendor.Cerner
 import io.mockk.every
 import io.mockk.mockk
@@ -92,7 +92,10 @@ internal class CernerIdentifierServiceTest {
             assertThrows<VendorIdentifierNotFoundException> {
                 service.getMRNIdentifier(tenant, listOf())
             }
-        assertEquals("No MRN identifier with system '${tenant.vendorAs<Cerner>().patientMRNSystem}' found for Patient", exception.message)
+        assertEquals(
+            "No MRN identifier with system '${tenant.vendorAs<Cerner>().patientMRNSystem}' found for Patient",
+            exception.message,
+        )
     }
 
     @Test
