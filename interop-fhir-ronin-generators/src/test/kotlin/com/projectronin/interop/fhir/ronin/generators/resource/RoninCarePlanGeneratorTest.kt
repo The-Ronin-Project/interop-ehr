@@ -11,6 +11,7 @@ import com.projectronin.interop.fhir.r4.datatype.primitive.asFHIR
 import com.projectronin.interop.fhir.ronin.generators.util.rcdmReference
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.resource.RoninCarePlan
 import com.projectronin.interop.fhir.validate.LocationContext
@@ -25,6 +26,7 @@ import org.junit.jupiter.api.Test
 
 class RoninCarePlanGeneratorTest {
     private lateinit var rcdmCarePlan: RoninCarePlan
+    private lateinit var registry: NormalizationRegistryClient
     private val tenant =
         mockk<Tenant> {
             every { mnemonic } returns "test"
@@ -32,6 +34,7 @@ class RoninCarePlanGeneratorTest {
 
     @BeforeEach
     fun setup() {
+        registry = mockk()
         val normalizer: Normalizer =
             mockk {
                 every { normalize(any(), tenant) } answers { firstArg() }
@@ -40,7 +43,7 @@ class RoninCarePlanGeneratorTest {
             mockk {
                 every { localize(any(), tenant) } answers { firstArg() }
             }
-        rcdmCarePlan = RoninCarePlan(normalizer, localizer)
+        rcdmCarePlan = RoninCarePlan(registry, normalizer, localizer)
     }
 
     @Test

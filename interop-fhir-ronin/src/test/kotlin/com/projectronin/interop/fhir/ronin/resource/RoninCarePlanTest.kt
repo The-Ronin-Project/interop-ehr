@@ -35,6 +35,8 @@ import com.projectronin.interop.fhir.r4.valueset.NarrativeStatus
 import com.projectronin.interop.fhir.r4.valueset.RequestStatus
 import com.projectronin.interop.fhir.ronin.localization.Localizer
 import com.projectronin.interop.fhir.ronin.localization.Normalizer
+import com.projectronin.interop.fhir.ronin.normalization.ConceptMapCodeableConcept
+import com.projectronin.interop.fhir.ronin.normalization.NormalizationRegistryClient
 import com.projectronin.interop.fhir.ronin.profile.RoninExtension
 import com.projectronin.interop.fhir.ronin.profile.RoninProfile
 import com.projectronin.interop.fhir.ronin.util.dataAuthorityExtension
@@ -46,10 +48,17 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertNull
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
+@Suppress("ktlint:standard:max-line-length")
 class RoninCarePlanTest {
+    private lateinit var registryClient: NormalizationRegistryClient
+    private lateinit var normalizer: Normalizer
+    private lateinit var localizer: Localizer
+    private lateinit var roninCarePlan: RoninCarePlan
+
     // using to double-check transformation for reference
     private val mockReference =
         Reference(
@@ -61,15 +70,126 @@ class RoninCarePlanTest {
             every { mnemonic } returns "test"
         }
 
-    private val normalizer =
-        mockk<Normalizer> {
-            every { normalize(any(), tenant) } answers { firstArg() }
+    private val unmappedCategory1 =
+        CodeableConcept(
+            coding =
+                listOf(
+                    Coding(
+                        system = Uri("UnmappedCategorySystem#1"),
+                        code = Code(value = "UnmappedCategory#1"),
+                    ),
+                ),
+        )
+    private val mappedCategory1 =
+        CodeableConcept(
+            coding =
+                listOf(
+                    Coding(
+                        system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                        code = Code(value = "assess-plan"),
+                    ),
+                ),
+        )
+    private val unmappedCategory2 =
+        CodeableConcept(
+            coding =
+                listOf(
+                    Coding(
+                        system = Uri("UnmappedCategorySystem#2"),
+                        code = Code(value = "UnmappedCategory#2"),
+                    ),
+                ),
+        )
+    private val mappedCategory2 =
+        CodeableConcept(
+            coding =
+                listOf(
+                    Coding(
+                        system = Uri("MappedCategorySystem#2"),
+                        code = Code(value = "MappedCategory#2"),
+                    ),
+                ),
+        )
+    private val unmappedCategory3 =
+        CodeableConcept(
+            coding =
+                listOf(
+                    Coding(
+                        system = Uri("UnmappedCategorySystem#3"),
+                        code = Code(value = "UnmappedCategory#3"),
+                    ),
+                ),
+        )
+
+    private val normalizationRegistryClient =
+        mockk<NormalizationRegistryClient> {
+            every {
+                getConceptMapping(
+                    tenant,
+                    "CarePlan.category",
+                    unmappedCategory1,
+                    any<CarePlan>(),
+                )
+            } answers {
+                ConceptMapCodeableConcept(
+                    codeableConcept = mappedCategory1,
+                    extension =
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODEABLE_CONCEPT,
+                                    value = unmappedCategory1,
+                                ),
+                        ),
+                    metadata = listOf(),
+                )
+            }
+            every {
+                getConceptMapping(
+                    tenant,
+                    "CarePlan.category",
+                    unmappedCategory2,
+                    any<CarePlan>(),
+                )
+            } answers {
+                ConceptMapCodeableConcept(
+                    codeableConcept = mappedCategory2,
+                    extension =
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                            value =
+                                DynamicValue(
+                                    type = DynamicValueType.CODEABLE_CONCEPT,
+                                    value = unmappedCategory2,
+                                ),
+                        ),
+                    metadata = listOf(),
+                )
+            }
+            every {
+                getConceptMapping(
+                    tenant,
+                    "CarePlan.category",
+                    unmappedCategory3,
+                    any<CarePlan>(),
+                )
+            } returns null
         }
-    private val localizer =
-        mockk<Localizer> {
-            every { localize(any(), tenant) } answers { firstArg() }
-        }
-    private val roninCarePlan = RoninCarePlan(normalizer, localizer)
+
+    @BeforeEach
+    fun setup() {
+        registryClient = mockk()
+        normalizer =
+            mockk {
+                every { normalize(any(), tenant) } answers { firstArg() }
+            }
+        localizer =
+            mockk {
+                every { localize(any(), tenant) } answers { firstArg() }
+            }
+        roninCarePlan = RoninCarePlan(normalizationRegistryClient, normalizer, localizer)
+    }
 
     @Test
     fun `validation fails without subject`() {
@@ -93,6 +213,25 @@ class RoninCarePlanTest {
                             type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                             system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
                             value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(
+                                        coding =
+                                            listOf(
+                                                Coding(
+                                                    system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                                    code = Code("assess-plan"),
+                                                ),
+                                            ),
+                                    ),
+                                ),
                         ),
                     ),
                 text =
@@ -129,6 +268,75 @@ class RoninCarePlanTest {
     }
 
     @Test
+    fun `validation fails if tenant-source-extension list size doesnt match category list size`() {
+        val carePlan =
+            CarePlan(
+                id = Id("12345"),
+                meta = Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
+                identifier =
+                    listOf(
+                        Identifier(
+                            type = CodeableConcepts.RONIN_FHIR_ID,
+                            system = CodeSystem.RONIN_FHIR_ID.uri,
+                            value = "12345".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_TENANT,
+                            system = CodeSystem.RONIN_TENANT.uri,
+                            value = "test".asFHIR(),
+                        ),
+                        Identifier(
+                            type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                            system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                            value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/extension-1"),
+                            value = DynamicValue(DynamicValueType.STRING, "value"),
+                        ),
+                    ),
+                text =
+                    Narrative(
+                        status = NarrativeStatus.GENERATED.asCode(),
+                        div = "div".asFHIR(),
+                    ),
+                status = RequestStatus.DRAFT.asCode(),
+                intent = CarePlanIntent.OPTION.asCode(),
+                category =
+                    listOf(
+                        CodeableConcept(
+                            coding =
+                                listOf(
+                                    Coding(
+                                        system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                        code = Code("assess-plan"),
+                                    ),
+                                ),
+                        ),
+                    ),
+                subject =
+                    Reference(
+                        reference = "Patient/1234".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
+            )
+
+        val exception =
+            assertThrows<IllegalArgumentException> {
+                roninCarePlan.validate(carePlan).alertIfErrors()
+            }
+
+        assertEquals(
+            "Encountered validation error(s):\n" +
+                "ERROR RONIN_CAREPLAN_001: CarePlan category list size must match the tenantSourceCarePlanCategory extension list size @ CarePlan.",
+            exception.message,
+        )
+    }
+
+    @Test
     fun `validation fails with no subject`() {
         val carePlan =
             CarePlan(
@@ -150,6 +358,25 @@ class RoninCarePlanTest {
                             type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                             system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
                             value = "EHR Data Authority".asFHIR(),
+                        ),
+                    ),
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(
+                                        coding =
+                                            listOf(
+                                                Coding(
+                                                    system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                                    code = Code("assess-plan"),
+                                                ),
+                                            ),
+                                    ),
+                                ),
                         ),
                     ),
                 status = RequestStatus.DRAFT.asCode(),
@@ -204,6 +431,25 @@ class RoninCarePlanTest {
                             value = "EHR Data Authority".asFHIR(),
                         ),
                     ),
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(
+                                        coding =
+                                            listOf(
+                                                Coding(
+                                                    system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                                    code = Code("assess-plan"),
+                                                ),
+                                            ),
+                                    ),
+                                ),
+                        ),
+                    ),
                 status = RequestStatus.DRAFT.asCode(),
                 intent = CarePlanIntent.OPTION.asCode(),
                 category =
@@ -254,6 +500,25 @@ class RoninCarePlanTest {
                             type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                             system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
                             value = "Data Authority Identifier.asFHIR".asFHIR(),
+                        ),
+                    ),
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(
+                                        coding =
+                                            listOf(
+                                                Coding(
+                                                    system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                                    code = Code("assess-plan"),
+                                                ),
+                                            ),
+                                    ),
+                                ),
                         ),
                     ),
                 status = RequestStatus.DRAFT.asCode(),
@@ -311,6 +576,25 @@ class RoninCarePlanTest {
                             type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
                             system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
                             value = "Data Authority Identifier.asFHIR".asFHIR(),
+                        ),
+                    ),
+                extension =
+                    listOf(
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(
+                                        coding =
+                                            listOf(
+                                                Coding(
+                                                    system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                                    code = Code("assess-plan"),
+                                                ),
+                                            ),
+                                    ),
+                                ),
                         ),
                     ),
                 status = RequestStatus.DRAFT.asCode(),
@@ -378,18 +662,7 @@ class RoninCarePlanTest {
                 partOf = listOf(Reference(reference = "reference".asFHIR())),
                 status = RequestStatus.DRAFT.asCode(),
                 intent = CarePlanIntent.OPTION.asCode(),
-                category =
-                    listOf(
-                        CodeableConcept(
-                            coding =
-                                listOf(
-                                    Coding(
-                                        system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                        code = Code("assess-plan"),
-                                    ),
-                                ),
-                        ),
-                    ),
+                category = listOf(unmappedCategory1),
                 title = "CarePlan Title".asFHIR(),
                 description = "CarePlan Description".asFHIR(),
                 subject = localizeReferenceTest(mockReference),
@@ -574,8 +847,8 @@ class RoninCarePlanTest {
                                 coding =
                                     listOf(
                                         Coding(
-                                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                            code = Code("assess-plan"),
+                                            system = Uri("UnmappedCategorySystem#1"),
+                                            code = Code("UnmappedCategory#1"),
                                         ),
                                     ),
                             ),
@@ -834,6 +1107,22 @@ class RoninCarePlanTest {
                             url = Uri("http://hl7.org/extension-1"),
                             value = DynamicValue(DynamicValueType.STRING, "value"),
                         ),
+                        Extension(
+                            url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                            value =
+                                DynamicValue(
+                                    DynamicValueType.CODEABLE_CONCEPT,
+                                    CodeableConcept(
+                                        coding =
+                                            listOf(
+                                                Coding(
+                                                    system = CodeSystem.CAREPLAN_CATEGORY.uri,
+                                                    code = Code("assess-plan"),
+                                                ),
+                                            ),
+                                    ),
+                                ),
+                        ),
                     ),
                 modifierExtension =
                     listOf(
@@ -1063,8 +1352,8 @@ class RoninCarePlanTest {
                             coding =
                                 listOf(
                                     Coding(
-                                        system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                        code = Code("assess-plan"),
+                                        system = Uri("UnmappedCategorySystem#1"),
+                                        code = Code(value = "UnmappedCategory#1"),
                                     ),
                                 ),
                         ),
@@ -1143,8 +1432,8 @@ class RoninCarePlanTest {
                                 coding =
                                     listOf(
                                         Coding(
-                                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                            code = Code("assess-plan"),
+                                            system = Uri("UnmappedCategorySystem#1"),
+                                            code = Code("UnmappedCategory#1"),
                                         ),
                                     ),
                             ),
@@ -1208,18 +1497,7 @@ class RoninCarePlanTest {
                 meta = Meta(source = Uri("source")),
                 status = RequestStatus.DRAFT.asCode(),
                 intent = CarePlanIntent.OPTION.asCode(),
-                category =
-                    listOf(
-                        CodeableConcept(
-                            coding =
-                                listOf(
-                                    Coding(
-                                        system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                        code = Code("assess-plan"),
-                                    ),
-                                ),
-                        ),
-                    ),
+                category = listOf(unmappedCategory1, unmappedCategory2),
                 subject =
                     Reference(
                         reference = "Patient/1234".asFHIR(),
@@ -1256,8 +1534,24 @@ class RoninCarePlanTest {
                                 coding =
                                     listOf(
                                         Coding(
-                                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                            code = Code("assess-plan"),
+                                            system = Uri("UnmappedCategorySystem#1"),
+                                            code = Code("UnmappedCategory#1"),
+                                        ),
+                                    ),
+                            ),
+                        ),
+                ),
+                Extension(
+                    url = RoninExtension.TENANT_SOURCE_CARE_PLAN_CATEGORY.uri,
+                    value =
+                        DynamicValue(
+                            DynamicValueType.CODEABLE_CONCEPT,
+                            CodeableConcept(
+                                coding =
+                                    listOf(
+                                        Coding(
+                                            system = Uri("UnmappedCategorySystem#2"),
+                                            code = Code("UnmappedCategory#2"),
                                         ),
                                     ),
                             ),
@@ -1300,6 +1594,15 @@ class RoninCarePlanTest {
                             ),
                         ),
                 ),
+                CodeableConcept(
+                    coding =
+                        listOf(
+                            Coding(
+                                system = Uri("MappedCategorySystem#2"),
+                                code = Code("MappedCategory#2"),
+                            ),
+                        ),
+                ),
             ),
             transformed.category,
         )
@@ -1309,6 +1612,116 @@ class RoninCarePlanTest {
                 type = Uri("Patient", extension = dataAuthorityExtension),
             ),
             transformed.subject,
+        )
+    }
+
+    @Test
+    fun `transform care-plan with empty category`() {
+        val carePlan =
+            CarePlan(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                extension =
+                    listOf(
+                        Extension(
+                            url = Uri("http://hl7.org/extension-1"),
+                            value = DynamicValue(DynamicValueType.STRING, "value"),
+                        ),
+                    ),
+                category = emptyList(),
+                status = RequestStatus.DRAFT.asCode(),
+                intent = CarePlanIntent.OPTION.asCode(),
+                subject =
+                    Reference(
+                        reference = "Patient/1234".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
+            )
+
+        val (transformResponse, validation) = roninCarePlan.transform(carePlan, tenant)
+        validation.alertIfErrors()
+
+        transformResponse!!
+        assertEquals(0, transformResponse.embeddedResources.size)
+
+        val transformed = transformResponse.resource
+
+        assertEquals("CarePlan", transformed.resourceType)
+        assertEquals(Id(value = "12345"), transformed.id)
+        assertEquals(
+            Meta(profile = listOf(Canonical(RoninProfile.CARE_PLAN.value)), source = Uri("source")),
+            transformed.meta,
+        )
+        assertNull(transformed.implicitRules)
+        assertNull(transformed.language)
+        assertNull(transformed.text)
+        assertEquals(listOf<Resource<*>>(), transformed.contained)
+        assertEquals(
+            listOf(
+                Extension(
+                    url = Uri("http://hl7.org/extension-1"),
+                    value = DynamicValue(DynamicValueType.STRING, "value"),
+                ),
+            ),
+            transformed.extension,
+        )
+        assertEquals(listOf<Extension>(), transformed.modifierExtension)
+        assertEquals(
+            listOf(
+                Identifier(
+                    type = CodeableConcepts.RONIN_FHIR_ID,
+                    system = CodeSystem.RONIN_FHIR_ID.uri,
+                    value = "12345".asFHIR(),
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_TENANT,
+                    system = CodeSystem.RONIN_TENANT.uri,
+                    value = "test".asFHIR(),
+                ),
+                Identifier(
+                    type = CodeableConcepts.RONIN_DATA_AUTHORITY_ID,
+                    system = CodeSystem.RONIN_DATA_AUTHORITY.uri,
+                    value = "EHR Data Authority".asFHIR(),
+                ),
+            ),
+            transformed.identifier,
+        )
+        assertEquals(RequestStatus.DRAFT.asCode(), transformed.status)
+        assertEquals(CarePlanIntent.OPTION.asCode(), transformed.intent)
+        assertEquals(listOf<CodeableConcept>(), transformed.category)
+        assertEquals(
+            Reference(
+                reference = "Patient/1234".asFHIR(),
+                type = Uri("Patient", extension = dataAuthorityExtension),
+            ),
+            transformed.subject,
+        )
+    }
+
+    @Test
+    fun `transform care-plan with only required attributes using unmapped returning null fails`() {
+        val carePlan =
+            CarePlan(
+                id = Id("12345"),
+                meta = Meta(source = Uri("source")),
+                status = RequestStatus.DRAFT.asCode(),
+                intent = CarePlanIntent.OPTION.asCode(),
+                category = listOf(unmappedCategory1, unmappedCategory3),
+                subject =
+                    Reference(
+                        reference = "Patient/1234".asFHIR(),
+                        type = Uri("Patient", extension = dataAuthorityExtension),
+                    ),
+            )
+
+        val (_, validation) = roninCarePlan.transform(carePlan, tenant)
+        assertEquals(
+            "Tenant source value 'UnmappedCategory#3' has no target defined in any CarePlan.category concept map for tenant 'test'",
+            validation.issues().first().description,
+        )
+        assertEquals(
+            "CarePlan.category",
+            validation.issues().first().location.toString(),
         )
     }
 
@@ -1326,8 +1739,8 @@ class RoninCarePlanTest {
                             coding =
                                 listOf(
                                     Coding(
-                                        system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                        code = Code("assess-plan"),
+                                        system = Uri("UnmappedCategorySystem#1"),
+                                        code = Code(value = "UnmappedCategory#1"),
                                     ),
                                 ),
                         ),
@@ -1335,8 +1748,8 @@ class RoninCarePlanTest {
                             coding =
                                 listOf(
                                     Coding(
-                                        system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                        code = Code("assess-plan-2"),
+                                        system = Uri("UnmappedCategorySystem#2"),
+                                        code = Code(value = "UnmappedCategory#2"),
                                     ),
                                 ),
                         ),
@@ -1366,8 +1779,8 @@ class RoninCarePlanTest {
                                 coding =
                                     listOf(
                                         Coding(
-                                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                            code = Code("assess-plan"),
+                                            system = Uri("UnmappedCategorySystem#1"),
+                                            code = Code("UnmappedCategory#1"),
                                         ),
                                     ),
                             ),
@@ -1382,15 +1795,15 @@ class RoninCarePlanTest {
                                 coding =
                                     listOf(
                                         Coding(
-                                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                            code = Code("assess-plan-2"),
+                                            system = Uri("UnmappedCategorySystem#2"),
+                                            code = Code("UnmappedCategory#2"),
                                         ),
                                     ),
                             ),
                         ),
                 ),
             ),
-            transformed!!.extension,
+            transformed.extension,
         )
     }
 
@@ -1411,8 +1824,8 @@ class RoninCarePlanTest {
                             coding =
                                 listOf(
                                     Coding(
-                                        system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                        code = Code("assess-plan"),
+                                        system = Uri("UnmappedCategorySystem#1"),
+                                        code = Code(value = "UnmappedCategory#1"),
                                     ),
                                 ),
                         ),
@@ -1440,8 +1853,8 @@ class RoninCarePlanTest {
                             coding =
                                 listOf(
                                     Coding(
-                                        system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                        code = Code("assess-plan"),
+                                        system = Uri("UnmappedCategorySystem#1"),
+                                        code = Code(value = "UnmappedCategory#1"),
                                     ),
                                 ),
                         ),
@@ -1470,8 +1883,8 @@ class RoninCarePlanTest {
                             coding =
                                 listOf(
                                     Coding(
-                                        system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                        code = Code("assess-plan"),
+                                        system = Uri("UnmappedCategorySystem#1"),
+                                        code = Code(value = "UnmappedCategory#1"),
                                     ),
                                 ),
                         ),
@@ -1497,8 +1910,8 @@ class RoninCarePlanTest {
                             coding =
                                 listOf(
                                     Coding(
-                                        system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                        code = Code("assess-plan"),
+                                        system = Uri("UnmappedCategorySystem#1"),
+                                        code = Code(value = "UnmappedCategory#1"),
                                     ),
                                 ),
                         ),
@@ -1551,8 +1964,8 @@ class RoninCarePlanTest {
                                 coding =
                                     listOf(
                                         Coding(
-                                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                            code = Code("assess-plan"),
+                                            system = Uri("UnmappedCategorySystem#1"),
+                                            code = Code("UnmappedCategory#1"),
                                         ),
                                     ),
                             ),
@@ -1639,8 +2052,8 @@ class RoninCarePlanTest {
                             coding =
                                 listOf(
                                     Coding(
-                                        system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                        code = Code("assess-plan"),
+                                        system = Uri("UnmappedCategorySystem#1"),
+                                        code = Code(value = "UnmappedCategory#1"),
                                     ),
                                 ),
                         ),
@@ -1693,8 +2106,8 @@ class RoninCarePlanTest {
                                 coding =
                                     listOf(
                                         Coding(
-                                            system = CodeSystem.CAREPLAN_CATEGORY.uri,
-                                            code = Code("assess-plan"),
+                                            system = Uri("UnmappedCategorySystem#1"),
+                                            code = Code("UnmappedCategory#1"),
                                         ),
                                     ),
                             ),
