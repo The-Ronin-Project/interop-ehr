@@ -1,21 +1,18 @@
 [versions]
-caffeine = "3.1.8"
 commons = "1.11.0"
 datadog = "1.27.0"
 ehrda = "2.2.0"
 hapi = "2.5.1"
 interop-common = "4.1.0"
 interop-datalake = "9.0.0"
-interop-event-resource-internal = "1.2.3"
 interop-fhir = "9.1.1"
 interop-gradle = "4.0.2"
 interop-queue = "3.0.0"
-interop-validation = "4.0.1"
 jackson = "2.16.1"
 kotlinx-coroutines = "1.7.3"
 ktor = "2.3.7"
 ktorm = "3.6.0"
-mockk = "1.13.8"
+mockk = "1.13.9"
 mockwebserver = "4.12.0"
 mysql-connector = "8.2.0"
 opentracing = "0.33.0"
@@ -24,12 +21,10 @@ swagger-annotations = "2.2.20"
 testcontainers-mysql = "1.19.3"
 
 [libraries]
-caffeine = { module = "com.github.ben-manes.caffeine:caffeine", version.ref = "caffeine" }
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons" }
 dd-trace-api = { module = "com.datadoghq:dd-trace-api", version.ref = "datadog" }
 ehrda-client = { module = "com.projectronin.ehr:ehr-data-authority-client", version.ref = "ehrda" }
 ehrda-models = { module = "com.projectronin.ehr:ehr-data-authority-models", version.ref = "ehrda" }
-event-interop-resource-internal = { module = "com.projectronin.contract.event:event-interop-resource-internal", version.ref = "interop-event-resource-internal" }
 hapi-hl7v2-251 = { module = "ca.uhn.hapi:hapi-structures-v251", version.ref = "hapi" }
 hapi-hl7v2-base = { module = "ca.uhn.hapi:hapi-base", version.ref = "hapi" }
 interop-common = { module = "com.projectronin.interop:interop-common", version.ref = "interop-common" }
@@ -41,9 +36,7 @@ interop-fhir = { module = "com.projectronin.interop.fhir:interop-fhir", version.
 interop-fhir-generators = { module = "com.projectronin.interop.fhir:interop-fhir-generators", version.ref = "interop-fhir" }
 interop-publishers-datalake = { module = "com.projectronin.interop.publish:interop-datalake", version.ref = "interop-datalake" }
 interop-queue-api = { module = "com.projectronin.interop.queue:interop-queue", version.ref = "interop-queue" }
-interop-validation-client = { module = "com.projectronin.interop.validation:interop-validation-client", version.ref = "interop-validation" }
 jackson-datatype-jsr310 = { module = "com.fasterxml.jackson.datatype:jackson-datatype-jsr310", version.ref = "jackson" }
-jackson-module-kotlin = { module = "com.fasterxml.jackson.module:jackson-module-kotlin", version.ref = "jackson" }
 kotlinx-coroutines-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 ktor-server-auth-jwt = { module = "io.ktor:ktor-server-auth-jwt", version.ref = "ktor" }
 ktorm-core = { module = "org.ktorm:ktorm-core", version.ref = "ktorm" }
