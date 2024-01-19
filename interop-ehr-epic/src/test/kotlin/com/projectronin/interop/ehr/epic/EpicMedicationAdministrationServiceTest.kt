@@ -8,6 +8,7 @@ import com.projectronin.interop.fhir.r4.CodeSystem
 import com.projectronin.interop.fhir.r4.datatype.CodeableConcept
 import com.projectronin.interop.fhir.r4.datatype.DynamicValueType
 import com.projectronin.interop.fhir.r4.datatype.Identifier
+import com.projectronin.interop.fhir.r4.datatype.Quantity
 import com.projectronin.interop.fhir.r4.datatype.Reference
 import com.projectronin.interop.fhir.r4.datatype.primitive.Decimal
 import com.projectronin.interop.fhir.r4.datatype.primitive.FHIRString
@@ -23,6 +24,7 @@ import io.mockk.coEvery
 import io.mockk.every
 import io.mockk.mockk
 import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import java.math.BigDecimal
@@ -115,11 +117,13 @@ internal class EpicMedicationAdministrationServiceTest {
                                         administrationInstant = "2011-07-05T14:00:00Z",
                                         action = "Given",
                                         dose = EpicDose(value = "11", unit = "mg"),
+                                        rate = EpicRate(value = "30.0", unit = "mg/(24.h)"),
                                     ),
                                     EpicMedicationAdministration(
                                         administrationInstant = "",
                                         action = "Given",
                                         dose = EpicDose(value = "15", unit = "mg"),
+                                        rate = EpicRate(value = "2.25", unit = "bar/foo"),
                                     ),
                                 ),
                         ),
@@ -141,6 +145,176 @@ internal class EpicMedicationAdministrationServiceTest {
         assertEquals("Given", result.first().status?.value)
         assertEquals(Decimal(BigDecimal("11")), result.first().dosage?.dose?.value)
         assertEquals(FHIRString("mg"), result.first().dosage?.dose?.unit)
+        assertEquals(Decimal(BigDecimal("30.0")), (result.first().dosage?.rate?.value as Quantity).value)
+        assertEquals(FHIRString("mg/(24.h)"), (result.first().dosage?.rate?.value as Quantity).unit)
+    }
+
+    @Test
+    fun `MedicationAdministration has undefined rate`() {
+        val medRequest =
+            mockk<MedicationRequest> {
+                every { subject?.decomposedId() } returns "testTenant-patID"
+                every { encounter?.decomposedId() } returns "testTenant-encounterID"
+                every { findFhirId() } returns "medReqID"
+                every { identifier } returns
+                    listOf(
+                        mockk {
+                            every { system } returns CodeSystem.RONIN_FHIR_ID.uri
+                        },
+                        mockk {
+                            every { system } returns CodeSystem.RONIN_TENANT.uri
+                        },
+                        mockk {
+                            every { system } returns CodeSystem.RONIN_DATA_AUTHORITY.uri
+                        },
+                        mockk {
+                            every { system } returns Uri("orderSystem")
+                            every { value?.value } returns "orderID"
+                        },
+                    )
+            }
+        coEvery { ehrda.getResourceAs<Patient>(any(), "Patient", "testTenant-patID") } returns
+            mockk<Patient> {
+                every { identifier } returns listOf(mockk())
+            }
+        every { identifierService.getPatientIdentifier(testTenant, any()).value?.value } returns "patMRN"
+        coEvery {
+            ehrda.getResourceAs<Encounter>(
+                any(),
+                "Encounter",
+                "testTenant-encounterID",
+            )
+        } returns
+            mockk<Encounter> {
+                every { identifier } returns
+                    listOf(
+                        mockk {
+                            every { system } returns Uri("csnSystem")
+                            every { value?.value } returns "encCSN"
+                        },
+                    )
+            }
+        every { identifierService.getEncounterIdentifier(testTenant, any()).value?.value } returns "encCSN"
+        every { identifierService.getOrderIdentifier(testTenant, any()).value?.value } returns "orderID"
+
+        val epicResponse =
+            EpicMedAdmin(
+                orders =
+                    listOf(
+                        EpicMedicationOrder(
+                            name = "TEST NAME",
+                            medicationAdministrations =
+                                listOf(
+                                    EpicMedicationAdministration(
+                                        administrationInstant = "2011-07-05T14:00:00Z",
+                                        action = "Given",
+                                        dose = EpicDose(value = "11", unit = "mg"),
+                                        rate = null,
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+        coEvery { client.post(testTenant, any(), any()) } returns
+            mockk {
+                every { sourceURL } returns "https://example.org/medadmin"
+                coEvery { body<EpicMedAdmin>() } returns epicResponse
+            }
+        val result = service.findMedicationAdministrationsByRequest(testTenant, medRequest)
+        assertEquals(1, result.size)
+        assertEquals("orderID-1309874400", result.first().id?.value)
+        assertEquals("https://example.org/medadmin", result.first().meta?.source?.value)
+        assertEquals(DynamicValueType.CODEABLE_CONCEPT, result.first().medication?.type)
+        assertEquals(CodeableConcept(text = FHIRString("TEST NAME")), result.first().medication?.value)
+        assertEquals(Reference(reference = FHIRString("MedicationRequest/medReqID")), result.first().request)
+        assertEquals(Reference(reference = FHIRString("Patient/patID")), result.first().subject)
+        assertEquals("Given", result.first().status?.value)
+        assertEquals(Decimal(BigDecimal("11")), result.first().dosage?.dose?.value)
+        assertEquals(FHIRString("mg"), result.first().dosage?.dose?.unit)
+        assertNull(result.first().dosage?.rate)
+    }
+
+    @Test
+    fun `MedicationAdministration has undefined dosage`() {
+        val medRequest =
+            mockk<MedicationRequest> {
+                every { subject?.decomposedId() } returns "testTenant-patID"
+                every { encounter?.decomposedId() } returns "testTenant-encounterID"
+                every { findFhirId() } returns "medReqID"
+                every { identifier } returns
+                    listOf(
+                        mockk {
+                            every { system } returns CodeSystem.RONIN_FHIR_ID.uri
+                        },
+                        mockk {
+                            every { system } returns CodeSystem.RONIN_TENANT.uri
+                        },
+                        mockk {
+                            every { system } returns CodeSystem.RONIN_DATA_AUTHORITY.uri
+                        },
+                        mockk {
+                            every { system } returns Uri("orderSystem")
+                            every { value?.value } returns "orderID"
+                        },
+                    )
+            }
+        coEvery { ehrda.getResourceAs<Patient>(any(), "Patient", "testTenant-patID") } returns
+            mockk<Patient> {
+                every { identifier } returns listOf(mockk())
+            }
+        every { identifierService.getPatientIdentifier(testTenant, any()).value?.value } returns "patMRN"
+        coEvery {
+            ehrda.getResourceAs<Encounter>(
+                any(),
+                "Encounter",
+                "testTenant-encounterID",
+            )
+        } returns
+            mockk<Encounter> {
+                every { identifier } returns
+                    listOf(
+                        mockk {
+                            every { system } returns Uri("csnSystem")
+                            every { value?.value } returns "encCSN"
+                        },
+                    )
+            }
+        every { identifierService.getEncounterIdentifier(testTenant, any()).value?.value } returns "encCSN"
+        every { identifierService.getOrderIdentifier(testTenant, any()).value?.value } returns "orderID"
+
+        val epicResponse =
+            EpicMedAdmin(
+                orders =
+                    listOf(
+                        EpicMedicationOrder(
+                            name = "TEST NAME",
+                            medicationAdministrations =
+                                listOf(
+                                    EpicMedicationAdministration(
+                                        administrationInstant = "2011-07-05T14:00:00Z",
+                                        action = "Given",
+                                        dose = null,
+                                        rate = EpicRate(value = "2.25", unit = "bar/foo"),
+                                    ),
+                                ),
+                        ),
+                    ),
+            )
+        coEvery { client.post(testTenant, any(), any()) } returns
+            mockk {
+                every { sourceURL } returns "https://example.org/medadmin"
+                coEvery { body<EpicMedAdmin>() } returns epicResponse
+            }
+        val result = service.findMedicationAdministrationsByRequest(testTenant, medRequest)
+        assertEquals(1, result.size)
+        assertEquals("orderID-1309874400", result.first().id?.value)
+        assertEquals("https://example.org/medadmin", result.first().meta?.source?.value)
+        assertEquals(DynamicValueType.CODEABLE_CONCEPT, result.first().medication?.type)
+        assertEquals(CodeableConcept(text = FHIRString("TEST NAME")), result.first().medication?.value)
+        assertEquals(Reference(reference = FHIRString("MedicationRequest/medReqID")), result.first().request)
+        assertEquals(Reference(reference = FHIRString("Patient/patID")), result.first().subject)
+        assertEquals("Given", result.first().status?.value)
+        assertNull(result.first().dosage)
     }
 
     @Test

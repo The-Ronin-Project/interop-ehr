@@ -33,7 +33,7 @@ import java.time.Instant
 import java.time.LocalDate
 
 /**
- * Service providing access to Encounters within Epic.
+ * Service providing access to MedicationAdministration within Epic.
  */
 @Component
 class EpicMedicationAdministrationService(
@@ -128,6 +128,31 @@ class EpicMedicationAdministrationService(
                 if (epicMedAdmin.administrationInstant.isEmpty()) {
                     null
                 } else {
+                    val rate =
+                        if (epicMedAdmin.rate != null) {
+                            DynamicValue(
+                                DynamicValueType.QUANTITY,
+                                Quantity(
+                                    value = Decimal(BigDecimal(epicMedAdmin.rate.value)),
+                                    unit = FHIRString(epicMedAdmin.rate.unit),
+                                ),
+                            )
+                        } else {
+                            null
+                        }
+                    val dosage =
+                        if (epicMedAdmin.dose != null) {
+                            MedicationAdministrationDosage(
+                                dose =
+                                    Quantity(
+                                        value = Decimal(BigDecimal(epicMedAdmin.dose.value)),
+                                        unit = FHIRString(epicMedAdmin.dose.unit),
+                                    ),
+                                rate = rate,
+                            )
+                        } else {
+                            null
+                        }
                     MedicationAdministration(
                         id = Id("$orderID-${Instant.parse(epicMedAdmin.administrationInstant).epochSecond}"),
                         // TODO: determine if we should do concept mapping here or in interop-fhir
@@ -147,14 +172,7 @@ class EpicMedicationAdministrationService(
                                 value = DateTime(epicMedAdmin.administrationInstant),
                             ),
                         request = Reference(reference = FHIRString("MedicationRequest/$medicationRequestID")),
-                        dosage =
-                            MedicationAdministrationDosage(
-                                dose =
-                                    Quantity(
-                                        value = Decimal(BigDecimal(epicMedAdmin.dose.value)),
-                                        unit = FHIRString(epicMedAdmin.dose.unit),
-                                    ),
-                            ),
+                        dosage = dosage,
                     ).addMetaSource(response.transactionId) as MedicationAdministration
                 }
             }
@@ -178,11 +196,18 @@ data class EpicMedicationOrder(
 data class EpicMedicationAdministration(
     val administrationInstant: String,
     val action: String,
-    val dose: EpicDose,
+    val dose: EpicDose?,
+    val rate: EpicRate?,
 )
 
 @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
 data class EpicDose(
+    val value: String,
+    val unit: String,
+)
+
+@JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy::class)
+data class EpicRate(
     val value: String,
     val unit: String,
 )
