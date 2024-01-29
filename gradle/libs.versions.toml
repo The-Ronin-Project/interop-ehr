@@ -6,7 +6,7 @@ hapi = "2.5.1"
 interop-common = "4.1.0"
 interop-datalake = "9.0.0"
 interop-fhir = "9.1.1"
-interop-gradle = "4.0.2"
+interop-gradle = "4.0.3"
 interop-queue = "3.0.0"
 jackson = "2.16.1"
 kotlinx-coroutines = "1.7.3"
@@ -18,7 +18,7 @@ mysql-connector = "8.3.0"
 opentracing = "0.33.0"
 ronin-test = "0.2.0"
 swagger-annotations = "2.2.20"
-testcontainers-mysql = "1.19.3"
+testcontainers-mysql = "1.19.4"
 
 [libraries]
 commons-text = { module = "org.apache.commons:commons-text", version.ref = "commons" }
