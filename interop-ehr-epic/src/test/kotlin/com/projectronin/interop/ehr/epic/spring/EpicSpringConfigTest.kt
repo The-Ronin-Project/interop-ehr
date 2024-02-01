@@ -16,7 +16,6 @@ import org.springframework.beans.factory.getBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit.jupiter.SpringExtension
 
@@ -48,9 +47,6 @@ class TestConfig {
 
     @Bean
     fun httpClient() = mockk<HttpClient>(relaxed = true)
-
-    @Bean
-    fun threadPoolTaskExecutor() = mockk<ThreadPoolTaskExecutor>(relaxed = true)
 
     @Bean
     @Qualifier("ehr")
