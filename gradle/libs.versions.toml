@@ -1,6 +1,6 @@
 [versions]
 commons = "1.11.0"
-datadog = "1.28.0"
+datadog = "1.29.0"
 ehrda = "2.2.5"
 hapi = "2.5.1"
 interop-common = "4.1.0"
