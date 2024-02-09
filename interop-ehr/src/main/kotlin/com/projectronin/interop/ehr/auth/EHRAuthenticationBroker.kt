@@ -4,6 +4,7 @@ import com.projectronin.interop.common.auth.Authentication
 import com.projectronin.interop.common.auth.BrokeredAuthenticator
 import com.projectronin.interop.tenant.config.model.Tenant
 import org.springframework.stereotype.Component
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * Brokers [Authentication] allowing re-use of existing credentials as long as they have not expired.
@@ -15,7 +16,7 @@ class EHRAuthenticationBroker(authenticationServices: List<AuthenticationService
     // So we're following the same model used by the VendorFactory and EHRFactory within the AuthenticationService and here.
     private val authenticatorByVendorType =
         authenticationServices.associateBy { it.vendorType }
-    private val brokerByTenant = mutableMapOf<String, BrokeredAuthenticator>()
+    private val brokerByTenant = ConcurrentHashMap<String, BrokeredAuthenticator>()
 
     /**
      * Retrieves the current [BrokeredAuthenticator] for the supplied [Tenant].
