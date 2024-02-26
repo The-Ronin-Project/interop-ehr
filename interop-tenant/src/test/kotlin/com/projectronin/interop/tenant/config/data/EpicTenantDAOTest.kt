@@ -40,6 +40,7 @@ class EpicTenantDAOTest {
         assertEquals("urn:epic:apporchard.curprod", epicTenant?.hsi)
         assertEquals("E8675309", epicTenant?.patientOnboardedFlagId)
         assertEquals("urn:order.system1", epicTenant?.orderSystem)
+        assertEquals("2024.02", epicTenant?.appVersion)
     }
 
     @Test

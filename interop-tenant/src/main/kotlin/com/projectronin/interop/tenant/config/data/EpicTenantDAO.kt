@@ -46,6 +46,7 @@ class EpicTenantDAO(
             set(it.departmentInternalSystem, epicTenant.departmentInternalSystem)
             set(it.patientOnboardedFlagId, epicTenant.patientOnboardedFlagId)
             set(it.orderSystem, epicTenant.orderSystem)
+            set(it.appVersion, epicTenant.appVersion)
         }
         val epicTenants =
             database.from(EpicTenantDOs)
@@ -76,6 +77,7 @@ class EpicTenantDAO(
             set(it.departmentInternalSystem, epicTenant.departmentInternalSystem)
             set(it.patientOnboardedFlagId, epicTenant.patientOnboardedFlagId)
             set(it.orderSystem, epicTenant.orderSystem)
+            set(it.appVersion, epicTenant.appVersion)
             where {
                 it.tenantId eq epicTenant.tenantId
             }

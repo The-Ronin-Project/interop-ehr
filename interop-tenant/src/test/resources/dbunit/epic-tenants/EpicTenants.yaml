@@ -38,6 +38,7 @@ io_tenant_epic:
     department_internal_system: "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980"
     patient_onboarded_flag_id: "E8675309"
     order_system: "urn:order.system1"
+    app_version: "2024.02"
   - io_tenant_id: 1003
     release_version: "2021.10"
     service_endpoint: "https://localhost:8080/"
@@ -51,3 +52,4 @@ io_tenant_epic:
     mrn_type_text: "MRN"
     patient_internal_system: "urn:oid:internal.system"
     order_system: "urn:order.system2"
+    app_version: "2024.02"

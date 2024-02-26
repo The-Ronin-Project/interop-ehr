@@ -23,4 +23,5 @@ interface EpicTenantDO : EHRTenantDO, Entity<EpicTenantDO> {
     var departmentInternalSystem: String
     var patientOnboardedFlagId: String?
     var orderSystem: String?
+    var appVersion: String?
 }

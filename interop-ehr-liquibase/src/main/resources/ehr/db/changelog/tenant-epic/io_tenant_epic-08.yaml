@@ -1,0 +1,19 @@
+databaseChangeLog:
+  - changeSet:
+      id: io-tenant-epic-add-app-version
+      author: Steven Juana
+      preConditions:
+        - onFail: MARK_RAN
+          not:
+            - columnExists:
+                tableName: io_tenant_epic
+                columnName: app_version
+      changes:
+        - addColumn:
+            tableName: io_tenant_epic
+            columns:
+              - column:
+                  name: app_version
+                  type: java.sql.Types.VARCHAR(32)
+                  constraints:
+                    nullable: true
