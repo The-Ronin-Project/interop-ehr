@@ -2,7 +2,7 @@ name: Build interop-ehr-liquibase image, push to Nexus, and sync with ArgoCD
 
 on:
   workflow_run:
-    workflows: [ Interop Tenant Tests ]
+    workflows: [ Tests ]
     types: [ completed ]
     branches: [ main ]
 
