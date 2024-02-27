@@ -28,6 +28,7 @@ class EpicTest {
                 "urn:oid:1.2.840.114350.1.13.297.3.7.2.686980",
                 "E8675309",
                 "urn:oid:1.2.840.114350.1.13.0.1.7.2.798268",
+                "24.02",
             )
 
         assertEquals(VendorType.EPIC, epic.type)
@@ -45,5 +46,6 @@ class EpicTest {
         assertEquals("urn:oid:1.2.840.114350.1.13.297.3.7.2.686980", epic.departmentInternalSystem)
         assertEquals("E8675309", epic.patientOnboardedFlagId)
         assertEquals("urn:oid:1.2.840.114350.1.13.0.1.7.2.798268", epic.orderSystem)
+        assertEquals("24.02", epic.appVersion)
     }
 }

@@ -37,6 +37,7 @@ data class Epic(
     val departmentInternalSystem: String,
     val patientOnboardedFlagId: String? = null,
     val orderSystem: String? = null,
+    val appVersion: String? = null,
 ) : Vendor {
     override val type: VendorType
         get() = VendorType.EPIC
