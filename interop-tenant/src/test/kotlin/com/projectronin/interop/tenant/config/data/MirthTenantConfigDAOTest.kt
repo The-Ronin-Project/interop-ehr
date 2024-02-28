@@ -67,6 +67,7 @@ class MirthTenantConfigDAOTest {
         assertNotNull(mirthConfigs)
         assertEquals("blah,blegh,blurgh", mirthConfigs?.locationIds)
         assertEquals("appointment,organization", mirthConfigs?.blockedResources)
+        assertEquals("patient", mirthConfigs?.allowedResources)
     }
 
     @Test
@@ -84,6 +85,7 @@ class MirthTenantConfigDAOTest {
         val mirthConfigs = dao.getByTenantMnemonic("apposnd3")
         assertNull(mirthConfigs?.lastUpdated)
         assertNull(mirthConfigs?.blockedResources)
+        assertNull(mirthConfigs?.allowedResources)
     }
 
     @Test
@@ -93,17 +95,20 @@ class MirthTenantConfigDAOTest {
         val dao = MirthTenantConfigDAO(KtormHelper.database())
         val locationIds = "blarn,blurn,blorn"
         val blockedResources = "patient,encounter"
+        val allowedResources = "appointment"
 
         val testobj =
             MirthTenantConfigDO {
                 this.tenant = tenantDO
                 this.locationIds = locationIds
                 this.blockedResources = blockedResources
+                this.allowedResources = allowedResources
             }
         val result = dao.updateConfig(testobj)!!
         assertEquals(tenantDO.id, result.tenant.id)
         assertEquals(locationIds, result.locationIds)
         assertEquals(blockedResources, result.blockedResources)
+        assertEquals(allowedResources, result.allowedResources)
     }
 
     @Test
@@ -116,6 +121,7 @@ class MirthTenantConfigDAOTest {
                 tenant = tenantDO2
                 locationIds = "blarn,blurn,blorn"
                 blockedResources = "patient,encounter"
+                allowedResources = "observation"
             }
         val result = dao.updateConfig(testobj)
         assertNull(result)
@@ -131,11 +137,13 @@ class MirthTenantConfigDAOTest {
                 tenant = tenantDO2
                 locationIds = "blart,bleet,blurt"
                 blockedResources = "patient,encounter"
+                allowedResources = "appointment"
             }
         val result = dao.insertConfig(testobj)
         assertEquals(testobj.locationIds, result.locationIds)
         assertEquals(testobj.tenant.id, result.tenant.id)
         assertEquals(testobj.blockedResources, result.blockedResources)
+        assertEquals(testobj.allowedResources, result.allowedResources)
     }
 
     @Test
@@ -155,6 +163,7 @@ class MirthTenantConfigDAOTest {
                 tenant = fakeTenantDO
                 locationIds = "no"
                 blockedResources = "nada"
+                allowedResources = "nope"
             }
         assertThrows<SQLIntegrityConstraintViolationException> { dao.insertConfig(testobj) }
     }

@@ -13,4 +13,5 @@ interface MirthTenantConfigDO : Entity<MirthTenantConfigDO> {
     var locationIds: String
     var lastUpdated: OffsetDateTime?
     var blockedResources: String?
+    var allowedResources: String?
 }

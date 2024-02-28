@@ -49,6 +49,7 @@ class MirthTenantConfigDAO(
             set(it.locationIds, mirthTenantConfigDO.locationIds)
             set(it.loadTimestamp, mirthTenantConfigDO.lastUpdated)
             set(it.blockedResources, mirthTenantConfigDO.blockedResources)
+            set(it.allowedResources, mirthTenantConfigDO.allowedResources)
             where {
                 it.tenantId eq mirthTenantConfigDO.tenant.id
             }
@@ -65,6 +66,7 @@ class MirthTenantConfigDAO(
             set(it.locationIds, mirthTenantConfigDO.locationIds)
             set(it.loadTimestamp, mirthTenantConfigDO.lastUpdated)
             set(it.blockedResources, mirthTenantConfigDO.blockedResources)
+            set(it.allowedResources, mirthTenantConfigDO.allowedResources)
         }
         return getByTenantId(mirthTenantConfigDO.tenant.id)
             // This should be impossible to hit due to DB constraints

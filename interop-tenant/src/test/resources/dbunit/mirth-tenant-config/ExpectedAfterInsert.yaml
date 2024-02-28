@@ -32,9 +32,11 @@ io_mirth_tenant_config:
   - io_tenant_id: 1001
     location_ids: "blah,blegh,blurgh"
     blocked_resources: "appointment,organization"
+    allowed_resources: "patient"
   - io_tenant_id: 1002
     location_ids: "blart,bleet,blurt"
     blocked_resources: "patient,encounter"
+    allowed_resources: "appointment"
   - io_tenant_id: 1003
     location_ids: "hgrulb,hgelb,halb"
 

@@ -34,5 +34,6 @@ io_mirth_tenant_config:
     location_ids: "blah,blegh,blurgh"
     load_last_run: "2022-08-01 11:18:00 +0000"
     blocked_resources: "appointment,organization"
+    allowed_resources: "patient"
   - io_tenant_id: 1003
     location_ids: "hgrulb,hgelb,halb"
