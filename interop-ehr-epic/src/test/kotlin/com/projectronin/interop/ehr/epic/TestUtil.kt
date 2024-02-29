@@ -44,6 +44,7 @@ fun createTestTenant(
     patientOnboardedFlagId: String? = null,
     timezone: String = "Etc/UTC",
     monitoredIndicator: Boolean? = null,
+    appVersion: String = "1.0",
 ): Tenant {
     return Tenant(
         internalId,
@@ -69,6 +70,7 @@ fun createTestTenant(
             departmentInternalSystem,
             patientOnboardedFlagId,
             orderSystem,
+            appVersion,
         ),
         monitoredIndicator,
     )

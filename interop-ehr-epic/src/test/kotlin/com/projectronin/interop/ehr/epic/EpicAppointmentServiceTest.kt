@@ -334,6 +334,7 @@ class EpicAppointmentServiceTest {
                 "https://example.org",
                 testPrivateKey,
                 "TEST_TENANT",
+                appVersion = "1.3",
             )
         every { httpResponse.status } returns HttpStatusCode.OK
         coEvery { httpResponse.body<STU3Bundle>() } returns validPatientAppointmentSearchResponse
@@ -383,6 +384,7 @@ class EpicAppointmentServiceTest {
                 "https://example.org",
                 testPrivateKey,
                 "TEST_TENANT",
+                appVersion = "1.3",
             )
 
         val epicAppointmentService =
@@ -503,6 +505,7 @@ class EpicAppointmentServiceTest {
                 "https://example.org",
                 testPrivateKey,
                 "TEST_TENANT",
+                appVersion = "1.3",
             )
 
         val epicAppointmentService =
@@ -712,6 +715,7 @@ class EpicAppointmentServiceTest {
                 "https://example.org",
                 testPrivateKey,
                 "TEST_TENANT",
+                appVersion = "1.3",
             )
 
         val epicAppointmentService =

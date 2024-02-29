@@ -90,7 +90,8 @@ class EpicAppointmentService(
                 "status" to "booked",
                 "date" to RepeatingParameter(listOf("ge$startDate", "le$endDate")),
             )
-        return if (useFhirAPI) {
+        val appVersion = tenant.vendorAs<Epic>().appVersion
+        return if (appVersion != null && appVersion.toDouble() >= 1.3) {
             getResourceListFromSearchSTU3(tenant, parameters)
         } else {
             val mrnToUse = patientMRN ?: getPatientMRN(tenant, patientFHIRId)
@@ -250,8 +251,9 @@ class EpicAppointmentService(
                 }
             }.groupBy { patientFhirIdResponse[it.patientId]!!.fhirID }
 
+        val appVersion = tenant.vendorAs<Epic>().appVersion
         val r4AppointmentsToReturn =
-            if (useFhirAPI) {
+            if (appVersion != null && appVersion.toDouble() >= 1.3) {
                 retrieveAppointmentFromEpic(tenant, patientFhirIdToAppointments)
             } else {
                 transformEpicAppointments(tenant, patientFhirIdToAppointments)
